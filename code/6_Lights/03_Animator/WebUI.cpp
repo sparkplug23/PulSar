@@ -2242,7 +2242,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     
     uint16_t colours_in_palette = GetNumberOfColoursInPalette(palette_id);
    
-    ALOG_INF(PSTR("colours_in_palette=%d"),colours_in_palette);
+    // ALOG_INF(PSTR("colours_in_palette=%d"),colours_in_palette);
 
     JsonArray curPalette_obj = palettes.createNestedArray(String(palette_id));
     JsonObject curPalette_s_obj = palettes_style.createNestedObject(String(palette_id));
@@ -2407,7 +2407,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
               &encoded_gradient
             );
             // Serial.println(encoded_gradient);
-            DEBUG_LINE_HERE;
+            DEBUG_LINE_HERE_TRACE;
 
             /**
              * @brief 
@@ -2704,19 +2704,18 @@ void mAnimatorLight::serializeModeNames2(JsonArray arr, bool flag_get_first_name
   char lineBuffer[128] = {0};
   for(uint16_t i = 0; i < getEffectsAmount(); i++)
   {
-    GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer));
-
-  // ALOG_INF(PSTR("serializeModeNames2 %d"), getEffectsAmount());
-    if(flag_get_first_name_only)
-    {    
-      char* dataPtr = strchr(lineBuffer,'|');
-      if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+    GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer), true);
+    // ALOG_INF(PSTR("serializeModeNames2 %d %s"), getEffectsAmount(), lineBuffer);
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
+    switch(effects.development_stage[i])
+    {
+      default:
+      case 0: break; // leave when stable
+      case 1: strcat_P(lineBuffer, PSTR(" (alpha)")); break;
+      case 2: strcat_P(lineBuffer, PSTR(" (beta)")); break;
+      case 3: strcat_P(lineBuffer, PSTR(" (dev)")); break;  
     }
-
-
-
-
-  // ALOG_INF(PSTR("serializeModeNames2 %d %s"), getEffectsAmount(), lineBuffer);
+    #endif // ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
     arr.add(lineBuffer);
   }
@@ -2871,12 +2870,14 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       JsonObject info = lDoc.createNestedObject("info");
       serializeInfo(info);
       
+      DEBUG_LINE_HERE;
       SEGMENT_I(0).flags.fForceUpdate = true; // New data in, so we should update
+      DEBUG_LINE_HERE;
 
       if (subJson != JSON_PATH_STATE_INFO)
       {
         JsonArray effects = lDoc.createNestedArray(F("effects"));
-        serializeModeNames2(effects); // remove WLED-SR extensions from effect names
+        serializeModeNames2(effects);
 
         bool flag_get_first_name_only = true;        
         char lineBuffer[100] = {0};

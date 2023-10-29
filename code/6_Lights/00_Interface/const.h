@@ -268,6 +268,7 @@
  * 
  */
 #define IS_BUSTYPE_DIGITAL(t)       ((t) & 0x10) //digital are 16-31 and 48-63
+// #define IS_BUSTYPE_DIGITAL(t)       ((t) > 0 && (t) < 46) //digital are 16-31 and 48-63
 #define IS_BUSTYPE_PWM(t)           ((t) > 40 && (t) < 46)
 #define NUM_BUSTYPE_PWM_PINS(t)     ((t) - 40) //for analog PWM 41-45 only
 #define IS_BUSTYPE_2PIN(t)          ((t) > 47)

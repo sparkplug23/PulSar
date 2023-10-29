@@ -210,7 +210,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
 
     }
 
-    delay(3000);
+    // delay(3000);
 
   }
   
@@ -686,6 +686,56 @@ void mHardwarePins::GpioInit(void)
       // #endif
     }
   }
+
+  /**
+   * @brief New to help with inactive IC data lines, set esp32 outputs to either high or low for enable pins of ICs
+   * 
+   */
+  for (uint32_t i = 0; 
+                i < ARRAY_SIZE(pCONT_set->runtime.my_module.io);
+                i++
+  ){
+    
+    uint32_t mgpio_function = ValidPin_AdjustGPIO(i, pCONT_set->runtime.my_module.io[i]);
+    
+
+
+    ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio_function);
+
+    if(mgpio_function == GPIO_UNUSED_FORCED_LOW_ID)
+    {
+
+      if (((i < 6) || (i > 11)) && (0 == mgpio))
+      {  // Skip SPI flash interface
+        if (!((1 == i) || (3 == i))) {             // Skip serial
+          if((MODULE_H801_ID == pCONT_set->runtime.my_module_type) && (i !=2 ))
+          {
+            pinMode(i, OUTPUT);
+            digitalWrite(i, LOW);
+          }
+        }
+      }
+
+    }else
+    if(mgpio_function == GPIO_UNUSED_FORCED_HIGH_ID)
+    {
+      if (((i < 6) || (i > 11)) && (0 == mgpio))
+      {  // Skip SPI flash interface
+        if (!((1 == i) || (3 == i))) {             // Skip serial
+          if((MODULE_H801_ID == pCONT_set->runtime.my_module_type) && (i !=2 ))
+          {
+            pinMode(i, OUTPUT);
+            digitalWrite(i, HIGH);
+          }
+        }
+      }
+    }
+    
+
+  }
+
+
+
 
   DEBUG_LINE_HERE;
 /**

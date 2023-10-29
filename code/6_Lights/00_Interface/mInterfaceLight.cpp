@@ -23,7 +23,7 @@ void mInterfaceLight::Template_Load()
   memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
-  ALOG_DBM( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+  // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
@@ -93,10 +93,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   switch(function){
-    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:{
-      ALOG_DBM(PSTR("Disabled from conversion to vector segments, not sure if it is needed here"));
-    };
-    break;
     case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
       Template_Load();
     break;
@@ -221,6 +217,8 @@ bool NeoPixelShowTask::IsBusy()
 
 void mInterfaceLight::EveryLoop()
 {
+
+
         
 } // END everyloop
 
@@ -711,13 +709,37 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     ALOG_INF(PSTR("start %d"), start);
   }
 
+  if(jtok = obj["S"])
+  {
+    start = jtok.getInt();
+    ALOG_INF(PSTR("start %d"), start);
+  }
+
   if(jtok = obj["Length"])
+  {
+    length = jtok.getInt();
+    ALOG_INF(PSTR("length %d"), length);
+  }
+  if(jtok = obj["L"])
   {
     length = jtok.getInt();
     ALOG_INF(PSTR("length %d"), length);
   }
 
   if(jtok = obj["BusType"])
+  {
+    if(jtok.isInt())
+    {
+      bus_type = jtok.getInt();
+    }
+    else
+    if(jtok.isStr())
+    {
+      bus_type = Get_BusTypeID_FromName(jtok.getStr());
+    }
+    ALOG_INF(PSTR("bus_type %d"), bus_type);
+  }
+  if(jtok = obj["BT"])
   {
     if(jtok.isInt())
     {
@@ -747,10 +769,29 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
 //cant do, no segment index as its bus related, needs to happen elsewhere
     // }
   }
+  if(jtok = obj["CO"])
+  {
+    if(jtok.isStr())
+    {
+      ColourOrder = GetColourOrder_FromName(jtok.getStr());
+    }
+  }
 
   DEBUG_LINE_HERE;
   uint8_t bus_index = bus_count; // next bus space 
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
+
+
+  ALOG_HGL(PSTR("============BusConfig(type%d,pin0=%d,start%d,len%d,CO%d)"),
+    bus_type,
+    pins[0],
+    start,
+    length,
+    ColourOrder.data
+  
+  
+  );
+
 
   DEBUG_LINE_HERE;
   busConfigs[bus_index] = new BusConfig(
@@ -870,7 +911,7 @@ int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 {
 
-  // ALOG_DBM( PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
+  ALOG_DBM( PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
 
   char buffer[50];
   JsonParserToken jtok = 0; 
@@ -896,6 +937,17 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
         parseJSONObject__BusConfig(value.getObject());
       }
     }
+  }else{
+    ALOG_HGL(PSTR("BusConfig MISSING"));//, jtok.getType());
+    #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+    if(jtok = obj["Segment0"])
+    {
+      ALOG_HGL(PSTR("Segment0 YES"));
+    }else{
+      ALOG_HGL(PSTR("Segment0 MISSING"));
+    }
+    delay(5000);
+    #endif
   }
 
   DEBUG_LINE_HERE;
@@ -1158,7 +1210,9 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
   {
     JBI->Object_Start_F("Bus%d", bus_i);
 
-  //     JBI->Add("getLength", bus_manager->busses[bus_i]->getLength());
+      JBI->Add("getLength", bus_manager->busses[bus_i]->getLength());
+      JBI->Add("s", bus_manager->busses[bus_i]->_start);
+      JBI->Add("l", bus_manager->busses[bus_i]->_len);
 
   //     COLOUR_ORDER_T colour_order = bus_manager->busses[bus_i]->getColorOrder();
   //     JBI->Array_Start("ColourOrder");
@@ -1171,16 +1225,16 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
 
       JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
 
-  //     uint8_t pins[5] = {0};
-  //     uint8_t pin_count = 0;
-  //     // pin_count = bus_manager->busses[bus_i]->getPins(pins);
-  //     // JBI->Array_Start("getPins");
-  //     // JBI->Add(pin_count);
-  //     // for(uint8_t ii=0;ii<5;ii++)//pin_count;ii++)
-  //     // {
-  //     //   JBI->Add(pins[ii]);
-  //     // }
-  //     // JBI->Array_End();
+      uint8_t pins[5] = {0};
+      uint8_t pin_count = 0;
+      pin_count = bus_manager->busses[bus_i]->getPins(pins);
+      JBI->Array_Start("p");
+      // JBI->Add(pin_count);
+      for(uint8_t ii=0;ii<pin_count;ii++)
+      {
+        JBI->Add(pins[ii]);
+      }
+      JBI->Array_End();
 
     JBI->Object_End();
   }

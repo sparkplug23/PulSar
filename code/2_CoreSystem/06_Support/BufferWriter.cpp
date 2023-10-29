@@ -25,14 +25,11 @@ uint16_t BufferWriter::GetLength(){
 // }
 
 
-uint16_t* BufferWriter::GetLengthPtr(){
-  return writer.length;
-}
 uint16_t BufferWriter::GetBufferSize(){
   return writer.buffer_size;
 }
 
-void BufferWriter::Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size)
+void BufferWriter::Start(char* _buffer, uint16_t _length, uint16_t _buffer_size)
 {
   writer.buffer = _buffer;
   writer.length = _length;
@@ -41,34 +38,34 @@ void BufferWriter::Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size
 }
 void BufferWriter::Clear()
 {
-    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }  
+    if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }  
     memset(writer.buffer,0,writer.buffer_size);
-    *writer.length = 0;
+    writer.length = 0;
 }
 void BufferWriter::Start()
 {
-    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }  
+    if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }  
     memset(writer.buffer,0,writer.buffer_size);
-    *writer.length = 0;
+    writer.length = 0;
 }
 bool BufferWriter::End()
 {
-    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return false; }  
+    if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return false; }  
     return strlen(writer.buffer)?true:false; //isvalid
 }
 
 void BufferWriter::Append(const char* buff)
 {
-    if((writer.buffer == nullptr)||(writer.length == nullptr)) { return; }  
-    *writer.length += snprintf_P(&writer.buffer[*writer.length], writer.buffer_size, buff);
+    if(writer.buffer == nullptr) { return; }  
+    writer.length += snprintf_P(&writer.buffer[writer.length], writer.buffer_size, buff);
 }
 
 void BufferWriter::Append_P(const char* formatP, ...)
 {
-  if((writer.buffer == nullptr)||(writer.length == nullptr)) { return; }  
+  if(writer.buffer == nullptr) { return; }  
   va_list arg;
   va_start(arg, formatP);
-  *writer.length += vsnprintf_P(&writer.buffer[*writer.length], writer.buffer_size, formatP, arg);
+  writer.length += vsnprintf_P(&writer.buffer[writer.length], writer.buffer_size, formatP, arg);
   va_end(arg);
 }
 

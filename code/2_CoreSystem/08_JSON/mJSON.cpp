@@ -265,18 +265,25 @@ void JsonBuilder::Add_P_FV(const char* key, const char* formatP_value, ...) // P
 // Use valist to populate the key
 void JsonBuilder::Add_FV(const char* key, const char* formatP_value, ...) // FV = format value
 {
+  // DEBUG_LINE_HERE;
   // Prefix comma if not first pair
   if(
     (writer.length>1)&&
     (writer.buffer[writer.length-1]!='{')
   ){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
   // Write key
-  writer.length += sprintf_P(&writer.buffer[writer.length],"\"%s\":",key);
+  // DEBUG_LINE_HERE;
+  writer.length += snprintf_P(&writer.buffer[writer.length],DATA_BUFFER_PAYLOAD_MAX_LENGTH,"\"%s\":",key);
   // Add value
   va_list arg;
+  // DEBUG_LINE_HERE;
   va_start(arg, formatP_value);
+  // DEBUG_LINE_HERE;
   writer.length += vsnprintf_P(&writer.buffer[writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH-writer.length, formatP_value, arg);
+  
+  // DEBUG_LINE_HERE;
   va_end(arg);
+  // DEBUG_LINE_HERE;
 }
 
 // Use valist to populate the key

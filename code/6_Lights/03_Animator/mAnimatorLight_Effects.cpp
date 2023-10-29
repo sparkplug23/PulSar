@@ -13121,23 +13121,23 @@ void mAnimatorLight::LoadEffects()
 {
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                    PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR,                                   PM_EFFECT_CONFIG__SOLID_COLOUR);
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                    PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR,                                   PM_EFFECT_CONFIG__SOLID_COLOUR, Effect_DevStage::Release);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                  PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR,                                 PM_EFFECT_CONFIG__STATIC_PALETTE);
+  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                  PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR,                                 PM_EFFECT_CONFIG__STATIC_PALETTE, Effect_DevStage::Release);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,  PM_EFFECTS_FUNCTION__SPANNED_PALETTE__NAME_CTR,                           PM_EFFECT_CONFIG__SPANNED_PALETTE);
+  addEffect3(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,  PM_EFFECTS_FUNCTION__SPANNED_PALETTE__NAME_CTR,                           PM_EFFECT_CONFIG__SPANNED_PALETTE, Effect_DevStage::Beta);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR,                                      PM_EFFECT_CONFIG__SLOW_GLOW);
+  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR,                                      PM_EFFECT_CONFIG__SLOW_GLOW, Effect_DevStage::Release);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__CANDLE_SINGLE__NAME_CTR,                             PM_EFFECT_CONFIG__CANDLE_SINGLE);  
-  addEffect3(EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__CANDLE_MULTIPLE__NAME_CTR,                           PM_EFFECT_CONFIG__CANDLE_MULTIPLE);
+  addEffect3(EFFECTS_FUNCTION__CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__CANDLE_SINGLE__NAME_CTR,                             PM_EFFECT_CONFIG__CANDLE_SINGLE, Effect_DevStage::Alpha);  
+  addEffect3(EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__CANDLE_MULTIPLE__NAME_CTR,                           PM_EFFECT_CONFIG__CANDLE_MULTIPLE, Effect_DevStage::Alpha);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECTS_FUNCTION__SHIMMERING_TWO_PALETTES__NAME_CTR,                        PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECTS_FUNCTION__SHIMMERING_TWO_PALETTES__NAME_CTR,                        PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES, Effect_DevStage::Dev);
   #endif  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,   PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR,                  PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION);

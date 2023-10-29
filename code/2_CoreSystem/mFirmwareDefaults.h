@@ -421,7 +421,66 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 
 
+/**
+ * @brief This method allows the storage to be loaded, but will always then load templates and override anything from settings
+ *        to make sure the device starts in a known state. This will make sure SSID etc are loaded 
+ */
+#ifdef ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
 
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+    #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+    #define WLED_ENABLE_FS_EDITOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+    #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+
+
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+
+
+/**
+ * @brief This is for release to other people. A templated version will be compiled, and enable an ESP to be flashed
+ *        and then fully configured via the webui. This will include SSIDs, MQTT, and other settings, so will require settings
+ *        to be fully working and with fallback to starting in direct wifi mode for webpage configuration
+ */
+#ifdef ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_ONLY_ON_RESET
+
+
+
+
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_ONLY_ON_RESET
+
+
+
+/**
+ * @brief To enable ESP to load and save playlists, with access to the file edit URL
+ * 
+ */
+#ifdef ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+    #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+    #define WLED_ENABLE_FS_EDITOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+    #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+
+
+#endif // ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
 
 

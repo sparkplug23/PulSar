@@ -103,13 +103,20 @@ With latest version, all longer term shared debug features should be added here 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
 /*********************************************************************************************\
+ *  Templates
+\*********************************************************************************************/
+#define ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
+
+/*********************************************************************************************\
  *  Logging
 \*********************************************************************************************/
 #define SYS_LOG_HOST                  ""                      // [LogHost] (Linux) syslog host
 #define SYS_LOG_PORT                  514                     // [LogPort] default syslog UDP port
 #define SYS_LOG_LEVEL                 LOG_LEVEL_DEBUG_MORE    // [SysLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define SERIAL_LOG_LEVEL              LOG_LEVEL_DEBUG         // [SerialLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
-#define SERIAL_LOG_LEVEL_DURING_BOOT  LOG_LEVEL_INFO         // [SerialLogBoot] LOG_LEVEL_TEST//LOG_LEVEL_ALL
+#ifndef SERIAL_LOG_LEVEL_DURING_BOOT
+  #define SERIAL_LOG_LEVEL_DURING_BOOT  LOG_LEVEL_INFO         // [SerialLogBoot] LOG_LEVEL_TEST//LOG_LEVEL_ALL
+#endif
 #define WEB_LOG_LEVEL                 LOG_LEVEL_INFO          // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define TELNET_LOG_LEVEL              LOG_LEVEL_DEBUG
 #define LOGTIME_DEFAULT_FORMAT        1                       //  true == short
@@ -117,10 +124,10 @@ With latest version, all longer term shared debug features should be added here 
   /***********************************
    * SECTION: System Configs
   ************************************/    
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
 
   /***********************************
@@ -162,7 +169,7 @@ With latest version, all longer term shared debug features should be added here 
   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-  #ifndef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  #if !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE) && !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
   // Enable the default method must devices need to use
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_DUAL_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS // To switch between I2S and RMT as primary channels
   #endif
@@ -645,24 +652,14 @@ With latest version, all longer term shared debug features should be added here 
       #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
       #define WLED_MIN_VIRTUAL_BUSSES 3
     #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
-      #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
-        #define WLED_MAX_BUSSES 6             // will allow 4 digital & 2 analog
-        #define WLED_MIN_VIRTUAL_BUSSES 4
-      #else
-        #define WLED_MAX_BUSSES 7             // will allow 5 digital & 2 analog
-        #define WLED_MIN_VIRTUAL_BUSSES 3
-      #endif
+      #define WLED_MAX_BUSSES 7             // will allow 5 digital & 2 analog
+      #define WLED_MIN_VIRTUAL_BUSSES 3
     #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
       #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog
       #define WLED_MIN_VIRTUAL_BUSSES 4
     #else
-      #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
-        #define WLED_MAX_BUSSES 8
-        #define WLED_MIN_VIRTUAL_BUSSES 2
-      #else
-        #define WLED_MAX_BUSSES 10
-        #define WLED_MIN_VIRTUAL_BUSSES 0
-      #endif
+      #define WLED_MAX_BUSSES 16
+      #define WLED_MIN_VIRTUAL_BUSSES 0
     #endif
   #endif
 #else

@@ -90,7 +90,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L10__ESP32__7SEGMENTCLOCK
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER    // Outside Tree Tester
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L12__ESP32_LARGE_SINGLE_PIN_TESTER_WITH_DEBUG_PINS // Timing Tester
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L13__ESP32_OUTSIDE_TREE // To become the actual christmas controller, this should be moved into its own firmware folder
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L13__ESP32_OUTSIDE_TREE // To become the actual christmas controller, this should be moved into its own firmware folder
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L14__ESP32_I2S_PARALLEL_TESTER
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L15__ESP32_I2S_PARALLEL_RED_BOARDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L16__ESP32_I2S_PARALLEL_RED_BOARDS2
@@ -4500,6 +4500,11 @@
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
+  #define ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS
+  #define ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
+
+  #define SERIAL_LOG_LEVEL_DURING_BOOT LOG_LEVEL_DEBUG
+
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
   /***********************************
@@ -4632,13 +4637,13 @@
         "Grouping":1
       },
       "Transition": {
-        "TimeMs": 980,
-        "RateMs": 1000
+        "TimeMs": 2500,
+        "RateMs": 5000
       },
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
     },
-    "BrightnessRGB": 100,
+    "BrightnessRGB": 5,
     "BrightnessCCT": 0
   }
   )=====";
@@ -4736,6 +4741,8 @@
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
+
+    #error "here"
 
   /***********************************
    * SECTION: System Debug Options

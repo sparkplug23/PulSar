@@ -233,6 +233,11 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),
         pCONT_log->log_data
       );
+      
+      if(loglevel == LOG_LEVEL_DEBUG_LOWLEVEL)
+      {
+        SERIAL_DEBUG.flush();
+      }
     #else
 
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT START<<\n\r\n\r"); }

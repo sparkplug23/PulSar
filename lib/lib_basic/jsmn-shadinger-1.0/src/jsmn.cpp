@@ -376,6 +376,8 @@ JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
     }
   }
 
+  Serial.printf("count=%d\n\r",count);
+
   return count;
 }
 

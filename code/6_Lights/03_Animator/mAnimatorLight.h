@@ -2477,8 +2477,18 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
     void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
 
+
+    enum Effect_DevStage
+    {
+      Release=0,
+      Beta=1,
+      Alpha=2,
+      Dev=3
+    };
+
+
     typedef void (mAnimatorLight::*RequiredFunction)();        
-    void addEffect3(uint8_t id, RequiredFunction function, const char *name, const char* effect_config = nullptr); // add effect to the list; defined in FX.cpp
+    void addEffect3(uint8_t id, RequiredFunction function, const char *name, const char* effect_config = nullptr, uint8_t development_stage = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
 
     struct EFFECTS
     {
@@ -2486,6 +2496,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       std::vector<RequiredFunction>   function;     // SRAM footprint: 4 bytes per element
       std::vector<const char*>        data; // mode (effect) name and its slider control data array
       std::vector<const char*>        data_config; // For at least now, using WLED options until webpage is functional.
+      std::vector<uint8_t>            development_stage; // 0:stable, 1:beta, 2:alpha, 3:dev
     }effects;
 
 

@@ -33,6 +33,9 @@
 #define JSMN_API extern
 // #endif
 
+
+// #define USE_DEBUG_JSMN
+
 /**
  * JSON type identifier. Basic types are:
  * 	o Object

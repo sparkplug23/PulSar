@@ -286,7 +286,9 @@ void mSettings::JsonAppend_Settings()
 
   // JBI->Object_Start_F(GetModuleFriendlyName());  //json file parser will pass them to the modules, but should strip out the level_object from commands
     JBI->Add("BootCount", Settings.bootcount);
+    #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
     JBI->Add("FastBootCount", RtcFastboot.fast_reboot_count);
+    #endif
   // JBI->Object_End();
 
 }

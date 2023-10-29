@@ -31,6 +31,36 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
       //ModuleSettings_ShowTemplateLog();
       //ModuleSettings_ShowActiveTemplate();
     break;
+    case FUNC_LOOP:{
+
+      #ifdef ENABLE_DEBUGFEATURE_SET_PINS_MANUAL_STATES
+  
+      uint16_t pin = 0;
+
+      // pin = 4;  pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 16; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 17; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 18; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 19; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 21; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 22; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 23; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+
+      // pin = 2;  pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 13; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 14; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 27; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 26; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 25; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 33; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 32; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+
+
+
+      #endif // ENABLE_DEBUGFEATURE_SET_PINS_MANUAL_STATES
+
+
+    }break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -931,6 +961,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA1_CTR)==0){   return GPIO_RGB_DATA_ID; } // force legacy pin version for now
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA_CTR)==0){   return GPIO_RGB_DATA_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_CLOCK_CTR)==0){  return GPIO_RGB_CLOCK_ID; }
+
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR)==0){   return GPIO_UNUSED_FORCED_HIGH_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR)==0){  return GPIO_UNUSED_FORCED_LOW_ID; }
 
   #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_A_CTR)==0){   return GPIO_PIXELBUS_01_A_ID; }

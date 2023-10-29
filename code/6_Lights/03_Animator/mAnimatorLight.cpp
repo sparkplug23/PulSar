@@ -104,7 +104,8 @@ void mAnimatorLight::EveryLoop()
   //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
   if (doInitBusses) {
     doInitBusses = false;
-    DEBUG_PRINTLN(F("Re-init busses."));
+    ALOG_INF(PSTR("Re-init busses."));
+    DEBUG_LINE_HERE_TRACE;
     bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
     pCONT_iLight->bus_manager->removeAll();
     uint32_t mem = 0;
@@ -114,14 +115,14 @@ void mAnimatorLight::EveryLoop()
       mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
       if (mem <= MAX_LED_MEMORY) 
       {
-        DEBUG_LINE_HERE;
+        DEBUG_LINE_HERE_TRACE;
         pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
-        DEBUG_LINE_HERE;
+        DEBUG_LINE_HERE_TRACE;
       }
       else
       {        
         ALOG_ERR(PSTR("MEMORY ISSUE"));
-        DEBUG_LINE_HERE;
+        DEBUG_LINE_HERE_TRACE;
       }
       delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
     }
@@ -455,7 +456,7 @@ void mAnimatorLight::EverySecond_AutoOff()
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
     #endif       
-    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE_TRACE;
     pCONT_lAni->CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
     //#ifdef ENABLE_LOG_LEVEL_INFO
     auto_off_settings.time_decounter_secs=0;
@@ -680,11 +681,16 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     mPalette::STATIC_PALETTE *ptr = &mPaletteI->static_palettes[palette_id_adj];
 
     #ifdef ESP32
-    _palette_container->pData = std::vector<uint8_t>();
-    _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
-    // for(int i=0;i<_palette_container->pData.size();i++){
-    //   Serial.printf("%d,\n\r", _palette_container->pData[i]);
-    // }
+    // _palette_container->pData = std::vector<uint8_t>();
+    // _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
+    
+    // uint8_t buffer3[255];//ptr->data_length];
+    // memcpy_P(buffer3, ptr->data.begin, sizeof(uint8_t)*ptr->data_length);
+    // _palette_container->pData.assign(buffer3, buffer3 + ptr->data_length);
+
+    _palette_container->pData = ptr->data;
+
+    // for(int i=0;i<_palette_container->pData.size();i++){ Serial.printf("%d,\n\r", _palette_container->pData[i]); }
     #else // ESP8266 requires safe reading out of progmem first
     // _palette_container->pData = std::vector<uint8_t>();
     // _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
@@ -707,13 +713,11 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
   if(
     (palette_id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID)
   ){  
-
     
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
     for(uint8_t i=0;i<16;i++){
       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
     }
-
 
     /**
      * @brief These pri/sec/ter should really be merged into my palettes as another encoded type, thus, removing colors[x] from palette.cpp
@@ -849,7 +853,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     } // END switch
     
   }
-  //DEBUG_LINE_HERE;
+  //DEBUG_LINE_HERE_TRACE;
 
 }
 
@@ -974,7 +978,7 @@ int16_t mAnimatorLight::GetPaletteIDbyName(char* buffer)
 
   }
   
-  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE_TRACE;
 
   return found_id;
 
@@ -1131,8 +1135,16 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
 }
 
 
-
-void mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *name, const char* effect_config)
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @param function 
+ * @param name 
+ * @param effect_config 
+ * @param development_stage Added to allow for effects to be added but not shown in the UI. 0 = normal, 1 = beta, 2 = alpha, 3 = dev
+ */
+void mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *name, const char* effect_config, uint8_t development_stage)
 {
 
   // if (id == 255) { // find empty slot
@@ -1149,6 +1161,7 @@ void mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const ch
     effects.function.push_back(function);
     effects.data.push_back(name);
     effects.data_config.push_back(effect_config);
+    effects.development_stage.push_back(development_stage);
     if (effects.count < effects.function.size()) effects.count++;
   }
   
@@ -1589,7 +1602,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     
     // ALOG_INF(PSTR("============  pal.data_length/encoded_colour_width %d %d"),  pal.data_length, encoded_colour_width);
   
-    palette_colour_count = pal.data_length/encoded_colour_width; 
+    palette_colour_count = pal.data.size()/encoded_colour_width; 
  
   }
   else
@@ -2107,7 +2120,7 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen,
 }
 
 
-const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found)
+const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_only)
 {
   if(id<getEffectsAmount()){
     snprintf_P(buffer, buflen, effects.data[id]);  
@@ -2116,7 +2129,7 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
   }
 
   // Insert a null termination early if requested
-  if(return_first_option_if_not_found)
+  if(return_first_option_only)
   {    
     char* dataPtr = strchr(buffer,'|');
     if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
@@ -2252,7 +2265,7 @@ uint16_t mAnimatorLight::Segment_New::maxHeight = 1;
 // copy assignment
 mAnimatorLight::Segment_New& mAnimatorLight::Segment_New::operator= (const mAnimatorLight::Segment_New &orig) {
   
-      DEBUG_LINE_HERE;
+      DEBUG_LINE_HERE_TRACE;
   //DEBUG_PRINTLN(F("-- Copying segment --"));
   if (this != &orig) {
     // clean destination
@@ -2274,14 +2287,14 @@ mAnimatorLight::Segment_New& mAnimatorLight::Segment_New::operator= (const mAnim
     if (orig._t)   { _t = new Transition(orig._t->_dur, orig._t->_briT, orig._t->_cctT, orig._t->_colorT); }
     if (orig.leds && !mAnimatorLight::Segment_New::_globalLeds) { leds = (CRGB*)malloc(sizeof(CRGB)*length()); if (leds) memcpy(leds, orig.leds, sizeof(CRGB)*length()); }
   }
-      DEBUG_LINE_HERE;
+      DEBUG_LINE_HERE_TRACE;
   return *this;
 }
 
 // move assignment
 mAnimatorLight::Segment_New& mAnimatorLight::Segment_New::operator= (mAnimatorLight::Segment_New &&orig) noexcept {
   
-      DEBUG_LINE_HERE;
+      DEBUG_LINE_HERE_TRACE;
   //DEBUG_PRINTLN(F("-- Moving segment --"));
   if (this != &orig) {
     if (name) delete[] name; // free old name
@@ -2295,7 +2308,7 @@ mAnimatorLight::Segment_New& mAnimatorLight::Segment_New::operator= (mAnimatorLi
     orig._t   = nullptr;
     orig.leds = nullptr;
   }
-      DEBUG_LINE_HERE;
+      DEBUG_LINE_HERE_TRACE;
   return *this;
 }
 
@@ -2332,21 +2345,21 @@ bool mAnimatorLight::Segment_New::allocateData(size_t len)
   memset(data, 0, len);
       
       
-  // DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE_TRACE;
 
   return true;
 }
 
 void mAnimatorLight::Segment_New::deallocateData()
 {
-      // DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE_TRACE;
   if (!data) return;
-      // DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE_TRACE;
   free(data);
   data = nullptr;
-      // DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE_TRACE;
   addUsedSegmentData(-_dataLen);
-      // DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE_TRACE;
   _dataLen = 0;
 }
 
@@ -3342,7 +3355,7 @@ void mAnimatorLight::finalizeInit(void)
     pCONT_iLight->BusManager_Create_DefaultSingleNeoPixel();
   }
 
-  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE_TRACE;
 
   DEBUG_PRINTF("busses->getNumBusses() %d\n\r", pCONT_iLight->bus_manager->getNumBusses());
 
@@ -4051,9 +4064,9 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
    * @brief Load palette into temporary buffer first, then handle using the default function 
    **/
   mPaletteLoaded palette_container_temp = mPaletteLoaded();
-  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE_TRACE;
   pCONT_lAni->LoadPalette(palette_id, 0, &palette_container_temp);
-  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE_TRACE;
 
   uint8_t segment_index = 0; //force as zero when just getting unloaded for webui. This is because active_Segment_index can change in async loop
   
@@ -4066,7 +4079,7 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
     flag_crgb_exact_colour
   );
-  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE_TRACE;
 
   return colour;
 
@@ -4684,7 +4697,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
         // JBI->Add("n", pal.friendly_name_ctr);
         // JBI->Add("i", pal.id);
         
-    uint8_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(pal.id);
+        uint8_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(pal.id);
         JBI->Add("s",colours_in_palette);
 
 

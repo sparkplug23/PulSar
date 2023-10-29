@@ -219,6 +219,15 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #define ALOG_DEBUG_LINE_HERE ALOG_DBG(PSTR("DP:%s|%d"),__FILE__,__LINE__);
 
 
+#if defined(ENABLE_DEBUG_LINE_HERE_TRACE)
+  #define DEBUG_LINE_HERE_TRACE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE_HERE_TRACE   //nothing, no code
+#endif
+
 //For single test use, no ifdefs
 // #ifdef USE_DEBUG_LINE
 #if defined(ENABLE_DEBUG_LINE_HERE)

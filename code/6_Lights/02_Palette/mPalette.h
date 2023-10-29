@@ -372,32 +372,15 @@ class mPalette
 
     struct STATIC_PALETTE{ //6 bytes per palette
       // enum: Used to call for ctr of friendly name
-      uint8_t id;
+      uint8_t id; // phase out, not needed, just get as relative index
       // Pointer to name
       const char* friendly_name_ctr;
       // colour bytes 
-      const uint8_t* data; // pointer to progmem
-      // Active pixels
-      uint8_t  data_length; // total bytes in palette (includes index information)
+      std::vector<uint8_t> data;
       // Contains information on formatting of data buffer
       PALETTE_ENCODING_DATA encoding;
     };
     std::vector<STATIC_PALETTE> static_palettes;
-
-    // // Several palettes that automatically are reactive based on other events, eg solar position
-    // struct DYNAMIC_PALETTE{ //6 bytes per palette
-    //   // enum: Used to call for ctr of friendly name
-    //   uint8_t id;
-    //   // Pointer to name
-    //   const char* friendly_name_ctr;
-    //   // colour bytes 
-    //   const uint8_t* data; // pointer to progmem
-    //   // Active pixels
-    //   uint8_t  data_length; // total bytes in palette (includes index information)
-    //   // Contains information on formatting of data buffer
-    //   PALETTE_ENCODING_DATA encoding;
-    // };
-    // std::vector<DYNAMIC_PALETTE> dynamic_palettes;
 
 
     struct DYNAMIC_PALETTE{
@@ -413,8 +396,10 @@ class mPalette
       PALETTE_ENCODING_DATA encoding;
     };
     std::vector<CUSTOM_PALETTE> custom_palettes;
+
  
     void addStaticPalette(STATIC_PALETTE palette);
+    void addStaticPalette(uint16_t id, const char* name, const uint8_t* data, const uint8_t length, uint16_t encoding);
     void addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
     void addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
 
@@ -427,27 +412,15 @@ class mPalette
 
 
 
-    RgbcctColor Get_StaticPalette_Encoded_Colour_ReadBuffer(
-      uint16_t palette_id = 0,
+
+
+
+    RgbcctColor Get_Encoded_Colour_ReadBuffer_Fast(
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr
+      uint8_t* encoded_index = nullptr,
+      PALETTE_ENCODING_DATA encoding = {0}
     );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     RgbcctColor Get_Encoded_StaticPalette_Colour(
@@ -462,14 +435,18 @@ class mPalette
     );
 
 
-
-
-
-
-
-
-
-
+    RgbcctColor Get_Encoded_Palette_Colour(
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t encoded_colour_width = 0,
+      uint8_t colours_in_palette = 0,
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      bool     flag_forced_gradient = false
+    );
 
 
     RgbcctColor SubGet_Encoded_CustomPalette_Colour(
@@ -482,25 +459,6 @@ class mPalette
       bool     flag_crgb_exact_colour = false,
       bool     flag_forced_gradient = false
     );
-    RgbcctColor Get_CustomPalette_Encoded_Colour_255Index(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t colour_index = 0,
-      uint8_t* encoded_index = nullptr
-    );
-    RgbcctColor Get_CustomPalette_Encoded_Colour_IterativeIndex(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t colour_index = 0,
-      uint8_t* encoded_index = nullptr
-    );
-    RgbcctColor Get_CustomPalette_Encoded_Colour_ReadBuffer(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr
-    );
-
 
     // Dynamic palettes should do any calculations, then rely on the other methods to get colours
     RgbcctColor Get_Encoded_DynamicPalette_Colour(
@@ -515,22 +473,9 @@ class mPalette
     );
 
 
-uint8_t GetPaletteDiscreteWidth(
-  uint16_t palette_id,
-  uint8_t* palette_buffer);
-
-    
-    RgbcctColor Get_StaticPalette_Encoded_Colour_255Index(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t colour_index = 0,
-      uint8_t* encoded_index = nullptr
-    );
-    RgbcctColor Get_StaticPalette_Encoded_Colour_IterativeIndex(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t colour_index = 0,
-      uint8_t* encoded_index = nullptr
+    uint8_t GetPaletteDiscreteWidth(
+      uint16_t palette_id,
+      uint8_t* palette_buffer
     );
 
     
@@ -560,15 +505,29 @@ uint8_t GetPaletteDiscreteWidth(
     );
 
 
-    RgbcctColor SubGet_Encoded_PaletteList_Colour_Gradient(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_crgb_exact_colour = false
-    );
+    // RgbcctColor Get_StaticPalette_Encoded_Colour_ReadBuffer(
+    //   uint16_t palette_id = 0,
+    //   uint8_t* palette_elements = nullptr,
+    //   uint16_t desired_index_from_palette = 0,
+    //   uint8_t* encoded_index = nullptr
+    // );
+
+    // RgbcctColor Get_StaticPalette_Encoded_Colour_IterativeIndex(
+    //   uint16_t palette_id = 0,
+    //   uint8_t* palette_elements = nullptr,
+    //   uint16_t colour_index = 0,
+    //   uint8_t* encoded_index = nullptr
+    // );
+
+    // RgbcctColor SubGet_Encoded_PaletteList_Colour_Gradient(
+    //   uint16_t palette_id = 0,
+    //   uint8_t* palette_elements = nullptr,
+    //   uint16_t desired_index_from_palette = 0,
+    //   uint8_t* encoded_index = nullptr,
+    //   bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    //   bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    //   bool     flag_crgb_exact_colour = false
+    // );
     
 };
 

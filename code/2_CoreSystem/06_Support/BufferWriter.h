@@ -19,7 +19,7 @@ class BufferWriter{
     struct WRITER_POINTERS{
         char*     buffer = nullptr;
         uint16_t  buffer_size = 0;
-        uint16_t* length = nullptr;
+        uint16_t  length = 0;
     }writer;
 
   public:
@@ -28,12 +28,11 @@ class BufferWriter{
     /* Here will be the instance stored. */
     static BufferWriter* instance;    
 
-    void Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size);
+    void Start(char* _buffer, uint16_t _length, uint16_t _buffer_size);
     void Start();
     void Clear();
     bool End();
     char* GetBufferPtr();
-    uint16_t* GetLengthPtr();
     uint16_t GetLength();
     uint16_t GetBufferSize();
     // void SetLength(uint16_t len);

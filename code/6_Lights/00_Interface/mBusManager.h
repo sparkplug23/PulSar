@@ -200,11 +200,11 @@ class Bus {
 
     bool reversed = false;
 
+    uint16_t _start;
+    uint16_t _len;
   protected:
     uint8_t  _type;
     uint8_t  _bri;
-    uint16_t _start;
-    uint16_t _len;
     bool     _valid;
     bool     _needsRefresh;
     uint8_t  _autoWhiteMode;

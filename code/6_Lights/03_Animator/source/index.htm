@@ -6,7 +6,7 @@
 	<meta name="theme-color" content="#222222">
 	<meta content="yes" name="apple-mobile-web-app-capable">
 	<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAGACGAAAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAAE1JREFUOI1j/P//PwOxgNGeAUMxE9G6cQCKDWAhpADZ2f8PMjBS3QW08QK20KaZC2gfC9hCnqouoNgARgY7zMxAyNlUdQHlXiAlO2MDAD63EVqNHAe0AAAAAElFTkSuQmCC"/>
-	<title>WLED</title>
+	<title>PulSar</title>
 	<script>
 	function feedback(){}
 	// instead of including [script src="iro.js"][/script] and [script src="rangetouch.js"][/script]
@@ -363,7 +363,7 @@
 		</div>
 	</div>
 	 <!-- Start at the end for debugging, but should be moved to primary (left) tab later -->
-	<div id="Overview" class="tabcontent">
+	<!-- <div id="Overview" class="tabcontent">
 		<div id="pql">
 		</div>
 		<p class="labels hd">Overview</p>
@@ -377,7 +377,7 @@
 		</div>
 		<div id="putil" class="staybot">
 		</div>
-	</div>
+	</div> -->
 </div>
 
 <div class="tab bot" id="bot">
@@ -400,16 +400,15 @@
 	<div>
 		<button class="btn infobtn" onclick="requestJson()">Refresh</button>
 		<button class="btn infobtn" onclick="toggleNodes()">Instance List</button>
-		<button class="btn infobtn" onclick="window.open(getURL('/update'),'_self');">Update WLED</button>
-		<button class="btn infobtn" id="resetbtn" onclick="cnfReset()">Reboot WLED</button>
+		<button class="btn infobtn" onclick="window.open(getURL('/update'),'_self');">Update</button>
+		<button class="btn infobtn" id="resetbtn" onclick="cnfReset()">Reboot PulSar</button>
 	</div>
 	<br>
-	<span class="h">Made with <span id="heart">&#10084;&#xFE0E;</span> by Aircoookie and the <a href="https://wled.discourse.group/" target="_blank">WLED community</a></span>
 </div>
 
 <div id="nodes" class="modal">
 	<button class="btn btn-xs close" onclick="toggleNodes()"><i class="icons rot45">&#xe18a;</i></button>
-	<div id="ndlt">WLED instances</div>
+	<div id="ndlt">PulSar instances</div>
 	<div id="kn">Loading...</div>
 	<div style="position:sticky;bottom:0;">
 		<button class="btn infobtn" onclick="loadNodes()">Refresh</button>

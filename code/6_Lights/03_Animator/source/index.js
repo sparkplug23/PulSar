@@ -1060,7 +1060,7 @@ function btype(b)
 
 function bname(o)
 {
-	if (o.name=="WLED") return o.ip;
+	if (o.name=="PulSar") return o.ip;
 	return o.name;
 }
 
@@ -1332,7 +1332,7 @@ function displayRover(i,s)
 {
 	gId('rover').style.transform = (i.live && s.lor == 0 && i.liveseg<0) ? "translateY(0px)":"translateY(100%)";
 	var sour = i.lip ? i.lip:""; if (sour.length > 2) sour = " from " + sour;
-	gId('lv').innerHTML = `WLED is receiving live ${i.lm} data${sour}`;
+	gId('lv').innerHTML = `PulSar is receiving live ${i.lm} data${sour}`;
 	gId('roverstar').style.display = (i.live && s.lor) ? "block":"none";
 }
 

@@ -123,22 +123,22 @@ void setup(void)
  ********************************************************************************************/
  
   #ifdef ESP32
-  #ifdef DISABLE_ESP32_BROWNOUT
-    DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
-  #endif  // DISABLE_ESP32_BROWNOUT
+    #ifdef DISABLE_ESP32_BROWNOUT
+      DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
+    #endif  // DISABLE_ESP32_BROWNOUT
 
-  #ifdef CONFIG_IDF_TARGET_ESP32
-  // restore GPIO16/17 if no PSRAM is found
-  if (!SupportESP32::FoundPSRAM()) {
-    // test if the CPU is not pico
-    uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
-    uint32_t pkg_version = chip_ver & 0x7;
-    if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
-      gpio_reset_pin(GPIO_NUM_16);
-      gpio_reset_pin(GPIO_NUM_17);
+    #ifdef CONFIG_IDF_TARGET_ESP32
+    // restore GPIO16/17 if no PSRAM is found
+    if (!SupportESP32::FoundPSRAM()) {
+      // test if the CPU is not pico
+      uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
+      uint32_t pkg_version = chip_ver & 0x7;
+      if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
+        gpio_reset_pin(GPIO_NUM_16);
+        gpio_reset_pin(GPIO_NUM_17);
+      }
     }
-  }
-  #endif  // CONFIG_IDF_TARGET_ESP32
+    #endif  // CONFIG_IDF_TARGET_ESP32
   #endif  // ESP32
 
   /**
@@ -167,64 +167,62 @@ void setup(void)
 
   #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 
-  RtcFastboot_Load();
+    RtcFastboot_Load();
 
-  if (!RtcFastboot_Valid())
-  {
-    RtcFastboot.fast_reboot_count = 0;
-  }
-  
-  /**
-   * @brief Good Boot: Waking from sleep, keep reseting the counter
-   **/
-  if (ResetReason_g() == REASON_DEEP_SLEEP_AWAKE) 
-  {
-    RtcFastboot.fast_reboot_count = 0;  // Disable fast reboot and quick power cycle detection
-  } 
-  /**
-   * @brief Bad Boot: Increment count
-   **/
-  else
-  {
-    RtcFastboot.fast_reboot_count++;
-    #ifdef DEBUG_FASTBOOT
-    Serial.printf("FastBoot: Count %d\n\r", RtcFastboot.fast_reboot_count); 
-    #endif
-  }
-  
-  RtcFastboot_Save(); // Save reboot
-
-
-  /**
-   * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
-   * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
-   **/
-  #if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-  if(RtcFastboot.fast_reboot_count > 10)
-  {
-    SafeMode_StartAndAwaitOTA();
-  }
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-  /**
-   * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
-   * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
-   **/
-  #if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-  if(RtcFastboot.fast_reboot_count > 10)
-  {
-    SafeMode_CellularConnectionAndSendLocation();
-  }
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+    if (!RtcFastboot_Valid())
+    {
+      RtcFastboot.fast_reboot_count = 0;
+    }
+    
+    /**
+     * @brief Good Boot: Waking from sleep, keep reseting the counter
+     **/
+    if (ResetReason_g() == REASON_DEEP_SLEEP_AWAKE) 
+    {
+      RtcFastboot.fast_reboot_count = 0;  // Disable fast reboot and quick power cycle detection
+    } 
+    /**
+     * @brief Bad Boot: Increment count
+     **/
+    else
+    {
+      RtcFastboot.fast_reboot_count++;
+      #ifdef DEBUG_FASTBOOT
+      Serial.printf("FastBoot: Count %d\n\r", RtcFastboot.fast_reboot_count); 
+      #endif
+    }
+    
+    RtcFastboot_Save(); // Save reboot
 
 
-#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+    /**
+     * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
+     * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
+     **/
+    #if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+    if(RtcFastboot.fast_reboot_count > 10)
+    {
+      SafeMode_StartAndAwaitOTA();
+    }
+    #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+    /**
+     * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
+     * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
+     **/
+    #if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+    if(RtcFastboot.fast_reboot_count > 10)
+    {
+      SafeMode_CellularConnectionAndSendLocation();
+    }
+    #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-#ifdef ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
-Serial.flush();
-delay(1000);
-pCONT_sup->CmndCrash();
-#endif  // ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+  #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 
+  #ifdef ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+  Serial.flush();
+  delay(1000);
+  pCONT_sup->CmndCrash();
+  #endif  // ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
 /********************************************************************************************
  ** RTC Settings ********************************************************************************
@@ -263,14 +261,13 @@ pCONT_sup->CmndCrash();
   Serial.setDebugOutput(true);
   #endif 
   
-
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
  
   // Init Json builder with memory address and size
   JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-  BufferWriterI->Start(data_buffer.payload.ctr, &data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
+  BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
   
   /**
    * @brief Start the Tasker_Interface module
@@ -280,9 +277,6 @@ pCONT_sup->CmndCrash();
 /********************************************************************************************
  ** Set boottime values *********************************************************************
  ********************************************************************************************/
-
-
-DEBUG_LINE_HERE;
 
   // Set boot method
   pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
@@ -301,7 +295,6 @@ DEBUG_LINE_HERE;
  ********************************************************************************************/
 
   ALOG_INF(PSTR("ResetReason=%d"), ResetReason_g());
-
 
 /********************************************************************************************
  ** Show PSRAM Present **********************************************************************
@@ -340,21 +333,6 @@ DEBUG_LINE_HERE;
   }
   #endif
 
-
-  #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
-    pCONT_set->SettingsLoad();
-  // SettingsDelta();
-
-  // OsWatchInit();
-
-
-
-
-  #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
-
-
-
-
 /********************************************************************************************
  ** Settings ********************************************************************************
  ********************************************************************************************/
@@ -374,43 +352,13 @@ DEBUG_LINE_HERE;
    * File system saving will become useful when I create an esp32 gps data logger as part of future LTE monitor.
    */
 
-  // pCONT_set->TestSettingsLoad();
-  // pCONT_set->TestSettings_ShowLocal_Header();
-
   ALOG_DBG(PSTR("Loading minimal defaults"));
-
   pCONT_set->SettingsDefault(); //preload minimal required
-
-  ALOG_DBG(PSTR("Loading settings from saved memory"));
-  
+  ALOG_DBG(PSTR("Loading settings from saved memory"));  
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
   // Check Load was successful
   pCONT_set->SettingsLoad_CheckSuccessful();
-  // #endif
-
-  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before4"));
-  // pCONT_set->TestSettingsLoad();
-  // pCONT_set->TestSettings_ShowLocal_Header();
-  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after4"));
-
-  // Test save and read back
-  // pCONT_set->Settings.bootcount = 13;
-  // pCONT_set->SettingsSave(1);
-
-  // pCONT_set->TestSettingsLoad();
-
-//   if (ResetReason() != REASON_DEEP_SLEEP_AWAKE) {
-// #ifdef ESP8266
-//     Settings->flag4.network_wifi = 1;           // Make sure we're in control
-// #endif
-// #ifdef ESP32
-//     if (!Settings->flag4.network_ethernet) {
-//       Settings->flag4.network_wifi = 1;         // Make sure we're in control
-//     }
-// #endif
-//   }
-
 
 /********************************************************************************************
  ** OsWatch ********************************************************************************
@@ -494,25 +442,23 @@ DEBUG_LINE_HERE;
  ** Load Templates **************************************************************************
  ********************************************************************************************/
    
-  pCONT->Tasker_Interface(FUNC_POINTER_INIT); // confirgure any memory address needed as part of module init or templates
+  pCONT->Tasker_Interface(FUNC_POINTER_INIT); // configure any memory address needed as part of module init or templates
   
-  // #ifdef FORCE_TEMPLATE_LOADING
+  #ifdef ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
-  // Load template before init
-  
+  // Load template before init  
   ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-  
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
   // load
   // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
-  // #else
-  // #warning "FORCE_TEMPLATE_LOADING is disabled, trying to use settings may result in improper loaded values"
-  // #endif
+  #else
+  #warning "FORCE_TEMPLATE_LOADING is disabled, trying to use settings may result in improper loaded values"
+  #endif
   
-  // // Set boot method
-  // pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
-  // pCONT_set->Settings.logging.serial_level = pCONT_set->seriallog_level_during_boot;  
+  // Set boot method
+  pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
+  pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;  
     
   /********************************************************************************************
    ** Initialise System and Modules ***********************************************************
@@ -533,11 +479,10 @@ DEBUG_LINE_HERE;
   pCONT->Tasker_Interface(FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES); // load the minimal
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
-  // load
   
-/********************************************************************************************
- ** File System : Load after settings for now, so this method overrides any defaults   ******
- ********************************************************************************************/
+  /********************************************************************************************
+   ** File System : Load after settings for now, so this method overrides any defaults   ******
+  ********************************************************************************************/
 
   #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -548,26 +493,23 @@ DEBUG_LINE_HERE;
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
    * */
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);//load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_AFTER_INIT)
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);
   // Configure sensor/drivers to values desired for modules
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
-  
+
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif
 
-// DEBUG_LINE_HERE_SHORT_PAUSE;
-
   // Init the refresh periods for mqtt
+  #ifndef ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+  #endif
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif
-
-  
-
 
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);

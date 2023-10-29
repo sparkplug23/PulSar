@@ -151,7 +151,12 @@ const char* Bus::getTypeName()
 
 BusDigital::BusDigital(BusConfig &bc, uint8_t digital_bus_number, const ColorOrderMap &com) : Bus(bc.type, bc.start, bc.autoWhite), _colorOrderMap(com) 
 {
-  if (!IS_BUSTYPE_DIGITAL(bc.type) || !bc.count) return;
+  DEBUG_LINE_HERE;
+  if (!IS_BUSTYPE_DIGITAL(bc.type) || !bc.count)
+  {    
+    ALOG_ERR(PSTR("BusDigital::BusDigital !IS_BUSTYPE_DIGITAL(bc.type) || !bc.count"));
+    return;
+  }
   _pins[0] = bc.pins[0];
   if (IS_BUSTYPE_2PIN(bc.type)) 
   {
@@ -161,14 +166,25 @@ BusDigital::BusDigital(BusConfig &bc, uint8_t digital_bus_number, const ColorOrd
   _needsRefresh = bc.refreshReq || bc.type == BUSTYPE_TM1814;
   _skip = bc.skipAmount;    //sacrificial pixels
   _len = bc.count + _skip;
+  // DEBUG_LINE_HERE;
   _iType = PolyBus::getI(bc.type, _pins, digital_bus_number);
-  if (_iType == BUSTYPE__NONE__ID) return;
+  // DEBUG_LINE_HERE;
+  if (_iType == BUSTYPE__NONE__ID)
+  {
+    ALOG_ERR(PSTR("BusDigital::BusDigital _iType == BUSTYPE__NONE__ID"));
+    return;
+  }
+  ALOG_INF(PSTR("iType %d"), _iType);
+  // DEBUG_LINE_HERE;
   uint16_t lenToCreate = _len;
+  // DEBUG_LINE_HERE;
   if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus 
+  // DEBUG_LINE_HERE;
   _busPtr = PolyBus::create(_iType, _pins, lenToCreate, digital_bus_number);
+  // DEBUG_LINE_HERE;
   _valid = (_busPtr != nullptr);
   _colorOrder = bc.colorOrder;
-  DEBUG_PRINTF("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u)\n", _valid?"S":"Uns", digital_bus_number, _len, bc.type, _pins[0],_pins[1],_iType);
+  ALOG_INF(PSTR("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u)"), _valid?"S":"Uns", digital_bus_number, _len, bc.type, _pins[0],_pins[1],_iType);
 }
 
 
@@ -641,6 +657,8 @@ uint32_t BusManager::memUsage(BusConfig &bc)
 int BusManager::add(BusConfig &bc) 
 {
 
+  DEBUG_LINE_HERE;
+
   uint8_t bus_count = getNumBusses() - getNumVirtualBusses();
   if (bus_count >= WLED_MAX_BUSSES) 
   {
@@ -648,22 +666,27 @@ int BusManager::add(BusConfig &bc)
     return -1;
   }
 
+  DEBUG_LINE_HERE;
   if(
     bc.type >= BUSTYPE_NET_DDP_RGB && 
     bc.type < 96) 
   {
+    ALOG_INF(PSTR("BusManager::add::Type BusNetwork"));
     busses[numBusses] = new BusNetwork(bc); // IP
   } 
   else if(IS_BUSTYPE_DIGITAL(bc.type)) 
   {
+    ALOG_INF(PSTR("BusManager::add::Type BusDigital"));
     busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap); // Neopixel
   } 
   else if(bc.type == BUSTYPE_ONOFF) 
   {
+    ALOG_INF(PSTR("BusManager::add::Type BUSTYPE_ONOFF"));
     busses[numBusses] = new BusOnOff(bc); // Relays
   } 
   else 
   {
+    ALOG_INF(PSTR("BusManager::add::Type ELSE"));
     busses[numBusses] = new BusPwm(bc); // H801
   }
 
@@ -687,7 +710,7 @@ void BusManager::removeAll()
     ALOG_INF(PSTR("i < numBusses %d"), numBusses);
 
   // Sanity check
-    ALOG_ERR(PSTR("numBusses exceed busses array size %d %d"), numBusses, ARRAY_SIZE(busses));
+    ALOG_ERR(PSTR("numBusses busses array size %d %d"), numBusses, ARRAY_SIZE(busses));
   if(numBusses >= ARRAY_SIZE(busses))
   {
     ALOG_ERR(PSTR("numBusses exceed busses array size %d %d"), numBusses, ARRAY_SIZE(busses));

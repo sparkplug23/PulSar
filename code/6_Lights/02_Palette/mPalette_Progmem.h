@@ -1805,8 +1805,9 @@ DEF_PGM_UINT8(PM_PALETTE_WINTER_01__DATA)
   0x27, 0x4d, 0x83, // 
 };
 
+// Redo, "no dark", not useful as its just brightness
 #ifndef D_PALETTE_WINTER_02_NAME_CTR
-#define D_PALETTE_WINTER_02_NAME_CTR        "Winter Dark W02"  // Should contain whites (e.g. a snow covered mountain scene with pale blue sky, the kind that has a hazy white to it near horizon)
+#define D_PALETTE_WINTER_02_NAME_CTR        "Winter --- W02"  // Should contain whites (e.g. a snow covered mountain scene with pale blue sky, the kind that has a hazy white to it near horizon)
 #endif
 DEF_PGM_CTR  (PM_PALETTE_WINTER_02_NAME_CTR)        D_PALETTE_WINTER_02_NAME_CTR;
 #define        D_PALETTE_WINTER_02_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
@@ -1814,6 +1815,9 @@ DEF_PGM_UINT8(PM_PALETTE_WINTER_02__DATA)
 {      
   0x1f, 0x29, 0x33, // Ebony Clay
   0x13, 0x1e, 0x32, // Blue
+
+  // deep purple
+  // deep blue
 };
 
 #ifndef D_PALETTE_WINTER_03_NAME_CTR

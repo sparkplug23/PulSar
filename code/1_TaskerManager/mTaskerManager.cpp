@@ -24,6 +24,17 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     if (!obj) {
       ALOG_ERR(PM_JSON_DESERIALIZATION_ERROR);
       return 0;
+    }else{
+      ALOG_HGL(PSTR("JSON PARSED OK"));
+
+      JsonParserToken jtok = 0; 
+      if(jtok = obj["Segment0"])
+      {
+        ALOG_HGL(PSTR("Segment0 YES"));
+      }else{
+        ALOG_HGL(PSTR("Segment0 MISSING"));
+      }
+
     }
 
     for(uint8_t i=0;i<GetClassCount();i++)

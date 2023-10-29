@@ -133,7 +133,6 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     JBI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
     JBI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer, sizeof(buffer)));
     JBI->Add(PM_JSON_BUILDTIME,       __TIME__);
-    // JBI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
     JBI->Add(PM_JSON_VERSION_NUMBER,   (uint32_t)PROJECT_VERSION);
     JBI->Add(PM_JSON_VERSION_NUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
     JBI->Add(PM_JSON_VERSION_NUMBER_NOTYPE,   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
