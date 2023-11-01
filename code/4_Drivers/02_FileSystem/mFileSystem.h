@@ -78,6 +78,15 @@ class mFileSystem :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_FILESYSTEM_ID; }
 
 
+
+void ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
+void ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
+void JSONFile_Save(char* filename_With_extension, char* buffer, uint16_t buflen);
+void JSONFile_Load(char* filename_With_extension, char* buffer, uint16_t buflen);
+
+
+
+void SystemTask__Execute_Module_Data_Save();
     
 // saves 80 bytes of flash, makes the UI cleaner for folders containing lots of files.
 // disables recursive folder listing in file UI

@@ -1396,6 +1396,8 @@ char* mTime::GetDateAndTimeCtr(uint8_t time_type, char* buffer, uint8_t buflen)
 {
   // "2017-03-07T11:08:02-07:00" - ISO8601:2004
 
+  // later, investigate way to also add millis for uptime and utctime 
+
   // Types that write into the buffer directly
   switch(time_type){
     case DT_TIMEZONE:

@@ -77,18 +77,18 @@
 #ifdef ESP32
   #include <WiFi.h>
   #ifndef DISABLE_NETWORK
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include <SPIFFSEditor.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include <ESP8266WiFi.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
 
 #include "math.h"
@@ -161,7 +161,37 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
 #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
 #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-#include "6_Lights/03_Animator/mWebUI_Headers.h" // Not inside the class
+// #include "6_Lights/03_Animator/mWebUI_Headers.h" // Not inside the class
+
+#include "webpages_generated/html_ui.h"
+#ifdef WLED_ENABLE_SIMPLE_UI
+  #include "webpages_generated/html_simple.h"
+#endif
+#include "webpages_generated/html_settings.h"
+#include "webpages_generated/html_other.h"
+#ifdef WLED_ENABLE_PIXART
+  #include "webpages_generated/html_pixart.h"
+#endif
+#ifndef WLED_DISABLE_PXMAGIC
+  #include "webpages_generated/html_pxmagic.h"
+#endif
+#include "webpages_generated/html_cpal.h"
+
+// #endif // HEADER_GUARD_ADD_PAGES
+
+const char JSON_mode_names[] PROGMEM = R"=====(["FX names moved"])=====";
+const char JSON_palette_names[] PROGMEM = R"=====([
+"Default Michael","* Random Cycle","* Color 1 this","* Colors 1&2","* Color Gradient","* Colors Only","Party","Cloud","Lava","Ocean",
+"Forest","Rainbow","Rainbow Bands","Sunset","Rivendell","Breeze","Red & Blue","Yellowout","Analogous","Splash",
+"Pastel","Sunset 2","Beach","Vintage","Departure","Landscape","Beech","Sherbet","Hult","Hult 64",
+"Drywet","Jul","Grintage","Rewhi","Tertiary","Fire","Icefire","Cyane","Light Pink","Autumn",
+"Magenta","Magred","Yelmag","Yelblu","Orange & Teal","Tiamat","April Night","Orangery","C9","Sakura",
+"Aurora","Atlantica","C9 2","C9 New","Temperature","Aurora 2","Retro Clown","Candy","Toxy Reaf","Fairy Reaf",
+"Semi Blue","Pink Candy","Red Reaf","Aqua Flash","Yelblu Hot","Lite Light","Red Flash","Blink Red","Red Shift","Red Tide",
+"Candy2"
+])=====";
+#define PALETTE_NAMES_COUNT_WLED 64
+
 #endif
 
 
@@ -228,6 +258,7 @@ class mAnimatorLight :
     bool doInitBusses = false; // debug
 
     void FileSystem_JsonAppend_Save_Module();
+    void Module_DataSave();
 
  
     #ifndef STRIP_OUTPUT_REPEATED_LENGTH
@@ -280,8 +311,7 @@ class mAnimatorLight :
 
     void CommandSet_LightPowerState(uint8_t value);
     bool CommandGet_LightPowerState();
-    void CommandSet_Auto_Time_Off_Secs(uint16_t value);    
-    // void CommandSet_LightSizeCount(uint16_t value);
+    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
     void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
     
@@ -336,7 +366,7 @@ class mAnimatorLight :
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
 
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER23
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
     void Web_RGBLightSettings_Draw(AsyncWebServerRequest *request);
     void Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request);
@@ -364,7 +394,7 @@ class mAnimatorLight :
     void WebPage_Root_AddHandlers();
     void WebAppend_JSON_RootPage_LiveviewPixels();
     void WebPage_Root_SendInformationModule();
-    #endif //USE_MODULE_NETWORK_WEBSERVER23
+    #endif //USE_MODULE_NETWORK_WEBSERVER
 
     #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
     void Test_Config();
@@ -434,12 +464,12 @@ class mAnimatorLight :
       void MQTTHandler_Set_RefreshAll();
       void MQTTHandler_Set_DefaultPeriodRate();  
       void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-      #ifdef USE_MODULE_NETWORK_WEBSERVER23
+      #ifdef USE_MODULE_NETWORK_WEBSERVER
       void MQTTHandler_AddWebURL_PayloadRequests();
       #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
       void MQTTHandler_AddWebURL_PayloadRequests2();
       #endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-      #endif // USE_MODULE_NETWORK_WEBSERVER23
+      #endif // USE_MODULE_NETWORK_WEBSERVER
       
       std::vector<struct handler<mAnimatorLight>*> mqtthandler_list;
     
@@ -488,15 +518,167 @@ class mAnimatorLight :
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
-    #include "mAnimatorLight_Auto_Playlists.h"
-    #endif
-    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETSUSE_MODULE_LIGHTS_ANIMATOR_OLD
-    #include "mAnimatorLight_Presets.h"
-    #endif
-    #ifdef USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
-    void LoadPreset_ManualUserCustom_ByID(uint8_t id);
-    #endif
+    // #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
+    // #include "mAnimatorLight_Auto_Playlists.h"
+    // #endif
+    // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETSUSE_MODULE_LIGHTS_ANIMATOR_OLD
+    
+    
+
+    //     //   void LoadMixerGroupByID(uint8_t id);
+          
+    //     //   void SubTask_Flasher_Animate_Mixer();
+    //     //   void LoadPreset_ManualTesting_ByID(uint8_t id = 0);
+    //     //   void LoadPreset_OutsideFrontTree_ByID(uint8_t id = 0);
+    //     //   void LoadPreset_ManualUserCustom_ByID(uint8_t id = 0);
+
+          
+    //     //   enum EFFECTS_FUNCTION_MIXER{
+    //     //     EFFECTS_FUNCTION_MIXER_01_ID=0,
+    //     //     // EFFECTS_FUNCTION_MIXER_02_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_03_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_04_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_05_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_06_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_07_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_08_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_09_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_10_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_11_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_12_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_13_ID,
+    //     //     // EFFECTS_FUNCTION_MIXER_14_ID, 
+    //     //     // EFFECTS_FUNCTION_MIXER_15_ID, 
+    //     //     EFFECTS_FUNCTION_MIXER_LENGTH_ID
+    //     //   };
+    //     //   #define EFFECTS_FUNCTION_MIXER_MAX EFFECTS_FUNCTION_MIXER_LENGTH_ID
+    //     //   // #define MIXER_GROUP_MAX 7
+
+          
+    //     //   typedef union {
+    //     //     uint16_t data; // allows full manipulating
+    //     //     struct { 
+    //     //       // enable animations (pause)
+    //     //       uint16_t Enabled : 1;
+    //     //       /**
+    //     //        * 0 - None
+    //     //        * 1 - Basic multiplier
+    //     //        * 2 - Using mapped index array 
+    //     //       */
+    //     //       // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
+    //     //       // uint16_t mapped_array_editable_or_progmem : 1;
+
+              
+
+
+    //     //     };
+    //     //   } MIXER_SETTINGS_FLAGS;
+
+    //     //   typedef union {
+    //     //     uint16_t data; // allows full manipulating
+    //     //     struct { 
+    //     //       // enable animations (pause)
+    //     //       uint16_t Enabled : 1;
+    //     //       /**
+    //     //        * 0 - None
+    //     //        * 1 - Basic multiplier
+    //     //        * 2 - Using mapped index array 
+    //     //       */
+    //     //       // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
+    //     //       // uint16_t mapped_array_editable_or_progmem : 1;
+              
+    //     //       uint16_t enable_force_preset_brightness_scaler : 1; // to allow manual brightness leveling
+
+
+    //     // /**
+    //     //  * Any mixer setting that needed this, should probably just becomes its own animation, and hence just a different animation mode will be chosen
+    //     //  * "Mixer" should be distilled down to ONLY picking animation, setting brightness, intensities etc
+    //     //  * 
+    //     //  * */
+    //     //       uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
+    //     //       uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
+
+
+
+    //     //     };
+    //     //   } MIXER_SETTINGS_GROUP_FLAGS;
+          
+
+    //     //   struct MIXER_SETTINGS{
+    //     //   // #ifdef DEVICE_OUTSIDETREE
+    //     //     struct MODE{
+    //     //       uint8_t running_id = EFFECTS_FUNCTION_MIXER_01_ID;
+    //     //       uint16_t time_on_secs[EFFECTS_FUNCTION_MIXER_MAX]; // stores which to use
+    //     //       int16_t time_on_secs_active = 60; //signed
+    //     //       // char running_friendly_name_ctr[40];
+    //     //       struct TIMES{
+    //     //       // uint16_t enable_skip_restricted_by_time[EFFECTS_FUNCTION_MIXER_MAX]; // if set, this mode will only run if INSIDE the "flashy" time period
+    //     //         struct time_short flashing_starttime; //shortime
+    //     //         struct time_short flashing_endtime;
+    //     //         uint8_t skip_restricted_by_time_isactive = 0;
+    //     //       }times;
+    //     //     }mode; //active 
+    //     //     // #endif
+            
+    //     //     // uint32_t tSavedMillisToChangeAt = 0;
+    //     //     uint32_t tSavedTrigger = millis();
+    //     //     // uint32_t tSavedRestart = millis();
+    //     //     // uint8_t enabled = false;
+    //     //     // uint8_t time_scaler = 6;
+    //     //     // uint32_t tSavedSendData;
+    //     //     uint8_t enabled_mixer_count = 0; // 10 max
+
+    //     //     // Shared loaded values to act on
+    //     //     uint8_t brightness_lower_255 = 0;
+    //     //     uint8_t brightness_higher_255 = 255;
+
+    //     //     MIXER_SETTINGS_FLAGS flags;
+
+
+    //     //     //int16_t time_on_secs_active = 10; //signed
+    //     //     // char running_friendly_name_ctr[100];
+    //     //     uint8_t running_id = EFFECTS_FUNCTION_MIXER_01_ID;
+    //     //     uint8_t run_time_duration_scaler_as_percentage = 100; // for debugging, running faster
+              
+    //     //     struct GROUPS_SETTINGS{
+    //     //       int16_t time_on_secs_decounter = -1;
+    //     //       struct time_short starttime;
+    //     //       struct time_short endtime;
+    //     //       uint8_t enable_skip_restricted_by_time = 0;
+    //     //       uint8_t isenabled = true;
+
+    //     //       uint8_t ifenabled_forced_brightness_level_percentage = 100;
+    //     //       int8_t pixels_to_update_as_percentage = 10;//-1; // -1 disables, ie ALL
+
+    //     //       struct TRANSITION{
+    //     //         uint16_t time = 0;
+    //     //         uint16_t rate = 0;
+    //     //         uint8_t  time_unit_id = 0; // secs vs ms
+    //     //       }transition;
+
+    //     //       uint8_t brightness_lower_255 = 0;
+    //     //       uint8_t brightness_higher_255 = 255;
+
+    //     //       uint8_t animation_transition_order = 0;//TRANSITION_ORDER_INORDER_ID;
+    //     //       uint8_t flashersettings_function = 1;//EFFECTS_FUNCTION_SLOW_GLOW_ID;
+    //     //       uint16_t run_time_duration_sec = 120;
+    //     //       uint8_t palette_id = 0;
+
+    //     //       uint8_t pixel_multiplier_id = 0;//PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID;
+    //     //       uint8_t pixel_multiplier_enabled = false;
+
+    //     //       MIXER_SETTINGS_GROUP_FLAGS flags;
+
+    //     //     }group[EFFECTS_FUNCTION_MIXER_MAX];
+
+    //     //   }mixer;
+
+    //     //   void init_mixer_defaults();
+
+    // #endif
+    // #ifdef USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
+    // void LoadPreset_ManualUserCustom_ByID(uint8_t id);
+    // #endif
 
     /*****************************************************************************************************************************************************************************
     ********************************************************************************************************************************************************************************
@@ -694,7 +876,7 @@ class mAnimatorLight :
     #define SEGMENT          segments[getCurrSegmentId()]
     #define SEGMENT_I(X)     segments[X]
     #define pSEGMENT_I(X)    pCONT_lAni->segments[X]
-    #define SEGLEN           _virtualSegmentLength
+    #define SEGLEN           _virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
 
     #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT._speed))/SEGLEN
 
@@ -881,6 +1063,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
@@ -1348,6 +1533,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Stepping_Palette();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  void EffectAnim__Stepping_Palette_With_Background();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Popping_Decay_Palette_To_Black();
@@ -1905,11 +2093,38 @@ typedef struct Segment_New {
       uint16_t vLength = (length() + groupLen - 1) / groupLen;
       if (options & MIRROR)
         vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
+
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+
+      if(decimate > 0)
+      {
+        vLength = (vLength + decimate - 1) / decimate;
+      }
+
+      #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+
+
       return vLength;
     }
 
+    struct PERFORMANCE{
+
+      uint32_t effect_build_ns = 0;
+
+    }performance;
+
     uint8_t  grouping = 1;
     uint8_t  spacing = 0;
+
+    /**
+     * @brief New setting to reduce pixels generated for speed, and will replicate the data out to proper seglen
+     * For example, with 1000 led segment, if the same pattern is generated every 10 leds, then only 100 leds will be generated and pushed out 10 times on the bus
+     * 
+     * Decimate is a multiplier, so 0 means none, with each value being a divisor. Decimate 10 would be only generate 10% of the leds
+     */
+    uint8_t decimate = 0;
+    
+    
     uint8_t opacity = 255; // PHASE OUT ie opacity is the segment "brightness"
     // uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
 
@@ -2483,7 +2698,8 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       Release=0,
       Beta=1,
       Alpha=2,
-      Dev=3
+      Dev=3,
+      Unstable=4
     };
 
 
@@ -2510,7 +2726,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline void setTransition(uint16_t t) { _transitionDur = t; }
     inline void appendSegment(const Segment_New &seg = Segment_New()) {
 
-      // DEBUG_LINE_HERE;
+      Serial.println("DEBUG_LINE_HERE;");
        segments.push_back(seg); 
        
        }
@@ -2916,14 +3132,14 @@ void sappend(char stype, const char* key, int val);
 
 
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveSettings(AsyncWebServerRequest* request, bool post = false);
 bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
 void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
 void serveIndex(AsyncWebServerRequest* request);
 void getSettingsJS(byte subPage, char* dest);
-#endif // USE_MODULE_NETWORK_WEBSERVER23
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte id, bool forPreset = false, bool segmentBounds = true);
@@ -3269,43 +3485,44 @@ bool e131Multicast _INIT(false);                      // multicast or unicast
 bool e131SkipOutOfSequence _INIT(false);              // freeze instead of flickering
 uint16_t pollReplyCount _INIT(0);                     // count number of replies for ArtPoll node report
 
-// mqtt
-unsigned long lastMqttReconnectAttempt _INIT(0);  // used for other periodic tasks too
-#ifndef WLED_DISABLE_MQTT
-// AsyncMqttClient *mqtt _INIT(NULL);
-bool mqttEnabled _INIT(false);
-char mqttStatusTopic[40] = {0};//_INIT("");            // this must be global because of async handlers
-char mqttDeviceTopic[33] = {0};//_INIT("");            // main MQTT topic (individual per device, default is wled/mac)
-char mqttGroupTopic[33] = {0};//_INIT("wled/all");     // second MQTT topic (for example to group devices)
-char mqttServer[33] = {0};//_INIT("");                 // both domains and IPs should work (no SSL)
-char mqttUser[41]= {0};// _INIT("");                   // optional: username for MQTT auth
-char mqttPass[65]= {0};// _INIT("");                   // optional: password for MQTT auth
-char mqttClientID[41]= {0};// _INIT("");               // override the client ID
-uint16_t mqttPort _INIT(1883);
-bool retainMqttMsg _INIT(false);               // retain brightness and color
-#define WLED_MQTT_CONNECTED (mqtt != nullptr && mqtt->connected())
-#else
-#define WLED_MQTT_CONNECTED false
-#endif
+// // mqtt
+// unsigned long lastMqttReconnectAttempt _INIT(0);  // used for other periodic tasks too
+// #ifndef WLED_DISABLE_MQTT
+// // AsyncMqttClient *mqtt _INIT(NULL);
+// bool mqttEnabled _INIT(false);
+// char mqttStatusTopic[40] = {0};//_INIT("");            // this must be global because of async handlers
+// char mqttDeviceTopic[33] = {0};//_INIT("");            // main MQTT topic (individual per device, default is wled/mac)
+// char mqttGroupTopic[33] = {0};//_INIT("wled/all");     // second MQTT topic (for example to group devices)
+// char mqttServer[33] = {0};//_INIT("");                 // both domains and IPs should work (no SSL)
+// char mqttUser[41]= {0};// _INIT("");                   // optional: username for MQTT auth
+// char mqttPass[65]= {0};// _INIT("");                   // optional: password for MQTT auth
+// char mqttClientID[41]= {0};// _INIT("");               // override the client ID
+// uint16_t mqttPort _INIT(1883);
+// bool retainMqttMsg _INIT(false);               // retain brightness and color
+// #define WLED_MQTT_CONNECTED (mqtt != nullptr && mqtt->connected())
+// #else
+// #define WLED_MQTT_CONNECTED false
+// #endif
 
-#ifndef WLED_DISABLE_HUESYNC
-bool huePollingEnabled _INIT(false);           // poll hue bridge for light state
-uint16_t huePollIntervalMs _INIT(2500);        // low values (< 1sec) may cause lag but offer quicker response
-char hueApiKey[47]  = {0};//_INIT("api");               // key token will be obtained from bridge
-byte huePollLightId _INIT(1);                  // ID of hue lamp to sync to. Find the ID in the hue app ("about" section)
-IPAddress hueIP;// _INIT_N(((0, 0, 0, 0))); // IP address of the bridge
-bool hueApplyOnOff _INIT(true);
-bool hueApplyBri _INIT(true);
-bool hueApplyColor _INIT(true);
-#endif
 
-uint16_t serialBaud _INIT(1152); // serial baud rate, multiply by 100
+// #ifndef WLED_DISABLE_HUESYNC
+// bool huePollingEnabled _INIT(false);           // poll hue bridge for light state
+// uint16_t huePollIntervalMs _INIT(2500);        // low values (< 1sec) may cause lag but offer quicker response
+// char hueApiKey[47]  = {0};//_INIT("api");               // key token will be obtained from bridge
+// byte huePollLightId _INIT(1);                  // ID of hue lamp to sync to. Find the ID in the hue app ("about" section)
+// IPAddress hueIP;// _INIT_N(((0, 0, 0, 0))); // IP address of the bridge
+// bool hueApplyOnOff _INIT(true);
+// bool hueApplyBri _INIT(true);
+// bool hueApplyColor _INIT(true);
+// #endif
 
-// Time CONFIG
-bool ntpEnabled _INIT(false);    // get internet time. Only required if you use clock overlays or time-activated macros
-bool useAMPM _INIT(false);       // 12h/24h clock format
-byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
-int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
+// uint16_t serialBaud _INIT(1152); // serial baud rate, multiply by 100
+
+// // Time CONFIG
+// bool ntpEnabled _INIT(false);    // get internet time. Only required if you use clock overlays or time-activated macros
+// bool useAMPM _INIT(false);       // 12h/24h clock format
+// byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
+// int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
 
 #define FLASH_COUNT 4 
 #define LED_SKIP_AMOUNT  0
@@ -3315,32 +3532,32 @@ int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone ca
 byte overlayCurrent _INIT(0);    // 0: no overlay 1: analog clock 2: was single-digit clock 3: was cronixie
 byte overlayMin _INIT(0), overlayMax _INIT(DEFAULT_LED_COUNT - 1);   // boundaries of overlay mode
 
-byte analogClock12pixel _INIT(0);               // The pixel in your strip where "midnight" would be
-bool analogClockSecondsTrail _INIT(false);      // Display seconds as trail of LEDs instead of a single pixel
-bool analogClock5MinuteMarks _INIT(false);      // Light pixels at every 5-minute position
+// byte analogClock12pixel _INIT(0);               // The pixel in your strip where "midnight" would be
+// bool analogClockSecondsTrail _INIT(false);      // Display seconds as trail of LEDs instead of a single pixel
+// bool analogClock5MinuteMarks _INIT(false);      // Light pixels at every 5-minute position
 
-bool countdownMode _INIT(false);                         // Clock will count down towards date
-byte countdownYear _INIT(20), countdownMonth _INIT(1);   // Countdown target date, year is last two digits
-byte countdownDay  _INIT(1) , countdownHour  _INIT(0);
-byte countdownMin  _INIT(0) , countdownSec   _INIT(0);
+// bool countdownMode _INIT(false);                         // Clock will count down towards date
+// byte countdownYear _INIT(20), countdownMonth _INIT(1);   // Countdown target date, year is last two digits
+// byte countdownDay  _INIT(1) , countdownHour  _INIT(0);
+// byte countdownMin  _INIT(0) , countdownSec   _INIT(0);
 
 
-byte macroNl   _INIT(0);        // after nightlight delay over
-byte macroCountdown _INIT(0);
-byte macroAlexaOn _INIT(0), macroAlexaOff _INIT(0);
-byte macroButton[WLED_MAX_BUTTONS]        _INIT({0});
-byte macroLongPress[WLED_MAX_BUTTONS]     _INIT({0});
-byte macroDoublePress[WLED_MAX_BUTTONS]   _INIT({0});
+// byte macroNl   _INIT(0);        // after nightlight delay over
+// byte macroCountdown _INIT(0);
+// byte macroAlexaOn _INIT(0), macroAlexaOff _INIT(0);
+// byte macroButton[WLED_MAX_BUTTONS]        _INIT({0});
+// byte macroLongPress[WLED_MAX_BUTTONS]     _INIT({0});
+// byte macroDoublePress[WLED_MAX_BUTTONS]   _INIT({0});
 
-// Security CONFIG
+// // Security CONFIG
 bool otaLock     _INIT(false);  // prevents OTA firmware updates without password. ALWAYS enable if system exposed to any public networks
-bool wifiLock    _INIT(false);  // prevents access to WiFi settings when OTA lock is enabled
-bool aOtaEnabled _INIT(true);   // ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
+// bool wifiLock    _INIT(false);  // prevents access to WiFi settings when OTA lock is enabled
+// bool aOtaEnabled _INIT(true);   // ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
 char settingsPIN[5]  = {0};//_INIT("");  // PIN for settings pages
 bool correctPIN     _INIT(true);
-unsigned long lastEditTime _INIT(0);
+// unsigned long lastEditTime _INIT(0);
 
-uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
+// uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
 
 #ifdef WLED_ENABLE_DMX
   // dmx CONFIG
@@ -3440,46 +3657,6 @@ bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INI
 // ui style
 bool showWelcomePage _INIT(false);
 
-//Hue error codes
-#define HUE_ERROR_INACTIVE        0
-#define HUE_ERROR_UNAUTHORIZED    1
-#define HUE_ERROR_LIGHTID         3
-#define HUE_ERROR_PUSHLINK      101
-#define HUE_ERROR_JSON_PARSING  250
-#define HUE_ERROR_TIMEOUT       251
-#define HUE_ERROR_ACTIVE        255
-
-// hue
-byte hueError _INIT(HUE_ERROR_INACTIVE);
-// uint16_t hueFailCount _INIT(0);
-float hueXLast _INIT(0), hueYLast _INIT(0);
-uint16_t hueHueLast _INIT(0), hueCtLast _INIT(0);
-byte hueSatLast _INIT(0), hueBriLast _INIT(0);
-unsigned long hueLastRequestSent _INIT(0);
-bool hueAuthRequired _INIT(false);
-bool hueReceived _INIT(false);
-bool hueStoreAllowed _INIT(false), hueNewKey _INIT(false);
-
-// countdown
-unsigned long countdownTime _INIT(1514764800L);
-bool countdownOverTriggered _INIT(true);
-
-//timer
-byte lastTimerMinute  _INIT(0);
-byte timerHours[10]     _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-int8_t timerMinutes[10] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-byte timerMacro[10]     _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-//weekdays to activate on, bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
-byte timerWeekday[10]   _INIT_N(({ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 }));
-//upper 4 bits start, lower 4 bits end month (default 28: start month 1 and end month 12)
-byte timerMonth[8]     _INIT_N(({28,28,28,28,28,28,28,28}));
-byte timerDay[8]       _INIT_N(({1,1,1,1,1,1,1,1}));
-byte timerDayEnd[9]		_INIT_N(({31,31,31,31,31,31,31,31}));
-
-//improv
-byte improvActive _INIT(0); //0: no improv packet received, 1: improv active, 2: provisioning
-byte improvError _INIT(0);
-
 //playlists
 // int16_t currentPlaylist _INIT(-1);
 //still used for "PL=~" HTTP API command
@@ -3500,9 +3677,7 @@ uint8_t tpmPacketCount _INIT(0);
 uint16_t tpmPayloadFrameSize _INIT(0);
 bool useMainSegmentOnly _INIT(false);
 
-
-
-    #endif
+#endif
 
 
 

@@ -50,17 +50,17 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WEB SECTION * 
     *******************/   
-    #ifdef USE_MODULE_NETWORK_WEBSERVER23
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_HANDLER:    
       WebPage_Root_AddHandlers();
     break;
-    #endif // USE_MODULE_NETWORK_WEBSERVER23
+    #endif // USE_MODULE_NETWORK_WEBSERVER
   }
 
 }
 
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 void mTelemetry::WebPage_Root_AddHandlers()
 {
 
@@ -71,7 +71,7 @@ void mTelemetry::WebPage_Root_AddHandlers()
   #endif
 
 }
-#endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+#endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 #ifdef USE_MODULE_NETWORK_MQTT

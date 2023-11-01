@@ -102,13 +102,13 @@ struct AVE{
 void CommandSet_FanSpeed_Manual(uint16_t value);
 
 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
 void WebCommand_Parse(void);
 
 
 void WebAppend_Root_Draw_PageTable();
 void WebAppend_Root_Status_Table();
-  #endif// USE_MODULE_NETWORK_WEBSERVER23
+  #endif// USE_MODULE_NETWORK_WEBSERVER
 
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);

@@ -145,10 +145,18 @@ enum TASKER_FUNCTION_TYPES {
 
   /**
    * @brief Response Tasks
+   * 
+   * Remove these
    **/
   FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID,
   FUNC_FILESYSTEM_APPEND_JSON__Stored_Secure__ID,
   FUNC_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID, // Temporary, will be replaced with flash settings
+
+
+  FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID,   // Each module is asked to save its data -- this should be starggered to avoid blocking
+  FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID,   // Each module is asked to load its data on restore at boot
+
+
 
   /**
    * @brief Rules

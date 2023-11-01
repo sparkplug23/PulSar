@@ -51,17 +51,17 @@
 #ifdef ESP32
   #include <WiFi.h>
   #ifndef DISABLE_NETWORK
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include <ESP8266WiFi.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
 
 

@@ -752,11 +752,11 @@ void mSupport::ArduinoOTAInit(void)
   {
     // #ifdef ESP8266
       //pCONT_set->SettingsSave(1);  // Free flash for OTA update
-      //#ifdef USE_MODULE_NETWORK_WEBSERVER23
+      //#ifdef USE_MODULE_NETWORK_WEBSERVER
         // if (pCONT_set->Settings.webserver) { 
           //pCONT_web->StopWebserver(); 
           // /}
-      // #endif  // USE_MODULE_NETWORK_WEBSERVER23
+      // #endif  // USE_MODULE_NETWORK_WEBSERVER
       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
@@ -2836,7 +2836,7 @@ void mSupport::PerformEverySecond(void)
 //       StartMdns();
 // #endif  // USE_DISCOVERY
 
-// #ifdef USE_MODULE_NETWORK_WEBSERVER23
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 //       if (Settings.webserver) {
 
 // #ifdef ESP8266
@@ -2860,7 +2860,7 @@ void mSupport::PerformEverySecond(void)
 // #ifdef USE_EMULATION
 //     if (Settings.flag2.emulation) { UdpConnect(); }
 // #endif  // USE_EMULATION
-// #endif  // USE_MODULE_NETWORK_WEBSERVER23
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 // #ifdef USE_DEVICE_GROUPS
 //       DeviceGroupsStart();
@@ -2948,9 +2948,9 @@ DEBUG_LINE_HERE;
       if (pCONT_set->runtime.ota_state_flag <= 0) {
 
 // DEBUG_LINE_HERE;
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
         // if (pCONT_set->Settings.webserver) //StopWebserver();
-#endif  // USE_MODULE_NETWORK_WEBSERVER23
+#endif  // USE_MODULE_NETWORK_WEBSERVER
 // #ifdef USE_ARILUX_RF
 //         AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
 // #endif  // USE_ARILUX_RF

@@ -599,7 +599,7 @@ DEFINE_PGM_CTR(kOptionFollowInv)        "FollowInv|Inverted";
 
 
 // xdrv_02_webserver.ino
-// #ifdef USE_MODULE_NETWORK_WEBSERVER23
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 // const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 // const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 // const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
@@ -643,7 +643,7 @@ const char S_RESTORE_CONFIGURATION[] PROGMEM = D_RESTORE_CONFIGURATION;
 // const char S_CONSOLE[] PROGMEM = D_CONSOLE;
 // const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
 const char S_RESTART[] PROGMEM = D_RESTART;
-// #endif  // USE_MODULE_NETWORK_WEBSERVER23
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 
 

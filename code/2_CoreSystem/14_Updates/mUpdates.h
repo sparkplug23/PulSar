@@ -7,8 +7,6 @@
 
 #ifdef USE_MODULE_CORE_UPDATES
 
-#include "3_Network/MQTT/mMQTT.h"
-
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mUpdates :
@@ -37,16 +35,21 @@ class mUpdates :
     void Pre_Init();
 
     void parse_JSONCommand(JsonParserObject obj);
+
+    void WebPage_Root_AddHandlers();
     
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
-    //#ifdef USE_CORE_MQTT 
+  
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     struct handler<mUpdates> mqtthandler_settings_teleperiod;
+
+    
+    std::vector<struct handler<mUpdates>*> mqtthandler_list;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 

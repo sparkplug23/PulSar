@@ -77,37 +77,6 @@ uint32_t NeoGammaWLEDMethod::Correct32(uint32_t color)
 }
 
 
-// // re-calculates & fills gamma table
-// void NeoGammaWLEDMethod::calcGammaTable(float gamma)
-// {
-//   for (size_t i = 0; i < 256; i++) {
-//     gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
-//   }
-// }
-
-// uint8_t NeoGammaWLEDMethod::Correct(uint8_t value)
-// {
-//   if (!gammaCorrectCol) return value;
-//   return gammaT[value];
-// }
-
-// // used for color gamma correction
-// uint32_t NeoGammaWLEDMethod::Correct32(uint32_t color)
-// {
-//   if (!gammaCorrectCol) return color;
-//   uint8_t w = W(color);
-//   uint8_t r = R(color);
-//   uint8_t g = G(color);
-//   uint8_t b = B(color);
-//   w = gammaT[w];
-//   r = gammaT[r];
-//   g = gammaT[g];
-//   b = gammaT[b];
-//   return RGBW32(r, g, b, w);
-// }
-
-
-
 void mAnimatorLight::toggleOnOff()
 {
   if (pCONT_iLight->_briRGB_Global == 0)
@@ -180,10 +149,6 @@ void mAnimatorLight::exitRealtime() {
   }
   // updateInterfaces(CALL_MODE_WS_SEND);
 }
-
-
-
-
 
 
 //simple macro for ArduinoJSON's or syntax
@@ -409,9 +374,9 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
       //   // btnPin[s] = -1;
       // }
       JsonArray hw_btn_ins_0_macros = btn["macros"];
-      CJSON(macroButton[s], hw_btn_ins_0_macros[0]);
-      CJSON(macroLongPress[s],hw_btn_ins_0_macros[1]);
-      CJSON(macroDoublePress[s], hw_btn_ins_0_macros[2]);
+      // CJSON(macroButton[s], hw_btn_ins_0_macros[0]);
+      // CJSON(macroLongPress[s],hw_btn_ins_0_macros[1]);
+      // CJSON(macroDoublePress[s], hw_btn_ins_0_macros[2]);
       if (++s >= WLED_MAX_BUTTONS) break; // max buttons reached
     }
     // clear remaining buttons
@@ -467,7 +432,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   //   rlyMde = !relay["rev"];
   // }
 
-  CJSON(serialBaud, hw[F("baud")]);
+  // CJSON(serialBaud, hw[F("baud")]);
   // if (serialBaud < 96 || serialBaud > 15000) serialBaud = 1152;
   // updateBaudRate(serialBaud *100);
 
@@ -539,7 +504,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   if (nightlightDelayMinsDefault != prev) nightlightDelayMins = nightlightDelayMinsDefault;
 
   CJSON(nightlightTargetBri, light_nl[F("tbri")]);
-  CJSON(macroNl, light_nl["macro"]);
+  // CJSON(macroNl, light_nl["macro"]);
 
   JsonObject def = doc["def"];
   CJSON(bootPreset, def["ps"]);
@@ -604,8 +569,8 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 
   CJSON(alexaEnabled, interfaces["va"][F("alexa")]); // false
 
-  CJSON(macroAlexaOn, interfaces["va"]["macros"][0]);
-  CJSON(macroAlexaOff, interfaces["va"]["macros"][1]);
+  // CJSON(macroAlexaOn, interfaces["va"]["macros"][0]);
+  // CJSON(macroAlexaOff, interfaces["va"]["macros"][1]);
 
   CJSON(alexaNumPresets, interfaces["va"]["p"]);
 
@@ -630,101 +595,69 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 #endif
 
 
-#ifndef WLED_DISABLE_HUESYNC
-  JsonObject if_hue = interfaces["hue"];
-  CJSON(huePollingEnabled, if_hue["en"]);
-  CJSON(huePollLightId, if_hue["id"]);
-  tdd = if_hue[F("iv")] | -1;
-  if (tdd >= 2) huePollIntervalMs = tdd * 100;
+// #ifndef WLED_DISABLE_HUESYNC
+//   JsonObject if_hue = interfaces["hue"];
+//   CJSON(huePollingEnabled, if_hue["en"]);
+//   CJSON(huePollLightId, if_hue["id"]);
+//   tdd = if_hue[F("iv")] | -1;
+//   if (tdd >= 2) huePollIntervalMs = tdd * 100;
 
-  JsonObject if_hue_recv = if_hue["recv"];
-  CJSON(hueApplyOnOff, if_hue_recv["on"]);
-  CJSON(hueApplyBri, if_hue_recv["bri"]);
-  CJSON(hueApplyColor, if_hue_recv["col"]);
+//   JsonObject if_hue_recv = if_hue["recv"];
+//   CJSON(hueApplyOnOff, if_hue_recv["on"]);
+//   CJSON(hueApplyBri, if_hue_recv["bri"]);
+//   CJSON(hueApplyColor, if_hue_recv["col"]);
 
-  JsonArray if_hue_ip = if_hue["ip"];
+//   JsonArray if_hue_ip = if_hue["ip"];
 
-  for (byte i = 0; i < 4; i++)
-    CJSON(hueIP[i], if_hue_ip[i]);
-#endif
+//   for (byte i = 0; i < 4; i++)
+//     CJSON(hueIP[i], if_hue_ip[i]);
+// #endif
 
-  JsonObject if_ntp = interfaces[F("ntp")];
-  CJSON(ntpEnabled, if_ntp["en"]);
-  getStringFromJson(ntpServerName, if_ntp[F("host")], 33); // "1.wled.pool.ntp.org"
-  CJSON(currentTimezone, if_ntp[F("tz")]);
-  CJSON(utcOffsetSecs, if_ntp[F("offset")]);
-  CJSON(useAMPM, if_ntp[F("ampm")]);
-  // CJSON(longitude, if_ntp[F("ln")]);
-  // CJSON(latitude, if_ntp[F("lt")]);
+  // JsonObject if_ntp = interfaces[F("ntp")];
+  // CJSON(ntpEnabled, if_ntp["en"]);
+  // getStringFromJson(ntpServerName, if_ntp[F("host")], 33); // "1.wled.pool.ntp.org"
+  // CJSON(currentTimezone, if_ntp[F("tz")]);
+  // CJSON(utcOffsetSecs, if_ntp[F("offset")]);
+  // CJSON(useAMPM, if_ntp[F("ampm")]);
+  // // CJSON(longitude, if_ntp[F("ln")]);
+  // // CJSON(latitude, if_ntp[F("lt")]);
 
-  JsonObject ol = doc[F("ol")];
-  CJSON(overlayCurrent ,ol[F("clock")]); // 0
-  CJSON(countdownMode, ol[F("cntdwn")]);
+  // JsonObject ol = doc[F("ol")];
+  // CJSON(overlayCurrent ,ol[F("clock")]); // 0
+  // CJSON(countdownMode, ol[F("cntdwn")]);
 
-  CJSON(overlayMin, ol["min"]);
-  CJSON(overlayMax, ol[F("max")]);
-  CJSON(analogClock12pixel, ol[F("o12pix")]);
-  CJSON(analogClock5MinuteMarks, ol[F("o5m")]);
-  CJSON(analogClockSecondsTrail, ol[F("osec")]);
+  // CJSON(overlayMin, ol["min"]);
+  // CJSON(overlayMax, ol[F("max")]);
+  // CJSON(analogClock12pixel, ol[F("o12pix")]);
+  // CJSON(analogClock5MinuteMarks, ol[F("o5m")]);
+  // CJSON(analogClockSecondsTrail, ol[F("osec")]);
 
-  //timed macro rules
-  JsonObject tm = doc[F("timers")];
-  JsonObject cntdwn = tm[F("cntdwn")];
-  JsonArray cntdwn_goal = cntdwn[F("goal")];
-  CJSON(countdownYear,  cntdwn_goal[0]);
-  CJSON(countdownMonth, cntdwn_goal[1]);
-  CJSON(countdownDay,   cntdwn_goal[2]);
-  CJSON(countdownHour,  cntdwn_goal[3]);
-  CJSON(countdownMin,   cntdwn_goal[4]);
-  CJSON(countdownSec,   cntdwn_goal[5]);
-  CJSON(macroCountdown, cntdwn["macro"]);
-  // setCountdown();
+  // //timed macro rules
+  // JsonObject tm = doc[F("timers")];
+  // JsonObject cntdwn = tm[F("cntdwn")];
+  // JsonArray cntdwn_goal = cntdwn[F("goal")];
+  // CJSON(countdownYear,  cntdwn_goal[0]);
+  // CJSON(countdownMonth, cntdwn_goal[1]);
+  // CJSON(countdownDay,   cntdwn_goal[2]);
+  // CJSON(countdownHour,  cntdwn_goal[3]);
+  // CJSON(countdownMin,   cntdwn_goal[4]);
+  // CJSON(countdownSec,   cntdwn_goal[5]);
+  // CJSON(macroCountdown, cntdwn["macro"]);
+  // // setCountdown();
 
-  JsonArray timers = tm["ins"];
-  uint8_t it = 0;
-  for (JsonObject timer : timers) {
-    if (it > 9) break;
-    if (it<8 && timer[F("hour")]==255) it=8;  // hour==255 -> sunrise/sunset
-    CJSON(timerHours[it], timer[F("hour")]);
-    CJSON(timerMinutes[it], timer["min"]);
-    CJSON(timerMacro[it], timer["macro"]);
-
-    byte dowPrev = timerWeekday[it];
-    //note: act is currently only 0 or 1.
-    //the reason we are not using bool is that the on-disk type in 0.11.0 was already int
-    int actPrev = timerWeekday[it] & 0x01;
-    CJSON(timerWeekday[it], timer[F("dow")]);
-    if (timerWeekday[it] != dowPrev) { //present in JSON
-      timerWeekday[it] <<= 1; //add active bit
-      int act = timer["en"] | actPrev;
-      if (act) timerWeekday[it]++;
-    }
-    if (it<8) {
-      JsonObject start = timer["start"];
-      byte startm = start["mon"];
-      if (startm) timerMonth[it] = (startm << 4);
-      CJSON(timerDay[it], start["day"]);
-      JsonObject end = timer["end"];
-      CJSON(timerDayEnd[it], end["day"]);
-      byte endm = end["mon"];
-      if (startm) timerMonth[it] += endm & 0x0F;
-      if (!(timerMonth[it] & 0x0F)) timerMonth[it] += 12; //default end month to 12
-    }
-    it++;
-  }
 
   JsonObject ota = doc["ota"];
   const char* pwd = ota["psk"]; //normally not present due to security
 
-  bool pwdCorrect = !otaLock; //always allow access if ota not locked
-  if (pwd != nullptr && strncmp(otaPass, pwd, 33) == 0) pwdCorrect = true;
+  // bool pwdCorrect = !otaLock; //always allow access if ota not locked
+  // if (pwd != nullptr && strncmp(otaPass, pwd, 33) == 0) pwdCorrect = true;
 
-  if (pwdCorrect) { //only accept these values from cfg.json if ota is unlocked (else from wsec.json)
-    CJSON(otaLock, ota[F("lock")]);
-    CJSON(wifiLock, ota[F("lock-wifi")]);
-    CJSON(aOtaEnabled, ota[F("aota")]);
-    getStringFromJson(otaPass, pwd, 33); //normally not present due to security
-  }
+  // if (pwdCorrect) { //only accept these values from cfg.json if ota is unlocked (else from wsec.json)
+  //   CJSON(otaLock, ota[F("lock")]);
+  //   CJSON(wifiLock, ota[F("lock-wifi")]);
+  //   CJSON(aOtaEnabled, ota[F("aota")]);
+  //   getStringFromJson(otaPass, pwd, 33); //normally not present due to security
+  // }
 
   #ifdef WLED_ENABLE_DMX
   JsonObject dmx = doc["dmx"];
@@ -754,285 +687,6 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   if (doInitBusses) return false; // no save needed, will do after bus init in wled.cpp loop
   return (doc["sv"] | true);
 }
-
-
-
-
-
-
-// /*
-//  * Methods to handle saving and loading presets to/from the filesystem
-//  */
-
-// #ifdef ARDUINO_ARCH_ESP32
-// static char *tmpRAMbuffer = nullptr;
-// #endif
-
-// static volatile byte presetToApply = 0;
-// static volatile byte callModeToApply = 0;
-// static volatile byte presetToSave = 0;
-// static volatile int8_t saveLedmap = -1;
-// static char quickLoad[9];
-// static char saveName[33];
-// static bool includeBri = true, segBounds = true, selectedOnly = false, playlistSave = false;;
-
-// static const char *getFileName(bool persist = true) {
-//   return persist ? "/presets.json" : "/tmp.json";
-// }
-
-// static void doSaveState() {
-//   bool persist = (presetToSave < 251);
-//   const char *filename = getFileName(persist);
-
-//   if (!requestJSONBufferLock(10)) return; // will set fileDoc
-
-//   initPresetsFile(); // just in case if someone deleted presets.json using /edit
-//   JsonObject sObj = doc.to<JsonObject>();
-
-//   DEBUG_PRINTLN(F("Serialize current state"));
-//   if (playlistSave) {
-//     serializePlaylist(sObj);
-//     if (includeBri) sObj["on"] = true;
-//   } else {
-//     serializeState(sObj, true, includeBri, segBounds, selectedOnly);
-//   }
-//   sObj["n"] = saveName;
-//   if (quickLoad[0]) sObj[F("ql")] = quickLoad;
-//   if (saveLedmap >= 0) sObj[F("ledmap")] = saveLedmap;
-// /*
-//   #ifdef WLED_DEBUG
-//     DEBUG_PRINTLN(F("Serialized preset"));
-//     serializeJson(doc,Serial);
-//     DEBUG_PRINTLN();
-//   #endif
-// */
-//   #if defined(ARDUINO_ARCH_ESP32)
-//   if (!persist) {
-//     if (tmpRAMbuffer!=nullptr) free(tmpRAMbuffer);
-//     size_t len = measureJson(*fileDoc) + 1;
-//     DEBUG_PRINTLN(len);
-//     // if possible use SPI RAM on ESP32
-//     #if defined(BOARD_HAS_PSRAM) && defined(WLED_USE_PSRAM)
-//     if (psramFound())
-//       tmpRAMbuffer = (char*) ps_malloc(len);
-//     else
-//     #endif
-//       tmpRAMbuffer = (char*) malloc(len);
-//     if (tmpRAMbuffer!=nullptr) {
-//       serializeJson(*fileDoc, tmpRAMbuffer, len);
-//     } else {
-//       writeObjectToFileUsingId(filename, presetToSave, fileDoc);
-//     }
-//   } else
-//   #endif
-//   writeObjectToFileUsingId(filename, presetToSave, fileDoc);
-
-//   if (persist) presetsModifiedTime = toki.second(); //unix time
-//   releaseJSONBufferLock();
-//   updateFSInfo();
-
-//   // clean up
-//   saveLedmap   = -1;
-//   presetToSave = 0;
-//   saveName[0]  = '\0';
-//   quickLoad[0] = '\0';
-//   playlistSave = false;
-// }
-
-// bool getPresetName(byte index, String& name)
-// {
-//   if (!requestJSONBufferLock(9)) return false;
-//   bool presetExists = false;
-//   if (readObjectFromFileUsingId(getFileName(), index, &doc))
-//   {
-//     JsonObject fdo = doc.as<JsonObject>();
-//     if (fdo["n"]) {
-//       name = (const char*)(fdo["n"]);
-//       presetExists = true;
-//     }
-//   }
-//   releaseJSONBufferLock();
-//   return presetExists;
-// }
-
-// void initPresetsFile()
-// {
-//   if (FILE_SYSTEM.exists(getFileName())) return;
-
-//   StaticJsonDocument<64> doc;
-//   JsonObject sObj = doc.to<JsonObject>();
-//   sObj.createNestedObject("0");
-//   File f = FILE_SYSTEM.open(getFileName(), "w");
-//   if (!f) {
-//     errorFlag = ERR_FS_GENERAL;
-//     return;
-//   }
-//   serializeJson(doc, f);
-//   f.close();
-// }
-
-// bool applyPreset(byte index, byte callMode)
-// {
-//   DEBUG_PRINT(F("Request to apply preset: "));
-//   DEBUG_PRINTLN(index);
-//   presetToApply = index;
-//   callModeToApply = callMode;
-//   return true;
-// }
-
-// // apply preset or fallback to a effect and palette if it doesn't exist
-// void applyPresetWithFallback(uint8_t index, uint8_t callMode, uint8_t effectID, uint8_t paletteID)
-// {
-//   applyPreset(index, callMode);
-//   //these two will be overwritten if preset exists in handlePresets()
-//   effectCurrent = effectID;
-//   effectPalette = paletteID;
-// }
-
-// void handlePresets()
-// {
-//   if (presetToSave) {
-//     doSaveState();
-//     return;
-//   }
-
-//   if (presetToApply == 0 || fileDoc) return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
-
-//   bool changePreset = false;
-//   uint8_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
-//   uint8_t tmpMode   = callModeToApply;
-
-//   JsonObject fdo;
-//   const char *filename = getFileName(tmpPreset < 255);
-
-//   // allocate buffer
-//   if (!requestJSONBufferLock(9)) return;  // will also assign fileDoc
-
-//   presetToApply = 0; //clear request for preset
-//   callModeToApply = 0;
-
-//   DEBUG_PRINT(F("Applying preset: "));
-//   DEBUG_PRINTLN(tmpPreset);
-
-//   #ifdef ARDUINO_ARCH_ESP32
-//   if (tmpPreset==255 && tmpRAMbuffer!=nullptr) {
-//     deserializeJson(*fileDoc,tmpRAMbuffer);
-//     errorFlag = ERR_NONE;
-//   } else
-//   #endif
-//   {
-//   errorFlag = readObjectFromFileUsingId(filename, tmpPreset, fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
-//   }
-//   fdo = fileDoc->as<JsonObject>();
-
-//   //HTTP API commands
-//   const char* httpwin = fdo["win"];
-//   if (httpwin) {
-//     String apireq = "win"; // reduce flash string usage
-//     apireq += F("&IN&"); // internal call
-//     apireq += httpwin;
-//     handleSet(nullptr, apireq, false); // may call applyPreset() via PL=
-//     setValuesFromFirstSelectedSeg(); // fills legacy values
-//     changePreset = true;
-//   } else {
-//     if (!fdo["seg"].isNull() || !fdo["on"].isNull() || !fdo["bri"].isNull() || !fdo["nl"].isNull() || !fdo["ps"].isNull() || !fdo[F("playlist")].isNull()) changePreset = true;
-//     if (!(tmpMode == CALL_MODE_BUTTON_PRESET && fdo["ps"].is<const char *>() && strchr(fdo["ps"].as<const char *>(),'~') != strrchr(fdo["ps"].as<const char *>(),'~')))
-//       fdo.remove("ps"); // remove load request for presets to prevent recursive crash (if not called by button and contains preset cycling string "1~5~")
-//     deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset); // may change presetToApply by calling applyPreset()
-//   }
-//   if (!errorFlag && tmpPreset < 255 && changePreset) presetCycCurr = currentPreset = tmpPreset;
-
-//   #if defined(ARDUINO_ARCH_ESP32)
-//   //Aircoookie recommended not to delete buffer
-//   if (tmpPreset==255 && tmpRAMbuffer!=nullptr) {
-//     free(tmpRAMbuffer);
-//     tmpRAMbuffer = nullptr;
-//   }
-//   #endif
-
-//   releaseJSONBufferLock(); // will also clear fileDoc
-//   if (changePreset) notify(tmpMode); // force UDP notification
-//   stateUpdated(tmpMode);  // was colorUpdated() if anything breaks
-//   updateInterfaces(tmpMode);
-// }
-
-// //called from handleSet(PS=) [network callback (fileDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
-// void savePreset(byte index, const char* pname, JsonObject sObj)
-// {
-//   if (index == 0 || (index > 250 && index < 255)) return;
-//   if (pname) strlcpy(saveName, pname, 33);
-//   else {
-//     if (sObj["n"].is<const char*>()) strlcpy(saveName, sObj["n"].as<const char*>(), 33);
-//     else                             sprintf_P(saveName, PSTR("Preset %d"), index);
-//   }
-
-//   DEBUG_PRINT(F("Saving preset (")); DEBUG_PRINT(index); DEBUG_PRINT(F(") ")); DEBUG_PRINTLN(saveName);
-
-//   presetToSave = index;
-//   playlistSave = false;
-//   if (sObj[F("ql")].is<const char*>()) strlcpy(quickLoad, sObj[F("ql")].as<const char*>(), 9); // client limits QL to 2 chars, buffer for 8 bytes to allow unicode
-
-//   if (sObj["o"].isNull()) { // no "o" means not a playlist or custom API call, saving of state is async (not immediately)
-//     includeBri   = sObj["ib"].as<bool>() || index==255; // temporary preset needs brightness
-//     segBounds    = sObj["sb"].as<bool>() || index==255; // temporary preset needs bounds
-//     selectedOnly = sObj[F("sc")].as<bool>();
-//     saveLedmap   = sObj[F("ledmap")] | -1;
-//   } else {
-//     // this is a playlist or API call
-//     if (sObj[F("playlist")].isNull()) {
-//       // we will save API call immediately (often causes presets.json corruption)
-//       presetToSave = 0;
-//       if (index > 250 || !fileDoc) return; // cannot save API calls to temporary preset (255)
-//       sObj.remove("o");
-//       sObj.remove("v");
-//       sObj.remove("time");
-//       sObj.remove(F("error"));
-//       sObj.remove(F("psave"));
-//       if (sObj["n"].isNull()) sObj["n"] = saveName;
-//       initPresetsFile(); // just in case if someone deleted presets.json using /edit
-//       writeObjectToFileUsingId(getFileName(index<255), index, fileDoc);
-//       presetsModifiedTime = toki.second(); //unix time
-//       updateFSInfo();
-//     } else {
-//       // store playlist
-//       // WARNING: playlist will be loaded in json.cpp after this call and will have repeat counter increased by 1
-//       includeBri   = true; // !sObj["on"].isNull();
-//       playlistSave = true;
-//     }
-//   }
-// }
-
-// void deletePreset(byte index) {
-//   StaticJsonDocument<24> empty;
-//   writeObjectToFileUsingId(getFileName(), index, &empty);
-//   presetsModifiedTime = toki.second(); //unix time
-//   updateFSInfo();
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //macro to convert F to const
@@ -2531,55 +2185,6 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     }
 
 
-  // }
-
-
-
-
-// return;
-
-//   for (int i = start; i < end; i++) {
-//     JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
-//     switch (i) {
-//       case 1: //random
-//           curPalette.add("r");
-//           curPalette.add("r");
-//           curPalette.add("r");
-//           curPalette.add("r");
-//         break;
-//       case 2: //primary color only
-//         curPalette.add("c1");
-//         break;
-//       case 3: //primary + secondary
-//         curPalette.add("c1");
-//         curPalette.add("c1");
-//         curPalette.add("c2");
-//         curPalette.add("c2");
-//         break;
-//       case 4: //primary + secondary + tertiary
-//         curPalette.add("c3");
-//         curPalette.add("c2");
-//         curPalette.add("c1");
-//         break;
-//       case 5: //primary + secondary (+tert if not off), more distinct
-//         curPalette.add("c1");
-//         curPalette.add("c1");
-//         curPalette.add("c1");
-//         curPalette.add("c1");
-//         curPalette.add("c1");
-//         curPalette.add("c2");
-//         curPalette.add("c2");
-//         curPalette.add("c2");
-//         curPalette.add("c2");
-//         curPalette.add("c2");
-//         curPalette.add("c3");
-//         curPalette.add("c3");
-//         curPalette.add("c3");
-//         curPalette.add("c3");
-//         curPalette.add("c3");
-//         curPalette.add("c1");
-//         break;
-//   }
 
 
 
@@ -2694,8 +2299,7 @@ void mAnimatorLight::serializeModeNames(JsonArray arr) {
 }
 
 
-// deserializes mode names string into JsonArray
-// also removes effect data extensions (@...) from deserialised names
+// deserializes mode names string into JsonArray also removes effect data extensions (@...) from deserialised names
 void mAnimatorLight::serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) 
 {
 
@@ -2705,7 +2309,6 @@ void mAnimatorLight::serializeModeNames2(JsonArray arr, bool flag_get_first_name
   for(uint16_t i = 0; i < getEffectsAmount(); i++)
   {
     GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer), true);
-    // ALOG_INF(PSTR("serializeModeNames2 %d %s"), getEffectsAmount(), lineBuffer);
     #ifdef ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
     switch(effects.development_stage[i])
     {
@@ -2713,12 +2316,14 @@ void mAnimatorLight::serializeModeNames2(JsonArray arr, bool flag_get_first_name
       case 0: break; // leave when stable
       case 1: strcat_P(lineBuffer, PSTR(" (alpha)")); break;
       case 2: strcat_P(lineBuffer, PSTR(" (beta)")); break;
-      case 3: strcat_P(lineBuffer, PSTR(" (dev)")); break;  
+      case 3: strcat_P(lineBuffer, PSTR(" (dev)")); break; 
+      case 4: strcat_P(lineBuffer, PSTR(" (uns)")); break; 
     }
     #endif // ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
-
+    // ALOG_INF(PSTR("serializeModeNames2 %d %s"), getEffectsAmount(), lineBuffer);
     arr.add(lineBuffer);
   }
+
 }
 
 
@@ -3122,21 +2727,31 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   ALOG_INF(PSTR("================deserializeSegment"));
 
   byte id = elem["id"] | it;
-  if (id >= getMaxSegments()) return false;
+  if (id >= getMaxSegments())
+  {
+    ALOG_INF(PSTR("deserializeSegment id >= getMaxSegments()"));
+    return false;
+  }
 
   int stop = elem["stop"] | -1;
 
   // if using vectors use this code to append segment
   if (id >= getSegmentsNum()) {
 
+    if (stop <= 0) return false; // ignore empty/inactive segments
+
     ALOG_HGL(PSTR("DESTROYING SEGMENT, BAD %d %d"), id, getSegmentsNum());
 
-    if (stop <= 0) return false; // ignore empty/inactive segments
     appendSegment(mAnimatorLight::Segment_New(0, getLengthTotal()));
     id = getSegmentsNum()-1; // segments are added at the end of list
   }
 
   mAnimatorLight::Segment_New& seg = getSegment(id);
+
+  /**
+   * @brief Note that making a backup will also allocate memory, this will be destroyed when we leave this function
+   * 
+   */
   mAnimatorLight::Segment_New prev = seg; //make a backup so we can tell if something changed
 
   uint16_t start = elem["start"] | seg.pixel_range.start;
@@ -3144,6 +2759,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     uint16_t len = elem["len"];
     stop = (len > 0) ? start + len : seg.pixel_range.stop;
   }
+
   // 2D segments
   uint16_t startY = elem["startY"] | seg.startY;
   uint16_t stopY = elem["stopY"] | seg.stopY;
@@ -3162,6 +2778,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       elem["start"] = start;
       elem["stop"]  = start + len;
       elem["rev"]   = !elem["rev"]; // alternate reverse on even/odd segments
+      DEBUG_LINE_HERE;
       deserializeSegment(elem, i, presetId); // recursive call with new id
     }
     return true;
@@ -3253,7 +2870,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   if (!colarr.isNull())
   {
 
-    ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "JsonArray colarr"));
+    // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "JsonArray colarr"));
 
     if (seg.getLightCapabilities() & 3) {
       // segment has RGB or White
@@ -3289,7 +2906,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
         if (!colValid) continue;
 
-        ALOG_INF(PSTR("seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));"));
+        // ALOG_INF(PSTR("seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));"));
     
         seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));
         if (seg.animation_mode_id == 0) trigger(); //instant refresh
@@ -3300,18 +2917,6 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       seg.setColor(1, BLACK);
     }
   }
-
-  // lx parser
-  #ifdef WLED_ENABLE_LOXONE
-  int lx = elem[F("lx")] | -1;
-  if (lx > 0) {
-    parseLxJson(lx, id, false);
-  }
-  int ly = elem[F("ly")] | -1;
-  if (ly > 0) {
-    parseLxJson(ly, id, true);
-  }
-  #endif
 
   #ifndef WLED_DISABLE_2D
   bool reverse  = seg.reverse;
@@ -3494,6 +3099,8 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     seg.map1D2D = oldMap1D2D; // restore mapping
     trigger(); // force segment update
   }
+
+  
   // send UDP/WS if segment options changed (except selection; will also deselect current preset)
   if (seg.differs(prev) & 0x7F) stateChanged = true;
 
@@ -3920,57 +3527,6 @@ void mAnimatorLight::initServer_LightOnly()
     this->setStaticContentCacheHeaders(response);
     request->send(response);
   });
-
-#ifndef WLED_DISABLE_OTA
-  //init ota page
-  pCONT_web->server->on("/update", HTTP_GET, [this](AsyncWebServerRequest *request){
-    ALOG_INF(PSTR("URL HTTP_GET \"/update\""));
-    // if (otaLock) {
-    //   serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_ota), 254);
-    // } else
-      this->serveSettings(request); // checks for "upd" in URL and handles PIN
-  });
-
-  pCONT_web->server->on("/update", HTTP_POST, [this](AsyncWebServerRequest *request){
-    ALOG_INF(PSTR("URL HTTP_POST \"/update\""));
-    // if (!correctPIN) {
-    //   serveSettings(request, true); // handle PIN page POST request
-    //   return;
-    // }
-    if (Update.hasError() || otaLock) {
-      pCONT_web->serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
-    } else {
-      pCONT_web->serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
-      // doReboot = true;
-    }
-  },[this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-    if (!this->correctPIN || this->otaLock) return;
-    if(!index){
-      DEBUG_PRINTLN(F("OTA Update Start"));
-      // WLED::instance().disableWatchdog();
-      // usermods.onUpdateBegin(true); // notify usermods that update is about to begin (some may require task de-init)
-      // lastEditTime = millis(); // make sure PIN does not lock during update
-      #ifdef ESP8266
-      Update.runAsync(true);
-      #endif
-      Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
-    }
-    if(!Update.hasError()) Update.write(data, len);
-    if(final){
-      if(Update.end(true)){
-        DEBUG_PRINTLN(F("Update Success"));
-      } else {
-        DEBUG_PRINTLN(F("Update Failed"));
-        // usermods.onUpdateBegin(false); // notify usermods that update has failed (some may require task init)
-        // WLED::instance().enableWatchdog();
-      }
-    }
-  });
-#else
-  pCONT_web->server->on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    serveMessage(request, 501, "Not implemented", F("OTA updating is disabled in this build."), 254);
-  });
-#endif
 
 
   #ifdef WLED_ENABLE_DMX

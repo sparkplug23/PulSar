@@ -5,161 +5,6 @@
 const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
 const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR = D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
 
-
-void mInterfaceLight::Pre_Init(void)
-{
-
-  bus_manager = new BusManager();
-
-}
-
-
-void mInterfaceLight::Template_Load()
-{
-
-  #ifdef USE_LIGHTING_TEMPLATE
-  // load from progmem into local
-  D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-  // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
-  #endif // USE_LIGHTING_TEMPLATE
-
-}
-
-
-void mInterfaceLight::Init(void)
-{
-  #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-  Init_NeoPixelBus_PinnedTask(void)
-  #endif  
-
-}
-
-
-#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-void mInterfaceLight::Init_NeoPixelBus_PinnedTask(void)
-{
-
-  neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
-  // constexpr
-  // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
-  uint8_t kTaskRunnerCore = 1;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
-
-  ALOG_INF(PSTR("kTaskRunnerCore=%d"),kTaskRunnerCore);
-
-  neopixel_runner->begin(
-      [this]() {
-        /**
-         * @brief Actual bit of the code that gets called each time
-         */
-        if(!neopixel_runner->flag_block_show)
-        {
-          if(bus_manager)
-          {
-            bus_manager->show();
-          }
-          // Serial.println("NeoPixelShowTask::Show Y");
-          // delay(10);
-        }else
-        {
-          Serial.println("NeoPixelShowTask::Show --------------");
-        }
-        // I could also try a temporary way of adding a flag to the "runner", so its set when show is called and cleared after. or rahter, the reverse, have it only call show if the animation is now updating
-      },
-      kTaskRunnerCore
-  );
-
-}
-#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-
-
-void mInterfaceLight::ShowInterface()
-{
-
-  if(bus_manager){ bus_manager->show(); }
-        
-}
-
-
-int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
-{
-  
-  int8_t function_result = 0;
-
-  // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
-  switch(function){
-    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
-      Template_Load();
-    break;
-    case FUNC_POINTER_INIT:
-
-    break;
-    case FUNC_PRE_INIT:
-      Pre_Init();
-    break;
-    case FUNC_INIT:
-      Init();
-    break;
-  }
-
-  switch(function){
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP:
-      EveryLoop();
-    break;
-    /************
-     * STORAGE SECTION * 
-    *******************/    
-    case FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
-      Template_Load_DefaultConfig();
-    break;
-    case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
-      FileSystem_JsonAppend_Save_Module();
-    break;
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEB SECTION * 
-    *******************/   
-    case FUNC_WEB_ADD_HANDLER:    
-      #ifdef USE_MODULE_NETWORK_WEBSERVER23
-      // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
-      #endif
-    break;
-
-  } // end switch
-  
-} // END function
-
-
 #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
 
 namespace
@@ -212,7 +57,164 @@ bool NeoPixelShowTask::IsBusy()
 
 }
 
+void mInterfaceLight::Init_NeoPixelBus_PinnedTask(void)
+{
+
+  neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
+  // constexpr
+  // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
+  uint8_t kTaskRunnerCore = 1;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+
+  ALOG_INF(PSTR("kTaskRunnerCore=%d"),kTaskRunnerCore);
+
+  neopixel_runner->begin(
+      [this]() {
+        /**
+         * @brief Actual bit of the code that gets called each time
+         */
+        if(!neopixel_runner->flag_block_show)
+        {
+          if(bus_manager)
+          {
+            bus_manager->show();
+          }
+          // Serial.println("NeoPixelShowTask::Show Y");
+          // delay(10);
+        }else
+        {
+          Serial.println("NeoPixelShowTask::Show --------------");
+        }
+        // I could also try a temporary way of adding a flag to the "runner", so its set when show is called and cleared after. or rahter, the reverse, have it only call show if the animation is now updating
+      },
+      kTaskRunnerCore
+  );
+
+}
+
 #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+
+
+
+void mInterfaceLight::Pre_Init(void)
+{
+
+  bus_manager = new BusManager();
+
+}
+
+
+void mInterfaceLight::Template_Load()
+{
+
+  #ifdef USE_LIGHTING_TEMPLATE
+  // load from progmem into local
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  #endif // USE_LIGHTING_TEMPLATE
+
+}
+
+
+void mInterfaceLight::Init(void)
+{
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+  Init_NeoPixelBus_PinnedTask(void)
+  #endif  
+
+}
+
+
+void mInterfaceLight::ShowInterface()
+{
+
+  if(bus_manager){ bus_manager->show(); }
+        
+}
+
+
+int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
+{
+  
+  int8_t function_result = 0;
+
+  // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
+  switch(function){
+    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+      Template_Load();
+    break;
+    case FUNC_POINTER_INIT:
+
+    break;
+    case FUNC_PRE_INIT:
+      Pre_Init();
+    break;
+    case FUNC_INIT:
+      Init();
+    break;
+  }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_LOOP:
+      EveryLoop();
+    break;
+    /************
+     * STORAGE SECTION * 
+    *******************/    
+    case FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
+      Template_Load_DefaultConfig();
+    break;
+    // case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
+    //   FileSystem_JsonAppend_Save_Module();
+    // break;
+    #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+      Module_DataSave();
+    break;
+    #endif
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      MQTTHandler_Set_DefaultPeriodRate();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_RefreshAll();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+    /************
+     * WEB SECTION * 
+    *******************/   
+    case FUNC_WEB_ADD_HANDLER:    
+      #ifdef USE_MODULE_NETWORK_WEBSERVER
+      // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
+      #endif
+    break;
+
+  } // end switch
+  
+} // END function
 
 
 void mInterfaceLight::EveryLoop()
@@ -251,10 +253,65 @@ void mInterfaceLight::Template_Load_DefaultConfig()
 }
 
 
+void mInterfaceLight::Module_DataSave()
+{
+  
+  ALOG_INF(PSTR("mInterfaceLight::Module_DataSave()"));
+
+  char buffer[100] = {0};
+
+  /********************************************************************
+   * Byte Data
+   * ******************************************************************/
+
+  char filename_byte[50];
+  snprintf_P(filename_byte, sizeof(filename_byte), "/lgt_%S_byte.txt", GetModuleFriendlyName()); // debugging in .txt so webui/edt can read it
+  // snprintf_P(filename_byte, sizeof(filename_byte), "/lgt_%S.bin", GetModuleFriendlyName()); // possibly switch to .bin for binary data, though UI wont be able to read it
+
+  struct TEST{
+    uint16_t test = 1234;
+    char message[7] = "hello\0";
+  }test;
+
+  pCONT_mfile->ByteFile_Save(filename_byte, (uint8_t*)&test, sizeof(TEST));
+
+
+  /********************************************************************
+   * Json Data
+   * ******************************************************************/
+
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return;
+  }
+ 
+  JBI->Start();
+
+  #ifdef ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+  #endif // ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  //
+
+  JBI->End();
+
+  char filename_json[50];
+  snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleFriendlyName());
+
+  pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
+
+  JBI->ReleaseLock();
+
+
+
+
+}
+
 
 
 void mInterfaceLight::FileSystem_JsonAppend_Save_Module()
 {
+
+//delete this, as I Want to have every file as its own thing to make it not matter if its a module or not
 
   uint8_t bus_appended = 0;
 
@@ -349,8 +406,6 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_AdjustedBrightness(float value
 
     return colour;
 
-
-
 }
 
 /**
@@ -401,8 +456,6 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_FullBrightness(float value,
     // colour = RgbColor((int)value, 2, 3);
 
     return colour;
-
-
 
 }
 
@@ -867,7 +920,6 @@ COLOUR_ORDER_T mInterfaceLight::GetColourOrder_FromName(const char* c)
 int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
 {
 
-  //nodemcu/wemos named
   if     (strcmp(c,"WS2812_1CH")==0){ return BUSTYPE_WS2812_1CH; }
   else if(strcmp(c,"WS2812_1CH_X3")==0){ return BUSTYPE_WS2812_1CH_X3; }
   else if(strcmp(c,"WS2812_2CH_X3")==0){ return BUSTYPE_WS2812_2CH_X3; }
@@ -898,9 +950,6 @@ int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
   return BUSTYPE_NONE;
   
 }
-
-
-
 
 
 /******************************************************************************************************************
@@ -1342,12 +1391,12 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t id)
   }
 }
   
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 void mInterfaceLight::MQTTHandler_AddWebURL_PayloadRequests()
 {    
   CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests();
 }
-#endif // USE_MODULE_NETWORK_WEBSERVER23
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 #endif// USE_MODULE_NETWORK_MQTT
 

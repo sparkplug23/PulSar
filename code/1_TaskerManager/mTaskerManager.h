@@ -103,7 +103,7 @@
   #define mSupportHardware SupportESP32
 #endif
 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
       
     #define LOROL_LITTLEFS 
 
@@ -154,7 +154,7 @@
     #endif
 
 
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 // #include <variant>
 
@@ -210,10 +210,10 @@ enum FUNCTION_RESULT_IDS{
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
   #include <ESP8266WiFi.h>
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     // #include <ESPAsyncTCP.h>
     //?#include <ESPAsyncWebServer.h>
-  #endif //USE_MODULE_NETWORK_WEBSERVER23
+  #endif //USE_MODULE_NETWORK_WEBSERVER
 #endif
 
 #include "2_CoreSystem/08_JSON/mJSON.h"
@@ -284,7 +284,7 @@ enum TASKER_ID{
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
   // Displays
@@ -626,7 +626,7 @@ enum TASKER_ID{
   #define   pCONT_rules                             static_cast<mRuleEngine*>(pCONT->pModule[EM_MODULE_CORE_RULES_ID])
 #endif
 #ifdef USE_MODULE_CORE_UPDATES
-  #include "2_CoreSystem/Updates/mUpdates.h"
+  #include "2_CoreSystem/14_Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
 #endif
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
@@ -651,7 +651,7 @@ enum TASKER_ID{
   #include "3_Network/10_MQTT/mMQTT.h"
   #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/21_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif

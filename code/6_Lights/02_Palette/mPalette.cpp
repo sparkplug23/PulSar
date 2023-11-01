@@ -1164,68 +1164,39 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   ){
 
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
-
-    if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } // safety check since we may be async loading, restrict to inside segments.
-    // I bet this arose when I moved the iter to after the loop when it used to be before!
-
+    if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
 
     CRGB fastled_col;
     
-    // ALOG_INF(PSTR("palette_id %d  \tpixel_pos%d "), palette_id, _pixel_position);
-
-    uint8_t pixel_position_adjust = _pixel_position;    
-
-// DEBUG_LINE_HERE;
+    uint16_t pixel_position_adjust = _pixel_position;    
 
     if(flag_crgb_exact_colour)
     {
-      uint8_t pixels_in_crgb16palette = GetColoursInCRGB16Palette(palette_id);
-// DEBUG_LINE_HERE;
-      pixel_position_adjust = _pixel_position % pixels_in_crgb16palette; // convert incoming pixels into repeating 0-15 numbers.
-// DEBUG_LINE_HERE;
-      /**
-       * @brief If exact, instead of scale I should use the index to get the position
-       * Convert index (that wraps by amount of colours) to get scaled 255 version
-       **/
-      // Serial.println(_pixel_position);
-      // Serial.println(pixel_position_adjust);
-      // Serial.println(segIdx);
-      // Serial.println(pCONT_lAni->segments.size());
-
-  
-// DEBUG_LINE_HERE;
-//       ALOG_INF(PSTR("Cpixel_position_adjust %d|%d==%d"), _pixel_position, pixel_position_adjust, pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size());
-// DEBUG_LINE_HERE;
       if(pixel_position_adjust < pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size())
       {
-// DEBUG_LINE_HERE;
+        uint8_t pixels_in_crgb16palette = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size();
+        pixel_position_adjust = _pixel_position % pixels_in_crgb16palette;
+        // ALOG_INF(PSTR("Cpixel_position_adjust %d|%d==%d"), _pixel_position, pixel_position_adjust, pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size());
         pixel_position_adjust = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[pixel_position_adjust];
-// DEBUG_LINE_HERE;
       }
     }
     
-    
-// DEBUG_LINE_HERE;
     if(flag_spanned_segment)
     {
       pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
     }
-
 
     if(flag_wrap_hard_edge==true) // If OFF, then cut end of palette off (rescale to 240)
     {
       pixel_position_adjust = scale8(pixel_position_adjust, 240); // cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
     }
 
-// DEBUG_LINE_HERE;
     // if(palette_id==72)
     //     ALOG_INF(PSTR("pixel_position_adjust %d|%d"), _pixel_position, pixel_position_adjust);
     
     fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, NOBLEND);
   
-// DEBUG_LINE_HERE;
     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b);
-
 
   } // END of CRGBPalette's
 
@@ -1245,6 +1216,26 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     uint8_t adjust_buf_i =  adjusted_id*3;
     colour = RgbcctColor(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2]);
 
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * 
+  ***************************************************************/
+  else
+  if(
+    (palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+  ){  
+
+    uint8_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+
+    if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
+    if(adjusted_id < RGBCCTCOLOURS_SIZE)
+    {
+      colour = pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
+    }
   }
 
   /**************************************************************
@@ -1321,27 +1312,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     );
     
   }
-
-  /**************************************************************
-   * 
-   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
-   * 
-  ***************************************************************/
-  else
-  if(
-    (palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
-  ){  
-
-    uint8_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
-    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
-
-    if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
-    if(adjusted_id < RGBCCTCOLOURS_SIZE)
-    {
-      colour = pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
-    }
-  }
-
 
   
   /**************************************************************
@@ -1496,7 +1466,8 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
   uint8_t* palette_buffer,
   uint16_t pixel_position,  
   uint8_t* return_encoded_value,
-  PALETTE_ENCODING_DATA encoding
+  PALETTE_ENCODING_DATA encoding,
+  uint8_t encoded_colour_width
 ){
 
   uint16_t index_relative = 0; // get expected pixel position
@@ -1521,7 +1492,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
     // ALOG_INF(PSTR("p = %d, r = %d, v = %d|%d, w=%d"), pixel_position, index_relative, palette_elements[index_relative], palette_elements[index_relative+1],colour_width);
 
     // Get Start of Colour Information by adjusting for indexing
-    index_relative = pixel_position*GetEncodedColourWidth(encoding); // get expected pixel position
+    index_relative = pixel_position*encoded_colour_width; // get expected pixel position
       
     // ALOG_INF(PSTR("index_relativeA=%d"),index_relative);
 
@@ -1673,11 +1644,9 @@ IRAM_ATTR
 mPalette::Get_Encoded_Palette_Colour(
   uint8_t* palette_buffer,
   uint16_t _pixel_position, 
-
   uint8_t encoded_colour_width,
   uint8_t colours_in_palette,
   PALETTE_ENCODING_DATA encoding,
-
   uint8_t* encoded_value, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
@@ -1774,8 +1743,10 @@ mPalette::Get_Encoded_Palette_Colour(
       palette_buffer,
       pixel_position_adjust,  
       encoded_value,
-      encoding
+      encoding,
+      encoded_colour_width
     );
+    
     return colour;
 
   }
@@ -1847,7 +1818,8 @@ mPalette::Get_Encoded_Palette_Colour(
             palette_buffer,
             pix_i,  
             &encoded_value2,
-            encoding
+            encoding,
+            encoded_colour_width
           );
         gradient_palettes.push_back(encoded_value2);
       }
@@ -1966,13 +1938,15 @@ mPalette::Get_Encoded_Palette_Colour(
       palette_buffer,
       lower_boundary_i,  
       nullptr,
-      encoding
+      encoding,
+      encoded_colour_width
     );
     RgbcctColor upper_colour = Get_Encoded_Colour_ReadBuffer_Fast(
       palette_buffer,
       upper_boundary_i,  
       nullptr,
-      encoding
+      encoding,
+      encoded_colour_width
     );
 
     colour = RgbcctColor::LinearBlend(lower_colour, upper_colour, progress);
@@ -2012,7 +1986,8 @@ mPalette::Get_Encoded_Palette_Colour(
     palette_buffer,
     palette_index,  
     encoded_value,
-    encoding
+    encoding,
+    encoded_colour_width
   );
   
 
@@ -2189,8 +2164,6 @@ RgbcctColor mPalette::Get_Encoded_DynamicPalette_Colour(
       colour_out.debug_print("colour_out");
 
       return colour_out;
-
-       
 
       // Serial.println(elevation);
       // Serial.println(progress);

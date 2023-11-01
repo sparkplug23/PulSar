@@ -226,4 +226,80 @@ void mFileSystem::JsonFile_Load__Stored_Secure()
 }
 
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//// Shared functions: For all modules to pass its file name and bytes to save, or byte to load and the position to write into
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void mFileSystem::ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen) // where to write the data from
+{
+  
+  ALOG_INF( PSTR("ByteFile_Save") );
+
+  File file;  
+  // Open file for writing, if it does not exist, create it
+  // Seek is placed at the start of the file, contents will be overwriten
+  file = FILE_SYSTEM.open(filename_With_extension, "w+");
+  
+  if(!file) 
+  {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), filename_With_extension);
+    return;
+  }
+
+  file.write((const uint8_t*)buffer, buflen);
+  file.close();
+    
+  ALOG_INF(PSTR("Writing file (%s) \"%s\""), filename_With_extension, buffer);
+
+}
+
+void mFileSystem::ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen) // where to write the data into
+{
+  
+  ALOG_INF( PSTR("ByteFile_Load") );
+
+
+  
+}
+
+
+
+void mFileSystem::JSONFile_Save(char* filename_With_extension, char* buffer, uint16_t buflen) // where to write the data from
+{
+  
+  ALOG_INF( PSTR("JSONFile_Save") );
+
+  File file;  
+  // Open file for writing, if it does not exist, create it
+  // Seek is placed at the start of the file, contents will be overwriten
+  file = FILE_SYSTEM.open(filename_With_extension, "w+");
+  
+  if(!file) 
+  {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), filename_With_extension);
+    return;
+  }
+
+  file.write((const uint8_t*)buffer, buflen);
+  file.close();
+    
+  ALOG_INF(PSTR("Writing file (%s) \"%s\""), filename_With_extension, buffer);
+
+}
+
+
+void mFileSystem::JSONFile_Load(char* filename_With_extension, char* buffer, uint16_t buflen) // where to write the data into
+{
+
+  ALOG_INF( PSTR("JSONFile_Load") );
+
+}
+
 #endif // USE_MODULE_DRIVERS_FILESYSTEM

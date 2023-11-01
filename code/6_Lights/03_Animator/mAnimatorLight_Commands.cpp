@@ -345,6 +345,18 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Decimate"])
+  { 
+    ALOG_INF( PSTR("Decimate %d %d"), jtok.getInt(), segment_index );
+    SEGMENT_I(segment_index).decimate = jtok.getInt();  
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Spacing"])
   { 
 

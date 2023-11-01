@@ -509,7 +509,7 @@
 //  * Presentation
 // \*********************************************************************************************/
 
-// #ifdef USE_MODULE_NETWORK_WEBSERVER23
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 // #ifdef USE_TIMERS_WEB
 
 // #define WEB_HANDLE_TIMER "tm"
@@ -751,7 +751,7 @@
 //   AddLogAddLog(LOG_LEVEL_DEBUG);
 // }
 // #endif  // USE_TIMERS_WEB
-// #endif  // USE_MODULE_NETWORK_WEBSERVER23
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 // /*********************************************************************************************\
 //  * Interface
@@ -766,7 +766,7 @@
 //     case FUNC_PRE_INIT:
 //       TimerSetRandomWindows();
 //       break;
-// #ifdef USE_MODULE_NETWORK_WEBSERVER23
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 // #ifdef USE_TIMERS_WEB
 //     case FUNC_WEB_ADD_BUTTON:
 // #ifdef USE_RULES
@@ -779,7 +779,7 @@
 //       WebServer->on("/" WEB_HANDLE_TIMER, HandleTimerConfiguration);
 //       break;
 // #endif  // USE_TIMERS_WEB
-// #endif  // USE_MODULE_NETWORK_WEBSERVER23
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 //     case FUNC_EVERY_SECOND://Serial.println("Xdrv09 - FUNC_EVERY_SECOND");
 //       TimerEverySecond();
 //       break;

@@ -18,9 +18,9 @@
   #include <ESP8266httpUpdate.h>
 #endif
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 #include "3_Network/21_WebServer/mWebServer.h"
-#endif // USE_MODULE_NETWORK_WEBSERVER23
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #include "1_TaskerManager/mTaskerInterface.h"

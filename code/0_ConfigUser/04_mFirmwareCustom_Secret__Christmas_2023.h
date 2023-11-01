@@ -17,13 +17,15 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
+// new method, similar to "grouping"/"spacing" to "generate less internal but replicate out"
 
 // #define DEVICE_CHRISTMAS__OUTSIDE_TREE_I2S_PARALLEL_8_CHANNELS_MODE
+#define DEVICE_CHRISTMAS__GIVEAWAY_ESP32_4PIN_CONTROLLER     // 4pin versions for green BGR
+
 // #define DEVICE_CHRISTMAS__LIGHTING_EFFECTS__DININGROOM_SNOWTREE_16_CHANNELS
 // DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022  // just do the 200 ws2811 inline with the 400 under, same as last year, single esp32-1pin
 // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TVROOM_XMAS2022 // Use other snow tree, use transparant wire from big snow last year. Do 4pin esp32. No docorations, just light it up
 // DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_SHELF // do 2pin, 2 segments, green tree (50) + candle (rgbw sk6812). Use new wire (clear 30awg) incoming for it, perhaps 3 pin it one for each candle to reduce visible wiries
-#define DEVICE_CHRISTMAS__GIVEAWAY_ESP32_4PIN_CONTROLLER     // 4pin versions for green BGR
 
 
 /**************************************************************************************************************************************************
@@ -81,7 +83,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
   /***********************************
@@ -94,6 +96,8 @@
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+
+  #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
   // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -276,7 +280,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
   /***********************************
@@ -895,6 +899,7 @@ Pin    :      Connection (Left, Right, 1 to 8 with 1 at top)
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
+
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
   // #define DISABLE_SERIAL_LOGGING
@@ -922,7 +927,7 @@ Pin    :      Connection (Left, Right, 1 to 8 with 1 at top)
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
   /***********************************
@@ -938,9 +943,14 @@ Pin    :      Connection (Left, Right, 1 to 8 with 1 at top)
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE_LIGHTING__REMOVE_PALETTEO23
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  #define ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
+
+  #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
 
   // PixelDriver 2,4,18,19
   // 13, 18, 19, 22, 23, 25, 26, 27       USED

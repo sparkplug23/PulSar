@@ -1000,7 +1000,7 @@ void mWebCamera::WcInterruptControl() {
 
 
 void mWebCamera::WcPicSetup(void) {
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   WebServer_on(PSTR("/wc.jpg"), HandleImage);
   WebServer_on(PSTR("/wc.mjpeg"), HandleImage);
   WebServer_on(PSTR("/snapshot.jpg"), HandleImage);
@@ -1010,7 +1010,7 @@ void mWebCamera::WcPicSetup(void) {
 void mWebCamera::WcShowStream(void) {
   
   #ifdef ENABLE_DEVFEATURE_CAMERA_TASMOTA_INCLUDE_WEBSERVER
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   if (pCONT_set->Settings.webcam_config.stream) {
 //    if (!Wc.CamServer || !Wc.up) {
     if (!Wc.CamServer) {
@@ -1023,7 +1023,7 @@ void mWebCamera::WcShowStream(void) {
     }
   }
   
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
   #endif // ENABLE_DEVFEATURE_CAMERA_TASMOTA_INCLUDE_WEBSERVER
 
 }

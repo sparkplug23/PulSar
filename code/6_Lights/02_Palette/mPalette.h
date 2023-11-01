@@ -419,7 +419,8 @@ class mPalette
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,
-      PALETTE_ENCODING_DATA encoding = {0}
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t encoded_colour_width = 0
     );
 
 

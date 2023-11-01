@@ -77,7 +77,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj)
   /************
    * WEBPAGE SECTION * 
   *******************/  
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
   #endif
 

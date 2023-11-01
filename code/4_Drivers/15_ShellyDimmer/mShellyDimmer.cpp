@@ -172,9 +172,9 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * WEBPAGE SECTION * 
   *******************/
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
 

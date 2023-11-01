@@ -102,6 +102,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
 {
   
   DEBUG_PIN1_SET(0);
+
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
   RgbcctColor colour = RgbcctColor(0);
@@ -1238,7 +1239,7 @@ static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM = ",,,,,Time,Rate
 void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 {
 
-  // ALOG_INF(PSTR("EffectAnim__Rotating_Previous_Animation"));
+  ALOG_INF(PSTR("EffectAnim__Rotating_Previous_Animation"));
 
   uint16_t* movement_direction_p = &SEGMENT.params_internal.aux0;  
 
@@ -1255,16 +1256,53 @@ void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
   // }
   // else
   // {
+
+
+
+
+
+
+
+
+
     /**
+     * @brief 
+     * 
+     * 
+     * 
+     * Should test option, if segment size remains the same, then dont destroy and recreate on webui command load of palette 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     *
      * @brief Save last, move pixels back to first, assert first
+     * 
+     * I think the brightness is suppressing out the colour
+     * 
      **/
     RgbcctColor colourfirst = SEGMENT.GetPixelColor(0); 
-    for(uint16_t p = 0; p < SEGLEN-1; p++) //move them all ONCE towards first pixel
-    { 
-      SEGMENT.SetPixelColor(p, SEGMENT.GetPixelColor(p+1));
+    RgbcctColor colour = SEGMENT.GetPixelColor(0); 
+    // RgbcctColor colour1 = SEGMENT.GetPixelColor(0); 
+    // colourfirst.debug_print("colourfirst");
+    for(uint16_t p = 0; p < SEGLEN-1; p++){ //move them all ONCE towards first pixel
+    // for(uint16_t p = 0; p < 10; p++){ //move them all ONCE towards first pixel
+      colour = SEGMENT.GetPixelColor(p+1);
+      // colour1 = SEGMENT.GetPixelColor(p+1);
+      // ALOG_INF(PSTR("p0 %d=%d,%d,%d"),p, colour.R, colour.G, colour.B);
+      // ALOG_INF(PSTR("p1 %d=%d,%d,%d"),p, colour1.R, colour1.G, colour1.B);
+    // colour.debug_print("colour");
+      SEGMENT.SetPixelColor(p, colour, BRIGHTNESS_ALREADY_SET);
     }
     SEGMENT.SetPixelColor(SEGLEN-1, colourfirst); // Insert saved first pixel into last pixel as "wrap around"
+
   // }
+
+  // SEGMENT.SetPixelColor(0, RgbColor(random(0,10)*25,255,255));
 
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR(); // Change this to be function that sets transition up
 
@@ -1372,6 +1410,122 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
 }
 static const char PM_EFFECT_CONFIG__STEPPING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+
+
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Step_Through_Palette
+ * @note : Picks sequential colours from palette and steps through them ie Red, Green, Blue, Orange  would be (R,G) (B,G) (B,O) with the next palette colour in order, keeping the same colour for two steps 
+ *  
+ * Future Change: Make it so more than two can be shown, ie if 5 colours exist, then have "Intensity" (as percentage) select how many colours to remain visible
+ * 
+     * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
+     *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
+     * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
+     * TODO: Add size of step as percentage ie to show 50% of 4 colours would be 2 of 4, 75% of 4 is 3
+     * 
+     * Note: allocate_buffer is used as transition data
+     * 
+     * New for 2023, add to outside tree.
+     * Similar to step_palette over the white strip palette
+     * Apply the stepping palette over the background colour (e.g white), and use the intensity option to set how many background pixels between palette colours
+     * eg. 5 white that are on dim (for brightness correction) and then palette changing single colours (or two colours?) with white infill
+     * 
+     * Slider1: The spacing between palette colours over background, ie how many backfill pixels
+     * Slider2: How many of colours of the palette to show at once; 0/255 is single palette, and 255/255 is all (but one) palette over background
+     * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
+{
+
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
+
+  if (!SEGMENT.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+    return;
+  }
+
+  uint16_t* region_p          = &SEGMENT.params_internal.aux0;
+  uint16_t* indexes_active_p  = &SEGMENT.params_internal.aux1; // shared_flasher_parameters_segments.indexes.active
+  uint16_t* indexes_counter_p = &SEGMENT.params_internal.aux2; // shared_flasher_parameters_segments.indexes.counter
+
+  desired_pixel=0;
+    
+  uint8_t pixel_position = 0;
+  uint8_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette.id);
+
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+  
+  desired_pixel = *indexes_active_p;
+  uint8_t pixels_map_upper_limit = *indexes_active_p+1;
+  uint8_t pixels_map_lower_limit = *indexes_active_p;
+
+  uint8_t index_1, index_2;
+  uint8_t counter = 0;
+      
+  //if last pixel, then include it and the first, else include it and the next
+  if(*indexes_active_p == pixels_in_map-1){ //wrap wround
+    index_1 = 0;
+    index_2 = *indexes_active_p;
+    counter = 0;
+  }else{
+    index_1 = *indexes_active_p;
+    index_2 = *indexes_active_p+1;
+    counter = 1;
+
+  }
+
+  *indexes_counter_p ^= 1;
+
+  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "counter = %d/%d/%d"), counter,index_1,index_2);
+
+  RgbcctColor colour;
+
+  for(uint16_t index=SEGMENT.pixel_range.start;
+                index<=SEGMENT.pixel_range.stop;
+                index++
+  ){
+
+    if(counter^=1){
+      desired_pixel = *indexes_counter_p ? index_2 : index_1;
+    }else{
+      desired_pixel = *indexes_counter_p ? index_1 : index_2;
+    }
+    
+    colour = SEGMENT.GetPaletteColour(desired_pixel, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, &pixel_position); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette.id, desired_pixel, &pixel_position);
+    
+    colour = ApplyBrightnesstoRgbcctColour(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.data, SEGMENT.DataLength(), index++, SEGMENT.colour_type__used_in_effect_generate, SEGCOLOR_RGBCCT(0));
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.data, SEGMENT.DataLength(), index++, SEGMENT.colour_type__used_in_effect_generate, SEGCOLOR_RGBCCT(0));
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.data, SEGMENT.DataLength(), index, SEGMENT.colour_type__used_in_effect_generate, colour);
+        
+  } 
+
+//messy
+  if(++*indexes_active_p>pixels_in_map-1){
+    *indexes_active_p=0;
+  }
+  
+  
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6775,7 +6929,6 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows()
     }
   }
 
-  // SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
@@ -13155,6 +13308,9 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,   &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,     PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR,                    PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,           &mAnimatorLight::EffectAnim__Stepping_Palette_With_Background,                      PM_EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__NAME_CTR,                                  PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,                           &mAnimatorLight::EffectAnim__Stepping_Palette,                      PM_EFFECTS_FUNCTION__STEPPING_PALETTE__NAME_CTR,                                  PM_EFFECT_CONFIG__STEPPING_PALETTE);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -13167,7 +13323,7 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,                   &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,              PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR,                          PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,                      &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black,                 PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__NAME_CTR,                             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK);
+  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,                      &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black,                 PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__NAME_CTR,                             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK, Effect_DevStage::Unstable);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__ID,                       &mAnimatorLight::EffectAnim__Popping_Decay_Random_To_Black,                  PM_EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__NAME_CTR,                              PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_BLACK);

@@ -85,14 +85,14 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     // /************
     //  * WEBPAGE SECTION * 
     // *******************/
-    // #ifdef USE_MODULE_NETWORK_WEBSERVER23
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER
     // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
     //   WebAppend_Root_Status_Table_Draw();
     //   break;
     // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
     //   WebAppend_Root_Status_Table_Data();
     //   break;
-    // #endif //USE_MODULE_NETWORK_WEBSERVER23
+    // #endif //USE_MODULE_NETWORK_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/

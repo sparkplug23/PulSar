@@ -2844,7 +2844,8 @@ function unfocusSliders()
 }
 
 // sliding UI
-const _C = d.querySelector('.container'), N = 5; // Overview Added as 5th UI tab
+const _C = d.querySelector('.container'), N = 4; // Overview Added as 5th UI tab
+// const _C = d.querySelector('.container'), N = 5; // Overview Added as 5th UI tab
 
 let iSlide = 0, x0 = null, scrollS = 0, locked = false;
 

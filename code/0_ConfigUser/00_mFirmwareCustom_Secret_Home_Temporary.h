@@ -42,6 +42,7 @@
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 // #define DEVICE_PORTABLE_TEMPERATURE_SENSOR
 // #define DEVICE_H801__MASTERBEDROOM_UPLIGHT
+// #define DEVICE_HOLLOWEEN__FRONTDOOR
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -385,8 +386,8 @@
   #define USE_MODULE_NETWORK_WIFI
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER
 
   #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
 
@@ -603,8 +604,8 @@
   #define USE_MODULE_NETWORK_WIFI
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER
 
   #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
 
@@ -695,8 +696,8 @@
 
 
   // // #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // //   #define USE_MODULE_NETWORK_WEBSERVER23
-  // //   #define USE_MODULE_NETWORK_WEBSERVER23
+  // //   #define USE_MODULE_NETWORK_WEBSERVER
+  // //   #define USE_MODULE_NETWORK_WEBSERVER
   // // #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // // // #define ENABLE_FREERAM_APPENDING_SERIAL
 
@@ -720,7 +721,7 @@
   
   // #define ENABLE_DEVFEATURE_NEXTION_WEBUI
 
-  // // #define USE_MODULE_NETWORK_WEBSERVER23
+  // // #define USE_MODULE_NETWORK_WEBSERVER
 
 
 
@@ -732,8 +733,8 @@
 
 
   #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-    #define USE_MODULE_NETWORK_WEBSERVER23
-    #define USE_MODULE_NETWORK_WEBSERVER23
+    #define USE_MODULE_NETWORK_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
@@ -774,7 +775,7 @@
 
   // #define ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
 
-  // #define USE_MODULE_NETWORK_WEBSERVER23
+  // #define USE_MODULE_NETWORK_WEBSERVER
 
   // #define ENABLE_LOG_LEVEL__DEBUG_TRACE
   // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
@@ -1344,8 +1345,8 @@
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   
-  // #define USE_MODULE_NETWORK_WEBSERVER23
-  // #define USE_MODULE_NETWORK_WEBSERVER23
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER
     // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   // #define ESP8266
@@ -1359,8 +1360,8 @@
 
 
 
-  // #define USE_MODULE_NETWORK_WEBSERVER23
-  // #define USE_MODULE_NETWORK_WEBSERVER23
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER
 
   // #define ESP32
   // #undef ESP8266
@@ -1516,8 +1517,8 @@
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_MODULE_NETWORK_WEBSERVER23
-//   #define USE_MODULE_NETWORK_WEBSERVER23
+//   #define USE_MODULE_NETWORK_WEBSERVER
+//   #define USE_MODULE_NETWORK_WEBSERVER
 
 //   // #define ESP32
 //   // #undef ESP8266
@@ -2394,8 +2395,8 @@
   #define USE_MODULE_NETWORK_WIFI
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER
 
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
@@ -2630,8 +2631,8 @@
   #define USE_MODULE_NETWORK_WIFI
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER
 
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
@@ -2917,6 +2918,142 @@
   #endif // USE_MODULE_LIGHTS_INTERFACE
   
 #endif
+
+
+
+
+
+/**
+ * @brief Outside Tree controller should not load its saved state, but instead use the default template
+ * Presets/Playlists will still need to load from the filesystem
+ * 
+ */
+#ifdef DEVICE_HOLLOWEEN__FRONTDOOR
+  #define DEVICENAME_CTR          "holloween23_frontdoor"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree"
+  #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+    #define SETTINGS_HOLDER 1239
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/   
+
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
+
+  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+
+  #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
+
+  #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+
+  // PixelDriver 2,4,18,19
+  // 13, 18, 19, 22, 23, 25, 26, 27       USED
+  // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        200
+      ],
+      "ColourPalette":"Halloween Orange-Purple",
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 7
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{},"
+    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}" 
+  "}";
+
+#endif // DEVICE_CHRISTMAS__OUTSIDE_TREE_I2S_PARALLEL_8_CHANNELS_MODE
+
+
+
 
 
 

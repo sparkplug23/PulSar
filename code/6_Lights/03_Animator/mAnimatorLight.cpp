@@ -31,7 +31,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:{      
       //EverySecond();
       EverySecond_AutoOff(); 
-      // ALOG_INF(PSTR("param users %d, %d, %d, %d"), SEGMENT_I(0).params_user.val0, SEGMENT_I(0).params_user.val1, SEGMENT_I(0).params_user.val2, SEGMENT_I(0).params_user.val3);
     }break;
     case FUNC_LOOP:     
       EveryLoop();  
@@ -42,9 +41,16 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * STORAGE SECTION * 
     *******************/  
-    case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
-      FileSystem_JsonAppend_Save_Module();
+    // case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
+    //   FileSystem_JsonAppend_Save_Module();
+    // break;
+    #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+      Module_DataSave();
     break;
+    #endif
+
+
     /************
      * TRIGGERS SECTION * 
     *******************/
@@ -86,15 +92,110 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WEBUI SECTION * 
     *******************/   
-    #ifdef USE_MODULE_NETWORK_WEBSERVER23
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
-    #endif // USE_MODULE_NETWORK_WEBSERVER23
+    #endif // USE_MODULE_NETWORK_WEBSERVER
   } // switch(command)
 
 
 } // END FUNCTION
+
+
+void mAnimatorLight::Module_DataSave()
+{
+
+  ALOG_INF(PSTR("mAnimatorLight::Module_DataSave()"));
+
+  char buffer[100] = {0};
+
+  /********************************************************************
+   * Byte Data
+   * ******************************************************************/
+
+
+  /********************************************************************
+   * Json Data
+   * ******************************************************************/
+
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return;
+  }
+ 
+  JBI->Start();
+
+  #ifdef ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+  #endif // ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  uint8_t bus_appended = 0;
+
+
+  for(uint8_t seg_i = 0; seg_i< getSegmentsNum(); seg_i++)
+  {
+    JBI->Object_Start_F("Segment%d",seg_i);      
+
+      JBI->Array_Start("PixelRange");
+        JBI->Add(segments[seg_i].pixel_range.start);
+        JBI->Add(segments[seg_i].pixel_range.stop);
+      JBI->Array_End();
+
+      JBI->Add("ColourPalette", GetPaletteNameByID(segments[seg_i].palette.id, buffer, sizeof(buffer)) );
+
+      JBI->Object_Start_F("Effects");      
+        JBI->Add("Function",  GetFlasherFunctionNamebyID(segments[seg_i].effect_id, buffer, sizeof(buffer), true));
+        JBI->Add("Speed",     segments[seg_i].speed() );
+        JBI->Add("Intensity", segments[seg_i].intensity() );
+      JBI->Object_End();
+      JBI->Object_Start_F("Transition");
+        JBI->Add("TimeMs",  segments[seg_i].transition.time_ms );
+        JBI->Add("RateMs",  segments[seg_i].transition.rate_ms );
+      JBI->Object_End();
+
+      for(uint8_t seg_col = 0; seg_col < 5; seg_col++)
+      {
+        JBI->Array_Start_P(PSTR("SegColour%d"), seg_col);
+          for(uint8_t p=0;p<5;p++){ JBI->Add(segments[seg_i].rgbcctcolors[seg_col][p]); }
+        JBI->Array_End();
+      }
+
+    JBI->Object_End();
+  }
+
+  JBI->End();
+
+  char filename_json[50];
+  snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleFriendlyName());
+
+  pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
+
+  JBI->ReleaseLock();
+
+
+}
+
+
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+
+
+void mAnimatorLight::WebPage_Root_AddHandlers()
+{
+ initServer_LightOnly();
+
+
+}
+
+
+
+
+
+
+
+
+
+#endif //     #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 void mAnimatorLight::EveryLoop()
@@ -1240,10 +1341,14 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, SEGMENT_I(seg_i).effect_id, millis()); 
 
+      SEGMENT_I(seg_i).performance.effect_build_ns = micros();
+
       if(SEGMENT_I(seg_i).effect_id < effects.function.size())
       {
         (this->*effects.function[SEGMENT_I(seg_i).effect_id])(); // Call Effect Function (passes and returns nothing)
       }
+
+      SEGMENT_I(seg_i).performance.effect_build_ns = micros() - SEGMENT_I(seg_i).performance.effect_build_ns;
 
       /**
        * @brief Only calls Animator if effects are not directly handled
@@ -2338,7 +2443,7 @@ bool mAnimatorLight::Segment_New::allocateData(size_t len)
     return false; //allocation failed
   }
 
-  Serial.printf("NEW_MEMORY of %d for segment index %d\n\r", len, palette.id );// delay(2000);
+  Serial.printf("NEW_MEMORY of %d bytes\n\r", len );// delay(2000);
 
   addUsedSegmentData(len);
   _dataLen = len;
@@ -3526,6 +3631,8 @@ void mAnimatorLight::estimateCurrentAndLimitBri() {
 
 void mAnimatorLight::show(void) {
 
+  DEBUG_LINE_HERE;
+
   // avoid race condition, caputre _callback value
   show_callback callback = _callback;
   if (callback) callback();
@@ -3812,35 +3919,35 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
     }
     #endif
   } else 
-  // if (autoSegments) { //make one segment per bus
-  //   uint16_t segStarts[MAX_NUM_SEGMENTS] = {0};
-  //   uint16_t segStops [MAX_NUM_SEGMENTS] = {0};
-  //   uint8_t s = 0;
-  //   // for (uint8_t i = 0; i < busses.getNumBusses(); i++) {
-  //   //   Bus* b = busses.getBus(i);
+  if (autoSegments) { //make one segment per bus
+    uint16_t segStarts[MAX_NUM_SEGMENTS] = {0};
+    uint16_t segStops [MAX_NUM_SEGMENTS] = {0};
+    uint8_t s = 0;
+    for (uint8_t i = 0; i < pCONT_iLight->bus_manager->getNumBusses(); i++) {
+      Bus* b = pCONT_iLight->bus_manager->getBus(i);
 
-  //   //   segStarts[s] = b->getStart();
-  //   //   segStops[s]  = segStarts[s] + b->getLength();
+      segStarts[s] = b->getStart();
+      segStops[s]  = segStarts[s] + b->getLength();
 
-  //   //   //check for overlap with previous segments
-  //   //   for (size_t j = 0; j < s; j++) {
-  //   //     if (segStops[j] > segStarts[s] && segStarts[j] < segStops[s]) {
-  //   //       //segments overlap, merge
-  //   //       segStarts[j] = min(segStarts[s],segStarts[j]);
-  //   //       segStops [j] = max(segStops [s],segStops [j]); segStops[s] = 0;
-  //   //       s--;
-  //   //     }
-  //   //   }
-  //   //   s++;
-  //   // }
-  //   segments.clear();
-  //   for (size_t i = 0; i < s; i++) {
-  //     mAnimatorLight::Segment_New seg = mAnimatorLight::Segment_New(segStarts[i], segStops[i]);
-  //     seg.selected = true;
-  //     segments.push_back(seg);
-  //   }
-  //   _mainSegment = 0;
-  // } else 
+      //check for overlap with previous segments
+      for (size_t j = 0; j < s; j++) {
+        if (segStops[j] > segStarts[s] && segStarts[j] < segStops[s]) {
+          //segments overlap, merge
+          segStarts[j] = min(segStarts[s],segStarts[j]);
+          segStops [j] = max(segStops [s],segStops [j]); segStops[s] = 0;
+          s--;
+        }
+      }
+      s++;
+    }
+    segments.clear();
+    for (size_t i = 0; i < s; i++) {
+      mAnimatorLight::Segment_New seg = mAnimatorLight::Segment_New(segStarts[i], segStops[i]);
+      seg.selected = true;
+      segments.push_back(seg);
+    }
+    _mainSegment = 0;
+  } else 
   {
     if (forceReset || getSegmentsNum() == 0) resetSegments2();
     //expand the main seg to the entire length, but only if there are no other segments, or reset is forced
@@ -3869,10 +3976,10 @@ void mAnimatorLight::fixInvalidSegments() {
 bool mAnimatorLight::checkSegmentAlignment() {
   bool aligned = false;
   for (segment_new &seg : segments) {
-    // for (uint8_t b = 0; b<busses.getNumBusses(); b++) {
-    //   Bus *bus = busses.getBus(b);
-    //   if (seg.start == bus->getStart() && seg.stop == bus->getStart() + bus->getLength()) aligned = true;
-    // }
+    for (uint8_t b = 0; pCONT_iLight->bus_manager->getNumBusses(); b++) {
+      Bus *bus = pCONT_iLight->bus_manager->getBus(b);
+      if (seg.pixel_range.start == bus->getStart() && seg.pixel_range.stop == bus->getStart() + bus->getLength()) aligned = true;
+    }
     if (seg.pixel_range.start == 0 && seg.pixel_range.stop == _length) aligned = true;
     if (!aligned) return false;
   }
@@ -4230,6 +4337,8 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
   #endif // ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
 
 
+
+
   /**
    * @brief Set all pixels in the group
    **/
@@ -4256,11 +4365,39 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
 
       if (indexSet >= pixel_range.stop) indexSet -= segment_length; // Wrap
       pCONT_iLight->bus_manager->setPixelColor(indexSet, colour_hardware);
+      
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      // Replicate for virtuallength*decimate
+      for(uint8_t d=0;d<decimate;d++) 
+      {
+        uint16_t new_indexSet = indexSet + (d*virtualLength());
+       // recheck still within range
+       if (
+          new_indexSet >= pixel_range.start && 
+          new_indexSet <  pixel_range.stop
+        ){
+          // ALOG_INF(PSTR("new_indexSet d%d=%d"), d, new_indexSet);
+          pCONT_iLight->bus_manager->setPixelColor(new_indexSet, colour_hardware);
+        }
+      }
+      #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
     }
   
     ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
 
   }
+
+  
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+
+    // Use the decimate to replicate output
+
+    // if(decimate > 0)
+    // {
+    //   vLength = (vLength + decimate - 1) / decimate;
+    // }
+
+    #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
 
 }
 
@@ -4358,9 +4495,9 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
 
     for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
     {
-        
       JBI->Add("Start", SEGMENT_I(seg_i).pixel_range.start);
       JBI->Add("Stop",  SEGMENT_I(seg_i).pixel_range.stop);
+      JBI->Add("EffectMicros",   SEGMENT_I(seg_i).performance.effect_build_ns);
 
     }
   return JBI->End();
@@ -4783,7 +4920,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
@@ -4943,7 +5080,7 @@ void mAnimatorLight::MQTTHandler_Sender(uint8_t id)
 /**
  * @brief MQTTHandler_AddWebURL_PayloadRequests
  * */
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 {    
 
@@ -4995,7 +5132,7 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 
 
 }
-#endif // USE_MODULE_NETWORK_WEBSERVER23
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED

@@ -684,7 +684,7 @@ void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 
     void StartTelnetServer();
 
-    #define TELNET_PORT 24
+    #define TELNET_PORT 23
 
     WiFiServer* TelnetServer;
     WiFiClient Telnet;

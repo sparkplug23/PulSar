@@ -14,6 +14,36 @@
  * 
  * Step 1: build now and be able to view files on the SD card in the webui editor
  * 
+ * 
+ * 
+ * 
+ * 
+****
+ * 
+ * Three types of files, stored as (.byte, .json, .txt)
+ * 
+ * 
+ * sys_ = system files
+ * drv_
+ * sns_
+ * lgt_anim_0# = When data is  more than signal file can hold, it is split into multiple files
+ * egy_
+ * dsp_
+ * con_
+ * cns_
+ * 
+ * 
+ * When possible, all data from a module should be held within a "DATA"/"data" struct, and this will be called to save as ".byte" and when requested, "restore state at boot"
+ * "If data cant fit in a struct because of its format, then save and load as .json". Anything in json will be passed through the command parser.
+ * ".txt" files are for "logs" and "debugging". 
+ * 
+ * 
+ * 
+ * 
+ * 
+
+
+
  */
 
 #include "mFileSystem.h"
@@ -53,12 +83,16 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_MINUTE:
       // JsonFile_Save__Stored_Module();
       // JsonFile_Save__Stored_Secure();
+      #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
+      SystemTask__Execute_Module_Data_Save();
+      #endif     
     break;  
     case FUNC_EVERY_FIVE_MINUTE:
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
       JsonFile_Save__Stored_Module();
       JsonFile_Save__Stored_Secure();
       #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
+       
     break;
     /************
      * COMMANDS SECTION * 
@@ -114,6 +148,16 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
   
 
 } // END Tasker
+
+
+void mFileSystem::SystemTask__Execute_Module_Data_Save()
+{
+
+  ALOG_INF(PSTR("SystemTask__Execute_Module_Data_Save"));
+
+  pCONT->Tasker_Interface(FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID);
+
+}
 
 
 void mFileSystem::FileWrite_Test()

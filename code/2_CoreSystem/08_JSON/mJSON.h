@@ -81,6 +81,16 @@ class JsonBuilder{
     uint16_t GetLength();
     uint16_t GetBufferSize();
 
+    char* GetBuffer() // New versions, remove above
+    {
+      return writer.buffer;
+    }
+    uint16_t GetBufferLength()
+    {
+      return writer.length;
+    }
+
+
     bool RequestLock(uint16_t module_unique_id)
     {
 

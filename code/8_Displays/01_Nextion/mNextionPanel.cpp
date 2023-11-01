@@ -2255,7 +2255,7 @@ void mNextionPanel::MQTTHandler_Sender(uint8_t id)
  * SECTION: WebServer
 *******************************************************************************************************************/
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 void mNextionPanel::WebPage_AddHandlers()
 {
@@ -3070,7 +3070,7 @@ void mNextionPanel::nextionUpdateProgress(const unsigned int &progress, const un
 }
 
 
-#endif // USE_MODULE_NETWORK_WEBSERVER23
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #endif

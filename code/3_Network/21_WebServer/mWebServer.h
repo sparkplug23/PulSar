@@ -5,7 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 #ifdef DEBUG_WEBSERVER_MEMORY
 typedef struct  FREEMEM_HANDLER{

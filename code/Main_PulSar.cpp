@@ -361,7 +361,7 @@ void setup(void)
   pCONT_set->SettingsLoad_CheckSuccessful();
 
 /********************************************************************************************
- ** OsWatch ********************************************************************************
+ ** OsWatch: To detect loop hangs that might happen during (OTA) upgrades  ******************
  ********************************************************************************************/
 
   // OsWatchInit();
@@ -474,7 +474,6 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_POST_INIT);
   // Run system functions 
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
-  // Preload any templates defined in mFirmwareCustom.h
   // Load the minimal default settings in modules (hard coded) before loading any stored user values
   pCONT->Tasker_Interface(FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES); // load the minimal
   // Load any stored user values into module

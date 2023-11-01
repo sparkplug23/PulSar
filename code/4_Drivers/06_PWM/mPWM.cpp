@@ -100,14 +100,14 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER23
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
       WebAppend_Root_Draw_Table();
     break; 
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break; 
-    #endif //USE_MODULE_NETWORK_WEBSERVER23
+    #endif //USE_MODULE_NETWORK_WEBSERVER
 
   }
 
@@ -486,7 +486,7 @@ void mPWM::MQTTHandler_Sender(uint8_t id)
  * WebServer
 *******************************************************************************************************************/
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 void mPWM::WebAppend_Root_Draw_Table(){
 
@@ -528,7 +528,7 @@ void mPWM::WebAppend_Root_Status_Table(){
 }
 
 
-#endif// USE_MODULE_NETWORK_WEBSERVER23
+#endif// USE_MODULE_NETWORK_WEBSERVER
 
 
 #endif
