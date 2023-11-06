@@ -390,7 +390,7 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
               pCONT_rules->rules[rule_index].command.json_commands_dlist_id, 
               pCONT_rules->jsonbuffer.data
             ); 
-            data_buffer.payload.len += strlen(data_buffer.payload.ctr);
+            data_buffer.payload.length_used += strlen(data_buffer.payload.ctr);
 
             ALOG_INF( PSTR("FUNC_JSON_COMMAND_ID mrules=%s"), data_buffer.payload.ctr );
     

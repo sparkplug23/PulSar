@@ -3540,7 +3540,7 @@ void mAnimatorLight::initServer_LightOnly()
   #endif
 
   pCONT_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-    // if (captivePortal(request)) return;
+    if (captivePortal(request)) return;
     bool showWelcomePage = false;
     if (!showWelcomePage || request->hasArg(F("sliders"))){
       this->serveIndex(request);

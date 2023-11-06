@@ -88,17 +88,23 @@ void JsonBuilder::Start(bool override_lock)
 
   // PRINT_FLUSHED("JsonBuilder::Start()");
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) {  
-    //PRINT_FLUSHED("JsonBuilder::return()");
+    // PRINT_FLUSHED("JsonBuilder::return()");
+    // Serial.println(writer.buffer == nullptr ? "writer.buffer == nullptr" : "writer.buffer_size != nullptr");
+    // Serial.println(writer.buffer_size);
     return;
   }  
   // PRINT_FLUSHED("memset::start()");
-  memset(writer.buffer,0,writer.buffer_size);
+  // memset(writer.buffer,0,writer.buffer_size);
   // PRINT_FLUSHED("memset::end()");
   // Serial.println(writer.buffer_size);
   // Serial.println(DATA_BUFFER_PAYLOAD_MAX_LENGTH); Serial.flush();
   writer.length = 0;
   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s","{");
-  // PRINT_FLUSHED("JsonBuilder::Start::end()");
+
+// Serial.println(writer.buffer);
+// Serial.println(writer.length);
+
+//   PRINT_FLUSHED("JsonBuilder::Start::end()");
 }
 
 // for speed
@@ -273,13 +279,16 @@ void JsonBuilder::Add_FV(const char* key, const char* formatP_value, ...) // FV 
   ){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
   // Write key
   // DEBUG_LINE_HERE;
-  writer.length += snprintf_P(&writer.buffer[writer.length],DATA_BUFFER_PAYLOAD_MAX_LENGTH,"\"%s\":",key);
+  // DEBUG_LINE_HERE_VALUE(writer.length);
+  // writer.length += snprintf_P(&writer.buffer[writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH, "\"%s\":", key);
+  writer.length += sprintf_P(&writer.buffer[writer.length], "\"%s\":", key);
   // Add value
   va_list arg;
   // DEBUG_LINE_HERE;
   va_start(arg, formatP_value);
   // DEBUG_LINE_HERE;
-  writer.length += vsnprintf_P(&writer.buffer[writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH-writer.length, formatP_value, arg);
+  writer.length += vsnprintf_P(&writer.buffer[writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH, formatP_value, arg);
+  // writer.length += vsprintf_P(&writer.buffer[writer.length], formatP_value, arg);
   
   // DEBUG_LINE_HERE;
   va_end(arg);

@@ -574,6 +574,11 @@ void JsonParser::parse(char* json_in) {
   _json = json_in;
   k_current_json_buffer = _json;
   size_t json_len = strlen(json_in);
+  
+  #ifdef ENABLE_DEBUG_JSON_LARGE_PARSING
+  Serial.printf("json_len=%d\n\r", json_len);
+  #endif 
+
   if (_size == 0) {
     // first run is used to count tokens before allocation
     jsmn_init(&this->_parser);
@@ -581,9 +586,18 @@ void JsonParser::parse(char* json_in) {
     if (_token_len <= 0) { return; }
     _size = _token_len + 1;
   }
+  DEBUG_JSON_LARGE_PARSING;
   allocate();
+  DEBUG_JSON_LARGE_PARSING;
   jsmn_init(&this->_parser);
+  DEBUG_JSON_LARGE_PARSING;
   _token_len = jsmn_parse(&this->_parser, json_in, json_len, _tokens, _size);
+  
+  #ifdef ENABLE_DEBUG_JSON_LARGE_PARSING
+  Serial.printf("_token_len=%d\n\r", _token_len);
+  #endif 
+
+
   // TODO error checking
   if (_token_len >= 0) {
     postProcess(json_len);

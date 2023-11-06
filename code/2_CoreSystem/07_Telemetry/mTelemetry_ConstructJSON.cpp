@@ -15,6 +15,8 @@
 uint8_t mTelemetry::ConstructJSON_LWT_Online(uint8_t json_level, bool json_appending)
 { 
 
+  
+
   JBI->Start();
     JBI->Add("LWT", "Online");
     JBI->Add("ResetReason", "TBA");
@@ -43,8 +45,11 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     // JBI->Object_End();
     // // test end
 
+    // DEBUG_LINE_HERE;
     JBI->Add(PM_JSON_TIME,           pCONT_time->RtcTime.hhmmss_ctr);
+    // DEBUG_LINE_HERE;
     JBI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    // DEBUG_LINE_HERE;
     JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JBI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime.sleep ? "Dynamic" : "Unknown");
     JBI->Add(PM_JSON_SLEEP,          pCONT_set->runtime.sleep); // typ. 20

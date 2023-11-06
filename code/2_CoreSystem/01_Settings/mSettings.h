@@ -44,17 +44,19 @@ typedef union
 struct DATA_BUFFER{
   struct TOPIC{
     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
-    uint8_t len = 0;
+    uint16_t length_used = 0;
+    uint16_t length_max = DATA_BUFFER_TOPIC_MAX_LENGTH;
   }topic;
   struct PAYLOAD{
     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
-    uint16_t len = 0;
+    uint16_t length_used = 0;
+    uint16_t length_max = DATA_BUFFER_PAYLOAD_MAX_LENGTH;
   }payload;
   uint16_t isserviced = 0; // Set to 0 on new mqtt
   DATA_BUFFER_FLAGS flags;
 };
 extern struct DATA_BUFFER data_buffer;
-#define D_DATA_BUFFER_CLEAR() memset(&data_buffer,0,sizeof(data_buffer))
+#define D_DATA_BUFFER_CLEAR() //memset(&data_buffer,0,sizeof(data_buffer))
 
 
 

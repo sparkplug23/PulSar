@@ -192,10 +192,10 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
 
   // Save MQTT data ASAP as it's data is discarded by PubSubClient with next publish as used in MQTTlog
   D_DATA_BUFFER_CLEAR();
-  data_buffer.topic.len = strlen(mqtt_topic)+1;
-  strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.len);
-  data_buffer.payload.len = data_len;
-  memcpy(data_buffer.payload.ctr, mqtt_data, sizeof(char)*data_buffer.payload.len);
+  data_buffer.topic.length_used = strlen(mqtt_topic)+1;
+  strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.length_used);
+  data_buffer.payload.length_used = data_len;
+  memcpy(data_buffer.payload.ctr, mqtt_data, sizeof(char)*data_buffer.payload.length_used);
 
   if(data_len){
     data_buffer.flags.waiting = true;
@@ -208,8 +208,8 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
       level = LOG_LEVEL_TEST;
       #endif
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
-      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
+      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.length_used,  data_buffer.topic.ctr);
+      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.length_used,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 

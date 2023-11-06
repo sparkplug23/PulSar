@@ -296,6 +296,10 @@ void mAnimatorLight::EveryLoop()
 
   if(!realtimeMode)
   {
+    
+    #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+    if (apActive) dnsServer.processNextRequest();
+    #endif 
 
     #ifdef ENABLE_ANIMATION_MODE__EFFECTS
     SubTask_Segments_Effects();
@@ -460,6 +464,9 @@ void mAnimatorLight::Init(void)
   finalizeInit();
   makeAutoSegments();
   #endif 
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
+  BusConfig_ManualLoad_16Pin();
+  #endif // ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
   
   // settings.light_size_count = STRIP_SIZE_MAX;
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag

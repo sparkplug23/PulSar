@@ -266,9 +266,11 @@ void setup(void)
  ********************************************************************************************/
  
   // Init Json builder with memory address and size
-  JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-  BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
+  JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
   
+
+  delay(3000);
   /**
    * @brief Start the Tasker_Interface module
    **/

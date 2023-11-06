@@ -110,13 +110,25 @@ void mInterfaceLight::Template_Load()
   // load from progmem into local
   D_DATA_BUFFER_CLEAR();
   memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+
+  ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
+  #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+  Serial.println(data_buffer.payload.ctr);
+  #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+
 
   // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
   #endif // USE_LIGHTING_TEMPLATE
+
+  #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+  Serial.println("Template_Load PAUSE");
+  delay(10000);
+  #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
 
 }
 
@@ -723,6 +735,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
       bus_count++;
     }
   }
+
   ALOG_INF(PSTR("getNumBusses %d"), bus_count);
 
   uint16_t start = 0;
@@ -730,6 +743,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   int8_t bus_type = BUSTYPE_NONE;
   COLOUR_ORDER_T ColourOrder = {COLOUR_ORDER_INIT_DISABLED};
   uint8_t pins[5] = {255}; // 255 is unset
+  
   
   if(jtok2 = obj["Pin"])
   {
@@ -754,19 +768,18 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     ALOG_INF(PSTR("pins %d,%d,%d,%d,%d"), pins[0], pins[1], pins[2], pins[3], pins[4]);  
   }
 
-  DEBUG_LINE_HERE;
 
   if(jtok = obj["Start"])
   {
     start = jtok.getInt();
     ALOG_INF(PSTR("start %d"), start);
   }
-
   if(jtok = obj["S"])
   {
     start = jtok.getInt();
     ALOG_INF(PSTR("start %d"), start);
   }
+
 
   if(jtok = obj["Length"])
   {
@@ -778,6 +791,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     length = jtok.getInt();
     ALOG_INF(PSTR("length %d"), length);
   }
+
 
   if(jtok = obj["BusType"])
   {
@@ -792,35 +806,14 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     }
     ALOG_INF(PSTR("bus_type %d"), bus_type);
   }
-  if(jtok = obj["BT"])
-  {
-    if(jtok.isInt())
-    {
-      bus_type = jtok.getInt();
-    }
-    else
-    if(jtok.isStr())
-    {
-      bus_type = Get_BusTypeID_FromName(jtok.getStr());
-    }
-    ALOG_INF(PSTR("bus_type %d"), bus_type);
-  }
+  
 
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER])
   {
     if(jtok.isStr())
     {
       ColourOrder = GetColourOrder_FromName(jtok.getStr());
-    }    
-    /**
-     * @brief Possible breaking change, or maybe a fix. Right now just use the length of rgbcct colour to set the colourtype, but later parse the values to set the exact type (rgbw,ww/wc, white only etc)
-     * 
-     */
-    // uint8_t colour_byte_length = strlen(jtok.getStr());
-    // if(colour_byte_length == 3)
-    // {
-//cant do, no segment index as its bus related, needs to happen elsewhere
-    // }
+    }
   }
   if(jtok = obj["CO"])
   {
@@ -830,7 +823,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     }
   }
 
-  DEBUG_LINE_HERE;
+
   uint8_t bus_index = bus_count; // next bus space 
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
 
@@ -841,8 +834,6 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     start,
     length,
     ColourOrder.data
-  
-  
   );
 
 
@@ -861,8 +852,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   DEBUG_LINE_HERE;
   pCONT_lAni->doInitBusses = true; // adds checks
 
-  
-    ALOG_DBG( PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
+  ALOG_DBG( PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
   DEBUG_LINE_HERE;
 
 }
@@ -979,23 +969,26 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   { 
     if(jtok.isArray())
     {      
+  ALOG_INF(PSTR("buffer_writerA ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
       ALOG_INF(PSTR("BusConfig **************  \t%d"), jtok.getType());
       JsonParserArray arrobj = jtok;      
       for(auto value : arrobj) 
       {
+  ALOG_INF(PSTR("buffer_writerB ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
         parseJSONObject__BusConfig(value.getObject());
+  ALOG_INF(PSTR("buffer_writerC ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
       }
     }
   }else{
-    ALOG_HGL(PSTR("BusConfig MISSING"));//, jtok.getType());
+    ALOG_INF(PSTR("BusConfig MISSING"));//, jtok.getType());
     #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     if(jtok = obj["Segment0"])
     {
-      ALOG_HGL(PSTR("Segment0 YES"));
+      ALOG_INF(PSTR("Segment0 YES"));
     }else{
-      ALOG_HGL(PSTR("Segment0 MISSING"));
+      ALOG_INF(PSTR("Segment0 MISSING"));
     }
-    delay(5000);
+    // delay(5000);
     #endif
   }
 
@@ -1263,14 +1256,14 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
       JBI->Add("s", bus_manager->busses[bus_i]->_start);
       JBI->Add("l", bus_manager->busses[bus_i]->_len);
 
-  //     COLOUR_ORDER_T colour_order = bus_manager->busses[bus_i]->getColorOrder();
-  //     JBI->Array_Start("ColourOrder");
-  //       JBI->Add(colour_order.red);
-  //       JBI->Add(colour_order.green);
-  //       JBI->Add(colour_order.blue);
-  //       JBI->Add(colour_order.white_cold);
-  //       JBI->Add(colour_order.white_warm);
-  //     JBI->Array_End();
+      COLOUR_ORDER_T colour_order = bus_manager->busses[bus_i]->getColorOrder();
+      JBI->Array_Start("CO");
+        JBI->Add(colour_order.red);
+        JBI->Add(colour_order.green);
+        // JBI->Add(colour_order.blue);
+        // JBI->Add(colour_order.white_cold);
+        // JBI->Add(colour_order.white_warm);
+      JBI->Array_End();
 
       JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
 

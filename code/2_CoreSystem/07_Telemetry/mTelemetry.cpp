@@ -370,7 +370,10 @@ void mTelemetry::MQTTHandler_Set_DefaultPeriodRate()
  * */
 void mTelemetry::MQTTHandler_Sender(uint8_t id)
 {
+
+
   for(auto& handle:mqtthandler_list){
+    // DEBUG_LINE_HERE;
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_TELEMETRY_ID, handle, id);
   }
 }

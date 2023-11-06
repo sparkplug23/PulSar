@@ -1365,50 +1365,6 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 //         handleConfig(request);
 //       });
 
-//   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-//     // if (captivePortal(request)) return;
-//     // if (!showWelcomePage || request->hasArg(F("sliders"))){
-//       serveIndex(request);
-//     // } else {
-//     //   serveSettings(request);
-//     // }
-//   });
-
-// //       AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-    
-// // DEBUG_LINE_HERE;
-// //       request->send(response);
-// //   });
-
-//     // server.onNotFound(notFound);
-// DEBUG_LINE_HERE;
-//     //called when the url is not defined here, ajax-in; get-settings
-//     server.onNotFound([](AsyncWebServerRequest *request){
-//       DEBUG_PRINTLN("Not-Found HTTP call:");
-//       DEBUG_PRINTLN("URI: " + request->url());
-//       // if (captivePortal(request)) return;
-
-//       //make API CORS compatible
-//       if (request->method() == HTTP_OPTIONS)
-//       {
-//         AsyncWebServerResponse *response = request->beginResponse(200);
-//         response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-//         request->send(response);
-//         return;
-//       }
-
-//       // if(handleSet(request, request->url())) return;
-//       // #ifndef WLED_DISABLE_ALEXA
-//       // if(espalexa.handleAlexaApiCall(request)) return;
-//       // #endif
-//       // if(handleFileRead(request, request->url())) return;
-//       AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-//       response->addHeader(FPSTR(s_content_enc),"gzip");
-//       setStaticContentCacheHeaders(response);
-// DEBUG_LINE_HERE;
-//       request->send(response);
-//     });
-
 
 
   break;
@@ -1742,33 +1698,9 @@ void mWebServer::initServer()
   // pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);/
   pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
 
-  // //called when the url is not defined here, ajax-in; get-settings
-  // pCONT_web->server->onNotFound([this](AsyncWebServerRequest *request){
-  //    DEBUG_PRINTLN("Not-Found HTTP call:");
-  //   DEBUG_PRINTLN("URI: " + request->url());
-  //   if (this->captivePortal(request)) return;
 
-  //   //make API CORS compatible
-  //   if (request->method() == HTTP_OPTIONS)
-  //   {
-  //     AsyncWebServerResponse *response = request->beginResponse(200);
-  //     response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-  //     request->send(response);
-  //     return;
-  //   }
 
-  //   DEBUG_LINE_HERE;
 
-  //   // if(handleSet(request, request->url())) return;
-  //   // #ifndef WLED_DISABLE_ALEXA
-  //   // if(espalexa.handleAlexaApiCall(request)) return;
-  //   // #endif
-  //   if(handleFileRead(request, request->url())) return;
-  //   AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-  //   response->addHeader(FPSTR(s_content_enc),"gzip");
-  //   this->setStaticContentCacheHeaders(response);
-  //   request->send(response);
-  // });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -129,18 +129,20 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
   for (; parser->pos < len && js[parser->pos] != '\0'; parser->pos++) {
     char c = js[parser->pos];
 
-    #ifdef USE_DEBUG_JSMN
-    Serial.printf("%02d %c\n\r",parser->pos,js[parser->pos]);
-    #endif // USE_DEBUG_JSMN
+    // #ifdef USE_DEBUG_JSMN
+    // Serial.printf("%02d %c\n\r",parser->pos,js[parser->pos]);
+    // #endif // USE_DEBUG_JSMN
 
     /* Quote: end of string */
 
 
     // this will not allow a single quote of any kind mid string, as it will match and assume end
     if (c == '\"') {
-    #ifdef USE_DEBUG_JSMN
-      Serial.println("Quote: end of string");
-    #endif // USE_DEBUG_JSMN
+
+      #ifdef USE_DEBUG_JSMN
+      Serial.println("JSMN: string token");
+      #endif // USE_DEBUG_JSMN
+
       if (tokens == NULL) {
         return 0;
       }
@@ -205,13 +207,13 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
       }
     }
     
-    #ifdef USE_DEBUG_JSMN
-  Serial.printf("parser->pos%d = start%d\n\r", parser->pos,start);
-    #endif // USE_DEBUG_JSMN
+  //   #ifdef USE_DEBUG_JSMN
+  // Serial.printf("parser->pos%d = start%d\n\r", parser->pos,start);
+    // #endif // USE_DEBUG_JSMN
   }
-    #ifdef USE_DEBUG_JSMN
-  Serial.printf("parser->pos%d = start%d", parser->pos,start);
-    #endif// USE_DEBUG_JSMN
+  //   #ifdef USE_DEBUG_JSMN
+  // Serial.printf("parser->pos%d = start%d", parser->pos,start);
+  //   #endif// USE_DEBUG_JSMN
   parser->pos = start;
   return JSMN_ERROR_PART;
 }
@@ -286,14 +288,19 @@ JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
       }
       break;
     case '\"':
+      DEBUG_JSON_LARGE_PARSING;
       r = jsmn_parse_string(parser, js, len, tokens, num_tokens);
+      DEBUG_JSON_LARGE_PARSING;
       if (r < 0) {
         return r;
       }
+      DEBUG_JSON_LARGE_PARSING;
       count++;
       if (parser->toksuper != -1 && tokens != NULL) {
+      DEBUG_JSON_LARGE_PARSING;
         tokens[parser->toksuper].size++;
       }
+      DEBUG_JSON_LARGE_PARSING;
       break;
     case '\t':
     case '\r':
@@ -349,7 +356,11 @@ JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
     /* In non-strict mode every unquoted value is a primitive */
     default:
 #endif
+
+      DEBUG_JSON_LARGE_PARSING;
       r = jsmn_parse_primitive(parser, js, len, tokens, num_tokens);
+
+      DEBUG_JSON_LARGE_PARSING;
       if (r < 0) {
         return r;
       }
@@ -376,7 +387,8 @@ JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
     }
   }
 
-  Serial.printf("count=%d\n\r",count);
+  // Serial.printf("count=%d\n\r",count);
+      DEBUG_JSON_LARGE_PARSING;
 
   return count;
 }
@@ -433,9 +445,9 @@ void json_unescape(char* string) {
 		if ('\\' == c) {
 			c = string[++i];
       
-    #ifdef USE_DEBUG_JSMN
-  Serial.printf("outlength=%d\t c=%c\n\r", outlength,c);
-    #endif// USE_DEBUG_JSMN
+  //   #ifdef USE_DEBUG_JSMN
+  // Serial.printf("outlength=%d\t c=%c\n\r", outlength,c);
+  //   #endif// USE_DEBUG_JSMN
 			switch (c) {
         case 0:
     #ifdef USE_DEBUG_JSMN
@@ -497,17 +509,21 @@ void json_unescape(char* string) {
 		}
 		else {
 			string[outlength++] = c;
-    #ifdef USE_DEBUG_JSMN
-      Serial.printf("outlength=%d\t c=%c %s\n\r", outlength,c,string);
-    #endif// USE_DEBUG_JSMN
 		}
 	}
 
 //add null
 
   #ifdef USE_DEBUG_JSMN
-  Serial.printf("outlength=%d\t strlen=%d\n\r", outlength,strlen(string));
+  Serial.printf("outlength=%d\t strlen=%d\n\r", outlength, strlen(string));
   #endif// USE_DEBUG_JSMN
+
+  if(string != nullptr)
+  {
+    #ifdef USE_DEBUG_JSMN
+      Serial.printf("outlength=%d\t %s\n\r", outlength, string);
+    #endif// USE_DEBUG_JSMN
+  }
   
   if(outlength!=strlen(string)){
     #ifdef USE_DEBUG_JSMN

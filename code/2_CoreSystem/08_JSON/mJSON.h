@@ -260,8 +260,12 @@ class JsonBuilder{
     {
 
       if((writer.buffer == nullptr)||(writer.buffer_size == 0))
+      {
+
+        Serial.println("ERROR: JsonBuilder::Add() buffer not valid");
         return;
-      
+      }
+
       if(
         (writer.length>1)&&
         (writer.buffer[writer.length-1]!='{')&&
@@ -307,7 +311,7 @@ class JsonBuilder{
          **/
         // if(writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
         // {
-        //   //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
+          // DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
         // }
 
       }
@@ -362,6 +366,8 @@ class JsonBuilder{
   }
 
   // DEBUG_PRINTF("TEST TIME = %s\n\r",writer.buffer[0]);
+  
+          // DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
 
 }
 

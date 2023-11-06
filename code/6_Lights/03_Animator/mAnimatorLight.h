@@ -91,6 +91,8 @@
   #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
 
+#include <DNSServer.h>
+
 #include "math.h"
 #include "fastmath.h"
 
@@ -254,6 +256,7 @@ class mAnimatorLight :
     }settings;
 
     void TestCode_AddBus1();
+    void TestCode_Add16ParallelBus1();
 
     bool doInitBusses = false; // debug
 
@@ -3355,6 +3358,12 @@ typedef enum mapping1D2D {
   #endif
 #endif
 
+
+#ifdef ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
+void BusConfig_ManualLoad_16Pin();
+#endif // ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
+
+
 // Timer mode types
 #define NL_MODE_SET               0            //After nightlight time elapsed, set to target brightness
 #define NL_MODE_FADE              1            //Fade to target brightness gradually
@@ -3663,6 +3672,12 @@ bool showWelcomePage _INIT(false);
 byte presetCycCurr _INIT(0);
 byte presetCycMin _INIT(1);
 byte presetCycMax _INIT(5);
+
+#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+// dns server
+DNSServer dnsServer;
+#endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
 
 //realtime override modes
 #define REALTIME_OVERRIDE_NONE    0

@@ -17,7 +17,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   if(function == FUNC_JSON_COMMAND_ID)
   { 
     
+  ALOG_INF(PSTR("buffer_writer p1 ------------------------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
+  delay(1000);
     JsonParser parser(data_buffer.payload.ctr);
+  ALOG_INF(PSTR("buffer_writer p2 ------------------------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
     
     // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
     obj = parser.getRootObject();   
@@ -32,7 +35,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       {
         ALOG_HGL(PSTR("Segment0 YES"));
       }else{
-        ALOG_HGL(PSTR("Segment0 MISSING"));
+        ALOG_HGL(PSTR("Segment0 MISSING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
       }
 
     }
@@ -93,6 +96,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t start_millis = millis();
+    
+  ALOG_INF(PSTR("buffer_writer START ------------------------------- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif
     
     pModule[switch_index]->Tasker(function, obj);    
@@ -110,6 +115,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     #endif 
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
+    
+  ALOG_INF(PSTR("buffer_writerT ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIE_%d FUNC time %dms"), millis(), millis()-start_millis);
     #endif
     #if defined(ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS)

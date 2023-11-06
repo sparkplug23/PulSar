@@ -1061,9 +1061,66 @@ void mWiFi::WifiConnect(void)
   connection.retry = connection.retry_init;
   connection.counter = 1;
 
+
+#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+// dns server
+DNSServer dnsServer;
+#endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+
+
+
+
+
+
 //   memcpy((void*) &Wifi.bssid, (void*) Settings.wifi_bssid, sizeof(Wifi.bssid));
   
 }
+
+#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+void mWiFi::initAP(bool resetAP)
+{
+  if (apBehavior == AP_BEHAVIOR_BUTTON_ONLY && !resetAP)
+    return;
+
+  if (resetAP) {
+    WLED_SET_AP_SSID();
+    strcpy_P(apPass, PSTR(WLED_AP_PASS));
+  }
+  DEBUG_PRINT(F("Opening access point "));
+  DEBUG_PRINTLN(apSSID);
+  WiFi.softAPConfig(IPAddress(4, 3, 2, 1), IPAddress(4, 3, 2, 1), IPAddress(255, 255, 255, 0));
+  WiFi.softAP(apSSID, apPass, apChannel, apHide);
+  #if defined(LOLIN_WIFI_FIX) && (defined(ARDUINO_ARCH_ESP32C3) || defined(ARDUINO_ARCH_ESP32S2))
+  WiFi.setTxPower(WIFI_POWER_8_5dBm);
+  #endif
+
+  if (!apActive) // start captive portal if AP active
+  {
+    DEBUG_PRINTLN(F("Init AP interfaces"));
+    server.begin();
+    if (udpPort > 0 && udpPort != ntpLocalPort) {
+      udpConnected = notifierUdp.begin(udpPort);
+    }
+    if (udpRgbPort > 0 && udpRgbPort != ntpLocalPort && udpRgbPort != udpPort) {
+      udpRgbConnected = rgbUdp.begin(udpRgbPort);
+    }
+    if (udpPort2 > 0 && udpPort2 != ntpLocalPort && udpPort2 != udpPort && udpPort2 != udpRgbPort) {
+      udp2Connected = notifier2Udp.begin(udpPort2);
+    }
+    e131.begin(false, e131Port, e131Universe, E131_MAX_UNIVERSE_COUNT);
+    ddp.begin(false, DDP_DEFAULT_PORT);
+
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(53, "*", WiFi.softAPIP());
+  }
+  apActive = true;
+}
+
+#endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+
 
 
 void mWiFi::WifiShutdown(bool option)

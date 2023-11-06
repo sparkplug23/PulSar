@@ -36,8 +36,8 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
       timerAlarmEnable(timerwdt);                          //enable interrupt
     }
     void WDT_Reset(){
-    // DEBUG_LINE_HERE;
-    if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
+      // DEBUG_LINE_HERE;
+      if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
       timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
       // Serial.println("WDT_Reset");
     }
@@ -1385,11 +1385,11 @@ void mSupport::MQTTCommand_Add(const char* topic, const char* payload){; // Writ
   // Clear mqtt packet with expectation to execute
   memset(&data_buffer.payload,0,sizeof(data_buffer.payload));
 
-  data_buffer.topic.len = strlen(topic);
-  data_buffer.payload.len = strlen(payload);
+  data_buffer.topic.length_used = strlen(topic);
+  data_buffer.payload.length_used = strlen(payload);
 
-  memcpy(&data_buffer.topic.ctr,topic,data_buffer.topic.len);
-  memcpy(&data_buffer.payload.ctr,payload,data_buffer.payload.len);
+  memcpy(&data_buffer.topic.ctr,topic,data_buffer.topic.length_used);
+  memcpy(&data_buffer.payload.ctr,payload,data_buffer.payload.length_used);
         
 }
 

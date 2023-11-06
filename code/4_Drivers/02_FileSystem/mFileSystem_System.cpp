@@ -127,9 +127,9 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
   file.read(buffer_p, file.available());
   file.close();
   
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
@@ -215,9 +215,9 @@ void mFileSystem::JsonFile_Load__Stored_Secure()
   file.read(buffer_p, file.available());
   file.close();
   
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-  ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 

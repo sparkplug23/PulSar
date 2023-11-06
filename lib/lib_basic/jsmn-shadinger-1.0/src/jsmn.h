@@ -36,6 +36,18 @@
 
 // #define USE_DEBUG_JSMN
 
+
+#if defined(USE_DEBUG_JSMN)
+  #define SERIAL_DEBUG Serial
+  #define DEBUG_JSON_LARGE_PARSING     SERIAL_DEBUG.printf("DEBUG_JSON_LARGE_PARSING HERE: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_JSON_LARGE_PARSING   //nothing, no code
+#endif
+
+
 /**
  * JSON type identifier. Basic types are:
  * 	o Object
@@ -78,8 +90,14 @@ enum jsmnerr {
 // size of bitfield, sum is 32
 #define JSMN_TYPE_B    4
 #define JSMN_SIZE_B    6    // max 63 items per level (ex: max 63 keys per object)
-#define JSMN_START_B  11    // max 2KB input buffer
-#define JSMN_LEN_B    11    // max 2KB per item
+
+/// Original
+// #define JSMN_START_B  11    // max 2KB input buffer
+// #define JSMN_LEN_B    11    // max 2KB per item
+
+/// TESTING for larger memory, 12 bits??
+#define JSMN_START_B  12    // max 2KB input buffer
+#define JSMN_LEN_B    12    // max 2KB per item
 
 typedef struct jsmntok {
   jsmntype_t type : JSMN_TYPE_B;

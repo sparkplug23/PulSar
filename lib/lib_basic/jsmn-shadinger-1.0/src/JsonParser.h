@@ -34,6 +34,24 @@
 
 // #define ENABLE_DEVFEATURE_JSONPAIR
 
+
+// #define ENABLE_DEBUG_JSON_LARGE_PARSING
+
+//////////////////////////
+
+
+
+#if defined(ENABLE_DEBUG_JSON_LARGE_PARSING)
+  #define SERIAL_DEBUG Serial
+  #define DEBUG_JSON_LARGE_PARSING     SERIAL_DEBUG.printf("DEBUG_JSON_LARGE_PARSING HERE: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_JSON_LARGE_PARSING   //nothing, no code
+#endif
+
+
 /*********************************************************************************************\
  * Utilities
 \*********************************************************************************************/
