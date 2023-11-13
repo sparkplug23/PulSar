@@ -259,10 +259,16 @@ class JsonBuilder{
     void Add(const char* key, T value)
     {
 
-      if((writer.buffer == nullptr)||(writer.buffer_size == 0))
+      if((writer.buffer == nullptr))
       {
 
-        Serial.println("ERROR: JsonBuilder::Add() buffer not valid");
+        Serial.println("ERROR: JsonBuilder::Add() buffer nullptr not valid");
+        return;
+      }
+      if((writer.buffer_size == 0))
+      {
+
+        Serial.println("ERROR: JsonBuilder::Add() buffer size zero not valid");
         return;
       }
 

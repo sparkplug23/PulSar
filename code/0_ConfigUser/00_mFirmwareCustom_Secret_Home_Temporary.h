@@ -3050,7 +3050,7 @@
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
-#endif // DEVICE_CHRISTMAS__OUTSIDE_TREE_I2S_PARALLEL_8_CHANNELS_MODE
+#endif // DEVICE_CHRISTMAS__OUTSIDE_TREE__8_CHANNELS
 
 
 

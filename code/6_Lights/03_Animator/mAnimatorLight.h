@@ -158,12 +158,18 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
  **/
 #include "6_Lights/03_Animator/EffectNames/progmem.h"
 
-#define ARDUINOJSON_DECODE_UNICODE 0
-#include "3_Network/21_WebServer/AsyncJson-v6.h"
-#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+  #define ARDUINOJSON_DECODE_UNICODE 0
+
+  #include "3_Network/21_WebServer/ArduinoJson-v6.h"
+
+#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
 
 #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-// #include "6_Lights/03_Animator/mWebUI_Headers.h" // Not inside the class
+
+#include "3_Network/21_WebServer/AsyncJson-v6.h"
 
 #include "webpages_generated/html_ui.h"
 #ifdef WLED_ENABLE_SIMPLE_UI
@@ -933,7 +939,9 @@ bool handleFileRead(AsyncWebServerRequest* request, String path);
 
 #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
+#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 StaticJsonDocument<JSON_BUFFER_SIZE> doc;
+#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -970,8 +978,12 @@ bool applyPreset(byte index, byte callMode = CALL_MODE_DIRECT_CHANGE);
 void applyPresetWithFallback(uint8_t presetID, uint8_t callMode, uint8_t effectID = 0, uint8_t paletteID = 0);
 void handlePresets();
 inline bool applyTemporaryPreset() {return applyPreset(255);};
+
+#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 void savePreset(byte index, const char* pname = nullptr, JsonObject saveobj = JsonObject());
 inline void saveTemporaryPreset() {savePreset(255);};
+#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
 void deletePreset(byte index);
 #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
@@ -3094,6 +3106,8 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
 
 
+#endif
+
 
 void serializeNetworks(JsonObject root);
 
@@ -3177,13 +3191,20 @@ void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only = true);
 bool requestJSONBufferLock(uint8_t module);
 void releaseJSONBufferLock();
 
+    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
-
-void setPaletteColors(JsonArray json, CRGBPalette16 palette);
-
 bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 
 void serveJson(AsyncWebServerRequest* request);
+
+bool  captivePortal(AsyncWebServerRequest *request);
+void  notFound(AsyncWebServerRequest *request);
+
+
+#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+void setPaletteColors(JsonArray json, CRGBPalette16 palette);
+
 bool deserializeSegment(JsonObject elem, byte it, byte presetId = 0);
 
 void parseNumber(const char* str, byte* val, byte minv=0, byte maxv=255);
@@ -3194,9 +3215,6 @@ bool deserializeState(JsonObject root, byte callMode = CALL_MODE_DIRECT_CHANGE, 
 
 bool isIp(String str);
 
-
-bool  captivePortal(AsyncWebServerRequest *request);
-void  notFound(AsyncWebServerRequest *request);
 
 
 void initServer();
@@ -3691,8 +3709,6 @@ unsigned long realtimeTimeout _INIT(0);
 uint8_t tpmPacketCount _INIT(0);
 uint16_t tpmPayloadFrameSize _INIT(0);
 bool useMainSegmentOnly _INIT(false);
-
-#endif
 
 
 

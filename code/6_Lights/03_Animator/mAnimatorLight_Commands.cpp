@@ -12,18 +12,12 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   char buffer[50];
   uint16_t isserviced_start_count = data_buffer.isserviced;
 
-
-  DEBUG_LINE_HERE;
   if(isserviced_start_count != data_buffer.isserviced) //ie something was parsed inside this function
   {
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
   }
-  DEBUG_LINE_HERE;
-
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-
-
 
   if(jtok = obj["ListDir"]){
 
@@ -38,14 +32,8 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     
   }
 
-
-
-
-
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
-
-  DEBUG_LINE_HERE;
 
 
 
@@ -59,7 +47,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     { 
 
       ALOG_INF(PSTR("Seg: \"%s\" with %d Slots Active"), buffer, pCONT_lAni->segments.size());
-DEBUG_LINE_HERE;
+
       /**
        * @brief Add check here that only sets the segment if it is already permitted
        * 
@@ -70,45 +58,30 @@ DEBUG_LINE_HERE;
       // if(segment_i > pCONT_lAni->segments.size()-1)
       if(segment_i >= pCONT_lAni->segments.size())
       { 
-DEBUG_LINE_HERE;
         ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
         // Segment_AppendNew(0, 0, segment_i+1);
         Segment_AppendNew(0, 100, segment_i); // STRIP_SIZE_MAX
         ALOG_HGL(PSTR("size check Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
       }
-DEBUG_LINE_HERE;
-
+      
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
 
-DEBUG_LINE_HERE;
       segments_found++;
 
-DEBUG_LINE_HERE;
-
-DEBUG_LINE_HERE;
     }
   }
 
-
-DEBUG_LINE_HERE;
   /**
    * @brief If no segments have been directly set, then assume default of Segment0
    **/
   if(segments_found == 0)
   {
-DEBUG_LINE_HERE;
     data_buffer.isserviced += subparse_JSONCommand(obj); // Legacy commands
   }
 
-DEBUG_LINE_HERE;
   ALOG_DBM(PSTR(D_LOG_LIGHT D_TOPIC "mAnimatorLight::parse_JSONCommand::End"));
 
 }
-
-
-
-
-
 
 
 void mAnimatorLight::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
@@ -194,14 +167,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   int16_t tmp_id = 0;
   char buffer[50];
 
-DEBUG_LINE_HERE;
+
   /**
    * @brief Critical this is always parsed first, as many other commands rely on this value
    **/
   if(segment_index == 255)
   {
     ALOG_COM( PSTR("Segment Index assumed \"0\"") );
-DEBUG_LINE_HERE;
+
     segment_index = 0;
 
     // purgeSegments(true); // reduce to single segment
@@ -216,11 +189,11 @@ DEBUG_LINE_HERE;
   if(!pCONT_lAni->segments.size())
   {
     ALOG_ERR(PSTR("Segment Index %d exceeds max %d"), segment_index, pCONT_lAni->segments.size());
-    DEBUG_LINE_HERE;
+    
     return 0;
   }
 
-  DEBUG_LINE_HERE;
+  
   
   /**
    * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
@@ -251,7 +224,7 @@ DEBUG_LINE_HERE;
     ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(SEGMENT_I(segment_index).palette.id, buffer, sizeof(buffer)) );
   }
 
-  DEBUG_LINE_HERE;
+  
 
   if(jtok = obj[D_JSON_PIXELRANGE])
   { 
@@ -274,7 +247,7 @@ DEBUG_LINE_HERE;
     }
   }
 
-  DEBUG_LINE_HERE;
+  
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_FUNCTION])
   { // Might move to "Mode" instead of function later
@@ -294,7 +267,7 @@ DEBUG_LINE_HERE;
     ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
   }
   
-  DEBUG_LINE_HERE;
+  
 
   // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_COLOUR_REFRESH_RATE])
   // { 
@@ -346,14 +319,17 @@ DEBUG_LINE_HERE;
   }
 
 
+  
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Decimate"])
   { 
+    
     ALOG_INF( PSTR("Decimate %d %d"), jtok.getInt(), segment_index );
     SEGMENT_I(segment_index).decimate = jtok.getInt();  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+  
 
 
 
@@ -368,7 +344,7 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  DEBUG_LINE_HERE;
+  
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Opacity"])
   { 
@@ -543,7 +519,7 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  DEBUG_LINE_HERE;
+  
   if(jtok = obj["PixelRange"]){ 
     if(jtok.isArray()){
       uint8_t array[2];
@@ -554,13 +530,13 @@ DEBUG_LINE_HERE;
 
         
 
-  DEBUG_LINE_HERE;
+  
         switch(arrlen)
         {
           case 0:SEGMENT_I(segment_index).pixel_range.start = v.getInt(); break;
           case 1:SEGMENT_I(segment_index).pixel_range.stop  = v.getInt(); break;
         }
-  DEBUG_LINE_HERE;
+  
 
         array[arrlen++] = v.getInt();
         #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -599,7 +575,7 @@ DEBUG_LINE_HERE;
 
    
 
-  DEBUG_LINE_HERE;
+  
   
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
@@ -656,7 +632,7 @@ DEBUG_LINE_HERE;
 
 
   }
-  DEBUG_LINE_HERE;
+  
 
 
   if(jtok = obj["Override"].getObject()["Animation"].getObject()["TimeMs"])
@@ -667,7 +643,7 @@ DEBUG_LINE_HERE;
   }
 
 
-  DEBUG_LINE_HERE;
+  
   if(jtok = obj["Override"].getObject()["Animation_Off"].getObject()["TimeMs"])
   {
   
@@ -676,7 +652,7 @@ DEBUG_LINE_HERE;
 
   }
 
-  DEBUG_LINE_HERE;
+  
   
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000, segment_index);
@@ -692,7 +668,7 @@ DEBUG_LINE_HERE;
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)), SEGMENT_I(segment_index).transition.time_ms);  
     #endif
   }
-  DEBUG_LINE_HERE;
+  
   
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000, segment_index);
@@ -718,7 +694,7 @@ DEBUG_LINE_HERE;
  * 
  */
   
-  DEBUG_LINE_HERE;
+  
   if(jtok = obj[PM_JSON_COLOUR_TYPE])
   {
     // if(jtok.isStr()){
@@ -734,7 +710,7 @@ DEBUG_LINE_HERE;
     // ALOG_COM(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer))); // should be internal to rgbcct
   }
 
-  DEBUG_LINE_HERE;
+  
   /**
    * @brief Segment colours
    * 
@@ -754,7 +730,7 @@ DEBUG_LINE_HERE;
 
 
   
-  DEBUG_LINE_HERE;
+  
     if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
       SEGMENT_I(segment_index).setBrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255));
       // CommandSet_SegColour_RgbcctColour_BrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
@@ -769,7 +745,7 @@ DEBUG_LINE_HERE;
     }
   
   
-  DEBUG_LINE_HERE;
+  
       if(jtok = obj["TimeOnSecs"]){ // Assume range 0-359
 
         SEGMENT_I(segment_index).auto_timeoff.Start(jtok.getInt());
@@ -795,7 +771,7 @@ DEBUG_LINE_HERE;
 
 
 
-  DEBUG_LINE_HERE;
+  
   /**
    * @brief RgbcctColours
    * 

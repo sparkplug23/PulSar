@@ -40,9 +40,6 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
       // Settings_Save();
     break;
-    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-      // Settings_Default();
-    break;
     case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
       // Settings_Default();
       // pCONT_set->SettingsSave(2);

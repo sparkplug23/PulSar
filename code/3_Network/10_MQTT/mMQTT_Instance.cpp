@@ -188,14 +188,25 @@ void MQTTConnection::MqttDisconnected(int state)
 void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
 
   // Do not allow more data than would be feasable within stack space
-  if (data_len >= MQTT_MAX_PACKET_SIZE) { return; }
+  if (data_len >= DATA_BUFFER_PAYLOAD_MAX_LENGTH) 
+  {  
+    ALOG_INF(PSTR("MqttDataHandler"));
+    return;
+  }
 
   // Save MQTT data ASAP as it's data is discarded by PubSubClient with next publish as used in MQTTlog
   D_DATA_BUFFER_CLEAR();
-  data_buffer.topic.length_used = strlen(mqtt_topic)+1;
+  // memset(data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr));
+  // memset(data_buffer.payload.ctr,0,sizeof(data_buffer.payload.ctr));
+
+
+  data_buffer.topic.length_used = strlen(mqtt_topic);
   strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.length_used);
+  data_buffer.topic.ctr[data_buffer.topic.length_used] = '\0'; // null terminate
+
   data_buffer.payload.length_used = data_len;
   memcpy(data_buffer.payload.ctr, mqtt_data, sizeof(char)*data_buffer.payload.length_used);
+  data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
 
   if(data_len){
     data_buffer.flags.waiting = true;

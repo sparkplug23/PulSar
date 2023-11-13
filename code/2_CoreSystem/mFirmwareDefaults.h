@@ -236,7 +236,6 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #endif // USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
 
 
-
 #ifdef USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_RGBCCT_PWM_H801
 
   #define USE_SERIAL_ALTERNATE_TX
@@ -483,6 +482,20 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #endif // ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
 
+
+/**
+ * @brief This needs to be at the end to undef above
+ * 
+ */
+#ifdef ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING
+
+#undef USE_MODULE_NETWORK_WEBSERVER
+#undef USE_MODULE_NETWORK_WIFI
+#undef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#define DISABLE_NETWORK
+
+
+#endif // ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING
 
 
 

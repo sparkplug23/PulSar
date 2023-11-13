@@ -4,6 +4,10 @@
 
 #pragma once
 
+
+#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+
 #ifdef __cplusplus
 
 #if __cplusplus >= 201103L
@@ -7337,3 +7341,6 @@ using namespace ArduinoJson;
 #error ArduinoJson requires a C++ compiler, please change file extension to .cc or .cpp
 
 #endif
+
+
+#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6

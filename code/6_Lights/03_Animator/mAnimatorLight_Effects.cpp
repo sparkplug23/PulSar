@@ -7070,6 +7070,8 @@ static const char PM_EFFECT_CONFIG__EXPLODING_FIREWORKS[] PROGMEM = "Gravity,Fir
  *******************************************************************************************************************************************************************************************************************
  * @name : Exploding fireworks effect
  * @note : Converted from WLED Effects
+ * 
+ * Needs edited so the "launch" portion is properly skipped (ie no time with no pixels on)
  *
  * Exploding fireworks effect
  * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
@@ -7106,7 +7108,8 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
   float gravity = -0.0004 - (SEGMENT.speed()/800000.0); // m/s/s
   gravity *= SEGLEN;
   
-  if (SEGMENT.params_internal.aux0 < 2) { //FLARE
+  if (SEGMENT.params_internal.aux0 < 2) 
+  { //FLARE
 
     // if (SEGMENT.params_internal.aux0 == 0) { //init flare
       flare->pos = 0;
@@ -7140,7 +7143,15 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
       SEGMENT.params_internal.aux0 = 2;  // ready to explode
     // }
 
-  } else if (SEGMENT.params_internal.aux0 < 4) {
+  }
+  
+  
+  // else // REMOVING ELSE SO THE FLARE TO EXPLODE IS THE SAME FRAME
+  
+  
+  
+  if (SEGMENT.params_internal.aux0 < 4) 
+  {
     /*
      * Explode!
      * 
@@ -7193,7 +7204,9 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
     } else {
       SEGMENT.params_internal.aux0 = 6 + random8(10); //wait for this many frames
     }
-  } else {
+  } 
+  else 
+  {
     SEGMENT.params_internal.aux0--;
     if (SEGMENT.params_internal.aux0 < 4) {
       SEGMENT.params_internal.aux0 = 0; //back to flare

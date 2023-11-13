@@ -36,7 +36,8 @@ typedef union
     // Waiting
     uint16_t waiting : 1;
     // Encoding format
-    uint8_t encoded_type_id; //json,raw
+    uint16_t encoded_type_id : 1; //json,raw
+    uint16_t reserved : 10;
   };
 } DATA_BUFFER_FLAGS;
 
@@ -45,18 +46,29 @@ struct DATA_BUFFER{
   struct TOPIC{
     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
     uint16_t length_used = 0;
-    uint16_t length_max = DATA_BUFFER_TOPIC_MAX_LENGTH;
+    // uint16_t length_max = DATA_BUFFER_TOPIC_MAX_LENGTH;
   }topic;
   struct PAYLOAD{
     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
     uint16_t length_used = 0;
-    uint16_t length_max = DATA_BUFFER_PAYLOAD_MAX_LENGTH;
+    // uint16_t length_max = DATA_BUFFER_PAYLOAD_MAX_LENGTH;
   }payload;
   uint16_t isserviced = 0; // Set to 0 on new mqtt
   DATA_BUFFER_FLAGS flags;
 };
 extern struct DATA_BUFFER data_buffer;
-#define D_DATA_BUFFER_CLEAR() //memset(&data_buffer,0,sizeof(data_buffer))
+#define D_DATA_BUFFER_CLEAR()  Serial.println("CLEAR SKIPPED") //memset(&data_buffer,0,sizeof(data_buffer))
+
+// #define D_DATA_BUFFER_CLEAR()   
+
+//memset(&data_buffer.payload.ctr[0],0,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
+// #define D_DATA_BUFFER_CLEAR() \
+//     memset(data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr)); \
+//     data_buffer.topic.length_used = 0; \
+//     memset(data_buffer.payload.ctr,0,sizeof(data_buffer.payload.ctr)); \
+//     data_buffer.payload.length_used = 0; 
+
 
 
 

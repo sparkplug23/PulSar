@@ -93,11 +93,11 @@ With latest version, all longer term shared debug features should be added here 
 #define DISABLE_SLEEP
 
 // #ifdef ESP32
-// #define ENABLE_FEATURE_WATCHDOG_TIMER
-// #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
-// #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-// #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-// #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+#define ENABLE_FEATURE_WATCHDOG_TIMER
+#define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+#define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+#define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 // #endif
 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
@@ -145,7 +145,7 @@ With latest version, all longer term shared debug features should be added here 
   #define STA_SSID3                     ""                // [Ssid2] Optional alternate AP Wifi SSID
   #define STA_PASS3                     ""                // [Password2] Optional alternate AP Wifi password
 
-  #define WIFI_CONFIG_TOOL              WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
+  #define WIFI_CONFIG_TOOL              4//WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
                                                           //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
   #define WIFI_CONFIG_NO_SSID           WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
                                                           //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
@@ -154,6 +154,10 @@ With latest version, all longer term shared debug features should be added here 
                                                           //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
 
   #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+  
+  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+  
   // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   /***********************************

@@ -126,6 +126,21 @@
       #include "esp_wifi.h"
       #include <ESPmDNS.h>
       #include <AsyncTCP.h>
+      #include "esp_task_wdt.h"
+
+      #ifndef WLED_DISABLE_ESPNOW
+        #include <esp_now.h>
+      #endif
+    #endif
+
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+
+
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+
+
+    #define LOROL_LITTLEFS 
+    
       #ifdef LOROL_LITTLEFS
         #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
           #define CONFIG_LITTLEFS_FOR_IDF_3_2
@@ -134,12 +149,6 @@
       #else
         #include <LittleFS.h>
       #endif
-      #include "esp_task_wdt.h"
-
-      #ifndef WLED_DISABLE_ESPNOW
-        #include <esp_now.h>
-      #endif
-    #endif
 
 
     //Filesystem to use for preset and config files. SPIFFS or LittleFS on ESP8266, SPIFFS only on ESP32 (now using LITTLEFS port by lorol)
@@ -154,7 +163,10 @@
     #endif
 
 
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+
+
+
+  #endif // USE_MODULE_DRIVERS_FILESYSTEM
 
 // #include <variant>
 

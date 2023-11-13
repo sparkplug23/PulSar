@@ -74,7 +74,7 @@ void JsonBuilder::Write_P(const char* formatP, ...)
 
 void JsonBuilder::Start(char* _buffer, uint16_t _length, uint16_t _buffer_size)
 {
-  // PRINT_FLUSHED("JsonBuilder::Start(,,)");
+  PRINT_FLUSHED("JsonBuilder::Start(,,)");
   writer.buffer = _buffer;
   writer.length = _length;
   writer.buffer_size = _buffer_size;
@@ -88,11 +88,12 @@ void JsonBuilder::Start(bool override_lock)
 
   // PRINT_FLUSHED("JsonBuilder::Start()");
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) {  
-    // PRINT_FLUSHED("JsonBuilder::return()");
-    // Serial.println(writer.buffer == nullptr ? "writer.buffer == nullptr" : "writer.buffer_size != nullptr");
-    // Serial.println(writer.buffer_size);
+    PRINT_FLUSHED("JsonBuilder::return()");
+    Serial.println(writer.buffer == nullptr ? "writer.buffer == nullptr" : "writer.buffer_size != nullptr");
+    Serial.println(writer.buffer_size);
     return;
   }  
+  
   // PRINT_FLUSHED("memset::start()");
   // memset(writer.buffer,0,writer.buffer_size);
   // PRINT_FLUSHED("memset::end()");

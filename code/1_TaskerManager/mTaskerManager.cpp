@@ -17,10 +17,17 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   if(function == FUNC_JSON_COMMAND_ID)
   { 
     
-  ALOG_INF(PSTR("buffer_writer p1 ------------------------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
-  delay(1000);
+  ALOG_INF(PSTR("buffer_writer before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+  // Serial.println(data_buffer.payload.ctr);
+  // delay(1000);
     JsonParser parser(data_buffer.payload.ctr);
-  ALOG_INF(PSTR("buffer_writer p2 ------------------------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
+  ALOG_INF(PSTR("buffer_writer after parser ------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
+
+  if(JBI->GetBufferSize()==0)
+  {
+    Serial.println("error occured");
+    delay(4000);
+  }
     
     // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
     obj = parser.getRootObject();   
@@ -30,13 +37,13 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     }else{
       ALOG_HGL(PSTR("JSON PARSED OK"));
 
-      JsonParserToken jtok = 0; 
-      if(jtok = obj["Segment0"])
-      {
-        ALOG_HGL(PSTR("Segment0 YES"));
-      }else{
-        ALOG_HGL(PSTR("Segment0 MISSING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
-      }
+      // JsonParserToken jtok = 0; 
+      // if(jtok = obj["Segment0"])
+      // {
+      //   ALOG_HGL(PSTR("Segment0 YES"));
+      // }else{
+      //   ALOG_HGL(PSTR("Segment0 MISSING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+      // }
 
     }
 
@@ -696,7 +703,6 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     case FUNC_JSON_APPEND:                            return PM_FUNC_JSON_APPEND_CTR;
     case FUNC_SAVE_BEFORE_RESTART:                    return PM_FUNC_SAVE_BEFORE_RESTART_CTR;
     case FUNC_SETTINGS_DEFAULT:                       return PM_FUNC_SETTINGS_DEFAULT_CTR;
-    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:    return PM_FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES_CTR;
     case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
     case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
     case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE:       return PM_FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;

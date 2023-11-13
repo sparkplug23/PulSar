@@ -12,6 +12,10 @@
 */
 #ifndef ASYNC_JSON_H_
 #define ASYNC_JSON_H_
+
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
 #include "ArduinoJson-v6.h"
 #include <Print.h>
 
@@ -163,4 +167,11 @@ public:
   }
   virtual bool isRequestHandlerTrivial() override final {return _onRequest ? false : true;}
 };
-#endif
+
+
+
+#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
+#endif // HEADER
+

@@ -5,6 +5,9 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+// Included in baseconfig
+enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
+
 #ifdef USE_MODULE_NETWORK_WIFI
 
 // #define ENABLE_WIFI_DEVELOPMENT
@@ -41,7 +44,6 @@
   #define mSupportHardware SupportESP32
 #endif
 
-enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
 
 #include "1_TaskerManager/mTaskerInterface.h"
 #include "2_CoreSystem/02_Time/mTime.h"

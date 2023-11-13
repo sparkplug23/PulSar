@@ -15,6 +15,10 @@ class SupportESP8266{
     
     static uint32_t ESP_getChipId(void);
 
+    static void ESP_Restart(void) {
+    //  ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
+      ESP.reset();
+    }
 
 
 };
@@ -84,10 +88,6 @@ class SupportESP8266{
 // //   return free_block_size;
 // // }
 
-// // void ESP_Restart(void) {
-// // //  ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
-// //   ESP.reset();
-// // }
 
 // // #endif
 

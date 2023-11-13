@@ -125,9 +125,9 @@ void mAnimatorLight::Module_DataSave()
  
   JBI->Start();
 
-  #ifdef ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
     JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
-  #endif // ENABLE_DEBFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
   uint8_t bus_appended = 0;
 
@@ -524,7 +524,7 @@ void mAnimatorLight::Settings_Save()
 
 void mAnimatorLight::Settings_Default(){
 
-  init(); //default values
+
 
 }
 
@@ -5164,56 +5164,6 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests2()
 
 
 
-// //gamma 2.8 lookup table used for color correction
-// uint8_t mAnimatorLight::NeoGammaWLEDMethod::gammaT[256] = {
-//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-//     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-//     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-//     5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-//    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-//    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-//    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-//    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-//    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-//    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-//    90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-//   115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-//   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-//   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-//   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-
-// // re-calculates & fills gamma table
-// void mAnimatorLight::NeoGammaWLEDMethod::calcGammaTable(float gamma)
-// {
-//   for (size_t i = 0; i < 256; i++) {
-//     gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
-//   }
-// }
-
-// uint8_t mAnimatorLight::NeoGammaWLEDMethod::Correct(uint8_t value)
-// {
-//   // if (!gammaCorrectCol) return value;
-//   // return gammaT[value];
-// }
-
-// // used for color gamma correction
-// uint32_t mAnimatorLight::NeoGammaWLEDMethod::Correct32(uint32_t color)
-// {
-//   // if (!gammaCorrectCol) return color;
-//   // uint8_t w = W(color);
-//   // uint8_t r = R(color);
-//   // uint8_t g = G(color);
-//   // uint8_t b = B(color);
-//   // w = gammaT[w];
-//   // r = gammaT[r];
-//   // g = gammaT[g];
-//   // b = gammaT[b];
-//   // return RGBW32(r, g, b, w);
-// }
-
-
-
 /*
  * UDP sync notifier / Realtime / Hyperion / TPM2.NET
  */
@@ -5249,8 +5199,6 @@ void realtimeLock2(uint32_t timeoutMs, byte md);
 #define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
 
 void setRealtimePixel(uint16_t i, byte r, byte g, byte b, byte w = 0);
-
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 //scales the brightness with the briMultiplier factor
 byte scaledBri2(byte in)
@@ -5399,6 +5347,10 @@ void mAnimatorLight::notify(byte callMode, bool followUp)
   pCONT_lAni->notificationSentTime = millis();
   pCONT_lAni->notificationCount = followUp ? pCONT_lAni->notificationCount + 1 : 0;
 }
+
+
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+
 
 void realtimeLock2(uint32_t timeoutMs, byte md)
 {

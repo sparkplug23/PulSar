@@ -21,40 +21,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-
 #include "1_TaskerManager/mTaskerManager.h"
-
-
-// #include <AsyncTCP.h>
-// #include <ESPAsyncWebServer.h>
-
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * Commands
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * ConstructJson
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * MQTT
-*******************************************************************************************************************/
-
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-
-
-
-
 
 
 /*********************************************************************************************
@@ -79,11 +46,10 @@
   #endif  
 #endif // ESP32
 
-#ifdef USE_EMERGENCY_RESET
+#ifdef ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
 /*********************************************************************************************\
  * Emergency reset if Rx and Tx are tied together
 \*********************************************************************************************/
-
 void EmergencySerial_SettingsReset(void) {
   Serial.begin(115200);
   Serial.write(0xA5);
@@ -91,14 +57,14 @@ void EmergencySerial_SettingsReset(void) {
   delay(1);
   if (Serial.available() == 2) {
     if ((Serial.read() == 0xA5) && (Serial.read() == 0x5A)) {
-      SettingsErase(3);       // Reset all settings including QuickPowerCycle flag
+      pCONT_set->SettingsErase(3);       // Reset all settings including QuickPowerCycle flag
 
       do {                    // Wait for user to remove Rx Tx jumper and power cycle
         Serial.write(0xA5);
         delay(1000);          // Satisfy SDK
       } while (Serial.read() == 0xA5);  // Poll for removal of jumper
 
-      ESP_Restart();          // Restart to init default settings
+      mSupportHardware::ESP_Restart();          // Restart to init default settings
     }
   }
   Serial.println();
@@ -109,7 +75,7 @@ void EmergencySerial_SettingsReset(void) {
   delay(10);                  // Allow time to cleanup queues - if not used hangs ESP32
 #endif  // ESP32
 }
-#endif  // USE_EMERGENCY_RESET
+#endif  // ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
 
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
@@ -194,7 +160,6 @@ void setup(void)
     
     RtcFastboot_Save(); // Save reboot
 
-
     /**
      * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
      * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
@@ -244,10 +209,10 @@ void setup(void)
  
   #ifndef DISABLE_SERIAL0_CORE
   Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
-  #endif // DISABLE_SERIAL0_CORE
+  #endif
   #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
-  #endif // USE_SERIAL_ALTERNATE_TX
+  #endif
   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
   #ifndef DISABLE_SERIAL_LOGGING
   #ifdef ENABLE_BUG_TRACING
@@ -269,22 +234,18 @@ void setup(void)
   JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
   
-
-  delay(3000);
   /**
    * @brief Start the Tasker_Interface module
    **/
   pCONT->Instance_Init();
   
 /********************************************************************************************
- ** Set boottime values *********************************************************************
+ ** LOGGING: Set boot log levels *********************************************************************
  ********************************************************************************************/
 
-  // Set boot method
   pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;
   
-  RESET_BOOT_STATUS();
 
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
@@ -304,10 +265,10 @@ void setup(void)
 
   #ifdef ESP32
     // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
-    //           SupportESP32::FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
+    //           SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), SupportESP32::FoundPSRAM(), SupportESP32::CanUsePSRAM());
     // #if !defined(HAS_PSRAM_FIX)
-    // if (FoundPSRAM() && !CanUsePSRAM()) {
+    // if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
     //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
     // }
     // #endif
@@ -341,26 +302,28 @@ void setup(void)
 
   pCONT_set->SettingsInit();
 
-  #ifdef USE_EMERGENCY_RESET
+  #ifdef ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
     EmergencySerial_SettingsReset();
-  #endif  // USE_EMERGENCY_RESET
+  #endif  // ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
 
   pCONT_sup->init_FirmwareVersion();
 
-  /**
-   * @brief Before getting settings to work, I need to first get UFS working and understand it, as its the future of settings saving. 
-   * Both methods need to be working.
-   * 
-   * File system saving will become useful when I create an esp32 gps data logger as part of future LTE monitor.
-   */
-
+   //preload minimal required
+  pCONT_set->SettingsDefault();
   ALOG_DBG(PSTR("Loading minimal defaults"));
-  pCONT_set->SettingsDefault(); //preload minimal required
-  ALOG_DBG(PSTR("Loading settings from saved memory"));  
-  // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
-  pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
+   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
+  ALOG_DBG(PSTR("Loading settings from saved memory"));    
+  pCONT_set->SettingsLoad();                   // Only the system level settings are loaded here, not the module settings which should happen below
   // Check Load was successful
   pCONT_set->SettingsLoad_CheckSuccessful();
+
+/********************************************************************************************
+ ** LOGGING: Set boot log levels again to override settings load *********************************************************************
+ ********************************************************************************************/
+
+  uint8_t saved_serial_loglevel = pCONT_set->Settings.logging.serial_level;
+  pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
+  pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;
 
 /********************************************************************************************
  ** OsWatch: To detect loop hangs that might happen during (OTA) upgrades  ******************
@@ -392,38 +355,35 @@ void setup(void)
             uint32_t i = 0; //i < MAX_RULE_SETS; i++) {
           //   if (bitRead(Settings->rule_stop, i)) {
           //     bitWrite(Settings->rule_enabled, i, 0);  // Disable rules causing boot loop
-          ALOG_DBM( PSTR("Fastboot: Disable Rule %d"), i );
+          ALOG_INF( PSTR("Fastboot: Disable Rule %d"), i );
           //   }
           // }
         }
         if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
           // Settings->rule_enabled = 0;                  // Disable all rules
           // TasmotaGlobal.no_autoexec = true;
-          ALOG_DBM( PSTR("Fastboot: Disable All Rules") );
+          ALOG_INF( PSTR("Fastboot: Disable All Rules") );
         }
         if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
           // for (uint32_t i = 0; i < nitems(Settings->my_gp.io); i++) {
           //   Settings->my_gp.io[i] = GPIO_NONE;         // Reset user defined GPIO disabling sensors
           // }
-          ALOG_DBM( PSTR("Fastboot: Disable GPIO Functions") );
+          ALOG_INF( PSTR("Fastboot: Disable GPIO Functions") );
         }
         if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
           // Settings->module = Settings->fallback_module;  // Reset module to fallback module
           // Settings->last_module = Settings->fallback_module;
-          ALOG_DBM( PSTR("Fastboot: Reset Module") );
+          ALOG_INF( PSTR("Fastboot: Reset Module") );
         }
-        ALOG_DBM( PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
+        ALOG_INF( PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
       }
     }
 
   #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 
 /********************************************************************************************
- ** Reconfigure baud rate if SettingsLoad changed it ****************************************
+ ** SERIAL: Change baud to module default if module has changed ****************************************
  ********************************************************************************************/
-
-  // TasmotaGlobal.seriallog_level = Settings->seriallog_level;
-  // TasmotaGlobal.syslog_level = Settings->syslog_level;
 
   // TasmotaGlobal.module_changed = (Settings->module != Settings->last_module);
   // if (TasmotaGlobal.module_changed) {
@@ -443,22 +403,25 @@ void setup(void)
 /********************************************************************************************
  ** Load Templates **************************************************************************
  ********************************************************************************************/
-   
-  pCONT->Tasker_Interface(FUNC_POINTER_INIT); // configure any memory address needed as part of module init or templates
   
+  // configure any memory address needed as part of module init or templates
+  pCONT->Tasker_Interface(FUNC_POINTER_INIT);
+
+  /**
+   * @brief DEBUG: Load template from progmem and override settings to ensure my developing devices always enter a known state.
+   *               This should be disabled for production devices, and only enabled for development devices.
+   **/
   #ifdef ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
-  // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
-  // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
-  // Load template before init  
   ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
-  // load
-  // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
   #else
-  #warning "FORCE_TEMPLATE_LOADING is disabled, trying to use settings may result in improper loaded values"
+  #warning "FORCE_TEMPLATE_LOADING is disabled, and production/release is assumed. This REQUIRES valid settings/storage or device may be unstable"
   #endif
   
-  // Set boot method
+/********************************************************************************************
+ ** Set RUNTIME log values *********************************************************************
+ ********************************************************************************************/
+
   pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;  
     
@@ -476,11 +439,12 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_POST_INIT);
   // Run system functions 
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
-  // Load the minimal default settings in modules (hard coded) before loading any stored user values
-  pCONT->Tasker_Interface(FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES); // load the minimal
   // Load any stored user values into module
-  pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
-  
+  pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
+  // Init any dynamic memory buffers
+  pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
+
+
   /********************************************************************************************
    ** File System : Load after settings for now, so this method overrides any defaults   ******
   ********************************************************************************************/
@@ -494,46 +458,60 @@ void setup(void)
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
    * */
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM); //USED
   // Configure sensor/drivers to values desired for modules
-  pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
-  // init mqtt handlers from memory
-  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
+  pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE); //??
 
-  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-  WDT_Reset();
-  #endif
+  /********************************************************************************************
+   ** MQTT: Configure mqtt handlers in modules   ******
+  ********************************************************************************************/
+
+  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
 
   // Init the refresh periods for mqtt
   #ifndef ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #endif
-  #ifdef ENABLE_FUNCTION_DEBUG
-    pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
-  #endif
 
-  // Init any dynamic memory buffers
-  pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
-  // For debugging, allow method to override init/loaded values
-  #ifdef ENABLE_BOOT_OVERRIDE_INIT
-  pCONT->Tasker_Interface(FUNC_OVERRIDE_BOOT_INIT);
-  #endif
-
-  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-  WDT_Reset();
-  #endif
+  /********************************************************************************************
+   ** RULES: Configure mqtt handlers in modules   ******
+  ********************************************************************************************/
 
   #ifdef USE_MODULE_CORE_RULES
   pCONT->Tasker_Interface(FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
   #endif 
   
+/********************************************************************************************
+ ** LOGGING: Set runtime log levels *********************************************************************
+ ********************************************************************************************/
+
+  pCONT_set->Settings.logging.serial_level = saved_serial_loglevel;
+
+
+  /********************************************************************************************
+   ** // For debugging, allow method to override init/loaded values **************************************************************************
+  ********************************************************************************************/
+  
+  #ifdef ENABLE_FUNCTION_DEBUG
+    pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
+  #endif
+
+  #ifdef ENABLE_BOOT_OVERRIDE_INIT
+  pCONT->Tasker_Interface(FUNC_OVERRIDE_BOOT_INIT);
+  #endif
+
   /********************************************************************************************
    ** Boot Completed **************************************************************************
   ********************************************************************************************/
 
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
+  #endif
+
 }
+
 
 void LoopTasker()
 {

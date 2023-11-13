@@ -430,6 +430,8 @@ void mAnimatorLight::updateFSInfo()
 }
 
 
+    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+
 //Un-comment any file types you need
 String mAnimatorLight::getContentType(AsyncWebServerRequest* request, String filename)
 {
@@ -477,6 +479,7 @@ bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path)
 }
 
 
+#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
