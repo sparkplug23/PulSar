@@ -1414,10 +1414,12 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t id)
 }
   
 #ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 void mInterfaceLight::MQTTHandler_AddWebURL_PayloadRequests()
 {    
   CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests();
 }
+#endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
 #endif// USE_MODULE_NETWORK_MQTT

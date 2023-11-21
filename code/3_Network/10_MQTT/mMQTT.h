@@ -22,6 +22,7 @@
 #define DEFAULT_MQTT_DRIVER_MINIMAL_RATE_SECS 10
 
 
+// #ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 #define CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests()  \
   char uri_buffer[70] = {0};\
   snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, GetModuleFriendlyName());\
@@ -44,7 +45,7 @@
       }\
     }\
   );\
-
+// #endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 
 // global enum for types of mqtt handlers, this can be asked for as a system command
 // Note: "MQTT_HANDLER_LENGTH_ID" is used in module/classes as the start position/index for specialised handlers

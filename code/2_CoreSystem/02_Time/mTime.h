@@ -182,8 +182,12 @@ class mTime :
     uint32_t GetTimeOfDay_Seconds(void);
     static const char* ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds, char* buffer, uint8_t buflen);
     // static const char* ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen);
+
+
+
     
     static const char* ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8_t buflen);
+    // static const char* ConvertShortTimetoCtr(time_short_t time, char* buffer, uint8_t buflen);
 
     static const char* ConvertU32TimetoCtr(uint32_t* _time, char* buffer, uint8_t buflen, bool flag_include_weekday = false);
 

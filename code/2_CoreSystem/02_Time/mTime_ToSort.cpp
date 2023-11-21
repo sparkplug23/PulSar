@@ -422,6 +422,18 @@ const char* mTime::ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8
   return buffer;
 }
 
+// const char* mTime::ConvertShortTimetoCtr(time_short_t time, char* buffer, uint8_t buflen)
+// {
+  
+//   snprintf_P(buffer, buflen, 
+//               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+//               time.hour, time.minute, time.second
+//   );
+//   return buffer;
+// }
+
+
+
 /**
  * @brief 
  * */

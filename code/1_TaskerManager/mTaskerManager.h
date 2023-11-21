@@ -1169,6 +1169,8 @@ class mTaskerManager{
 
     bool ValidTaskID(uint8_t module_id);
     
+    void JSONCommand_Run(char* json);
+    
     mTaskerInterface* GetModuleObjectbyUniqueID(uint16_t id);
     
     int16_t GetEnumVectorIndexbyModuleUniqueID(int16_t unique_id);

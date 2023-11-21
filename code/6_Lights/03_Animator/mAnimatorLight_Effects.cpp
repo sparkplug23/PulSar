@@ -174,6 +174,8 @@ static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",!,,,,Time,Rate
  * 
  * ^^ 4 options really needs to be reduced down
  * 
+ * Intensity should be used to calculate the timems/ratems ratio, ie intensity of 255 would mean the timems is 100% of the ratems, and 127 would be 50% of the ratems and hence only half the time would be changing and the rest static
+ * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -12443,6 +12445,215 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // } // END FUNCTION
 
 
+
+
+
+  /**
+   * @brief 
+   * 
+   * Ideas
+   * 
+   * (1) Flash pixels on a bus in sequence. The pixels on that bus should also have colours in 50s of RGB for easy counting.
+   * (2) Enable turning on pixels within a range only (when indexed at 0, this will also include showing progress). Base/off pixels should be option, either dark red or off. drawing over should be white, with different colours showing the 50th (so first red = 50, second green = 100)
+   *          50 - red
+   *         100 - green
+   *         150 - blue
+   *         200 - magenta
+   *         250 - yellow
+   *         300 - cyan
+   *         350 - orange
+   *         400 - hotpink
+   *         450 - purple
+   *         500 - limegreen, then after this repeat pattern
+   * (3) Indentify pixel with light sensor. A new method I should create a 3d box that the light gets inserted into/held against, with an "ident" button (starts sequence).
+   *        - another button to also "remove led", so one to add and another too remove from section.
+   *        - then via mqtt commands, trigger which group the current ident values are being added to (vectorise the IDs as vector of vectors) 
+   * 
+   * 
+   * 
+   */
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * Speed slider sets amount of LEDs lit, intensity() sets unlit
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+void mAnimatorLight::EffectAnim__Hardware__Show_Bus()
+{
+
+  // ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus"));
+  
+  uint16_t lit = 1 + SEGMENT.speed();
+  uint16_t unlit = 1 + SEGMENT.intensity();
+  bool drawingLit = true;
+  uint16_t cnt = 0;
+
+  uint8_t buscount = pCONT_iLight->bus_manager->getNumBusses();
+
+  for(uint8_t bus_i = 0; bus_i < buscount; bus_i++)
+  {
+
+    uint16_t start = pCONT_iLight->bus_manager->getBus(bus_i)->getStart();
+    uint16_t length = pCONT_iLight->bus_manager->getBus(bus_i)->getLength();
+
+    ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus %d (%d/%d\t%d)"), bus_i, start, length, start + length);
+
+    float huef = mSupport::mapfloat(bus_i, 0, buscount, 0, 1);
+    float satf = 1.0f;
+
+    if(bus_i%2)
+      satf = 0.85f;
+
+    RgbcctColor colour = RgbcctColor(HsbColor(huef,satf,0.5f));
+
+    for(uint16_t i = start; i < start + length; i++)
+    {
+      if(i < start + 5)
+        SEGMENT.SetPixelColor(i, RgbcctColor(255,255,255));
+      else
+        SEGMENT.SetPixelColor(i, colour);
+    }
+
+
+  }
+
+  
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  
+}
+static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS[] PROGMEM = "Fg size,Bg size;Fg,!;!;;pal=19";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * Speed slider sets amount of LEDs lit, intensity() sets unlit
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+void mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting()
+{
+  
+  SEGMENT.fill(RgbcctColor(5,5,5).getU32());
+
+  uint16_t hue_list[] = {0,120,240,340,50,180,14,350,280};
+  uint8_t used_hue = 0;  
+  
+  RgbcctColor colour = RgbcctColor();
+
+
+  for (uint16_t i = 0; i < SEGLEN; i++)
+  {
+
+    if((i%10)==0) // Every 10th should be bright white
+    {
+      
+      if((i%50)==0) // If its every 50th, then use hue map instead of the bright white
+      {
+
+        SEGMENT.SetPixelColor(i, HsbColor(360.0f/hue_list[used_hue++],1.0f,1.0f));
+        
+        ALOG_INF(PSTR("50i %d"), i);
+
+
+        if(used_hue >= ARRAY_SIZE(hue_list))
+          used_hue = 0;
+
+      }else{
+
+        SEGMENT.SetPixelColor(i, RgbColor(30,30,30));
+
+      }
+
+    }
+
+
+
+
+
+
+  }
+
+
+
+
+  SEGMENT.SetPixelColor(0, RgbcctColor(255,0,0));
+  
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  
+}
+static const char PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM = "Fg size,Bg size;Fg,!;!;;pal=19";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * Speed slider sets amount of LEDs lit, intensity() sets unlit
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+void mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
+{
+
+  SEGMENT.fill(SEGCOLOR_U32(0));
+  
+  for (uint16_t i = SEGMENT.params_internal.aux0; i < SEGMENT.params_internal.aux1; i++)
+  {
+    SEGMENT.fill(SEGCOLOR_U32(1));
+  }
+    
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  
+}
+static const char PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM = "Fg size,Bg size;Fg,!;!;;pal=19";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * Speed slider sets amount of LEDs lit, intensity() sets unlit
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+void mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+{
+  
+  uint16_t lit = 1 + SEGMENT.speed();
+  uint16_t unlit = 1 + SEGMENT.intensity();
+  bool drawingLit = true;
+  uint16_t cnt = 0;
+
+  for (uint16_t i = 0; i < SEGLEN; i++) {
+    SEGMENT.SetPixelColor(i, 
+      (drawingLit) ? RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE)) : SEGCOLOR_U32(1)
+    );
+    cnt++;
+    if (cnt >= ((drawingLit) ? lit : unlit)) {
+      cnt = 0;
+      drawingLit = !drawingLit;
+    }
+  }
+  
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  
+}
+static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Fg size,Bg size;Fg,!;!;;pal=19";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
+
+
+
 /*******************************************************************************************************************
 ********************************************************************************************************************
 ************ END OF AMBILIGHT DEFINITIONS ********************************************************************************************
@@ -13511,6 +13722,12 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__SINELON_RAINBOW__ID,     &mAnimatorLight::EffectAnim__Sinelon_Rainbow,         PM_EFFECTS_FUNCTION__SINELON_RAINBOW__NAME_CTR,         PM_EFFECT_CONFIG__SINELON_RAINBOW);
   addEffect3(EFFECTS_FUNCTION__DRIP__ID,                &mAnimatorLight::EffectAnim__Drip,                    PM_EFFECTS_FUNCTION__DRIP__NAME_CTR,                    PM_EFFECT_CONFIG__DRIP);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  addEffect3(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,                      &mAnimatorLight::EffectAnim__Hardware__Show_Bus,                    PM_EFFECTS_NAME__HARDWARE__SHOW_BUS,                        PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS);
+  addEffect3(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,         &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,       PM_EFFECTS_NAME__HARDWARE__MANUAL_PIXEL_COUNTING,           PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING);
+  addEffect3(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,              &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,            PM_EFFECTS_NAME__HARDWARE__VIEW_PIXEL_RANGE,                PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE);
+  addEffect3(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,   &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing, PM_EFFECTS_NAME__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,     PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING);  
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   addEffect3(EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,                                     &mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01,                                               PM_EFFECTS_FUNCTION__SUNPOSITIONS__SUNRISE_ALARM_01__NAME_CTR,                                          PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01); 
   addEffect3(EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,               &mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01,                         PM_EFFECTS_FUNCTION__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__NAME_CTR,                    PM_EFFECT_CONFIG__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01); 

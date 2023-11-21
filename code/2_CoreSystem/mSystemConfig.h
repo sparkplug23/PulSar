@@ -18,6 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes
+ * #120 : XMAS 2023
  * #119 : Updated to latest neopixelbus library, and added support for 8 pin parallel output.
  * #118 : Nextion support added. TFT Upload via WebUI Async Webserver.
  * #117 : Introduction of first lighting testgroup (ie 6 candidate template default options to provide new users)
@@ -29,7 +30,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    119 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    120 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #06 : New BME680 added, bme/p 180/280 manual without library

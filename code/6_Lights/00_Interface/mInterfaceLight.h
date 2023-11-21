@@ -337,12 +337,14 @@ class mInterfaceLight :
     *******************************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 
       /**
        * @brief MQTTHandler_AddWebURL_PayloadRequests
        * */
       void MQTTHandler_AddWebURL_PayloadRequests();
 
+    #endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
     #endif // USE_MODULE_NETWORK_WEBSERVER
 
 

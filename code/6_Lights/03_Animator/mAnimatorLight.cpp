@@ -313,6 +313,10 @@ void mAnimatorLight::EveryLoop()
     handlePresets();
     #endif
 
+    #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER
+    handleSequencer();
+    #endif
+
   } // End of !realtimeMode and Effect methods
 
 }
@@ -496,9 +500,9 @@ void mAnimatorLight::Init(void)
 
   ALOG_INF(PSTR("Segments Initiated and save to use")); 
 
-  #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
-  init_mixer_defaults();
-  #endif
+  #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER
+  Init_Sequencer();
+  #endif // ENABLE_FEATURE_LIGHTING__SEQUENCER
 
   settings.flags.EnableModule = true;
 
@@ -4394,18 +4398,6 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
 
   }
 
-  
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-
-    // Use the decimate to replicate output
-
-    // if(decimate > 0)
-    // {
-    //   vLength = (vLength + decimate - 1) / decimate;
-    // }
-
-    #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-
 }
 
 /**
@@ -4868,17 +4860,6 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-//   uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level, bool json_appending)
-//   {
-
-// JBI->Start();
-
-//   JBI->Add("millis", millis());
-
-// return JBI->End();
-
-// }
-
   ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
   mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -4944,6 +4925,19 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Playlist;
   mqtthandler_list.push_back(ptr);
+
+  #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER
+  ptr = &mqtthandler_automation_sequencer;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEQUENCER;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Sequencer;
+  mqtthandler_list.push_back(ptr);
+  #endif // ENABLE_FEATURE_LIGHTING__SEQUENCER
   
   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   ptr = &mqtthandler_mode_ambilight_teleperiod;
@@ -5066,12 +5060,12 @@ void mAnimatorLight::MQTTHandler_Set_RefreshAll()
  * */
 void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**
@@ -5088,6 +5082,7 @@ void mAnimatorLight::MQTTHandler_Sender(uint8_t id)
  * @brief MQTTHandler_AddWebURL_PayloadRequests
  * */
 #ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 {    
 
@@ -5139,6 +5134,7 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 
 
 }
+#endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
 

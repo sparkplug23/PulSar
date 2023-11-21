@@ -939,84 +939,24 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
 
 
-  /**
-   * @brief 
-   * All PRESET options
-   **/
 
-  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  // if(jtok = obj["Presets"].getObject()["SetPresetManual"]){  
-  //   // void mAnimatorLight::
-  //   // CommandSet_Mixer_RunningID(jtok.getInt());
-  //   uint8_t val = jtok.getInt();
-  //   // mixer.running_id = val;
-  //   LoadMixerGroupByID(val);
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // }
+  #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER
 
-  // if(jtok = obj["Presets"].getObject()["SetPresetManual_Testing"]){  
-  //   // void mAnimatorLight::
-  //   // CommandSet_Mixer_RunningID(jtok.getInt());
-  //   uint8_t val = jtok.getInt();
-  //   // mixer.running_id = val;
-  //   LoadPreset_ManualTesting_ByID(val);
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // }
-
-  #ifdef USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
-  // #error "error"
-  if(jtok = obj["Presets"].getObject()["SetPreset_ManualUserCustom"]){  
-    // void mAnimatorLight::
-    // CommandSet_Mixer_RunningID(jtok.getInt());
-    uint8_t val = jtok.getInt();
-    // mixer.running_id = val;
-    LoadPreset_ManualUserCustom_ByID(val);
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  if(jtok = obj["Sequencer"].getObject()["LoadSet"])
+  {
+    Load_Sequencer(jtok.getInt());
   }
-  #endif // USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
+  if(jtok = obj["Sequencer"].getObject()["ItemTime"])
+  {
+    SetSequenceTimes(jtok.getInt());
+  }  
 
-  
+  #endif // ENABLE_FEATURE_LIGHTING__SEQUENCER
 
-  // #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
-  //   // CommandSet_Mixer_Flags_Enabled(jtok.getInt());
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-   
-  // // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
-  // //   mixer.time_scaler = jtok.getInt();
-  // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-  // //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // // }
 
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
-  //   // CommandSet_Mixer_RunTimeScalerPercentage(jtok.getInt());
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
 
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-  //   // CommandSet_Mixer_RunningID(jtok.getInt());
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-  // #endif //ENABLE_PIXEL_AUTOMATION_PLAYLIST
 
-  #endif //ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+
 
 
   if(jtok = obj["Light"].getObject()[PM_JSON_TIME_ON]){ // default to secs
