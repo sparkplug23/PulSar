@@ -84,7 +84,7 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
       // JsonFile_Save__Stored_Module();
       // JsonFile_Save__Stored_Secure();
       #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
-      SystemTask__Execute_Module_Data_Save();
+      // SystemTask__Execute_Module_Data_Save();
       #endif     
     break;  
     case FUNC_EVERY_FIVE_MINUTE:

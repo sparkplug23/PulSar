@@ -645,9 +645,9 @@ void loop(void)
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif
-
+  
   LoopTasker();
-      
+  
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
 
   if(mTime::TimeReached(&pCONT_set->runtime.tSavedUpdateLoopStatistics, 1000)){

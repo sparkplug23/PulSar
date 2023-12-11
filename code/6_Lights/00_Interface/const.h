@@ -254,7 +254,7 @@
 
 // Size of buffer for API JSON object (increase for more segments)
 #ifdef ESP8266
-  #define JSON_BUFFER_SIZE 5000//10240
+  #define JSON_BUFFER_SIZE 1000//10240
 #else
   #define JSON_BUFFER_SIZE 24576
 #endif

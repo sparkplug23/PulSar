@@ -179,7 +179,8 @@ class mHardwarePins :
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);
     void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);
-
+    bool DigitalRead(uint32_t gpio_pin, uint32_t index = 0);
+    
     uint8_t ModuleNr();
     bool ValidTemplateModule(uint8_t index);
     bool ValidModule(uint8_t index);

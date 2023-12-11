@@ -125,9 +125,9 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
 
   uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
-  #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
+  // #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
   loglevel = LOG_LEVEL_TEST;
-  #endif
+  // #endif
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(loglevel, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);
   AddLog(loglevel, PSTR("lwt_topic = %s"),pCONT_set->Settings.mqtt.lwt_topic);

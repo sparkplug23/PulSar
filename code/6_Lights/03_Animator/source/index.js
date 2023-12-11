@@ -1241,6 +1241,10 @@ function updateUI()
 	updateTrail(gId('sliderC1'));
 	updateTrail(gId('sliderC2'));
 	updateTrail(gId('sliderC3'));
+	
+	updateTrail(gId('sliderTransitionTime'));
+	updateTrail(gId('sliderTransitionRate'));
+	updateTrail(gId('sliderGrouping'));
 
 	if (hasRGB) {
 		updateTrail(gId('sliderR'));
@@ -1457,6 +1461,7 @@ function readState(s,command=false)
 	gId('sliderC3').value  = i.c3 ? i.c3 : 0;
 	gId('sliderTransitionTime').value = i.tt;
 	gId('sliderTransitionRate').value = i.tr;
+	gId('sliderGrouping').value = i.grp;
 	gId('checkO1').checked = !(!i.o1);
 	gId('checkO2').checked = !(!i.o2);
 	gId('checkO3').checked = !(!i.o3);
@@ -1522,7 +1527,20 @@ function setEffectParameters(idx)
 	var paOnOff = (effectPars.length<3  || effectPars[2]=='')?[]:effectPars[2].split(",");
 
 	// set html slider items on/off
-	let nSliders = 7; //5+my two timers
+
+	/**
+	 * Slider 0: Effect Speed
+	 * Slider 1: Effect Intensity
+	 * Slider 2: Custom 1
+	 * Slider 3: Custom 2
+	 * Slider 4: Custom 3
+	 * Slider 5: TimeMS    // removing
+	 * Slider 6: RateMS    // removing
+	 * Slider 7: Grouping 
+	 * 
+	 */
+
+	let nSliders = 8; //5+my Three timers
 	for (let i=0; i<nSliders; i++) {
 		var slider = gId("slider" + i);
 		var label = gId("sliderLabel" + i);
@@ -1531,6 +1549,9 @@ function setEffectParameters(idx)
 			if (slOnOff.length>i && slOnOff[i]!="!") label.innerHTML = slOnOff[i];
 			else if (i==0)                           label.innerHTML = "Effect speed";
 			else if (i==1)                           label.innerHTML = "Effect intensity";
+			else if (i==5)                           label.innerHTML = "Effect Time(Phaseout)";
+			else if (i==6)                           label.innerHTML = "Effect Rate";
+			else if (i==7)                           label.innerHTML = "Effect Grouping";
 			else                                     label.innerHTML = "Custom" + (i-1);
 			slider.classList.remove('hide');
 		} else {
@@ -2318,6 +2339,15 @@ function setTransitionRate()
 	var obj = {"seg": {"tr": parseInt(gId('sliderTransitionRate').value)}};
 	requestJson(obj);
 }
+function setGrouping()
+{
+	var obj = {"seg": {"grp": parseInt(gId('sliderGrouping').value)}};
+	requestJson(obj);
+}
+
+
+
+
 
 function setCustom(i=1)
 {

@@ -75,6 +75,320 @@
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
 
+
+/* ** 
+
+3D printed base, to hold an esp32 that replicates the whole hvac heating for the house from a hardware perspective.
+
+Four single socket outputs, with pzem 100A CT monitoring them.
+
+Hardware to implement:
+- 4 PZEM 400A
+- 4 16A relays (remove V2 relays, and make sure its just one going forward)
+- 2 BME680
+- 8 DB18S20 across 2 pins for pin developing
+- 1 DHT22
+- 4 sk6812 strip to show relays active
+- another strip (and pin) with maybe 10 144/m pixels that should show the 8 DB18S20 sensors in a colour gradient
+- maybe peizo buzzer for alarm
+- Add OLED for debug
+- Nextion 2.5inch could be used for manual control and feedback
+- Add BH1750 for light level (since i2c is already in use)
+
+Software to implement:
+- Filesystem
+  -- Heating schedules should be done, so the electric floor mat automatically turns on, this needs to include power cycle tool to stop the timeout
+- Should enable integration with remote sensor to use the rooms temperature as the target temperature for oil heater
+
+
+
+
+Blue (Upstairs Link) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           R_IH           21*           Immersion relay (5v IO)
+ * bl/w          I2D            12*           DHT22?     
+ * w/bl          I2C            13*           UNUSED   
+ * g/w           3V3            3V3           
+ * w/br                      
+ * br/w          DSX            14*           ds18b20 water, 4k7 pulled high        (comes from blue by connector)   NOT WORKING, wiring too long, Needs rerouted
+ * ** Green (Downstairs Sensors) **************************************************************************
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           1Wire          4*            DS18B20 water pipe sensors
+ * bl/w          I2D            22*           BME in Dinning Room (Alternatively, DHT22 data pin)
+ * w/bl          I2C            23*           BME in Dinning Room
+ * g/w           3V3            3V3           White
+ * w/br                                       NC
+ * br/w          DHT22          25*           DHT22 (until BME is working)            
+ * ** Orange (Nextion Display) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           NEO            27*             SK6812 4 pixels of rgbW
+ * bl/w                                      
+ * w/bl                                      
+ * g/w           3V3            3V3           
+ * w/br          RX2            17*              Nextion TX
+ * br/w          TX2            16*              Nextion RX   -- "SERIAL TX" of Serial will always be dominant colour (brown) as its important to know the output pin
+ * Twin          Switch
+ * Twin          Switch
+ * ** Power Screw Jacks **************************************************************************
+ * 4 (Top)       12V
+ * 3             5V
+ * 2
+ * 1 (Bottom)    GND
+ * ** ADC Input **************************************************************************
+ * 4 (Top)       LDR_US         33
+ *               LDR_DS         32 
+ *               LDR_WB         35
+ * Extra Ethernet for LDRs hot glued onto the red led of the servos?
+ * 
+ * Upstairs Connectors
+ * 3pin (DHT22)    - gnd,5v,dht_data 
+ * 3pin (relay US) - gnd,5v,relay_ih
+ * 3pin (water sensors) - gnd,3v3,ds18b20
+ * 
+ * Create seond device dad can swap in, only have basic relay control, no sensors, so it should be the most stable.
+ * 
+ **/
+#ifdef DEVICE_TESTBED__HEATING_ENERGY_SYSTEM
+  #define DEVICENAME_CTR          "heating"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating 2023#2"
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
+
+  #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
+  
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
+  //   #define STRIP_SIZE_MAX 10
+
+  //   #define USE_RGB_OUT_BASIC_SHOW_PALETTE
+
+
+  #define USE_MODULE_CONTROLLER_HVAC
+    #define HEATING_DEVICE_MAX 3
+    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define DS18X20_MAX_SENSORS 20
+      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
+  #define USE_MODULE_SENSORS_DHT
+              
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_SENSORS_SWITCHES
+  
+    // #define SHOW_SPLASH
+    // #define USE_MODULE_DISPLAYS_NEXTION
+    // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+
+
+  // Actual
+  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
+  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_FUNCTION_REL3_INV_CTR
+/**
+ * 
+ * 
+ * Ethernet R
+ * 
+ * w/o  gnd
+ * o/w     5v
+ * w/g    left LED (upstairs)              D27
+ * bl/w   centre Relay (downstairs)        D5
+ * w/bl   centre LED (downstairs)          D33
+ * g/w    left Relay (upstairs)            D18
+ * w/br   right LED (boiler)               D26
+ * br/w   right Relay (boiler)             D19
+ * 
+ * Ethernet N
+ * 
+ * w/o  gnd
+ * o/w     5v
+ * w/g    SK6812 D4
+ * bl/w   NC
+ * w/bl   NC
+ * g/w    NC
+ * w/br   RX2 of esp32 from nextion
+ * br/w   TX2 of esp32 from nextion    
+ * 
+
+*/
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"5\":\""  GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  "\","
+      "\"18\":\"" GPIO_NAME_ZONE1_UPSTAIRS_RELAY    "\","
+      "\"19\":\"" GPIO_NAME_ZONE2_BOILER_RELAY      "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"33\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      "\"27\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
+      "\"26\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
+      #endif  
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
+      #endif
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      #endif    
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  /**
+   * @brief Drivers and Sensors for HVAC zones
+   **/
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Upstairs"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "Boiler"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
+
+  /**
+   * @brief HVAC zones
+   **/
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Upstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Boiler"
+
+  /** 
+   * Pin_DS
+   * */
+  #define D_DEVICE_SENSOR_DB18S20_06_NAME        "Water21-Upstairs"
+  #define D_DEVICE_SENSOR_DB18S20_06_ADDRESS     "[40,208,174,149,240,1,60,127]"
+
+  #define D_DEVICE_SENSOR_DB18S20_07_NAME        "Water22-HotCross"
+  #define D_DEVICE_SENSOR_DB18S20_07_ADDRESS     "[40,168,253,149,240,1,60,157]"
+
+  #define D_DEVICE_SENSOR_DB18S20_08_NAME        "Water23-R/C"
+  #define D_DEVICE_SENSOR_DB18S20_08_ADDRESS     "[40,12,164,2,0,0,0,72]"
+
+  #define D_DEVICE_SENSOR_DB18S20_09_NAME        "Water24-Mains"
+  #define D_DEVICE_SENSOR_DB18S20_09_ADDRESS     "[40,9,77,4,0,0,0,131]"
+
+  #define D_DEVICE_SENSOR_DB18S20_10_NAME        "Water25-HotFromBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_10_ADDRESS     "[40,121,172,3,0,0,0,138]"
+
+  #define D_DEVICE_SENSOR_DB18S20_11_NAME        "Water26-Downstairs"
+  #define D_DEVICE_SENSOR_DB18S20_11_ADDRESS     "[40,205,241,149,240,1,60,148]"
+
+  #define D_DEVICE_SENSOR_DB18S20_12_NAME        "Water27-R/H"
+  #define D_DEVICE_SENSOR_DB18S20_12_ADDRESS     "[40,195,112,2,0,0,0,178]"
+
+  #define D_DEVICE_SENSOR_DB18S20_13_NAME        "Water28-HotFromFurnace"
+  #define D_DEVICE_SENSOR_DB18S20_13_ADDRESS     "[40,103,49,3,0,0,0,153]"
+
+  #define D_DEVICE_SENSOR_DB18S20_14_NAME        "Water29-WaterBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_14_ADDRESS     "[40,183,162,149,240,1,60,24]"
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\":" D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\":" D_DEVICE_SENSOR_DB18S20_07_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\":" D_DEVICE_SENSOR_DB18S20_08_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\":" D_DEVICE_SENSOR_DB18S20_09_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\":" D_DEVICE_SENSOR_DB18S20_10_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\":" D_DEVICE_SENSOR_DB18S20_11_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\":" D_DEVICE_SENSOR_DB18S20_12_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\":" D_DEVICE_SENSOR_DB18S20_13_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\":" D_DEVICE_SENSOR_DB18S20_14_ADDRESS ""
+      "}"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+  "}";
+  
+#endif
+
+
 #ifdef DEVICE_TESTBED_CAMERA_SENSOR_MODULE
   #define DEVICENAME_CTR          "testbed_camera_sensor"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"

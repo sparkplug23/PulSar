@@ -23,12 +23,12 @@
 #define SET_BIT(var,bit)    ((var)|=(uint16_t)(0x0001<<(bit)))
 #define UNSET_BIT(var,bit)  ((var)&=(~(uint16_t)(0x0001<<(bit))))
 
-#define NUM_ICS_WS2812_1CH_3X(len) (((len)+2)/3)   // 1 WS2811 IC controls 3 zones (each zone has 1 LED, W)
-#define IC_INDEX_WS2812_1CH_3X(i)  ((i)/3)
+#define NUM_ICS_WS2812_1CH_3X(len)    (((len)+2)/3)   // 1 WS2811 IC controls 3 zones (each zone has 1 LED, W)
+#define IC_INDEX_WS2812_1CH_3X(i)     ((i)/3)
 
-#define NUM_ICS_WS2812_2CH_3X(len) (((len)+1)*2/3) // 2 WS2811 ICs control 3 zones (each zone has 2 LEDs, CW and WW)
-#define IC_INDEX_WS2812_2CH_3X(i)  ((i)*2/3)
-#define WS2812_2CH_3X_SPANS_2_ICS(i) ((i)&0x01)    // every other LED zone is on two different ICs
+#define NUM_ICS_WS2812_2CH_3X(len)    (((len)+1)*2/3) // 2 WS2811 ICs control 3 zones (each zone has 2 LEDs, CW and WW)
+#define IC_INDEX_WS2812_2CH_3X(i)     ((i)*2/3)
+#define WS2812_2CH_3X_SPANS_2_ICS(i)  ((i)&0x01)    // every other LED zone is on two different ICs
 
 
 // Temporary struct for passing bus configuration to bus
@@ -297,7 +297,6 @@ class BusPwm : public Bus {
 
   private:
     uint8_t _pins[5] = {255, 255, 255, 255, 255};
-    // uint16_t _data[5] = {0}; // 10 bit
     RgbcctColor output_colour;
     #ifdef ARDUINO_ARCH_ESP32
     uint8_t _ledcStart = 255;

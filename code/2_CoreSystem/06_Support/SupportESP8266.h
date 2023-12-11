@@ -2,6 +2,8 @@
 #ifndef _SupportESP8266_H_
 #define _SupportESP8266_H_
 
+#include <Arduino.h> // ADDED BY ME
+
 #ifdef ESP8266
 
 #include "stdint.h"
@@ -17,7 +19,8 @@ class SupportESP8266{
 
     static void ESP_Restart(void) {
     //  ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
-      ESP.reset();
+      // ESP.reset();
+      ESP.restart();
     }
 
 

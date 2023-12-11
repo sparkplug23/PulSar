@@ -406,7 +406,7 @@ Serial.flush();
         }
         else
         {
-          Serial.println(D_LOG_PUBSUB "loop() Not Connected");
+          // Serial.println(D_LOG_PUBSUB "loop() Not Connected");
 
           /**
            * @brief Check if not waiting to reconnect
@@ -414,7 +414,7 @@ Serial.flush();
           if(!con->retry_counter)
           {
             con->flag_start_reconnect = true;
-            con->retry_counter = 10;
+            con->retry_counter = 5;
           }
           
         }

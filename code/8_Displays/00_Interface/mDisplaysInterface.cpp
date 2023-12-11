@@ -303,13 +303,13 @@ void mDisplaysInterface::InitDriver(void)
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_UTC_TIME_ID;
 
   if (pCONT_set->Settings.display.model) {
-    pCONT_set->devices_present++;
+    pCONT_set->runtime.devices_present++;
     if (!pCONT_pins->PinUsed(GPIO_BACKLIGHT_ID)) {
-      if (pCONT_set->runtime_var.light_type && (4 == pCONT_set->Settings.display.model)) {
-        pCONT_set->devices_present--;  // Assume PWM channel is used for backlight
+      if (pCONT_set->runtime.light_type && (4 == pCONT_set->Settings.display.model)) {
+        pCONT_set->runtime.devices_present--;  // Assume PWM channel is used for backlight
       }
     }
-    disp_device = pCONT_set->devices_present;
+    disp_device = pCONT_set->runtime.devices_present;
 
 
     #ifdef ENABLE_FEATURE_DISPLAY_LOG_BUFFER

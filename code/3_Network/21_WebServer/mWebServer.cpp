@@ -62,7 +62,7 @@ void mWebServer::createEditHandler(bool enable)
       #ifdef ARDUINO_ARCH_ESP32
       editHandler = &pCONT_web->server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
       #else
-      editHandler = &server.addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
+      editHandler = &pCONT_web->server->addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
       #endif
     #else
       editHandler = &pCONT_web->server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -1715,15 +1715,21 @@ void mWebServer::webHandleReboot(AsyncWebServerRequest* request)
 
   delay(2000); // Allow redirect to be sent
 
+#ifdef ESP32
   esp_restart();
+#else
 
+#endif
 }
 
 
 void mWebServer::webHandleRoot(AsyncWebServerRequest* request)
 { 
 
+#ifdef ESP32
   ALOG_INF(PSTR(D_LOG_NEXTION DEBUG_INSERT_PAGE_BREAK "HTTP: Sending root page to client connected from: %s"), request->host());
+#endif
+
 
   String conv = String();
 

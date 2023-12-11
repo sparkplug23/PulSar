@@ -83,10 +83,13 @@ enum ButtonStates
     
 bool ModuleEnabled();
 
+#ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
 
 #ifndef MAX_KEYS
 #define MAX_KEYS 8                 // Max number of keys or buttons
 #endif // MAX_KEYS
+
+#endif
 
 uint8_t GetHardwareSpecificPullMethod(uint8_t real_pin);
 

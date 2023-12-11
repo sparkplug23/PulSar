@@ -253,7 +253,7 @@ void mSettings::Function_Template_Load(){
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
-  delay(1000);
+  // delay(1000);
 
   runtime.boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE

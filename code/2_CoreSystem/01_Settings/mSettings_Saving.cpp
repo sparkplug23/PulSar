@@ -88,13 +88,13 @@ void mSettings::SettingsLoad(void)
     while (slot <= max_slots) {                                  // Read all config pages in search of valid and latest
       if (slot > 0) {
         flash_location = (1 == slot) ? EEPROM_LOCATION : (2 == slot) ? SETTINGS_LOCATION : flash_location -1;
-        ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)Settings, sizeof(TSettings));
+        // ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, &Settings, sizeof(SETTINGS_HOLDER));
       }
-      if ((Settings->cfg_crc32 != 0xFFFFFFFF) && (Settings->cfg_crc32 != 0x00000000) && (Settings->cfg_crc32 == GetSettingsCrc32())) {
-        if (Settings->save_flag > save_flag) {                    // Find latest page based on incrementing save_flag
-          save_flag = Settings->save_flag;
+      if ((Settings.cfg_crc32 != 0xFFFFFFFF) && (Settings.cfg_crc32 != 0x00000000) && (Settings.cfg_crc32 == GetSettingsCrc32())) {
+        if (Settings.save_flag > save_flag) {                    // Find latest page based on incrementing save_flag
+          save_flag = Settings.save_flag;
           settings_location = flash_location;
-          if (Settings->flag.stop_flash_rotate && (1 == slot)) {  // Stop if only eeprom area should be used and it is valid
+          if (Settings.flag_system.stop_flash_rotate && (1 == slot)) {  // Stop if only eeprom area should be used and it is valid
             break;
           }
         }
@@ -110,8 +110,9 @@ void mSettings::SettingsLoad(void)
       } else
   #endif  // USE_UFILESYS
       {
-        ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)Settings, sizeof(TSettings));
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu"), settings_location, Settings->save_flag);
+        // ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)Settings, sizeof(TSettings));
+        // ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, &Settings, sizeof(SETTINGS));
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu"), settings_location, Settings.save_flag);
       }
     }
   #endif // ESP8266
@@ -242,13 +243,13 @@ void mSettings::SettingsSave(uint8_t rotate)
 
 #ifdef ESP8266
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-    pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)Settings, sizeof(SETTINGS));
+    // pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, &Settings, sizeof(SETTINGS));
 #endif  // USE_MODULE_DRIVERS_FILESYSTEM
-    if (ESP.flashEraseSector(settings_location)) {
-      ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)Settings, sizeof(SETTINGS));
-    }
+    // if (ESP.flashEraseSector(settings_location)) {
+    //   ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, &Settings, sizeof(SETTINGS));
+    // }
 
-    if (!TasmotaGlobal.stop_flash_rotate && rotate) {  // SetOption12 - (Settings) Switch between dynamic (0) or fixed (1) slot flash save location
+    if (!Settings.flag_system.stop_flash_rotate && rotate) {  // SetOption12 - (Settings) Switch between dynamic (0) or fixed (1) slot flash save location
       for (uint32_t i = 0; i < CFG_ROTATES; i++) {
         ESP.flashEraseSector(SETTINGS_LOCATION -i);    // Delete previous configurations by resetting to 0xFF
         delay(1);
@@ -315,7 +316,7 @@ void mSettings::TestSettingsLoad()
       settings_tmp.save_flag,
       settings_tmp.version,
       settings_tmp.bootcount,
-      settings_tmp.cfg_crc
+      0
   );
     #endif // ESP8266
   

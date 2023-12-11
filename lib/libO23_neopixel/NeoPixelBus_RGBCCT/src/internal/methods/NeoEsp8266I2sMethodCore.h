@@ -81,8 +81,14 @@ const uint8_t c_I2sPin = 3; // due to I2S hardware, the pin used is restricted t
 class NeoEsp8266I2sMethodCore
 {
 private:
-    static const uint8_t c_StateBlockCount = 2;
-    static const size_t c_StateDataSize = 4; // mulitples of c_I2sByteBoundarySize
+    // static const uint8_t c_StateBlockCount = 2;
+    // static const size_t c_StateDataSize = 4; // mulitples of c_I2sByteBoundarySize
+
+    // static constexpr uint8_t c_StateBlockCount = 2;
+    // static constexpr size_t c_StateDataSize = 4; // mulitples of c_I2sByteBoundarySize
+
+    #define c_StateBlockCount (uint8_t)2
+    #define c_StateDataSize (size_t)4
 
     // i2s sends 4 byte elements, 
     static const uint16_t c_I2sByteBoundarySize = 4;

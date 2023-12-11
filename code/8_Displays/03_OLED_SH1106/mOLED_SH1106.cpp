@@ -141,7 +141,7 @@ void mOLED_SH1106::RefreshDisplay()
 
 void mOLED_SH1106::InitDriver(void)
 {
-  if (!pCONT_set->i2c_enabled) 
+  if (!pCONT_set->runtime.i2c_enabled) 
   {
     return; 
   }

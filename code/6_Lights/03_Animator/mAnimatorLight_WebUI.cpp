@@ -170,7 +170,10 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
     if (errorFlag) {root[F("error")] = errorFlag; errorFlag = ERR_NONE;} //prevent error message to persist on screen
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;
+    
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
     root[F("pl")] = currentPlaylist;
+#endif //  ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
     JsonObject nl = root.createNestedObject("nl");
     nl["on"] = nightlightActive;

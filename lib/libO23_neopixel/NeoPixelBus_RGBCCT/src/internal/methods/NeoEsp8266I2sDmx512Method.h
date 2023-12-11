@@ -158,7 +158,7 @@ public:
         AllocateI2s(i2sBufferSize, i2sResetSize, is2BufMaxBlockSize, T_SPEED::MtbpLevel);
     }
 
-    NeoEsp8266I2sDmx512MethodBase([[maybe_unused]] uint8_t pin, uint16_t pixelCount, size_t elementSize, size_t settingsSize) : 
+    NeoEsp8266I2sDmx512MethodBase( uint8_t pin, uint16_t pixelCount, size_t elementSize, size_t settingsSize) : 
         NeoEsp8266I2sDmx512MethodBase(pixelCount, elementSize, settingsSize)
     {
     }
@@ -223,7 +223,7 @@ public:
         return _sizeData - T_SPEED::HeaderSize;
     }
 
-    void applySettings([[maybe_unused]] const SettingsObject& settings)
+    void applySettings( const SettingsObject& settings)
     {
     }
 

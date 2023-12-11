@@ -126,10 +126,10 @@ void mRuleEngine::RulesLoad_From_Progmem()
   // Read into local
   D_DATA_BUFFER_CLEAR();
   memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  ALOG_INF( PSTR("RULES_TEMPLATE Load = \"%d|%s\""), data_buffer.payload.len, data_buffer.payload.ctr);
+  ALOG_INF( PSTR("RULES_TEMPLATE Load = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);

@@ -123,10 +123,8 @@ void mBME::Pre_Init(){
       bmp_sensors[bmp_count].bmp_type = bmp_type;
       bmp_sensors[bmp_count].bmp_model = 0;
 
-      
       ALOG_INF(PSTR("i2c_address %d"), bmp_sensors[bmp_count].i2c_address);
       ALOG_INF(PSTR("bmp_type %d"), bmp_sensors[bmp_count].bmp_type);
-
 
       bool success = false;
       switch (bmp_type) {
@@ -466,10 +464,10 @@ bool mBME::Bme680Init(uint8_t bmp_idx) {
   int8_t rslt = bme68x_init(&bme_dev[bmp_idx]);
   if (rslt != BME68X_OK) { return false; }
 
-//  AddLog(LOG_LEVEL_DEBUG, PSTR("BME: Gas variant %d"), bme_dev[bmp_idx].variant_id);
+  //  AddLog(LOG_LEVEL_DEBUG, PSTR("BME: Gas variant %d"), bme_dev[bmp_idx].variant_id);
 
-//  rslt = bme68x_get_conf(&bme_conf[bmp_idx], &bme_dev[bmp_idx]);
-//  if (rslt != BME68X_OK) { return false; }
+  //  rslt = bme68x_get_conf(&bme_conf[bmp_idx], &bme_dev[bmp_idx]);
+  //  if (rslt != BME68X_OK) { return false; }
   // Set the temperature, pressure and humidity settings
   bme_conf[bmp_idx].os_hum = BME68X_OS_2X;
   bme_conf[bmp_idx].os_pres = BME68X_OS_4X;
@@ -585,13 +583,13 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
         #ifdef ENABLE_DEVFEATURE_BME680
         JBI->Add(D_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
          #endif // ENABLE_DEVFEATURE_BME680
-        if(json_level >=  JSON_LEVEL_DETAILED)
-        {          
-          JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-            JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-            JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-bmp_sensors[sensor_id].ischangedtLast)/1000));
-          JBI->Object_End();  
-        }
+        // if(json_level >=  JSON_LEVEL_DETAILED)
+        // {          
+        //   JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
+        //     JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+        //     JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-bmp_sensors[sensor_id].ischangedtLast)/1000));
+        //   JBI->Object_End();  
+        // }
       JBI->Object_End();
     }
   }
@@ -599,7 +597,6 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
   return JBI->End();
 
 }
-
 
   
 /******************************************************************************************************************

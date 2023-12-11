@@ -65,6 +65,13 @@
 void mAnimatorLight::EffectAnim__Solid_Colour()
 {
 
+// tmp force it, but in reality it should be always set to reserve the space
+
+#ifdef DEVICE_CHRISTMAS__KITCHEN_SHELF
+
+#endif
+
+
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2) ){ return; } // Pixel_Width * Two_Channels
 
   RgbcctColor desired_colour = SEGMENT.GetPaletteColour();
@@ -124,7 +131,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
   DEBUG_PIN1_SET(1);
 
 }
-static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;ra=1000,ti=300";
+static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = "!,!,c1,c2,c3,!,!,!;!,!,!,!,!;ra=1000,ti=300";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -1231,17 +1238,20 @@ static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM = ",,,,,Time,Rate
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
-    /**
-     * Desc: pixels are rotated
-     * Para: direction of motion, speed, instant or blend change
-     * 
-     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
-     * */
-
+/**
+ * DESRIPTION: Current pixels are rotated set by previous palette. With seqencing/playlists, this enables cascading effect
+ * Para: 
+ * 
+ * Intensity slider will be how many pixels to move by.
+ * 0of255, will mean the minimum which is 1 pixel
+ * 255 will be scaled from the segment length, perhaps half but needs visual testing for what makes sense. Half would mean alternate the entire pixels
+ * 
+ * 
+ * */
 void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 {
 
-  ALOG_INF(PSTR("EffectAnim__Rotating_Previous_Animation"));
+  // ALOG_INF(PSTR("EffectAnim__Rotating_Previous_Animation"));
 
   uint16_t* movement_direction_p = &SEGMENT.params_internal.aux0;  
 
@@ -1258,10 +1268,35 @@ void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
   // }
   // else
   // {
+    RgbcctColor colour = SEGMENT.GetPixelColor(0); 
+
+    #ifndef ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY
 
 
 
+    RgbcctColor colourfirst = SEGMENT.GetPixelColor(0); 
+    RgbcctColor colour = SEGMENT.GetPixelColor(0); 
+    // RgbcctColor colour1 = SEGMENT.GetPixelColor(0); 
+    // colourfirst.debug_print("colourfirst");
+    for(uint16_t p = 0; p < SEGLEN-1; p++){ //move them all ONCE towards first pixel
+    // for(uint16_t p = 0; p < 10; p++){ //move them all ONCE towards first pixel
+      colour = SEGMENT.GetPixelColor(p+1);
+      // colour1 = SEGMENT.GetPixelColor(p+1);
+      // ALOG_INF(PSTR("p0 %d=%d,%d,%d"),p, colour.R, colour.G, colour.B);
+      // ALOG_INF(PSTR("p1 %d=%d,%d,%d"),p, colour1.R, colour1.G, colour1.B);
+    // colour.debug_print("colour");
+      SEGMENT.SetPixelColor(p, colour, BRIGHTNESS_ALREADY_SET);
+    }
+    SEGMENT.SetPixelColor(SEGLEN-1, colourfirst); // Insert saved first pixel into last pixel as "wrap around"
 
+    SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR(); // Change this to be function that sets transition up
+    return;
+
+
+    #endif
+
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY
 
 
 
@@ -1287,29 +1322,56 @@ void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
      * I think the brightness is suppressing out the colour
      * 
      **/
-    RgbcctColor colourfirst = SEGMENT.GetPixelColor(0); 
-    RgbcctColor colour = SEGMENT.GetPixelColor(0); 
-    // RgbcctColor colour1 = SEGMENT.GetPixelColor(0); 
-    // colourfirst.debug_print("colourfirst");
-    for(uint16_t p = 0; p < SEGLEN-1; p++){ //move them all ONCE towards first pixel
-    // for(uint16_t p = 0; p < 10; p++){ //move them all ONCE towards first pixel
-      colour = SEGMENT.GetPixelColor(p+1);
-      // colour1 = SEGMENT.GetPixelColor(p+1);
-      // ALOG_INF(PSTR("p0 %d=%d,%d,%d"),p, colour.R, colour.G, colour.B);
-      // ALOG_INF(PSTR("p1 %d=%d,%d,%d"),p, colour1.R, colour1.G, colour1.B);
-    // colour.debug_print("colour");
-      SEGMENT.SetPixelColor(p, colour, BRIGHTNESS_ALREADY_SET);
+
+    uint8_t intensity_value = SEGMENT.intensity();
+    uint16_t pixels_to_move = map(intensity_value, 0,255, 1,SEGLEN/2); // 0of255, will mean the minimum which is 1 pixel
+
+    /**STEP 1: Save the START section that will be overwritten
+     * @brief JUMP  section:    0 - pixels_to_move  Jump is saved, then inserted at the end for the wrap
+     *        SLIDE section:    (pixels_to_move+1) - SEGLEN   Slide is moved one pixel at a time
+     */
+    uint16_t jump_end_pixel = pixels_to_move; // ie 0-jump_end_pixel 
+
+    // ALOG_INF(PSTR("intensity_value %d, pixels_to_move %d"), intensity_value, pixels_to_move);
+
+    std::vector<RgbcctColor> colours_saved;
+    for(uint16_t pixel = 0; pixel < jump_end_pixel; pixel++)
+    {
+      // ALOG_INF(PSTR("Ap %d, %d/%d"), pixel, pixel, jump_end_pixel);
+      colours_saved.push_back(SEGMENT.GetPixelColor(pixel));
     }
-    SEGMENT.SetPixelColor(SEGLEN-1, colourfirst); // Insert saved first pixel into last pixel as "wrap around"
+      // ALOG_INF(PSTR("colours_saved %d"), colours_saved.size() );
 
-  // }
+    /* STEP 2: Move the rest of the pixels from END, into START
+    *
+    * So if 100 leds total, and we are moving the last 50, then the 50th needs moved to 0, 51st to 1 etc
+    * So the shift would be getPixel(50) to setPixel(0), getPixel(51) to setPixel(1) etc
+    * 
+    */
+    for(uint16_t pixel = 0; pixel < SEGLEN-jump_end_pixel; pixel++){ // 100-50
+      colour = SEGMENT.GetPixelColor(pixel+jump_end_pixel);
+      SEGMENT.SetPixelColor(pixel, colour, BRIGHTNESS_ALREADY_SET);
+      // ALOG_INF(PSTR("Bp %d->%d"), pixel+jump_end_pixel, pixel);
+    }
 
-  // SEGMENT.SetPixelColor(0, RgbColor(random(0,10)*25,255,255));
+    /** STEP 3: Insert the saved pixels at the end
+     * @brief 
+     * 
+     * 
+     */
+    for(uint16_t pixel = 0; pixel < colours_saved.size(); pixel++){ // 100-50
+      colour = colours_saved[pixel];
+      SEGMENT.SetPixelColor(pixel+(SEGLEN-jump_end_pixel), colour, BRIGHTNESS_ALREADY_SET);
+      // ALOG_INF(PSTR("Cp %d->%d,  %d, %d/%d"),pixel, pixel+(SEGLEN-jump_end_pixel), pixel, pixel, jump_end_pixel);
+    }
+
 
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR(); // Change this to be function that sets transition up
 
+    #endif
 }
-static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+// static const char PM_EFFECT_CONFIG__POPCORN[] PROGMEM = "!,!,,,,,,,Overlay;!,!,!;!;;m12=1"; //bar
+static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM = "!,!,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
@@ -1840,6 +1902,112 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+
+
+
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+void mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
+{
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.virtualLength();
+
+  if (!SEGMENT.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+    return;
+  }
+  
+  /**
+   * @brief Step 1: Draw palette 1 as base
+   * 
+   */
+  RgbcctColor colour = RgbcctColor(0);
+  for(uint16_t pixel = 0; 
+                pixel < SEGMENT.virtualLength(); 
+                pixel++
+  ){
+
+    colour = SEGMENT.GetPaletteColour(pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette.id, pixel);
+    
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+    
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type__used_in_effect_generate, colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
+    #endif
+
+  }
+
+  /**
+   * @brief Step 2: Draw over randomly with palette 2
+   * Intensity will pick how many to randomly pick
+   * 
+   * For xmas2022, forced as white
+   */
+
+  RgbcctColor overdraw_colour = RgbcctColor(0);
+
+
+
+
+
+
+
+
+  // colour = RgbcctColor(255,255,255);
+  uint16_t random_pixel = 0;
+  
+  uint16_t pixels_to_update = mapvalue(
+                                      SEGMENT.intensity(), 
+                                      0,255, 
+                                      0,SEGMENT.length()
+                                    );
+
+  for(uint16_t pixel = 0; 
+                pixel < pixels_to_update; 
+                pixel++
+  ){
+
+    // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette.id, pixel);
+    
+    // if(SEGMENT.flags.brightness_applied_during_colour_generation){
+    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+    // }
+
+    random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
+
+    overdraw_colour = RgbcctColor(0);  //GetColourFromUnloadedPalette2(SEGMENT.params_user.val0, random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
+
+    // overdraw_colour.debug_print("overdraw_colour");
+
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type__used_in_effect_generate, overdraw_colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
+    #endif
+
+  }
+
+
+
+  /**
+   * @brief Update outputs
+   * 
+   */
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+static const char PM_EFFECT_CONFIG__TWINKLE_OUT_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
@@ -7398,8 +7566,9 @@ void mAnimatorLight::EffectAnim__Twinkle_Up() // Firework_Rain
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__TWINKLEUP[] PROGMEM = "!,Intensity;!,!;!;;m12=0";
+static const char PM_EFFECT_CONFIG__TWINKLE_UP[] PROGMEM = "!,Intensity;!,!;!;;m12=0";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8985,13 +9154,13 @@ void mAnimatorLight::EffectAnim__Twinkle_Fox()
 {
   return EffectAnim__Base_Twinkle_Fox(false);
 }
-static const char PM_EFFECT_CONFIG__TWINKLEFOX[] PROGMEM = "!,Twinkle rate;;!";
+static const char PM_EFFECT_CONFIG__TWINKLE_FOX[] PROGMEM = "!,Twinkle rate;;!";
 
 void mAnimatorLight::EffectAnim__Twinkle_Cat()
 {
   return EffectAnim__Base_Twinkle_Fox(true);
 }
-static const char PM_EFFECT_CONFIG__TWINKLECAT[] PROGMEM = "!,Twinkle rate;;!";
+static const char PM_EFFECT_CONFIG__TWINKLE_CAT[] PROGMEM = "!,Twinkle rate;;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -12500,22 +12669,25 @@ void mAnimatorLight::EffectAnim__Hardware__Show_Bus()
     uint16_t start = pCONT_iLight->bus_manager->getBus(bus_i)->getStart();
     uint16_t length = pCONT_iLight->bus_manager->getBus(bus_i)->getLength();
 
-    ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus %d (%d/%d\t%d)"), bus_i, start, length, start + length);
+    ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus %d/%d (%d/%d\t%d)"), bus_i, buscount, start, length, start + length);
 
-    float huef = mSupport::mapfloat(bus_i, 0, buscount, 0, 1);
+    float huef = mSupport::mapfloat((float)bus_i, 0.0f, (float)buscount, 0.0f, 1.0f);
     float satf = 1.0f;
 
     if(bus_i%2)
-      satf = 0.85f;
+      satf = 1.0f;
 
-    RgbcctColor colour = RgbcctColor(HsbColor(huef,satf,0.5f));
+    RgbcctColor colour = HsbColor(huef,satf,1.0f);
 
     for(uint16_t i = start; i < start + length; i++)
     {
-      if(i < start + 5)
+      if(i < start + 1 + bus_i) // let the number of one white pixels be the bus index
+      {
         SEGMENT.SetPixelColor(i, RgbcctColor(255,255,255));
-      else
+        ALOG_INF(PSTR("Bus i < start  %d (%d/%d\t%d)\ti=%d hue100=%d"), bus_i, start, length, start + length, i, uint16_t(huef*100));
+      }else{
         SEGMENT.SetPixelColor(i, colour);
+      }
     }
 
 
@@ -13493,7 +13665,15 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = ",,,,,Time,
 
 
 
-
+/**
+ * @brief 
+ * 
+ * Effect Ideas:
+ * 
+ * (1) Wipe Random from the top, that fills pixel by pixel until it reaches an end stop on the bottom. This end may jump in single pixels, or in multiples (ie grouping=200). The effect would be banded falling tetris blocks and when the banding is complete, restart
+ * 
+ * 
+ */
 void mAnimatorLight::LoadEffects()
 {
 
@@ -13543,6 +13723,13 @@ void mAnimatorLight::LoadEffects()
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect3(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID, &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,          PM_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR,        PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI);
   #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,                        &mAnimatorLight::EffectAnim__Twinkle_Out_Palette,          PM_EFFECT_NAME__TWINKLE_OUT_PALETTE,        PM_EFFECT_CONFIG__TWINKLE_OUT_PALETTE);
+  #endif
+
+
+
+  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect3(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,                   &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,              PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR,                          PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE);
   #endif
@@ -13666,9 +13853,9 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__HYPER_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Hyper,               PM_EFFECTS_FUNCTION__HYPER_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__HYPER_SPARKLE);
   addEffect3(EFFECTS_FUNCTION__TWINKLE__ID,         &mAnimatorLight::EffectAnim__Twinkle,                     PM_EFFECTS_FUNCTION__TWINKLE__NAME_CTR,                 PM_EFFECT_CONFIG__TWINKLE);
   addEffect3(EFFECTS_FUNCTION__COLORTWINKLE__ID,    &mAnimatorLight::EffectAnim__Twinkle_Colour,              PM_EFFECTS_FUNCTION__COLORTWINKLE__NAME_CTR,            PM_EFFECT_CONFIG__COLORTWINKLE);
-  addEffect3(EFFECTS_FUNCTION__TWINKLEFOX__ID,      &mAnimatorLight::EffectAnim__Twinkle_Fox,                 PM_EFFECTS_FUNCTION__TWINKLEFOX__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLEFOX);
-  addEffect3(EFFECTS_FUNCTION__TWINKLECAT__ID,      &mAnimatorLight::EffectAnim__Twinkle_Cat,                 PM_EFFECTS_FUNCTION__TWINKLECAT__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLECAT);
-  addEffect3(EFFECTS_FUNCTION__TWINKLEUP__ID,       &mAnimatorLight::EffectAnim__Twinkle_Up,                  PM_EFFECTS_FUNCTION__TWINKLEUP__NAME_CTR,               PM_EFFECT_CONFIG__TWINKLEUP);
+  addEffect3(EFFECTS_FUNCTION__TWINKLE_FOX__ID,     &mAnimatorLight::EffectAnim__Twinkle_Fox,                 PM_EFFECTS_FUNCTION__TWINKLE_FOX__NAME_CTR,             PM_EFFECT_CONFIG__TWINKLE_FOX);
+  addEffect3(EFFECTS_FUNCTION__TWINKLE_CAT__ID,     &mAnimatorLight::EffectAnim__Twinkle_Cat,                 PM_EFFECTS_FUNCTION__TWINKLE_CAT__NAME_CTR,             PM_EFFECT_CONFIG__TWINKLE_CAT);
+  addEffect3(EFFECTS_FUNCTION__TWINKLE_UP__ID,      &mAnimatorLight::EffectAnim__Twinkle_Up,                  PM_EFFECTS_FUNCTION__TWINKLE_UP__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLE_UP);
   addEffect3(EFFECTS_FUNCTION__SAW__ID,             &mAnimatorLight::EffectAnim__Saw,                         PM_EFFECTS_FUNCTION__SAW__NAME_CTR,                     PM_EFFECT_CONFIG__SAW);
   addEffect3(EFFECTS_FUNCTION__DISSOLVE__ID,        &mAnimatorLight::EffectAnim__Dissolve,                    PM_EFFECTS_FUNCTION__DISSOLVE__NAME_CTR,                PM_EFFECT_CONFIG__DISSOLVE);
   addEffect3(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID, &mAnimatorLight::EffectAnim__Dissolve_Random,             PM_EFFECTS_FUNCTION__DISSOLVE_RANDOM__NAME_CTR,         PM_EFFECT_CONFIG__DISSOLVE_RANDOM);

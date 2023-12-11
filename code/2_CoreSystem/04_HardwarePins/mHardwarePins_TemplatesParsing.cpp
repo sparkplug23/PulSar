@@ -34,6 +34,7 @@ bool mHardwarePins::ReadModuleTemplateFromProgmem(){
     ModuleTemplateJsonParser(buffer);
     return true;
   #else 
+    #error "USE_MODULE_TEMPLATE not defined"
     return false;
   #endif // MODULE_TEMPLATE
   
@@ -536,7 +537,7 @@ void mHardwarePins::GpioInit(void)
    * 2023: Just check if the HWSerial is set to 2 then do it here
    * 
    */
-    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { 
+    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->runtime.my_module_type)) { 
       DEBUG_LINE_HERE;
       Serial.set_tx(2); 
       flag_serial_set_tx_set = true;
@@ -688,6 +689,9 @@ void mHardwarePins::GpioInit(void)
   }
 
   /**
+   * @brief **********************************************************************************************************************
+   * 
+   *
    * @brief New to help with inactive IC data lines, set esp32 outputs to either high or low for enable pins of ICs
    * 
    */
@@ -859,7 +863,7 @@ void mHardwarePins::GpioInit(void)
 
       #ifdef ESP8266
       // if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
-        analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
+        analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->runtime.pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
       // } else {
       //   pCONT_set->pwm_present = true;
       //   analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);

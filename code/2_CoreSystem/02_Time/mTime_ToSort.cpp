@@ -644,6 +644,92 @@ uint8_t mTime::CheckBetween_Day_DateTimes(datetime_t* start, datetime_t* end){
 }
 
 
+bool mTime::IsShortTimeWithinRange(time_short start, time_short end)
+{
+
+  uint32_t start_sod = (start.hour*SEC2HOUR)+(start.minute*SEC2MIN)+(start.second);
+  uint32_t end_sod =   (end.hour*SEC2HOUR)+(end.minute*SEC2MIN)+(end.second);
+
+  uint32_t time_of_day_secs_now = RtcTime.Dseconds;
+  int32_t time_until_start = time_of_day_secs_now-start_sod; 
+  int32_t time_until_end = end_sod-time_of_day_secs_now;
+
+  bool flag_24hrs_added = false;
+  bool flag_time_period_over_midnight = false;
+  bool flag_within_time_window = false;
+
+  // if times are equal, return early as false
+  if(start_sod == end_sod) return false;
+
+  /**
+   * Check if condition has time going over midnight into next day
+   * */
+  if(end_sod < start_sod)
+  {
+    flag_time_period_over_midnight = true;
+  }
+  
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, flag_time_period_over_midnight = %d"), flag_time_period_over_midnight);
+
+  if(flag_time_period_over_midnight)
+  {
+    /**
+     * Check if current time is within current, or next day (after midnight)
+     * If tod < end, it is already inside time window
+     * */
+    if(time_of_day_secs_now < end_sod)
+    {
+      flag_within_time_window = true;
+    }
+    /**
+     * If not inside next day window, lets check previous day (ie from start to midnight)
+     * */
+    else
+    if(time_of_day_secs_now > start_sod)
+    {
+      flag_within_time_window = true;
+    }
+  }
+  /**
+   * time window spans same day ie start before end, on same day
+   * */
+  else
+  {
+
+    if((start_sod < time_of_day_secs_now)&&(time_of_day_secs_now < end_sod)){ //now>start AND now<END
+      flag_within_time_window = true;
+    }else{
+      flag_within_time_window = false;
+    }
+
+  }
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+  //   start.hour,start.minute,start.second,time_until_start,
+  //   RtcTime.Dseconds,
+  //   time_until_end,end.hour,end.minute,end.second
+  // );
+  
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME 
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d %d)"
+    "\n\r\t%02d:%02d:%02d (%d seconds)"
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d) %s %s"),   
+    start.hour,start.minute,start.second, start_sod, time_until_start,
+    RtcTime.hour,RtcTime.minute,RtcTime.second, RtcTime.Dseconds, time_of_day_secs_now,
+    end.hour,end.minute,end.second, end_sod, time_until_end,
+    // flag_24hrs_added?"+24hrs added":"",
+    flag_time_period_over_midnight?"Window Across Midnight":"",
+    flag_within_time_window?"WITHIN":"OUTSIDE"
+  );
+  #endif// ENABLE_LOG_LEVEL_INFO
+
+  return flag_within_time_window;
+
+
+
+
+}
 
 // New datetime checker for week only (Wday,hours,minutes,seconds)
 int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t* end){
@@ -1914,9 +2000,9 @@ void mTime::RtcSecond(void)
 void mTime::RtcSync(void) {
   // Rtc.time_synced = true;
   RtcSecond();
-    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
  AddLog(LOG_LEVEL_TEST, PSTR("RTC: Synced"));
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 // #endif
@@ -1955,7 +2041,9 @@ void mTime::RtcPreInit(void) {
 void mTime::WifiPollNtp() {
   static uint8_t ntp_sync_minute = 0;
 
-  // ALOG_INF(PSTR("mTime::WifiPollNtp"));
+  #ifdef ENABLE_DEBUGFEATURE_TIME__NTP_CHECK
+  ALOG_INF(PSTR("mTime::WifiPollNtp"));
+  #endif
 
   // DEBUG_LINE_HERE;
   
@@ -1970,32 +2058,45 @@ void mTime::WifiPollNtp() {
 
   }
     
-    // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
+    AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
 
   uint8_t uptime_minute = (uptime.seconds_nonreset / 60) % 60;  // 0 .. 59
   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
     ntp_sync_minute = 1;                 // If sync prepare for a new cycle
   }
+
+  #ifdef ENABLE_DEBUGFEATURE_TIME__NTP_CHECK
+    AddLog(LOG_LEVEL_TEST, PSTR("uptime.seconds_nonreset %d"), uptime.seconds_nonreset);
+    AddLog(LOG_LEVEL_TEST, PSTR("uptime_minute %d"), uptime_minute);
+  #endif
+
   // First try ASAP to sync. If fails try once every 60 seconds based on chip id
   uint8_t offset = (uptime.seconds_nonreset < 30) ? RtcTime.second : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
        pCONT_set->runtime.ntp_force_sync ) ) {                                          // Forced sync
-//  AddLog(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
+    
+    #ifdef ENABLE_DEBUGFEATURE_TIME__NTP_CHECK
+    AddLog(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
+    #endif
 
     pCONT_set->runtime.ntp_force_sync = false;
     uint32_t ntp_time = WifiGetNtp();
-    // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
+
+    #ifdef ENABLE_DEBUGFEATURE_TIME__NTP_CHECK
+    AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
+    #endif
 
     if (ntp_time > START_VALID_UTC_TIME) {
       Rtc.utc_time = ntp_time;
-      Rtc.ntp_time = ntp_time; //me
+      Rtc.ntp_time = ntp_time;
       ntp_sync_minute = 60;             // Sync so block further requests
       RtcSync();
     } else {
       ntp_sync_minute++;                // Try again in next minute
     }
   }
+  
 }
 
 uint32_t mTime::WifiGetNtp(void) {

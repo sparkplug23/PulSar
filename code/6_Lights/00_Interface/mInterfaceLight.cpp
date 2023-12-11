@@ -106,8 +106,65 @@ void mInterfaceLight::Pre_Init(void)
 void mInterfaceLight::Template_Load()
 {
 
+  bool template_loaded = false;
+
+  /**
+   * @brief Check first if alternate templates are being used, to be selected by pin
+   * 
+   */
+  #ifdef ENABLE_FEATURE_LIGHTING__ENABLE_ALTERANTE_TEMPLATE_USING_GPIO_SWITCH_ONE
+
+  if(pCONT_pins->PinUsed(GPIO_SWT1_INV_ID))
+  {
+    if(pCONT_pins->DigitalRead(GPIO_SWT1_INV_ID)==0) // switch to LOW to activate alternate template
+    {
+      template_loaded = true;
+          
+      ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
+      D_DATA_BUFFER_CLEAR();
+
+
+      ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
+
+
+      // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
+      // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
+      memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE_ALTERNATE,sizeof(LIGHTING_TEMPLATE_ALTERNATE));
+
+      ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+      data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+
+      data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // to avoid need to memset everything
+
+      ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+      ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE_ALTERNATE), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE_ALTERNATE)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
+      #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+      Serial.println(data_buffer.payload.ctr);
+      #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+
+
+      ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+
+      // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+
+      pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+      ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
+
+    }
+
+  }
+
+  #endif  // ENABLE_FEATURE_LIGHTING__ENABLE_ALTERANTE_TEMPLATE_USING_GPIO_SWITCH_ONE
+
+
+
   #ifdef USE_LIGHTING_TEMPLATE
   // load from progmem into local
+
+  if(!template_loaded)
+  {
 
 
   ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
@@ -151,6 +208,8 @@ void mInterfaceLight::Template_Load()
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
   ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
+
+  }
 
   #endif // USE_LIGHTING_TEMPLATE
 
@@ -803,11 +862,11 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     start = jtok.getInt();
     ALOG_INF(PSTR("start %d"), start);
   }
-  if(jtok = obj["S"])
-  {
-    start = jtok.getInt();
-    ALOG_INF(PSTR("start %d"), start);
-  }
+  // if(jtok = obj["S"])
+  // {
+  //   start = jtok.getInt();
+  //   ALOG_INF(PSTR("start %d"), start);
+  // }
 
 
   if(jtok = obj["Length"])
@@ -815,11 +874,11 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     length = jtok.getInt();
     ALOG_INF(PSTR("length %d"), length);
   }
-  if(jtok = obj["L"])
-  {
-    length = jtok.getInt();
-    ALOG_INF(PSTR("length %d"), length);
-  }
+  // if(jtok = obj["L"])
+  // {
+  //   length = jtok.getInt();
+  //   ALOG_INF(PSTR("length %d"), length);
+  // }
 
 
   if(jtok = obj["BusType"])
@@ -844,13 +903,13 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
       ColourOrder = GetColourOrder_FromName(jtok.getStr());
     }
   }
-  if(jtok = obj["CO"])
-  {
-    if(jtok.isStr())
-    {
-      ColourOrder = GetColourOrder_FromName(jtok.getStr());
-    }
-  }
+  // if(jtok = obj["CO"])
+  // {
+  //   if(jtok.isStr())
+  //   {
+  //     ColourOrder = GetColourOrder_FromName(jtok.getStr());
+  //   }
+  // }
 
 
   uint8_t bus_index = bus_count; // next bus space 
@@ -1295,6 +1354,10 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
       JBI->Array_End();
 
       JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
+
+      JBI->Add("getTypeName", bus_manager->busses[bus_i]->getTypeName());
+
+      
 
       uint8_t pins[5] = {0};
       uint8_t pin_count = 0;

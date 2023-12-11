@@ -75,7 +75,7 @@
 			<div class="slider" style="padding-right:32px;">
 				<i class="icons slider-icon" onclick="tglTheme()" style="transform: translate(-32px,5px);">&#xe2a6;</i>
 				<div class="sliderwrap il">
-					<input id="sliderBri" onchange="setBri()" oninput="updateTrail(this)" max="255" min="1" type="range" value="128" />
+					<input id="sliderBri" onchange="setBri()" oninput="updateTrail(this)" max="255" min="0" type="range" value="128" />
 					<div class="sliderdisplay"></div>
 				</div>
 				<output class="sliderbubble"></output>
@@ -316,6 +316,15 @@
 				</div>
 				<output class="sliderbubble"></output>
 				<span id="sliderLabel6" class="tooltiptext">Transition Rate</span>
+			</div>
+			<div id="slider7" class="slider">
+				<i class="icons slider-icon" onclick="tglFreeze()">&#xe325;</i>
+				<div class="sliderwrap il">
+					<input id="sliderGrouping" class="noslide" onchange="setGrouping()" oninput="updateTrail(this)" max="255" min="1" type="range" value="1" />
+					<div class="sliderdisplay"></div>
+				</div>
+				<output class="sliderbubble"></output>
+				<span id="sliderLabel7" class="tooltiptext">Grouping</span>
 			</div>
 			<div id="fxopt" class="option fade">
 				<label id="opt0" class="check ochkl hide"><i class="icons">&#xe2b3;</i><span class="tooltiptext" id="optLabel0">Check 1</span>

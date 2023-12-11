@@ -250,7 +250,7 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
   }
 
   // relay_status[num].onoff = state;
-  bitWrite(pCONT_set->power, num, state);
+  bitWrite(pCONT_set->runtime.power, num, state);
 
   if(state){ 
     relay_status[num].last.ontime = pCONT_time->RtcTime; //create future "operators" to handle these conversions
@@ -265,7 +265,7 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 }
 
 uint8_t mRelays::CommandGet_Relay_Power(uint8_t num){
-  return bitRead(pCONT_set->power, num);
+  return bitRead(pCONT_set->runtime.power, num);
 }
 
 

@@ -274,8 +274,6 @@ class mBME :
     struct bme68x_heatr_conf *bme_heatr_conf = nullptr;
 
     static void Bme68x_Delayus(uint32_t period, void *intf_ptr);
-    // int8_t Bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
-    // int8_t Bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
     bool Bme680Init(uint8_t bmp_idx);
     void Bme680Read(uint8_t bmp_idx);
 
@@ -292,26 +290,17 @@ class mBME :
       if(index > settings.fSensorCount-1) {value->sensor_type.push_back(0); return ;}  
       switch (bmp_sensors[index].bmp_type) 
       {
-        case BMP180_CHIPID:            
+        case BME280_CHIPID:
+          value->sensor_type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+          value->data_f.push_back(bmp_sensors[index].humidity);
+          // nobreak intentional
+        case BMP280_CHIPID:    
+        case BMP180_CHIPID:        
           value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
           value->data_f.push_back(bmp_sensors[index].temperature);
           value->sensor_type.push_back(SENSOR_TYPE_PRESSURE_ID);
           value->data_f.push_back(bmp_sensors[index].pressure);          
-          break;
-        case BMP280_CHIPID:
-          value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-          value->data_f.push_back(bmp_sensors[index].temperature);
-          value->sensor_type.push_back(SENSOR_TYPE_PRESSURE_ID);
-          value->data_f.push_back(bmp_sensors[index].pressure);   
-          break;
-        case BME280_CHIPID:
-          value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-          value->data_f.push_back(bmp_sensors[index].temperature);
-          value->sensor_type.push_back(SENSOR_TYPE_PRESSURE_ID);
-          value->data_f.push_back(bmp_sensors[index].pressure);   
-          value->sensor_type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-          value->data_f.push_back(bmp_sensors[index].humidity);
-          break;
+        break;
         #ifdef ENABLE_DEVFEATURE_BME680
         case BME680_CHIPID:        
           value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
@@ -322,7 +311,7 @@ class mBME :
           value->data_f.push_back(bmp_sensors[index].pressure);
           value->sensor_type.push_back(SENSOR_TYPE_GAS_RESISTANCE_ID);
           value->data_f.push_back(bmp_sensors[index].bmp_gas_resistance);   
-          break;
+        break;
         #endif // ENABLE_DEVFEATURE_BME680
       }
       value->sensor_id = index;

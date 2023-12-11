@@ -806,9 +806,14 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     #else // ESP8266 requires safe reading out of progmem first
     // _palette_container->pData = std::vector<uint8_t>();
     // _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
-    uint8_t buffer3[255];//ptr->data_length];
-    memcpy_P(buffer3, ptr->data, sizeof(uint8_t)*ptr->data_length);
-    _palette_container->pData.assign(buffer3, buffer3 + ptr->data_length);
+
+
+    // uint8_t buffer3[255];//ptr->data_length];
+    // memcpy_P(buffer3, ptr->data, sizeof(uint8_t)*ptr->data_length);
+    // _palette_container->pData.assign(buffer3, buffer3 + ptr->data_length);
+
+    
+    _palette_container->pData = ptr->data;
     #endif  
 
   }else
@@ -4378,9 +4383,19 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
       pCONT_iLight->bus_manager->setPixelColor(indexSet, colour_hardware);
       
       #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+
+      
+
       // Replicate for virtuallength*decimate
       for(uint8_t d=0;d<decimate;d++) 
       {
+
+        // tmp fix, decimate and grouping on together breaks it
+        if(j>0)
+        {
+          break; //dont apply decimate when grouping is on
+        }
+
         uint16_t new_indexSet = indexSet + (d*virtualLength());
        // recheck still within range
        if (

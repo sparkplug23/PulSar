@@ -205,7 +205,7 @@ void mButtons::Pre_Init(void)
     }
   }
 
-  pCONT_set->devices_present += settings.buttons_found;
+  pCONT_set->runtime.devices_present += settings.buttons_found;
   if(settings.buttons_found){ settings.fEnableSensor = true; }
 
   // buttons_found = 0;
@@ -632,7 +632,7 @@ void mButtons::ButtonHandler(void) {
            * @brief Hold timer is counting (pressed) and press count is within range
            * */
           if (
-            !pCONT_set->restart_flag && 
+            !pCONT_set->runtime.restart_flag && 
             !buttons[id].hold_timer && 
             (buttons[id].press_counter > 0) && (buttons[id].press_counter < 7)
           ){

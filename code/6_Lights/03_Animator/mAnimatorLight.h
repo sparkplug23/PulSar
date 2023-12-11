@@ -539,7 +539,15 @@ class mAnimatorLight :
     void Init_Sequencer();
     void handleSequencer();
     void Load_Sequencer(uint8_t id);
+    void SubLoad_Sequencer_Device(uint8_t id);
     void SetSequenceTimes(uint16_t secs);
+
+    enum FLASH_LEVEL{
+      Static=0,
+      Gentle=1,
+      Flashing=2,
+      FastFlashing=3
+    }FlashLevel;
 
     struct SEQUENCER_ITEM
     {
@@ -549,9 +557,12 @@ class mAnimatorLight :
         struct time_short end = {0};
         bool isArmed = false;
       }time_enabled;
+      struct DISABLE{
+        uint8_t flash_level = 0; // let use 3, 0 is static, 1 is gentle, 2 is flashing, 3 is fast flashing
 
-      String json_command;// = nullptr;
-
+      }limit;
+      String json_command;
+      String description;
     }sequencer_item;
     std::vector<struct SEQUENCER_ITEM> sequencer_item_list;
 
@@ -560,6 +571,8 @@ class mAnimatorLight :
       uint8_t active_sequence_index = 0;
       uint32_t tSaved_Tick = 0;
       uint8_t loaded_sequence_set = 1; // 0 means disabled 
+      bool Enable_TimeRestraints = false;
+      uint8_t remote_openhab_limit_flashing = 1; // default is no block. Openhab will send enable at 9am, and disable at 8pm
     }sequencer_runtime;
 
 
@@ -656,7 +669,7 @@ class mAnimatorLight :
     #ifdef ESP8266
       #define MAX_NUM_SEGMENTS    3
       /* How much data bytes all segments combined may allocate */
-      #define MAX_SEGMENT_DATA  5120
+      #define MAX_SEGMENT_DATA  1000
     #else
       #ifndef MAX_NUM_SEGMENTS
         #define MAX_NUM_SEGMENTS  6
@@ -813,8 +826,8 @@ bool handleFileRead(AsyncWebServerRequest* request, String path);
 
 #else
 
-static String getContentType(AsyncWebServerRequest* request, String filename);
-bool handleFileRead(AsyncWebServerRequest* request, String path);
+// static String getContentType(AsyncWebServerRequest* request, String filename);
+// bool handleFileRead(AsyncWebServerRequest* request, String path);
 
 #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
@@ -966,6 +979,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
@@ -1147,9 +1163,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     EFFECTS_FUNCTION__HYPER_SPARKLE__ID,
     EFFECTS_FUNCTION__TWINKLE__ID,
     EFFECTS_FUNCTION__COLORTWINKLE__ID,
-    EFFECTS_FUNCTION__TWINKLEFOX__ID,
-    EFFECTS_FUNCTION__TWINKLECAT__ID,
-    EFFECTS_FUNCTION__TWINKLEUP__ID,
+    EFFECTS_FUNCTION__TWINKLE_FOX__ID,
+    EFFECTS_FUNCTION__TWINKLE_CAT__ID,
+    EFFECTS_FUNCTION__TWINKLE_UP__ID,
     EFFECTS_FUNCTION__SAW__ID,
     EFFECTS_FUNCTION__DISSOLVE__ID,
     EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID,
@@ -1467,6 +1483,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void EffectAnim__Twinkle_Palette_Onto_Palette();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void EffectAnim__Twinkle_Out_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void EffectAnim__Twinkle_Decaying_Palette();

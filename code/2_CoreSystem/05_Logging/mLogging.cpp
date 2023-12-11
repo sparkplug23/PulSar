@@ -196,14 +196,23 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   memset(mxtime,0,sizeof(mxtime));
   // if time is short, ie debugging, them only show uptime (not RTCTime)
   if(pCONT_set->Settings.logging.time_isshort){
-    if(pCONT_time->uptime.hour<1){
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
-        pCONT_time->uptime.minute,pCONT_time->uptime.second
-      );
-    }else{
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
-        pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-    }
+    #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
+      // Only show hour
+      if(pCONT_time->uptime.hour<1){
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.minute,pCONT_time->uptime.second);
+      }else{
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+      }
+    #else
+      if(pCONT_time->uptime.hour<1){
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
+          pCONT_time->uptime.minute,pCONT_time->uptime.second
+        );
+      }else{
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
+          pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+      }
+    #endif
     
   }else{
     snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),

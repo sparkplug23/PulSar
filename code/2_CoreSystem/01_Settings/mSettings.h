@@ -130,6 +130,13 @@ DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR) D_SWITCHMODE_PUSHBUTTONHOLD
 DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR) D_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR;
 
 
+#ifdef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+//command source will be useful for rules, 
+enum CommandSource { SRC_IGNORE, SRC_MQTT, SRC_RESTART, SRC_BUTTON, SRC_SWITCH, SRC_BACKLOG, SRC_SERIAL, SRC_WEBGUI, SRC_WEBCOMMAND, SRC_WEBCONSOLE, SRC_PULSETIMER,
+                     SRC_TIMER, SRC_RULE, SRC_MAXPOWER, SRC_MAXENERGY, SRC_LIGHT, SRC_KNX, SRC_DISPLAY, SRC_WEMO, SRC_HUE, SRC_RETRY, SRC_MAX };
+const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Serial|WebGui|WebCommand|WebConsole|PulseTimer|Timer|Rule|MaxPower|MaxEnergy|Light|Knx|Display|Wemo|Hue|Retry";
+#endif 
+
 
 enum DATABUILDER_JSON_LEVEL{ //in order of importance
   JSON_LEVEL_NONE=0,
@@ -186,16 +193,22 @@ typedef unsigned long power_t;              // Power (Relay) type
 
 // Why 28? Because in addition to relays there may be lights and uint32_t bitmap can hold up to 32 devices
 #ifdef ESP8266
-const uint8_t MAX_RELAYS = 8;               // Max number of relays selectable on GPIO
-const uint8_t MAX_INTERLOCKS = 4;           // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
-const uint8_t MAX_SWITCHES = 8;             // Max number of switches selectable on GPIO
-const uint8_t MAX_KEYS = 8;                 // Max number of keys or buttons selectable on GPIO
+
+#ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
+
+// const uint8_t MAX_RELAYS = 8;               // Max number of relays selectable on GPIO
+// const uint8_t MAX_INTERLOCKS = 4;           // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
+// const uint8_t MAX_SWITCHES = 8;             // Max number of switches selectable on GPIO
+// const uint8_t MAX_KEYS = 8;                 // Max number of keys or buttons selectable on GPIO
+#endif
 #endif  // ESP8266
 #ifdef ESP32
-const uint8_t MAX_RELAYS = 28;              // Max number of relays selectable on GPIO
-const uint8_t MAX_INTERLOCKS = 14;          // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
-const uint8_t MAX_SWITCHES = 28;            // Max number of switches selectable on GPIO
-const uint8_t MAX_KEYS = 28;                // Max number of keys or buttons selectable on GPIO
+#ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
+// const uint8_t MAX_RELAYS = 28;              // Max number of relays selectable on GPIO
+// const uint8_t MAX_INTERLOCKS = 14;          // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
+// // const uint8_t MAX_SWITCHES = 28;            // Max number of switches selectable on GPIO
+// const uint8_t MAX_KEYS = 28;                // Max number of keys or buttons selectable on GPIO
+#endif
 #endif  // ESP32
 const uint8_t MAX_RELAYS_SET = 32;          // Max number of relays
 const uint8_t MAX_KEYS_SET = 32;            // Max number of keys

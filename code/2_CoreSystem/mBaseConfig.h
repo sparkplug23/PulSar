@@ -35,6 +35,8 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
+#else
+// #error"here"
 #endif // D_USER_MICHAEL
 
 /*********************************************************************************************\
@@ -92,13 +94,13 @@ With latest version, all longer term shared debug features should be added here 
 // Forcing this to disable until all devices are optimised so nothing is starved of CPU 
 #define DISABLE_SLEEP
 
-// #ifdef ESP32
+#ifdef ESP32
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
 #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-// #endif
+#endif
 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
@@ -119,15 +121,23 @@ With latest version, all longer term shared debug features should be added here 
 #endif
 #define WEB_LOG_LEVEL                 LOG_LEVEL_INFO          // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define TELNET_LOG_LEVEL              LOG_LEVEL_DEBUG
+
+// #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
+// #define LOGTIME_DEFAULT_FORMAT        0                       //  false == LONG
+// #else
 #define LOGTIME_DEFAULT_FORMAT        1                       //  true == short
+// #endif
+
 
   /***********************************
    * SECTION: System Configs
   ************************************/    
+
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
 
   /***********************************
@@ -155,7 +165,7 @@ With latest version, all longer term shared debug features should be added here 
 
   #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
   
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
   
   // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
@@ -649,7 +659,7 @@ With latest version, all longer term shared debug features should be added here 
 
 #ifndef WLED_MAX_BUSSES
   #ifdef ESP8266
-    #define WLED_MAX_BUSSES 10
+    #define WLED_MAX_BUSSES 1
     #define WLED_MIN_VIRTUAL_BUSSES 2
   #else
     #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM

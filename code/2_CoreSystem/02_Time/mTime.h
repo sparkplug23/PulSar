@@ -46,7 +46,7 @@ typedef struct datetime{
 
 // used for basic time info only for week period - RENAME "time_t"
 typedef struct time_short{
-  uint8_t Wday; // week day [0-7]
+  uint8_t Wday; // week day [0-7], weekday 1-7 is Mon to Sun, 0 is all days
   uint8_t hour;   // [0-23]
   uint8_t minute; // [0-59]
   uint8_t second; // [0-59]
@@ -434,6 +434,7 @@ struct RTC {
     datetime_t uptime;
 
     uint8_t CheckBetweenDateTimes(datetime_t* start, datetime_t* end);
+    bool IsShortTimeWithinRange(time_short start, time_short end);
 
     uint8_t AddSecondsToDateTime(datetime_t* start, uint32_t seconds);
 

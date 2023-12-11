@@ -599,6 +599,25 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
 }
 
 
+bool mHardwarePins::DigitalRead(uint32_t gpio_pin, uint32_t index)
+{
+  // if (PinUsed(gpio_pin, index)) {
+  //   digitalWrite(GetPin(gpio_pin, index), state &1);
+  // }else{
+  // // }
+  // digitalWrite(gpio_pin, state &1);
+
+  uint8_t real_pin = Pin(gpio_pin, index);
+
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
+  //   #endif // ENABLE_LOG_LEVEL_COMMANDS
+  // // if (PinUsed(gpio_pin, index)) {
+  //   digitalWrite(real_pin, state &1);
+  // // }
+
+  return digitalRead(real_pin);
+}
 
 // #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 

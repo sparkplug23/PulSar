@@ -252,8 +252,11 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
    * AppendJSONResponse_Drivers_Unified()
    * 
    */
+  // #ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
   pCONT->Tasker_Interface(FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID);
-  
+  // #endif 
+
+
   // float sensor_data = -1;
   // char buffer[100] = {0};
   // bool flag_level_started = false;

@@ -204,11 +204,15 @@ public:
         uint8_t temp[T_COLOR_FEATURE::PixelSize]; 
         uint8_t* pixels = _pixels();
 
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
         T_COLOR_FEATURE::applyPixelColor(temp, 0, color);
 
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
         T_COLOR_FEATURE::replicatePixel(pixels, temp, _countPixels);
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
 
         Dirty();
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
     };
 
     void ClearTo(typename T_COLOR_FEATURE::ColorObject color, uint16_t first, uint16_t last)

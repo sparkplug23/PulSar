@@ -186,6 +186,7 @@
 
 #define D_EFFECTS_FUNCTION__BLEND_TWO_PALETTES__NAME_CTR                            "Blend Two Palettes"
 #define D_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR    "Twinkle Palette Two on One"
+#define D_EFFECT_NAME__TWINKLE_OUT_PALETTE "Twinkle Out Palette"
 #define D_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR                      "Twinkle Decaying Palette"
 #define D_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR                       "Static Gradient Palette"
 

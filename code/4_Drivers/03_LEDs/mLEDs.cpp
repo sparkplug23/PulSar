@@ -102,7 +102,7 @@ void mLEDs::Pre_Init(void){
     }
   }
 
-  pCONT_set->devices_present += settings.leds_found;
+  pCONT_set->runtime.devices_present += settings.leds_found;
   if(settings.leds_found){ settings.fEnableSensor = true; }
 
 }
@@ -290,19 +290,19 @@ void mLEDs::UpdateStatusBlink()
   // pCONT_set->global_state.network_down = (pCONT_set->global_state.wifi_down && pCONT_set->global_state.eth_down);
 
   if (!pCONT_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
-    if (pCONT_set->global_state.data) {                              // Any problem
-      if (pCONT_set->global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
-      if (pCONT_set->global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
-      pCONT_set->blinks = 201;                                       // Allow only a single blink in case the problem is solved
+    if (pCONT_set->runtime.global_state.data) {                              // Any problem
+      if (pCONT_set->runtime.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
+      if (pCONT_set->runtime.global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
+      pCONT_set->runtime.blinks = 201;                                       // Allow only a single blink in case the problem is solved
     }
   }
 
 //DEBUG_LINE_HERE;
   DEBUG_LINE;
-  if (pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag) {
+  if (pCONT_set->runtime.blinks || pCONT_set->runtime.restart_flag || pCONT_set->runtime.ota_state_flag) {
 
     // Work out the led state based on time
-    if (pCONT_set->restart_flag || pCONT_set->ota_state_flag) {                 // Overrule blinks and keep led lit
+    if (pCONT_set->runtime.restart_flag || pCONT_set->runtime.ota_state_flag) {                 // Overrule blinks and keep led lit
     
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_WARN, PSTR("blinkstate phasing out for new method"));
@@ -311,26 +311,26 @@ void mLEDs::UpdateStatusBlink()
     #endif //  ENABLE_LOG_LEVEL_INFO
       
       
-      pCONT_set->blinkstate = true;                                  // Stay lit
+      pCONT_set->runtime.blinkstate = true;                                  // Stay lit
     } else {
-      pCONT_set->blinkspeed--; // based of multiples of 200ms
-      if (!pCONT_set->blinkspeed) {
-        pCONT_set->blinkspeed = blinkinterval;                       // Set interval to 0.2 (default), 1 or 2 seconds
-        pCONT_set->blinkstate ^= 1;                                  // Blink
+      pCONT_set->runtime.blinkspeed--; // based of multiples of 200ms
+      if (!pCONT_set->runtime.blinkspeed) {
+        pCONT_set->runtime.blinkspeed = blinkinterval;                       // Set interval to 0.2 (default), 1 or 2 seconds
+        pCONT_set->runtime.blinkstate ^= 1;                                  // Blink
       }
     }
 
 //DEBUG_LINE_HERE;
   DEBUG_LINE;
     // Update Link LED
-    if ((!(pCONT_set->Settings.ledstate &0x08)) && ((pCONT_set->Settings.ledstate &0x06) || (pCONT_set->blinks > 200) || (pCONT_set->blinkstate))) {
-      pCONT_led->SetLedLink(pCONT_set->blinkstate);                            // Set led on or off
+    if ((!(pCONT_set->Settings.ledstate &0x08)) && ((pCONT_set->Settings.ledstate &0x06) || (pCONT_set->runtime.blinks > 200) || (pCONT_set->runtime.blinkstate))) {
+      pCONT_led->SetLedLink(pCONT_set->runtime.blinkstate);                            // Set led on or off
     }
 
     // If blink has completed
-    if (!pCONT_set->blinkstate) {
-      pCONT_set->blinks--;
-      if (200 == pCONT_set->blinks) pCONT_set->blinks = 0;                      // Disable blink
+    if (!pCONT_set->runtime.blinkstate) {
+      pCONT_set->runtime.blinks--;
+      if (200 == pCONT_set->runtime.blinks) pCONT_set->runtime.blinks = 0;                      // Disable blink
     }
 
   }
@@ -350,7 +350,7 @@ void mLEDs::UpdateStatusBlink()
 
   DEBUG_LINE;
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
+  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->runtime.blinkstate,pCONT_set->blinks);
   //   #endif// ENABLE_LOG_LEVEL_INFO
 
 }

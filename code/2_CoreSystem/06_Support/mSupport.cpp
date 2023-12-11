@@ -9,8 +9,8 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
 \*********************************************************************************************/
 #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   #ifdef ESP8266
-    void WDT_Init(){ ESP.wdtEnable(0);}
-    void WDT_Reset(){ESP.wdtFeed();}
+    void WDT_Init(){ ESP.wdtEnable(6000);}
+    void WDT_Reset(){ESP.wdtFeed(); }
   #endif // ESP8266
   #ifdef ESP32
     #include "esp_system.h"

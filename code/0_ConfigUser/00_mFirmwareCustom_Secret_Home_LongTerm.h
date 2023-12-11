@@ -225,6 +225,7 @@ Bathroom
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_FLOORFAN2
 // #define DEVICE_FLOORFAN4
+// #define DEVICE_DEFAULT_SONOFF_BASIC__06
 
 
 /**************************************************************************************************************************************************
@@ -373,6 +374,11 @@ Bathroom
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
+  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+
+  // #define ENABLE_DEBUGFEATURE__RELOAD_TEMPLATE__RULES_EVER_MINUTE
 
   #define USE_MODULE_CORE_RULES
   
@@ -4666,6 +4672,8 @@ R"=====(
   // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
   // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 110
   // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
 
 // Change to only update the immersion nextion every 10 seconds to reduce load on esp32 to check for stability
 

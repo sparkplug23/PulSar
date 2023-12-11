@@ -140,7 +140,7 @@ void mRelays::Pre_Init(void){
       uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
       pinMode(pin_number, OUTPUT);
       settings.fEnableSensor = true;
-      pCONT_set->devices_present++;
+      pCONT_set->runtime.devices_present++;
       if(settings.relays_connected++ >= MAX_RELAYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
@@ -149,7 +149,7 @@ void mRelays::Pre_Init(void){
       pinMode(pin_number, OUTPUT);
       bitSet(rel_inverted, driver_index); //temp fix
       settings.fEnableSensor = true;
-      pCONT_set->devices_present++;
+      pCONT_set->runtime.devices_present++;
       if(settings.relays_connected++ >= MAX_RELAYS){ break; }
     }
   }
@@ -159,7 +159,7 @@ void mRelays::Pre_Init(void){
 
 void mRelays::init(void){
 
-  // settings.relays_connected = pCONT_set->devices_present; //phase out
+  // settings.relays_connected = pCONT_set->runtime.devices_present; //phase out
 
   // settings.relays_connected = MAX_RELAYS;
 
@@ -438,12 +438,12 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
   // power xx10 - toggle REL1 (Off) and REL4 (On)  - device 1 Off, device 2 On
   // power xx11 - toggle REL2 (On)  and REL4 (On)  - device 1 On,  device 2 On
 
-  if (state && !pCONT_set->latching_relay_pulse) {  // Set latching relay to power if previous pulse has finished
+  if (state && !pCONT_set->runtime.latching_relay_pulse) {  // Set latching relay to power if previous pulse has finished
     latching_power = lpower;
-    pCONT_set->latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
+    pCONT_set->runtime.latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
   }
 
-  for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
+  for (uint32_t i = 0; i < pCONT_set->runtime.devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
     pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rel_inverted, port) ? !state : state);
   }
@@ -455,14 +455,14 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   DEBUG_LINE;
 
   pCONT_sup->ShowSource(source);
-  pCONT_set->last_source = source;
+  pCONT_set->runtime.last_source = source;
   DEBUG_LINE;
   
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
 
   if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {  // All on and stay on
-    pCONT_set->power = (1 << pCONT_set->devices_present);// -1;
-    rpower = pCONT_set->power;
+    pCONT_set->runtime.power = (1 << pCONT_set->runtime.devices_present);// -1;
+    rpower = pCONT_set->runtime.power;
   }
 
   // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
@@ -470,7 +470,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
   //     power_t mask = 1;
   //     uint32_t count = 0;
-  //     for (uint32_t j = 0; j < pCONT_set->devices_present; j++) {
+  //     for (uint32_t j = 0; j < pCONT_set->runtime.devices_present; j++) {
   //       if ((pCONT_set->Settings.interlock[i] & mask) && (rpower & mask)) {
   //         count++;
   //       }
@@ -542,7 +542,7 @@ DEBUG_LINE;
 
     uint16_t gpio_pin = 0;
 
-    for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
+    for (uint32_t i = 0; i < pCONT_set->runtime.devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {
 
@@ -571,7 +571,7 @@ DEBUG_LINE;
 
 void mRelays::RestorePower(bool publish_power, uint32_t source)
 {
-  if (pCONT_set->power != last_power) {
+  if (pCONT_set->runtime.power != last_power) {
     SetDevicePower(last_power, source);
     if (publish_power) {
       mqtthandler_state_teleperiod.flags.SendNow = true;
@@ -597,18 +597,18 @@ void mRelays::SetAllPower(uint32_t state, uint32_t source)
     publish_power = false;
   }
   if ((state >= POWER_OFF) && (state <= POWER_TOGGLE)) {
-    power_t all_on = (1 << pCONT_set->devices_present);// -1;
+    power_t all_on = (1 << pCONT_set->runtime.devices_present);// -1;
     switch (state) {
     case POWER_OFF:
-      pCONT_set->power = 0;
+      pCONT_set->runtime.power = 0;
       break;
     case POWER_ON:
-      pCONT_set->power = all_on;
+      pCONT_set->runtime.power = all_on;
       break;
     case POWER_TOGGLE:
-      pCONT_set->power ^= all_on;                    // Complement current state
+      pCONT_set->runtime.power ^= all_on;                    // Complement current state
     }
-    SetDevicePower(pCONT_set->power, source);
+    SetDevicePower(pCONT_set->runtime.power, source);
   }
   if (publish_power) {
     mqtthandler_state_teleperiod.flags.SendNow = true;
@@ -632,37 +632,37 @@ void mRelays::SetPowerOnState(void)
       {
       case POWER_ALL_OFF:
       case POWER_ALL_OFF_PULSETIME_ON:
-        pCONT_set->power = 0;
-        SetDevicePower(pCONT_set->power, SRC_RESTART);
+        pCONT_set->runtime.power = 0;
+        SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         break;
       case POWER_ALL_ON:  // All on
-        pCONT_set->power = (1 << pCONT_set->devices_present);// -1;
-        SetDevicePower(pCONT_set->power, SRC_RESTART);
+        pCONT_set->runtime.power = (1 << pCONT_set->runtime.devices_present);// -1;
+        SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         break;
       case POWER_ALL_SAVED_TOGGLE:
-        pCONT_set->power = (pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) )) ^ POWER_MASK;
+        pCONT_set->runtime.power = (pCONT_set->Settings.power & ((1 << pCONT_set->runtime.devices_present) )) ^ POWER_MASK;
         if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
-          SetDevicePower(pCONT_set->power, SRC_RESTART);
+          SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         }
         break;
       case POWER_ALL_SAVED:
-        pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
+        pCONT_set->runtime.power = pCONT_set->Settings.power & ((1 << pCONT_set->runtime.devices_present) );
         if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
-          SetDevicePower(pCONT_set->power, SRC_RESTART);
+          SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         }
         break;
       }
 
     } else {
-      pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
+      pCONT_set->runtime.power = pCONT_set->Settings.power & ((1 << pCONT_set->runtime.devices_present) );
       if (pCONT_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
-        SetDevicePower(pCONT_set->power, SRC_RESTART);
+        SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
       }
     }
     
   }
 
-  blink_powersave = pCONT_set->power;
+  blink_powersave = pCONT_set->runtime.power;
 }
 
 
@@ -700,7 +700,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 //   }
 // #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
 
-  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteComPow(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->devices_present);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteComPow(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->runtime.devices_present);
 
   bool publish_power = true;
   if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
@@ -710,7 +710,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
   if (
     // (device < 1) || 
-  (device > pCONT_set->devices_present)) {
+  (device > pCONT_set->runtime.devices_present)) {
     device = 0;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS DEBUG_INSERT_PAGE_BREAK "device>1\tfall back to single relay"));
   }
@@ -753,15 +753,15 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
     switch (state) {
     case POWER_OFF: {
-      pCONT_set->power &= (POWER_MASK ^ mask);
+      pCONT_set->runtime.power &= (POWER_MASK ^ mask);
       break; }
     case POWER_ON:
-      pCONT_set->power |= mask;
+      pCONT_set->runtime.power |= mask;
       break;
     case POWER_TOGGLE: // STATE_NUMBER_TOGGLE_ID
-      pCONT_set->power ^= mask;
+      pCONT_set->runtime.power ^= mask;
     }
-    SetDevicePower(pCONT_set->power, source);
+    SetDevicePower(pCONT_set->runtime.power, source);
 
     // if (device <= MAX_PULSETIMERS) {  // Restart PulseTime if powered On
     //   SetPulseTimer(device , (((POWER_ALL_OFF_PULSETIME_ON == Settings.poweronstate) ? ~power : power) & mask) ? Settings.pulse_timer[device -1] : 0);

@@ -237,7 +237,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
   // }
   
   #ifdef ESP8266
-    WiFi.hostname(pCONT_set->my_hostname);
+    WiFi.hostname(pCONT_set->runtime.my_hostname);
   #endif
   
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -270,7 +270,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
     pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], 
     pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active], 
     kWifiPhyMode[WiFi.getPhyMode() & 0x3], 
-    pCONT_set->my_hostname);
+    pCONT_set->runtime.my_hostname);
     #endif// ENABLE_LOG_LEVEL_INFO
   #endif
 

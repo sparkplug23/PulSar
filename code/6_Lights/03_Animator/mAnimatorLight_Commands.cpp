@@ -84,9 +84,11 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 }
 
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 void mAnimatorLight::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
     Serial.printf("Listing directory: %s\n", dirname);
 
+#ifdef ESP32
     File root = fs.open(dirname);
     if(!root){
         Serial.println("Failed to open directory");
@@ -113,12 +115,15 @@ void mAnimatorLight::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
         }
         file = root.openNextFile();
     }
+
+    #endif 
 }
 
 
 void mAnimatorLight::readFile(fs::FS &fs, const char * path){
     Serial.printf("Reading file: %s\n\r", path);
 
+#ifdef ESP32
     File file = fs.open(path);
     if(!file){
         Serial.println("Failed to open file for reading");
@@ -129,6 +134,7 @@ void mAnimatorLight::readFile(fs::FS &fs, const char * path){
     while(file.available()){
         Serial.write(file.read());
     }
+    #endif
 
     Serial.println();
 }
@@ -144,7 +150,7 @@ void mAnimatorLight::CommandSet_ReadFile(const char* filename){
 
 } 
 
-
+#endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
 
 
@@ -520,7 +526,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
 
   
-  if(jtok = obj["PixelRange"]){ 
+  if(jtok = obj[PSTR("PixelRange")]){ 
     if(jtok.isArray()){
       uint8_t array[2];
       uint8_t arrlen = 0;
@@ -662,6 +668,15 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     #endif
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME_MS]){
+
+    ALOG_WRN(PSTR("PM_JSON_TRANSITION PM_JSON_TIME_MS to be phased out as external command"));
+
+    // Effect such as slow glow, will use the RateMs together with intensity to work out TimeMs. So TimeMs = mapfloat(intensity, 0,255, 0,rate)
+
+    // Now how could rate be removed? This is related to speed, but depends on the max speed an effect may be. Sometimes as long as a minute.
+
+    // Transition.RateMs to be phased as TransitionRate, without MS and should always be assumed as ms.
+
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -707,6 +722,10 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       CommandSet_ColourTypeID(jtok.getInt(), segment_index);
       data_buffer.isserviced++;
     }
+
+    ALOG_WRN(PSTR("PM_JSON_COLOUR_TYPE is in conflict with subtype, likely this needs to be the main command and subtype set internally only with no external command"));
+
+
     // ALOG_COM(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer))); // should be internal to rgbcct
   }
 
@@ -946,10 +965,27 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   {
     Load_Sequencer(jtok.getInt());
   }
+  if(jtok = obj["Sequencer"].getObject()["EnableTimeRestraints"])
+  {
+    sequencer_runtime.Enable_TimeRestraints = jtok.getInt();
+  }
   if(jtok = obj["Sequencer"].getObject()["ItemTime"])
   {
     SetSequenceTimes(jtok.getInt());
   }  
+
+  if(jtok = obj["Sequencer"].getObject()["LimitFlashing"])
+  {
+    sequencer_runtime.remote_openhab_limit_flashing = jtok.getInt();
+  }  
+
+
+
+
+
+
+
+  
 
   #endif // ENABLE_FEATURE_LIGHTING__SEQUENCER
 

@@ -44,9 +44,9 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
     case FUNC_EVERY_50_MSECOND:
       MM_Every50mSecond();
 
-      if(brokers.size())   
-        if(brokers[0]->retry_counter)
-          Serial.printf(D_LOG_PUBSUB "retry_counter = %d\n\r", brokers[0]->retry_counter);
+      // if(brokers.size())   
+      //   if(brokers[0]->retry_counter)
+      //     Serial.printf(D_LOG_PUBSUB "retry_counter = %d\n\r", brokers[0]->retry_counter);
 
     break;
     case FUNC_EVERY_SECOND:      
@@ -72,8 +72,8 @@ void mMQTT::Load_New_Subscriptions_From_Function_Template()
   #ifdef USE_FUNCTION_TEMPLATE  
   D_DATA_BUFFER_CLEAR();
   memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.len, data_buffer.payload.ctr);
+  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif //USE_FUNCTION_TEMPLATE
 
   JsonParser parser(data_buffer.payload.ctr);

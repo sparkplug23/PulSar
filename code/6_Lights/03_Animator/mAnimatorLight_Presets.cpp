@@ -177,7 +177,6 @@ void mAnimatorLight::doSaveState()
   } 
   else
   {
-  #endif
   
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
@@ -190,6 +189,7 @@ void mAnimatorLight::doSaveState()
     #endif
   
   }
+  #endif
 
   if (persist) presetsModifiedTime = toki.second(); //unix time
   

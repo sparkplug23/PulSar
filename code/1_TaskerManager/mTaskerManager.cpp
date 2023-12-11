@@ -189,53 +189,33 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 void mTaskerManager::JSONCommand_Run(char* json)
 {
 
+
   #ifdef USE_LIGHTING_TEMPLATE
-  // load from progmem into local
+    // ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
+    D_DATA_BUFFER_CLEAR();
+
+    sprintf(data_buffer.payload.ctr, "%s", json);
+
+    // ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+    data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+
+    data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // to avoid need to memset everything
+
+    // ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+    ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
+    #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+    Serial.println(data_buffer.payload.ctr);
+    #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
 
 
-  // ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-  D_DATA_BUFFER_CLEAR();
+    // ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
 
-  
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------B- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   memset(data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr)); 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------C- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   data_buffer.topic.length_used = 0; 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------D- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   memset(data_buffer.payload.ctr,0,sizeof(data_buffer.payload.ctr)); 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------E- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   data_buffer.payload.length_used = 0; 
+    // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
+    Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
-
-
-  // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-  // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
-  // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-
-  sprintf(data_buffer.payload.ctr, "%s", json);
-
-  // ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
-
-  data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // to avoid need to memset everything
-
-  // ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
-  ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-
-  #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
-  Serial.println(data_buffer.payload.ctr);
-  #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
-
-
-  // ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
-
-  // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
-
-  Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
+    // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
 
   #endif // USE_LIGHTING_TEMPLATE
 
@@ -584,6 +564,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
     addTasker(EM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__ID, new mWLEDWebUI());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE
+    addTasker(EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID, new mPrinter3D());
   #endif
 
   Serial.printf(D_LOG_CLASSLIST "Loaded %d|%d modules\n\r",  pModule.size(), GetClassCount());
