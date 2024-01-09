@@ -112,7 +112,12 @@ void mBME::Pre_Init(){
     // }
 
     
-    if(pCONT_sup->I2cDevice(bmp_addresses[i]))
+    // if(pCONT_sup->I2cDevice(bmp_addresses[i]))
+    // {
+    //   DEBUG_LINE_HERE;
+    // }
+
+    if(pCONT_sup->I2cDevice_IsConnected(bmp_addresses[i]))
     {
       DEBUG_LINE_HERE;
     }
@@ -155,12 +160,15 @@ void mBME::Pre_Init(){
         bmp_count++;
         settings.fSensorCount++;
       }
+    }else{
+          
+      #ifdef ESP32
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_sup->wire->getErrorText(pCONT_sup->wire->lastError()));
+      #endif 
+
     }
   }
 
-  #ifdef ESP32
-  AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_sup->wire->getErrorText(pCONT_sup->wire->lastError()));
-  #endif 
 
   if(settings.fSensorCount){
     settings.fEnableSensor = true;
@@ -557,8 +565,17 @@ void mBME::BMP_EnterSleep(void)
 
 uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
+  char buffer[50];
   JBI->Start();
     JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+
+
+    for(uint8_t sensor_id = 0;sensor_id<settings.fSensorCount;sensor_id++){
+      JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
+        JBI->Add("Type",bmp_sensors[sensor_id].bmp_type);
+      JBI->Object_End();
+    }
+
   return JBI->End();
 
 }

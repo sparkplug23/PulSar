@@ -149,6 +149,17 @@ class mEnergyINA219 :
   private:
   public:
     mEnergyINA219(){};
+
+    
+    static const char* PM_MODULE_ENERGY_INA219_CTR;
+    static const char* PM_MODULE_ENERGY_INA219_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INA219_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_INA219_FRIENDLY_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INA219_ID; }
+
+
+
+
     void Pre_Init(void);
     void init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -201,8 +212,8 @@ class mEnergyINA219 :
     // float ina219_voltage[4] = {0,0,0,0};
     // float ina219_current[4] = {0,0,0,0};
 
-    void WebAppend_Root_Status_Table_Draw();
-    void WebAppend_Root_Status_Table_Data();
+    // void WebAppend_Root_Status_Table_Draw();
+    // void WebAppend_Root_Status_Table_Data();
     struct SENSORDATA{
       uint8_t isvalid=false;
       uint8_t ischanged=false;
@@ -236,12 +247,13 @@ class mEnergyINA219 :
     void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mEnergyINA219>* ptr;
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
+    
     struct handler<mEnergyINA219> mqtthandler_settings_teleperiod;
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mEnergyINA219> mqtthandler_sensor_ifchanged;
     struct handler<mEnergyINA219> mqtthandler_sensor_teleperiod;
+
+    std::vector<struct handler<mEnergyINA219>*> mqtthandler_list;
+
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;

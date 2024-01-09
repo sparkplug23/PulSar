@@ -16,6 +16,11 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  https://github.com/mandulaj/PZEM-004T-v30/blob/master/src/PZEM004Tv30.cpp
+
+
+
 */
 #include "mPZEM004T.h"
 
@@ -84,7 +89,7 @@ void mEnergyPZEM004T::Pre_Init(void)
 
   if (pCONT_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   {
-    pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
+    pCONT_set->runtime.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
     // set bit for drivers
     settings.fEnableSensor = true;
   }
@@ -110,7 +115,7 @@ void mEnergyPZEM004T::Init(void)
      * */
 
   } else {
-    pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
+    pCONT_set->runtime.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
     settings.fEnableSensor = false;
     return;
   }
@@ -177,6 +182,13 @@ void mEnergyPZEM004T::EveryLoop(){
         settings.active_sensor = 0; // reset to start or remain on single sensor 
         measure_time.millis = millis();
       }
+
+#ifdef ENABLE_DEBUGFEATURE_PZEM_FIXED_ONE_SENSOR
+settings.active_sensor = 0;
+#endif
+
+
+
       ALOG_DBM( PSTR("settings.active_sensor = %d"),settings.active_sensor);
     }
 
@@ -198,35 +210,49 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
     case TRANSCEIVE_REQUEST_READING_ID:
     case TRANSCEIVE_RESPONSE_TIMEOUT_ID:
     case TRANSCEIVE_RESPONSE_SUCCESS_ID:
+    {
 
       timeout = millis();
 
-      if(mTime::TimeReached(&tSaved_backoff, 10))
+      uint16_t backoff_millis_to_wait = 10;
+
+      #ifdef ENABLE_DEBUGFEATURE_PZEM_BACKOFF_TIME_MS
+        backoff_millis_to_wait = ENABLE_DEBUGFEATURE_PZEM_BACKOFF_TIME_MS;
+      #endif
+
+      if(mTime::TimeReached(&tSaved_backoff, backoff_millis_to_wait))
       {
         stats.start_time = millis();
         modbus->Send(pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);      
         
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_PZEM "modbus->Send(address=%d)"), pCONT_iEnergy->GetAddressWithID(device_id));
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_PZEM "modbus->Send(address=%d)"), pCONT_iEnergy->GetAddressWithID(device_id));
 
         transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
       }
-
+    }
     break; // Allow follow into next mode
     case TRANSCEIVE_AWAITING_RESPONSE_ID:
 
+      // AddLog(LOG_LEVEL_TEST, PSTR("SplitTask_UpdateSensor %d %d %d"), device_id, pCONT_iEnergy->GetAddressWithID(device_id), transceive_mode);
+    
+        // ALOG_INF( "ReceiveCount() %d", modbus->ReceiveCount());
       if(modbus->ReceiveReady())
       {
+
         uint8_t modbus_buffer[30] = {0};  // At least 5 + (2 * 10) = 25
         uint8_t registers = 10;
         uint8_t error = modbus->ReceiveBuffer(modbus_buffer, registers);
 
+        ALOG_INF( "ReceiveCount()================================= %d", modbus->ReceiveCount());
+        AddLog_Array(LOG_LEVEL_DEBUG, PSTR("bufferA"), modbus_buffer, (uint8_t)30);
+
         if(!error)
         {
-          //AddLog_Array(LOG_LEVEL_DEBUG_MORE, PSTR("buffer"), modbus_buffer, (uint8_t)30);
+          AddLog_Array(LOG_LEVEL_DEBUG, PSTR("buffer"), modbus_buffer, (uint8_t)30);
           ALOG_DBM( "ReceiveCount() %d", modbus->ReceiveCount());
           // Check if response matches expected device
           // if(modbus_buffer[0] == pCONT_iEnergy->address[device_id][3]){
-            ALOG_DBM( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
+            ALOG_INF( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
             ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
             stats.success_reads++;
             stats.end_time = millis();
@@ -283,6 +309,82 @@ void mEnergyPZEM004T::ParseModbusBuffer(DATA_MODBUS* mod, uint8_t* buffer){
  * Commands
 *******************************************************************************************************************/
 
+// /*!
+//  * PZEM004Tv30::setAddress
+//  *
+//  * Set a new device address and update the device
+//  * WARNING - should be used to set up devices once.
+//  * Code initializtion will still have old address on next run!
+//  *
+//  * @param[in] addr New device address 0x01-0xF7
+//  *
+//  * @return success
+// */
+// bool PZEM004Tv30::setAddress(uint8_t addr)
+// {
+//     if(addr < 0x01 || addr > 0xF7) // sanity check
+//         return false;
+
+//     // Write the new address to the address register
+//     if(!sendCmd8(CMD_WSR, WREG_ADDR, addr, true))
+//         return false;
+
+//     _addr = addr; // If successful, update the current slave address
+
+//     return true;
+// }
+// /*!
+//  * PZEM004Tv30::sendCmd8
+//  *
+//  * Prepares the 8 byte command buffer and sends
+//  *
+//  * @param[in] cmd - Command to send (position 1)
+//  * @param[in] rAddr - Register address (postion 2-3)
+//  * @param[in] val - Register value to write (positon 4-5)
+//  * @param[in] check - perform a simple read check after write
+//  *
+//  * @return success
+// */
+// bool PZEM004Tv30::sendCmd8(uint8_t cmd, uint16_t rAddr, uint16_t val, bool check, uint16_t slave_addr){
+//     uint8_t sendBuffer[8]; // Send buffer
+//     uint8_t respBuffer[8]; // Response buffer (only used when check is true)
+
+//     if((slave_addr == 0xFFFF) ||
+//        (slave_addr < 0x01) ||
+//        (slave_addr > 0xF7)){
+//         slave_addr = _addr;
+//     }
+
+//     sendBuffer[0] = slave_addr;                   // Set slave address
+//     sendBuffer[1] = cmd;                     // Set command
+
+//     sendBuffer[2] = (rAddr >> 8) & 0xFF;     // Set high byte of register address
+//     sendBuffer[3] = (rAddr) & 0xFF;          // Set low byte =//=
+
+//     sendBuffer[4] = (val >> 8) & 0xFF;       // Set high byte of register value
+//     sendBuffer[5] = (val) & 0xFF;            // Set low byte =//=
+
+//     setCRC(sendBuffer, 8);                   // Set CRC of frame
+
+//     _serial->write(sendBuffer, 8); // send frame
+
+//     if(check) {
+//         if(!receive(respBuffer, 8)){ // if check enabled, read the response
+//             return false;
+//         }
+
+//         // Check if response is same as send
+//         for(uint8_t i = 0; i < 8; i++){
+//             if(sendBuffer[i] != respBuffer[i])
+//                 return false;
+//         }
+//     }
+//     return true;
+// }
+
+
+
+
 
 void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 {
@@ -290,6 +392,29 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
   // AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
+
+  
+  if(jtok = obj[D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR].getObject()["SetAddress"])
+  {
+    // I could the first time it is sent that a random number is generated, and only when that number is sent in the next command will it be accepted. Otherwise a new number is generated..
+    ALOG_WRN(PSTR("SetAddress = %d, only one device should be connected"), jtok.getInt());
+    
+    uint16_t addr = jtok.getInt();
+
+    #define SLAVE_ADDRESS 0xF8 // I think this means of the esp32, not the pzem004t.
+
+    uint8_t return_code = modbus->Send(SLAVE_ADDRESS, CMD_WSR, WREG_ADDR, 1, (uint16_t *) &addr);
+
+    // PzemAcModbus->Send(0xF8, 0x06, 0x0002, 1, (uint16_t *) &addr);
+
+    // Addres(1), Function(1), Start/Coil Address(2), Registercount or Data (2), CRC(2)
+    
+    ALOG_INF(PSTR("return_code = %d"), return_code);
+
+    // delay(5000);
+
+
+  }
   
   if(jtok = obj[D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR].getObject()["SearchForDevices"])
   {
@@ -321,7 +446,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
         { 
           uint8_t error = modbus->ReceiveBuffer(modbus_buffer, 10);
           found_address = modbus_buffer[2]; // addres byte
-          AddLog(LOG_LEVEL_TEST, PSTR("MODBUS Address = %d FOUND %d"), address_search, found_address);
+          AddLog(LOG_LEVEL_INFO, PSTR("MODBUS Address = %d FOUND %d"), address_search, found_address);
           flag_timeout = false;
           break; // out of the while
         }
@@ -330,7 +455,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
       if(flag_timeout)
       {
-        AddLog(LOG_LEVEL_TEST, PSTR("MODBUS Address %d: No Response"), address_search);
+        AddLog(LOG_LEVEL_INFO, PSTR("MODBUS Address %d: No Response"), address_search);
       }
     }
 

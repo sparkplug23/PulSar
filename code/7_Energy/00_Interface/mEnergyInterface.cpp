@@ -139,7 +139,7 @@ for(int i=0;i<MAX_ENERGY_SENSORS;i++){
 
 
 
-  if (pCONT_set->runtime_var.energy_driver) {
+  if (pCONT_set->runtime.energy_driver) {
     // // if (RtcSettingsValid()) {
     //   Energy.kWhtoday_offset = pCONT_set->RtcSettings.energy_kWhtoday;
     // // }
@@ -354,14 +354,14 @@ void mEnergyInterface::EnergyUpdateTotal(float value, bool kwh)
     Energy.kWhtoday = (unsigned long)((value - Energy.start_energy) * multiplier);
   }
 
-  if((Energy.total < (value - 0.01)) &&       // We subtract a little offset to avoid continuous updates
-      pCONT_set->Settings.flag_network.hardware_energy_total) {  // SetOption72 - Enable hardware energy total counter as reference (#6561)
-    pCONT_set->RtcSettings.energy_kWhtotal = (unsigned long)((value * multiplier) - Energy.kWhtoday_offset - Energy.kWhtoday);
-    pCONT_set->Settings.energy_usage.energy_kWhtotal = pCONT_set->RtcSettings.energy_kWhtotal;
-    Energy.total = (float)(pCONT_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
-    pCONT_set->Settings.energy_usage.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? pCONT_time->LocalTime() : pCONT_time->Midnight();
-    AddLog(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total updated with hardware value"));
-  }
+  // if((Energy.total < (value - 0.01)) &&       // We subtract a little offset to avoid continuous updates
+  //     pCONT_set->Settings.flag_network.hardware_energy_total) {  // SetOption72 - Enable hardware energy total counter as reference (#6561)
+  //   pCONT_set->RtcSettings.energy_kWhtotal = (unsigned long)((value * multiplier) - Energy.kWhtoday_offset - Energy.kWhtoday);
+  //   pCONT_set->Settings.energy_usage.energy_kWhtotal = pCONT_set->RtcSettings.energy_kWhtotal;
+  //   Energy.total = (float)(pCONT_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
+  //   pCONT_set->Settings.energy_usage.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? pCONT_time->LocalTime() : pCONT_time->Midnight();
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total updated with hardware value"));
+  // }
   EnergyUpdateToday();
   
 }

@@ -203,6 +203,12 @@
 
   #define D_MODULE_ENERGY_ADE7953_CTR              "ADE7953"
   #define D_MODULE_ENERGY_ADE7953_FRIENDLY_CTR     "ade7953"
+
+  #define D_MODULE_ENERGY_INA219_CTR "ina219"
+  #define D_MODULE_ENERGY_INA219_FRIENDLY_CTR "ina219"
+
+
+
 //#endif
 // Lights (Range 140-169
 //#ifdef USE_MODULE_LIGHTS_INTERFACE

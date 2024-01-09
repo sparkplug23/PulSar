@@ -255,9 +255,9 @@ void mCellular::SMS_CommandIntoJSONCommand(char* sms_command)
 
     sprintf(data_buffer.payload.ctr, "{\"%s\":%s}", key, value);
 
-    data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+    data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-    ALOG_COM( PSTR(DEBUG_INSERT_PAGE_BREAK  "SMS->JsonCommandBuffer = \"%d|%s\""), data_buffer.payload.len, data_buffer.payload.ctr);
+    ALOG_COM( PSTR(DEBUG_INSERT_PAGE_BREAK  "SMS->JsonCommandBuffer = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
 
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 

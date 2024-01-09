@@ -148,8 +148,10 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:
     {
       // Update_Channel1_ADC_Readings();
-       average_DEMA.value = average_DEMA.filter->AddValue(adc1_get_raw(ADC1_CHANNEL_7));
- 
+      int reading = adc1_get_raw(ADC1_CHANNEL_7);
+      Serial.println(reading);
+      average_DEMA.value = average_DEMA.filter->AddValue(reading); 
+      Serial.println(average_DEMA.value);
     }
     break;
     /************
@@ -344,10 +346,10 @@ uint8_t mADCInternal::ConstructJSON_Settings(uint8_t json_level, bool json_appen
 uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
 
-  if(!json_appending)
-  { 
+  // if(!json_appending)
+  // { 
     JBI->Start(); 
-  }
+  // }
 
   char buffer[50];
 
@@ -381,14 +383,14 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level, bool json_appendi
   // }
   JBI->Array_End();
 
-  JBI->Add("dma_smoothed", average_DEMA.value);
-
-
-  JBI->Add("Percentage", constrain(map(average_DEMA.value, 1375,2280,  0,100),0,100)); //Inverse!
-  JBI->Add("Percentage_Raw", map(average_DEMA.value, 1375,2280,  0,100) ); //Inverse!
-
+  if(average_DEMA.value>0)
+  {
+    JBI->Add("dma_smoothed", average_DEMA.value);
+    JBI->Add("Percentage", constrain(map(average_DEMA.value, 1375,2280,  0,100),0,100)); //Inverse!
+    JBI->Add("Percentage_Raw", map(average_DEMA.value, 1375,2280,  0,100) ); //Inverse!
+  }
   
-  JBI->Add("DigitalPin", digitalRead(4));
+  JBI->Add("DigitalPin", digitalRead(23));
 
   // JBI->Array_Start("ADC1");
   // for(int i=0;i<8;i++){
@@ -421,8 +423,10 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level, bool json_appendi
   // }
   // JBI->Array_End();
 
+  JBI->End();
+
   
-  return json_appending ? JBI->Length() : JBI->End();
+  return 5;//json_appending ? JBI->Length() : JBI->End();
 
 }
 
@@ -442,6 +446,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mADCInternal::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -452,6 +457,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mADCInternal::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -462,6 +468,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mADCInternal::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } //end "MQTTHandler_Init"
 

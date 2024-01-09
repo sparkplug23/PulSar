@@ -29,7 +29,115 @@
 
 // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TVROOM_XMAS2022 // Use other snow tree, use transparant wire from big snow last year. Do 4pin esp32. No docorations, just light it up
 // DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_SHELF // do 2pin, 2 segments, green tree (50) + candle (rgbw sk6812). Use new wire (clear 30awg) incoming for it, perhaps 3 pin it one for each candle to reduce visible wiries
+// #define DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
 
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** LOCATION: Livingroom ****************************************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+#ifdef DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
+  #define DEVICENAME_CTR          "xmas_tree_water"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Tree Water"
+  #define DEVICENAME_ROOMHINT_CTR "Living Room"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+
+
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+ 
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\","
+      #endif
+      "\"4\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG  "FurnaceOutflow"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG  "Exhaust"
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG  "GarageRadiator"
+  #define D_DEVICE_SENSORS_ANALOG_1_CTR       "LockOut Lamp Luminance"
+  #define D_DEVICE_SENSORS_SWITCH_1_CTR       "FurnaceActive"
+  #define D_DEVICE_SENSORS_SWITCH_2_CTR       "FurnaceLockOut"
+  #define D_DEVICE_SENSORS_SWITCH_3_CTR       "PIR"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Garage"
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "}";
+
+#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************

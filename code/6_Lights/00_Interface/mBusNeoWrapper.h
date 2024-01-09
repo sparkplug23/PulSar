@@ -1009,7 +1009,7 @@ class PolyBus
         if(num < 8)
         {
           // Assume a max of 8 pins supported for now, using the I2S1 (which supports 8) and maybe later I2S0 (which supports 16)
-          offset_method_inside_group = 4;//4; // handled inside library automatically for I2S1 types
+          offset_method_inside_group = 4; // handled inside library automatically for I2S1 types
         }
         else
         {

@@ -61,6 +61,7 @@
   #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #endif // D_USER_MICHAEL
 
 
@@ -824,7 +825,7 @@ enum TASKER_ID{
   #define pCONT_ade7953                         static_cast<mEnergyADE7953*>(pCONT->pModule[EM_MODULE_ENERGY_ADE7953_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_INA219
-  #include "7_Energy/INA219/mEnergyINA219.h"
+  #include "7_Energy/03_INA219/mINA219.h"
   #define pCONT_mina219                         static_cast<mEnergyINA219*>(pCONT->pModule[EM_MODULE_ENERGY_INA219_ID])
 #endif
 

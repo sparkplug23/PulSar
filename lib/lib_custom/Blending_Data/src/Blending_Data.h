@@ -1,5 +1,5 @@
-#ifndef DATA_SMOOTHING_H
-#define DATA_SMOOTHING_H
+#ifndef DATA_SMOOTHING_H2
+#define DATA_SMOOTHING_H2
 
 /*-------------------------------------------------------------------------
 mDataBlend provides blend timing support.

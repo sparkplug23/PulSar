@@ -3,6 +3,9 @@
 #ifdef USE_MODULE_ENERGY_INA219
 #ifdef USE_I2C
 
+const char* mEnergyINA219::PM_MODULE_ENERGY_INA219_CTR = D_MODULE_ENERGY_INA219_CTR;
+const char* mEnergyINA219::PM_MODULE_ENERGY_INA219_FRIENDLY_CTR = D_MODULE_ENERGY_INA219_FRIENDLY_CTR;
+
 
 uint8_t ina219_type[4] = {0,0,0,0};
 uint8_t ina219_addresses[] = { INA219_ADDRESS1, INA219_ADDRESS2, INA219_ADDRESS3, INA219_ADDRESS4 };
@@ -52,24 +55,32 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
     break;  
     case FUNC_EVERY_SECOND:
       AddLog(LOG_LEVEL_TEST, PSTR("Read"));   
+
+      
+      // DIGITAL_INVERT_PIN(13);
+      // DIGITAL_INVERT_PIN(14);
+      // DIGITAL_INVERT_PIN(27);
+      // DIGITAL_INVERT_PIN(26);
+
+
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
+      // parse_JSONCommand(obj);
     break; 
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Status_Table_Draw();
-      break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table_Data();
-      break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    //   WebAppend_Root_Status_Table_Draw();
+    //   break;
+    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    //   WebAppend_Root_Status_Table_Data();
+    //   break;
+    // #endif //USE_MODULE_NETWORK_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/
@@ -185,68 +196,68 @@ void mEnergyINA219::EveryLoop(){
   
 }
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
+//     #ifdef USE_MODULE_NETWORK_WEBSERVER
+// void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
 
-  char buffer[30];
+//   char buffer[30];
    
-  BufferWriterI->Append_P(PSTR("{t}"));  
-  BufferWriterI->Append_P(PSTR("<tr><td><b>INA219 Current Sensor</b></td></tr>"));//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr));
+//   BufferWriterI->Append_P(PSTR("{t}"));  
+//   BufferWriterI->Append_P(PSTR("<tr><td><b>INA219 Current Sensor</b></td></tr>"));//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr));
 
-  //headers
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  for(int col=0;col<settings.fSensorCount+1;col++){ //sensors + title colomn
-    if(col==0){ //first column blank
-      BufferWriterI->Append_P(PSTR("<th></th>"));
-    }else{
-      BufferWriterI->Append_P(PSTR("<td>%s</td>"), DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,col-1,buffer,sizeof(buffer)));
-    }
-  }    
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  //rows
-  for(int row=0;row<TABLE_ROW_ITEMS_COUNT+1;row++){
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    for(int col=0;col<settings.fSensorCount+1;col++){
-      if(col==0){ //row name
-        BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS_INA219));
-      }else{
-        BufferWriterI->Append_P(PSTR("<td>{dc}%s'>" D_DEFAULT_HTML_VALUE "</div></td>"),"ina219_tab");  
-      }
-    }
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  }
-  BufferWriterI->Append_P(PSTR("{t2}")); 
+//   //headers
+//   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//   for(int col=0;col<settings.fSensorCount+1;col++){ //sensors + title colomn
+//     if(col==0){ //first column blank
+//       BufferWriterI->Append_P(PSTR("<th></th>"));
+//     }else{
+//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,col-1,buffer,sizeof(buffer)));
+//     }
+//   }    
+//   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+//   //rows
+//   for(int row=0;row<TABLE_ROW_ITEMS_COUNT+1;row++){
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//     for(int col=0;col<settings.fSensorCount+1;col++){
+//       if(col==0){ //row name
+//         BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS_INA219));
+//       }else{
+//         BufferWriterI->Append_P(PSTR("<td>{dc}%s'>" D_DEFAULT_HTML_VALUE "</div></td>"),"ina219_tab");  
+//       }
+//     }
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//   }
+//   BufferWriterI->Append_P(PSTR("{t2}")); 
 
-}
+// }
 
 
-//append to internal buffer if any root messages table
-void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
+// //append to internal buffer if any root messages table
+// void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
   
-  uint8_t count = 0;
+//   uint8_t count = 0;
 
-  JsonBuilderI->Array_Start("ina219_tab");// Class name
-  for(int row=0;row<6;row++){
-    for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++){
-      JsonBuilderI->Object_Start();
-        JsonBuilderI->Add("id",count++);
-        if(sensor[sensor_id].power_mw>30){ JsonBuilderI->Add("fc","#ff0000");
-        }else{ JsonBuilderI->Add("fc","#ffffff"); }
-        switch(row){
-          case 0: JsonBuilderI->Add("ih",sensor[sensor_id].bus_voltage_mv); break;
-          case 1: JsonBuilderI->Add("ih",sensor[sensor_id].shunt_voltage_mv); break;
-          case 2: JsonBuilderI->Add("ih",sensor[sensor_id].load_voltage_mv); break;
-          case 3: JsonBuilderI->Add("ih",sensor[sensor_id].current_ma); break;
-          case 4: JsonBuilderI->Add("ih",sensor[sensor_id].power_mw); break;
-        } //switch      
-      JsonBuilderI->Object_End();
-    }
-  }//end for
-  JsonBuilderI->Array_End();
+//   JsonBuilderI->Array_Start("ina219_tab");// Class name
+//   for(int row=0;row<6;row++){
+//     for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++){
+//       JsonBuilderI->Object_Start();
+//         JsonBuilderI->Add("id",count++);
+//         if(sensor[sensor_id].power_mw>30){ JsonBuilderI->Add("fc","#ff0000");
+//         }else{ JsonBuilderI->Add("fc","#ffffff"); }
+//         switch(row){
+//           case 0: JsonBuilderI->Add("ih",sensor[sensor_id].bus_voltage_mv); break;
+//           case 1: JsonBuilderI->Add("ih",sensor[sensor_id].shunt_voltage_mv); break;
+//           case 2: JsonBuilderI->Add("ih",sensor[sensor_id].load_voltage_mv); break;
+//           case 3: JsonBuilderI->Add("ih",sensor[sensor_id].current_ma); break;
+//           case 4: JsonBuilderI->Add("ih",sensor[sensor_id].power_mw); break;
+//         } //switch      
+//       JsonBuilderI->Object_End();
+//     }
+//   }//end for
+//   JsonBuilderI->Array_End();
 
-}
+// }
 
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+//     #endif // USE_MODULE_NETWORK_WEBSERVER
 
 // New function that breaks things up into switch statements
 // Extra argument -- "require_completion" ie loop until status SPLIT_TASK_DONE_ID
@@ -362,7 +373,7 @@ uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_level, bool json_appe
 
 }
 
-uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
 
@@ -370,7 +381,7 @@ uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level){
 
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     // if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,sensor_id,buffer,sizeof(buffer))); 
+      JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer))); 
 
 
       JsonBuilderI->Add("ina219_current_multiplier",ina219_current_multiplier);
@@ -414,73 +425,79 @@ uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level){
 
 void mEnergyINA219::MQTTHandler_Init(){
 
+  struct handler<mEnergyINA219>* ptr;
+
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mEnergyINA219::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyINA219::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
+  ptr->flags.PeriodicEnabled = 1;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyINA219::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } //end "MQTTHandler_Init"
 
-
-void mEnergyINA219::MQTTHandler_Set_RefreshAll(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mEnergyINA219::MQTTHandler_Set_DefaultPeriodRate(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_DefaultPeriodRate"
-
-
-void mEnergyINA219::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_SENSOR_IFCHANGED_ID, MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mEnergyINA219>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_INA219_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, 
-    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mEnergyINA219::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mEnergyINA219::MQTTHandler_Set_DefaultPeriodRate()
+{
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mEnergyINA219::MQTTHandler_Sender(uint8_t id)
+{    
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INA219_ID, handle, id);
+  }
+}
+
+
+
+
 
 
 

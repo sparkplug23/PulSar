@@ -7,7 +7,7 @@
 
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
 
-#include "2c_Internal_IsolatedNoTaskerSystems/DataBlend/mDataBlend.h"
+#include "Blending_Data.h"
 
 //tmp pin fixes
 // #define Pin(GPIO_SHELLY_DIMMER_RST_INV) 1

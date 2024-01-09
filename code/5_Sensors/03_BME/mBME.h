@@ -62,10 +62,10 @@
 #define BMP_ADDR1            0x76
 #define BMP_ADDR2            0x77
 
-#define BMP180_CHIPID        0x55
-#define BMP280_CHIPID        0x58
-#define BME280_CHIPID        0x60
-#define BME680_CHIPID        0x61
+#define BMP180_CHIPID        0x55 // 85 Dec
+#define BMP280_CHIPID        0x58 // 88 Dec
+#define BME280_CHIPID        0x60 // 96 Dec
+#define BME680_CHIPID        0x61 // 97 Dec
 
 #define BMP_REGISTER_CHIPID  0xD0
 

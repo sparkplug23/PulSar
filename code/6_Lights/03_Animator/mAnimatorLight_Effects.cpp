@@ -13671,7 +13671,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = ",,,,,Time,
  * Effect Ideas:
  * 
  * (1) Wipe Random from the top, that fills pixel by pixel until it reaches an end stop on the bottom. This end may jump in single pixels, or in multiples (ie grouping=200). The effect would be banded falling tetris blocks and when the banding is complete, restart
- * 
+ *     - Using a background colour, either black or white for the "unfilled" part will give nice effects
  * 
  */
 void mAnimatorLight::LoadEffects()

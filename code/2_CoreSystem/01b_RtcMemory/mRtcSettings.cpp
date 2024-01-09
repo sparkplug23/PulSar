@@ -174,7 +174,7 @@ void RtcSettingsSave(void) {
   if(pCONT->pModule[0]==nullptr){ return; }
   
   RtcSettings.baudrate = pCONT_set->Settings.baudrate * 300;
-  if (pCONT_time->GetUTCTime() > START_VALID_TIME) {  // 2016-01-01
+  if (pCONT_time->GetUTCTime() > START_VALID_UTC_TIME) {  // 2016-01-01
     RtcSettings.utc_time = pCONT_time->GetUTCTime();
   }
   if (GetRtcSettingsCrc() != rtc_settings_crc) {

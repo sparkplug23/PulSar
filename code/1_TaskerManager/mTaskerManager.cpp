@@ -384,7 +384,7 @@ uint8_t mTaskerManager::Instance_Init(){
     addTasker(EM_MODULE_ENERGY_ADE7953_ID, new mEnergyADE7953());
   #endif
   #ifdef USE_MODULE_ENERGY_INA219
-    addTasker(EM_MODULE_ENERGY_INA219_ID, new X());
+    addTasker(EM_MODULE_ENERGY_INA219_ID, new mEnergyINA219());
   #endif
 
   // Lights

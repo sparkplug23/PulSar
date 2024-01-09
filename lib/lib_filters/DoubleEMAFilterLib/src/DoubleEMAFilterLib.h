@@ -61,7 +61,6 @@ T DoubleEMAFilter<T>::AddValue(const T value)
 	this->_lowPassFilterLow  = (T)(this->_alphaLow  * value + (1 - this->_alphaLow)  * this->_lowPassFilterLow);
 	this->_lowPassFilterHigh = (T)(this->_alphaHigh * value + (1 - this->_alphaHigh) * this->_lowPassFilterHigh);
 
-
 	this->_bandPassFilter    = this->_lowPassFilterHigh - this->_lowPassFilterLow;
 	this->_bandStopFilter    = value - this->_bandPassFilter;
 	// my addition

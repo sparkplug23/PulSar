@@ -573,6 +573,18 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
         Serial.println(WiFi.localIP());
 
       #endif // ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+      #ifdef ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
+
+      if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+      {
+        char mqtt_data[300];
+        pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+        ALOG_INF(PSTR("I2C_Scan=%s"), mqtt_data);
+      }
+
+
+
+      #endif // ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
 
 
 
@@ -2930,9 +2942,9 @@ void mSupport::Handle_OTA_URLS()
       pCONT_set->runtime.ota_state_flag--;
       if (2 == pCONT_set->runtime.ota_state_flag) {
         // pCONT_set->ota_url = pCONT_set->Settings.ota_url;
-        #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-        pCONT_set->RtcSettings.ota_loader = 0;  // Try requested image first
-        #endif
+        // #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
+        // pCONT_set->RtcSettings.ota_loader = 0;  // Try requested image first
+        // #endif
         // pCONT_set->ota_retry_counter = OTA_ATTEMPTS;
         
         #ifdef ESP8266

@@ -88,7 +88,7 @@ void mPrinter3D::Pre_Init(void)
 void mPrinter3D::Init(void)
 {
   
-    settings.fEnableSensor = true;
+  settings.fEnableSensor = true;
 
 }
 
@@ -124,7 +124,7 @@ void mPrinter3D::SubTask_UpdateOLED()
   snprintf(buffer, sizeof(buffer), "%s", pCONT_time->RtcTime.hhmmss_ctr);
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
 
-  #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+  // #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
 
   float sensor_data = -1;
 
@@ -132,28 +132,28 @@ void mPrinter3D::SubTask_UpdateOLED()
    * @brief Add each sensor on new line
    */
    
-  uint8_t sensors_available = pCONT_db18->GetSensorCount();
+  uint8_t sensors_available = pCONT_bme->GetSensorCount();
 
   for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
   {
     sensors_reading_t val;
-    pCONT_db18->GetSensorReading(&val, sensor_id);
+    pCONT_bme->GetSensorReading(&val, sensor_id);
     if(val.Valid())
     {
 
       sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+      DLI->GetDeviceName_WithModuleUniqueID( pCONT_bme->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
       /**
        * @brief Check for name and replace with OLED friendly short name
        * 
        */
-      if(strcmp(buffer_n, D_DEVICE_SENSOR_DB18S20_0_NAME)==0)
+      if(strcmp(buffer_n, D_DEVICE_SENSOR_BME_LONG_WIRE_NAME)==0)
       {
         memset(buffer_n, 0, sizeof(buffer_n));
         sprintf(buffer_n, "%s", "TOP");
       }else 
-      if(strcmp(buffer_n, D_DEVICE_SENSOR_DB18S20_1_NAME)==0)
+      if(strcmp(buffer_n, D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME)==0)
       {
         memset(buffer_n, 0, sizeof(buffer_n));
         sprintf(buffer_n, "%s", "BOT");
@@ -166,7 +166,7 @@ void mPrinter3D::SubTask_UpdateOLED()
 
   }
 
-  #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
+  // #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 
 }
 

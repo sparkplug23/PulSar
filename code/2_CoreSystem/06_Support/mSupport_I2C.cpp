@@ -214,23 +214,23 @@ bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired 
 {
 
   
-  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
 
   for (uint8_t address = 1; address <= 127; address++) {
       // AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x|%x)=for"),address,addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) 
     {
-      ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
+      ALOG_INF( PSTR("I2cDevice(%x)=true found"),addr);
       return true;
     }else
     if (!wire->endTransmission() && (address != addr))
     {
-      ALOG_DBM( PSTR("I2cDevice(%x) also found %x"),address,addr);
+      ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
     }
   }
   
-  ALOG_ERR(PSTR("I2cDevice(%x)=FALSE"),addr);
+  ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
   
   return false;
 }
