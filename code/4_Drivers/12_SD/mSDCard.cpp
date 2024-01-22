@@ -109,7 +109,7 @@ void sdcardWriterTask(void *param)
     //   jLen = 0;
       
     //   // jLen += sprintf(json_second_section+jLen, ",\"N\":%d,", sequence_test_global++);
-    //   #ifdef USE_MODULE_DRIVERS_GPS
+    //   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
     //   // // keyed method
     //   // // jLen += sprintf(json_second_section+jLen, ",\"G\":{");
     //   // //   jLen += sprintf(json_second_section+jLen, "\"t\":%d,", pCONT_gps->my_gps_vals.lat); 
@@ -133,7 +133,7 @@ void sdcardWriterTask(void *param)
     //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.seconds); 
     //   //   jLen += sprintf(json_second_section+jLen, "%d", pCONT_gps->my_gps_vals.dateTime_ms/100); // are always hundreds, so shorted to 1 sig fig then recover on matlab
     //   // jLen += sprintf(json_second_section+jLen, "]");
-    //   #endif // USE_MODULE_DRIVERS_GPS
+    //   #endif // USE_MODULE_SENSORS_GPS_SERIAL
 
     //   // jLen += sprintf(json_second_section+jLen, "}");
 
@@ -1060,7 +1060,7 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
      * */
     if(sdcard_status.isopened)
     {
-      #ifdef USE_MODULE_DRIVERS_GPS
+      #ifdef USE_MODULE_SENSORS_GPS_SERIAL
       pCONT_time->SetUTCTime(
                     pCONT_gps->gps_result_stored.dateTime.year,
                     pCONT_gps->gps_result_stored.dateTime.month,
@@ -1069,7 +1069,7 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
                     pCONT_gps->gps_result_stored.dateTime.minutes,
                     pCONT_gps->gps_result_stored.dateTime.seconds
                   );
-      #endif // USE_MODULE_DRIVERS_GPS
+      #endif // USE_MODULE_SENSORS_GPS_SERIAL
 
     }
 

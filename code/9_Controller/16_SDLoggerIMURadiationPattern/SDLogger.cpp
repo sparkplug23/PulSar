@@ -84,7 +84,7 @@ void mSDLoggerIMURadiationPattern::UpdateInternalRTCTimeWithGPSTime()
   /**
    * Only update the time IF the sdcard is not open already and being written to
    * */
-  #if defined(USE_MODULE_DRIVERS_GPS) && defined(USE_SYSTEM_SDCARD_LOGGING)
+  #if defined(USE_MODULE_SENSORS_GPS_SERIAL) && defined(USE_SYSTEM_SDCARD_LOGGING)
   if(pCONT_sdcard->sdcard_status.isopened==0)
   {
 

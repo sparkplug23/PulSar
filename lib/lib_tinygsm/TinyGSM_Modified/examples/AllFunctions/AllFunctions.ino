@@ -6,15 +6,15 @@
  * NOTE:
  * Some of the functions may be unavailable for your modem.
  * Just comment them out.
- *
+ *https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
  **************************************************************/
 
 // Select your modem:
-// #define TINY_GSM_MODEM_SIM800
+#define TINY_GSM_MODEM_SIM800
 // #define TINY_GSM_MODEM_SIM808
 // #define TINY_GSM_MODEM_SIM868
 // #define TINY_GSM_MODEM_SIM900
-#define TINY_GSM_MODEM_SIM7000
+// #define TINY_GSM_MODEM_SIM7000
 // #define TINY_GSM_MODEM_SIM7000SSL
 // #define TINY_GSM_MODEM_SIM7080
 // #define TINY_GSM_MODEM_SIM5360
@@ -32,6 +32,201 @@
 // #define TINY_GSM_MODEM_XBEE
 // #define TINY_GSM_MODEM_SEQUANS_MONARCH
 
+
+#define SIM800L_IP5306_VERSION_20190610
+
+#include <Wire.h>
+
+#if defined(SIM800L_IP5306_VERSION_20190610)
+
+#define MODEM_RST             5
+#define MODEM_PWRKEY          4
+#define MODEM_POWER_ON       23
+#define MODEM_TX             27
+#define MODEM_RX             26
+
+#define I2C_SDA              21
+#define I2C_SCL              22
+#define LED_GPIO             13
+#define LED_ON               HIGH
+#define LED_OFF              LOW
+
+#define IP5306_ADDR          0x75
+#define IP5306_REG_SYS_CTL0  0x00
+
+// setPowerBoostKeepOn
+bool setupPMU()
+{
+    bool en = true;
+    Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.beginTransmission(IP5306_ADDR);
+    Wire.write(IP5306_REG_SYS_CTL0);
+    if (en) {
+        Wire.write(0x37); // Set bit1: 1 enable 0 disable boost keep on
+    } else {
+        Wire.write(0x35); // 0x37 is default reg value
+    }
+    return Wire.endTransmission() == 0;
+}
+
+
+#elif defined(SIM800L_AXP192_VERSION_20200327)
+
+#define MODEM_RST            5
+#define MODEM_PWRKEY          4
+#define MODEM_POWER_ON       23
+#define MODEM_TX             27
+#define MODEM_RX             26
+#define MODEM_DTR            32
+#define MODEM_RI             33
+
+#define I2C_SDA              21
+#define I2C_SCL              22
+#define LED_GPIO             13
+#define LED_ON               HIGH
+#define LED_OFF              LOW
+
+
+#elif defined(SIM800C_AXP192_VERSION_20200609)
+// pin definitions
+#define MODEM_PWRKEY          4
+#define MODEM_POWER_ON       25
+#define MODEM_TX             27
+#define MODEM_RX             26
+#define MODEM_DTR            32
+#define MODEM_RI             33
+
+#define I2C_SDA              21
+#define I2C_SCL              22
+#define LED_GPIO             12
+#define LED_ON               LOW
+#define LED_OFF              HIGH
+
+#elif defined(SIM800L_IP5306_VERSION_20200811)
+
+
+#define MODEM_RST             5
+#define MODEM_PWRKEY          4
+#define MODEM_POWER_ON       23
+#define MODEM_TX             27
+#define MODEM_RX             26
+
+#define MODEM_DTR            32
+#define MODEM_RI             33
+
+#define I2C_SDA              21
+#define I2C_SCL              22
+#define LED_GPIO             13
+#define LED_ON               HIGH
+#define LED_OFF              LOW
+
+#define IP5306_ADDR          0x75
+#define IP5306_REG_SYS_CTL0  0x00
+
+// setPowerBoostKeepOn
+bool setupPMU()
+{
+    bool en = true;
+    Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.beginTransmission(IP5306_ADDR);
+    Wire.write(IP5306_REG_SYS_CTL0);
+    if (en) {
+        Wire.write(0x37); // Set bit1: 1 enable 0 disable boost keep on
+    } else {
+        Wire.write(0x35); // 0x37 is default reg value
+    }
+    return Wire.endTransmission() == 0;
+}
+
+#else
+
+#error "Please select the corresponding model"
+
+#endif
+
+
+#if defined(SIM800L_AXP192_VERSION_20200327) || defined(SIM800C_AXP192_VERSION_20200609)
+#include <axp20x.h>         //https://github.com/lewisxhe/AXP202X_Library
+
+AXP20X_Class axp;
+
+bool setupPMU()
+{
+// For more information about the use of AXP192, please refer to AXP202X_Library https://github.com/lewisxhe/AXP202X_Library
+    Wire.begin(I2C_SDA, I2C_SCL);
+    int ret = axp.begin(Wire, AXP192_SLAVE_ADDRESS);
+
+    if (ret == AXP_FAIL) {
+        Serial.println("AXP Power begin failed");
+        return false;
+    }
+
+    //! Turn off unused power
+    axp.setPowerOutPut(AXP192_DCDC1, AXP202_OFF);
+    axp.setPowerOutPut(AXP192_LDO2, AXP202_OFF);
+    axp.setPowerOutPut(AXP192_LDO3, AXP202_OFF);
+    axp.setPowerOutPut(AXP192_DCDC2, AXP202_OFF);
+    axp.setPowerOutPut(AXP192_EXTEN, AXP202_OFF);
+
+    //! Do not turn off DC3, it is powered by esp32
+    // axp.setPowerOutPut(AXP192_DCDC3, AXP202_ON);
+
+    // Set the charging indicator to turn off
+    // Turn it off to save current consumption
+    // axp.setChgLEDMode(AXP20X_LED_OFF);
+
+    // Set the charging indicator to flash once per second
+    // axp.setChgLEDMode(AXP20X_LED_BLINK_1HZ);
+
+
+    //! Use axp192 adc get voltage info
+    axp.adc1Enable(AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_BATT_VOL_ADC1, true);
+
+    float vbus_v = axp.getVbusVoltage();
+    float vbus_c = axp.getVbusCurrent();
+    float batt_v = axp.getBattVoltage();
+    // axp.getBattPercentage();   // axp192 is not support percentage
+    Serial.printf("VBUS:%.2f mV %.2f mA ,BATTERY: %.2f\n", vbus_v, vbus_c, batt_v);
+
+    return true;
+}
+
+#endif
+
+
+
+void setupModem()
+{
+
+    // Start power management
+    if (setupPMU() == false) {
+        Serial.println("Setting power error");
+    }
+
+#ifdef MODEM_RST
+    // Keep reset high
+    pinMode(MODEM_RST, OUTPUT);
+    digitalWrite(MODEM_RST, HIGH);
+#endif
+
+    pinMode(MODEM_PWRKEY, OUTPUT);
+    pinMode(MODEM_POWER_ON, OUTPUT);
+
+    // Turn on the Modem power first
+    digitalWrite(MODEM_POWER_ON, HIGH);
+
+    // Pull down PWRKEY for more than 1 second according to manual requirements
+    digitalWrite(MODEM_PWRKEY, HIGH);
+    delay(100);
+    digitalWrite(MODEM_PWRKEY, LOW);
+    delay(1000);
+    digitalWrite(MODEM_PWRKEY, HIGH);
+
+    // Initialize the indicator as an output
+    pinMode(LED_GPIO, OUTPUT);
+    digitalWrite(LED_GPIO, LED_OFF);
+}
+
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
 
@@ -47,7 +242,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 #endif
 
 // See all AT commands, if wanted
-// #define DUMP_AT_COMMANDS
+#define DUMP_AT_COMMANDS
 
 // Define the serial console for debug prints, if needed
 #define TINY_GSM_DEBUG SerialMon
@@ -56,7 +251,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 // NOTE:  DO NOT AUTOBAUD in production code.  Once you've established
 // communication, set a fixed baud rate using modem.setBaud(#).
 #define GSM_AUTOBAUD_MIN 9600
-#define GSM_AUTOBAUD_MAX 57600
+#define GSM_AUTOBAUD_MAX 115200
 
 // Add a reception delay, if needed.
 // This may be needed for a fast processor at a slow baud rate.
@@ -70,14 +265,14 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 #define TINY_GSM_TEST_TCP true
 #define TINY_GSM_TEST_SSL true
 #define TINY_GSM_TEST_CALL false
-#define TINY_GSM_TEST_SMS false
+#define TINY_GSM_TEST_SMS true
 #define TINY_GSM_TEST_USSD false
 #define TINY_GSM_TEST_BATTERY true
 #define TINY_GSM_TEST_TEMPERATURE true
-#define TINY_GSM_TEST_GSM_LOCATION false
+#define TINY_GSM_TEST_GSM_LOCATION true
 #define TINY_GSM_TEST_NTP false
 #define TINY_GSM_TEST_TIME false
-#define TINY_GSM_TEST_GPS false
+#define TINY_GSM_TEST_GPS true
 // disconnect and power down modem after tests
 #define TINY_GSM_POWERDOWN false
 
@@ -85,18 +280,18 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 #define GSM_PIN ""
 
 // Set phone numbers, if you want to test SMS and Calls
-// #define SMS_TARGET  "+380xxxxxxxxx"
-// #define CALL_TARGET "+380xxxxxxxxx"
+#define SMS_TARGET  "+447515358597"
+#define CALL_TARGET "+447515358597"
 
 // Your GPRS credentials, if any
-const char apn[] = "YourAPN";
+const char apn[] = "giffgaff.com";
 // const char apn[] = "ibasis.iot";
-const char gprsUser[] = "";
-const char gprsPass[] = "";
+const char gprsUser[] = "gg";
+const char gprsPass[] = "p";
 
 // Your WiFi connection credentials, if applicable
-const char wifiSSID[] = "YourSSID";
-const char wifiPass[] = "YourWiFiPass";
+const char wifiSSID[] = "HACS2400";
+const char wifiPass[] = "af4d8bc9ab";
 
 // Server details to test TCP/SSL
 const char server[]   = "vsh.pp.ua";
@@ -133,12 +328,27 @@ void setup() {
   // !!!!!!!!!!!
   // Set your reset, enable, power pins here
   // !!!!!!!!!!!
+    // Start power management
+    if (setupPMU() == false) {
+        Serial.println("Setting power error");
+    }
+
+    // Some start operations
+    setupModem();
+
+    // Set GSM module baud rate and UART pins
+    SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
 
   DBG("Wait...");
-  delay(6000);
+  delay(500);
 
   // Set GSM module baud rate
   TinyGsmAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+
+Serial.println("here");
+
+// while(1);
+
   // SerialAT.begin(9600);
 }
 

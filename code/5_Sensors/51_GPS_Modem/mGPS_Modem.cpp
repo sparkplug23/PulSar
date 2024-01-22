@@ -6,6 +6,19 @@
  * @version 1.0
  * @date 2022-05-01
  * 
+ * 
+ * This file should just hold the GPS data, that is populated by the driver for the modem
+ * So really should GPS_Modem simply become a driver? 
+ * Though different modems may/maynot have GPS.
+ * 
+ * SensorInterface in this sense needs a way to hold (like mavlink log) a basic "system position data". May not be practical here.
+ * 
+ * 
+ * For now, keep this file as simply a storage location for the GPS data and reporting. It could easily just become an interface mqtt payload/constructor.
+ * 
+ * 
+ * 
+ * 
  * @copyright Copyright (c) 2022
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -32,9 +45,6 @@ const char* mGPS_Modem::PM_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR = D_MODULE__S
 int8_t mGPS_Modem::Tasker(uint8_t function, JsonParserObject obj)
 {
   
-  int8_t function_result = 0;
-  
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
@@ -54,27 +64,9 @@ int8_t mGPS_Modem::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case FUNC_EVERY_SECOND:
-      // SubTask_ReadSensor();
-
       /**
        * @brief Temp fix, manually get from modem
-       * 
        */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     break;
     /************
      * COMMANDS SECTION * 
@@ -98,7 +90,7 @@ int8_t mGPS_Modem::Tasker(uint8_t function, JsonParserObject obj)
     #endif //USE_MODULE_NETWORK_MQTT
   }
   
-  return function_result;
+  return FUNCTION_RESULT_SUCCESS_ID;
 
 } // END function
 
@@ -106,38 +98,36 @@ int8_t mGPS_Modem::Tasker(uint8_t function, JsonParserObject obj)
 void mGPS_Modem::Pre_Init(void)
 {
   
-  // if (pCONT_sup->I2cEnabled(XI2C_11)) 
-  // {
-  //   ALOG_INF( PSTR(D_LOG_BH1750 "I2cEnabled(XI2C_11)") );
-  // }
-
 }
 
 
 void mGPS_Modem::Init(void)
 {
   
+  settings.sensor_count++;
   settings.fEnableSensor = true;
-
-  // for (uint32_t i = 0; i < sizeof(Bh1750.addresses); i++) 
-  // {
-
-  //   if (pCONT_sup->I2cActive(Bh1750.addresses[i])) { continue; }
-
-  //   device_data[settings.sensor_count].address = Bh1750.addresses[i];
-
-  //   if (Set_MeasurementTimeRegister(settings.sensor_count)) 
-  //   {
-      settings.sensor_count++;
-      settings.fEnableSensor = true;
-  //   }
-
-  // }
 
   ALOG_INF( PSTR(D_LOG_BH1750 "Count: %d"), settings.sensor_count );
 
 }
 
+/*********************************************************************************************\
+ * Commands
+\*********************************************************************************************/
+
+void mGPS_Modem::parse_JSONCommand(JsonParserObject obj)
+{
+
+  // ALOG_DBM( PSTR(D_LOG_BH1750 "parse_JSONCommand") );
+  
+  char buffer[50];
+  JsonParserToken jtok = 0; 
+
+}
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
 
 uint8_t mGPS_Modem::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
@@ -152,50 +142,19 @@ uint8_t mGPS_Modem::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
 
 }
 
-
 uint8_t mGPS_Modem::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
 
   JBI->Start();
     
-  for (uint32_t sensor_index = 0; sensor_index < settings.sensor_count; sensor_index++) {
-    // if (device_data[sensor_index].valid) {
-      // JBI->Add(D_JSON_ILLUMINANCE, device_data[sensor_index].illuminance);
-      // JBI->Add(D_JSON_LEVEL, device_data[sensor_index].level);
-    // }
-  }
+  JBI->Add("Altitude", location.altitude);
+  JBI->Add("Latitude", location.latitude);
+  JBI->Add("Longitude", location.longitude);
 
   return JBI->End();
     
 }
-
-
-
-
-/*********************************************************************************************\
- * Commands
-\*********************************************************************************************/
-
-void mGPS_Modem::parse_JSONCommand(JsonParserObject obj)
-{
-
-  // ALOG_DBM( PSTR(D_LOG_BH1750 "parse_JSONCommand") );
   
-  char buffer[50];
-  JsonParserToken jtok = 0; 
-
-
-}
-
-/******************************************************************************************************************
- * Commands
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * ConstructJson
-*******************************************************************************************************************/
-
   
 /******************************************************************************************************************
  * MQTT
@@ -217,6 +176,7 @@ void mGPS_Modem::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mGPS_Modem::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -227,16 +187,18 @@ void mGPS_Modem::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mGPS_Modem::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 10; 
+  ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mGPS_Modem::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } //end "MQTTHandler_Init"
 

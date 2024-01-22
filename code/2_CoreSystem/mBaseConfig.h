@@ -96,11 +96,13 @@ With latest version, all longer term shared debug features should be added here 
 #define DISABLE_SLEEP
 
 #ifdef ESP32
+#ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
 #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+#endif
 #endif
 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
@@ -238,8 +240,8 @@ With latest version, all longer term shared debug features should be added here 
   ************************************/    
 
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
-    #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  //   #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
 
 
 

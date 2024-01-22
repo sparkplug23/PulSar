@@ -26,7 +26,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   if(JBI->GetBufferSize()==0)
   {
     Serial.println("error occured");
-    delay(4000);
+    // delay(4000);
+    return 0;
   }
     
     // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
@@ -103,8 +104,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t start_millis = millis();
-    
-  ALOG_INF(PSTR("buffer_writer START ------------------------------- >>>>>>>>>> %d"),JBI->GetBufferSize());
+    ALOG_INF(PSTR("buffer_writer START ------------------------------- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif
     
     pModule[switch_index]->Tasker(function, obj);    
@@ -122,15 +122,14 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     #endif 
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
-    
-  ALOG_INF(PSTR("buffer_writerT ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIE_%d FUNC time %dms"), millis(), millis()-start_millis);
-    #endif
+    ALOG_INF(PSTR("buffer_writerT ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIE_%d FUNC time %dms"), millis(), millis()-start_millis);
     #if defined(ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS)
       if(this_millis > ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS){
         AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TASKER @@@@@@@@@@@@@@@@@@ %d ms %s %S"), millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
       }
     #endif
+    #endif // ENABLE_ADVANCED_DEBUGGING
 
     if(target_tasker!=0)
     {
@@ -318,9 +317,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_SDCARD
     addTasker(EM_MODULE_DRIVERS_SDCARD_ID, new mSDCard());
   #endif
-  #ifdef USE_MODULE_DRIVERS_GPS
-    addTasker(EM_MODULE_DRIVERS_GPS_ID, new mGPS());
-  #endif
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
     addTasker(EM_MODULE_DRIVERS_SERIAL_UART_ID, new mSerialUART());
   #endif
@@ -371,6 +367,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
     addTasker(EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID, new mWebCamera());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+    addTasker(EM_MODULE_DRIVERS__MODEM_7000G__ID, new mSIM7000G());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_800L
+    addTasker(EM_MODULE_DRIVERS__MODEM_800L__ID, new mSIM800L());
   #endif
 
   // Energy
@@ -472,7 +474,7 @@ uint8_t mTaskerManager::Instance_Init(){
     addTasker(EM_MODULE_SENSORS__DS18X20__ID, new mDB18x20_ESP32());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-    addTasker(EM_MODULE__SENSORS_GPS_SERIAL__ID, new mDB18x20_ESP32());
+    addTasker(EM_MODULE__SENSORS_GPS_SERIAL__ID, new mGPS_Serial());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_MODEM
     addTasker(EM_MODULE__SENSORS_GPS_MODEM__ID, new mGPS_Modem());

@@ -1,7 +1,7 @@
 #ifndef _MODULE__SENSORS_GPS_MODEM__H
 #define _MODULE__SENSORS_GPS_MODEM__H
 
-#define D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID   ((5*1000)+51)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID   ((5*1000)+51)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -58,13 +58,6 @@ class mGPS_Modem :
       value->data_f.push_back(location.speed);
       value->sensor_type.push_back(SENSOR_TYPE_ALTITUDE_ID);
       value->data_f.push_back(location.altitude);
-
-
-
-
-
-      // value->sensor_type.push_back(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);
-      // value->data_f.push_back(device_data[index].illuminance);
       value->sensor_id = index;
     };
     
@@ -84,16 +77,7 @@ class mGPS_Modem :
     struct handler<mGPS_Modem> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    //No extra handlers example
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    //with extra handlers example
-    
-    struct handler<mGPS_Modem>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
+    std::vector<struct handler<mGPS_Modem>*> mqtthandler_list;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

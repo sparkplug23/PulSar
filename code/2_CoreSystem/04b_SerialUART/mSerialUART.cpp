@@ -43,7 +43,7 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
 //      * */
 //     case FUNC_LOOP:
 
-//       #ifndef USE_MODULE_DRIVERS_GPS
+//       #ifndef USE_MODULE_SENSORS_GPS_SERIAL
 //         // Finsihed with manual control, start ISRs
 //         pCONT_uart->flag_init_buffers_and_start_isrs = true;
 //       #endif

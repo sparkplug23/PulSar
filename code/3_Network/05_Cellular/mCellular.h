@@ -88,9 +88,16 @@ class mCellular :
 
   private:
   public:
+    /**
+     * @brief Constructor
+     * 
+     */
     mCellular(){};
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
+    /**
+     * @brief Class Naming, used for mTaskerManager
+     * 
+     */
     static const char* PM_MODULE__NETWORK_CELLULAR__CTR;
     static const char* PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
@@ -100,190 +107,25 @@ class mCellular :
     uint16_t GetClassSize(){      return sizeof(mCellular); };
     #endif
     
+    /**
+     * @brief Common Tasker functions and configuration settings
+     * 
+     */
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void Pre_Init();
+    void Init(void);
+    void EveryLoop();
+
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t leds_found = 0;
     }settings;
 
-    
-    // StreamDebugger debugger(SerialAT, Serial);
-    // TinyGsm modem(debugger);
+    /**
+     * @brief Unique features of this class
+     * 
+     */
 
-    
-
-    bool Modem__Running(uint16_t wait_millis = 1000);
-    bool Modem__PowerUntilRunning(uint16_t wait_millis = 5000);
-    bool SimNetwork__InitConfig();
-    bool SimNetwork__StartConnection();
-    bool SimNetwork__CheckConnection();
-
-    bool DataNetwork__InitConfig();
-    bool DataNetwork__StartConnection();
-    bool DataNetwork__CheckConnection();
-
-    bool Modem_CheckAndRestartUnresponsiveModem();
-
-
-    float GetSignalQualityPower();
-    float GetSignalQualityPower(int16_t signal_quality_raw);
-
-    
-    bool SendAT(const char* buffer, uint16_t wait_millis = 0);
-    bool SendAT_F(uint16_t wait_millis, PGM_P formatP, ...);
-    bool SendAT_ATParseResponse_F(uint16_t wait_millis, uint8_t response_loglevel, PGM_P formatP, ...);
-
-
-    TinyGsm* modem = nullptr;
-    TinyGsmClient* gsm_client = nullptr;
-
-    int counter = 0, lastIndex = 0, numberOfPieces = 24;
-    String pieces[24], input;
-
-
-    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    struct GPS_STATUS
-    {
-      timereached_t tReached_Update;
-      bool enabled = 0; // 0 disabled, 1 enabled            
-      float latitude = 54.5;// Latitude
-      float longitude = -6.0;// Longitude
-      float speed = 0;// Speed Over Ground. Unit is knots.
-      float altitude = 0;// MSL Altitude. Unit is meters
-      int vsat = 0;// GNSS Satellites in View
-      int usat = 0;// GNSS Satellites Used
-      float accuracy = 0;// Horizontal Dilution Of Precision
-      int year = 0; // Four digit year
-      int month = 0;// Two digit month
-      int day = 0;// Two digit day
-      int hour = 0;// Two digit hour
-      int minute = 0;// Two digit minute
-      int second = 0;// 6 digit second with subseconds
-      
-      float course      = 0;
-      int   FixMode     = 0;
-      float accuracy_position    = 0;
-      float accuracy_vertical    = 0;
-      int   usat_glonass = 0;
-      int   cno_max = 0;
-      int   HPA = 0;
-      int   VPA = 0;
-
-
-    }gps;
-    void GPS_Enable();
-    void GPS_Disable();
-    void ModemUpdate_GPS();
-    void SMS_GPSLocation();
-    void SMS_GPSLocationAuto();
-    void SMS_BatteryDetailed();
-
-
-    struct SMSAuto_GPS_Messages{
-      uint16_t rate_seconds = 0; //0 is disable
-      uint32_t tSaved_LastSent = 0;
-    }smsauto_gps_messages;
-    void AutoSMS_Messages_Handle();
-
-
-    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-
-    
-    void SMS_CommandIntoJSONCommand(char* command);
-
-
-
-
-    void GPRS_UpdateConnectionState(bool state);
-    
-    struct GPRS_STATUS
-    {
-      timereached_t tReached_Update;
-      bool enabled = 0; // 0 disabled, 1 enabled  
-      uint32_t last_comms_millis_updated = 0; 
-      float signal_quality_rssi_dbm = 0;
-      int16_t signal_quality_raw = 0;   
-      uint32_t connected_seconds = 0;      
-      uint16_t downtime_secs = 0;
-
-      bool connected = true;
-
-
-      uint16_t reconnect_init_counts = 0;
-
-      uint16_t apn_connect_called = 0;
-
-    }gprs;
-    void GPRS_Disable();
-    void ModemUpdate_GPRS();
-    void Modem_Enable();
-
-    struct SMS_STATUS
-    {
-      timereached_t tReached_Update;
-      bool enabled = 0; // 0 disabled, 1 enabled       
-      std::vector<uint8_t> messages_incoming_index_list;     
-    }sms;
-    void SMS_Enable();
-    void SMS_Disable();
-    void ModemUpdate_SMS();
-    void SMSReadAndEraseSavedSMS();
-    
-    bool Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_millis = 0);
-
-    void Get_Modem_Hardware();
-
-    struct DATA
-    {
-      struct batt_status
-      {
-        uint16_t volts_mv    = 0;
-        int8_t   percentage = 0;
-        uint8_t  charge_state = 0;
-        bool isvalid = false;
-      }
-      battery;
-
-    }modem_status;
-
-    struct SMS_PDU_Message{
-
-      uint8_t length_of_smsc_information = 0;
-
-
-    }sms_pdu_message;
-
-    
-
-
-    bool flag_modem_initialized = false;
-
-    bool parse_ATCommands(char* buffer, uint16_t buflen, uint8_t log_level = 6);
-     
-    void ModemUpdate_BatteryStatus();
-
-    void SMS_Send_TimedHeartbeat();
-      
-
-
-    void modemPowerOn();
-    void modemPowerOff();
-    void modemRestart();
-
-    void SendATCommand_SMSFormatAscii();
-    void SendATCommand_SMSFormatPDU();
-    void SendATCommand_SMSImmediateForwardOverSerial();
-    void SendATCommand_FunctionalityMode_Minimum();
-    void SendATCommand_FunctionalityMode_Full();
-
-    char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
-
-    void ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_t buflen, uint8_t response_loglevel);
-
-
-    void EveryLoop();
-
-    void Pre_Init();
-    void Init(void);
     
     void parse_JSONCommand(JsonParserObject obj);
 

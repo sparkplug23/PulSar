@@ -133,13 +133,30 @@ bool mInterfaceNetwork::Connected(uint8_t type)
     (type == NETWORK_TYPE_CELLULAR) ||
     (type == NETWORK_TYPE_ANY)
   ){
-    if(pCONT_cell->modem != nullptr)
+
+    /**
+     * @brief Perfect example of how this needs to become a superclass
+     * 
+     */
+    #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+    if(pCONT_sim7000g->modem != nullptr)
     {
-      if(pCONT_cell->modem->isGprsConnected())
+      if(pCONT_sim7000g->modem->isGprsConnected())
       {
         return true;
       }
     }
+    #endif
+    #ifdef USE_MODULE_DRIVERS_MODEM_800L
+    if(pCONT_sim800l->modem != nullptr)
+    {
+      if(pCONT_sim800l->modem->isGprsConnected())
+      {
+        return true;
+      }
+    }
+    #endif
+
   }
   #endif // USE_MODULE_NETWORK_CELLULAR
 

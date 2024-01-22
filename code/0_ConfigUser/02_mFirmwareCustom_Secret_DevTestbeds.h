@@ -29,8 +29,11 @@
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
-// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__2024
-#define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_02__2024
+
+// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM9000G_2024
+// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_02__ON_SIM9000G_2024
+// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_03__ON_SIM800L_2024
+#define DEVICE_HARDWARE_TESTBED__TINY_GPS_SERIAL
 
 /**
  * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
@@ -1785,29 +1788,33 @@ Blue (Upstairs Link) ***********************************************************
 
 
 /**
- * @brief Self contained 2024 testbed, with integrated battery for car tracking for testing
+ * @brief Self contained 2024 testbed, with integrate1100d battery for car tracking for testing
  * 
  */
-#ifdef DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__2024
-  #define DEVICENAME_CTR          "cellular_locator_01"
-  #define DEVICENAME_FRIENDLY_CTR "Selfcontained tracker with SIM staying" // Antennas covers SIM, but flip the board later
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+#ifdef DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM9000G_2024
+  #define DEVICENAME_CTR                                "cellular_locator_01"
+  #define DEVICENAME_FRIENDLY_CTR                       "Selfcontained tracker with SIM staying" // Antennas covers SIM, but flip the board later
+  #define DEVICENAME_ROOMHINT_CTR                       "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG  "CellularLocator01"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
-  #define UART_CELLULAR_BAUD   921600
+  #define UART_CELLULAR_BAUD                            921600
   #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
   #define USE_GROUPFEATURE__MODEM_GPS
-  #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "10" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
-  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0"
-  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+  #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR        "10" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
+  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR            "0"
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
+
+  
+  #define USE_MODULE_DRIVERS_MODEM_7000G
+
 #endif
 /**
  * @brief 2024 Device
  * For testing lnog range devices, without a battery that uses the aircrafts power source. Last known will be used as tracking instead of constant updates.
  * 
  */
-#ifdef DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_02__2024
+#ifdef DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_02__ON_SIM9000G_2024
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
@@ -1819,8 +1826,38 @@ Blue (Upstairs Link) ***********************************************************
   #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
   #define USE_GROUPFEATURE__MODEM_GPS
   #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "1" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
-  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "60"
+  // #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "60" // When deployed, this will text me every 60 seconds with the GPS position
+  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0" // Turned off for testing
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
+
+  
+  #define USE_MODULE_DRIVERS_MODEM_7000G
+
+#endif
+/**
+ * @brief 2024 Device
+ * For testing lnog range devices, without a battery that uses the aircrafts power source. Last known will be used as tracking instead of constant updates.
+ * 800L as smaller and lighter than 7000G
+ */
+#ifdef DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_03__ON_SIM800L_2024
+  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
+  #define DEVICENAME_ROOMHINT_CTR "roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define SIM_CARD_PHONE_NUMBER "07518522105"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define UART_CELLULAR_BAUD   115200
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
+  #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "1" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
+  // #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "60" // When deployed, this will text me every 60 seconds with the GPS position
+  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0" // Turned off for testing
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
+
+  // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
+  // #define USE_MODULE_DRIVERS_MODEM_800L
+
 #endif
 #ifdef SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
 
@@ -1837,6 +1874,8 @@ Blue (Upstairs Link) ***********************************************************
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
   /***********************************
@@ -1847,6 +1886,7 @@ Blue (Upstairs Link) ***********************************************************
   /***********************************
    * SECTION: Network Configs
   ************************************/    
+
 
 
 
@@ -1866,16 +1906,15 @@ Blue (Upstairs Link) ***********************************************************
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
   #ifdef ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
-    #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
+    // #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
     #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 10    
-    #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES    
+    // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES    
     // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
     #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
     #define ENABLE_DEBUG_FUNCTION_NAMES
     #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
     // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
     #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
-    #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
     #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
     // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
     #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
@@ -1900,57 +1939,84 @@ Blue (Upstairs Link) ***********************************************************
 
   // *************************************************************************************
 
-  #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
-    #define SERIAL_DEBUG_BAUD_DEFAULT 921600
-  #endif 
-  #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
-    #define USE_MODULE__DRIVERS_MAVLINK_DECODER
-      #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
-      #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
-      #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
-    #define USE_MODULE_CORE_SERIAL_UART
-      #define ENABLE_HARDWARE_UART_2
-      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
-  #endif
-  #ifdef USE_GROUPFEATURE__MODEM_GPS
-    #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define USE_MODULE_SENSORS_GPS_MODEM
-  #endif 
-  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR 
-    #define DISABLE_NETWORK_WIFI
-    #define USE_MODULE_NETWORK_CELLULAR
-    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-    #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    #define USE_MODULE_NETWORK_MQTT
-    // #define MQTT_SOCKET_TIMEOUT 1
-    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
-     #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
-    // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-    // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
-    #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-    // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
-  #endif
-  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
-    #define USE_MODULE_NETWORK_WIFI
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define MQTT_PORT     1883
-  #endif
-  #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
-    #define DISABLE_NETWORK_WIFI
-    #define USE_MODULE_NETWORK_CELLULAR
-    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-    // #define USE_MODULE_SENSORS_INTERFACE
-    // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
-    // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
-  #endif
+  // #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+  //   #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+  // #endif 
+  // #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
+  //   #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+  //     #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+  //     #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+  //     #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+  //   #define USE_MODULE_CORE_SERIAL_UART
+  //     #define ENABLE_HARDWARE_UART_2
+  //     #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  // #endif
+  // #ifdef USE_GROUPFEATURE__MODEM_GPS
+  //   #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+  //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  //   #define USE_MODULE_SENSORS_GPS_MODEM
+  // #endif 
+  // #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR 
+  //   #define DISABLE_NETWORK_WIFI
+  //   #define USE_MODULE_NETWORK_CELLULAR
+  //   #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+  //   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  //   #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+  //   #define USE_MODULE_NETWORK_MQTT
+  //   // #define MQTT_SOCKET_TIMEOUT 1
+  //   // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+  //    #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
+  //   // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  //   // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+  //   #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+  //   // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+  // #endif
+  // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
+  //   #define USE_MODULE_NETWORK_WIFI
+  //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  //   #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  //   #define MQTT_PORT     1883
+  // #endif
+  // #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  //   #define DISABLE_NETWORK_WIFI
+  //   #define USE_MODULE_NETWORK_CELLULAR
+  //   #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+  //   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  //   // #define USE_MODULE_SENSORS_INTERFACE
+  //   // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+  //   // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+  //   // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+  // #endif
 
+  /**
+   *  GPS
+   * */
+  #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+    #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+    #define USE_MODULE_SENSORS_GPS_SERIAL
+    #define ENABLE_GPS_PARSER_NMEA
+    #define ENABLE_GPS_PARSER_UBX
+    #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+    #define NMEAGPS_DERIVED_TYPES
+    // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+    #define NMEAGPS_PARSE_SAVE_MILLIS
+    // #define gpsPort Serial1
+    #define D_GPS_BAUD_RATE_FAST    921600
+    #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+    // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+
+    // #define USE_MODULE_DRIVERS_INTERFACE
+    // #define USE_MODULE_DRIVERS_SERIAL_UART
+    #define ENABLE_HARDWARE_UART_1
+    #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
 
   /***********************************
    * SECTION: Template Configs
@@ -1972,6 +2038,20 @@ Blue (Upstairs Link) ***********************************************************
       "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
       "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
+
+
+      /** 5P small - UART1 GPS Stream
+       * Orange      19, UART1_TX
+       * Yellow      18, UART1_RX
+       * White        
+       * Red         VCC, 3V3
+       * Black       GND
+       * */
+      "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+
+
+
       #ifdef USE_MODULE_DRIVERS_SDCARD
       "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
       "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
@@ -1993,7 +2073,7 @@ Blue (Upstairs Link) ***********************************************************
   /***********************************
    * SECTION: Device Configs
   ************************************/    
- 
+
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
@@ -2005,7 +2085,7 @@ Blue (Upstairs Link) ***********************************************************
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"   
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
@@ -3205,6 +3285,84 @@ Blue (Upstairs Link) ***********************************************************
 #endif
 
 
+
+
+#ifdef DEVICE_HARDWARE_TESTBED__TINY_GPS_SERIAL
+  #define DEVICENAME_CTR          "testbed_tinygsm"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Filesystem"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define DEVICENAME_ROOMHINT_CTR "Example"
+
+  /***********************************
+   * SECTION: Core Configs
+  ************************************/     
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+
+  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+
+  #define ENABLE_DEBUG_LINE_HERE
+
+
+
+  /**
+   *  GPS
+   * */
+  #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+    #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+    #define USE_MODULE_SENSORS_GPS_SERIAL
+    #define ENABLE_GPS_PARSER_NMEA
+    #define ENABLE_GPS_PARSER_UBX
+    #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+    #define NMEAGPS_DERIVED_TYPES
+    // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+    #define NMEAGPS_PARSE_SAVE_MILLIS
+    #define gpsPort Serial2
+    #define D_GPS_BAUD_RATE_FAST    921600
+    #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+    #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+
+    // #define USE_MODULE_DRIVERS_INTERFACE
+    // #define USE_MODULE_DRIVERS_SERIAL_UART
+    #define ENABLE_HARDWARE_UART_1
+    #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
 
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_DEV_TESTBEDS_H

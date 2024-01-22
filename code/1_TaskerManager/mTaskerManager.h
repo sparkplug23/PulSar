@@ -333,9 +333,6 @@ enum TASKER_ID{
   #ifdef USE_MODULE_DRIVERS_SDCARD
     EM_MODULE_DRIVERS_SDCARD_ID,
   #endif
-  #ifdef USE_MODULE_DRIVERS_GPS
-    EM_MODULE_DRIVERS_GPS_ID,
-  #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
     EM_MODULE_DRIVERS_SHELLY_DIMMER_ID,
   #endif
@@ -400,9 +397,12 @@ enum TASKER_ID{
   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
     EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID,
   #endif
-
-
-
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+    EM_MODULE_DRIVERS__MODEM_7000G__ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_800L
+    EM_MODULE_DRIVERS__MODEM_800L__ID,
+  #endif
 
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -811,6 +811,17 @@ enum TASKER_ID{
   #define pCONT_ir_remote                           static_cast<mIRRemote*>(pCONT->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
 #endif
 
+#ifdef USE_MODULE_DRIVERS_MODEM_7000G
+#include "4_Drivers/80_Modem_SIM7000G/mSIM7000G.h"
+  #define pCONT_sim7000g                           static_cast<mSIM7000G*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_7000G__ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_MODEM_800L
+#include "4_Drivers/81_Modem_SIM800L/mSIM800L.h"
+  #define pCONT_sim800l                           static_cast<mSIM800L*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
+#endif
+
+
+
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
   #include "7_Energy/00_Interface/mEnergyInterface.h"
@@ -959,7 +970,7 @@ enum TASKER_ID{
 
 
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-  #include "5_Sensors/50_GPS_Serial/mGPS.h"
+  #include "5_Sensors/50_GPS_Serial/mGPS_Serial.h"
   #define pCONT_gps                                 static_cast<mGPS_Serial*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID])
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_MODEM

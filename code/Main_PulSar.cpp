@@ -652,7 +652,9 @@ void loop(void)
 
   if(mTime::TimeReached(&pCONT_set->runtime.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
+    #ifdef ENABLE_DEBUGFEATURE__SPLASH__LOOPS_PER_SECOND
     ALOG_INF(PSTR("LOOPSEC = \t\t\t\tLPS=%d, LoopTime=%d"), pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+    #endif
     pCONT_sup->activity.loop_counter=0;
   }
 

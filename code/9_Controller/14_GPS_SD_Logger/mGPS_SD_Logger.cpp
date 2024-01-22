@@ -252,7 +252,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool 
   JBI->Add("D",elapsed_millis_from_last_construct);
 
   // GPS data
-  #ifdef USE_MODULE_DRIVERS_GPS
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   JBI->Object_Start("G");
     JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
     JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
@@ -274,7 +274,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool 
     JBI->Add("tms",  tod_millis);
     JBI->Add_FV("t",  "\"%02d:%02d:%02d-%03d\"", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
   JBI->Object_End();
-  #endif // USE_MODULE_DRIVERS_GPS
+  #endif // USE_MODULE_SENSORS_GPS_SERIAL
   
   return JsonBuilderI->End();
     

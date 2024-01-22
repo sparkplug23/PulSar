@@ -320,7 +320,7 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //   //     JBI->Add("M",millis());
 
 //   //     // GPS data
-//   //     #ifdef USE_MODULE_DRIVERS_GPS
+//   //     #ifdef USE_MODULE_SENSORS_GPS_SERIAL
 //   //     JBI->Object_Start("G");
 //   //       JBI->Add("t", pCONT_gps->my_gps_vals.lat); 
 //   //       JBI->Add("n", pCONT_gps->my_gps_vals.lon); 
@@ -335,7 +335,7 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //   //         JBI->Add("i", pCONT_gps->my_gps_vals.dateTime_ms); // are always hundreds, so shorted to 1 sig fig then recover on matlab
 //   //       // JBI->Object_End();
 //   //     JBI->Object_End();
-//   //     #endif // USE_MODULE_DRIVERS_GPS
+//   //     #endif // USE_MODULE_SENSORS_GPS_SERIAL
       
 //   //     BufferWriterI->Append(",\"F\":[");
 //   // //     // BufferWriterI->Append(",\"F\":\"");
@@ -822,7 +822,7 @@ void ISR_Direct_SubTask_Generate_SyncFrame_To_SDCard_Stream()
   // JBI->Add("M",millis());
 
   // // GPS data
-  // #ifdef USE_MODULE_DRIVERS_GPS
+  // #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   // JBI->Object_Start("G");
   //   JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
   //   JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
@@ -837,7 +837,7 @@ void ISR_Direct_SubTask_Generate_SyncFrame_To_SDCard_Stream()
   //     JBI->Add("i", pCONT_gps->gps_result_stored.dateTime_ms());
   //   JBI->Object_End();
   // JBI->Object_End();
-  // #endif // USE_MODULE_DRIVERS_GPS
+  // #endif // USE_MODULE_SENSORS_GPS_SERIAL
   
   // BufferWriterI->Append(",\"SF\":[");
   // for(int i=0;i<rss_data_read_size;i++){
@@ -1036,7 +1036,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
    * GPS data
    * 
    * */
-  #ifdef USE_MODULE_DRIVERS_GPS
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   float latitude = pCONT_gps->gps_result_stored.latitudeL();
   uint32_t latitude_U32 = (uint32_t)latitude;
   uint8_t latitude_num_digits = mSupport::NumDigitsT(latitude_U32);
@@ -1092,7 +1092,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
     // pCONT_gps->gps_result_stored.valid.location?'V':'E' //this needs updating regardless or V/A in RMC, to include timeouts without new updates
   );
   pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
-  #endif // USE_MODULE_DRIVERS_GPS
+  #endif // USE_MODULE_SENSORS_GPS_SERIAL
 
   //Test display messages
   //[1234567890123456]
@@ -1191,7 +1191,7 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_lev
   // JBI->Add("D",elapsed_millis_from_last_construct);
 
   // GPS data
-  #ifdef USE_MODULE_DRIVERS_GPS
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   JBI->Object_Start("G");
     JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
     JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
@@ -1225,7 +1225,7 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_lev
 
     // JBI->Add_FV("t",  "%02d:%02d:%02d-%03d", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
   JBI->Object_End();
-  #endif // USE_MODULE_DRIVERS_GPS
+  #endif // USE_MODULE_SENSORS_GPS_SERIAL
 
 
   // /**
