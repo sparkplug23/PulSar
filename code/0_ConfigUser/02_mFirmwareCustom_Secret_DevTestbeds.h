@@ -3308,7 +3308,7 @@ Blue (Upstairs Link) ***********************************************************
 
   // #define USE_MODULE_NETWORK_WEBSERVER
 
-  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
 
   #define ENABLE_DEBUG_LINE_HERE
@@ -3334,13 +3334,21 @@ Blue (Upstairs Link) ***********************************************************
 
     #define USE_DEVFEATURE_GPS_POLLING_INPUT
 
+    // #define USE_MODULE_CORE__SERIAL
+
     // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+    #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+// #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
 
 
     // #define USE_MODULE_DRIVERS_INTERFACE
     // #define USE_MODULE_DRIVERS_SERIAL_UART
-    #define ENABLE_HARDWARE_UART_1
-    #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+    #define ENABLE_HARDWARE_UART_2
+    #define HARDWARE_UART_2_BAUD_RATE_SPEED  9600  //D_GPS_BAUD_RATE_FAST
   #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
 
 
@@ -3350,6 +3358,10 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_CORE__SERIAL
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","
+      #endif
       #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  

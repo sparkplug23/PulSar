@@ -3,53 +3,25 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#define D_UNIQUE_MODULE_DRIVERS_GPS_ID 55
+#define D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID ((5*1000)+50)
 
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
 
 #include <string.h>
 #include <strings.h>
 
-// #define NMEAGPS_DERIVED_TYPES
-// #define NMEAGPS_PARSE_PROPRIETARY
-// #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
-// #define gpsPort Serial1
-// #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
+#define UBLOX_PARSE_STATUS
+#define UBLOX_PARSE_TIMEGPS
+#define UBLOX_PARSE_TIMEUTC
+#define UBLOX_PARSE_POSLLH
+#define UBLOX_PARSE_DOP
+#define UBLOX_PARSE_PVT
+#define UBLOX_PARSE_VELNED
+#define UBLOX_PARSE_SVINFO
+#define UBLOX_PARSE_TIMEUTC
+#define GPS_FIX_TIME
 
-// #include "5_Sensors/50_GPS_Serial/internal/configs/NeoGPS_cfg.h"
-// #include "5_Sensors/50_GPS_Serial/internal/ublox/ubxGPS.h"
-
-// #include "5_Sensors/50_GPS_Serial/internal/ublox/ubxmsg.h"
-
-
-// // #include "5_Sensors/50_GPS_Serial/internal/NMEA_Parser.h"
-// #include "5_Sensors/50_GPS_Serial/internal/types/Streamers.h"
-
-// #include "5_Sensors/50_GPS_Serial/mGPS_UBlox.h
-
-// #define NEOGPS_USE_SERIAL1
-
-
-// #include <NMEAGPS.h>
-
-
-
-// //-------------------------------------------------------------------------
-// //  The GPSport.h include file tries to choose a default serial port
-// //  for the GPS device.  If you know which serial port you want to use,
-// //  edit the GPSport.h file.
-
-// #include <GPSport.h>
-
-// //------------------------------------------------------------
-// // For the NeoGPS example programs, "Streamers" is common set
-// //   of printing and formatting routines for GPS data, in a
-// //   Comma-Separated Values text format (aka CSV).  The CSV
-// //   data will be printed to the "debug output device".
-// // If you don't need these formatters, simply delete this section.
-
-// #include <Streamers.h>
-
+#define NMEAGPS_PARSE_SATELLITES
 
 #include <NeoGPS_cfg.h>
 #include <ublox/ubxGPS.h>
@@ -239,11 +211,11 @@ class mGPS_Serial :
     mGPS_Serial(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static const char* PM_MODULE_DRIVERS_GPS_CTR;
-    static const char* PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_GPS_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_GPS_ID; }
+    static const char* PM_MODULE_SENSORS__GPS_SERIAL_CTR;
+    static const char* PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS__GPS_SERIAL_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
@@ -348,6 +320,8 @@ void changeBaud( const char *textCommand, unsigned long baud );
 
     enum
     {
+      NOT_STARTED,
+      INIT,
       GETTING_STATUS, 
       GETTING_LEAP_SECONDS, 
       GETTING_UTC, 
@@ -363,27 +337,19 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void get_utc();
     void start_running();
     bool running();
+    bool DeviceConfigure();
+
+    bool started_successfully = false;
 
 
-
-
-//-----------------------------------------------------------------
-//  Derive a class to add the state machine for starting up:
-//    1) The status must change to something other than NONE.
-//    2) The GPS leap seconds must be received
-//    3) The UTC time must be received
-//    4) All configured messages are "requested"
-//         (i.e., "enabled" in the ublox device)
-//  Then, all configured messages are parsed and explicitly merged.
-// #ifdef ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
-//     // #ifdef ENABLE_GPS_PARSER_NMEA
+    #ifdef ENABLE_GPS_PARSER_NMEA
     NMEAGPS*  nmea_parser = nullptr; // This parses the GPS characters
-//     // #endif // ENABLE_GPS_PARSER_NMEA
-//     #ifdef ENABLE_GPS_PARSER_UBX
+    #endif // ENABLE_GPS_PARSER_NMEA
+    #ifdef ENABLE_GPS_PARSER_UBX
+    #ifndef USE_DEVFEATURE_UBLOX_GLOBAL
     ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
-//     #endif
-// #endif //   ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
-
+    #endif // USE_DEVFEATURE_UBLOX_GLOBAL
+    #endif
     /**
      * @note Holds a partial result during parsing, only to be merged with the stored fix is valid
      * */

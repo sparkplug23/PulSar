@@ -128,11 +128,13 @@ ubloxGPS::decode_t ubloxGPS::decode( char c )
     decode_t res = DECODE_CHR_OK;
     uint8_t chr = c;
 
-//Serial.print( '-' );
-//Serial.print( rxState );
-//Serial.print( 'x' );
-//Serial.print( toHexDigit(c >> 4) );
-//Serial.print( toHexDigit(c) );
+    // Serial.println("ubloxGPS::decode");
+
+// Serial.print( '-' );
+// Serial.print( rxState );
+// Serial.print( 'x' );
+// Serial.print( toHexDigit(c >> 4) );
+// Serial.print( toHexDigit(c) );
 
     switch ((ubxState_t) rxState) {
 
@@ -359,11 +361,14 @@ void ubloxGPS::write( const msg_t & msg )
 
   if(m_device == NULL) {
     Serial.println("m_device is NULL");
-    return;
+    m_device = &Serial2;
   }
 
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
+
+  
+    // Serial.println("m_device is >>>>>>>>>>>>>>>>>>>>>>>>>>>>"); Serial.flush();
 
   uint8_t  crc_a = 0;
   uint8_t  crc_b = 0;
@@ -422,14 +427,28 @@ void ubloxGPS::write_P( const msg_t & msg )
 
 bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 {
+
+
+  // if(m_device == NULL)
+  // {
+  //   Serial2.begin(9600);
+  //   m_device = &Serial2;
+  //   PrintDevice(" m_device = &Serial2; ERRORRRRRRRRRRRRRRRRRRRRRRRRRRRR"); delay(4000);
+  // }
+  
+  
+      // PrintDevice(" ubloxGPS::send1");
 // trace << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
-Serial.println("ubloxGPS::send"); Serial.flush();
+// Serial.println("ubloxGPS::sendA"); Serial.flush();
+      // PrintDevice(" ubloxGPS::send2");
   bool ok = true;
 
-Serial.println("ubloxGPS::send"); Serial.flush();
+// Serial.println("ubloxGPS::sendB"); Serial.flush();
+      // PrintDevice(" ubloxGPS::send3");
   write( msg );
+      // PrintDevice(" ubloxGPS::send4");
 
-Serial.println("ubloxGPS::send"); Serial.flush();
+// Serial.println("ubloxGPS::sendC"); Serial.flush();
   if (msg.msg_class == UBX_CFG) {
     ack_received     = false;
     nak_received     = false;
@@ -446,7 +465,7 @@ Serial.println("ubloxGPS::send"); Serial.flush();
   if (waiting()) {
     ok = wait_for_ack();
 
-    #if 0
+    #if 1
       Serial.print( F("wait_for_ack ") );
       if (ok)
         Serial.print( F("ok! ") );

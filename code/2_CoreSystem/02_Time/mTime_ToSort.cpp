@@ -2058,7 +2058,7 @@ void mTime::WifiPollNtp() {
 
   }
     
-    AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
+    // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
 
   uint8_t uptime_minute = (uptime.seconds_nonreset / 60) % 60;  // 0 .. 59
   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {

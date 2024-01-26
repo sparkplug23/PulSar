@@ -82,6 +82,9 @@
 #define D_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR "cellular"
 
 
+#define D_MODULE_CORE__SERIAL__CTR                  "Serial"
+#define D_MODULE_CORE__SERIAL__FRIENDLY_CTR         "Serial"
+
 
 
 
@@ -136,8 +139,8 @@
   #define D_MODULE_DRIVERS_SDCARD_CTR           "sdcard"
   #define D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR  "sdcard"
 
-  #define D_MODULE_DRIVERS_GPS_CTR           "GPS"
-  #define D_MODULE_DRIVERS_GPS_FRIENDLY_CTR  "gps"
+  #define D_MODULE_SENSORS__GPS_SERIAL__CTR           "GPS"
+  #define D_MODULE_SENSORS__GPS_SERIAL__FRIENDLY_CTR  "gps"
 
 
   #define D_MODULE_DRIVERS_SHELLY_DIMMER_CTR "shellydimmer"
@@ -1529,6 +1532,7 @@
   #define D_LOG_DHT "DHT: "          // DHT sensor
   #define D_LOG_DSB "DSB: "          // DS18xB20 sensor
   #define D_LOG_GARAGE "GAR: "         // relays
+  #define D_LOG_GPS "GPS: "
   #define D_LOG_HTTP "HTP: "         // HTTP webserver
   #define D_LOG_I2C "I2C: "          // I2C
   #define D_LOG_IRR "IRR: "          // Infra Red Received

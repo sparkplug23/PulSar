@@ -229,7 +229,7 @@ void mTaskerManager::JSONCommand_Run(char* json)
 
 
 
-void mTaskerManager::addTasker(TASKER_ID id, mTaskerInterface* mod)
+void mTaskerManager::addTasker(TaskerID id, mTaskerInterface* mod)
 {
   pModule.push_back(mod);
   Serial.printf("AddTasker[%d]\t%S\n\r", id, mod->GetModuleFriendlyName());
@@ -262,6 +262,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CORE_UPDATES
   addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());  // this should be enabled by default and OTA/HTTP flashing moved here
+  #endif
+  #ifdef USE_MODULE_CORE__SERIAL
+  addTasker(TaskerID::CORE__SERIAL, new mSerial());  // this should be enabled by default and OTA/HTTP flashing moved here
   #endif
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID, new mDevelopmentDebugging());

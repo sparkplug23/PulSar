@@ -191,6 +191,8 @@ NMEAGPS::decode_t NMEAGPS::decode( char c )
     statistics.chars++;
   #endif
 
+  // Serial.println("NMEAGPS::decode");
+
   decode_t res = DECODE_CHR_OK;
 
   if (c == '$') {  // Always restarts

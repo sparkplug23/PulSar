@@ -149,8 +149,8 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_HWSERIAL1_TX_ID, GPIO_HWSERIAL1_RX_ID,
   GPIO_HWSERIAL2_TX_ID, GPIO_HWSERIAL2_RX_ID,
   GPIO_SWSERIAL0_TX_ID, GPIO_SWSERIAL0_RX_ID,
-  // RingBuffers are used on the receive data
-  GPIO_HWSERIAL0_RING_BUFFER_TX_ID, GPIO_HWSERIAL0_RING_BUFFER_RX_ID,
+  // RingBuffers are used on the receive data (PHASE OUT)
+  GPIO_HWSERIAL0_RING_BUFFER_TX_ID, GPIO_HWSERIAL0_RING_BUFFER_RX_ID,       // RinfBuffer GPIO should be removed, and instead be a special mode of the serial class. Simply set TX/RX, then with another command enable ringbuffer when desired. 
   GPIO_HWSERIAL1_RING_BUFFER_TX_ID, GPIO_HWSERIAL1_RING_BUFFER_RX_ID,
   GPIO_HWSERIAL2_RING_BUFFER_TX_ID, GPIO_HWSERIAL2_RING_BUFFER_RX_ID,
 

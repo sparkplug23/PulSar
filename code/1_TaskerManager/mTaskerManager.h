@@ -249,7 +249,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 
 #define D_TARGET_TASKER_NONE 0
 
-enum TASKER_ID{
+enum TaskerID{
   // Core
   #ifdef USE_MODULE_CORE_HARDWAREPINS
     EM_MODULE_CORE_HARDWAREPINS_ID,
@@ -277,6 +277,9 @@ enum TASKER_ID{
   #endif 
   #ifdef USE_MODULE_CORE_UPDATES
     EM_MODULE_CORE_UPDATES_ID,
+  #endif 
+  #ifdef USE_MODULE_CORE__SERIAL
+    CORE__SERIAL,
   #endif 
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
     EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID,
@@ -645,6 +648,10 @@ enum TASKER_ID{
 #ifdef USE_MODULE_CORE_UPDATES
   #include "2_CoreSystem/14_Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
+#endif
+#ifdef USE_MODULE_CORE__SERIAL
+  #include "2_CoreSystem/15_SerialUART/mSerial.h"
+  #define   tkr_Serial                              static_cast<mSerial*>(pCONT->pModule[TaskerID::CORE__SERIAL])
 #endif
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   #include "2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h"
@@ -1155,7 +1162,7 @@ class mTaskerManager{
       return instance;
     };
 
-    void addTasker(TASKER_ID id, mTaskerInterface* mod);
+    void addTasker(TaskerID id, mTaskerInterface* mod);
 
     int16_t GetModuleIndexbyFriendlyName(const char* c);
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);

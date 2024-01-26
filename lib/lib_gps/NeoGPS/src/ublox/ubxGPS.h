@@ -45,9 +45,9 @@
 
 class ubloxGPS : public UBLOXGPS_BASE
 {
-    ubloxGPS & operator =( const ubloxGPS & );
-    ubloxGPS( const ubloxGPS & );
-    ubloxGPS();
+    ubloxGPS & operator =( const ubloxGPS & ){Serial.println("ubloxGPS & operator =( const ubloxGPS & )"); Serial.flush(); };
+    ubloxGPS( const ubloxGPS & ){Serial.println("ubloxGPS & operator =( const ubloxGPS & )"); Serial.flush(); };
+    ubloxGPS(){Serial.println("ubloxGPS & operator =( const ubloxGPS & )"); Serial.flush(); };;
 
 public:
 
@@ -61,7 +61,23 @@ public:
         m_device( device )
       {
 
-Serial.println("ubloxGPS( Stream *device )==========================================================================================="); Serial.flush();
+  if(m_device == NULL){ Serial.println("m_device is NULLA"); Serial.flush(); }else{ Serial.println("m_device is NOT NULLA"); Serial.flush(); }
+
+m_device = device;
+
+  if(m_device == NULL){ Serial.println("m_device is NULLB"); Serial.flush(); }else{ Serial.println("m_device is NOT NULLA"); Serial.flush(); }
+
+// Serial.println("ubloxGPS( Stream *device )==========================================================================================="); Serial.flush();
+
+// if(device)
+// {    
+// Serial.println("valid"); Serial.flush();
+// }else{
+// Serial.println("invalid"); Serial.flush();
+// }
+
+// Serial.println("ubloxGPS( Stream *device )==========================================================================================="); Serial.flush();
+
 
       };
 
@@ -93,7 +109,16 @@ Serial.println("ubloxGPS( Stream *device )======================================
 
     bool enable_msg( ublox::msg_class_t msg_class, ublox::msg_id_t msg_id )
     {
-      return send( ublox::cfg_msg_t( msg_class, msg_id, 1 ) );
+      // PrintDevice("enable_msg1");
+
+      // auto msg = ublox::cfg_msg_t( msg_class, msg_id, 1 );
+
+      // PrintDevice("enable_msgC");
+      // bool result = send( msg );
+      // PrintDevice("enable_msgB");
+      // return result;
+
+      return send(ublox::cfg_msg_t( msg_class, msg_id, 1 ));
     }
 
     bool disable_msg( ublox::msg_class_t msg_class, ublox::msg_id_t msg_id )
@@ -171,6 +196,15 @@ Serial.println("ubloxGPS( Stream *device )======================================
     //  Return the Stream that was passed into the constructor.
 
     Stream *Device() const { return (Stream *)m_device; };
+
+    void PrintDevice( const char *label ) const
+    {
+      if (m_device)
+        Serial.printf("WORKING--------------------------------------------------- %s\n\r", label);
+      else
+        Serial.printf("NULL--------------------------------------------------- %s\n\r", label);
+    };
+
 
 protected:
 
@@ -250,6 +284,7 @@ protected:
                ((nmeaMessage        != (nmea_msg_t) UBX_MSG) &&
                 NMEAGPS::intervalCompleted());
       }
+
 
 private:
     ublox::msg_t   *storage;   // cached ptr to hold a received msg.
