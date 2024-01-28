@@ -254,6 +254,7 @@ class mGPS_Serial :
 //  reading the GPS chars as they come in, so that no chars are lost.
 
 
+bool flag_show_incoming_gps_byte_stream = false;
 
 
 
@@ -318,6 +319,22 @@ void changeBaud( const char *textCommand, unsigned long baud );
 
 
 
+
+
+
+
+    int16_t test_value = 0;
+    void main_body_function();
+    void header_function(){
+      test_value++;
+      Serial.printf("header_function %d\n",test_value);
+    }
+
+
+
+
+
+
     enum
     {
       NOT_STARTED,
@@ -342,14 +359,23 @@ void changeBaud( const char *textCommand, unsigned long baud );
     bool started_successfully = false;
 
 
-    #ifdef ENABLE_GPS_PARSER_NMEA
-    NMEAGPS*  nmea_parser = nullptr; // This parses the GPS characters
-    #endif // ENABLE_GPS_PARSER_NMEA
-    #ifdef ENABLE_GPS_PARSER_UBX
-    #ifndef USE_DEVFEATURE_UBLOX_GLOBAL
-    ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
-    #endif // USE_DEVFEATURE_UBLOX_GLOBAL
-    #endif
+    // #ifdef ENABLE_GPS_PARSER_NMEA
+    // NMEAGPS*  nmea_parser = nullptr; // This parses the GPS characters
+    // #endif // ENABLE_GPS_PARSER_NMEA
+    // #ifdef ENABLE_GPS_PARSER_UBX
+    // #ifndef USE_DEVFEATURE_UBLOX_GLOBAL
+    // ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
+    // #endif // USE_DEVFEATURE_UBLOX_GLOBAL
+    // #endif
+    // ubloxGPS*  gps_ublox = nullptr; // This parses the GPS characters
+
+
+    // #ifdef USE_DEVFEATURE__UBLOX_TEST_CLASS
+    // ubloxGPS*  ubx_test = nullptr; // This parses the GPS characters
+    // #endif
+
+
+
     /**
      * @note Holds a partial result during parsing, only to be merged with the stored fix is valid
      * */

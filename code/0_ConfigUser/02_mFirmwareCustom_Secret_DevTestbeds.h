@@ -3342,7 +3342,11 @@ Blue (Upstairs Link) ***********************************************************
 
     #define USE_DEVFEATURE_UBLOX_GLOBAL
     
-// #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+    // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+    #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+    // #define ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
 
 
     // #define USE_MODULE_DRIVERS_INTERFACE

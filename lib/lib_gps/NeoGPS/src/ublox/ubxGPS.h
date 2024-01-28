@@ -27,6 +27,8 @@
 #include "GPSTime.h"
 #include "ublox/ubx_cfg.h"
 
+#define NMEAGPS_PARSE_SATELLITES // should be added somewhere else
+
 #if !defined(UBLOX_PARSE_STATUS)  & !defined(UBLOX_PARSE_TIMEGPS) & \
     !defined(UBLOX_PARSE_TIMEUTC) & !defined(UBLOX_PARSE_POSLLH)  & \
     !defined(UBLOX_PARSE_DOP)     & !defined(UBLOX_PARSE_PVT)     & \
@@ -40,16 +42,63 @@
   #include <Stream.h>
   #include <stddef.h>
 
-  // NOTE: millis() is used for ACK timing
+#define ENABLE_DEBUG_NEOGPS
+
+// NOTE: millis() is used for ACK timing
+
+// #define ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
 
 
 class ubloxGPS : public UBLOXGPS_BASE
 {
-    ubloxGPS & operator =( const ubloxGPS & ){Serial.println("ubloxGPS & operator =( const ubloxGPS & )"); Serial.flush(); };
-    ubloxGPS( const ubloxGPS & ){Serial.println("ubloxGPS & operator =( const ubloxGPS & )"); Serial.flush(); };
-    ubloxGPS(){Serial.println("ubloxGPS & operator =( const ubloxGPS & )"); Serial.flush(); };;
+
+  ubloxGPS(){};
 
 public:
+
+    #ifdef ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
+
+    HardwareSerial* m_device2 = &Serial2;
+
+    int16_t calls = 100;
+    int16_t test1 = 100;
+
+
+    int16_t test_header_set = 100;
+    int16_t test_body_set = 100;
+
+    bool sendTEST( int16_t calls_arg);
+    // {
+    //   calls++;
+    //   test1++;
+    //   Serial.printf("sendTEST \tcalls[%d]\ttest1[%d] \n\r", calls, test1 );
+    //   return true;
+    // }
+
+
+    bool enable_msg( ublox::msg_class_t msg_class, ublox::msg_id_t msg_id )
+    {
+
+      calls++;
+      test1++;
+      Serial.printf("enable_msg \tcalls[%d]\ttest1[%d] \n\r", calls, test1 );
+
+      if(m_device2 == NULL) {
+        Serial2.printf("H\t m_device3 == NULL \n\r");
+        Serial2.printf("H\t h%d c%d \n\r", test_header_set, test_body_set);
+      }else{
+        m_device2->println("H\t m_device3 sendTEST");
+        Serial2.printf("H\t h%d c%d \n\r", test_header_set, test_body_set);
+      }
+
+      test_header_set = 10;
+
+      return sendTEST( calls );
+    }
+
+    #endif // ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
+
+
 
     // Constructor needs to know the device to handle the UBX binary protocol
     ubloxGPS( Stream *device )
@@ -59,26 +108,13 @@ public:
         reply_expected( false ),
         ack_expected( false ),
         m_device( device )
+      {};
+
+
+      // ADDED BY MICHAEL
+      void SetDevice(Stream *device)
       {
-
-  if(m_device == NULL){ Serial.println("m_device is NULLA"); Serial.flush(); }else{ Serial.println("m_device is NOT NULLA"); Serial.flush(); }
-
-m_device = device;
-
-  if(m_device == NULL){ Serial.println("m_device is NULLB"); Serial.flush(); }else{ Serial.println("m_device is NOT NULLA"); Serial.flush(); }
-
-// Serial.println("ubloxGPS( Stream *device )==========================================================================================="); Serial.flush();
-
-// if(device)
-// {    
-// Serial.println("valid"); Serial.flush();
-// }else{
-// Serial.println("invalid"); Serial.flush();
-// }
-
-// Serial.println("ubloxGPS( Stream *device )==========================================================================================="); Serial.flush();
-
-
+        m_device = device;
       };
 
     // ublox binary UBX message type.
@@ -105,19 +141,9 @@ m_device = device;
 
     ublox::msg_t & rx() { return m_rx_msg; }
 
-    //................................................................
 
     bool enable_msg( ublox::msg_class_t msg_class, ublox::msg_id_t msg_id )
     {
-      // PrintDevice("enable_msg1");
-
-      // auto msg = ublox::cfg_msg_t( msg_class, msg_id, 1 );
-
-      // PrintDevice("enable_msgC");
-      // bool result = send( msg );
-      // PrintDevice("enable_msgB");
-      // return result;
-
       return send(ublox::cfg_msg_t( msg_class, msg_id, 1 ));
     }
 
@@ -153,6 +179,8 @@ m_device = device;
     //    If /msg/ is both, this will wait for both the reply and the ACK/NAK.
     //    If /storage_for/ is implemented, those messages will continue
     //      to be saved while waiting for this reply.
+
+
 
     bool send( const ublox::msg_t & msg, ublox::msg_t *reply_msg = (ublox::msg_t *) NULL );
     bool send_P( const ublox::msg_t & msg, ublox::msg_t *reply_msg = (ublox::msg_t *) NULL );
@@ -197,12 +225,16 @@ m_device = device;
 
     Stream *Device() const { return (Stream *)m_device; };
 
-    void PrintDevice( const char *label ) const
+    void PrintDevice( const char *label )
     {
+      
+    #ifdef ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
+      // calls*=-1;
       if (m_device)
-        Serial.printf("WORKING--------------------------------------------------- %s\n\r", label);
+        Serial.printf("WORKING %d ----------- %s\n\r", calls, label);
       else
-        Serial.printf("NULL--------------------------------------------------- %s\n\r", label);
+        Serial.printf("NULL %d      --------- %s\n\r", calls, label);
+    #endif // ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
     };
 
 
@@ -334,7 +366,7 @@ private:
     static const uint8_t SYNC_1 = 0xB5;
     static const uint8_t SYNC_2 = 0x62;
 
-    Stream *m_device;
+    Stream* m_device = &Serial2;
 
     bool parseNavStatus ( uint8_t chr );
     bool parseNavDOP    ( uint8_t chr );
@@ -377,7 +409,7 @@ private:
       return true;
     }
 
-} NEOGPS_PACKED;
+};// NEOGPS_PACKED;
 
 #endif // UBX messages enabled
 

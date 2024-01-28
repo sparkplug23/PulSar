@@ -670,6 +670,7 @@ const __FlashStringHelper *NMEAGPS::string_for( nmea_msg_t msg ) const
 
 bool NMEAGPS::parseField(char chr)
 {
+  // Serial.printf("NMEAGPS::parseField: %d|%c\n\r", nmeaMessage, chr);
     switch (nmeaMessage) {
 
       #if defined(NMEAGPS_PARSE_GGA)

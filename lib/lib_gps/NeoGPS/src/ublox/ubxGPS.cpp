@@ -300,6 +300,12 @@ void ubloxGPS::wait_for_idle()
 
 bool ubloxGPS::wait_for_ack()
 {
+  if(m_device == NULL) 
+  {
+    Serial.printf("Error: Manual 3Fix\n\r");
+    m_device = &Serial2;
+  }
+
   m_device->flush();
 
   uint16_t sent              = 0;
@@ -359,16 +365,14 @@ bool ubloxGPS::wait_for_ack()
 void ubloxGPS::write( const msg_t & msg )
 {
 
-  if(m_device == NULL) {
-    Serial.println("m_device is NULL");
+  if(m_device == NULL) 
+  {
+    Serial.printf("Error: Manual 2Fix\n\r");
     m_device = &Serial2;
   }
 
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
-
-  
-    // Serial.println("m_device is >>>>>>>>>>>>>>>>>>>>>>>>>>>>"); Serial.flush();
 
   uint8_t  crc_a = 0;
   uint8_t  crc_b = 0;
@@ -389,6 +393,12 @@ void ubloxGPS::write( const msg_t & msg )
 
 void ubloxGPS::write_P( const msg_t & msg )
 {
+  if(m_device == NULL) 
+  {
+    Serial.printf("Error: Manual 2Fix\n\r");
+    m_device = &Serial2;
+  }
+  
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
 
@@ -425,30 +435,78 @@ void ubloxGPS::write_P( const msg_t & msg )
 //---------------------------------------------------------
 // Sends UBX command and optionally waits for the ack.
 
+
+
+
+
+
+
+
+
+
+
+
+
+// bool ubloxGPS::sendTEST(int16_t calls_arg)
+// {
+
+//   Serial.printf("sendTEST \tcalls[%d]\ttest1[%d]\tcalls_arg[%d] \n\r", calls, test1, calls_arg );
+//   test1++;
+//   Serial.printf("sendTEST \tcalls[%d]\ttest1[%d]\tcalls_arg[%d] \n\r", calls, test1, calls_arg );
+  
+// }
+
+
+    #ifdef ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
+  bool ubloxGPS::sendTEST( int16_t calls_arg)
+  {
+    calls++;
+    test1++;
+    Serial.printf("sendTEST \tcalls[%d]\ttest1[%d] \n\r", calls, test1 );
+
+    if(m_device2 == NULL) {
+      Serial2.printf("C\t m_device3 == NULL \n\r");
+      Serial2.printf("H\t h%d c%d \n\r", test_header_set, test_body_set);
+    }else{
+      m_device2->println("C\t m_device3 sendTEST");
+      Serial2.printf("H\t h%d c%d \n\r", test_header_set, test_body_set);
+    }
+
+    test_body_set = 11;
+
+    return true;
+  }
+#endif // ENABLE_DEBUG_NEOGPS_SERIAL_ISSUE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 {
-
-
-  // if(m_device == NULL)
-  // {
-  //   Serial2.begin(9600);
-  //   m_device = &Serial2;
-  //   PrintDevice(" m_device = &Serial2; ERRORRRRRRRRRRRRRRRRRRRRRRRRRRRR"); delay(4000);
-  // }
-  
-  
-      // PrintDevice(" ubloxGPS::send1");
 // trace << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
-// Serial.println("ubloxGPS::sendA"); Serial.flush();
-      // PrintDevice(" ubloxGPS::send2");
+  
+  if(m_device == NULL) 
+  {
+    Serial.printf("Error: Manual 1Fix\n\r");
+    m_device = &Serial2;
+  }
+
   bool ok = true;
 
-// Serial.println("ubloxGPS::sendB"); Serial.flush();
-      // PrintDevice(" ubloxGPS::send3");
   write( msg );
-      // PrintDevice(" ubloxGPS::send4");
 
-// Serial.println("ubloxGPS::sendC"); Serial.flush();
   if (msg.msg_class == UBX_CFG) {
     ack_received     = false;
     nak_received     = false;
@@ -465,7 +523,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
   if (waiting()) {
     ok = wait_for_ack();
 
-    #if 1
+    #ifdef ENABLE_DEBUG_NEOGPS
       Serial.print( F("wait_for_ack ") );
       if (ok)
         Serial.print( F("ok! ") );
@@ -486,8 +544,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 
 bool ubloxGPS::send_P( const msg_t & msg, msg_t *reply_msg )
 {
-    return false;
-
+  return false;
 } // send_P
 
 //---------------------------------------------
@@ -503,6 +560,10 @@ bool ubloxGPS::parseField( char c )
 
     case UBX_NAV: //=================================================
 //if (chrCount == 0) Serial << F(" NAV ") << (uint8_t) rx().msg_id;
+
+      // Serial.printf("rx().msg_id[%d] \n\r", rx().msg_id);
+
+
       switch (rx().msg_id) {
         case UBX_NAV_STATUS : return parseNavStatus ( chr );
         case UBX_NAV_POSLLH : return parseNavPosLLH ( chr );
@@ -1181,7 +1242,7 @@ bool ubloxGPS::parseNavTimeGPS( uint8_t chr )
 {
   bool ok = true;
 
-//if (chrCount == 0) trace << F( "timegps ");
+// if (chrCount == 0) Serial.println("timegps ");
   #ifdef UBLOX_PARSE_TIMEGPS
     switch (chrCount) {
 
@@ -1206,7 +1267,7 @@ bool ubloxGPS::parseNavTimeGPS( uint8_t chr )
               } else if ((GPSTime::start_of_week() == 0) &&
                          m_fix.valid.date && m_fix.valid.time) {
                 GPSTime::start_of_week( m_fix.dateTime );
-//trace << m_fix.dateTime << '.' << m_fix.dateTime_cs;
+// Serial << m_fix.dateTime << '.' << m_fix.dateTime_cs;
               }
             }
           }
