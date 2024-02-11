@@ -20,9 +20,12 @@
 #ifndef _M_SENSOR_TYPE_H
 #define _M_SENSOR_TYPE_H
 
+#pragma once
+
 #include <vector>
 #include <String>
 #include <Arduino.h>
+
 
 
 /* Constants */
@@ -102,8 +105,19 @@ typedef enum
   
   
   SENSOR_TYPE_GRAVITY_ID,
+
+
+  /**
+   * @brief Energy
+   **/
   SENSOR_TYPE_VOLTAGE_ID,
   SENSOR_TYPE_CURRENT_ID,
+  SENSOR_TYPE_ACTIVE_POWER_ID,
+  SENSOR_TYPE_FREQUENCY_ID,
+  SENSOR_TYPE_POWER_FACTOR_ID,
+  SENSOR_TYPE_ENERGY_ID,
+
+
   SENSOR_TYPE_COLOR_ID,
   SENSOR_TYPE_SUN_AZIMUTH_ID,
   SENSOR_TYPE_SUN_ELEVATION_ID,
@@ -279,12 +293,10 @@ Temporary fix, not most efficient code but makes other calls easier. Clean up
 
   }
 
-
   bool HasString(uint8_t index)
   {
     return index < data_s.size() ? true : false;
   }
-
 
   // bool Valid()
   // {
@@ -295,5 +307,48 @@ Temporary fix, not most efficient code but makes other calls easier. Clean up
     return !data_f.empty();// || !data_s.empty()) ? true : false; //(!data_f.empty() || !data_s.empty());
   };
 } sensors_reading_t;
+
+
+// move into sensor type?? YES!! -- so its not duplicated
+static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
+{
+  
+  switch(id){
+    default:                                    break;
+    // Floats
+    case SENSOR_TYPE_TEMPERATURE_ID:            return PSTR("Temperature");
+    case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:      return PSTR("Humidity");
+    case SENSOR_TYPE_PRESSURE_ID:               return PSTR("Pressure");
+    case SENSOR_TYPE_GAS_RESISTANCE_ID:         return PSTR("GasResistance");
+    case SENSOR_TYPE_LIGHT_LEVEL_ID:            return PSTR("LightLevel");
+    case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return PSTR("LightLuminance");
+    case SENSOR_TYPE_SUN_AZIMUTH_ID:            return PSTR("SunAzimuth");
+    case SENSOR_TYPE_SUN_ELEVATION_ID:          return PSTR("SunElevation");
+    case SENSOR_TYPE_DOOR_POSITION_ID:          return PSTR("DoorPosition");
+    case SENSOR_TYPE_DOOR_LOCKED_ID:            return PSTR("DoorLocked");    
+    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PSTR("UltraSonicDistanceCM");  
+    case SENSOR_TYPE_SPEED_ID:                  return PSTR("Speed");  
+    case SENSOR_TYPE_LATITUDE_ID:               return PSTR("Latitude");  
+    case SENSOR_TYPE_LONGITUDE_ID:              return PSTR("Longitude");  
+    case SENSOR_TYPE_ALTITUDE_ID:               return PSTR("Altitude");  
+
+    case SENSOR_TYPE_VOLTAGE_ID:                return PSTR("Voltage");
+    case SENSOR_TYPE_CURRENT_ID:                return PSTR("Current");
+    case SENSOR_TYPE_ACTIVE_POWER_ID:           return PSTR("ActivePower");
+    case SENSOR_TYPE_FREQUENCY_ID:              return PSTR("Frequency");
+    case SENSOR_TYPE_POWER_FACTOR_ID:           return PSTR("PowerFactor");
+    case SENSOR_TYPE_ENERGY_ID:                 return PSTR("Energy");
+
+    case SENSOR_TYPE_STATE_ACTIVE_ID:           return PSTR("StateActive");
+    // Strings
+    case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PSTR("TemperatureHeatmapRGBString");
+  }
+  return PSTR("NoMatch");      
+
+}
+
+
+
+
 
 #endif // _M_SENSOR_TYPE_H

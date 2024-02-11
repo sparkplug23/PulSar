@@ -1,8 +1,9 @@
 #ifndef MSENSORSINA219_H
 #define MSENSORSINA219_H 0.1
 
-#define D_UNIQUE_MODULE_ENERGY_INA219_ID    132
-#define D_GROUP_MODULE_ENERGY_INA219_ID      2
+
+#define D_UNIQUE_MODULE_ENERGY_INA219_ID ((7*1000)+03) // [(Folder_Number*100)+ID_File]
+
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -234,6 +235,25 @@ class mEnergyINA219 :
     struct SENSOR_AVERAGES{
       float bus_voltage_mv = 0;
     }sensor_averages[MAX_SENSORS];
+
+    
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.fSensorCount;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > MAX_SENSORS-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_VOLTAGE_ID);       value->data_f.push_back(sensor[index].bus_voltage_mv/1000);
+      value->sensor_type.push_back(SENSOR_TYPE_CURRENT_ID);       value->data_f.push_back(sensor[index].direct_current_ma/1000);
+      value->sensor_type.push_back(SENSOR_TYPE_ACTIVE_POWER_ID);  value->data_f.push_back(sensor[index].direct_power_mw/1000);
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
+
 
 
 

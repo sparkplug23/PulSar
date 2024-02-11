@@ -9,8 +9,6 @@
 
 #include "stdint.h"
 
-#include "5_Sensors/00_Interface/mSensorType.h"
-
 typedef struct event_motion_s{
   uint8_t  state     = false;
   uint8_t  isactive  = false;
@@ -89,8 +87,6 @@ class mSensorsInterface :
     #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
     void MQTT_Report_Event_Button();
-
-    const char* GetUnifiedSensor_NameByTypeID(uint8_t id);
 
     #ifdef USE_MODULE_LIGHTS_INTERFACE
     uint8_t flag_unified_sensor_colour_heatmap_type = 0;

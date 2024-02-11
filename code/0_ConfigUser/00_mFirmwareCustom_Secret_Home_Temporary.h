@@ -44,7 +44,7 @@
 // #define DEVICE_H801__MASTERBEDROOM_UPLIGHT
 // #define DEVICE_HOLLOWEEN__FRONTDOOR
 // #define DEVICE_PRUSA_CLIMATE_CONTROL
-// #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+#define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -3655,14 +3655,42 @@ May need to add two power connections too, so its not just the cat5e wire to let
  * 
  * 
  **/
+/**
+ * 
+ * 
+ * Ethernet R
+ * 
+ * w/o  gnd
+ * o/w     5v
+ * w/g    left LED (upstairs)              D27
+ * bl/w   centre Relay (downstairs)        D5
+ * w/bl   centre LED (downstairs)          D33
+ * g/w    left Relay (upstairs)            D18
+ * w/br   right LED (boiler)               D26
+ * br/w   right Relay (boiler)             D19
+ * 
+ * Ethernet N
+ * 
+ * w/o  gnd
+ * o/w     5v
+ * w/g    SK6812 D4
+ * bl/w   NC
+ * w/bl   NC
+ * g/w    NC
+ * w/br   RX2 of esp32 from nextion
+ * br/w   TX2 of esp32 from nextion    
+ * 
+
+*/
 #ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
-  #define DEVICENAME_CTR          "hvac_bedroom"
-  #define DEVICENAME_FRIENDLY_CTR "HVAC Bedroom DevPlatform"
+  #define DEVICENAME_CTR          "hvac_desk"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
+
 
   /***********************************
    * SECTION: System Debug Options
@@ -3677,7 +3705,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
   /***********************************
    * SECTION: System Configs
@@ -3703,48 +3733,68 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
 
-//   /***********************************
-//    * SECTION: Network Configs
-//   ************************************/    
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
 
-//   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
 
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define DS18X20_MAX_SENSORS 20
+      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20     
+  #define USE_MODULE_SENSORS_BME
+    #define ENABLE_DEVFEATURE_BME680
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_BH1750
+    
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
+             
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  //  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
+  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+  #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
+  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
-//   /***********************************
-//    * SECTION: Lighting Configs
-//   ************************************/    
-//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-
-//   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
-
-//   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-
-//   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-
-//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-
-//   // #define ENABLE_FEATURE_LIGHTING__SEQUENCER
-//   //    #define ENABLE_FEATURE_SEQUENCER__LOAD_DEVICE_LIST
-//   //   //  #define ENABLE_DEVFEATURE_SEQUENCER__ENABLE_TIME_RESTRAINTS
-//   //    // #define ENABLE_FEATURE_SEQUENCE__DEVICE_SNOWTREE
-//   //    #define ENABLE_FEATURE_SEQUENCE__DEVICE_OUTSIDETREE
-//   //    #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS 
-//   //    // #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_TWO__ADDED_FLASHING_EFFECTS
-
-//      #define ENABLE_DEVFEATURE__LIMIT_FLASHING_REMOTE_FLAG
-
-
-// #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
   // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -3798,7 +3848,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         144,
         148
       ],
-      "ColourPalette":"Christmas Snowy 02",
+      "ColourPalette":"Blue and White",
       "SegColour0": {
         "Hue": 0,
         "Sat":100,
@@ -3823,87 +3873,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   }
   )=====";
 
-
-
-
-
-////////////////////////////////////
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
-
-  #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
-  
-  // // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
-  // // #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
-  // //   #define STRIP_SIZE_MAX 10
-
-  // //   #define USE_RGB_OUT_BASIC_SHOW_PALETTE
-
-
-  // // #define USE_MODULE_CONTROLLER_HVAC
-  // //   #define HEATING_DEVICE_MAX 3
-  // //   #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-  //   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  //   #define DS18X20_MAX_SENSORS 20
-  //     #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
-  // #define USE_MODULE_SENSORS_DHT
-              
-  // #define USE_MODULE_DRIVERS_INTERFACE
-  // #define USE_MODULE_DRIVERS_RELAY
-
-  // #define USE_MODULE_SENSORS_SWITCHES
-  
-  //   // #define SHOW_SPLASH
-  //   // #define USE_MODULE_DISPLAYS_NEXTION
-  //   // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
-
-  // /***********************************
-  //  * SECTION: Sensor Configs
-  // ************************************/  
-
-
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
-
-
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // //   #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-  // // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  // //   #define DS18X20_MAX_SENSORS 20
-  // //   #define ENABLE_DEVFEATURE_DS18B20_SEARCHING_SENSOR_LOCATION_WITH_ADDRESS_TEMP_SPLASH
-  // #define USE_MODULE_SENSORS_BME
-  //   #define ENABLE_DEVFEATURE_BME680
-
-  //   #define ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
-
-  //   #define USE_MODULE_SENSORS_BH1750
-    
-  // /***********************************
-  //  * SECTION: Display Configs
-  // ************************************/  
-
-  // #define USE_MODULE_DISPLAYS_INTERFACE
-  // #define USE_MODULE_DISPLAYS_OLED_SH1106
-  //   #define SHOW_SPLASH
-
-
-  /***********************************
-   * SECTION: Driver Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
-
   /***********************************
    * SECTION: Energy Configs
   ************************************/  
@@ -3911,54 +3880,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_PZEM004T_V3
     #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+  #define MAX_ENERGY_SENSORS 4
+  #define MAX_PZEM004T_DEVICES 4
+  #define USE_MODULE_ENERGY_INA219
+  // #define ENABLE_DEVFEATURE_ENERGY__DISABLE_ENERGY_INTERFACE_FOR_DEBUGGING
 
-
-#define MAX_ENERGY_SENSORS 4
-
-#define ENABLE_DEBUGFEATURE_PZEM_BACKOFF_TIME_MS 500
-
-#define ENABLE_DEBUGFEATURE_PZEM_FIXED_ONE_SENSOR
-
-  // #define USE_MODULE_ENERGY_INA219
-
-
-    
-  // #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-
-  // // Actual
-  // #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
-  // #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
-  // #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_FUNCTION_REL3_INV_CTR
-
-
-
-/**
- * 
- * 
- * Ethernet R
- * 
- * w/o  gnd
- * o/w     5v
- * w/g    left LED (upstairs)              D27
- * bl/w   centre Relay (downstairs)        D5
- * w/bl   centre LED (downstairs)          D33
- * g/w    left Relay (upstairs)            D18
- * w/br   right LED (boiler)               D26
- * br/w   right Relay (boiler)             D19
- * 
- * Ethernet N
- * 
- * w/o  gnd
- * o/w     5v
- * w/g    SK6812 D4
- * bl/w   NC
- * w/bl   NC
- * g/w    NC
- * w/br   RX2 of esp32 from nextion
- * br/w   TX2 of esp32 from nextion    
- * 
-
-*/
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3968,24 +3897,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\","
-      #endif
-      // #ifdef USE_MODULE_SENSORS_SWITCHES
-      // "\"33\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      // "\"27\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
-      // "\"26\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
-      // #endif  
-      // #ifdef USE_MODULE_SENSORS_DHT
-      // "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
-      // #endif
-      // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      // "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // #endif 
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
+      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
+      "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
       #endif
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
@@ -4006,20 +3920,12 @@ May need to add two power connections too, so its not just the cat5e wire to let
   /**
    * @brief Drivers and Sensors for HVAC zones
    **/
-  #define D_DEVICE_DRIVER_RELAY_0_NAME "Dryer"
-  #define D_DEVICE_DRIVER_RELAY_1_NAME "FloorMat"
-  #define D_DEVICE_DRIVER_RELAY_2_NAME "OilRadiator"
-  #define D_DEVICE_DRIVER_RELAY_3_NAME "FanHeater"
+  #define D_DEVICE_HEATER_0_NAME "Dryer"
+  #define D_DEVICE_HEATER_1_NAME "FloorMat"
+  #define D_DEVICE_HEATER_2_NAME "FanHeater"
+  #define D_DEVICE_HEATER_3_NAME "OilRadiator"
 
   #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
-
-  /**
-   * @brief HVAC zones
-   **/
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME D_DEVICE_DRIVER_RELAY_0_NAME
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME D_DEVICE_DRIVER_RELAY_1_NAME
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME D_DEVICE_DRIVER_RELAY_2_NAME
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME D_DEVICE_DRIVER_RELAY_3_NAME
 
 // {"NumDevices":4,"DeviceNameIndex":[-1,-1,-1,-1],"AddressList":[[40,140,131,47,0,0,0,230],[40,18,77,49,0,0,0,233],[40,233,112,49,0,0,0,11],[40,165,161,47,0,0,0,189]]}
 
@@ -4041,6 +3947,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
   #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
 
+  #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
+
   #define D_DEVICE_SENSOR_CURRENT "LEDStrip"
 
   
@@ -4048,44 +3956,16 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "2"
   #define D_DEVICE_SENSOR_PZEM004T_2_ADDRESS "3"
   #define D_DEVICE_SENSOR_PZEM004T_3_ADDRESS "4"
-  #define D_DEVICE_SENSOR_PZEM004T_4_ADDRESS "5"
-  #define D_DEVICE_SENSOR_PZEM004T_5_ADDRESS "6"
-  #define D_DEVICE_SENSOR_PZEM004T_6_ADDRESS "7"
-  #define D_DEVICE_SENSOR_PZEM004T_7_ADDRESS "8"
-  #define D_DEVICE_SENSOR_PZEM004T_8_ADDRESS "9"
-  #define D_DEVICE_SENSOR_PZEM004T_9_ADDRESS "10"
-  #define D_DEVICE_SENSOR_PZEM004T_10_ADDRESS "11"
-  #define D_DEVICE_SENSOR_PZEM004T_11_ADDRESS "12"
-
   
-  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Mains"
-  #define D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "Cooker"
-  #define D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "Immersion"
-  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "Washing Machine"
-  #define D_SENSOR_PZEM004T_4_FRIENDLY_NAME_CTR "Dishwasher"
-  #define D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR "Pump Shower"
-  #define D_SENSOR_PZEM004T_6_FRIENDLY_NAME_CTR "Heating"
-  #define D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR "Tumble Dryer"
-  #define D_SENSOR_PZEM004T_8_FRIENDLY_NAME_CTR "Garage"
-  #define D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR "Bathroom Shower"
-  #define D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR "Main Sockets"
-  #define D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "Kitchen Sockets"
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR D_DEVICE_HEATER_0_NAME
+  #define D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR D_DEVICE_HEATER_1_NAME
+  #define D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR D_DEVICE_HEATER_2_NAME
+  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR D_DEVICE_HEATER_3_NAME 
   
-  
-  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   "Mains"
-  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   "Cooker"
-  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   "Immersion"
-  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   "Washing Machine"
-  #define D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR   "Dishwasher"
-  #define D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR   "Pump Shower"
-  #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR   "Heating"
-  #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR   "Tumble Dryer"
-  #define D_DRIVER_ENERGY_8_FRIENDLY_NAME_CTR   "Garage"
-  #define D_DRIVER_ENERGY_9_FRIENDLY_NAME_CTR   "Bathroom Shower"
-  #define D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR  "Main Sockets"
-  #define D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR  "Kitchen Sockets"
-  
-
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_0_NAME
+  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_1_NAME
+  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_2_NAME
+  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_3_NAME
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -4093,18 +3973,21 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_JSON_ENERGY "\":{"
         "\"DeviceCount\":4"    
     "},"
+    "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":{"
+        "\"DeviceCount\":4"    
+    "},"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         // Downstairs
@@ -4117,7 +4000,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR "\":["
-        "\"" "Bedroom" "\""
+        "\"" "Desk" "\""
       "],"  
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_280_NAME "\","
@@ -4126,39 +4009,26 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" D_MODULE_SENSORS_INA219_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CURRENT "\""
       "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+      "],"
       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_8_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_9_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR "\""
+        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\""
       "],"
       "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_4_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_6_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_8_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "\""
+        "\"" D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "\""
       "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -4173,15 +4043,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_1_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_2_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_3_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_4_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_5_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_6_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_7_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_8_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_9_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_10_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_11_ADDRESS ""
+        D_DEVICE_SENSOR_PZEM004T_3_ADDRESS
       "]"  
     "},"
     "\"" "HVACZone" "\":{"
@@ -4193,17 +4055,17 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" "SetOutput" "\":["
         "{"
           "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_0_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "},"
         "{"
           "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_1_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "},"
         "{"
           "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_2_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"

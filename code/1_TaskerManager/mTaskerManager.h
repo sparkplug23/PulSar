@@ -65,6 +65,7 @@
 #endif // D_USER_MICHAEL
 
 
+#include "2_CoreSystem/06_Support/mSensorType.h"
 
 
 
@@ -246,6 +247,18 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 };
 
 #define pCONT mTaskerManager::GetInstance()
+
+
+
+
+// macro to know if a module is a type (ie within a range)
+#define IS_MODULE_SENSOR_SUBMODULE(x)   (x >= 5001 && x <= 5999) // skipping the interface
+#define IS_MODULE_LIGHTING_SUBMODULE(x) (x >= 6001 && x <= 6999) // skipping the interface
+#define IS_MODULE_ENERGY_SUBMODULE(x)   (x >= 7001 && x <= 7999) // skipping the interface
+#define IS_MODULE_DISPLAY_SUBMODULE(x)  (x >= 8001 && x <= 8999) // skipping the interface
+
+
+
 
 #define D_TARGET_TASKER_NONE 0
 

@@ -154,37 +154,6 @@ void mSensorsInterface::EveryLoop()
 
 }
 
-// move into sensor type?? YES!!
-const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
-{
-  
-  switch(id){
-    default: 
-    return PM_SEARCH_NOMATCH;
-    // Floats
-    case SENSOR_TYPE_TEMPERATURE_ID:            return PM_JSON_TEMPERATURE;
-    case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:      return PM_JSON_HUMIDITY;
-    case SENSOR_TYPE_PRESSURE_ID:               return PM_JSON_PRESSURE;
-    case SENSOR_TYPE_GAS_RESISTANCE_ID:               return PM_JSON_GAS_RESISTANCE;
-    case SENSOR_TYPE_LIGHT_LEVEL_ID:            return PM_JSON_LIGHT_LEVEL;
-    case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return PM_JSON_LIGHT_LUMINANCE_LUX;
-    case SENSOR_TYPE_SUN_AZIMUTH_ID:            return PM_JSON_SUN_AZIMUTH;
-    case SENSOR_TYPE_SUN_ELEVATION_ID:          return PM_JSON_SUN_ELEVATION;
-    case SENSOR_TYPE_DOOR_POSITION_ID:          return PM_JSON_DOOR_POSITION;
-    case SENSOR_TYPE_DOOR_LOCKED_ID:            return PM_JSON_DOOR_LOCKED;    
-    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;  
-    case SENSOR_TYPE_SPEED_ID:            return PM_JSON_SPEED;  
-    case SENSOR_TYPE_LATITUDE_ID:            return PM_JSON_LATITUDE;  
-    case SENSOR_TYPE_LONGITUDE_ID:            return PM_JSON_LONGITUDE;  
-    case SENSOR_TYPE_ALTITUDE_ID:            return PM_JSON_ALTITUDE;  
-    case SENSOR_TYPE_VOLTAGE_ID:            return PM_JSON_VOLTAGE;
-    case SENSOR_TYPE_STATE_ACTIVE_ID: return PM_JSON_STATE_ACTIVE;
-    // Strings
-    case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING;
-  }
-  return PM_SEARCH_NOMATCH;      
-
-}
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 /**
@@ -363,136 +332,139 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
      **/
     for(auto& pmod:pCONT->pModule)
     {
-      //Get any sensors in module
-      uint8_t sensors_available = pmod->GetSensorCount();
-      // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-      
-      if(sensors_available)
+      if( IS_MODULE_SENSOR_SUBMODULE( pmod->GetModuleUniqueID() ) )
       {
+        //Get any sensors in module
+        uint8_t sensors_available = pmod->GetSensorCount();
         // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-
-        for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+        
+        if(sensors_available) 
         {
-          sensors_reading_t val;
-          pmod->GetSensorReading(&val, sensor_id);
-          
-          if(val.Valid())
+          // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
+
+          for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
           {
-
-            /**
-             * @brief Special cases
-             * 
-             */
-            if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
+            sensors_reading_t val;
+            pmod->GetSensorReading(&val, sensor_id);
+            
+            if(val.Valid())
             {
-              type_id_adjusted = SENSOR_TYPE_TEMPERATURE_ID;              
-            }
-            else
-            {
-              type_id_adjusted = type_id;
-            }
-
-            if(val.isFloatWaiting_WithSensorType(type_id_adjusted))
-            {
-
-              
-              // val.sensor_id is used to since the order of devicename list may not match in accending order
-              DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
 
               /**
-               * @brief Modify for special cases
+               * @brief Special cases
                * 
                */
               if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
               {
-
-                sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);                
-                // Convert into colour
-                float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-                #ifdef USE_MODULE_LIGHTS_INTERFACE
-                
-                // Only add sensor type if any has been found
-                if(flag_level_started != true)
-                {     
-                  JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
-                  flag_level_started = true;
-                  flag_level_ended_needed = true;
-                }
-                
-                RgbColor colour  = GetColourValueUsingMaps_ForUnifiedSensor(temperature);
-
-                JBI->Add_FV(
-                  DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
-                  PSTR("\"%02X%02X%02X\""),
-                  colour.R, colour.G, colour.B
-                );
-                #endif // USE_MODULE_LIGHTS_INTERFACE
-
+                type_id_adjusted = SENSOR_TYPE_TEMPERATURE_ID;              
               }
-              /**
-               * @brief As read from sensor
-               * 
-               */
               else
               {
+                type_id_adjusted = type_id;
+              }
+
+              if(val.isFloatWaiting_WithSensorType(type_id_adjusted))
+              {
+
+                
+                // val.sensor_id is used to since the order of devicename list may not match in accending order
+                DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
+
+                /**
+                 * @brief Modify for special cases
+                 * 
+                 */
+                if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
+                {
+
+                  sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);                
+                  // Convert into colour
+                  float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
+                  #ifdef USE_MODULE_LIGHTS_INTERFACE
+                  
+                  // Only add sensor type if any has been found
+                  if(flag_level_started != true)
+                  {     
+                    JBI->Level_Start_P( GetUnifiedSensor_NameByTypeID(type_id) );
+                    flag_level_started = true;
+                    flag_level_ended_needed = true;
+                  }
+                  
+                  RgbColor colour  = GetColourValueUsingMaps_ForUnifiedSensor(temperature);
+
+                  JBI->Add_FV(
+                    DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
+                    PSTR("\"%02X%02X%02X\""),
+                    colour.R, colour.G, colour.B
+                  );
+                  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+                }
+                /**
+                 * @brief As read from sensor
+                 * 
+                 */
+                else
+                {
+                  // Only add sensor type if any has been found
+                  if(flag_level_started != true)
+                  {     
+                    JBI->Level_Start_P( GetUnifiedSensor_NameByTypeID(type_id) );
+                    flag_level_started = true;
+                    flag_level_ended_needed = true;
+                  }
+                  
+                  sensor_data = val.GetFloat(type_id);
+                  JBI->Add(buffer, sensor_data);
+                }
+                
+              }
+
+              // if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
+              // {
+              //   DEBUG_LINE_HERE;
+              // Serial.println(val.GetString(type_id));
+              //     sensor_data_string = val.GetString(type_id);
+              // Serial.println(sensor_data_string);
+              // Serial.println(sensor_data_string.c_str());
+              
+              // }
+              
+              // sensor_data_string = val.GetString(type_id);
+              // if(!sensor_data_string.equals("error"))
+              // {
+
+              #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
+              if(val.HasString(sensor_id))
+              {
+              // if((sensor_data_string = val.GetString(type_id)) != "error" )
+              // // if((sensor_data_string = val.GetString(type_id)) != val.error ) //SENSOR_STRING_TYPE_INVALID)
+              // {
+
+                sensor_data_string = val.GetString(type_id);
+
+                
                 // Only add sensor type if any has been found
                 if(flag_level_started != true)
-                {     
+                {              
                   JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
                   flag_level_started = true;
                   flag_level_ended_needed = true;
                 }
                 
-                sensor_data = val.GetFloat(type_id);
-                JBI->Add(buffer, sensor_data);
+                // val.sensor_id is used to since the order of devicename list may not match in accending order
+                DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
+
+                JBI->Add(buffer, sensor_data_string.c_str());
+                
               }
-              
+              #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
+
             }
-
-            // if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
-            // {
-            //   DEBUG_LINE_HERE;
-            // Serial.println(val.GetString(type_id));
-            //     sensor_data_string = val.GetString(type_id);
-            // Serial.println(sensor_data_string);
-            // Serial.println(sensor_data_string.c_str());
-            
-            // }
-            
-            // sensor_data_string = val.GetString(type_id);
-            // if(!sensor_data_string.equals("error"))
-            // {
-
-            #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-            if(val.HasString(sensor_id))
-            {
-            // if((sensor_data_string = val.GetString(type_id)) != "error" )
-            // // if((sensor_data_string = val.GetString(type_id)) != val.error ) //SENSOR_STRING_TYPE_INVALID)
-            // {
-
-              sensor_data_string = val.GetString(type_id);
-
-              
-              // Only add sensor type if any has been found
-              if(flag_level_started != true)
-              {              
-                JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
-                flag_level_started = true;
-                flag_level_ended_needed = true;
-              }
-              
-              // val.sensor_id is used to since the order of devicename list may not match in accending order
-              DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-
-              JBI->Add(buffer, sensor_data_string.c_str());
-              
-            }
-            #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-
           }
-        }
 
-      }
+        }
+      } // oNLY USE SENSOR MODULES
 
     } // END modules checking
     

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "5_Sensors/00_Interface/mSensorType.h"
+#include "2_CoreSystem/06_Support/mSensorType.h"
 
 /**
  * @brief 
@@ -30,6 +30,7 @@ class mTaskerInterface
     
     /**
      * Push 0 if none are used, maybe internalise
+     * Rename to "GetDeviceReading"
      * */
     virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->sensor_type.push_back(0); }
   

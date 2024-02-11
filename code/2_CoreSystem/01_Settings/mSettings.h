@@ -527,7 +527,7 @@ class mSettings :
   struct RUNTIME_GLOBALS{
     uint8_t sleep;                              // Current copy of Settings.sleep
     uint32_t tSavedUpdateLoopStatistics;
-    uint8_t energy_driver;                    // Energy monitor configured
+    uint8_t energy_driver;                    // Energy monitor configured    // phase this out, more than one can exist
     uint8_t light_driver;                     // Light module configured
     uint8_t light_type;                       // Light types
     SysBitfield_BootStatus boot_status;

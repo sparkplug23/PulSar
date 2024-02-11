@@ -227,6 +227,7 @@ Bathroom
 // #define DEVICE_FLOORFAN2
 // #define DEVICE_FLOORFAN4
 // #define DEVICE_DEFAULT_SONOFF_BASIC__06
+// #define DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT // Desk floor mat
 
 
 /**************************************************************************************************************************************************

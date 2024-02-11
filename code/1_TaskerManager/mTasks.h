@@ -33,7 +33,7 @@ enum TASKER_FUNCTION_TYPES {
    * @brief "PRE_INIT" as FUNC_INIT_GPIO_POINTERS?
    * 
    */
-  FUNC_PRE_INIT,     // Configure sub modules and classes as needed
+  FUNC_PRE_INIT,     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
   
   
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc

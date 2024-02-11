@@ -14,8 +14,6 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-#include "5_Sensors/00_Interface/mSensorType.h"
-
 class mRemoteDevice :
   public mTaskerInterface
 {

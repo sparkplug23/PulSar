@@ -57,8 +57,6 @@ class mDriverInterface :
 
     void MQTT_Report_Event_Button();
 
-    const char* GetUnifiedSensor_NameByTypeID(uint8_t id);
-
     // sensor_t
 
     

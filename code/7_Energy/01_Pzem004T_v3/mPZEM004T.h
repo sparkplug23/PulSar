@@ -19,8 +19,9 @@
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H 0.1
 
-#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID    132
-#define D_GROUP_MODULE_ENERGY_PZEM004T_ID      2
+
+#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID ((7*1000)+01) // [(Folder_Number*100)+ID_File]
+
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -57,7 +58,7 @@
 #include <TasmotaSerial.h>
 #include <TasmotaModbus.h>
 
-#define ENERGY_PZEM004T_MEASURE_RATE_MS_TIMEOUT 900
+#define ENERGY_PZEM004T_MEASURE_RATE_MS_TIMEOUT 200
 
 // #include "1_TaskerManager/mTaskerManager.h"
 // http://innovatorsguru.com/wp-content/uploads/2019/06/PZEM-004T-V3.0-Datasheet-User-Manual.pdf
@@ -86,19 +87,46 @@ class mEnergyPZEM004T :
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
-      uint8_t found = 0;
       uint16_t rate_measure_ms = 1000;
-      // uint8_t sensor_count = 1;
-      uint8_t active_sensor = 0;
+      uint8_t active_sensor = 0; //move
+      uint8_t devices_present = 0;
     }settings;
 
     void EveryLoop();    
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void AllocateDynamicMemory();
     
-    #ifndef MAX_ENERGY_SENSORS
-      #define MAX_ENERGY_SENSORS 12
+    #ifndef MAX_PZEM004T_DEVICES
+      #define MAX_PZEM004T_DEVICES 12
     #endif
+
+
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.devices_present;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > MAX_PZEM004T_DEVICES-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_VOLTAGE_ID);       value->data_f.push_back(data_modbus[index].voltage);
+      value->sensor_type.push_back(SENSOR_TYPE_CURRENT_ID);       value->data_f.push_back(data_modbus[index].current);
+      value->sensor_type.push_back(SENSOR_TYPE_ACTIVE_POWER_ID);  value->data_f.push_back(data_modbus[index].active_power);
+      value->sensor_type.push_back(SENSOR_TYPE_FREQUENCY_ID);     value->data_f.push_back(data_modbus[index].frequency);
+      value->sensor_type.push_back(SENSOR_TYPE_POWER_FACTOR_ID);  value->data_f.push_back(data_modbus[index].power_factor);
+      value->sensor_type.push_back(SENSOR_TYPE_ENERGY_ID);        value->data_f.push_back(data_modbus[index].energy);
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
+
+    
+    void SetIDWithAddress(uint8_t address_id, uint8_t address_to_save);
+    uint8_t GetAddressWithID(uint8_t address_id);
+    std::vector<uint8_t> address;
+
+
 
     enum TRANSCEIVE_MODE_IDS{
       TRANSCEIVE_RESPONSE_TIMEOUT_ID=-2,

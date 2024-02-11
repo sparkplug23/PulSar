@@ -93,29 +93,6 @@ void mDriverInterface::EveryLoop()
 
 }
 
-
-const char* mDriverInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
-{
-  
-  switch(id){
-    default: 
-    case SENSOR_TYPE_TEMPERATURE_ID:            return PM_JSON_TEMPERATURE;
-    case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:      return PM_JSON_HUMIDITY;
-    case SENSOR_TYPE_PRESSURE_ID:               return PM_JSON_PRESSURE;
-    case SENSOR_TYPE_LIGHT_LEVEL_ID:            return PM_JSON_LIGHT_LEVEL;
-    case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return PM_JSON_LIGHT_LUMINANCE_LUX;
-    case SENSOR_TYPE_SUN_AZIMUTH_ID:            return PM_JSON_SUN_AZIMUTH;
-    case SENSOR_TYPE_SUN_ELEVATION_ID:          return PM_JSON_SUN_ELEVATION;
-    case SENSOR_TYPE_DOOR_POSITION_ID:          return PM_JSON_DOOR_POSITION;
-    case SENSOR_TYPE_DOOR_LOCKED_ID:            return PM_JSON_DOOR_LOCKED;    
-    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;    
-  }
-  return PM_SEARCH_NOMATCH;      
-
-}
-
-
-
 void mDriverInterface::MQTT_Report_Event_Button()
 {
 

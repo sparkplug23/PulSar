@@ -1,7 +1,11 @@
 #ifndef _MODULE_DISPLAYS_INTERFACE_H
 #define _MODULE_DISPLAYS_INTERFACE_H
 
-#define D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID ((8*1000)+00)
+
+
+
+
 #define D_GROUP_MODULE_DISPLAYS_INTERFACE_ID    1    // Numerical accesending order of module within a group
 
 // #define USE_MODULE_EXAMPLE_CLASS

@@ -43,9 +43,9 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_INIT:
       Init();
     break;
-    case FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID:
-      AllocateDynamicMemory(); // needs moved, as I want a delayed start and need to poll first for sensors
-    break;
+    // case FUNC_RESCAN_FOR_DEVICES:
+
+    // break;
   }
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -89,11 +89,16 @@ void mEnergyPZEM004T::Pre_Init(void)
 
   if (pCONT_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   {
-    pCONT_set->runtime.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
+    pCONT_set->runtime.energy_driver = 1; // phase out // D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
     // set bit for drivers
     settings.fEnableSensor = true;
   }
 
+  SetIDWithAddress(0, 1);
+  SetIDWithAddress(1, 2);
+  SetIDWithAddress(2, 3);
+  SetIDWithAddress(3, 4);
+  
 }
 
 
@@ -115,10 +120,14 @@ void mEnergyPZEM004T::Init(void)
      * */
 
   } else {
-    pCONT_set->runtime.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
+    // pCONT_set->runtime.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
     settings.fEnableSensor = false;
     return;
   }
+
+  settings.devices_present = 4;
+
+  AllocateDynamicMemory();
 
 }
 
@@ -128,18 +137,18 @@ void mEnergyPZEM004T::Init(void)
 void mEnergyPZEM004T::AllocateDynamicMemory()
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ALLOCATE for %d sensors"),pCONT_iEnergy->Energy.phase_count);
+  
+  AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ALLOCATE for %d sensors"), settings.devices_present);
 
-  if(pCONT_iEnergy->Energy.phase_count<=MAX_ENERGY_SENSORS)
+  if(settings.devices_present<=MAX_ENERGY_SENSORS)
   {
-    data_modbus = new DATA_MODBUS[pCONT_iEnergy->Energy.phase_count];
+    data_modbus = new DATA_MODBUS[settings.devices_present];
 
-    AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ALLOCATE data_modbus for %d sensors"),pCONT_iEnergy->Energy.phase_count);
-    settings.found = pCONT_iEnergy->Energy.phase_count;
+    AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ALLOCATE data_modbus for %d sensors"), settings.devices_present);
   }else{
 
-    AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ERROR ALLOCATE data_modbus for %d sensors"),pCONT_iEnergy->Energy.phase_count);
-    settings.found = pCONT_iEnergy->Energy.phase_count;
+    AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ERROR ALLOCATE data_modbus for %d sensors"), settings.devices_present);
+    settings.devices_present = 0;
   }
 
   // Optional poll for all sensors?
@@ -150,20 +159,24 @@ void mEnergyPZEM004T::AllocateDynamicMemory()
 
 void mEnergyPZEM004T::EveryLoop(){
 
+
+  // Every second, should just be moved into every second instead of loop???
   if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms))
   {
     
+    // AddLog(LOG_LEVEL_TEST, PSTR( "data_modbus for %d sensors"), settings.devices_present);
+
     SplitTask_UpdateSensor(settings.active_sensor);
     
     if(labs(millis()-timeout)>ENERGY_PZEM004T_MEASURE_RATE_MS_TIMEOUT)
     {
-      AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
+      AddLog(LOG_LEVEL_DEBUG, PSTR("TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
       transceive_mode = TRANSCEIVE_RESPONSE_TIMEOUT_ID;
       timeout = millis();
       stats.timeout_reads++;
     }
 
-    if((transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID) && (settings.active_sensor == settings.found-1)) // if(success) AND (last to read)
+    if((transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID) && (settings.active_sensor == settings.devices_present-1)) // if(success) AND (last to read)
     {
       mqtthandler_sensor_ifchanged.flags.SendNow = true;
     }
@@ -172,8 +185,9 @@ void mEnergyPZEM004T::EveryLoop(){
       (transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID) ||
       (transceive_mode == TRANSCEIVE_RESPONSE_TIMEOUT_ID)
     )
-    { // If needed, advance to next sensor
-      if(settings.active_sensor < pCONT_iEnergy->Energy.phase_count-1)
+    { 
+      // If needed, advance to next sensor
+      if(settings.active_sensor < settings.devices_present-1)
       {
         settings.active_sensor++;
       }
@@ -183,13 +197,7 @@ void mEnergyPZEM004T::EveryLoop(){
         measure_time.millis = millis();
       }
 
-#ifdef ENABLE_DEBUGFEATURE_PZEM_FIXED_ONE_SENSOR
-settings.active_sensor = 0;
-#endif
-
-
-
-      ALOG_DBM( PSTR("settings.active_sensor = %d"),settings.active_sensor);
+      ALOG_INF( PSTR("settings.active_sensor = %d"),settings.active_sensor);
     }
 
   }
@@ -223,9 +231,12 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
       if(mTime::TimeReached(&tSaved_backoff, backoff_millis_to_wait))
       {
         stats.start_time = millis();
-        modbus->Send(pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);      
+
+        uint8_t address = GetAddressWithID(device_id);
+
+        modbus->Send(address, 0x04, 0, 10);      
         
-        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_PZEM "modbus->Send(address=%d)"), pCONT_iEnergy->GetAddressWithID(device_id));
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_PZEM "modbus->Send(address=%d)"), address);
 
         transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
       }
@@ -234,8 +245,7 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
     case TRANSCEIVE_AWAITING_RESPONSE_ID:
 
       // AddLog(LOG_LEVEL_TEST, PSTR("SplitTask_UpdateSensor %d %d %d"), device_id, pCONT_iEnergy->GetAddressWithID(device_id), transceive_mode);
-    
-        // ALOG_INF( "ReceiveCount() %d", modbus->ReceiveCount());
+      // ALOG_INF( "ReceiveCount() %d", modbus->ReceiveCount());
       if(modbus->ReceiveReady())
       {
 
@@ -248,32 +258,15 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
 
         if(!error)
         {
-          AddLog_Array(LOG_LEVEL_DEBUG, PSTR("buffer"), modbus_buffer, (uint8_t)30);
+          // AddLog_Array(LOG_LEVEL_DEBUG, PSTR("buffer"), modbus_buffer, (uint8_t)30);
           ALOG_DBM( "ReceiveCount() %d", modbus->ReceiveCount());
           // Check if response matches expected device
-          // if(modbus_buffer[0] == pCONT_iEnergy->address[device_id][3]){
-            ALOG_INF( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
-            ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
-            stats.success_reads++;
-            stats.end_time = millis();
-            stats.sample_time = stats.end_time - stats.start_time;
+          ALOG_INF( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
+          ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
+          stats.success_reads++;
+          stats.end_time = millis();
+          stats.sample_time = stats.end_time - stats.start_time;
 
-            /**
-             * @brief Populate Energy Interface here
-             * What amount different sensors? ie 3 pzem044 and 3 other energy sensors, this wont allow them to work together due to indexing issues.
-             */
-                    
-            pCONT_iEnergy->Energy.voltage[device_id]       = data_modbus[device_id].voltage;   
-            pCONT_iEnergy->Energy.current[device_id]       = data_modbus[device_id].current;  
-            pCONT_iEnergy->Energy.active_power[device_id]  = data_modbus[device_id].active_power; 
-            pCONT_iEnergy->Energy.frequency[device_id]     = data_modbus[device_id].frequency;  
-            pCONT_iEnergy->Energy.power_factor[device_id]  = data_modbus[device_id].power_factor;  
-            pCONT_iEnergy->Energy.energy_read[device_id]       = data_modbus[device_id].energy;  
-
-
-          // }else{            
-          //   transceive_mode = TRANSCEIVE_RESPONSE_ERROR_ID;
-          // }
           transceive_mode = TRANSCEIVE_RESPONSE_SUCCESS_ID;
         }
         else
@@ -305,6 +298,25 @@ void mEnergyPZEM004T::ParseModbusBuffer(DATA_MODBUS* mod, uint8_t* buffer){
 }
 
   
+
+void mEnergyPZEM004T::SetIDWithAddress(uint8_t address_id, uint8_t address_to_save)//, uint8_t address_length)
+{
+  address.insert(address.begin() + address_id, address_to_save);
+}
+
+uint8_t mEnergyPZEM004T::GetAddressWithID(uint8_t address_id)//, uint8_t* address_to_get, uint8_t address_length)
+{
+  if(address.size())
+  {
+    return address[address_id];
+  }
+
+  ALOG_ERR(PSTR("Not address size"));
+  return 0;
+
+}
+
+
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
@@ -473,7 +485,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.found);
+    JBI->Add(D_JSON_COUNT, settings.devices_present);
   return JBI->End();
 
 }
@@ -484,13 +496,10 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_appe
 
   // AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::ConstructJSON_Sensor %d"), pCONT_iEnergy->Energy.phase_count);
   JBI->Start();
-  for(
-    int ii=0;
-    ii<pCONT_iEnergy->Energy.phase_count;
-    // ii<2;
-    ii++
-  ){
+  for( int ii=0; ii < settings.devices_present; ii++)
+  {
     JsonBuilderI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
+      JBI->Add("Address", GetAddressWithID(ii) );
       JBI->Add(D_JSON_VOLTAGE,      data_modbus[ii].voltage);
       JBI->Add(D_JSON_CURRENT,      data_modbus[ii].current);
       JBI->Add(D_JSON_ACTIVE_POWER, data_modbus[ii].active_power);
