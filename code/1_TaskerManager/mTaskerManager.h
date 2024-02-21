@@ -188,6 +188,13 @@ enum FUNCTION_RESULT_IDS{
   FUNCTION_RESULT_LENGTH_ID
 };
 
+enum ModuleStatus{
+  Disabled,
+  Initialising,
+  Running,
+};
+
+
 #include "2_CoreSystem/mFirmwareDefaults.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
@@ -716,7 +723,6 @@ enum TaskerID{
  * @brief DRIVERS
  * @note  Clases with threaded "Tasks" that control external hardware
  **/
-
 #ifdef USE_MODULE_DRIVERS_INTERFACE
   #include "4_Drivers/00_Interface/mDriverInterface.h"
   #define pCONT_iDrivers                           static_cast<mDriverInterface*>(pCONT->pModule[EM_MODULE_DRIVERS_INTERFACE_ID])
@@ -727,10 +733,6 @@ enum TaskerID{
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/04_Relays/mRelays.h"
-  #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_RELAY_V2
-  #include "4_Drivers/04_Relays_v2/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
@@ -749,16 +751,10 @@ enum TaskerID{
   #include "4_Drivers/10_RCSwitch_Extended/mRCSwitch_Extended.h"
   #define pCONT_rcswitch                            static_cast<mRCSwitch*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID])
 #endif
-
-
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
   #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
 #endif
-
-
-
-
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
   #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
   #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
@@ -779,7 +775,6 @@ enum TaskerID{
   #include "4_Drivers/50_CAM_OV2640/mCamera.h"
   #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
 #endif
-
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
   #include "4_Drivers/Camera_OV2640/mCameraOV2640.h"
   #define pCONT_camera                              static_cast<mCameraOV2640*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID])
@@ -792,8 +787,6 @@ enum TaskerID{
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
 #endif
-
-
 #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
   #include "4_Drivers/60_WebCam_Arduino/mWebCam.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
@@ -806,7 +799,6 @@ enum TaskerID{
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
 #endif
-
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
   #define pCONT_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
@@ -819,9 +811,6 @@ enum TaskerID{
   #include "4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
   #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
 #endif
-
-
-
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   #include "4_Drivers/02_FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
@@ -830,7 +819,6 @@ enum TaskerID{
 #include "4_Drivers/IRRemote/mIRRemote.h"
   #define pCONT_ir_remote                           static_cast<mIRRemote*>(pCONT->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
 #endif
-
 #ifdef USE_MODULE_DRIVERS_MODEM_7000G
 #include "4_Drivers/80_Modem_SIM7000G/mSIM7000G.h"
   #define pCONT_sim7000g                           static_cast<mSIM7000G*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_7000G__ID])

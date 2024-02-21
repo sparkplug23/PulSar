@@ -474,3 +474,6 @@ Add sunelevation palette that is actually left on overnight, and is black when i
     If it is done with a vectorised struct, then other parameters such as delays can be used to added wait times.
 
     First use of this will be with CELLULAR_CONNECTION_ESTABLSIHED, CELLULAR_CONNECTION_LOST
+
+#FI-131 
+    Patterns for output, ie to allow ifan controls for speeds

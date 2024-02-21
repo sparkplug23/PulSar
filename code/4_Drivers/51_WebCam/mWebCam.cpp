@@ -1160,7 +1160,7 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_EVERY_SECOND:
     //   SubTask_Relay_Time_To_Remain_On_Seconds();
-    //   SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
+    //   SubTask_Relay_PulseOff();
     
   // if(delay_Start>0)
   // {

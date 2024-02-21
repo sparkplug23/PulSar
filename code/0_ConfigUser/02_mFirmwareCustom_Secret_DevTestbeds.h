@@ -1797,6 +1797,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_ROOMHINT_CTR                       "testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG  "CellularLocator01"
+  #define SIM_CARD_PHONE_NUMBER "07708542353" // spark28007
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
   #define UART_CELLULAR_BAUD                            921600
   #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS

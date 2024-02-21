@@ -3686,7 +3686,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_CTR          "hvac_desk"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -3795,6 +3796,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define USE_MODULE_NETWORK_WEBSERVER
   // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
+  // ARRAY_SIZE
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
   // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -3848,21 +3850,21 @@ May need to add two power connections too, so its not just the cat5e wire to let
         144,
         148
       ],
-      "ColourPalette":"Blue and White",
+      "ColourPalette":"RGBO",
       "SegColour0": {
         "Hue": 0,
         "Sat":100,
         "BrightnessRGB":5
       },
       "Effects": {
-        "Function":"Static Palette",
+        "Function":"Slow Glow",
         "Speed":127,
         "Intensity":255,
         "Decimate":0,
         "Grouping":1
       },
       "Transition": {
-        "TimeMs": 0,
+        "TimeMs": 900,
         "RateMs": 1000
       },
       "BrightnessRGB": 100,
@@ -3888,6 +3890,24 @@ May need to add two power connections too, so its not just the cat5e wire to let
   /***********************************
    * SECTION: GPIO Template
   ************************************/  
+
+      // "\"4\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"16\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"17\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"18\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"19\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"21\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"22\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"23\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"2\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+            // "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
