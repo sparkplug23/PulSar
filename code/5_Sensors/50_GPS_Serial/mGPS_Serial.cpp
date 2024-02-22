@@ -32,7 +32,11 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
   }else
   if(function == FUNC_INIT){
     Init();
+    
+    // while(1) { char c = gpsPort.read(); Serial.print(c); }
+
   }
+
 
   // if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
@@ -63,6 +67,8 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
 
 
       // ubx_parser.PrintDevice("func loop");
+
+      started_successfully = true;
 
       if(started_successfully)
       {
@@ -95,6 +101,8 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
 
 
         #ifndef ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
+
+  // while(1) { char c = gpsPort.read(); Serial.print(c); }
 
         if (gpsPort.available()) 
         {
@@ -651,7 +659,14 @@ void mGPS_Serial::Init(void)
   // DEBUG_LINE_HERE;
 
   // delay(3000);
-  gpsPort.begin(9600);
+  gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, 18,19);
+
+  // while(1)
+  // {
+  //   char c = gpsPort.read();
+  //   Serial.print(c);
+
+  // }
 
   // #ifdef USE_DEVFEATURE__UBLOX_TEST_CLASS
   // gps_ublox = new ubloxGPS(&gpsPort);

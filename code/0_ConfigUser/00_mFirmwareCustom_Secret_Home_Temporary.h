@@ -44,7 +44,7 @@
 // #define DEVICE_H801__MASTERBEDROOM_UPLIGHT
 // #define DEVICE_HOLLOWEEN__FRONTDOOR
 // #define DEVICE_PRUSA_CLIMATE_CONTROL
-#define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+// #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************

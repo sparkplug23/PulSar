@@ -32,7 +32,7 @@
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM9000G_2024
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_02__ON_SIM9000G_2024
-// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_03__ON_SIM800L_2024
+#define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_03__ON_SIM800L_2024
 // #define DEVICE_HARDWARE_TESTBED__TINY_GPS_SERIAL
 
 /**
@@ -1856,8 +1856,16 @@ Blue (Upstairs Link) ***********************************************************
   #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0" // Turned off for testing
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
 
-  // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
-  // #define USE_MODULE_DRIVERS_MODEM_800L
+
+  // #define ENABLE_GROUPFEATURE__CELLULAR
+  #define ENABLE_GROUPFEATURE__GPS_SERIAL
+  // #define ENABLE_GROUPFEATURE__GYRO
+
+
+  #ifdef ENABLE_GROUPFEATURE__CELLULAR
+    // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
+    #define USE_MODULE_DRIVERS_MODEM_800L
+  #endif
 
 #endif
 #ifdef SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
@@ -1888,6 +1896,7 @@ Blue (Upstairs Link) ***********************************************************
    * SECTION: Network Configs
   ************************************/    
 
+ #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
 
 
 
@@ -1994,8 +2003,7 @@ Blue (Upstairs Link) ***********************************************************
   /**
    *  GPS
    * */
-  #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
-  #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
     #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
     #define USE_MODULE_SENSORS_GPS_SERIAL
     #define ENABLE_GPS_PARSER_NMEA
@@ -2005,12 +2013,36 @@ Blue (Upstairs Link) ***********************************************************
     // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
     #define NMEAGPS_PARSE_SAVE_MILLIS
     // #define gpsPort Serial1
-    #define D_GPS_BAUD_RATE_FAST    921600
-    #define D_GPS_BAUD_RATE_DEFAULT 9600
+    // #define D_GPS_BAUD_RATE_FAST    921600
+    // #define D_GPS_BAUD_RATE_DEFAULT 9600
 
     // #define USE_DEVFEATURE_GPS_POLLING_INPUT
 
     // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    
+    #define NMEAGPS_PARSE_SAVE_MILLIS
+    #define gpsPort Serial2
+    // #define D_GPS_BAUD_RATE_FAST    921600
+    // #define D_GPS_BAUD_RATE_DEFAULT 9600
+    #define D_GPS_BAUD_RATE_DEFAULT 460800
+
+    #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    // #define USE_MODULE_CORE__SERIAL
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+    #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+    // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+    #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+
+
 
 
     // #define USE_MODULE_DRIVERS_INTERFACE
@@ -2048,8 +2080,8 @@ Blue (Upstairs Link) ***********************************************************
        * Red         VCC, 3V3
        * Black       GND
        * */
-      "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 

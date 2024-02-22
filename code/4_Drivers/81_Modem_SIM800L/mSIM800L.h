@@ -14,7 +14,6 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-#define TINY_GSM_MODEM_SIM800
 
 // debug inside library
 #define TINY_GSM_DEBUG Serial
@@ -35,7 +34,9 @@
 // set GSM PIN, if any
 #define GSM_PIN ""
 
+#define TINY_GSM_MODEM_SIM800
 #include <TinyGsmClient.h>
+
 #include <SPI.h>
 #include <SD.h>
 #include <Ticker.h>
@@ -209,7 +210,7 @@ class mSIM800L :
     static const char* PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_MODEM_800L_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mSIM800L); };
     #endif
