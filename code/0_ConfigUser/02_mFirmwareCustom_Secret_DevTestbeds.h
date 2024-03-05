@@ -1856,8 +1856,16 @@ Blue (Upstairs Link) ***********************************************************
   #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0" // Turned off for testing
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
 
-  // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
-  // #define USE_MODULE_DRIVERS_MODEM_800L
+
+  // #define ENABLE_GROUPFEATURE__CELLULAR
+  #define ENABLE_GROUPFEATURE__GPS_SERIAL
+  // #define ENABLE_GROUPFEATURE__GYRO
+
+
+  #ifdef ENABLE_GROUPFEATURE__CELLULAR
+    // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
+    #define USE_MODULE_DRIVERS_MODEM_800L
+  #endif
 
 #endif
 #ifdef SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
@@ -1879,6 +1887,8 @@ Blue (Upstairs Link) ***********************************************************
 
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
+
+
   /***********************************
    * SECTION: System Configs
   ************************************/    
@@ -1888,6 +1898,7 @@ Blue (Upstairs Link) ***********************************************************
    * SECTION: Network Configs
   ************************************/    
 
+ #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
 
 
 
@@ -1994,8 +2005,7 @@ Blue (Upstairs Link) ***********************************************************
   /**
    *  GPS
    * */
-  #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
-  #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
     #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
     #define USE_MODULE_SENSORS_GPS_SERIAL
     #define ENABLE_GPS_PARSER_NMEA
@@ -2005,12 +2015,50 @@ Blue (Upstairs Link) ***********************************************************
     // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
     #define NMEAGPS_PARSE_SAVE_MILLIS
     // #define gpsPort Serial1
-    #define D_GPS_BAUD_RATE_FAST    921600
-    #define D_GPS_BAUD_RATE_DEFAULT 9600
+    // #define D_GPS_BAUD_RATE_FAST    921600
+    // #define D_GPS_BAUD_RATE_DEFAULT 9600
 
     // #define USE_DEVFEATURE_GPS_POLLING_INPUT
 
     // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    
+#define ENABLE_DEVFEATURE__START_STATIC_WHILE
+#define ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
+#define ENABLE_DEVFEATURE__START_STATIC_LOOP
+
+#define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+    #define NMEAGPS_PARSE_SAVE_MILLIS
+    #define gpsPort Serial2
+    // #define D_GPS_BAUD_RATE_FAST    921600
+    // #define D_GPS_BAUD_RATE_DEFAULT 9600
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    #define D_GPS_BAUD_RATE_DEFAULT 230400
+    // #define D_GPS_BAUD_RATE_DEFAULT 460800
+
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    // #define D_GPS_TX_PIN_DEFAULT 19
+    // #define D_GPS_RX_PIN_DEFAULT 18
+
+    #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    // #define USE_MODULE_CORE__SERIAL
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+    #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+    // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+    #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+    #define ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
+
+
+
 
 
     // #define USE_MODULE_DRIVERS_INTERFACE
@@ -2048,8 +2096,8 @@ Blue (Upstairs Link) ***********************************************************
        * Red         VCC, 3V3
        * Black       GND
        * */
-      "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
@@ -3289,7 +3337,7 @@ Blue (Upstairs Link) ***********************************************************
 
 
 #ifdef DEVICE_HARDWARE_TESTBED__TINY_GPS_SERIAL
-  #define DEVICENAME_CTR          "testbed_tinygsm"
+  #define DEVICENAME_CTR          "testbed_gps_serial"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Filesystem"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   #define DEVICENAME_ROOMHINT_CTR "Example"
@@ -3302,6 +3350,11 @@ Blue (Upstairs Link) ***********************************************************
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
 
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
 
   /***********************************
    * SECTION: Network Configs
@@ -3314,13 +3367,16 @@ Blue (Upstairs Link) ***********************************************************
 
   #define ENABLE_DEBUG_LINE_HERE
 
+#define ENABLE_DEVFEATURE__START_STATIC_WHILE
+#define ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
+#define ENABLE_DEVFEATURE__START_STATIC_LOOP
 
+#define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
   /**
    *  GPS
    * */
-  #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
-  #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  // #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
     #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
     #define USE_MODULE_SENSORS_GPS_SERIAL
     #define ENABLE_GPS_PARSER_NMEA
@@ -3329,9 +3385,25 @@ Blue (Upstairs Link) ***********************************************************
     #define NMEAGPS_DERIVED_TYPES
     // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
     #define NMEAGPS_PARSE_SAVE_MILLIS
+    // #define gpsPort Serial1
+    // #define D_GPS_BAUD_RATE_FAST    921600
+    // #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+    // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    
+    #define NMEAGPS_PARSE_SAVE_MILLIS
     #define gpsPort Serial2
-    #define D_GPS_BAUD_RATE_FAST    921600
     #define D_GPS_BAUD_RATE_DEFAULT 9600
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    // #define D_GPS_BAUD_RATE_DEFAULT 230400
+    // #define D_GPS_BAUD_RATE_DEFAULT 460800
+
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    // #define D_GPS_TX_PIN_DEFAULT 19
+    // #define D_GPS_RX_PIN_DEFAULT 18
 
     #define USE_DEVFEATURE_GPS_POLLING_INPUT
 
@@ -3347,14 +3419,57 @@ Blue (Upstairs Link) ***********************************************************
 
     #define USE_DEVFEATURE__UBLOX_TEST_CLASS
 
-    // #define ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
+    #define ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
+
+
+
 
 
     // #define USE_MODULE_DRIVERS_INTERFACE
     // #define USE_MODULE_DRIVERS_SERIAL_UART
-    #define ENABLE_HARDWARE_UART_2
-    #define HARDWARE_UART_2_BAUD_RATE_SPEED  9600  //D_GPS_BAUD_RATE_FAST
-  #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+    #define ENABLE_HARDWARE_UART_1
+    #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  // #endif // ENABLE_GROUPFEATURE__GPS_SERIAL
+
+  // /**
+  //  *  GPS
+  //  * */
+  // #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  // #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  //   #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+  //   #define USE_MODULE_SENSORS_GPS_SERIAL
+  //   #define ENABLE_GPS_PARSER_NMEA
+  //   #define ENABLE_GPS_PARSER_UBX
+  //   #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  //   #define NMEAGPS_DERIVED_TYPES
+  //   // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  //   #define NMEAGPS_PARSE_SAVE_MILLIS
+  //   #define gpsPort Serial2
+  //   #define D_GPS_BAUD_RATE_FAST    921600
+  //   #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+  //   #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+  //   // #define USE_MODULE_CORE__SERIAL
+
+  //   // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+  //   #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+  //   #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+  //   // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+  //   #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+  //   // #define ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
+
+
+  //   // #define USE_MODULE_DRIVERS_INTERFACE
+  //   // #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_2
+  //   #define HARDWARE_UART_2_BAUD_RATE_SPEED  9600  //D_GPS_BAUD_RATE_FAST
+  // #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
 
 
   #define USE_MODULE_TEMPLATE

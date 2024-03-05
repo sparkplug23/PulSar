@@ -150,10 +150,10 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level, bool json_appendi
   JBI->Start();
   for(int device_id=0;device_id<settings.active_zones;device_id++){
     JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID(pCONT_mry->GetModuleUniqueID(), device_id, buffer, sizeof(buffer)));
-      JBI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->relay_status[device_id].last.ontime.hour,  pCONT_mry->relay_status[device_id].last.ontime.minute,  pCONT_mry->relay_status[device_id].last.ontime.second);
-      JBI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->relay_status[device_id].last.offtime.hour,  pCONT_mry->relay_status[device_id].last.offtime.minute,  pCONT_mry->relay_status[device_id].last.offtime.second);
-      JBI->Add(D_JSON_TIME_ON "_Seconds",   pCONT_mry->relay_status[device_id].time_seconds_on);
-      JBI->Add(D_JSON_TIME_ON "_Mins",   pCONT_mry->relay_status[device_id].time_seconds_on/60);
+      JBI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->rt.relay_status[device_id].last.ontime.hour,  pCONT_mry->rt.relay_status[device_id].last.ontime.minute,  pCONT_mry->rt.relay_status[device_id].last.ontime.second);
+      JBI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->rt.relay_status[device_id].last.offtime.hour,  pCONT_mry->rt.relay_status[device_id].last.offtime.minute,  pCONT_mry->rt.relay_status[device_id].last.offtime.second);
+      JBI->Add(D_JSON_TIME_ON "_Seconds",   pCONT_mry->rt.relay_status[device_id].time_seconds_on);
+      JBI->Add(D_JSON_TIME_ON "_Mins",   pCONT_mry->rt.relay_status[device_id].time_seconds_on/60);
     JBI->Object_End();
   }
   return JBI->End();

@@ -89,7 +89,6 @@ void mRelays::Pre_Init(void){
     {
       uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
       pinMode(pin_number, OUTPUT);
-      module_state.devices++;
       pCONT_set->runtime.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
     }else
@@ -97,7 +96,6 @@ void mRelays::Pre_Init(void){
     {
       uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
       pinMode(pin_number, OUTPUT);
-      module_state.devices++;
       bitSet(rt.rel_inverted, driver_index); //temp fix
       pCONT_set->runtime.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
@@ -1283,14 +1281,14 @@ void mRelays::CommandSet_PowerTimeOnLimit_Until_Reset()
 uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 
   JBI->Start();
-    JBI->Add(PM_JSON_DEVICES_CONNECTED, module_state.devices);
+    // JBI->Add(PM_JSON_DEVICES_CONNECTED, module_state.devices);
 
-    JBI->Array_Start_P(PSTR("rel_inverted"));
-      for(int8_t bits=0; bits<sizeof(rt.rel_inverted)*8; bits++)
-      {
-        JBI->Add(bitRead(rt.rel_inverted,bits));
-      }
-    JBI->Array_End();
+    // JBI->Array_Start_P(PSTR("rel_inverted"));
+    //   for(int8_t bits=0; bits<sizeof(rt.rel_inverted)*8; bits++)
+    //   {
+    //     JBI->Add(bitRead(rt.rel_inverted,bits));
+    //   }
+    // JBI->Array_End();
 
 
 
@@ -1307,6 +1305,7 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
   {
     JBI->Start();
   }
+
 
   for(int device_id=0;device_id<module_state.devices;device_id++){
     if(rt.relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ rt.relay_status[device_id].ischanged=false;
@@ -1488,7 +1487,6 @@ void mRelays::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
 } //end "MQTTHandler_Init"
-
 
 /**
  * @brief Set flag for all mqtthandlers to send

@@ -208,20 +208,91 @@ class mGPS_Serial :
 
   private:
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mGPS_Serial(){};
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    
+    void   parse_JSONCommand(JsonParserObject obj);
+
     static const char* PM_MODULE_SENSORS__GPS_SERIAL_CTR;
     static const char* PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__GPS_SERIAL_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID; }
-
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mGPS_Serial);
-    };
+    uint16_t GetClassSize(){      return sizeof(mGPS_Serial);    };
     #endif
+    
+
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    void Load_Module(bool erase);
+    void Save_Module(void);
+    bool Restore_Module(void);
+
+    struct MODULE_RUNTIME{ // these will be saved and recovered on boot
+
+    }rt;
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_level = 0, bool json_appending = true);
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_RefreshAll();
+    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+
+    std::vector<struct handler<mGPS_Serial>*> mqtthandler_list;
+    struct handler<mGPS_Serial> mqtthandler_settings_teleperiod;
+    struct handler<mGPS_Serial> mqtthandler_gpspacket_minimal_teleperiod;
+    struct handler<mGPS_Serial> mqtthandler_gpspacket_required;
+    struct handler<mGPS_Serial> mqtthandler_gpspacket_all;
+    struct handler<mGPS_Serial> mqtthandler_gpspacket_micro;
+    struct handler<mGPS_Serial> mqtthandler_gpspacket_debug;
+    #endif // USE_MODULE_NETWORK_MQTT
+
+
+
+
+
+
+
+
+
+
 
     void EveryLoop_InputMethod_PollingSerial_Internal();
     void EveryLoop_InputMethod_PollingSerial_Bytes();
@@ -300,9 +371,15 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void Init_UBX_Only_Requires_PowerCycle();
 
     void sendUBX( const unsigned char *progmemBytes, size_t len );
+
+    struct STATS{
+      uint32_t last_message_received_time = 0;
+      uint32_t last_valid_message_received_time = 0;
+      uint32_t packets_received = 0;
+    }stats;
         
 
-    struct MY_GPS_VALS{
+    struct MY_GPS_VALS{  //remove this, store more of anything. Make it dynamic, so memory is not held unless desired.
       int32_t lat = 1;
       int32_t lon = 1;
       int32_t alt = 1;
@@ -401,12 +478,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
     uint32_t tSaved_parse_gps = 0;
 
 
-
-    void Init();
-    void Pre_Init();
     struct SETTINGS{
-      uint8_t fEnableModule = false;
-      uint8_t fShowManualSlider = false;
       uint8_t read_gps_method = GPS_INPUT_STREAM_METHOD_RINGBUFFERS_ID; 
     }settings;
 
@@ -497,7 +569,6 @@ void changeBaud( const char *textCommand, unsigned long baud );
 
 
     int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand(JsonParserObject obj);
 
     uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_appending);
 
@@ -507,47 +578,6 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Status_Table();
 
-
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_level = 0, bool json_appending = true);
-  
-  #ifdef USE_MODULE_NETWORK_MQTT
-
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    
-    struct handler<mGPS_Serial>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_minimal_teleperiod;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_required;
-    struct handler<mGPS_Serial> mqtthandler_settings_teleperiod;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_debug;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_micro;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_all;
-    
-    // Extra module only handlers
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
-      //later also send byte packet method for testing over mqtt
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-    };
-      
-    struct handler<mGPS_Serial>* mqtthandler_list[6] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_gpspacket_minimal_teleperiod,
-      &mqtthandler_gpspacket_required,
-      &mqtthandler_gpspacket_all,
-      &mqtthandler_gpspacket_micro,
-      &mqtthandler_gpspacket_debug
-    };
-    
-  #endif // USE_MODULE_NETWORK_MQTT
 
 
 };

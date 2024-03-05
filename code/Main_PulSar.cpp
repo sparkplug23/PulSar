@@ -510,6 +510,7 @@ void setup(void)
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif
+  
 
 }
 
@@ -550,6 +551,7 @@ void LoopTasker()
     // Uptime triggers
     if(pCONT_time->uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
     if(pCONT_time->uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
+    if(pCONT_time->uptime.seconds_nonreset == 60){   pCONT->Tasker_Interface(FUNC_UPTIME_1_MINUTES); }
     if(pCONT_time->uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
     if(pCONT_time->uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
 

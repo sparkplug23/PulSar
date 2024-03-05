@@ -6,8 +6,6 @@ const char* mTime::PM_MODULE_CORE_TIME_FRIENDLY_CTR = D_MODULE_CORE_TIME_FRIENDL
 int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
 {
 
-  
-
   switch(function){
     case FUNC_INIT:
       init();

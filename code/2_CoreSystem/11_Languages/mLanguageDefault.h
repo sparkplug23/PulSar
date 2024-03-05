@@ -451,6 +451,11 @@
 #define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_CTR "printer_enclosure"
 
 
+#define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR "sensor_colourbar"
+#define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR "sensor_colourbar"
+
+#define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR             "relay_state_ledstrip"
+#define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__FRIENDLY_CTR    "relay_state_ledstrip"
 
 /**
  * Time

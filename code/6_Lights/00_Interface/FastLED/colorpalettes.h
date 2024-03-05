@@ -41,8 +41,6 @@ extern const TProgmemRGBPalette16 RainbowStripeColors_p FL_PROGMEM;
 extern const TProgmemRGBPalette16 PartyColors_p FL_PROGMEM;
 
 
-extern const TProgmemRGBPalette16 Test_p FL_PROGMEM;
-
 /// Approximate "black body radiation" palette, akin to
 /// the FastLED 'HeatColor' function.
 /// Recommend that you use values 0-240 rather than
@@ -50,6 +48,15 @@ extern const TProgmemRGBPalette16 Test_p FL_PROGMEM;
 /// 'wrapping around' from the hot end to the cold end,
 /// which looks wrong.
 extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM;
+
+
+extern const TProgmemRGBPalette16 Matlab_Purula_p FL_PROGMEM;
+extern const TProgmemRGBPalette16 Matlab_Turbo_p FL_PROGMEM;
+extern const TProgmemRGBPalette16 Matlab_Hot_p FL_PROGMEM;
+extern const TProgmemRGBPalette16 Matlab_Cool_p FL_PROGMEM;
+extern const TProgmemRGBPalette16 Matlab_Spring_p FL_PROGMEM;
+extern const TProgmemRGBPalette16 Matlab_Autumn_p FL_PROGMEM;
+extern const TProgmemRGBPalette16 Matlab_Jet_p FL_PROGMEM;
 
 FASTLED_NAMESPACE_END
 

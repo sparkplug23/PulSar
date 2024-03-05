@@ -12,7 +12,18 @@
 
 #ifdef USE_MODULE_DRIVERS_MODEM_800L
 
-
+// #define MODEM_POWER_ON 23
+// ...
+// ...https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800/issues/29
+// ...
+// void GoToSleep() {
+//   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+//   digitalWrite(MODEM_POWER_ON, LOW);
+//   esp_deep_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
+//   esp_deep_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+//   esp_deep_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+//   esp_deep_sleep_start();
+// }
 
 #ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
 StreamDebugger debugger(SerialAT, Serial);
@@ -45,7 +56,7 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_LOOP: 
     {      
 
-      Handler_ModemResponses(LOG_LEVEL_DEBUG_MORE);
+      Handler_ModemResponses(LOG_LEVEL_DEBUG);
       
       /**
        * @brief Here so it can be set from anywhere/method and then read later
@@ -54,6 +65,7 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
       if(sms.messages_incoming_index_list.size())
       {
         SMSReadAndEraseSavedSMS();
+        DEBUG_LINE_HERE;
       } 
       
       if(flag_modem_initialized)
@@ -86,7 +98,7 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
       }
 
     }break;
-    case FUNC_EVERY_SECOND: 
+    case FUNC_EVERY_SECOND: {
 
       if(!flag_modem_initialized)
       {
@@ -117,7 +129,15 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
 
       }
 
+      // int batteryLevel = analogRead(35);
+      // Serial.printf(PSTR("Battery Level: %d\n"), batteryLevel);
+
+
+
+
+          #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       AutoSMS_Messages_Handle();
+          #endif// USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       
       #ifdef ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
       Serial.printf(PSTR("\n\r\n\r=========================SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n\r")); 
@@ -150,7 +170,7 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
         }
       }
       #endif // ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS
-
+    }
     break;
     case FUNC_EVERY_FIVE_SECOND:   
     {
@@ -641,9 +661,9 @@ void mSIM800L::ModemUpdate_SMS()
 void mSIM800L::SMSReadAndEraseSavedSMS()
 {
 
-  #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- START"));
-  #endif 
+  // #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- START %d"), sms.messages_incoming_index_list.size() );
+  // #endif 
 
   for(auto& id:sms.messages_incoming_index_list)
   {
@@ -664,6 +684,7 @@ void mSIM800L::SMSReadAndEraseSavedSMS()
   }
 
   sms.messages_incoming_index_list.clear(); // for now assumed its done
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- START =======%d"), sms.messages_incoming_index_list.size() );
 
   #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- END"));
@@ -719,6 +740,7 @@ void mSIM800L::SendATCommand_SMSImmediateForwardOverSerial()
 
 
 
+          #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 void mSIM800L::AutoSMS_Messages_Handle()
 {
 
@@ -738,6 +760,7 @@ void mSIM800L::AutoSMS_Messages_Handle()
 
 
 }
+          #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 
 
@@ -774,11 +797,13 @@ void mSIM800L::parse_JSONCommand(JsonParserObject obj)
   #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 
+          #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
   if(jtok = obj["SMSAuto_GPS"]){
     ALOG_INF( PSTR(D_LOG_CELLULAR "SMSAuto_GPS smsauto_gps_messages.rate_seconds %d"), jtok.getInt());
     smsauto_gps_messages.rate_seconds = jtok.getInt();
     
   }
+          #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 
 
@@ -1050,7 +1075,7 @@ bool mSIM800L::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response_
 {
 
   // #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-  //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "parse_ATCommands %d>> Buffer[%d] \"%s\""),response_loglevel, buflen, buffer);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "parse_ATCommands %d>> Buffer[%d] \"%s\""),response_loglevel, buflen, buffer);
   // #endif
 
   // +CDS:  A GSM/GPRS modem or mobile phone uses +CDS to forward a newly received SMS status report to the computer / PC.
@@ -1164,9 +1189,12 @@ bool mSIM800L::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response_
      **/
     
     sms.messages_incoming_index_list.push_back(new_sms_index);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "messages_incoming_index_list >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>%d"), sms.messages_incoming_index_list.size() );
+        DEBUG_LINE_HERE;
     }
 
-
+ AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "messages_incoming_index_list >1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>%d"), sms.messages_incoming_index_list.size() );
+ 
 
     // /**
     //  * @brief Splitting the Indexs out
@@ -1348,11 +1376,12 @@ bool mSIM800L::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response_
 void mSIM800L::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_t buflen, uint8_t response_loglevel)
 {
 
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "ATParse_CMGD__CommandNameInTextDeleteMessage messages_incoming_index_list %d"), sms.messages_incoming_index_list.size() );
   char* result2 = strstr(buffer, "+CMGD:"); 
   if(result2)
   {
     #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage S %s"),result2);
+    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage S ==========\n\r%s\n\r=================="),result2);
     #endif
 
     const char* delims = "()"; //space + ,
@@ -1366,7 +1395,9 @@ void mSIM800L::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_
       // 00:23 INF tok[3] = 0-4
       // 00:23 INF tok[4] =       
 
-      ALOG_DBG(PSTR(D_LOG_CELLULAR "MATCHED \"CMGD\" >>%s<<"), result2);
+      ALOG_INF(PSTR(D_LOG_CELLULAR "MATCHED \"CMGD\" >>%s<<"), result2);
+
+      response_loglevel = LOG_LEVEL_TEST;
 
       tok = strtok(NULL, delims); //skip 
 
@@ -1376,6 +1407,12 @@ void mSIM800L::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_
         char buffer[100];
         snprintf(buffer, sizeof(buffer), tok); // 0,1,2,4,5
         AddLog(response_loglevel,PSTR("hereeeeeeeeeeeeeeeeeeeeeeeeee buffer split = %s"), buffer);
+
+
+
+        // I see the issue:
+        // * I need to check when its multiple numbers, separated by comma, or
+        // * a range Separated by a dash, then iter between the low and high of dash
 
         /**
          * @brief Splitting the Indexs out
@@ -1390,11 +1427,17 @@ void mSIM800L::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_
           tok_ids = strtok(NULL, delims2);
         }
 
+        DEBUG_LINE_HERE;
+
       }
 
+    }else{
+      ALOG_ERR(PSTR(D_LOG_CELLULAR "ATParse_CMGD__CommandNameInTextDeleteMessage No tok"));
+    
     }
   }
-
+AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "ATParse_CMGD__CommandNameInTextDeleteMessageE messages_incoming_index_list %d"), sms.messages_incoming_index_list.size() );
+  
     #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
     ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage E"));
     #endif
@@ -2117,7 +2160,7 @@ bool mSIM800L::DataNetwork__InitConfig()
     // 2 NB-IoT
     // 3 CAT-M and NB-IoT
     // Set network preferre to auto
-    modem->setPreferredMode(3);
+    // modem->setPreferredMode(3);
 
     // Args:
     // 2 Automatic
@@ -2125,7 +2168,7 @@ bool mSIM800L::DataNetwork__InitConfig()
     // 38 LTE only
     // 51 GSM and LTE only
     // Set network mode to auto
-    modem->setNetworkMode(2);
+    // modem->setNetworkMode(2);
 
     uint32_t  timeout = millis();
     // Check network signal and registration information
@@ -2328,57 +2371,6 @@ bool mSIM800L::DataNetwork__CheckConnection()
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   
 /******************************************************************************************************************
  * ConstructJson
@@ -2388,8 +2380,11 @@ uint8_t mSIM800L::ConstructJSON_Settings(uint8_t json_level, bool json_appending
 
   JBI->Start();
     JBI->Add("SMSEnabled", sms.enabled);
-    JBI->Add("SMSAutoPosition", smsauto_gps_messages.rate_seconds);
     
+    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    JBI->Add("SMSAutoPosition", smsauto_gps_messages.rate_seconds);
+    #endif 
+
     JBI->Add("GPRSEnabled", gprs.enabled);
     
     #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
@@ -2461,6 +2456,7 @@ uint8_t mSIM800L::ConstructJSON_State(uint8_t json_level, bool json_appending){
       JBI->Add("Percentage", modem_status.battery.percentage);
       JBI->Add("ChargeState", modem_status.battery.charge_state);
       JBI->Add("Valid", modem_status.battery.isvalid);
+      JBI->Add("analog", analogRead(35) );
     JBI->Object_End();
   
   return JBI->End();
@@ -2535,7 +2531,7 @@ void mSIM800L::MQTTHandler_Set_DefaultPeriodRate()
 void mSIM800L::MQTTHandler_Sender(uint8_t id)
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__NETWORK_CELLULAR__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS__MODEM_800L__ID, handle, id);
   }
 }
 
