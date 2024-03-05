@@ -19,7 +19,7 @@ return;
 
   for(int device_id=0;device_id<4;device_id++){
 
-    time_minutes_on = pCONT_mry->relay_status[device_id].time_seconds_on/60;
+    time_minutes_on = pCONT_mry->rt.relay_status[device_id].time_seconds_on/60;
 
     if(
       (time_minutes_on>FAILSAFE_MINUTES_WARNING)&&

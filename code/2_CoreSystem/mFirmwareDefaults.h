@@ -30,6 +30,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
+#include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"

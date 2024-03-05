@@ -300,11 +300,14 @@ void ubloxGPS::wait_for_idle()
 
 bool ubloxGPS::wait_for_ack()
 {
+  #ifdef ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
   if(m_device == NULL) 
   {
     Serial.printf("Error: Manual 3Fix\n\r");
+    // Serial2.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, D_GPS_RX_PIN_DEFAULT, D_GPS_TX_PIN_DEFAULT);
     m_device = &Serial2;
   }
+  #endif // ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
 
   m_device->flush();
 
@@ -364,12 +367,15 @@ bool ubloxGPS::wait_for_ack()
 
 void ubloxGPS::write( const msg_t & msg )
 {
-
+  
+  #ifdef ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
   if(m_device == NULL) 
   {
     Serial.printf("Error: Manual 2Fix\n\r");
+    // Serial2.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, D_GPS_RX_PIN_DEFAULT, D_GPS_TX_PIN_DEFAULT);
     m_device = &Serial2;
   }
+  #endif // ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
 
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
@@ -393,12 +399,16 @@ void ubloxGPS::write( const msg_t & msg )
 
 void ubloxGPS::write_P( const msg_t & msg )
 {
+
+  #ifdef ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
   if(m_device == NULL) 
   {
     Serial.printf("Error: Manual 2Fix\n\r");
+    // Serial2.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, D_GPS_RX_PIN_DEFAULT, D_GPS_TX_PIN_DEFAULT);
     m_device = &Serial2;
   }
-  
+  #endif // ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
+
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
 
@@ -497,11 +507,14 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 {
 // trace << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
   
+  #ifdef ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
   if(m_device == NULL) 
   {
     Serial.printf("Error: Manual 1Fix\n\r");
+    // Serial2.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, D_GPS_RX_PIN_DEFAULT, D_GPS_TX_PIN_DEFAULT);
     m_device = &Serial2;
   }
+  #endif // ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
 
   bool ok = true;
 

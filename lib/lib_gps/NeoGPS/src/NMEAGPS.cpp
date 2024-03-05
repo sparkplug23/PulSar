@@ -290,7 +290,7 @@ NMEAGPS::decode_t NMEAGPS::handle( uint8_t c )
 {
   decode_t res = decode( c );
 
-  Serial.println("NMEAGPS::handle");
+  // Serial.printf("NMEAGPS::handle: %d\n\r", res);
 
   if (res == DECODE_COMPLETED) {
     storeFix();

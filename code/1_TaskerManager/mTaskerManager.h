@@ -543,6 +543,12 @@ enum TaskerID{
   #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
     EM_MODULE_CONTROLLER__HVAC_REMOTE__ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+    EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+    EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     EM_MODULE_CONTROLLER_RADIATORFAN_ID,
   #endif
@@ -1006,6 +1012,15 @@ enum TaskerID{
   #include "9_Controller/41_HVAC_Remote/mHVAC.h"
   #define pCONT_hvac_remote                        static_cast<mHVAC_Remote*>(pCONT->pModule[EM_MODULE_CONTROLLER__HVAC_REMOTE__ID])
 #endif
+#ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+  #include "9_Controller/42_SensorColourBar/mSensorColourBar.h"
+  #define pCONT_colourbar                        static_cast<mSensorColourBar*>(pCONT->pModule[EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+  #include "9_Controller/43_RelayStateLEDStrip/mRelayStateLEDStrip.h"
+  #define pCONT_relay_strip                      static_cast<mRelayStateLEDStrip*>(pCONT->pModule[EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID])
+#endif
+
 
 #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
   #include "9_Controller/03_Sonoff_iFan/mSonoffIFan.h"

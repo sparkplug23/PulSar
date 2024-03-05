@@ -496,6 +496,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_HVAC
     addTasker(EM_MODULE_CONTROLLER__HVAC__ID, new mHVAC());
   #endif
+  #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+    addTasker(EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, new mSensorColourBar());
+  #endif
+  #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+    addTasker(EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, new mRelayStateLEDStrip());
+  #endif
   #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
     addTasker(EM_MODULE_CONTROLLER_IRTRANSMITTER_ID, new X());
   #endif

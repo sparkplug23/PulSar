@@ -17,37 +17,277 @@ static ubloxGPS gps_ublox(&Serial2);
 #endif
 
 
+//-----------------------------------------------------------------
+//  Derive a class to add the state machine for starting up:
+//    1) The status must change to something other than NONE.
+//    2) The GPS leap seconds must be received
+//    3) The UTC time must be received
+//    4) All configured messages are "requested"
+//         (i.e., "enabled" in the ublox device)
+//  Then, all configured messages are parsed and explicitly merged.
+
+class MyGPS : public ubloxGPS
+{
+public:
+
+    enum
+      {
+        GETTING_STATUS, 
+        GETTING_LEAP_SECONDS, 
+        GETTING_UTC, 
+        RUNNING
+      }
+        state NEOGPS_BF(8);
+
+    MyGPS( Stream *device ) : ubloxGPS( device )
+    {
+      state = GETTING_STATUS;
+    }
+
+    //--------------------------
+
+    void get_status()
+    {
+      static bool acquiring = false;
+
+      if (fix().status == gps_fix::STATUS_NONE) {
+        static uint32_t dotPrint;
+        bool            requestNavStatus = false;
+
+        if (!acquiring) {
+          acquiring = true;
+          dotPrint = millis();
+          DEBUG_PORT.print( F("Acquiring...") );
+          requestNavStatus = true;
+
+        } else if (millis() - dotPrint > 1000UL) {
+          dotPrint = millis();
+          DEBUG_PORT << '.';
+
+          static uint8_t requestPeriod;
+          if ((++requestPeriod & 0x07) == 0)
+            requestNavStatus = true;
+        }
+
+        if (requestNavStatus)
+          // Turn on the UBX status message
+          enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS );
+
+      } else {
+        if (acquiring)
+          DEBUG_PORT << '\n';
+        DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
+
+        #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
+            defined(UBLOX_PARSE_TIMEGPS)
+
+          if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
+            DEBUG_PORT.println( F("enable TIMEGPS failed!") );
+
+          state = GETTING_LEAP_SECONDS;
+        #else
+          start_running();
+          state = RUNNING;
+        #endif
+      }
+    } // get_status
+
+    //--------------------------
+
+    void get_leap_seconds()
+    {
+      #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
+          defined(UBLOX_PARSE_TIMEGPS)
+
+        if (GPSTime::leap_seconds != 0) {
+          DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
+
+          if (!disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
+            DEBUG_PORT.println( F("disable TIMEGPS failed!") );
+
+          #if defined(UBLOX_PARSE_TIMEUTC)
+            if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC ))
+              DEBUG_PORT.println( F("enable TIMEUTC failed!") );
+            state = GETTING_UTC;
+          #else
+            start_running();
+          #endif
+        }
+      #endif
+
+    } // get_leap_seconds
+
+    //--------------------------
+
+    void get_utc()
+    {
+      #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
+          defined(UBLOX_PARSE_TIMEUTC)
+
+        lock();
+          bool            safe = is_safe();
+          NeoGPS::clock_t sow  = GPSTime::start_of_week();
+          NeoGPS::time_t  utc  = fix().dateTime;
+        unlock();
+
+        if (safe && (sow != 0)) {
+          DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';
+          DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';
+
+          start_running();
+        }
+      #endif
+
+    } // get_utc
+
+    //--------------------------
+
+    void start_running()
+    {
+      bool enabled_msg_with_time = false;
+
+      #if defined(UBLOX_PARSE_POSLLH)
+        if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH ))
+          DEBUG_PORT.println( F("enable POSLLH failed!") );
+
+        enabled_msg_with_time = true;
+      #endif
+
+      #if defined(UBLOX_PARSE_PVT)
+        if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_PVT ))
+          DEBUG_PORT.println( F("enable PVT failed!") );
+
+        enabled_msg_with_time = true;
+      #endif
+
+      #if defined(UBLOX_PARSE_VELNED)
+        if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED ))
+          DEBUG_PORT.println( F("enable VELNED failed!") );
+
+        enabled_msg_with_time = true;
+      #endif
+
+      #if defined(UBLOX_PARSE_DOP)
+        if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP ))
+          DEBUG_PORT.println( F("enable DOP failed!") );
+        else
+          DEBUG_PORT.println( F("enabled DOP.") );
+
+        enabled_msg_with_time = true;
+      #endif
+
+      #if defined(UBLOX_PARSE_SVINFO)
+        if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_SVINFO ))
+          DEBUG_PORT.println( F("enable SVINFO failed!") );
+        
+        enabled_msg_with_time = true;
+      #endif
+
+      #if defined(UBLOX_PARSE_TIMEUTC)
+
+        #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE)
+          if (enabled_msg_with_time &&
+              !disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC ))
+            DEBUG_PORT.println( F("disable TIMEUTC failed!") );
+
+        #elif defined(GPS_FIX_TIME) | defined(GPS_FIX_DATE)
+          // If both aren't defined, we can't convert TOW to UTC,
+          // so ask for the separate UTC message.
+          if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC ))
+            DEBUG_PORT.println( F("enable TIMEUTC failed!") );
+        #endif
+
+      #endif
+
+      state = RUNNING;
+      trace_header( DEBUG_PORT );
+
+    } // start_running
+
+    //--------------------------
+
+    bool running()
+    {
+      // Serial.println("running");
+      switch (state) {
+        case GETTING_STATUS      : get_status      (); break;
+        case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
+        case GETTING_UTC         : get_utc         (); break;
+      }
+
+      return (state == RUNNING);
+
+    } // running
+
+} NEOGPS_PACKED;
+
+// Construct the GPS object and hook it to the appropriate serial device
+static MyGPS static_gps( &gpsPort );
+
+#ifdef NMEAGPS_INTERRUPT_PROCESSING
+  static void GPSisr( uint8_t c )
+  {
+    gps.handle( c );
+  }
+#endif
+
+//--------------------------
+
+static void static_configNMEA( uint8_t rate )
+{
+  for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
+    ublox::configNMEA( static_gps, (NMEAGPS::nmea_msg_t) i, rate );
+  }
+}
+
+//--------------------------
+
+static void static_disableUBX()
+{
+  static_gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS );
+  static_gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC );
+  static_gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED );
+  static_gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH );
+  static_gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP );
+}
+
+
+
+
 const char* mGPS_Serial::PM_MODULE_SENSORS__GPS_SERIAL_CTR = D_MODULE_SENSORS__GPS_SERIAL__CTR;
 const char* mGPS_Serial::PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR = D_MODULE_SENSORS__GPS_SERIAL__FRIENDLY_CTR;
 
 
 int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
 
-
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
-    Pre_Init();
-  }else
-  if(function == FUNC_INIT){
-    Init();
-    
-    // while(1) { char c = gpsPort.read(); Serial.print(c); }
-
+  switch(function){
+    case FUNC_PRE_INIT:
+      Pre_Init();
+      break;
+    case FUNC_INIT:
+      // Init();
+      // delayed INIT
+      break;
+    case FUNC_UPTIME_30_SECONDS:
+      ALOG_INF(PSTR("mGPS_Serial::Tasker FUNC_UPTIME_30_SECONDS START"));
+      Init();
+      ALOG_INF(PSTR("mGPS_Serial::Tasker FUNC_UPTIME_30_SECONDS DONE"));
+      break;
   }
 
-
-  // if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
-     // Handle_Connection_And_Configuration();
+      // Handle_Connection_And_Configuration();
+      // ALOG_INF(PSTR("mGPS_Serial::Tasker"));
 
-        // ALOG_INF(PSTR("mGPS_Serial::Tasker"));
       /**
        * @10hz, I only need to check buffer every 100ms for new full data, this will allow the other 100ms to be used
        * Doing every 7 ms should mean each time spend here will be shorter parsing
@@ -62,9 +302,6 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
         // gps_ublox.SetDevice(&Serial2);
       //   ALOG_ERR(PSTR("GPS Device was null, setting to Serial2 SetDevice"));
       // }
-
-
-
 
       // ubx_parser.PrintDevice("func loop");
 
@@ -100,48 +337,56 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
         #endif
 
 
-        #ifndef ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
+  //       #ifndef ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
 
-  // while(1) { char c = gpsPort.read(); Serial.print(c); }
+  // // while(1) { char c = gpsPort.read(); Serial.print(c); }
 
-        if (gpsPort.available()) 
-        {
-          char c = gpsPort.read();
-          if(flag_show_incoming_gps_byte_stream) { Serial.write(c); }
-          gps_ublox.handle( c );
-          if (gps_ublox.available()) 
-          {
-            fix_parsing = gps_ublox.read();
+  //       if (gpsPort.available()) 
+  //       {
+  //         char c = gpsPort.read();
+  //         if(flag_show_incoming_gps_byte_stream) { Serial.write(c); }
+  //         gps_ublox.handle( c );
+  //         if (gps_ublox.available()) 
+  //         {
+  //           fix_parsing = gps_ublox.read();
 
-            if(fix_parsing.dateTime.hours)
-              ALOG_DBG(PSTR("GPS Par Time: %02d:%02d:%02d"), fix_parsing.dateTime.hours, fix_parsing.dateTime.minutes, fix_parsing.dateTime.seconds);
+  //           stats.packets_received++;
+  //           stats.last_message_received_time = millis();
 
-            if(fix_parsing.status > gps_fix::STATUS_NONE)
-            {
-              fix_valid |= fix_parsing; // Merge latest payload decode into validated stored data
-              ALOG_INF(PSTR("GPS Fix Time: %02d:%02d:%02d"), fix_valid.dateTime.hours, fix_valid.dateTime.minutes, fix_valid.dateTime.seconds);
-            }
-          }
-        }
+  //           if(fix_parsing.dateTime.hours)
+  //             ALOG_DBG(PSTR("GPS Par Time: %02d:%02d:%02d"), fix_parsing.dateTime.hours, fix_parsing.dateTime.minutes, fix_parsing.dateTime.seconds);
 
-        #endif
+  //           if(fix_parsing.status > gps_fix::STATUS_NONE)
+  //           {
+  //             fix_valid |= fix_parsing; // Merge latest payload decode into validated stored data
+  //             ALOG_INF(PSTR("GPS Fix Time: %02d:%02d:%02d pkt:%d"), fix_valid.dateTime.hours, fix_valid.dateTime.minutes, fix_valid.dateTime.seconds, stats.packets_received);
+  //           }
+  //         }
+  //       }
+
+  //       #endif
+
+
+   #ifdef      ENABLE_DEVFEATURE__START_STATIC_LOOP
+  if (static_gps.available( gpsPort ))
+    trace_all( DEBUG_PORT, static_gps, static_gps.read() );
+
+  // If the user types something, reset the message configuration
+  //   back to a normal set of NMEA messages.  This makes it
+  //   convenient to switch to another example program that
+  //   expects a typical set of messages.  This also saves
+  //   putting those config messages in every other example.
+
+  #endif // ENABLE_DEVFEATURE__START_STATIC_LOOP
 
       
       } // end started_successfully
 
     break;
-    case FUNC_EVERY_SECOND:
+    case FUNC_EVERY_MINUTE:
       #ifndef DISABLE_SERIAL_LOGGING
       Splash_Latest_Fix(&Serial);
       #endif
-
-      // gps_ublox.PrintDevice("func every second");
-      // Serial.printf("calls = %d\n\r", gps_ublox.calls);
-
-      // gps_ublox.test1++;
-
-      // main_body_function();
-
     break;
     /************
      * COMMANDS SECTION * 
@@ -593,7 +838,6 @@ bool mGPS_Serial::running()
 
 void mGPS_Serial::Pre_Init(){
 
-  settings.fEnableModule = true;
 
   // DEBUG_LINE_HERE;
   // #ifdef ENABLE_GPS_PARSER_NMEA
@@ -613,6 +857,7 @@ void mGPS_Serial::Pre_Init(){
   ubx_parser.PrintDevice("pre init end");
 #endif // ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
   state = NOT_STARTED;
+
 
 }
 
@@ -672,15 +917,31 @@ void mGPS_Serial::Init(void)
   // gps_ublox = new ubloxGPS(&gpsPort);
   // #endif // USE_DEVFEATURE__UBLOX_TEST_CLASS
 
+  #ifdef ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
 
 
-  DEBUG_LINE_HERE;
+  // Turn off the preconfigured NMEA standard messages
+  static_configNMEA( 0 );
+
+  // Turn off things that may be left on by a previous build
+  static_disableUBX();
+
+
+  #endif // ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
+
+
+
   DEBUG_LINE_HERE;
 
   // tkr_Serial->HWSerial2->print("TEST");
 
-
+  #ifdef ENABLE_DEVFEATURE__START_STATIC_WHILE
+  while (!static_gps.running())
+    if (static_gps.available( gpsPort ))
+      static_gps.read();
+  #endif // ENABLE_DEVFEATURE__START_STATIC_WHILE
   
+  DEBUG_LINE_HERE;
   // // // Turn off the preconfigured NMEA standard messages
   // configNMEA( 0 );
   // DEBUG_LINE_HERE;
@@ -701,6 +962,7 @@ void mGPS_Serial::Init(void)
   //   }
 
   // }
+  module_state.mode = ModuleStatus::Running;
 
 
   // gpsPort.begin( 9600, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID) );
@@ -1303,11 +1565,24 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
   int8_t tmp_id = 0;
 
   
-  uint8_t rate = 0;
+  uint8_t rate = 1;
   if(jtok = obj["GPS"].getObject()["Rate"])
   {
     rate = jtok.getInt();
   }
+
+  if(jtok = obj["GPS"].getObject()["Stream"])
+  {
+    flag_show_incoming_gps_byte_stream = jtok.getInt();
+    // if(flag_show_incoming_gps_byte_stream==2)
+    // {
+      while(1) { char c = gpsPort.read(); Serial.print(c); }
+    // }
+  }
+
+
+
+
 
 
 
@@ -1516,8 +1791,63 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
   }
 
 
+  #ifdef ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
+
+  if(jtok = obj["GPS"].getObject()["UBX_Enabled"])
+  {
+    AddLog(LOG_LEVEL_INFO, PSTR("uGPS-Test1"));
+
+    uint8_t commands = jtok.getInt();
+    
+    uint8_t ids[] = {
+      ublox::UBX_NAV_POSLLH,
+      ublox::UBX_NAV_STATUS,
+      ublox::UBX_NAV_DOP,
+      ublox::UBX_NAV_PVT,
+      ublox::UBX_NAV_VELNED,
+      ublox::UBX_NAV_TIMEGPS,
+      ublox::UBX_NAV_TIMEUTC,
+      ublox::UBX_NAV_SVINFO
+    };
+
+    for (uint8_t id=0; id<ARRAY_SIZE(ids); id++){
+      if(rate)
+        gps_ublox.enable_msg( ublox::UBX_NAV, (ublox::msg_id_t) id );
+      else
+        gps_ublox.disable_msg( ublox::UBX_NAV, (ublox::msg_id_t) id );
+    }
+    
+  }
+
+
+  if(jtok = obj["GPS"].getObject()["NMEA_Enabled"])
+  {
+    AddLog(LOG_LEVEL_INFO, PSTR("NMEA_Enabled"));
+
+    rate = jtok.getInt();
+    
+    for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
+      ublox::configNMEA( gps_ublox, (NMEAGPS::nmea_msg_t) i, rate );
+    }
+  }
+
+
+
+
+  #endif // ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
+
+
 
 /*
+
+{
+  "GPS": {
+    "NMEA_Enabled": 0,
+    "UBX_Enabled": 0
+  }
+}
+
+
 {
   "GPS": {
     "Rate":0,
@@ -1587,6 +1917,10 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Minimal(uint8_t json_level, bool js
   char buffer[30];
   
   JsonBuilderI->Start();  
+
+  
+      JsonBuilderI->Add("packets", stats.packets_received); 
+      JsonBuilderI->Add("last", millis()-stats.last_message_received_time); 
 
   // #ifdef ENABLE_GPS_PARSER_NMEA
     JsonBuilderI->Object_Start("Location");
@@ -1948,6 +2282,8 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Required(uint8_t json_level, bool j
 
 void mGPS_Serial::MQTTHandler_Init(){
 
+  struct handler<mGPS_Serial>* ptr;
+
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
@@ -1957,7 +2293,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_Settings;
-
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_debug; //also ifchanged together
   ptr->tSavedLastSent = millis();
@@ -1968,6 +2304,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Debug;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_micro; //also ifchanged together
   ptr->tSavedLastSent = millis();
@@ -1978,6 +2315,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Micro;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_all; //also ifchanged together
   ptr->tSavedLastSent = millis();
@@ -1988,6 +2326,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_All;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_minimal_teleperiod; //also ifchanged together
   ptr->tSavedLastSent = millis();
@@ -1998,6 +2337,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Minimal;
+  mqtthandler_list.push_back(ptr);
 
   // All sensor readings I had on pic32
   ptr = &mqtthandler_gpspacket_required;
@@ -2009,6 +2349,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Required;
+  mqtthandler_list.push_back(ptr);
 
 }
 

@@ -2569,10 +2569,6 @@ DEF_PGM_UINT8(PM_STATIC_SINGLE_COLOURS__DATA)
 
 
 
-
-
-
-
 // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
 
 
@@ -3447,7 +3443,7 @@ DEFINE_PGM_CTR(PM_DYNAMIC_RGBCCT_NAMES_CTR)
 
 DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_NAMES_CTR)
 {
-  "Rainbow 16|Cloud 16|Lava 16|Ocean 16|Forest 16|Rainbow Stripe 16|Party 16|Heat 16" // Name are not unique here!
+  "Rainbow 16|Cloud 16|Lava 16|Ocean 16|Forest 16|Rainbow Stripe 16|Party 16|Heat 16|Parula 16|Turbo 16|Hot 16|Cool 16|Spring 16|Autumn 16|Jet 16" // Name are not unique here!
 };
 
 DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR)

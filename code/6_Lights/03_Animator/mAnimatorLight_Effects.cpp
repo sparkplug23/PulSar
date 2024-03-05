@@ -12832,6 +12832,45 @@ static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROG
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * Speed slider sets amount of LEDs lit, intensity() sets unlit
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+void mAnimatorLight::EffectAnim__Manual__PixelSetElsewhere()
+{
+  
+  // uint16_t lit = 1 + SEGMENT.speed();
+  // uint16_t unlit = 1 + SEGMENT.intensity();
+  // bool drawingLit = true;
+  // uint16_t cnt = 0;
+
+  // for (uint16_t i = 0; i < SEGLEN; i++) {
+  //   SEGMENT.SetPixelColor(i, 
+  //     (drawingLit) ? RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE)) : SEGCOLOR_U32(1)
+  //   );
+  //   cnt++;
+  //   if (cnt >= ((drawingLit) ? lit : unlit)) {
+  //     cnt = 0;
+  //     drawingLit = !drawingLit;
+  //   }
+  // }
+
+  // SEGMENT.SetPixelColor(0, RgbcctColor(255,0,0));
+  // SEGMENT.SetPixelColor(1, RgbcctColor(0,255,0));
+  // SEGMENT.SetPixelColor(2, RgbcctColor(0,0,255));
+  
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  
+}
+static const char PM_EFFECT_CONFIG__MANUAL__PIXEL_SET_ELSEWHERE__INDEXING[] PROGMEM = "Fg size,Bg size;Fg,!;!;;pal=19";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+
+
 
 
 
@@ -13952,6 +13991,12 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__ID,    &mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient,                    PM_EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__NAME_CTR,           PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT);
   addEffect3(EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__ID,       &mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid,                       PM_EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__NAME_CTR,           PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+  /**
+   * Manual Methods (ie basic or limited effect generation, mostly updates output)
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+  addEffect3(EFFECTS_FUNCTION__MANUAL__PIXEL_SET_ELSEWHERE__ID,   &mAnimatorLight::EffectAnim__Manual__PixelSetElsewhere, PM_EFFECTS_FUNCTION__MANUAL__PIXEL_SET_ELSEWHERE__NAME_CTR,     PM_EFFECT_CONFIG__MANUAL__PIXEL_SET_ELSEWHERE__INDEXING);  
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
   /**
    * Development effects without full code 
    **/   

@@ -2033,6 +2033,22 @@ RgbcctColor mPalette::Get_Encoded_DynamicPalette_Colour(
 
 // ALOG_INF(PSTR("HERE %d"), palette_adjusted_id);
 
+/*
+// Should I make it here that one of the matlab colourmaps can be loaded into here, and then some the float vector is actually saved with the palettes
+// rather than the strip code? oh!
+// 1) matlab palettes should be called through this, 
+// 2) if the vector has been set, then it will enable the palette to be rescaled? though, this may not enable the temperature celius, or really its just added by command.
+// This would limit scalled palettes to be only 1, which is probably enough. so lets just use a vector that is cleared when not using matlab palettes. 
+// Should any palette be allowed to use this rescale? may be too complex and best to stick with matlab ones, otherwise the palette creation tool will be used
+// and this is just for exact mapping from a value into colourmap.
+// maybe it makes more sense to have another GetColourFromPalette that does the colour mapping, so it really is another functionality.
+
+
+GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float list))
+
+
+*/
+
   switch(palette_adjusted_id + PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) //switch back to palette_NOT_adjusted_id
   { 
     case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:{

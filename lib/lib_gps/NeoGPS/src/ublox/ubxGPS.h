@@ -22,6 +22,10 @@
 // Disable the entire file if derived types are not allowed.
 #ifdef NMEAGPS_DERIVED_TYPES
 
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    // #define D_GPS_TX_PIN_DEFAULT 19
+    // #define D_GPS_RX_PIN_DEFAULT 18
+    
 #include "ublox/ubxNMEA.h"
 #include "ublox/ubxmsg.h"
 #include "GPSTime.h"
@@ -43,6 +47,8 @@
   #include <stddef.h>
 
 #define ENABLE_DEBUG_NEOGPS
+
+// #define ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
 
 // NOTE: millis() is used for ACK timing
 
@@ -110,12 +116,13 @@ public:
         m_device( device )
       {};
 
-
+      #ifdef ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
       // ADDED BY MICHAEL
       void SetDevice(Stream *device)
       {
         m_device = device;
       };
+      #endif // ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
 
     // ublox binary UBX message type.
     enum ubx_msg_t {
@@ -366,7 +373,11 @@ private:
     static const uint8_t SYNC_1 = 0xB5;
     static const uint8_t SYNC_2 = 0x62;
 
+    #ifdef ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
     Stream* m_device = &Serial2;
+    #else
+    Stream* m_device;
+    #endif // ENABLE_HARDWARE_SERIAL_TEMPORARY_FIX
 
     bool parseNavStatus ( uint8_t chr );
     bool parseNavDOP    ( uint8_t chr );

@@ -738,6 +738,14 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
       case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   _palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
       case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
       case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__HEAT_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = HeatColors_p; break;
+
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_PARULA__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Purula_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_TURBO__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Turbo_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_HOT__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Hot_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_COOL__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Cool_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_SPRING__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Spring_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_AUTUMN__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Autumn_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_JET__ID: _palette_container->CRGB16Palette16_Palette.data = Matlab_Jet_p; break;
     }
 
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
