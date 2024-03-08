@@ -1348,6 +1348,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   };         
 
 
+  // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
+
+  
   #define WLED_GROUP_IDS_FIRST  EFFECTS_FUNCTION__STATIC_PATTERN__ID
   #define WLED_GROUP_IDS_LAST   EFFECTS_FUNCTION__DRIP__ID
 

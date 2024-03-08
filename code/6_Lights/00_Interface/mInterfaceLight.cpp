@@ -1137,7 +1137,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   }
 
 
-
   DEBUG_LINE_HERE;
 
 

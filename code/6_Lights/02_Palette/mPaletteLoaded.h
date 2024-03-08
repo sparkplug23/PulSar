@@ -22,6 +22,16 @@ class mPaletteLoaded
 
 	uint8_t loaded_palette_id = 0;
 
+	/**
+	 * @brief When set, this will be used to map the length of the palette to the known values stored here
+	 * ie [10.0,15.0,20.0] would be 0 to 255 from the palette
+	 * Using the float values as nonlinear, will let me get non-linear palette
+	 * ie [10, 14,15,16, 20] would be 255/14 255/15 etc, so the centre region would span a wider colour range (compression/expansion)
+	 * 
+	 * 
+	 */
+	std::vector<float> mapping_values;
+
 	std::vector<uint8_t> pData;
 
 	struct CRGB16Palette16_PALETTE

@@ -267,88 +267,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
-  // ARRAY_SIZE
-
-  // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
-
-  // 13, 18, 19, 22, 23, 25, 26, 27       USED
-  // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":21,
-  //       "ColourOrder":"GRBC",
-  //       "BusType":"SK6812_RGBW",
-  //       "Start":0,
-  //       "Length":144
-  //     },
-  //     {
-  //       "Pin":32,
-  //       "ColourOrder":"GRBC",
-  //       "BusType":"SK6812_RGBW",
-  //       "Start":144,
-  //       "Length":4
-  //     }
-  //   ],
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       144,
-  //       148
-  //     ],
-  //     "ColourPalette":"IceCream Floats",
-  //     "SegColour0": {
-  //       "Hue": 0,
-  //       "Sat":100,
-  //       "BrightnessRGB":5
-  //     },
-  //     "Effects": {
-  //       "Function":"Static Palette",
-  //       "Speed":127,
-  //       "Intensity":255,
-  //       "Decimate":0,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 200,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       144
-  //     ],
-  //     "ColourPalette":"Christmas RGPBO",
-  //     "SegColour0": {
-  //       "Hue": 0,
-  //       "Sat":100,
-  //       "BrightnessRGB":5
-  //     },
-  //     "Effects": {
-  //       "Function":"Static Palette",
-  //       "Speed":127,
-  //       "Intensity":255,
-  //       "Decimate":0,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 200,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "BrightnessRGB": 24,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-
-
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
   // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -380,6 +298,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         144
       ],
       "ColourPalette":"IceCream Floats",
+      "PaletteMappingValues":[10,15,20],
       "SegColour0": {
         "Hue": 0,
         "Sat":100,
@@ -405,6 +324,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         148
       ],
       "ColourPalette":"Christmas RGPBO",
+      "PaletteMappingValues":[10,15,20],
       "SegColour0": {
         "Hue": 0,
         "Sat":100,
@@ -454,6 +374,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
   #define USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
     #define ENABLE_CONTROLLERS__RELAY_STATE_LEDSTRIP__SEGMENT_INDEX   1
+  #define USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
 
   //   // Make all the water tank sensors be "remote sensors", then internally they will let me do the colour bar in the same way with IDs
 
@@ -484,6 +405,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
       #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      // 32 - LED Strip External
+      // 21 - LED Strip Onboard
+      // 25?
+      // 
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

@@ -579,6 +579,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE
     addTasker(EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID, new mPrinter3D());
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
+    addTasker(EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID, new mEnergyOLED());
+  #endif
 
   Serial.printf(D_LOG_CLASSLIST "Loaded %d|%d modules\n\r",  pModule.size(), GetClassCount());
   if(pModule.size() != GetClassCount())

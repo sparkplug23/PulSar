@@ -14,7 +14,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
   if(isserviced_start_count != data_buffer.isserviced) //ie something was parsed inside this function
   {
-    pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+    SEGMENT_I(0).flags.fForceUpdate = true;
   }
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -34,9 +34,6 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
-
-
-
   uint8_t segments_found = 0;
 
 
@@ -46,22 +43,22 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     if(jtok = obj[buffer])
     { 
 
-      ALOG_INF(PSTR("Seg: \"%s\" with %d Slots Active"), buffer, pCONT_lAni->segments.size());
+      ALOG_INF(PSTR("Seg: \"%s\" with %d Slots Active"), buffer, segments.size());
 
       /**
        * @brief Add check here that only sets the segment if it is already permitted
        * 
        */
     
-        ALOG_HGL(PSTR("CHECKING segment %d|%d"), segment_i, pCONT_lAni->segments.size());
+        ALOG_HGL(PSTR("CHECKING segment %d|%d"), segment_i, segments.size());
 
-      // if(segment_i > pCONT_lAni->segments.size()-1)
-      if(segment_i >= pCONT_lAni->segments.size())
+      // if(segment_i > segments.size()-1)
+      if(segment_i >= segments.size())
       { 
-        ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
+        ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,segments.size());
         // Segment_AppendNew(0, 0, segment_i+1);
         Segment_AppendNew(0, 100, segment_i); // STRIP_SIZE_MAX
-        ALOG_HGL(PSTR("size check Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
+        ALOG_HGL(PSTR("size check Creating new segment %d|%d"),segment_i,segments.size());
       }
       
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
@@ -192,14 +189,39 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    * @brief Exit if segment has not been created to stop errors
    * 
    */
-  if(!pCONT_lAni->segments.size())
+  if(!segments.size())
   {
-    ALOG_ERR(PSTR("Segment Index %d exceeds max %d"), segment_index, pCONT_lAni->segments.size());
+    ALOG_ERR(PSTR("Segment Index %d exceeds max %d"), segment_index, segments.size());
     
     return 0;
   }
 
-  
+
+  if(jtok = obj["PaletteMappingValues"])
+  { 
+    if(jtok.isArray())
+    {
+      uint8_t array[16];
+      uint8_t arrlen = 0;
+      
+      SEGMENT_I(segment_index).palette_container->mapping_values.clear(); // reset old map
+
+      JsonParserArray arrobj = jtok;
+      for(auto v : arrobj) 
+      {
+        if(arrlen > 16){ break; }
+        SEGMENT_I(segment_index).palette_container->mapping_values.push_back(v.getFloat());
+
+        Serial.println(SEGMENT_I(segment_index).palette_container->mapping_values[arrlen]);
+        
+        arrlen++;      
+      }
+
+      
+      data_buffer.isserviced++;
+    }
+  }
+
   
   /**
    * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
@@ -1392,7 +1414,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     // ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
     // #else
-    // ModifyStateNumberIfToggled(&state, pCONT_lAni->SEGMENT_I(0).flags.fEnable_Animation);
+    // ModifyStateNumberIfToggled(&state, SEGMENT_I(0).flags.fEnable_Animation);
     // #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
     // CommandSet_EnabledAnimation_Flag(state);
@@ -1412,7 +1434,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI)
   {
-    // pCONT_lAni->segment_animation_override.time_ms = 100;
+    // segment_animation_override.time_ms = 100;
   }
   
 
@@ -1882,9 +1904,9 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
     // Create segment if needed
     // Segment_AppendNew(data[1],data[2],data[0]);
 
-    if(segment_index > pCONT_lAni->segments.size()-1)
+    if(segment_index > segments.size()-1)
     { 
-      ALOG_HGL(PSTR("Creating new segment %d|%d"), segment_index, pCONT_lAni->segments.size());
+      ALOG_HGL(PSTR("Creating new segment %d|%d"), segment_index, segments.size());
       segments[0].rgbcctcolors[0].debug_print(">>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
       Segment_AppendNew(data[1],data[2], segment_index+1);
       segments[0].rgbcctcolors[0].debug_print("<<<<<<<<<<<<<<<<<<post segment Segment 0 colour");
@@ -2096,7 +2118,7 @@ void mAnimatorLight::CommandSet_AnimationModeID(uint8_t value){
 
   char buffer[60];
 
-  pCONT_lAni->SEGMENT_I(0).animation_mode_id = value;  // this is wrong
+  SEGMENT_I(0).animation_mode_id = value;  // this is wrong
           
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
@@ -2106,7 +2128,7 @@ void mAnimatorLight::CommandSet_AnimationModeID(uint8_t value){
 
 
 const char* mAnimatorLight::GetAnimationModeName(char* buffer, uint16_t buflen){
-  return GetAnimationModeNameByID(  pCONT_lAni->SEGMENT_I(0).animation_mode_id, buffer, buflen);
+  return GetAnimationModeNameByID(  SEGMENT_I(0).animation_mode_id, buffer, buflen);
 }
 const char* mAnimatorLight::GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen){
   switch(id){
@@ -2321,14 +2343,14 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
 
   if(state == LIGHT_POWER_STATE_OFF_ID) // turn off
   {
-    // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(10000);
+    // CommandSet_Animation_Transition_Rate_Ms(10000);
     SEGMENT_I(0).set_intensity(255);
     
-    pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms =  pCONT_lAni->SEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
+    SEGMENT_I(0).single_animation_override.time_ms =  SEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
 
-    ALOG_INF(PSTR("Setting override for off %d"), pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms);
+    ALOG_INF(PSTR("Setting override for off %d"), SEGMENT_I(0).single_animation_override.time_ms);
 
-    pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+    SEGMENT_I(0).flags.fForceUpdate = true;
 
     pCONT_iLight->CommandSet_Brt_255(0);
     
@@ -2337,14 +2359,14 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
   if(state == 1) // turn on
   {
 
-    // pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
+    // CommandSet_Animation_Transition_Time_Ms(1000);
 
-    pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms = 1000; // slow turn on
-    pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+    SEGMENT_I(0).single_animation_override.time_ms = 1000; // slow turn on
+    SEGMENT_I(0).flags.fForceUpdate = true;
 
 
-    // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
-    // pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    // CommandSet_Animation_Transition_Rate_Ms(1000);
+    // CommandSet_LightsCountToUpdateAsPercentage(100);
     
     pCONT_iLight->CommandSet_Brt_255(255);
 
@@ -2352,9 +2374,9 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
     // CommandSet_Global_BrtRGB_255(255);
     // CommandSet_Global_BrtCCT_255(255);
     
-    // pCONT_lAni->CommandSet_PaletteID(10, 0);
+    // CommandSet_PaletteID(10, 0);
     
-    // pCONT_lAni->CommandSet_Flasher_FunctionID(0 /**Add define later for "DEFAULT_EFFECT" */);//pCONT_lAni->EFFECTS_FUNCTION__SOLID_COLOUR__ID);
+    // CommandSet_Flasher_FunctionID(0 /**Add define later for "DEFAULT_EFFECT" */);//EFFECTS_FUNCTION__SOLID_COLOUR__ID);
 
 
 
@@ -2381,10 +2403,10 @@ bool mAnimatorLight::CommandGet_LightPowerState()
 
 void mAnimatorLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
 
-  pCONT_lAni->SEGMENT_I(0).flags.fEnable_Animation = value;
+  SEGMENT_I(0).flags.fEnable_Animation = value;
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_lAni->SEGMENT_I(0).flags.fEnable_Animation);    
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), SEGMENT_I(0).flags.fEnable_Animation);    
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -2455,7 +2477,7 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
   //   memcpy(palette_buffer,buffer,buflen);
 
   //   // rgbcct_controller.UpdateFromExternalBuffer();
-  //   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+  //   SEGMENT_I(0).flags.fForceUpdate = true;
 
   // }else
   if((palette_id>=mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
@@ -2468,8 +2490,8 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
     // // Add to select correct buffer depending on palette type
     // memcpy(palette_buffer,buffer,buflen);
 
-    // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->UpdateFromExternalBuffer();
-    pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+    // SEGMENT_I(0).rgbcct_controller->UpdateFromExternalBuffer();
+    SEGMENT_I(0).flags.fForceUpdate = true;
 
   }
   // else
