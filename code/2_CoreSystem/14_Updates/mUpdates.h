@@ -45,15 +45,12 @@ class mUpdates :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mUpdates> mqtthandler_settings_teleperiod;
 
     
     std::vector<struct handler<mUpdates>*> mqtthandler_list;
     
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
-
 };
 
 #endif

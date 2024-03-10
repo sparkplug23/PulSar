@@ -2242,10 +2242,10 @@ void mNextionPanel::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mNextionPanel::MQTTHandler_Sender(uint8_t id)
+void mNextionPanel::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_NEXTION_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_NEXTION_ID, handle);
   }
 }
 #endif// USE_MODULE_NETWORK_MQTT

@@ -5094,10 +5094,10 @@ void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mAnimatorLight::MQTTHandler_Sender(uint8_t id)
+void mAnimatorLight::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
   }
 }
 
@@ -5165,7 +5165,7 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests2()
 {    
   for(auto& handle:mqtthandler_list){
-    // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle, id);
+    // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
 
     pCONT_mqtt->MQTTHandler_AddWebURL(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
 

@@ -286,7 +286,7 @@ void Update_Channel1_ADC_Readings();
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mADCInternal> mqtthandler_settings_teleperiod;
     struct handler<mADCInternal> mqtthandler_sensor_ifchanged;
@@ -299,7 +299,7 @@ void Update_Channel1_ADC_Readings();
     };
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     
     #endif // USE_MODULE_NETWORK_MQTT
 

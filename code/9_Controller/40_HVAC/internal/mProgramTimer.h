@@ -19,7 +19,7 @@
 #ifndef mPROGRAMTIMER_H
 #define mPROGRAMTIMER_H
 
-#include "1_TaskerManager/mTaskerManager.h"
+// #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
@@ -99,7 +99,24 @@ class ProgramTimer
 			return state;
 		}
 
-    void EverySecond(void);
+    void EverySecond(void)
+    {
+
+
+      if(time_on_seconds_decounter == 0)
+      {
+          time_on_seconds_decounter = -1; //to disable it
+          // ALOG_DBM( PSTR("time_on_seconds_decounter=-1 DISABLED") );
+          ischanged=true;
+      }else 
+      if(time_on_seconds_decounter > 0){
+          time_on_seconds_decounter--;
+          ischanged=true;
+          // ALOG_DBM( PSTR("time_on_seconds_decounter=%d Ticking..."), time_on_seconds_decounter );    
+      }
+      
+
+    }
 
 };
 

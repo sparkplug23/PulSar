@@ -609,7 +609,7 @@ class mNextionPanel :
     void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mNextionPanel>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
     struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
     struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;

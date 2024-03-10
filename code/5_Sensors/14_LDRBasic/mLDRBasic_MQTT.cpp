@@ -69,10 +69,10 @@ void mLDRBasic::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mLDRBasic::MQTTHandler_Sender(uint8_t id)
+void mLDRBasic::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_LDR_BASIC_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_LDR_BASIC_ID, handle);
   }
 }
 

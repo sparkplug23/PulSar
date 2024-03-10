@@ -238,7 +238,7 @@ uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     struct handler<mWebCam> mqtthandler_settings_teleperiod;
     struct handler<mWebCam> mqtthandler_state_ifchanged;

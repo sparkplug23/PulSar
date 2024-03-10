@@ -123,7 +123,7 @@ void WebAppend_Root_Status_Table_Data();
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mDoorSensor>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
@@ -133,7 +133,7 @@ void WebAppend_Root_Status_Table_Data();
     struct handler<mDoorSensor> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
 
     
   struct handler<mDoorSensor>* mqtthandler_list[3] = {

@@ -84,7 +84,7 @@ class mPWM :
     void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mPWM>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     struct handler<mPWM> mqtthandler_settings_teleperiod;
     struct handler<mPWM> mqtthandler_state_ifchanged;

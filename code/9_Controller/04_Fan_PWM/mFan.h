@@ -106,7 +106,7 @@ void WebAppend_Root_Status_Table();
     void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mFan>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mFan> mqtthandler_settings_teleperiod;

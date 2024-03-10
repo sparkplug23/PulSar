@@ -263,10 +263,10 @@ void mSensorsL3G::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mSensorsL3G::MQTTHandler_Sender(uint8_t id)
+void mSensorsL3G::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_L3G_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_L3G_ID, handle);
   }
 }
 

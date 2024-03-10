@@ -74,14 +74,14 @@ class mLDRBasic :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mLDRBasic> mqtthandler_settings_teleperiod;
     struct handler<mLDRBasic> mqtthandler_sensor_ifchanged;
     struct handler<mLDRBasic> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
 
     struct handler<mLDRBasic>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,

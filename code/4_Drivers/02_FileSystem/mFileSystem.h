@@ -305,7 +305,7 @@ void WebAppend_Root_Status_Table();
     void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mFileSystem>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mFileSystem> mqtthandler_settings_teleperiod;
@@ -315,9 +315,6 @@ void WebAppend_Root_Status_Table();
     struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
     
     std::vector<struct handler<mFileSystem>*> mqtthandler_list;
-
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
 
 };
 

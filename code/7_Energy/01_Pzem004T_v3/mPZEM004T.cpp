@@ -95,9 +95,11 @@ void mEnergyPZEM004T::Pre_Init(void)
   }
 
   SetIDWithAddress(0, 1);
+  #ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
   SetIDWithAddress(1, 2);
   SetIDWithAddress(2, 3);
   SetIDWithAddress(3, 4);
+  #endif
   
 }
 
@@ -125,7 +127,11 @@ void mEnergyPZEM004T::Init(void)
     return;
   }
 
+  #ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
   settings.devices_present = 4;
+  #else
+  settings.devices_present = 1;
+  #endif
 
   AllocateDynamicMemory();
 
@@ -540,7 +546,6 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   struct handler<mEnergyPZEM004T>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -551,7 +556,6 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_SENSOR_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -562,7 +566,6 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->handler_id = MQTT_HANDLER_SENSOR_IFCHANGED_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -600,10 +603,10 @@ void mEnergyPZEM004T::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mEnergyPZEM004T::MQTTHandler_Sender(uint8_t id)
+void mEnergyPZEM004T::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID, handle);
   }
 }
 

@@ -80,7 +80,6 @@ void mTelemetry::MQTTHandler_Init()
   handler<mTelemetry>* ptr;
   
   ptr = &mqtthandler_lwt_online;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_LWT_ONLINE_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -93,7 +92,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_health;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_HEALTH_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -110,7 +108,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_settings;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_SETTINGS_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -123,7 +120,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_log;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_LOG_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -136,7 +132,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_firmware;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_FIRMWARE_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -149,7 +144,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_memory;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_MEMORY_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -162,7 +156,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_network;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_NETWORK_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -175,7 +168,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_mqtt;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_MQTT_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -188,7 +180,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_time;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_TIME_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -201,7 +192,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_devices;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEVICES_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -214,7 +204,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_reboot;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_REBOOT_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -227,7 +216,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_reboot_event;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
@@ -241,7 +229,6 @@ void mTelemetry::MQTTHandler_Init()
 
   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
   ptr = &mqtthandler_debug_pins;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -254,7 +241,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_template;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -267,7 +253,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_moduleinterface;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -280,7 +265,6 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_system_saved_settings;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -293,8 +277,7 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  ptr = &mqtthandler_debug_tasker_interface_performance;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_TASKER_INTERFACE_PERFORMANCE;
+  ptr = &mqtthandler_debug_tasker_interface_performance; 
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -325,7 +308,6 @@ void mTelemetry::MQTTHandler_Init()
   #endif // ENABLE_MQTT_DEBUG_TELEMETRY
   
   ptr = &mqtthandler_debug_minimal;
-  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -366,13 +348,11 @@ void mTelemetry::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mTelemetry::MQTTHandler_Sender(uint8_t id)
+void mTelemetry::MQTTHandler_Sender()
 {
-
-
   for(auto& handle:mqtthandler_list){
     // DEBUG_LINE_HERE;
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_TELEMETRY_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_TELEMETRY_ID, handle);
   }
 }
 

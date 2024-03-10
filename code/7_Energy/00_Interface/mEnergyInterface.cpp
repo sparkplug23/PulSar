@@ -356,7 +356,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
@@ -367,7 +367,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
@@ -401,10 +401,10 @@ void mEnergyInterface::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
+void mEnergyInterface::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle);
   }
 }
 
@@ -2226,10 +2226,10 @@ void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
 // /**
 //  * @brief MQTTHandler_Sender
 //  * */
-// void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
+// void mEnergyInterface::MQTTHandler_Sender()
 // {    
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle, id);
+//     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle);
 //   }
 // }
   

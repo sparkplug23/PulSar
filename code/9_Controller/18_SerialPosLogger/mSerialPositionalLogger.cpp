@@ -1538,10 +1538,10 @@ void mSerialPositionalLogger::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mSerialPositionalLogger::MQTTHandler_Sender(uint8_t id)
+void mSerialPositionalLogger::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID, handle);
   }
 }
 

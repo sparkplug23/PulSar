@@ -49,18 +49,18 @@
 
 // global enum for types of mqtt handlers, this can be asked for as a system command
 // Note: "MQTT_HANDLER_LENGTH_ID" is used in module/classes as the start position/index for specialised handlers
-enum MQTT_HANDLER_IDS{
-  // Ability to ask for everything
-  MQTT_HANDLER_ALL_ID = 0,
-  // Core/shared handlers
-  MQTT_HANDLER_SETTINGS_ID,
-  MQTT_HANDLER_SENSOR_IFCHANGED_ID,
-  MQTT_HANDLER_SENSOR_TELEPERIOD_ID,   
-  MQTT_HANDLER_OUTPUT_IFCHANGED_ID, //drivers primary output
-  MQTT_HANDLER_OUTPUT_TELEPERIOD_ID,    
-  // Count of total handlers and starting point for other modules
-  MQTT_HANDLER_LENGTH_ID 
-};
+// enum MQTT_HANDLER_IDS{
+//   // Ability to ask for everything
+//   MQTT_HANDLER_ALL_ID = 0,
+//   // Core/shared handlers
+//   MQTT_HANDLER_SETTINGS_ID,
+//   MQTT_HANDLER_SENSOR_IFCHANGED_ID,
+//   MQTT_HANDLER_SENSOR_TELEPERIOD_ID,   
+//   MQTT_HANDLER_OUTPUT_IFCHANGED_ID, //drivers primary output
+//   MQTT_HANDLER_OUTPUT_TELEPERIOD_ID,    
+//   // Count of total handlers and starting point for other modules
+//   MQTT_HANDLER_LENGTH_ID 
+// };
 
 // global enum for types of mqtt handlers, this can be asked for as a system command
 //System has no ifchanged/teleperiod extra level
@@ -137,7 +137,9 @@ struct handler {
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
   const char*   postfix_topic = nullptr;
-  uint8_t       handler_id = 0;
+  #ifdef ENABLE_PHASEOUT__MQTT_HANDLER_ID
+  uint8_t       handler_id = 0; //phase out, this is not used for anything
+  #endif
   Handler_Flags flags = {0}; //#issue FrequencyRedunctionLevel
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending); // member-function to sender with two args. Extra "json_appending" will allow calling constructjsons directly and adding them to another without closing the main json object
 };
@@ -466,7 +468,7 @@ Serial.flush();
      * @note  Optional desired_id will check if the handler id was set, and if it does not match, will return without servicing handler
      * */
     template<typename T>
-    void MQTTHandler_Command(T& class_ptr, uint16_t class_id, handler<T>* handler_ptr, int8_t optional_desired_id = -1)
+    void MQTTHandler_Command(T& class_ptr, uint16_t class_id, handler<T>* handler_ptr)
     {
       
       // Sanity check

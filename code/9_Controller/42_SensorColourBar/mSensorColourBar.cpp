@@ -330,10 +330,10 @@ void mSensorColourBar::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mSensorColourBar::MQTTHandler_Sender(uint8_t id)
+void mSensorColourBar::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, handle);
   }
 }
 

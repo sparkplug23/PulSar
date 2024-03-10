@@ -140,14 +140,14 @@ class mSerialPositionalLogger :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mSerialPositionalLogger> mqtthandler_settings_teleperiod;
     struct handler<mSerialPositionalLogger> mqtthandler_sensor_ifchanged;
     struct handler<mSerialPositionalLogger> mqtthandler_sensor_teleperiod;
     struct handler<mSerialPositionalLogger> mqtthandler_sdcard_superframe;
 
     //No extra handlers example
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     //with extra handlers example
         
     struct handler<mSerialPositionalLogger>* mqtthandler_list[4] = {

@@ -215,7 +215,7 @@ void CalculateOrientation(int16_t a_x, int16_t a_y, int16_t a_z, int16_t m_x, in
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mSensorsLSM303D> mqtthandler_settings_teleperiod;
     struct handler<mSensorsLSM303D> mqtthandler_sensor_ifchanged;
@@ -228,7 +228,7 @@ void CalculateOrientation(int16_t a_x, int16_t a_y, int16_t a_z, int16_t m_x, in
     };
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     
     #endif // USE_MODULE_NETWORK_MQTT
 

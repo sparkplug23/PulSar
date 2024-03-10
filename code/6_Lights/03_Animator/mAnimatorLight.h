@@ -476,7 +476,7 @@ class mAnimatorLight :
       void MQTTHandler_Init();
       void MQTTHandler_Set_RefreshAll();
       void MQTTHandler_Set_DefaultPeriodRate();  
-      void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+      void MQTTHandler_Sender();
       #ifdef USE_MODULE_NETWORK_WEBSERVER
       void MQTTHandler_AddWebURL_PayloadRequests();
       #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED

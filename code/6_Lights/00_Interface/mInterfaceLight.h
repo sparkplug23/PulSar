@@ -322,7 +322,7 @@ class mInterfaceLight :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;
     struct handler<mInterfaceLight> mqtthandler__state__ifchanged;
     struct handler<mInterfaceLight> mqtthandler__debug_module_config__teleperiod;

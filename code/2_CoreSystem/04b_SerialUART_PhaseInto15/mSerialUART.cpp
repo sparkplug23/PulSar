@@ -1857,10 +1857,10 @@ void mSerialUART::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mSerialUART::MQTTHandler_Sender(uint8_t id)
+void mSerialUART::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_SERIAL_UART_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_SERIAL_UART_ID, handle);
   }
 }
 #endif // USE_MODULE_NETWORK_MQTT

@@ -206,10 +206,10 @@ void mBattery_Modem::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mBattery_Modem::MQTTHandler_Sender(uint8_t id)
+void mBattery_Modem::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__SENSORS_BATTERY_MODEM__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__SENSORS_BATTERY_MODEM__ID, handle);
   }
 }
   
