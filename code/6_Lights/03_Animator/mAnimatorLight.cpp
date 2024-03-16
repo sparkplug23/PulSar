@@ -388,15 +388,9 @@ void mAnimatorLight::Init__Palettes()
   
   char buffer[30];
   
-  for (int ii=0;ii<(mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);ii++){ 
-    sprintf(buffer, D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR, ii+1);
-    uint8_t adjusted_id = ii;
-    DLI->AddDeviceName(buffer, GetModuleUniqueID(), adjusted_id);
-  }
-
   for (int ii=0;ii< mPaletteI->user_defined_palette_count;ii++){ 
     sprintf(buffer, D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR, ii+1);
-    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + (mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID));
+    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii);
   }
 
 }
@@ -798,7 +792,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
     // ALOG_HGL(PSTR("ERROR HERE palette_id_adj %d"),palette_id_adj); 
 
-    mPalette::STATIC_PALETTE *ptr = &mPaletteI->static_palettes[palette_id_adj];
+    mPalette::PALETTE_DATA *ptr = &mPaletteI->static_palettes[palette_id_adj];
 
     #ifdef ESP32
     // _palette_container->pData = std::vector<uint8_t>();
@@ -814,19 +808,16 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     #else // ESP8266 requires safe reading out of progmem first
     // _palette_container->pData = std::vector<uint8_t>();
     // _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
-
-
     // uint8_t buffer3[255];//ptr->data_length];
     // memcpy_P(buffer3, ptr->data, sizeof(uint8_t)*ptr->data_length);
     // _palette_container->pData.assign(buffer3, buffer3 + ptr->data_length);
-
     
     _palette_container->pData = ptr->data;
     #endif  
 
   }else
   if(
-    ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
+    ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
   ){
     // Preloading is not needed, already in ram
   }else
@@ -836,8 +827,10 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     // Preloading is not needed, already in ram
   }else
   if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID)
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id <= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
   ){  
+
+    // ALOG_ERR(PSTR("Dynamic Palette  NEEDS MOVES WITH OTHER DYANMIC %d"), palette_id);
     
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
     for(uint8_t i=0;i<16;i++){
@@ -931,14 +924,31 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
         }
       }
       break;    
-      case mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_TWO_12__ID:
+    }
+    
+  }else
+  if(
+    (palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)
+  ){  
+    
+    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+    for(uint8_t i=0;i<16;i++){
+      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
+    }
+
+    /**
+     * @brief These pri/sec/ter should really be merged into my palettes as another encoded type, thus, removing colors[x] from palette.cpp
+     **/
+    switch(palette_id)
+    { 
+      case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID:
       { //primary + secondary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
         _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,sec,sec); 
       }
       break;
-      case mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_THREE_123__ID:
+      case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID:
       { //primary + secondary + tertiary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
@@ -946,7 +956,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
         SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter); 
       }
       break;    
-      case mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_FOUR_1234__ID:
+      case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID:
       { //primary + secondary + tertiary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
@@ -955,7 +965,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
         SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter,four); 
       }
       break;    
-      case mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_FIVE_12345__ID:
+      case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID:
       { //primary + secondary + tertiary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
@@ -965,7 +975,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
         SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,prim, sec,sec,sec, ter,ter,ter, four,four,four, five,five,five,five); 
       }
       break;    
-      case mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_REPEATED_ACTIVE__ID:
+      case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID:
       { //primary + secondary + tertiary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
@@ -978,7 +988,8 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     } // END switch
     
   }
-  //DEBUG_LINE_HERE_TRACE;
+
+  DEBUG_LINE_HERE_TRACE;
 
 }
 
@@ -997,43 +1008,11 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
   // ALOG_INF(PSTR("GetPaletteNameByID %d"), palette_id);
   // Serial.flush();
 
-  /**************************************************************
-   * 
-   * Dynamic User Defined Names
-   * 
-   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
-  ***************************************************************/
-
-
-  if(
-    ((palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
-  ){  
-    int8_t adjusted_id = palette_id - mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
-    DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
-  // ALOG_INF(PSTR("device name %s %d"),buffer,adjusted_id );
-  }
-
-  
-  /**************************************************************
-   * 
-   * Dynamic User Defined Names
-   * 
-   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
-  ***************************************************************/
- else
-  if(
-    ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS) && (palette_id < mPaletteI->GetPaletteListLength()))
-  ){  
-    int8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS + 5; //also skip the rgbcct colour names, though, they should be static?
-    DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
-    ALOG_INF(PSTR("device name %s %d"),buffer,adjusted_id );
-  }
-
-  else
     
   /**
    * @brief All static (progmem) palette names are stored in palette class
    * 
+   * PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__IDS
    * PALETTELIST_STATIC__IDS
    * PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS
    * PALETTELIST_STATIC_CRGBPALETTE16__IDS
@@ -1041,9 +1020,23 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
    * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
    */
   if(
-    ((palette_id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))
+    ((palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED))
   ){       
     mPaletteI->GetPaletteNameByID(palette_id, buffer, buflen);
+  }
+  
+  /**************************************************************
+   * 
+   * CUSTOM_PALETTE
+   * 
+  ***************************************************************/
+  else
+  if(
+    ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) && (palette_id < mPaletteI->GetPaletteListLength()))
+  ){  
+    int8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; //also skip the rgbcct colour names, though, they should be static?
+    DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
+    ALOG_INF(PSTR("device name %s %d"),buffer, adjusted_id );
   }
 
   return buffer;
@@ -1687,6 +1680,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
 
   // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
 
+    DEBUG_LINE_HERE_TRACE;
   /**
    * @brief PaletteList Vectors should have the length stored in it. Actual pixel count depends on encoding type
    **/
@@ -1700,7 +1694,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     uint16_t encoded_colour_width = 0;
 
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
-    mPalette::STATIC_PALETTE pal = mPaletteI->static_palettes[constrain(palette_id_adj,0,mPaletteI->static_palettes.size()-1)];
+    mPalette::PALETTE_DATA pal = mPaletteI->static_palettes[constrain(palette_id_adj,0,mPaletteI->static_palettes.size()-1)];
 
     // Serial.println(ptr->encoding.data, BIN);
 
@@ -1725,7 +1719,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
 
     if(encoded_colour_width==0)
     {
-      ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
+      // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
       return palette_colour_count;
     }
     
@@ -1742,7 +1736,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
   }
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID)
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
   ){  
     palette_colour_count = 16;    
   }
@@ -1766,17 +1760,23 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
   ){   
     palette_colour_count = 16;
   }else
+
+  /**
+   * @brief CustomPalettes
+   * 
+   */
   if(
-    (palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS) && (palette_id < mPaletteI->GetPaletteListLength())
+    (palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) && (palette_id < mPaletteI->GetPaletteListLength())
   ){  
 
-    uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS; // adjust back into correct indexing
+    uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; // adjust back into correct indexing
 
     uint8_t colour_width  = mPaletteI->GetEncodedColourWidth(mPaletteI->custom_palettes[palette_adjusted_id].encoding); 
     palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size()/colour_width;
 
   }
 
+    DEBUG_LINE_HERE_TRACE;
   return palette_colour_count;
 
 }
@@ -4159,15 +4159,17 @@ mAnimatorLight::Segment_New::GetPaletteColour(
 
 uint8_t mAnimatorLight::Segment_New::GetPaletteDiscreteWidth()
 {
-  if(palette.id != palette_container->loaded_palette_id)
-  {
-    pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-  }
+//   if(palette.id != palette_container->loaded_palette_id)
+//   {
+//     pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+//   }
 
-  return mPaletteI->GetPaletteDiscreteWidth(
-    palette.id,
-    (uint8_t*)palette_container->pData.data()
-  );
+//   return mPaletteI->GetPaletteDiscreteWidth(
+//     palette.id,
+//     (uint8_t*)palette_container->pData.data()
+//   );
+
+  return mPaletteI->GetColoursInPalette(palette.id);
 
 }
 
@@ -4856,7 +4858,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
         // JBI->Add("n", pal.friendly_name_ctr);
         // JBI->Add("i", pal.id);
         
-        uint8_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(pal.id);
+        uint8_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(i);
         JBI->Add("s",colours_in_palette);
 
 
@@ -5125,7 +5127,7 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
         const String& incoming_uri = request->url();
         if(incoming_uri.indexOf(handle_url) > 0)
         {        
-          uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, handle->ConstructJSON_function)(handle->json_level, true);
+          uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, ha4ndle->ConstructJSON_function)(handle->json_level, true);
           ALOG_INF(PSTR("data_buffer=%s"), data_buffer.payload.ctr);
           request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
           break; // to stop accidental double matches, only respond once

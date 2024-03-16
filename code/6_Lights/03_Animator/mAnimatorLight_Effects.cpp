@@ -65,13 +65,6 @@
 void mAnimatorLight::EffectAnim__Solid_Colour()
 {
 
-// tmp force it, but in reality it should be always set to reserve the space
-
-#ifdef DEVICE_CHRISTMAS__KITCHEN_SHELF
-
-#endif
-
-
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2) ){ return; } // Pixel_Width * Two_Channels
 
   RgbcctColor desired_colour = SEGMENT.GetPaletteColour();
@@ -1014,8 +1007,10 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
        *  */
       uint16_t start_pixel = 0;
       uint16_t stop_pixel  = SEGLEN;
+
+      mPalette::PALETTE_DATA* ptr = &mPaletteI->static_palettes[SEGMENT.palette.id]  ;
       
-      mPalette::STATIC_PALETTE* ptr = &mPaletteI->static_palettes[SEGMENT.palette.id];
+      // mPalette:PALETTE_DATA* ptr = &mPaletteI->static_palettes[SEGMENT.palette.id];
       
       if(ptr->encoding.index_gradient)
       {

@@ -33,15 +33,15 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case FUNC_PRE_INIT_DELAYED:
       Pre_Init();  
       break;
-    case FUNC_INIT:
+    case FUNC_INIT_DELAYED:
       Init();
     break;
   }
 
-  // if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -94,7 +94,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_INIT_DELAYED:
       MQTTHandler_Init(); 
       MQTTHandler_Set_DefaultPeriodRate();
     break;
@@ -136,27 +136,76 @@ void mNextionPanel::Show_ConnectionNotWorking()
 void mNextionPanel::Pre_Init(void)
 {
 
+  module_state.mode = ModuleStatus::Initialising;
+
   // Plan to make Serial the primary code, then everything here will interface into it. 
   // For now, just using locally
 
+  #ifdef ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER
+  display = new HardwareSerial(ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER);
+  #else
   display = new HardwareSerial(2);
+  #endif
 
-  display->flush(); // Clear TX Buffers
-  while (display->available()) { display->read(); } // Clear RX Buffers
-  delay(1000);
-  display->end(); // End Serial
+  // display->flush(); // Clear TX Buffers
+  // while (display->available()) { display->read(); } // Clear RX Buffers
+  // delay(1000);
+  // display->end(); // End Serial
+
+
+
+  #ifdef ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER
+
+  
+
+    if(pCONT_pins->PinUsed(GPIO_NEXTION_RX_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX_ID))
+    {
+      ALOG_COM(PSTR("Using GPIO%d for Nextion RX"), pCONT_pins->GetPin(GPIO_NEXTION_RX_ID));
+
+    }
+
+
+    pinMode( pCONT_pins->GetPin(GPIO_NEXTION_RX_ID) , OUTPUT); // RX - try forcing these to GPIO to stop serial comms
+    pinMode( pCONT_pins->GetPin(GPIO_NEXTION_TX_ID) , OUTPUT); // TX - try forcing these to GPIO to stop serial comms
+
+    display->begin(
+      115200,
+      SERIAL_8N1,
+      pCONT_pins->GetPin(GPIO_NEXTION_RX_ID), // RX
+      pCONT_pins->GetPin(GPIO_NEXTION_TX_ID)  // TX
+    );
+      
+  
+  #endif
+
+
+
+
+#ifndef ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER
+
 
   pinMode(16, OUTPUT); // RX - try forcing these to GPIO to stop serial comms
   pinMode(17, OUTPUT); // TX - try forcing these to GPIO to stop serial comms
 
   delay(1000);
 
+
+  #ifdef USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+  display->begin(
+    9600,
+    SERIAL_8N1,
+    16, // RX
+    17  // TX
+  );
+  #else
   display->begin(
     115200,
     SERIAL_8N1,
     16, // RX
     17  // TX
   );
+  #endif
+  #endif
 
   // display->println("BOOT SUCCESFUL");
   
@@ -173,11 +222,14 @@ void mNextionPanel::Init()
     if (lcdConnected)
     {
       ALOG_INF(PSTR("HMI: LCD responding but initialization wasn't completed. Continuing program load anyway."));
+      module_state.devices++;
     }
     else
     {
       ALOG_INF(PSTR("HMI: LCD not responding, continuing program load"));
     }
+  }else{
+    module_state.devices++;
   }
   
   // init variables
@@ -191,18 +243,35 @@ void mNextionPanel::Init()
   sprintf(page_default_command,"page %d",NEXTION_DEFAULT_PAGE_NUMBER);
 
 
+
+  #ifdef USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT
+
+
+
+  
+  CommandSet_Baud(USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT);
+  #endif 
+
+
   #ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
     Template_Load_Init_Display_Command();
   #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
 
   settings.page = NEXTION_DEFAULT_PAGE_NUMBER;
 
-  settings.flags.EnableModule = true;
+
 
   //nextionSendCmd(page_default_command); //set page 1 as default 
   //   //nextionSendCmd("page 1"); //set page 1 as default 
 
   Command_SetPage(settings.page);
+
+  
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
+  }
+
 
 
 }

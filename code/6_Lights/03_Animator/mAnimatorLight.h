@@ -2485,7 +2485,7 @@ bool colorFromHexString(byte* rgb, const char* in);
       uint8_t* encoded_value = nullptr // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     );
 
-    uint8_t GetPaletteDiscreteWidth();
+    uint8_t GetPaletteDiscreteWidth(); // Rename to colours in palette
 
 
     // 2D matrix

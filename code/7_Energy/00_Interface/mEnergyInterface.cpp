@@ -47,47 +47,8 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
       EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:{
-      // Serial.println(sizeof(sensors_reading_t));
-      // Serial.println(pCONT_db18->GetSensorReading());
-      // Serial.println(pCONT_dht->GetSensorReading());
-      // Serial.println(pCONT_db18->test123());
-      // Serial.println(pCONT_dht->test123());
 
-      // Make nicer later with json command to enable and time period to show
-      if(settings.tTicker_Splash_Sensors_To_Logs-- == 1)
-      {
-        // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
-        ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
-        pCONT->Tasker_Interface(FUNC_SENSOR_SHOW_LATEST_LOGGED_ID);
-        settings.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
-      }
-      
-  
-
-
-      // for(auto& pmod:pCONT->pModule)
-      // {
-      //   for(int sensor_id=0;sensor_id<pmod->GetSensorCount();sensor_id++)
-      //   {
-      //     sensors_reading_t val;
-      //     pmod->GetSensorReading(&val, sensor_id);
-      //     if(val.type[0])
-      //     {
-      //       AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
-      //     }
-      //   }
-      // }
-
-//REMOTE SENSOR NEEDS TO INCLUDE THE UTC TIME IT WAS READ FOR "AGE" TO WORK REMOTELY
-      
-      //   pModule[switch_index]->Tasker(function, obj);
-
-
-      // pCONT_db18->test1234(&val);
-      // Serial.println(val.data[0]);
-      // pCONT_dht->test1234(&val);
-      // Serial.println(val.data[0]);
-  }break;
+    }break;
     /************
      * COMMANDS SECTION * 
     *******************/

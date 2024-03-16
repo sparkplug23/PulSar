@@ -652,8 +652,8 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
     double FastPrecisePow(double a, double b);
     uint32_t SqrtInt(uint32_t num);
     uint32_t RoundSqrtInt(uint32_t num);
-    char* GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack);
-    char* GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack);
+    static char* GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack);
+    static char* GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack);
     
     int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id);
 

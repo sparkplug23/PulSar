@@ -114,7 +114,6 @@ void mTreadmillLogger::EverySecond()
     {
       float estimated_speed = m * power + c;
       rt.estimated_speed = estimated_speed;
-      rt.estimated_speed_smoothed.value = rt.estimated_speed_smoothed.filter->AddValue(estimated_speed);
       // snprintf(buffer, sizeof(buffer), "Spd: %s", mSupport::float2CString(estimated_speed,2,buffer_f) );
       // pCONT_iDisp->LogBuffer_AddRow(buffer, 2);
     }else{
@@ -125,6 +124,8 @@ void mTreadmillLogger::EverySecond()
   }else{
     rt.estimated_speed = 0;
   }
+
+  rt.estimated_speed_smoothed.value = rt.estimated_speed_smoothed.filter->AddValue(rt.estimated_speed);
   
   SubTask_UpdateOLED();
 
@@ -282,6 +283,9 @@ uint8_t mTreadmillLogger::ConstructJSON_State(uint8_t json_level, bool json_appe
   char buffer[40];
 
   JBI->Start();  
+
+  JBI->Add("TrackingEnable", pCONT_swt->IsSwitchActive(0) );
+
 
   JBI->Add("EstimatedSpeed", rt.estimated_speed);
   JBI->Add("EstimatedSpeedSmoothed", rt.estimated_speed_smoothed.value);

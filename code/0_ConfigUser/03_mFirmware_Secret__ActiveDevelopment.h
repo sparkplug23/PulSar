@@ -21,6 +21,7 @@
 #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
 // #define DEVICE_TREADMILL_POWER_MONITOR
 // #define DEVICE_LIGHTING__LED_MATRIX_BOX_01
+// #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -178,7 +179,11 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
   // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 30
 
   #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
@@ -239,6 +244,54 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define SHOW_SPLASH
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  
+            #define USE_MODULE_DISPLAYS_NEXTION
+              #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+            #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+              #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+              // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+              #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+              #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+                          
+              #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+              
+              #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+              #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+              #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+              #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+              #define USE_MODULE_NETWORK_WEBSERVER
+
+              
+              DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+              R"=====(
+              {
+                "ObjectNameIDList": {
+                  "hIconUS": 2,
+                  "hTimeUS": 6,
+                  "hBoostUS": 11,
+                  "hAutoUS": 16,
+                  "hIconDS": 3,
+                  "hTimeDS": 7,
+                  "hBoostDS": 12,
+                  "hAutoDS": 17,
+                  "hIconIH": 4,
+                  "hTimeIH": 8,
+                  "hBoostIH": 13,
+                  "hAutoIH": 18,
+                  "hIconWB": 5,
+                  "hTimeWB": 9,
+                  "hBoostWB": 14,
+                  "hAutoWB": 19,
+                  "hIconDryer": 122,
+                  "hTimeDryer": 123,
+                  "hBoostDryer": 124,
+                  "hAutoDryer": 125
+                }
+              }
+              )=====";
 
   /***********************************
    * SECTION: Driver Configs
@@ -252,7 +305,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/  
 
-  //  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
@@ -350,82 +403,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   }
   )=====";
 
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":32,
-  //       "ColourOrder":"GRB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":144
-  //     },
-  //     {
-  //       "Pin":21,
-  //       "ColourOrder":"GRBC",
-  //       "BusType":"SK6812_RGBW",
-  //       "Start":144,
-  //       "Length":4
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       144
-  //     ],
-  //     "ColourPalette":"IceCream Floats",
-  //     "PaletteMappingValues":[10,15,20],
-  //     "SegColour0": {
-  //       "Hue": 0,
-  //       "Sat":100,
-  //       "BrightnessRGB":5
-  //     },
-  //     "Effects": {
-  //       "Function":"Spanned Palette",
-  //       "Speed":127,
-  //       "Intensity":255,
-  //       "Decimate":0,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 200,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 0,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       144,
-  //       148
-  //     ],
-  //     "ColourPalette":"Christmas RGPBO",
-  //     "PaletteMappingValues":[10,15,20],
-  //     "SegColour0": {
-  //       "Hue": 0,
-  //       "Sat":100,
-  //       "BrightnessRGB":5
-  //     },
-  //     "Effects": {
-  //       "Function":"Static Palette",
-  //       "Speed":127,
-  //       "Intensity":255,
-  //       "Decimate":0,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 200,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "BrightnessRGB": 24,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
   /***********************************
    * SECTION: Energy Configs
   ************************************/  
@@ -438,8 +415,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_ENERGY_INA219
   // #define ENABLE_DEVFEATURE_ENERGY__DISABLE_ENERGY_INTERFACE_FOR_DEBUGGING
 
-
-
   /***********************************
    * SECTION: Controller Configs
   ************************************/  
@@ -449,13 +424,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
     #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
 
-  #define USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
-  #define USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
-    #define ENABLE_CONTROLLERS__RELAY_STATE_LEDSTRIP__SEGMENT_INDEX   1
+  #ifdef USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
+    #define USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+    #define USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+      #define ENABLE_CONTROLLERS__RELAY_STATE_LEDSTRIP__SEGMENT_INDEX   1
+  #endif // USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
   #define USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
 
   //   // Make all the water tank sensors be "remote sensors", then internally they will let me do the colour bar in the same way with IDs
-
 
   /***********************************
    * SECTION: GPIO Template
@@ -481,6 +457,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
@@ -1046,6 +1026,111 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 #endif // DEVICE_CHRISTMAS__OUTSIDE_WREATH
 
+
+
+
+#ifdef DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI
+  #define DEVICENAME_CTR            "nextion_testbed"
+  #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
+  #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT 1883
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define   ENABLE_DEBUG_LINE_HERE
+
+
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_MOTION
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+// #define USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+
+// #define USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT 115200
+
+
+  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  R"=====(
+  {
+    "ObjectNameIDList": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 122,
+      "hTimeDryer": 123,
+      "hBoostDryer": 124,
+      "hAutoDryer": 125
+    }
+  }
+  )=====";
+
+
+#endif
 
 
 
