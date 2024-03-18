@@ -17,11 +17,11 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   if(function == FUNC_JSON_COMMAND_ID)
   { 
     
-  ALOG_INF(PSTR("buffer_writer before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+  ALOG_DBM(PSTR("buffer_writer before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
   // Serial.println(data_buffer.payload.ctr);
   // delay(1000);
     JsonParser parser(data_buffer.payload.ctr);
-  ALOG_INF(PSTR("buffer_writer after parser ------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
+  ALOG_DBM(PSTR("buffer_writer after parser ------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
 
   if(JBI->GetBufferSize()==0)
   {
@@ -36,7 +36,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       ALOG_ERR(PM_JSON_DESERIALIZATION_ERROR);
       return 0;
     }else{
-      ALOG_HGL(PSTR("JSON PARSED OK"));
+      ALOG_DBG(PSTR("JSON PARSED OK"));
 
       // JsonParserToken jtok = 0; 
       // if(jtok = obj["Segment0"])

@@ -132,15 +132,15 @@ void mSensorColourBar::EverySecond(void)
 
   */
 
-  std::vector<float> values;
-  values.push_back(10.1);
-  values.push_back(20.2);
+  // std::vector<float> values;
+  // values.push_back(10.1);
+  // values.push_back(20.2);
 
-  Serial.println("mSensorColourBar::EverySecond");
-  for(uint8_t i=0;i<values.size();i++)
-  {
-    Serial.println(values[i]);
-  }
+  // Serial.println("mSensorColourBar::EverySecond");
+  // for(uint8_t i=0;i<values.size();i++)
+  // {
+  //   Serial.println(values[i]);
+  // }
 
 
 

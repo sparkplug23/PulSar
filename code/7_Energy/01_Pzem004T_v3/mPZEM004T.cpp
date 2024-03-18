@@ -111,7 +111,7 @@ void mEnergyPZEM004T::Init(void)
 
   uint8_t result = modbus->Begin(9600);
 
-  ALOG_INF(PSTR("modbus result = %d"),result);
+  ALOG_DBG(PSTR("modbus result = %d"),result);
 
   if (result) {
     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
@@ -203,7 +203,7 @@ void mEnergyPZEM004T::EveryLoop(){
         measure_time.millis = millis();
       }
 
-      ALOG_INF( PSTR("settings.active_sensor = %d"),settings.active_sensor);
+      ALOG_DBG( PSTR("settings.active_sensor = %d"),settings.active_sensor);
     }
 
   }
@@ -251,7 +251,7 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
     case TRANSCEIVE_AWAITING_RESPONSE_ID:
 
       // AddLog(LOG_LEVEL_TEST, PSTR("SplitTask_UpdateSensor %d %d %d"), device_id, pCONT_iEnergy->GetAddressWithID(device_id), transceive_mode);
-      // ALOG_INF( "ReceiveCount() %d", modbus->ReceiveCount());
+      // ALOG_DBG( "ReceiveCount() %d", modbus->ReceiveCount());
       if(modbus->ReceiveReady())
       {
 
@@ -259,15 +259,15 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
         uint8_t registers = 10;
         uint8_t error = modbus->ReceiveBuffer(modbus_buffer, registers);
 
-        ALOG_INF( "ReceiveCount()================================= %d", modbus->ReceiveCount());
-        AddLog_Array(LOG_LEVEL_DEBUG, PSTR("bufferA"), modbus_buffer, (uint8_t)30);
+        ALOG_DBG( "ReceiveCount()================================= %d", modbus->ReceiveCount());
+        // AddLog_Array(LOG_LEVEL_DEBUG, PSTR("bufferA"), modbus_buffer, (uint8_t)30);
 
         if(!error)
         {
           // AddLog_Array(LOG_LEVEL_DEBUG, PSTR("buffer"), modbus_buffer, (uint8_t)30);
           ALOG_DBM( "ReceiveCount() %d", modbus->ReceiveCount());
           // Check if response matches expected device
-          ALOG_INF( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
+          ALOG_DBM( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
           ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
           stats.success_reads++;
           stats.end_time = millis();
@@ -427,7 +427,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
     // Addres(1), Function(1), Start/Coil Address(2), Registercount or Data (2), CRC(2)
     
-    ALOG_INF(PSTR("return_code = %d"), return_code);
+    ALOG_DBM(PSTR("return_code = %d"), return_code);
 
     // delay(5000);
 
@@ -439,7 +439,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
     uint8_t address_check_maxrange = jtok.getInt();
 
-    ALOG_INF(PSTR("address_check_maxrange = %d"), address_check_maxrange);
+    ALOG_DBM(PSTR("address_check_maxrange = %d"), address_check_maxrange);
 
     uint8_t found_address = 0;
     uint8_t modbus_buffer[30] = {0}; 

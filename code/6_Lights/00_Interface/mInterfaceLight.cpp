@@ -1047,8 +1047,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 
   // uint16_t isserviced_start_count = data_buffer.isserviced;  
 
-  DEBUG_LINE_HERE;
-  
+
   /**
    * @brief Bus needs to be configured first, and probably built immediately from within here so plattes etc next are added properly, otherwise EVERY_LOOP would have to happen
    * 
@@ -1068,7 +1067,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
       }
     }
   }else{
-    ALOG_INF(PSTR("BusConfig MISSING"));//, jtok.getType());
+    ALOG_DBM(PSTR("BusConfig MISSING"));//, jtok.getType());
     #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     if(jtok = obj["Segment0"])
     {
@@ -1080,7 +1079,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     #endif
   }
 
-  DEBUG_LINE_HERE;
 
   /**
    * @brief First thing after parsing the BusConfig, Segments should be created before any further commands
@@ -1089,7 +1087,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   pCONT_lAni->parse_JSONCommand(obj);
   
 
-  DEBUG_LINE_HERE;
 
   /**
    * @brief Master (previously global) shall control the final output, but per segment within animator can exist. 
@@ -1137,7 +1134,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   }
 
 
-  DEBUG_LINE_HERE;
 
 
   ALOG_DBM(PSTR("void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)======================"));

@@ -1979,7 +1979,7 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
     start_of_pixel_pair[9] = desired_colour.WC;
   }else{
     
-    #ifdef ENABLE_LOG_LEVEL_WARN
+    #ifdef ENABLE_LOG_LEVEL_WARNING
     AddLog(LOG_LEVEL_TEST, PSTR("NOT enough memory"));
     #endif // ENABLE_LOG_LEVEL_INFO
   }

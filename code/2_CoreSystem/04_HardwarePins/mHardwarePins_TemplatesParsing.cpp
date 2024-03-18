@@ -355,7 +355,7 @@ void mHardwarePins::GpioInit(void)
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MODULE "ValidModule %d"),pCONT_set->Settings.module);
     #endif // ENABLE_LOG_LEVEL_INFO
   }
-  DEBUG_LINE_HERE;
+
   SetModuleType();
 
   /**
@@ -376,9 +376,7 @@ void mHardwarePins::GpioInit(void)
       pCONT_set->Settings.user_template2.hardware.gp.io[i] = GPIO_USER_ID;  // Fix not supported sensor ids in template    }
     }
   }
-
-  DEBUG_LINE_HERE;
-  // DEBUG_LINE_HERE;
+  
 
   /**
    * @brief Part D: Read any template GPIO values. Function name needs changed!
@@ -387,15 +385,12 @@ void mHardwarePins::GpioInit(void)
   myio def_gp;
   TemplateGPIOs(&def_gp); // Get template values
 
-  DEBUG_LINE_HERE;
-  // DEBUG_LINE_HERE;
 
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     
-  // DEBUG_LINE_HERE;
 
   /**
    * @brief For all possible GPIO physical pins, populate gpio function if desired from TEMPLATE
@@ -404,7 +399,6 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.module_pins.io); i++) 
   { //all pins
     
-  // DEBUG_LINE_HERE;
     // #ifdef ENABLE_LOG_LEVEL_INFO
     //   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),pCONT_set->Settings.module_pins.io[i],i);
     // #endif // ENABLE_LOG_LEVEL_INFO

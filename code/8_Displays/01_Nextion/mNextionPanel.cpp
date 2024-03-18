@@ -33,15 +33,15 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT_DELAYED:
+    case FUNC_PRE_INIT:
       Pre_Init();  
       break;
-    case FUNC_INIT_DELAYED:
+    case FUNC_INIT:
       Init();
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -94,7 +94,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT_DELAYED:
+    case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
       MQTTHandler_Set_DefaultPeriodRate();
     break;
@@ -160,7 +160,7 @@ void mNextionPanel::Pre_Init(void)
 
     if(pCONT_pins->PinUsed(GPIO_NEXTION_RX_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX_ID))
     {
-      ALOG_COM(PSTR("Using GPIO%d for Nextion RX"), pCONT_pins->GetPin(GPIO_NEXTION_RX_ID));
+      ALOG_COM(PSTR(D_LOG_NEXTION "Using GPIO%d for Nextion RX"), pCONT_pins->GetPin(GPIO_NEXTION_RX_ID));
 
     }
 
@@ -227,10 +227,13 @@ void mNextionPanel::Init()
     else
     {
       ALOG_INF(PSTR("HMI: LCD not responding, continuing program load"));
+      module_state.devices++;
     }
   }else{
     module_state.devices++;
   }
+
+  delay(1000);
   
   // init variables
   memset(nextionSuffix,0xFF,sizeof(nextionSuffix));
@@ -289,6 +292,8 @@ void mNextionPanel::EverySecond_ActivityCheck()
   //     }
   //   }
 
+  ALOG_DBG(PSTR("fOpenHABDataStreamActive_last_secs = %d"), settings.timeout_check.timeout_period );
+
   if(settings.timeout_check.timeout_period==1)
   {
     ALOG_INF(PSTR("No data"));
@@ -335,164 +340,69 @@ void mNextionPanel::EveryLoop()
 }
 
 
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::debugPrintln(const String &debugText)
-{ // Debug output line of text to our debug targets
-
-//phase out!!
-
-  const String debugTimeText = "[+" + String(float(millis()) / 1000, 3) + "s] ";
-  if (debugSerialEnabled)
-  {
-    Serial.print(debugTimeText);
-    Serial.println(debugText);
-    // SoftwareSerial debugSerial(-1, 1); // -1==nc for RX, 1==TX pin
-    // debugSerial.begin(debugSerialBaud);
-    // debugSerial.print(debugTimeText);
-    // debugSerial.println(debugText);
-    // debugSerial.flush();
-  }
-  // if (debugTelnetEnabled)
-  // {
-  //   if (telnetClient.connected())
-  //   {
-  //     telnetClient.print(debugTimeText);
-  //     telnetClient.println(debugText);
-  //   }
-  // }
-}
-
-
   
 /******************************************************************************************************************
  * SECTION: Commands
 *******************************************************************************************************************/
 
 
-void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
+void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
+{
 
-//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEXTION D_TOPIC "Checking all commands"));
-//   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-
-//   char buffer[50];
-
-//   // Need to parse on a copy
-//   char parsing_buffer[data_buffer.payload.len+1];
-//   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-
-
-// // sprintf(parsing_buffer, "{[\"three=\\\"THREE\\\"\", \"two=\\\"TWO\\\"\"]}");
-
-// // Serial.println(parsing_buffer);
-
-//   JsonParser parser(parsing_buffer);
-//   JsonParserObject obj = parser.getRootObject();   
-//   if (!obj) { 
-//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-//     #endif //ENABLE_LOG_LEVEL_COMMANDS
-//     return;
-//   }  
-  JsonParserToken jtok = 0; 
+  JsonParserToken  jtok = 0; 
+  JsonParserObject jobj = 0;
   int8_t tmp_id = 0;
-  
-  /***
-   * As order of importance, others that rely on previous commands must come after
-   * */
+
   
 
-//   if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
-//     if(jtok.isStr()){
-//       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-//         CommandSet_PaletteID(tmp_id);
-//         data_buffer.isserviced++;
-//       }
-//     }else
-//     if(jtok.isNum()){
-//       CommandSet_PaletteID(jtok.getInt());
-//       data_buffer.isserviced++;
-//     }
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }
-
-
-// int8_t mNextionPanel::parsesub_SetMulti(JsonObjectConst obj){
-
-//   AddLog(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
-
-    // if(jtok = obj["commands"]){
-
-    //     JsonParserArray array = jtok;
-
-    //     Serial.println(array.size());
-
-    //     for(auto val : array) {
-    //         // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-
-    //         // if(val.isStr()){
-    //             Serial.println(val.getStr());
-    //         // }else{
-    //         //     Serial.println("NOT NOT val.isStr()");
-    //         // }
-
-    //         // nextionSendCmd(val.getStr());
-    //     }
-
+  if(jtok = obj["Display"].getObject()["SetPageIfChanged"])
+  {
+    // if(jtok.isStr())
+    // {
+    //   Command_SetPageIfChanged(jtok.getInt());
     // }
-  
-    if(jtok = obj["Display"].getObject()["SetPageIfChanged"])
-    {
-      // if(jtok.isStr())
-      // {
-      //   Command_SetPageIfChanged(jtok.getInt());
-      // }
-      // else
-      // if(jtok.isInt())
-      // {
-        Command_SetPageIfChanged(jtok.getInt());
-      // }
-    }
-
-  
-    if(jtok = obj["commands"]){
-        JsonParserArray array = jtok;
-        for(auto val : array) {
-            AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-            nextionSendCmd(val.getStr());
-        }
-    }
-  
-/**
- * @brief Construct a new if object
- * I need to add check, if failed (ie due to wrong screen) then stop attempting to update the rest of the messages to stop overflow of UART
- * 
- */
-    if(jtok = obj["commands_formatted"]){
-        JsonParserArray array = jtok;
-        for(auto val : array) {
-            ALOG_DBM( PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-            // need to add bool for bad response
-            nextionSendCmd_ContainingFormattedText(val.getStr());
-            data_buffer.isserviced++;
-        }
-        settings.timeout_check.timeout_period = 120; //make fucntion to reset it
-    }
+    // else
+    // if(jtok.isInt())
+    // {
+      Command_SetPageIfChanged(jtok.getInt());
+    // }
+  }
 
 
-    if(jtok = obj["Nextion"]){
-      SubParse_DisplaySet_JSON(jtok.getObject());  // JsonParserArray array = jtok;
-        // for(auto val : array) {
-        //     // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-        //     nextionSendCmd(val.getStr());
-        // }
-        // display->println(jtok.getStr());
-        settings.timeout_check.timeout_period = 120; //make fucntion to reset it
+  if(jtok = obj["commands"]){
+      JsonParserArray array = jtok;
+      for(auto val : array) {
+          AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+          nextionSendCmd(val.getStr());
+      }
+  }
+
+
+
+
+  /**
+   * @brief Construct a new if object
+   * I need to add check, if failed (ie due to wrong screen) then stop attempting to update the rest of the messages to stop overflow of UART
+   * 
+   */
+  #ifdef ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
+  if(jtok = obj["commands_formatted"]){
+      JsonParserArray array = jtok;
+      for(auto val : array) {
+          ALOG_DBM( PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+          // need to add bool for bad response
+          nextionSendCmd_ContainingFormattedText(val.getStr());
+          data_buffer.isserviced++;
+      }
+      settings.timeout_check.timeout_period = 120; //make fucntion to reset it
+  }
+  #endif // ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
+
+
+    if(jtok = obj["Nextion"])
+    {      
+      SubParse_DisplaySet_JSON(jtok.getObject());
+      settings.timeout_check.timeout_period = 10; //make fucntion to reset it
     }
 
 
@@ -527,7 +437,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
 void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
 {
 
-  ALOG_DBM(PSTR("mNextionPanel::SubParse_DisplaySet_JSON"));
+  ALOG_WRN(PSTR("mNextionPanel::SubParse_DisplaySet_JSON"));
 
   JsonParserToken jtok_items = 0;
   JsonParserToken jtok_items2 = 0;
@@ -546,6 +456,7 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
   {
     sprintf(page_name,"%s",jtok_items.getStr());
     Command_SetPageIfChanged(6); //tmp fix
+    ALOG_WRN(PSTR("Page is forced as 6 by default, need to fix this"));
   }
 
 
@@ -566,6 +477,22 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
         {
           ALOG_DBG(PSTR("txt = \"%s\""), jtok_item_attribute.getStr());
           sprintf(command_ctr,"%s.%s.txt=\"%s\"", page_name, item_name, jtok_item_attribute.getStr());
+          nextionSendCmd(command_ctr); 
+        }
+
+        if(jtok_item_attribute = jtok.getObject()["val"])
+        {
+          ALOG_DBG(PSTR("val = %d"), jtok_item_attribute.getInt());
+          sprintf(command_ctr,"%s.%s.val=%d", page_name, item_name, jtok_item_attribute.getInt());
+          nextionSendCmd(command_ctr);  
+        }
+        
+        if(jtok_item_attribute = jtok.getObject()["valf"])
+        {
+          char convf[TBUFFER_SIZE_FLOAT];
+          mSupport::float2CString(jtok_item_attribute.getFloat(), 1, convf);
+          ALOG_DBG(PSTR("val = \"%s\""), convf);          
+          sprintf(command_ctr,"%s.%s.val=%s", page_name, item_name, convf); //another conversion will be needed for float here later
           nextionSendCmd(command_ctr); 
         }
 
@@ -753,7 +680,7 @@ void mNextionPanel::nextionSendCmd(const char* c_str)
 { // Send a raw command to the Nextion panel
   serial_print(utf8ascii(c_str));
   serial_print_suffix();
-  // AddLog(settings.dynamic_log_level,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
+  AddLog(settings.dynamic_log_level,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
 }
 
 
@@ -788,73 +715,8 @@ void mNextionPanel::nextionSendCmd_String(const String &nextionCmd)
 }
 
 
-void mNextionPanel::HueToRgb(uint16_t hue, float* r, float* g, float* b)
-{
-    float h = hue/360.0f;
-    float s = 1.0f;
-    float v = 1.0f;
 
-    if (s == 0.0f)
-    {
-        *r = *g = *b = v; // achromatic or black
-    }
-    else
-    {
-        if (h < 0.0f)
-        {
-            h += 1.0f;
-        }
-        else if (h >= 1.0f)
-        {
-            h -= 1.0f;
-        }
-        h *= 6.0f;
-        int i = (int)h;
-        float f = h - i;
-        float q = v * (1.0f - s * f);
-        float p = v * (1.0f - s);
-        float t = v * (1.0f - s * (1.0f - f));
-        switch (i)
-        {
-        case 0:
-            *r = v;
-            *g = t;
-            *b = p;
-            break;
-        case 1:
-            *r = q;
-            *g = v;
-            *b = p;
-            break;
-        case 2:
-            *r = p;
-            *g = v;
-            *b = t;
-            break;
-        case 3:
-            *r = p;
-            *g = q;
-            *b = v;
-            break;
-        case 4:
-            *r = t;
-            *g = p;
-            *b = v;
-            break;
-        default:
-            *r = v;
-            *g = p;
-            *b = q;
-            break;
-        }
-    }
-
-    *r *= 255;
-    *g *= 255;
-    *b *= 255;
-
-}
-
+  #ifdef ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
 void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
 { // Send a raw command to the Nextion panel
 
@@ -943,6 +805,75 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
 
   nextionSendCmd(conversion_buffer);
 }
+
+void mNextionPanel::HueToRgb(uint16_t hue, float* r, float* g, float* b)
+{
+    float h = hue/360.0f;
+    float s = 1.0f;
+    float v = 1.0f;
+
+    if (s == 0.0f){ 
+        *r = *g = *b = v; // achromatic or black
+    }
+    else
+    {
+        if (h < 0.0f)
+        {
+            h += 1.0f;
+        }
+        else if (h >= 1.0f)
+        {
+            h -= 1.0f;
+        }
+        h *= 6.0f;
+        int i = (int)h;
+        float f = h - i;
+        float q = v * (1.0f - s * f);
+        float p = v * (1.0f - s);
+        float t = v * (1.0f - s * (1.0f - f));
+        switch (i)
+        {
+        case 0:
+            *r = v;
+            *g = t;
+            *b = p;
+            break;
+        case 1:
+            *r = q;
+            *g = v;
+            *b = p;
+            break;
+        case 2:
+            *r = p;
+            *g = v;
+            *b = t;
+            break;
+        case 3:
+            *r = p;
+            *g = q;
+            *b = v;
+            break;
+        case 4:
+            *r = t;
+            *g = p;
+            *b = v;
+            break;
+        default:
+            *r = v;
+            *g = p;
+            *b = q;
+            break;
+        }
+    }
+
+    *r *= 255;
+    *g *= 255;
+    *b *= 255;
+
+}
+
+
+  #endif // ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
 
 
 /******************************************************************************************************************
@@ -2253,6 +2184,8 @@ const char*  mNextionPanel::GetObjectName_FromID(uint8_t id, char* objname, uint
 
 void mNextionPanel::MQTTHandler_Init(){
 
+  struct handler<mNextionPanel>* ptr;
+
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
@@ -2262,6 +2195,7 @@ void mNextionPanel::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -2272,6 +2206,7 @@ void mNextionPanel::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -2282,6 +2217,7 @@ void mNextionPanel::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 }
 
@@ -2840,7 +2776,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
   WiFiClient lcdOtaWifi;
   if (lcdOtaUrl.startsWith(F("https")))
   {
-    debugPrintln("LCDOTA: Attempting firmware update from HTTPS host: " + lcdOtaUrl);
+    ALOG_INF(PSTR("LCDOTA: Attempting firmware update from HTTPS host: %s"), lcdOtaUrl.c_str());
 
     lcdOtaHttp.begin(lcdOtaWifiSecure, lcdOtaUrl);
     lcdOtaWifiSecure.setInsecure();
@@ -2848,7 +2784,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
   }
   else
   {
-    debugPrintln("LCDOTA: Attempting firmware update from HTTP host: " + lcdOtaUrl);
+    ALOG_INF(PSTR("LCDOTA: Attempting firmware update from HTTP host: %s"), lcdOtaUrl.c_str());
     lcdOtaHttp.begin(lcdOtaWifi, lcdOtaUrl);
   }
 

@@ -145,15 +145,24 @@ class mNextionPanel :
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
 
     /************************************************************************************************
      * SECITON: MQTT
      ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_RefreshAll();
+    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_Sender();
 
-
-
-
+    std::vector<struct handler<mNextionPanel>*> mqtthandler_list;
+    struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
+    struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
+    struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
 
 
 
@@ -492,7 +501,12 @@ class mNextionPanel :
     
     void nextionGetAttr(const char* c_str);
     void nextionSendCmd(const char* c_str);
+    
+    #ifdef ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
     void nextionSendCmd_ContainingFormattedText(const char* c_str);
+    void HueToRgb(uint16_t hue, float* r, float* g, float* b);
+
+    #endif // ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
 
     void Command_SetBrightness(uint8_t brightness_percentage);
     void Command_SetBrightness255(uint8_t brightness);
@@ -625,11 +639,9 @@ class mNextionPanel :
 
     void CommandSet_Baud(uint32_t baud);
     bool updateCheck();
-    void debugPrintln(const String &debugText);
+    
     byte utf8ascii(byte ascii);
     String utf8ascii(String s); // to be converted to working char*
-
-    void HueToRgb(uint16_t hue, float* r, float* g, float* b);
 
     void nextionSendCmd_String(const String &nextionCmd);
     
@@ -658,28 +670,6 @@ class mNextionPanel :
     void EverySecond_SendScreenInfo();
     
     
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_EnergyStats(uint8_t json_level = 0, bool json_appending = true);
-
-    #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    
-    struct handler<mNextionPanel>* ptr;
-    void MQTTHandler_Sender();
-    struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
-    struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
-    struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
-      
-    struct handler<mNextionPanel>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-    #endif // USE_MODULE_NETWORK_MQTT
-
 
 
 

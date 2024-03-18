@@ -224,6 +224,8 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 
+    data_buffer.isserviced = 0;
+
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
     ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"),data_buffer.isserviced);

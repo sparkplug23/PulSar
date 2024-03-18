@@ -54,7 +54,7 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
       EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:
-      AddLog(LOG_LEVEL_TEST, PSTR("Read"));   
+      ALOG_DBG( PSTR("Read"));   
 
       
       // DIGITAL_INVERT_PIN(13);
@@ -286,9 +286,9 @@ void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comp
   sensor[sensor_id].current_ma = sensor[sensor_id].shunt_voltage_mv * ina219_current_multiplier * 1000;
   sensor[sensor_id].power_mw  = (sensor[sensor_id].current_ma/1000) * sensor[sensor_id].load_voltage_mv;
   
-  AddLog(LOG_LEVEL_TEST, PSTR("sensor[%d].load_voltage_mv=%d"), sensor_id, (int)sensor[sensor_id].load_voltage_mv);
-  AddLog(LOG_LEVEL_TEST, PSTR("sensor[%d].current_ma=%d"),      sensor_id, (int)sensor[sensor_id].current_ma);   
-  AddLog(LOG_LEVEL_TEST, PSTR("sensor[%d].power_mw=%d"),        sensor_id, (int)sensor[sensor_id].power_mw);   
+  ALOG_DBG( PSTR("sensor[%d].load_voltage_mv=%d"), sensor_id, (int)sensor[sensor_id].load_voltage_mv);
+  ALOG_DBG( PSTR("sensor[%d].current_ma=%d"),      sensor_id, (int)sensor[sensor_id].current_ma);   
+  ALOG_DBG( PSTR("sensor[%d].power_mw=%d"),        sensor_id, (int)sensor[sensor_id].power_mw);   
 
   sensor[sensor_id].isvalid = true;
   sensor[sensor_id].ischanged = true;
@@ -518,7 +518,7 @@ float mEnergyINA219::GetBusVoltage_V(uint16_t addr)
 {
   // Shift 3 to the right to drop CNVR and OVF as unsigned
   uint16_t value = pCONT_sup->I2cRead16(addr, INA219_REG_BUSVOLTAGE) >> 3;
-  //AddLog(LOG_LEVEL_TEST, PSTR("GetBusVoltage_V: BusReg = 0x%04X"),value);
+  //ALOG_DBG( PSTR("GetBusVoltage_V: BusReg = 0x%04X"),value);
   // and multiply by LSB raw bus voltage to return bus voltage in volts (LSB=4mV=0.004V)
   return value * 0.004;
 }
@@ -602,7 +602,7 @@ bool mEnergyINA219::SetCalibration(uint8_t mode, uint16_t addr)
 {
   uint16_t config = 0;
 
-  AddLog(LOG_LEVEL_TEST, "SetCalibration: mode=%d",mode);
+  ALOG_DBG( "SetCalibration: mode=%d",mode);
   if (mode < 5)
   {
     // All legacy modes 0..2 are handled the same and consider default 0.1 shunt resistor
