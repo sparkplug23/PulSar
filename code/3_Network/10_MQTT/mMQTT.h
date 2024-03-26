@@ -5,6 +5,8 @@
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
 
+#include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
+
 #ifdef USE_MODULE_NETWORK_MQTT
 #include <stdint.h>
 
@@ -319,6 +321,7 @@ class mMQTT :
 
 
     boolean Publish(const char* topic, const char* payload, boolean retained = false);
+    boolean Subscribe(const char* topic, uint8_t qos = 0);
     
 
     char* TopicFormatted(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, char* buffer, uint8_t buflen);

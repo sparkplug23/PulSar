@@ -574,12 +574,12 @@ class mNextionPanel :
     void Show_ConnectionNotWorking();
 
     
-  #ifdef USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+  // #ifdef USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
 
-    char nextionBaud[7] = "9600";
-  #else
-    char nextionBaud[7] = "115200";
-    #endif
+  //   char nextionBaud[7] = "9600";
+  // #else
+  //   char nextionBaud[7] = "115200";
+  //   #endif
 
     void MQTTSend_LongPressEvent();
     uint32_t tSaved_MQTTSend_PressEvent = millis();

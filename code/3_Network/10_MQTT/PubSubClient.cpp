@@ -568,6 +568,7 @@ boolean PubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) {
 }
 
 boolean PubSubClient::subscribe(const char* topic) {
+    Serial.println(topic);
     return subscribe(topic, 0);
 }
 
