@@ -129,7 +129,7 @@ void mImmersionPanel::EverySecond()
   /*****
    * Red
   */
-  if(pCONT_hvac->zone[0].program_timer_method->IsRunning())
+  if(pCONT_hvac->zone[0].program_timer_method.IsRunning())
   {
     pCONT_led->CommandSet_LED_Power(1,0);
   }else{
@@ -214,16 +214,16 @@ void mImmersionPanel::SubTask_UpdateOLED()
    * */
   #ifdef USE_MODULE_CONTROLLER_HVAC
   
-  if(pCONT_hvac->zone[0].program_timer_method->GetTimer_Minutes() < 99)
+  if(pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes() < 99)
   {
     snprintf(line_ctr, sizeof(line_ctr), "IM:  %02d m",
-      pCONT_hvac->zone[0].program_timer_method->GetTimer_Minutes()
+      pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes()
     );
   }
   else
   {
     snprintf(line_ctr, sizeof(line_ctr), "IM: %03d m",
-      pCONT_hvac->zone[0].program_timer_method->GetTimer_Minutes()
+      pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes()
     );
   }
   pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);

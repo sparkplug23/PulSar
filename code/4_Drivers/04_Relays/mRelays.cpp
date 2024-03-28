@@ -262,7 +262,7 @@ void mRelays::SubTask_UpdateState(){
      * */
     if(rt.relay_status[relay_id].timer_off_then_on_decounter.seconds>0) //if active, then stop this function
     {
-      AddLog(LOG_LEVEL_WARN, PSTR("SubTask_UpdateState BLOCKED by timeoffthenon"));
+      AddLog(LOG_LEVEL_WARNING, PSTR("SubTask_UpdateState BLOCKED by timeoffthenon"));
       return;     
     }
 

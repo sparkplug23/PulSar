@@ -91,7 +91,7 @@ void mMotion::Init(void)
   settings.sensors_active = MAXIMUM_SENSORS;
 
   // #ifdef USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH
-  AddLog(LOG_LEVEL_WARN, PSTR("USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH"));
+  AddLog(LOG_LEVEL_WARNING, PSTR("USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH"));
   // default is toggle, follow must be used here for motion 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) { pCONT_set->Settings.switchmode[i] = SWITCHMODE_FOLLOW_ID; }
   // #endif // USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH
