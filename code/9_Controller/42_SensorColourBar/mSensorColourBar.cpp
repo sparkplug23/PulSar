@@ -132,15 +132,15 @@ void mSensorColourBar::EverySecond(void)
 
   */
 
-  std::vector<float> values;
-  values.push_back(10.1);
-  values.push_back(20.2);
+  // std::vector<float> values;
+  // values.push_back(10.1);
+  // values.push_back(20.2);
 
-  Serial.println("mSensorColourBar::EverySecond");
-  for(uint8_t i=0;i<values.size();i++)
-  {
-    Serial.println(values[i]);
-  }
+  // Serial.println("mSensorColourBar::EverySecond");
+  // for(uint8_t i=0;i<values.size();i++)
+  // {
+  //   Serial.println(values[i]);
+  // }
 
 
 
@@ -330,10 +330,10 @@ void mSensorColourBar::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mSensorColourBar::MQTTHandler_Sender(uint8_t id)
+void mSensorColourBar::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, handle);
   }
 }
 

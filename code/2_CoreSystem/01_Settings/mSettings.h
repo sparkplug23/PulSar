@@ -57,7 +57,7 @@ struct DATA_BUFFER{
   DATA_BUFFER_FLAGS flags;
 };
 extern struct DATA_BUFFER data_buffer;
-#define D_DATA_BUFFER_CLEAR()  Serial.println("CLEAR SKIPPED") //memset(&data_buffer,0,sizeof(data_buffer))
+#define D_DATA_BUFFER_CLEAR()  //Serial.println("CLEAR SKIPPED") //memset(&data_buffer,0,sizeof(data_buffer))
 
 // #define D_DATA_BUFFER_CLEAR()   
 

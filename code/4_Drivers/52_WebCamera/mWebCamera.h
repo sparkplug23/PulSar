@@ -118,13 +118,13 @@ const char* password = "af4d8bc9ab";
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     struct handler<mWebCamera> mqtthandler_settings_teleperiod;
     struct handler<mWebCamera> mqtthandler_state_ifchanged;
 
     //No extra handlers: ie settings and "state" only
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
       
     struct handler<mWebCamera>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,

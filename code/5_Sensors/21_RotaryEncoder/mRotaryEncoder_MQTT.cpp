@@ -56,10 +56,10 @@ void mRotaryEncoder::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mRotaryEncoder::MQTTHandler_Sender(uint8_t id)
+void mRotaryEncoder::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ROTARY_ENCODER_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ROTARY_ENCODER_ID, handle);
   }
 }
 

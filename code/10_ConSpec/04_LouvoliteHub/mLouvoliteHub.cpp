@@ -428,10 +428,10 @@ void mLouvoliteHub::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mLouvoliteHub::MQTTHandler_Sender(uint8_t id)
+void mLouvoliteHub::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID, handle);
   }
 }
 

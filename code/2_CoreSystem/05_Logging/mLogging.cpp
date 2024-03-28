@@ -6,59 +6,6 @@ const char* mLogging::PM_MODULE_CORE_LOGGING_FRIENDLY_CTR = D_MODULE_CORE_LOGGIN
 
 
 
-int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
-{ // KEEP TASKER ON TOP
-
-
-  switch(function){
-    case FUNC_INIT:
-      // init();
-      // StartTelnetServer();
-    break;
-    case FUNC_LOOP: 
-    // Serial.println("mLogging::Tasker");
-      // if(!Telnet) StartTelnetServer();
-      if(telnet_started){      handleTelnet();    }
-      // pCONT_log->Telnet.println("FUNC_LOOP: ");
-    break;
-    case FUNC_EVERY_SECOND:
-      // Serial.println("mLogging::Tasker");
-    break;
-    case FUNC_EVERY_MINUTE:
-
-
-  /**** For increasing log level temporarily then reseting
-   * 
-   * */
-  // if (pCONT_set->seriallog_timer) {
-  //   seriallog_timer--;
-  //   if (!seriallog_timer) {
-  //     if (seriallog_level) {
-  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
-  //     }
-  //     seriallog_level = 0;
-  //   }
-  // }
-
-  // if (syslog_timer) {  // Restore syslog level
-  //   syslog_timer--;
-  //   if (!syslog_timer) {
-  //     syslog_level = Settings.syslog_level;
-  //     if (Settings.syslog_level) {
-  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
-  //     }
-  //   }
-  // }
-
-    break;
-    case FUNC_WIFI_CONNECTED:
-      StartTelnetServer();
-    break;
-  }
-
-}//end
-
-
 void mLogging::init(void){
   // StartTelnetServer();
 }
@@ -627,7 +574,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
 void mLogging::SetSeriallog(uint8_t loglevel)
 {
-  // Settings.seriallog_level = loglevel;
+  pCONT_set->Settings.logging.serial_level = loglevel;
   // seriallog_level = loglevel;
   // seriallog_timer = 0;
 }
@@ -829,7 +776,7 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer, uint8_t
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
-    case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
+    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
     case LOG_LEVEL_HIGHLIGHT:           memcpy_P(buffer, PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR, sizeof(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
@@ -848,7 +795,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer, uint8_t bufl
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_LONG_CTR, sizeof(PM_LOG_LEVEL_NONE_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_LONG_CTR, sizeof(PM_LOG_LEVEL_ERROR_LONG_CTR)); break;
-    case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
+    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_LONG_CTR, sizeof(PM_LOG_LEVEL_TEST_LONG_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_LONG_CTR)); break;
     case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_LONG_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_LONG_CTR)); break;
@@ -885,6 +832,70 @@ int8_t mLogging::SetLogLevelIDbyName(const char* c){
     return LOG_LEVEL_DEBUG;
   }
 }
+
+
+int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
+{ // KEEP TASKER ON TOP
+
+
+  switch(function){
+    case FUNC_INIT:
+      // init();
+      // StartTelnetServer();
+    break;
+    case FUNC_LOOP: 
+    // Serial.println("mLogging::Tasker");
+      // if(!Telnet) StartTelnetServer();
+      if(telnet_started){      handleTelnet();    }
+      // pCONT_log->Telnet.println("FUNC_LOOP: ");
+    break;
+    case FUNC_EVERY_SECOND:
+      // Serial.println("mLogging::Tasker");
+      
+      #ifdef ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING
+      if(pCONT_time->uptime_seconds_nonreset == 60*1)
+      {
+        SetSeriallog(LOG_LEVEL_INFO);
+        Serial.printf("Reducing log level to %d to improve performance when not debugging", pCONT_set->Settings.logging.serial_level);
+        // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "Reducing log level to %d to improve performance when not debugging"), pCONT_set->Settings.logging.serial_level);
+      }
+      #endif
+
+    break;
+    case FUNC_EVERY_MINUTE:
+
+
+
+  /**** For increasing log level temporarily then reseting
+   * 
+   * */
+  // if (pCONT_set->seriallog_timer) {
+  //   seriallog_timer--;
+  //   if (!seriallog_timer) {
+  //     if (seriallog_level) {
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
+  //     }
+  //     seriallog_level = 0;
+  //   }
+  // }
+
+  // if (syslog_timer) {  // Restore syslog level
+  //   syslog_timer--;
+  //   if (!syslog_timer) {
+  //     syslog_level = Settings.syslog_level;
+  //     if (Settings.syslog_level) {
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
+  //     }
+  //   }
+  // }
+
+    break;
+    case FUNC_WIFI_CONNECTED:
+      StartTelnetServer();
+    break;
+  }
+
+}//end
 
 
 

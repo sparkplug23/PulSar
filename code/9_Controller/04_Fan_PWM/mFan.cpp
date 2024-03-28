@@ -229,10 +229,10 @@ void mFan::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mFan::MQTTHandler_Sender(uint8_t id)
+void mFan::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_FAN_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_FAN_ID, handle);
   }
 }
 

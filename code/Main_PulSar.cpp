@@ -531,7 +531,17 @@ void LoopTasker()
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000))
   {
-    
+
+    /**Since this only gets checked every second, we can use the uptime ticking to make sure it runs just once*/
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
+    if(pCONT_time->uptime.seconds_nonreset==ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS){
+      pCONT->Tasker_Interface(FUNC_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
+      pCONT->Tasker_Interface(FUNC_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
+      pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT_DELAYED);
+    }
+    #endif // ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
+
+
     pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
 
     // if(pCONT_time->RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }

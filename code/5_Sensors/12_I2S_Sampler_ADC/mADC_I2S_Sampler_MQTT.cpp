@@ -93,10 +93,10 @@ void mADC_I2S_Sampler::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mADC_I2S_Sampler::MQTTHandler_Sender(uint8_t id)
+void mADC_I2S_Sampler::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID, handle);
   }
 }
 

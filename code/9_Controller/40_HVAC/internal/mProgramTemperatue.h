@@ -19,9 +19,13 @@
 #ifndef mPROGRAMTEMP_H
 #define mPROGRAMTEMP_H
 
-#include "1_TaskerManager/mTaskerManager.h"
+// #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
+//   #error "found"
+// #endif
+
+#pragma once
 
 enum TEMPERATURE_MODE_IDS{
   TEMPERATURE_MODE_STANDBY_ID=0,
@@ -29,6 +33,9 @@ enum TEMPERATURE_MODE_IDS{
   TEMPERATURE_MODE_COOLING_ID,
   TEMPERATURE_MODE_LENGTH_ID  
 };
+
+#include <stdlib.h>
+#include <stdint.h>
 
 /**
  * Subclass that contains a heating method for 1 zone

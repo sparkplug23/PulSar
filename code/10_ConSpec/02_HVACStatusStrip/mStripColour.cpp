@@ -300,10 +300,10 @@ void mHeatingStripColour_Understairs::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mHeatingStripColour_Understairs::MQTTHandler_Sender(uint8_t id)
+void mHeatingStripColour_Understairs::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID, handle);
   }
 }
 

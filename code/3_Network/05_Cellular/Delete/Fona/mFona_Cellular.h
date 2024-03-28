@@ -236,13 +236,13 @@ uint8_t standy_mode_id = 0;
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mFona_Cellular> mqtthandler_settings_teleperiod;
     struct handler<mFona_Cellular> mqtthandler_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;  
+      
 
     struct handler<mFona_Cellular>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,

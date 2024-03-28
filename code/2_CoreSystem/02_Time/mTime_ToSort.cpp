@@ -2050,7 +2050,7 @@ void mTime::WifiPollNtp() {
   // if (TasmotaGlobal.global_state.network_down || Rtc.user_time_entry) { return; }
   if(pCONT_set->runtime.global_state.wifi_down){ 
     
-    #ifdef ENABLE_LOG_LEVEL_WARN
+    #ifdef ENABLE_LOG_LEVEL_WARNING
     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
     #endif // ENABLE_LOG_LEVEL_INFO
     

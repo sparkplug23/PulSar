@@ -17,10 +17,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #ifndef _MODULE_POWERMETER_H
-#define _MODULE_POWERMETER_H 0.1
+#define _MODULE_POWERMETER_H
 
-
-#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID ((7*1000)+01) // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID 7001 // [(Folder_Number*100)+ID_File]
 
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -179,7 +178,7 @@ class mEnergyPZEM004T :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mEnergyPZEM004T> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mEnergyPZEM004T> mqtthandler_sensor_ifchanged;
@@ -187,7 +186,7 @@ class mEnergyPZEM004T :
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
 
     struct handler<mEnergyPZEM004T>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,

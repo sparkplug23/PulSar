@@ -597,6 +597,12 @@ enum TaskerID{
   #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
     EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER__ENERGY_OLED
+    EM_MODULE_CONTROLLER__ENERGY_OLED__ID,
+  #endif
+
+
+
   // 10 Controller (Unique to one use case)
   #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
     EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID,
@@ -631,6 +637,9 @@ enum TaskerID{
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
     EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
+    EM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER__ID,
   #endif
   
 
@@ -1087,6 +1096,11 @@ enum TaskerID{
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER__ENERGY_OLED
+  #include "9_Controller/60_EnergyOnOLED/mEnergyOnOLED.h"
+  #define pCONT_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER__ENERGY_OLED__ID])
+#endif
+
 
 // 10 Controller (Unique to one use case)
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
@@ -1150,6 +1164,10 @@ enum TaskerID{
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
   #include "10_ConSpec/10_EnergyOnOLED/mEnergyOnOLED.h"
   #define pCONT_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
+  #include "10_ConSpec/12_TreadmillLogger/mTreadmillLogger.h"
+  #define pCONT_treadmill        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER__ID])
 #endif
 
 

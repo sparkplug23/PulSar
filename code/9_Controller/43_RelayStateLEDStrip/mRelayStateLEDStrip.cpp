@@ -324,10 +324,10 @@ void mRelayStateLEDStrip::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mRelayStateLEDStrip::MQTTHandler_Sender(uint8_t id)
+void mRelayStateLEDStrip::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, handle);
   }
 }
 

@@ -98,32 +98,96 @@ class mNextionPanel :
   public mTaskerInterface
 {
   public:
+  /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mNextionPanel(){};
-    void Pre_Init();    
-    
+    void Init(void);
+    void Pre_Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void   parse_JSONCommand(JsonParserObject obj);
+
     static const char* PM_MODULE_DISPLAYS_NEXTION_CTR;
     static const char* PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_NEXTION_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID; }
-
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID; } 
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mNEXTION);    };
-    #endif
-    void parse_JSONCommand(JsonParserObject obj);
+    uint16_t GetClassSize(){      return sizeof(mNextionPanel);    };
+    #endif    
+
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    void Load_Module(bool erase);
+    void Save_Module(void);
+    bool Restore_Module(void);
+
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+
+
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
+
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_RefreshAll();
+    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_Sender();
+
+    std::vector<struct handler<mNextionPanel>*> mqtthandler_list;
+    struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
+    struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
+    struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
     
     struct SETTINGS{
       uint8_t brightness_percentage = 0;
       int8_t page = 0;
       uint8_t page_saved = 0; //used to return to after message is flashed
-      // struct SETTINGS{
-      struct FLAGS{
-      // uint8_t EnableSceneModeWithSliders = true;
-      // uint8_t TemplateProvidedInProgMem = false;
-      uint8_t EnableModule = false;
-      }flags;
-      // }settings;
-      // LOG_LEVEL_
+      
       uint8_t dynamic_log_level = 9;//9;// LOG_LEVEL_DEBUG_MORE; // used for certain addlog that may only have elevated states (to block large serial prints on recursive array prints)
 
       struct TimeoutCheck
@@ -437,7 +501,12 @@ class mNextionPanel :
     
     void nextionGetAttr(const char* c_str);
     void nextionSendCmd(const char* c_str);
+    
+    #ifdef ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
     void nextionSendCmd_ContainingFormattedText(const char* c_str);
+    void HueToRgb(uint16_t hue, float* r, float* g, float* b);
+
+    #endif // ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
 
     void Command_SetBrightness(uint8_t brightness_percentage);
     void Command_SetBrightness255(uint8_t brightness);
@@ -484,8 +553,6 @@ class mNextionPanel :
 
     std::string& replace(std::string& s, const std::string& from, const std::string& to);
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void Init(void);
 
     #define LONG_PRESS_DURATION 1000
     uint8_t fEnableImmediateButtonTime = false;
@@ -506,7 +573,13 @@ class mNextionPanel :
     void Show_ConnectionWorking();
     void Show_ConnectionNotWorking();
 
-    char nextionBaud[7] = "115200";
+    
+  // #ifdef USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+
+  //   char nextionBaud[7] = "9600";
+  // #else
+  //   char nextionBaud[7] = "115200";
+  //   #endif
 
     void MQTTSend_LongPressEvent();
     uint32_t tSaved_MQTTSend_PressEvent = millis();
@@ -566,11 +639,9 @@ class mNextionPanel :
 
     void CommandSet_Baud(uint32_t baud);
     bool updateCheck();
-    void debugPrintln(const String &debugText);
+    
     byte utf8ascii(byte ascii);
     String utf8ascii(String s); // to be converted to working char*
-
-    void HueToRgb(uint16_t hue, float* r, float* g, float* b);
 
     void nextionSendCmd_String(const String &nextionCmd);
     
@@ -599,35 +670,6 @@ class mNextionPanel :
     void EverySecond_SendScreenInfo();
     
     
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_EnergyStats(uint8_t json_level = 0, bool json_appending = true);
-
-    #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    
-    struct handler<mNextionPanel>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
-    struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
-    struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
-    
-    // Extra module only handlers
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID,
-    };
-  
-    struct handler<mNextionPanel>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-    #endif // USE_MODULE_NETWORK_MQTT
-
 
 
 

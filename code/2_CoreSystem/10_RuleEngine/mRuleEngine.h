@@ -293,19 +293,10 @@ uint8_t rule_count2 = 0;
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     struct handler<mRuleEngine> mqtthandler_settings_teleperiod;
-    // struct handler<mRuleEngine> mqtthandler_sensor_ifchanged;
     struct handler<mRuleEngine> mqtthandler_state_ifchanged;
-    // struct handler<mRuleEngine> mqtthandler_scheduled_teleperiod;
-
-    // Extra module only handlers
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-    };
-
     
     struct handler<mRuleEngine>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,

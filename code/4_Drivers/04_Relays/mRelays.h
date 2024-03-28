@@ -29,8 +29,7 @@ class mRelays :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RELAY_ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mRelays);    };
-    #endif
-    
+    #endif    
 
     struct ClassState
     {
@@ -194,7 +193,7 @@ class mRelays :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();    
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     std::vector<struct handler<mRelays>*> mqtthandler_list;
     struct handler<mRelays> mqtthandler_settings_teleperiod;

@@ -76,7 +76,7 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
     void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mExerciseBike>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mExerciseBike> mqtthandler_settings_teleperiod;

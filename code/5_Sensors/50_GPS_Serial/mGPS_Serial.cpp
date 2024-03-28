@@ -2379,10 +2379,10 @@ void mGPS_Serial::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mGPS_Serial::MQTTHandler_Sender(uint8_t id)
+void mGPS_Serial::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__SENSORS_GPS_SERIAL__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__SENSORS_GPS_SERIAL__ID, handle);
   }
 }
 

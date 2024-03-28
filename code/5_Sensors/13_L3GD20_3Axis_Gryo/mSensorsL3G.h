@@ -146,7 +146,7 @@ L3G* gyro = nullptr;
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mSensorsL3G> mqtthandler_settings_teleperiod;
     struct handler<mSensorsL3G> mqtthandler_sensor_ifchanged;
@@ -159,7 +159,7 @@ L3G* gyro = nullptr;
     };
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     
     #endif // USE_MODULE_NETWORK_MQTT
 

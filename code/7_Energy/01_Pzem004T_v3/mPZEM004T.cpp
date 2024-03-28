@@ -95,9 +95,11 @@ void mEnergyPZEM004T::Pre_Init(void)
   }
 
   SetIDWithAddress(0, 1);
+  #ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
   SetIDWithAddress(1, 2);
   SetIDWithAddress(2, 3);
   SetIDWithAddress(3, 4);
+  #endif
   
 }
 
@@ -109,7 +111,7 @@ void mEnergyPZEM004T::Init(void)
 
   uint8_t result = modbus->Begin(9600);
 
-  ALOG_INF(PSTR("modbus result = %d"),result);
+  ALOG_DBG(PSTR("modbus result = %d"),result);
 
   if (result) {
     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
@@ -125,7 +127,11 @@ void mEnergyPZEM004T::Init(void)
     return;
   }
 
+  #ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
   settings.devices_present = 4;
+  #else
+  settings.devices_present = 1;
+  #endif
 
   AllocateDynamicMemory();
 
@@ -197,7 +203,7 @@ void mEnergyPZEM004T::EveryLoop(){
         measure_time.millis = millis();
       }
 
-      ALOG_INF( PSTR("settings.active_sensor = %d"),settings.active_sensor);
+      ALOG_DBG( PSTR("settings.active_sensor = %d"),settings.active_sensor);
     }
 
   }
@@ -245,7 +251,7 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
     case TRANSCEIVE_AWAITING_RESPONSE_ID:
 
       // AddLog(LOG_LEVEL_TEST, PSTR("SplitTask_UpdateSensor %d %d %d"), device_id, pCONT_iEnergy->GetAddressWithID(device_id), transceive_mode);
-      // ALOG_INF( "ReceiveCount() %d", modbus->ReceiveCount());
+      // ALOG_DBG( "ReceiveCount() %d", modbus->ReceiveCount());
       if(modbus->ReceiveReady())
       {
 
@@ -253,15 +259,15 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
         uint8_t registers = 10;
         uint8_t error = modbus->ReceiveBuffer(modbus_buffer, registers);
 
-        ALOG_INF( "ReceiveCount()================================= %d", modbus->ReceiveCount());
-        AddLog_Array(LOG_LEVEL_DEBUG, PSTR("bufferA"), modbus_buffer, (uint8_t)30);
+        ALOG_DBG( "ReceiveCount()================================= %d", modbus->ReceiveCount());
+        // AddLog_Array(LOG_LEVEL_DEBUG, PSTR("bufferA"), modbus_buffer, (uint8_t)30);
 
         if(!error)
         {
           // AddLog_Array(LOG_LEVEL_DEBUG, PSTR("buffer"), modbus_buffer, (uint8_t)30);
           ALOG_DBM( "ReceiveCount() %d", modbus->ReceiveCount());
           // Check if response matches expected device
-          ALOG_INF( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
+          ALOG_DBM( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
           ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
           stats.success_reads++;
           stats.end_time = millis();
@@ -421,7 +427,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
     // Addres(1), Function(1), Start/Coil Address(2), Registercount or Data (2), CRC(2)
     
-    ALOG_INF(PSTR("return_code = %d"), return_code);
+    ALOG_DBM(PSTR("return_code = %d"), return_code);
 
     // delay(5000);
 
@@ -433,7 +439,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
     uint8_t address_check_maxrange = jtok.getInt();
 
-    ALOG_INF(PSTR("address_check_maxrange = %d"), address_check_maxrange);
+    ALOG_DBM(PSTR("address_check_maxrange = %d"), address_check_maxrange);
 
     uint8_t found_address = 0;
     uint8_t modbus_buffer[30] = {0}; 
@@ -540,7 +546,6 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   struct handler<mEnergyPZEM004T>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -551,7 +556,6 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_SENSOR_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -562,7 +566,6 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->handler_id = MQTT_HANDLER_SENSOR_IFCHANGED_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -600,10 +603,10 @@ void mEnergyPZEM004T::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mEnergyPZEM004T::MQTTHandler_Sender(uint8_t id)
+void mEnergyPZEM004T::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID, handle);
   }
 }
 

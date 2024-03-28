@@ -106,7 +106,7 @@ class mSensorsInterface :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mSensorsInterface> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged;
@@ -115,11 +115,6 @@ class mSensorsInterface :
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-    };
-    
     struct handler<mSensorsInterface>* mqtthandler_list[5] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,

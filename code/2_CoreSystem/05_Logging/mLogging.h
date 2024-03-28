@@ -26,7 +26,7 @@
 enum LoggingLevels {LOG_LEVEL_NONE, 
                     LOG_LEVEL_DEBUG_TRACE, // Highest level of trace debug that will always be shown when called, but should always be disabled via ifdef calls ie "ENABLE_DEBUG_TRACE__##"
                     LOG_LEVEL_ERROR, 
-                    LOG_LEVEL_WARN, 
+                    LOG_LEVEL_WARNING, 
                     /**
                      * Used when developing a new thing
                      * */
@@ -456,6 +456,10 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
   //   ){
   //   return;
   // }  
+
+  // if(loglevel>pCONT_set->Settings.logging.serial_level){
+  //   return;
+  // }
   
   #ifndef DISABLE_SERIAL_LOGGING
   SERIAL_DEBUG.printf("%s = ",name_ctr);

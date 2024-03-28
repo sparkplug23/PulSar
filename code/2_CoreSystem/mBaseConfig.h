@@ -143,6 +143,8 @@ With latest version, all longer term shared debug features should be added here 
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
 
   /***********************************
    * SECTION: Networking

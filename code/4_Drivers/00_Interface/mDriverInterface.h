@@ -73,27 +73,12 @@ class mDriverInterface :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mDriverInterface> mqtthandler_settings_teleperiod;
     // void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mDriverInterface> mqtthandler_driver_status_teleperiod;
     // void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    //No extra handlers example
-    // const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    //with extra handlers exampleenum
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-    };
-    
-    // uint8_t list_ids[4] = {
-    //   MQTT_HANDLER_SETTINGS_ID, 
-    //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
-    //   MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID
-    // };
-    
     struct handler<mDriverInterface>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_driver_status_teleperiod

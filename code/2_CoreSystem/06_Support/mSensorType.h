@@ -339,7 +339,7 @@ static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_POWER_FACTOR_ID:           return PSTR("PowerFactor");
     case SENSOR_TYPE_ENERGY_ID:                 return PSTR("Energy");
 
-    case SENSOR_TYPE_STATE_ACTIVE_ID:           return PSTR("StateActive");
+    case SENSOR_TYPE_STATE_ACTIVE_ID:           return PSTR("State");
     // Strings
     case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PSTR("TemperatureHeatmapRGBString");
   }

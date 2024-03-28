@@ -47,47 +47,8 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
       EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:{
-      // Serial.println(sizeof(sensors_reading_t));
-      // Serial.println(pCONT_db18->GetSensorReading());
-      // Serial.println(pCONT_dht->GetSensorReading());
-      // Serial.println(pCONT_db18->test123());
-      // Serial.println(pCONT_dht->test123());
 
-      // Make nicer later with json command to enable and time period to show
-      if(settings.tTicker_Splash_Sensors_To_Logs-- == 1)
-      {
-        // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
-        ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
-        pCONT->Tasker_Interface(FUNC_SENSOR_SHOW_LATEST_LOGGED_ID);
-        settings.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
-      }
-      
-  
-
-
-      // for(auto& pmod:pCONT->pModule)
-      // {
-      //   for(int sensor_id=0;sensor_id<pmod->GetSensorCount();sensor_id++)
-      //   {
-      //     sensors_reading_t val;
-      //     pmod->GetSensorReading(&val, sensor_id);
-      //     if(val.type[0])
-      //     {
-      //       AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
-      //     }
-      //   }
-      // }
-
-//REMOTE SENSOR NEEDS TO INCLUDE THE UTC TIME IT WAS READ FOR "AGE" TO WORK REMOTELY
-      
-      //   pModule[switch_index]->Tasker(function, obj);
-
-
-      // pCONT_db18->test1234(&val);
-      // Serial.println(val.data[0]);
-      // pCONT_dht->test1234(&val);
-      // Serial.println(val.data[0]);
-  }break;
+    }break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -356,7 +317,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
@@ -367,7 +328,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
@@ -401,10 +362,10 @@ void mEnergyInterface::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
+void mEnergyInterface::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle);
   }
 }
 
@@ -2226,10 +2187,10 @@ void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
 // /**
 //  * @brief MQTTHandler_Sender
 //  * */
-// void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
+// void mEnergyInterface::MQTTHandler_Sender()
 // {    
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle, id);
+//     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_INTERFACE_ID, handle);
 //   }
 // }
   

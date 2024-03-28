@@ -688,10 +688,10 @@ void mBME::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mBME::MQTTHandler_Sender(uint8_t id)
+void mBME::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BME_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BME_ID, handle);
   }
 }
   

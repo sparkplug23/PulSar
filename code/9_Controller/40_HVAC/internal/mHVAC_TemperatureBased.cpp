@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHVAC.h"
+#include "9_Controller/40_HVAC/mHVAC.h"
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
@@ -80,16 +80,16 @@ void mHVAC::FunctionHandler_Programs_Temps(void){
   {
 
     // Store current temperature
-    zone[zone_id].program_temp_method->SetCurrentTemperature(zone[zone_id].sensor.temperature);
+    zone[zone_id].program_temp_method.SetCurrentTemperature(zone[zone_id].sensor.temperature);
     
     // Servicing program temps every second
-    zone[zone_id].program_temp_method->EverySecond();
+    zone[zone_id].program_temp_method.EverySecond();
 
     //  React if timer has started or ended
-    if(zone[zone_id].program_temp_method->IsChangedThenReset())
+    if(zone[zone_id].program_temp_method.IsChangedThenReset())
     {
       ALOG_DBM( PSTR("program_temp_method IsChangedThenReset %d"), zone_id);
-      if(zone[zone_id].program_temp_method->OutputDesiredState())
+      if(zone[zone_id].program_temp_method.OutputDesiredState())
       {
         SetZoneActive(zone_id, 1); // This can be changed to "FUNC_SET_POWER" for internal relay driver control
       }

@@ -1,5 +1,4 @@
-#include "9_Controller/40_HVAC/mProgramTimer.h"
-
+#include "9_Controller/41_HVAC_Remote/mHVAC.h"
 
 #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
 

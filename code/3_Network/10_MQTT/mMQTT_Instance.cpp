@@ -32,6 +32,11 @@ void MQTTConnection::MqttConnected(void)
   // subscribe("<devicename>/set/#");
   psubscribe(PSTR(D_MQTT_COMMAND "/#"));
 
+  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
+  pubsub->subscribe("openhab_broadcast/nextion/#", 0);
+  #endif // ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
+  
+
   // if succesful, clear flag
   flag_start_reconnect = false;
   
@@ -224,6 +229,8 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 
+    data_buffer.isserviced = 0;
+
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
     ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"),data_buffer.isserviced);
@@ -231,7 +238,6 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
   }
 
 }
-
 
 boolean MQTTConnection::psubscribe(const char* topic) {
   char ttopic[70];
