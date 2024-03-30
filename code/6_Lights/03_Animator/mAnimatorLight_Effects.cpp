@@ -13697,6 +13697,164 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = ",,,,,Time,
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 
 
+////////////////////////////
+//     2D Scrolling text  //
+////////////////////////////
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+void mAnimatorLight::EffectAnim__Matrix__2D_Scrolling_Text(void) 
+{
+
+  DEBUG_LINE_HERE;
+
+  ALOG_INF(PSTR("EffectAnim__Matrix__2D_Scrolling_Text"));
+
+
+  setPixelColorXY(0,0,RGBW32(0,0,255,0));
+  setPixelColorXY(0,1,RGBW32(0,0,254,0));
+  setPixelColorXY(0,2,RGBW32(0,0,253,0));
+  ALOG_INF(PSTR("EffectAnim__Matrix__2D_Scrolling_Text --------------------------------- EFFECT END"));
+
+  SEGMENT.transition.rate_ms = 1000;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+
+  return;
+
+  DEBUG_LINE_HERE;
+  if (!isMatrix) return EffectAnim__Solid_Colour(); // not a 2D set-up
+
+  DEBUG_LINE_HERE;
+
+  const uint16_t cols = SEGMENT.virtualWidth();
+  const uint16_t rows = SEGMENT.virtualHeight();
+
+  int letterWidth, rotLW;
+  int letterHeight, rotLH;
+  switch (map(SEGMENT.custom2, 0, 255, 1, 5)) {
+    default:
+    case 1: letterWidth = 4; letterHeight =  6; break;
+    case 2: letterWidth = 5; letterHeight =  8; break;
+    case 3: letterWidth = 6; letterHeight =  8; break;
+    case 4: letterWidth = 7; letterHeight =  9; break;
+    case 5: letterWidth = 5; letterHeight = 12; break;
+  }
+  DEBUG_LINE_HERE;
+  // letters are rotated
+  if (((SEGMENT.custom3+1)>>3) % 2) {
+    rotLH = letterWidth;
+    rotLW = letterHeight;
+  } else {
+    rotLW = letterWidth;
+    rotLH = letterHeight;
+  }
+  DEBUG_LINE_HERE;
+
+  char text[WLED_MAX_SEGNAME_LEN+1] = {'\0'};
+  if (SEGMENT.name) for (size_t i=0,j=0; i<strlen(SEGMENT.name); i++) if (SEGMENT.name[i]>31 && SEGMENT.name[i]<128) text[j++] = SEGMENT.name[i];
+  const bool zero = strchr(text, '0') != nullptr;
+
+  DEBUG_LINE_HERE;
+  char sec[5];
+  int  AmPmHour = pCONT_time->RtcTime.hour;// hour(localTime);
+  bool isitAM = true;
+  if (useAMPM) {
+    if (AmPmHour > 11) { AmPmHour -= 12; isitAM = false; }
+    if (AmPmHour == 0) { AmPmHour  = 12; }
+    sprintf_P(sec, PSTR(" %2s"), (isitAM ? "AM" : "PM"));
+  } else {
+    sprintf_P(sec, PSTR(":%02d"), pCONT_time->RtcTime.second);//(localTime));
+  }
+
+  DEBUG_LINE_HERE;
+  // if (!strlen(text)) { // fallback if empty segment name: display date and time
+    // sprintf_P(text, PSTR("%s %d, %d %d:%02d%s"), monthShortStr(month(localTime)), day(localTime), year(localTime), AmPmHour, minute(localTime), sec);
+    // sprintf_P(text, PSTR("%s %d, %d %d:%02d%s"), monthShortStr(month(localTime)), day(localTime), year(localTime), AmPmHour, minute(localTime), sec);
+    sprintf_P(text, PSTR("Test Message"));
+  // } else {
+  //   if      (!strncmp_P(text,PSTR("#DATE"),5)) sprintf_P(text, zero?PSTR("%02d.%02d.%04d"):PSTR("%d.%d.%d"),   day(localTime),   month(localTime),  year(localTime));
+  //   else if (!strncmp_P(text,PSTR("#DDMM"),5)) sprintf_P(text, zero?PSTR("%02d.%02d")     :PSTR("%d.%d"),      day(localTime),   month(localTime));
+  //   else if (!strncmp_P(text,PSTR("#MMDD"),5)) sprintf_P(text, zero?PSTR("%02d/%02d")     :PSTR("%d/%d"),      month(localTime), day(localTime));
+  //   else if (!strncmp_P(text,PSTR("#TIME"),5)) sprintf_P(text, zero?PSTR("%02d:%02d%s")   :PSTR("%2d:%02d%s"), AmPmHour,         minute(localTime), sec);
+  //   else if (!strncmp_P(text,PSTR("#HHMM"),5)) sprintf_P(text, zero?PSTR("%02d:%02d")     :PSTR("%d:%02d"),    AmPmHour,         minute(localTime));
+  //   else if (!strncmp_P(text,PSTR("#HH"),3))   sprintf_P(text, zero?PSTR("%02d")          :PSTR("%d"),         AmPmHour);
+  //   else if (!strncmp_P(text,PSTR("#MM"),3))   sprintf_P(text, zero?PSTR("%02d")          :PSTR("%d"),        minute(localTime));
+  // }
+
+  DEBUG_LINE_HERE;
+  const int  numberOfLetters = strlen(text);
+  const unsigned long now = millis(); // reduce millis() calls
+  int width = (numberOfLetters * rotLW);
+  int yoffset = map(SEGMENT.intensity(), 0, 255, -rows/2, rows/2) + (rows-rotLH)/2;
+  if (width <= cols) {
+    // scroll vertically (e.g. ^^ Way out ^^) if it fits
+    int speed = map(SEGMENT.speed(), 0, 255, 5000, 1000);
+    int frac = now % speed + 1;
+    if (SEGMENT.intensity() == 255) {
+      yoffset = (2 * frac * rows)/speed - rows;
+    } else if (SEGMENT.intensity() == 0) {
+      yoffset = rows - (2 * frac * rows)/speed;
+    }
+  }
+
+  DEBUG_LINE_HERE;
+  if (SEGMENT.step < now) {
+    // calculate start offset
+    if (width > cols) {
+      if (SEGMENT.check3) {
+        if (SEGMENT.params_internal.aux0 == 0) SEGMENT.params_internal.aux0  = width + cols - 1;
+        else                --SEGMENT.params_internal.aux0;
+      } else                ++SEGMENT.params_internal.aux0 %= width + cols;
+    } else                    SEGMENT.params_internal.aux0  = (cols + width)/2;
+    ++SEGMENT.params_internal.aux1 &= 0xFF; // color shift
+    SEGMENT.step = now + map(SEGMENT.speed(), 0, 255, 250, 50); // shift letters every ~250ms to ~50ms
+  }
+
+  DEBUG_LINE_HERE;
+  if (!SEGMENT.check2) SEGMENT.fade_out(255 - (SEGMENT.custom1>>4));  // trail
+
+  DEBUG_LINE_HERE;
+  for (int i = 0; i < numberOfLetters; i++) {
+    int xoffset = int(cols) - int(SEGMENT.params_internal.aux0) + rotLW*i;
+    if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
+    uint32_t col1 = RgbcctColor::GetU32Colour( SEGMENT.GetPaletteColour(SEGMENT.params_internal.aux1, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF) ); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t col2 = BLACK;
+    if (SEGMENT.check1 && SEGMENT.palette.id == 0) {
+      col1 = SEGCOLOR_U32(0); //SEGCOLOR(0);
+      col2 = SEGCOLOR_U32(2); //SEGCOLOR(2);
+    }
+    SEGMENT.drawCharacter(text[i], xoffset, yoffset, letterWidth, letterHeight, col1, col2, map(SEGMENT.custom3, 0, 31, -2, 2));
+  }
+  DEBUG_LINE_HERE;
+
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+
+}
+static const char PM_EFFECT_CONFIG__MATRIX__2D_SCROLLING_TEXT__INDEXING[] PROGMEM = "Scrolling Text@!,Y Offset,Trail,Font size,Rotate,Gradient,Overlay,Reverse;!,!,Gradient;!;2;ix=128,c1=0,rev=0,mi=0,rY=0,mY=0";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+
+/***
+ * 
+ * 
+ * Conversion mapping for WLED to mine
+ * 
+ * 
+ * 
+ * 
+ WLED                                  ------->                              PulSar
+
+
+SEGENV                                                                       SEGMENT
+strip.isMatrix                                                               isMatrix
+color_from_palette                                                           c
+SEGMENT.aux1                                                                 SEGMENT.params_internal.aux1
+
+
+
+
+ * 
+ * 
+ * 
+*/
 
 
 /**
@@ -13993,6 +14151,12 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__MANUAL__PIXEL_SET_ELSEWHERE__ID,   &mAnimatorLight::EffectAnim__Manual__PixelSetElsewhere, PM_EFFECTS_FUNCTION__MANUAL__PIXEL_SET_ELSEWHERE__NAME_CTR,     PM_EFFECT_CONFIG__MANUAL__PIXEL_SET_ELSEWHERE__INDEXING);  
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
   /**
+   * Manual Methods (ie basic or limited effect generation, mostly updates output)
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+  addEffect3(EFFECTS_FUNCTION__MATRIX__2D_SCROLLING_TEXT__ID,   &mAnimatorLight::EffectAnim__Matrix__2D_Scrolling_Text, PM_EFFECTS_FUNCTION__MATRIX__2D_SCROLLING_TEXT__NAME_CTR,     PM_EFFECT_CONFIG__MATRIX__2D_SCROLLING_TEXT__INDEXING);  
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+  /**
    * Development effects without full code 
    **/   
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
@@ -14010,3 +14174,5 @@ void mAnimatorLight::LoadEffects()
 
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
+
+

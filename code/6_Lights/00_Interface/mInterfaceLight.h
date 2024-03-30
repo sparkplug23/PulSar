@@ -250,6 +250,8 @@ class mInterfaceLight :
 
     BusManager* bus_manager = nullptr;
     BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    
+
     void BusManager_Create_DefaultSingleNeoPixel();
     void BusManager_Create_DefaultSinglePWM_5CH();
 

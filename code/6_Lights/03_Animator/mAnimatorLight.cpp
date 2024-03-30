@@ -233,9 +233,96 @@ void mAnimatorLight::EveryLoop()
     if (aligned) makeAutoSegments();
     else fixInvalidSegments();
     
-    yield();
+    doSerializeConfig = true;
     // serializeConfig(); // in WLED This saved everything to json memory
   }
+  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  // loadLedmap = 0;
+  isMatrix = true;
+  
+    // #ifndef WLED_DISABLE_2D
+    // if (i1 < mAnimatorLight::Segment_New::maxWidth) seg.pixel_range.start = i1;
+    // seg.pixel_range.stop = i2 > mAnimatorLight::Segment_New::maxWidth ? mAnimatorLight::Segment_New::maxWidth : i2;
+    // if (startY < mAnimatorLight::Segment_New::maxHeight) seg.startY = startY;
+    SEGMENT.startY = 0;
+    SEGMENT.stopY = 16;
+    SEGMENT.pixel_range.stop = 16;
+
+    // ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
+    // delay(1000);
+    // #endif
+
+
+
+  // 2D Matrix Settings
+  // JsonObject matrix = hw_led[F("matrix")];
+  // if (!matrix.isNull()) {
+  //   strip.isMatrix = true;
+    
+    panels = 1;
+    panel.clear();
+    // JsonArray panels = matrix[F("panels")];
+    uint8_t s = 0;
+    // if (!panels.isNull()) {
+      panel.reserve(max(1U,min((size_t)panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
+      // for (JsonObject pnl : panels) {
+
+      //   	var px = parseInt(Sf[`P${p}X`].value); //first led x
+			// var py = parseInt(Sf[`P${p}Y`].value); //first led y
+			// var pw = parseInt(Sf[`P${p}W`].value); //width
+			// var ph = parseInt(Sf[`P${p}H`].value); //height
+
+			// var pb = Sf[`P${p}B`].value == "1"; //bottom
+			// var pr = Sf[`P${p}R`].value == "1"; //right
+			// var pv = Sf[`P${p}V`].value == "1"; //vertical
+			// var ps = Sf[`P${p}S`].checked; //serpentine
+
+			// var topLeftX = px*ppL + space; //left margin
+			// var topLeftY = py*ppL + space; //top margin
+
+
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 1;//,    pnl["v"]);`
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 16;//,      pnl["h"]);
+        p.width = 16;//,       pnl["w"]);
+        panel.push_back(p);
+      //   if (++s >= WLED_MAX_PANELS || s >= strip.panels) break; // max panels reached
+      // }
+    // } else {
+    //   // fallback
+    //   WS2812FX::Panel p;
+    //   strip.panels = 1;
+    //   p.height = p.width = 8;
+    //   p.xOffset = p.yOffset = 0;
+    //   p.options = 0;
+    //   strip.panel.push_back(p);
+    // }
+    // cannot call strip.setUpMatrix() here due to already locked JSON buffer
+  // }
+
+
+
+  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  if (loadLedmap >= 0) {
+    ALOG_INF(PSTR("Loading LED map."));
+    if (!deserializeMap(loadLedmap) && isMatrix && loadLedmap == 0)
+    {
+      ALOG_INF(PSTR("Matrix setup"));
+      setUpMatrix();
+    }
+    loadLedmap = -1;
+  }
+  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  // ALOG_INF(PSTR("Matrix setup endddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"));
+  // delay(5000);
+  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  yield();
+  // if (doSerializeConfig) serializeConfig();
 
   /**
    * @brief If RealTime modes first
@@ -350,14 +437,14 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   _now = millis();
   timebase = 0;
   isMatrix = false;
-  #ifndef WLED_DISABLE_2D
-  hPanels(1),
-  vPanels(1),
-  panelH(8),
-  panelW(8),
-  matrix{0,0,0,0},
-  panel{{0,0,0,0}},
-  #endif
+  // #ifndef WLED_DISABLE_2D
+  // hPanels(1),
+  // vPanels(1),
+  // panelH(8),
+  // panelW(8),
+  // matrix{0,0,0,0},
+  // panel{{0,0,0,0}},
+  // #endif
   _virtualSegmentLength = 0;
   _length = DEFAULT_LED_COUNT;
   _brightness = DEFAULT_BRIGHTNESS;
@@ -428,6 +515,12 @@ void mAnimatorLight::Init(void)
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
   Init__Palettes();  
+
+  
+  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  loadLedmap = 0; // To enable it to load once
+
+  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
 
   // Allow runtime changes of animation size
   // settings.light_size_count = STRIP_SIZE_MAX; 
@@ -525,6 +618,1114 @@ void mAnimatorLight::Settings_Default(){
 
 
 }
+
+
+#ifdef ENABLE_DEVFEATURE_ANIMATORLIGHT__WLED_CONFIG_METHODS_TO_BE_REPLACED
+
+
+/*
+ * Serializes and parses the cfg.json and wsec.json settings files, stored in internal FS.
+ * The structure of the JSON is not to be considered an official API and may change without notice.
+ */
+
+//simple macro for ArduinoJSON's or syntax
+#define CJSON(a,b) a = b | a
+
+void getStringFromJson(char* dest, const char* src, size_t len) {
+  if (src != nullptr) strlcpy(dest, src, len);
+}
+
+bool deserializeConfig(JsonObject doc, bool fromFS) {
+  bool needsSave = false;
+  //int rev_major = doc["rev"][0]; // 1
+  //int rev_minor = doc["rev"][1]; // 0
+
+  //long vid = doc[F("vid")]; // 2010020
+
+  #ifdef WLED_USE_ETHERNET
+  JsonObject ethernet = doc[F("eth")];
+  CJSON(ethernetType, ethernet["type"]);
+  // NOTE: Ethernet configuration takes priority over other use of pins
+  WLED::instance().initEthernet();
+  #endif
+
+  JsonObject id = doc["id"];
+  getStringFromJson(cmDNS, id[F("mdns")], 33);
+  getStringFromJson(serverDescription, id[F("name")], 33);
+  getStringFromJson(alexaInvocationName, id[F("inv")], 33);
+#ifdef WLED_ENABLE_SIMPLE_UI
+  CJSON(simplifiedUI, id[F("sui")]);
+#endif
+
+  JsonObject nw_ins_0 = doc["nw"]["ins"][0];
+  getStringFromJson(clientSSID, nw_ins_0[F("ssid")], 33);
+  //int nw_ins_0_pskl = nw_ins_0[F("pskl")];
+  //The WiFi PSK is normally not contained in the regular file for security reasons.
+  //If it is present however, we will use it
+  getStringFromJson(clientPass, nw_ins_0["psk"], 65);
+
+  JsonArray nw_ins_0_ip = nw_ins_0["ip"];
+  JsonArray nw_ins_0_gw = nw_ins_0["gw"];
+  JsonArray nw_ins_0_sn = nw_ins_0["sn"];
+
+  for (byte i = 0; i < 4; i++) {
+    CJSON(staticIP[i], nw_ins_0_ip[i]);
+    CJSON(staticGateway[i], nw_ins_0_gw[i]);
+    CJSON(staticSubnet[i], nw_ins_0_sn[i]);
+  }
+
+  JsonObject ap = doc["ap"];
+  getStringFromJson(apSSID, ap[F("ssid")], 33);
+  getStringFromJson(apPass, ap["psk"] , 65); //normally not present due to security
+  //int ap_pskl = ap[F("pskl")];
+
+  CJSON(apChannel, ap[F("chan")]);
+  if (apChannel > 13 || apChannel < 1) apChannel = 1;
+
+  CJSON(apHide, ap[F("hide")]);
+  if (apHide > 1) apHide = 1;
+
+  CJSON(apBehavior, ap[F("behav")]);
+
+  /*
+  JsonArray ap_ip = ap["ip"];
+  for (byte i = 0; i < 4; i++) {
+    apIP[i] = ap_ip;
+  }
+  */
+
+  noWifiSleep = doc[F("wifi")][F("sleep")] | !noWifiSleep; // inverted
+  noWifiSleep = !noWifiSleep;
+  force802_3g = doc[F("wifi")][F("phy")] | force802_3g; //force phy mode g?
+
+  JsonObject hw = doc[F("hw")];
+
+  // initialize LED pins and lengths prior to other HW (except for ethernet)
+  JsonObject hw_led = hw["led"];
+
+  CJSON(strip.ablMilliampsMax, hw_led[F("maxpwr")]);
+  CJSON(strip.milliampsPerLed, hw_led[F("ledma")]);
+  Bus::setGlobalAWMode(hw_led[F("rgbwm")] | AW_GLOBAL_DISABLED);
+  CJSON(correctWB, hw_led["cct"]);
+  CJSON(cctFromRgb, hw_led[F("cr")]);
+  CJSON(strip.cctBlending, hw_led[F("cb")]);
+  Bus::setCCTBlend(strip.cctBlending);
+  strip.setTargetFps(hw_led["fps"]); //NOP if 0, default 42 FPS
+  CJSON(useGlobalLedBuffer, hw_led[F("ld")]);
+
+  #ifndef WLED_DISABLE_2D
+  // 2D Matrix Settings
+  JsonObject matrix = hw_led[F("matrix")];
+  if (!matrix.isNull()) {
+    strip.isMatrix = true;
+    CJSON(strip.panels, matrix[F("mpc")]);
+    strip.panel.clear();
+    JsonArray panels = matrix[F("panels")];
+    uint8_t s = 0;
+    if (!panels.isNull()) {
+      strip.panel.reserve(max(1U,min((size_t)strip.panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
+      for (JsonObject pnl : panels) {
+        WS2812FX::Panel p;
+        CJSON(p.bottomStart, pnl["b"]);
+        CJSON(p.rightStart,  pnl["r"]);
+        CJSON(p.vertical,    pnl["v"]);
+        CJSON(p.serpentine,  pnl["s"]);
+        CJSON(p.xOffset,     pnl["x"]);
+        CJSON(p.yOffset,     pnl["y"]);
+        CJSON(p.height,      pnl["h"]);
+        CJSON(p.width,       pnl["w"]);
+        strip.panel.push_back(p);
+        if (++s >= WLED_MAX_PANELS || s >= strip.panels) break; // max panels reached
+      }
+    } else {
+      // fallback
+      WS2812FX::Panel p;
+      strip.panels = 1;
+      p.height = p.width = 8;
+      p.xOffset = p.yOffset = 0;
+      p.options = 0;
+      strip.panel.push_back(p);
+    }
+    // cannot call strip.setUpMatrix() here due to already locked JSON buffer
+  }
+  #endif
+
+  JsonArray ins = hw_led["ins"];
+
+  if (fromFS || !ins.isNull()) {
+    uint8_t s = 0;  // bus iterator
+    if (fromFS) busses.removeAll(); // can't safely manipulate busses directly in network callback
+    uint32_t mem = 0, globalBufMem = 0;
+    uint16_t maxlen = 0;
+    bool busesChanged = false;
+    for (JsonObject elm : ins) {
+      if (s >= WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES) break;
+      uint8_t pins[5] = {255, 255, 255, 255, 255};
+      JsonArray pinArr = elm["pin"];
+      if (pinArr.size() == 0) continue;
+      pins[0] = pinArr[0];
+      uint8_t i = 0;
+      for (int p : pinArr) {
+        pins[i++] = p;
+        if (i>4) break;
+      }
+
+      uint16_t length = elm["len"] | 1;
+      uint8_t colorOrder = (int)elm[F("order")]; // contains white channel swap option in upper nibble
+      uint8_t skipFirst = elm[F("skip")];
+      uint16_t start = elm["start"] | 0;
+      if (length==0 || start + length > MAX_LEDS) continue; // zero length or we reached max. number of LEDs, just stop
+      uint8_t ledType = elm["type"] | TYPE_WS2812_RGB;
+      bool reversed = elm["rev"];
+      bool refresh = elm["ref"] | false;
+      uint16_t freqkHz = elm[F("freq")] | 0;  // will be in kHz for DotStar and Hz for PWM (not yet implemented fully)
+      ledType |= refresh << 7; // hack bit 7 to indicate strip requires off refresh
+      uint8_t AWmode = elm[F("rgbwm")] | RGBW_MODE_MANUAL_ONLY;
+      if (fromFS) {
+        BusConfig bc = BusConfig(ledType, pins, start, length, colorOrder, reversed, skipFirst, AWmode, freqkHz, useGlobalLedBuffer);
+        mem += BusManager::memUsage(bc);
+        if (useGlobalLedBuffer && start + length > maxlen) {
+          maxlen = start + length;
+          globalBufMem = maxlen * 4;
+        }
+        if (mem + globalBufMem <= MAX_LED_MEMORY) if (busses.add(bc) == -1) break;  // finalization will be done in WLED::beginStrip()
+      } else {
+        if (busConfigs[s] != nullptr) delete busConfigs[s];
+        busConfigs[s] = new BusConfig(ledType, pins, start, length, colorOrder, reversed, skipFirst, AWmode, freqkHz, useGlobalLedBuffer);
+        busesChanged = true;
+      }
+      s++;
+    }
+    doInitBusses = busesChanged;
+    // finalization done in beginStrip()
+  }
+  if (hw_led["rev"]) busses.getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
+
+  // read color order map configuration
+  JsonArray hw_com = hw[F("com")];
+  if (!hw_com.isNull()) {
+    ColorOrderMap com = {};
+    uint8_t s = 0;
+    for (JsonObject entry : hw_com) {
+      if (s > WLED_MAX_COLOR_ORDER_MAPPINGS) break;
+      uint16_t start = entry["start"] | 0;
+      uint16_t len = entry["len"] | 0;
+      uint8_t colorOrder = (int)entry[F("order")];
+      com.add(start, len, colorOrder);
+      s++;
+    }
+    busses.updateColorOrderMap(com);
+  }
+
+  // read multiple button configuration
+  JsonObject btn_obj = hw["btn"];
+  bool pull = btn_obj[F("pull")] | (!disablePullUp); // if true, pullup is enabled
+  disablePullUp = !pull;
+  JsonArray hw_btn_ins = btn_obj[F("ins")];
+  if (!hw_btn_ins.isNull()) {
+    for (uint8_t b = 0; b < WLED_MAX_BUTTONS; b++) { // deallocate existing button pins
+      pinManager.deallocatePin(btnPin[b], PinOwner::Button); // does nothing if trying to deallocate a pin with PinOwner != Button
+    }
+    uint8_t s = 0;
+    for (JsonObject btn : hw_btn_ins) {
+      CJSON(buttonType[s], btn["type"]);
+      int8_t pin = btn["pin"][0] | -1;
+      if (pin > -1 && pinManager.allocatePin(pin, false, PinOwner::Button)) {
+        btnPin[s] = pin;
+      #ifdef ARDUINO_ARCH_ESP32
+        // ESP32 only: check that analog button pin is a valid ADC gpio
+        if (((buttonType[s] == BTN_TYPE_ANALOG) || (buttonType[s] == BTN_TYPE_ANALOG_INVERTED)) && (digitalPinToAnalogChannel(btnPin[s]) < 0))
+        {
+          // not an ADC analog pin
+          DEBUG_PRINT(F("PIN ALLOC error: GPIO")); DEBUG_PRINT(btnPin[s]);
+          DEBUG_PRINT(F("for analog button #")); DEBUG_PRINT(s);
+          DEBUG_PRINTLN(F(" is not an analog pin!"));
+          btnPin[s] = -1;
+          pinManager.deallocatePin(pin,PinOwner::Button);
+        }
+        else
+      #endif
+        {
+          if (disablePullUp) {
+            pinMode(btnPin[s], INPUT);
+          } else {
+            #ifdef ESP32
+            pinMode(btnPin[s], buttonType[s]==BTN_TYPE_PUSH_ACT_HIGH ? INPUT_PULLDOWN : INPUT_PULLUP);
+            #else
+            pinMode(btnPin[s], INPUT_PULLUP);
+            #endif
+          }
+        }
+      } else {
+        btnPin[s] = -1;
+      }
+      JsonArray hw_btn_ins_0_macros = btn["macros"];
+      CJSON(macroButton[s], hw_btn_ins_0_macros[0]);
+      CJSON(macroLongPress[s],hw_btn_ins_0_macros[1]);
+      CJSON(macroDoublePress[s], hw_btn_ins_0_macros[2]);
+      if (++s >= WLED_MAX_BUTTONS) break; // max buttons reached
+    }
+    // clear remaining buttons
+    for (; s<WLED_MAX_BUTTONS; s++) {
+      btnPin[s]           = -1;
+      buttonType[s]       = BTN_TYPE_NONE;
+      macroButton[s]      = 0;
+      macroLongPress[s]   = 0;
+      macroDoublePress[s] = 0;
+    }
+  } else {
+    // new install/missing configuration (button 0 has defaults)
+    if (fromFS) {
+      // relies upon only being called once with fromFS == true, which is currently true.
+      uint8_t s = 0;
+      if (pinManager.allocatePin(btnPin[0], false, PinOwner::Button)) { // initialized to #define value BTNPIN, or zero if not defined(!)
+        ++s; // do not clear default button if allocated successfully
+      }
+      for (; s<WLED_MAX_BUTTONS; s++) {
+        btnPin[s]           = -1;
+        buttonType[s]       = BTN_TYPE_NONE;
+        macroButton[s]      = 0;
+        macroLongPress[s]   = 0;
+        macroDoublePress[s] = 0;
+      }
+    }
+  }
+  CJSON(touchThreshold,btn_obj[F("tt")]);
+  CJSON(buttonPublishMqtt,btn_obj["mqtt"]);
+
+  int hw_ir_pin = hw["ir"]["pin"] | -2; // 4
+  if (hw_ir_pin > -2) {
+    pinManager.deallocatePin(irPin, PinOwner::IR);
+    if (pinManager.allocatePin(hw_ir_pin, false, PinOwner::IR)) {
+      irPin = hw_ir_pin;
+    } else {
+      irPin = -1;
+    }
+  }
+  CJSON(irEnabled, hw["ir"]["type"]);
+  CJSON(irApplyToAllSelected, hw["ir"]["sel"]);
+
+  JsonObject relay = hw[F("relay")];
+  int hw_relay_pin = relay["pin"] | -2;
+  if (hw_relay_pin > -2) {
+    pinManager.deallocatePin(rlyPin, PinOwner::Relay);
+    if (pinManager.allocatePin(hw_relay_pin,true, PinOwner::Relay)) {
+      rlyPin = hw_relay_pin;
+      pinMode(rlyPin, OUTPUT);
+    } else {
+      rlyPin = -1;
+    }
+  }
+  if (relay.containsKey("rev")) {
+    rlyMde = !relay["rev"];
+  }
+
+  CJSON(serialBaud, hw[F("baud")]);
+  if (serialBaud < 96 || serialBaud > 15000) serialBaud = 1152;
+  updateBaudRate(serialBaud *100);
+
+  JsonArray hw_if_i2c = hw[F("if")][F("i2c-pin")];
+  CJSON(i2c_sda, hw_if_i2c[0]);
+  CJSON(i2c_scl, hw_if_i2c[1]);
+  PinManagerPinType i2c[2] = { { i2c_sda, true }, { i2c_scl, true } };
+  if (i2c_scl >= 0 && i2c_sda >= 0 && pinManager.allocateMultiplePins(i2c, 2, PinOwner::HW_I2C)) {
+    #ifdef ESP32
+    if (!Wire.setPins(i2c_sda, i2c_scl)) { i2c_scl = i2c_sda = -1; } // this will fail if Wire is initialised (Wire.begin() called prior)
+    else Wire.begin();
+    #else
+    Wire.begin(i2c_sda, i2c_scl);
+    #endif
+  } else {
+    i2c_sda = -1;
+    i2c_scl = -1;
+  }
+  JsonArray hw_if_spi = hw[F("if")][F("spi-pin")];
+  CJSON(spi_mosi, hw_if_spi[0]);
+  CJSON(spi_sclk, hw_if_spi[1]);
+  CJSON(spi_miso, hw_if_spi[2]);
+  PinManagerPinType spi[3] = { { spi_mosi, true }, { spi_miso, true }, { spi_sclk, true } };
+  if (spi_mosi >= 0 && spi_sclk >= 0 && pinManager.allocateMultiplePins(spi, 3, PinOwner::HW_SPI)) {
+    #ifdef ESP32
+    SPI.begin(spi_sclk, spi_miso, spi_mosi);  // SPI global uses VSPI on ESP32 and FSPI on C3, S3
+    #else
+    SPI.begin();
+    #endif
+  } else {
+    spi_mosi = -1;
+    spi_miso = -1;
+    spi_sclk = -1;
+  }
+
+  //int hw_status_pin = hw[F("status")]["pin"]; // -1
+
+  JsonObject light = doc[F("light")];
+  CJSON(briMultiplier, light[F("scale-bri")]);
+  CJSON(strip.paletteBlend, light[F("pal-mode")]);
+  CJSON(autoSegments, light[F("aseg")]);
+
+  CJSON(gammaCorrectVal, light["gc"]["val"]); // default 2.8
+  float light_gc_bri = light["gc"]["bri"];
+  float light_gc_col = light["gc"]["col"];
+  if (light_gc_bri > 1.0f) gammaCorrectBri = true;
+  else                     gammaCorrectBri = false;
+  if (light_gc_col > 1.0f) gammaCorrectCol = true;
+  else                     gammaCorrectCol = false;
+  if (gammaCorrectVal > 1.0f && gammaCorrectVal <= 3) {
+    if (gammaCorrectVal != 2.8f) NeoGammaWLEDMethod::calcGammaTable(gammaCorrectVal);
+  } else {
+    gammaCorrectVal = 1.0f; // no gamma correction
+    gammaCorrectBri = false;
+    gammaCorrectCol = false;
+  }
+
+  JsonObject light_tr = light["tr"];
+  CJSON(fadeTransition, light_tr["mode"]);
+  CJSON(modeBlending, light_tr["fx"]);
+  int tdd = light_tr["dur"] | -1;
+  if (tdd >= 0) transitionDelay = transitionDelayDefault = tdd * 100;
+  strip.setTransition(fadeTransition ? transitionDelayDefault : 0);
+  CJSON(strip.paletteFade, light_tr["pal"]);
+  CJSON(randomPaletteChangeTime, light_tr[F("rpc")]);
+
+  JsonObject light_nl = light["nl"];
+  CJSON(nightlightMode, light_nl["mode"]);
+  byte prev = nightlightDelayMinsDefault;
+  CJSON(nightlightDelayMinsDefault, light_nl["dur"]);
+  if (nightlightDelayMinsDefault != prev) nightlightDelayMins = nightlightDelayMinsDefault;
+
+  CJSON(nightlightTargetBri, light_nl[F("tbri")]);
+  CJSON(macroNl, light_nl["macro"]);
+
+  JsonObject def = doc["def"];
+  CJSON(bootPreset, def["ps"]);
+  CJSON(turnOnAtBoot, def["on"]); // true
+  CJSON(briS, def["bri"]); // 128
+
+  JsonObject interfaces = doc["if"];
+
+  JsonObject if_sync = interfaces["sync"];
+  CJSON(udpPort, if_sync[F("port0")]); // 21324
+  CJSON(udpPort2, if_sync[F("port1")]); // 65506
+
+  JsonObject if_sync_recv = if_sync["recv"];
+  CJSON(receiveNotificationBrightness, if_sync_recv["bri"]);
+  CJSON(receiveNotificationColor, if_sync_recv["col"]);
+  CJSON(receiveNotificationEffects, if_sync_recv["fx"]);
+  CJSON(receiveGroups, if_sync_recv["grp"]);
+  CJSON(receiveSegmentOptions, if_sync_recv["seg"]);
+  CJSON(receiveSegmentBounds, if_sync_recv["sb"]);
+  //! following line might be a problem if called after boot
+  receiveNotifications = (receiveNotificationBrightness || receiveNotificationColor || receiveNotificationEffects || receiveSegmentOptions);
+
+  JsonObject if_sync_send = if_sync["send"];
+  prev = notifyDirectDefault;
+  CJSON(notifyDirectDefault, if_sync_send[F("dir")]);
+  if (notifyDirectDefault != prev) notifyDirect = notifyDirectDefault;
+  CJSON(notifyButton, if_sync_send["btn"]);
+  CJSON(notifyAlexa, if_sync_send["va"]);
+  CJSON(notifyHue, if_sync_send["hue"]);
+  CJSON(notifyMacro, if_sync_send["macro"]);
+  CJSON(syncGroups, if_sync_send["grp"]);
+  if (if_sync_send[F("twice")]) udpNumRetries = 1; // import setting from 0.13 and earlier
+  CJSON(udpNumRetries, if_sync_send["ret"]);
+
+  JsonObject if_nodes = interfaces["nodes"];
+  CJSON(nodeListEnabled, if_nodes[F("list")]);
+  CJSON(nodeBroadcastEnabled, if_nodes[F("bcast")]);
+
+  JsonObject if_live = interfaces["live"];
+  CJSON(receiveDirect, if_live["en"]);
+  CJSON(useMainSegmentOnly, if_live[F("mso")]);
+  CJSON(e131Port, if_live["port"]); // 5568
+  if (e131Port == DDP_DEFAULT_PORT) e131Port = E131_DEFAULT_PORT; // prevent double DDP port allocation
+  CJSON(e131Multicast, if_live[F("mc")]);
+
+  JsonObject if_live_dmx = if_live[F("dmx")];
+  CJSON(e131Universe, if_live_dmx[F("uni")]);
+  CJSON(e131SkipOutOfSequence, if_live_dmx[F("seqskip")]);
+  CJSON(DMXAddress, if_live_dmx[F("addr")]);
+  if (!DMXAddress || DMXAddress > 510) DMXAddress = 1;
+  CJSON(DMXSegmentSpacing, if_live_dmx[F("dss")]);
+  if (DMXSegmentSpacing > 150) DMXSegmentSpacing = 0;
+  CJSON(e131Priority, if_live_dmx[F("e131prio")]);
+  if (e131Priority > 200) e131Priority = 200;
+  CJSON(DMXMode, if_live_dmx["mode"]);
+
+  tdd = if_live[F("timeout")] | -1;
+  if (tdd >= 0) realtimeTimeoutMs = tdd * 100;
+  CJSON(arlsForceMaxBri, if_live[F("maxbri")]);
+  CJSON(arlsDisableGammaCorrection, if_live[F("no-gc")]); // false
+  CJSON(arlsOffset, if_live[F("offset")]); // 0
+
+  CJSON(alexaEnabled, interfaces["va"][F("alexa")]); // false
+
+  CJSON(macroAlexaOn, interfaces["va"]["macros"][0]);
+  CJSON(macroAlexaOff, interfaces["va"]["macros"][1]);
+
+  CJSON(alexaNumPresets, interfaces["va"]["p"]);
+
+#ifdef WLED_ENABLE_MQTT
+  JsonObject if_mqtt = interfaces["mqtt"];
+  CJSON(mqttEnabled, if_mqtt["en"]);
+  getStringFromJson(mqttServer, if_mqtt[F("broker")], MQTT_MAX_SERVER_LEN+1);
+  CJSON(mqttPort, if_mqtt["port"]); // 1883
+  getStringFromJson(mqttUser, if_mqtt[F("user")], 41);
+  getStringFromJson(mqttPass, if_mqtt["psk"], 65); //normally not present due to security
+  getStringFromJson(mqttClientID, if_mqtt[F("cid")], 41);
+
+  getStringFromJson(mqttDeviceTopic, if_mqtt[F("topics")][F("device")], MQTT_MAX_TOPIC_LEN+1); // "wled/test"
+  getStringFromJson(mqttGroupTopic, if_mqtt[F("topics")][F("group")], MQTT_MAX_TOPIC_LEN+1); // ""
+  CJSON(retainMqttMsg, if_mqtt[F("rtn")]);
+#endif
+
+#ifndef WLED_DISABLE_ESPNOW
+  JsonObject remote = doc["remote"];
+  CJSON(enable_espnow_remote, remote[F("remote_enabled")]);
+  getStringFromJson(linked_remote, remote[F("linked_remote")], 13);
+#endif
+
+
+#ifndef WLED_DISABLE_HUESYNC
+  JsonObject if_hue = interfaces["hue"];
+  CJSON(huePollingEnabled, if_hue["en"]);
+  CJSON(huePollLightId, if_hue["id"]);
+  tdd = if_hue[F("iv")] | -1;
+  if (tdd >= 2) huePollIntervalMs = tdd * 100;
+
+  JsonObject if_hue_recv = if_hue["recv"];
+  CJSON(hueApplyOnOff, if_hue_recv["on"]);
+  CJSON(hueApplyBri, if_hue_recv["bri"]);
+  CJSON(hueApplyColor, if_hue_recv["col"]);
+
+  JsonArray if_hue_ip = if_hue["ip"];
+
+  for (byte i = 0; i < 4; i++)
+    CJSON(hueIP[i], if_hue_ip[i]);
+#endif
+
+  JsonObject if_ntp = interfaces[F("ntp")];
+  CJSON(ntpEnabled, if_ntp["en"]);
+  getStringFromJson(ntpServerName, if_ntp[F("host")], 33); // "1.wled.pool.ntp.org"
+  CJSON(currentTimezone, if_ntp[F("tz")]);
+  CJSON(utcOffsetSecs, if_ntp[F("offset")]);
+  CJSON(useAMPM, if_ntp[F("ampm")]);
+  CJSON(longitude, if_ntp[F("ln")]);
+  CJSON(latitude, if_ntp[F("lt")]);
+
+  JsonObject ol = doc[F("ol")];
+  CJSON(overlayCurrent ,ol[F("clock")]); // 0
+  CJSON(countdownMode, ol[F("cntdwn")]);
+
+  CJSON(overlayMin, ol["min"]);
+  CJSON(overlayMax, ol[F("max")]);
+  CJSON(analogClock12pixel, ol[F("o12pix")]);
+  CJSON(analogClock5MinuteMarks, ol[F("o5m")]);
+  CJSON(analogClockSecondsTrail, ol[F("osec")]);
+
+  //timed macro rules
+  JsonObject tm = doc[F("timers")];
+  JsonObject cntdwn = tm[F("cntdwn")];
+  JsonArray cntdwn_goal = cntdwn[F("goal")];
+  CJSON(countdownYear,  cntdwn_goal[0]);
+  CJSON(countdownMonth, cntdwn_goal[1]);
+  CJSON(countdownDay,   cntdwn_goal[2]);
+  CJSON(countdownHour,  cntdwn_goal[3]);
+  CJSON(countdownMin,   cntdwn_goal[4]);
+  CJSON(countdownSec,   cntdwn_goal[5]);
+  CJSON(macroCountdown, cntdwn["macro"]);
+  setCountdown();
+
+  JsonArray timers = tm["ins"];
+  uint8_t it = 0;
+  for (JsonObject timer : timers) {
+    if (it > 9) break;
+    if (it<8 && timer[F("hour")]==255) it=8;  // hour==255 -> sunrise/sunset
+    CJSON(timerHours[it], timer[F("hour")]);
+    CJSON(timerMinutes[it], timer["min"]);
+    CJSON(timerMacro[it], timer["macro"]);
+
+    byte dowPrev = timerWeekday[it];
+    //note: act is currently only 0 or 1.
+    //the reason we are not using bool is that the on-disk type in 0.11.0 was already int
+    int actPrev = timerWeekday[it] & 0x01;
+    CJSON(timerWeekday[it], timer[F("dow")]);
+    if (timerWeekday[it] != dowPrev) { //present in JSON
+      timerWeekday[it] <<= 1; //add active bit
+      int act = timer["en"] | actPrev;
+      if (act) timerWeekday[it]++;
+    }
+    if (it<8) {
+      JsonObject start = timer["start"];
+      byte startm = start["mon"];
+      if (startm) timerMonth[it] = (startm << 4);
+      CJSON(timerDay[it], start["day"]);
+      JsonObject end = timer["end"];
+      CJSON(timerDayEnd[it], end["day"]);
+      byte endm = end["mon"];
+      if (startm) timerMonth[it] += endm & 0x0F;
+      if (!(timerMonth[it] & 0x0F)) timerMonth[it] += 12; //default end month to 12
+    }
+    it++;
+  }
+
+  JsonObject ota = doc["ota"];
+  const char* pwd = ota["psk"]; //normally not present due to security
+
+  bool pwdCorrect = !otaLock; //always allow access if ota not locked
+  if (pwd != nullptr && strncmp(otaPass, pwd, 33) == 0) pwdCorrect = true;
+
+  if (pwdCorrect) { //only accept these values from cfg.json if ota is unlocked (else from wsec.json)
+    CJSON(otaLock, ota[F("lock")]);
+    CJSON(wifiLock, ota[F("lock-wifi")]);
+    CJSON(aOtaEnabled, ota[F("aota")]);
+    getStringFromJson(otaPass, pwd, 33); //normally not present due to security
+  }
+
+  #ifdef WLED_ENABLE_DMX
+  JsonObject dmx = doc["dmx"];
+  CJSON(DMXChannels, dmx[F("chan")]);
+  CJSON(DMXGap,dmx[F("gap")]);
+  CJSON(DMXStart, dmx["start"]);
+  CJSON(DMXStartLED,dmx[F("start-led")]);
+
+  JsonArray dmx_fixmap = dmx[F("fixmap")];
+  for (int i = 0; i < dmx_fixmap.size(); i++) {
+    if (i > 14) break;
+    CJSON(DMXFixtureMap[i],dmx_fixmap[i]);
+  }
+
+  CJSON(e131ProxyUniverse, dmx[F("e131proxy")]);
+  #endif
+
+  DEBUG_PRINTLN(F("Starting usermod config."));
+  JsonObject usermods_settings = doc["um"];
+  if (!usermods_settings.isNull()) {
+    needsSave = !usermods.readFromConfig(usermods_settings);
+  }
+
+  if (fromFS) return needsSave;
+  // if from /json/cfg
+  doReboot = doc[F("rb")] | doReboot;
+  if (doInitBusses) return false; // no save needed, will do after bus init in wled.cpp loop
+  return (doc["sv"] | true);
+}
+
+void deserializeConfigFromFS() {
+  bool success = deserializeConfigSec();
+  if (!success) { //if file does not exist, try reading from EEPROM
+    #ifdef WLED_ADD_EEPROM_SUPPORT
+    deEEPSettings();
+    return;
+    #endif
+  }
+
+  if (!requestJSONBufferLock(1)) return;
+
+  DEBUG_PRINTLN(F("Reading settings from /cfg.json..."));
+
+  success = readObjectFromFile("/cfg.json", nullptr, &doc);
+  if (!success) { // if file does not exist, optionally try reading from EEPROM and then save defaults to FS
+    releaseJSONBufferLock();
+    #ifdef WLED_ADD_EEPROM_SUPPORT
+    deEEPSettings();
+    #endif
+
+    // save default values to /cfg.json
+    // call readFromConfig() with an empty object so that usermods can initialize to defaults prior to saving
+    JsonObject empty = JsonObject();
+    usermods.readFromConfig(empty);
+    serializeConfig();
+    // init Ethernet (in case default type is set at compile time)
+    #ifdef WLED_USE_ETHERNET
+    WLED::instance().initEthernet();
+    #endif
+    return;
+  }
+
+  // NOTE: This routine deserializes *and* applies the configuration
+  //       Therefore, must also initialize ethernet from this function
+  bool needsSave = deserializeConfig(doc.as<JsonObject>(), true);
+  releaseJSONBufferLock();
+
+  if (needsSave) serializeConfig(); // usermods required new parameters
+}
+
+void serializeConfig() {
+  serializeConfigSec();
+
+  DEBUG_PRINTLN(F("Writing settings to /cfg.json..."));
+
+  if (!requestJSONBufferLock(2)) return;
+
+  JsonArray rev = doc.createNestedArray("rev");
+  rev.add(1); //major settings revision
+  rev.add(0); //minor settings revision
+
+  doc[F("vid")] = VERSION;
+
+  JsonObject id = doc.createNestedObject("id");
+  id[F("mdns")] = cmDNS;
+  id[F("name")] = serverDescription;
+  id[F("inv")] = alexaInvocationName;
+#ifdef WLED_ENABLE_SIMPLE_UI
+  id[F("sui")] = simplifiedUI;
+#endif
+
+  JsonObject nw = doc.createNestedObject("nw");
+
+  JsonArray nw_ins = nw.createNestedArray("ins");
+
+  JsonObject nw_ins_0 = nw_ins.createNestedObject();
+  nw_ins_0[F("ssid")] = clientSSID;
+  nw_ins_0[F("pskl")] = strlen(clientPass);
+
+  JsonArray nw_ins_0_ip = nw_ins_0.createNestedArray("ip");
+  JsonArray nw_ins_0_gw = nw_ins_0.createNestedArray("gw");
+  JsonArray nw_ins_0_sn = nw_ins_0.createNestedArray("sn");
+
+  for (byte i = 0; i < 4; i++) {
+    nw_ins_0_ip.add(staticIP[i]);
+    nw_ins_0_gw.add(staticGateway[i]);
+    nw_ins_0_sn.add(staticSubnet[i]);
+  }
+
+  JsonObject ap = doc.createNestedObject("ap");
+  ap[F("ssid")] = apSSID;
+  ap[F("pskl")] = strlen(apPass);
+  ap[F("chan")] = apChannel;
+  ap[F("hide")] = apHide;
+  ap[F("behav")] = apBehavior;
+
+  JsonArray ap_ip = ap.createNestedArray("ip");
+  ap_ip.add(4);
+  ap_ip.add(3);
+  ap_ip.add(2);
+  ap_ip.add(1);
+
+  JsonObject wifi = doc.createNestedObject("wifi");
+  wifi[F("sleep")] = !noWifiSleep;
+  wifi[F("phy")] = force802_3g;
+
+  #ifdef WLED_USE_ETHERNET
+  JsonObject ethernet = doc.createNestedObject("eth");
+  ethernet["type"] = ethernetType;
+  if (ethernetType != WLED_ETH_NONE && ethernetType < WLED_NUM_ETH_TYPES) {
+    JsonArray pins = ethernet.createNestedArray("pin");
+    for (uint8_t p=0; p<WLED_ETH_RSVD_PINS_COUNT; p++) pins.add(esp32_nonconfigurable_ethernet_pins[p].pin);
+    if (ethernetBoards[ethernetType].eth_power>=0)     pins.add(ethernetBoards[ethernetType].eth_power);
+    if (ethernetBoards[ethernetType].eth_mdc>=0)       pins.add(ethernetBoards[ethernetType].eth_mdc);
+    if (ethernetBoards[ethernetType].eth_mdio>=0)      pins.add(ethernetBoards[ethernetType].eth_mdio);
+    switch (ethernetBoards[ethernetType].eth_clk_mode) {
+      case ETH_CLOCK_GPIO0_IN:
+      case ETH_CLOCK_GPIO0_OUT:
+        pins.add(0);
+        break;
+      case ETH_CLOCK_GPIO16_OUT:
+        pins.add(16);
+        break;
+      case ETH_CLOCK_GPIO17_OUT:
+        pins.add(17);
+        break;
+    }
+  }
+  #endif
+
+  JsonObject hw = doc.createNestedObject("hw");
+
+  JsonObject hw_led = hw.createNestedObject("led");
+  hw_led[F("total")] = strip.getLengthTotal(); //no longer read, but provided for compatibility on downgrade
+  hw_led[F("maxpwr")] = strip.ablMilliampsMax;
+  hw_led[F("ledma")] = strip.milliampsPerLed;
+  hw_led["cct"] = correctWB;
+  hw_led[F("cr")] = cctFromRgb;
+  hw_led[F("cb")] = strip.cctBlending;
+  hw_led["fps"] = strip.getTargetFps();
+  hw_led[F("rgbwm")] = Bus::getGlobalAWMode(); // global auto white mode override
+  hw_led[F("ld")] = useGlobalLedBuffer;
+
+  #ifndef WLED_DISABLE_2D
+  // 2D Matrix Settings
+  if (strip.isMatrix) {
+    JsonObject matrix = hw_led.createNestedObject(F("matrix"));
+    matrix[F("mpc")] = strip.panels;
+    JsonArray panels = matrix.createNestedArray(F("panels"));
+    for (uint8_t i=0; i<strip.panel.size(); i++) {
+      JsonObject pnl = panels.createNestedObject();
+      pnl["b"] = strip.panel[i].bottomStart;
+      pnl["r"] = strip.panel[i].rightStart;
+      pnl["v"] = strip.panel[i].vertical;
+      pnl["s"] = strip.panel[i].serpentine;
+      pnl["x"] = strip.panel[i].xOffset;
+      pnl["y"] = strip.panel[i].yOffset;
+      pnl["h"] = strip.panel[i].height;
+      pnl["w"] = strip.panel[i].width;
+    }
+  }
+  #endif
+
+  JsonArray hw_led_ins = hw_led.createNestedArray("ins");
+
+  for (uint8_t s = 0; s < busses.getNumBusses(); s++) {
+    Bus *bus = busses.getBus(s);
+    if (!bus || bus->getLength()==0) break;
+    JsonObject ins = hw_led_ins.createNestedObject();
+    ins["start"] = bus->getStart();
+    ins["len"] = bus->getLength();
+    JsonArray ins_pin = ins.createNestedArray("pin");
+    uint8_t pins[5];
+    uint8_t nPins = bus->getPins(pins);
+    for (uint8_t i = 0; i < nPins; i++) ins_pin.add(pins[i]);
+    ins[F("order")] = bus->getColorOrder();
+    ins["rev"] = bus->isReversed();
+    ins[F("skip")] = bus->skippedLeds();
+    ins["type"] = bus->getType() & 0x7F;
+    ins["ref"] = bus->isOffRefreshRequired();
+    ins[F("rgbwm")] = bus->getAutoWhiteMode();
+    ins[F("freq")] = bus->getFrequency();
+  }
+
+  JsonArray hw_com = hw.createNestedArray(F("com"));
+  const ColorOrderMap& com = busses.getColorOrderMap();
+  for (uint8_t s = 0; s < com.count(); s++) {
+    const ColorOrderMapEntry *entry = com.get(s);
+    if (!entry) break;
+
+    JsonObject co = hw_com.createNestedObject();
+    co["start"] = entry->start;
+    co["len"] = entry->len;
+    co[F("order")] = entry->colorOrder;
+  }
+
+  // button(s)
+  JsonObject hw_btn = hw.createNestedObject("btn");
+  hw_btn["max"] = WLED_MAX_BUTTONS; // just information about max number of buttons (not actually used)
+  hw_btn[F("pull")] = !disablePullUp;
+  JsonArray hw_btn_ins = hw_btn.createNestedArray("ins");
+
+  // configuration for all buttons
+  for (uint8_t i=0; i<WLED_MAX_BUTTONS; i++) {
+    JsonObject hw_btn_ins_0 = hw_btn_ins.createNestedObject();
+    hw_btn_ins_0["type"] = buttonType[i];
+    JsonArray hw_btn_ins_0_pin = hw_btn_ins_0.createNestedArray("pin");
+    hw_btn_ins_0_pin.add(btnPin[i]);
+    JsonArray hw_btn_ins_0_macros = hw_btn_ins_0.createNestedArray("macros");
+    hw_btn_ins_0_macros.add(macroButton[i]);
+    hw_btn_ins_0_macros.add(macroLongPress[i]);
+    hw_btn_ins_0_macros.add(macroDoublePress[i]);
+  }
+
+  hw_btn[F("tt")] = touchThreshold;
+  hw_btn["mqtt"] = buttonPublishMqtt;
+
+  JsonObject hw_ir = hw.createNestedObject("ir");
+  hw_ir["pin"] = irPin;
+  hw_ir["type"] = irEnabled;  // the byte 'irEnabled' does contain the IR-Remote Type ( 0=disabled )
+  hw_ir["sel"] = irApplyToAllSelected;
+
+  JsonObject hw_relay = hw.createNestedObject(F("relay"));
+  hw_relay["pin"] = rlyPin;
+  hw_relay["rev"] = !rlyMde;
+
+  hw[F("baud")] = serialBaud;
+
+  JsonObject hw_if = hw.createNestedObject(F("if"));
+  JsonArray hw_if_i2c = hw_if.createNestedArray("i2c-pin");
+  hw_if_i2c.add(i2c_sda);
+  hw_if_i2c.add(i2c_scl);
+  JsonArray hw_if_spi = hw_if.createNestedArray("spi-pin");
+  hw_if_spi.add(spi_mosi);
+  hw_if_spi.add(spi_sclk);
+  hw_if_spi.add(spi_miso);
+
+  //JsonObject hw_status = hw.createNestedObject("status");
+  //hw_status["pin"] = -1;
+
+  JsonObject light = doc.createNestedObject(F("light"));
+  light[F("scale-bri")] = briMultiplier;
+  light[F("pal-mode")] = strip.paletteBlend;
+  light[F("aseg")] = autoSegments;
+
+  JsonObject light_gc = light.createNestedObject("gc");
+  light_gc["bri"] = (gammaCorrectBri) ? gammaCorrectVal : 1.0f;  // keep compatibility
+  light_gc["col"] = (gammaCorrectCol) ? gammaCorrectVal : 1.0f;  // keep compatibility
+  light_gc["val"] = gammaCorrectVal;
+
+  JsonObject light_tr = light.createNestedObject("tr");
+  light_tr["mode"] = fadeTransition;
+  light_tr["fx"] = modeBlending;
+  light_tr["dur"] = transitionDelayDefault / 100;
+  light_tr["pal"] = strip.paletteFade;
+  light_tr[F("rpc")] = randomPaletteChangeTime;
+
+  JsonObject light_nl = light.createNestedObject("nl");
+  light_nl["mode"] = nightlightMode;
+  light_nl["dur"] = nightlightDelayMinsDefault;
+  light_nl[F("tbri")] = nightlightTargetBri;
+  light_nl["macro"] = macroNl;
+
+  JsonObject def = doc.createNestedObject("def");
+  def["ps"] = bootPreset;
+  def["on"] = turnOnAtBoot;
+  def["bri"] = briS;
+
+  JsonObject interfaces = doc.createNestedObject("if");
+
+  JsonObject if_sync = interfaces.createNestedObject("sync");
+  if_sync[F("port0")] = udpPort;
+  if_sync[F("port1")] = udpPort2;
+
+  JsonObject if_sync_recv = if_sync.createNestedObject("recv");
+  if_sync_recv["bri"] = receiveNotificationBrightness;
+  if_sync_recv["col"] = receiveNotificationColor;
+  if_sync_recv["fx"]  = receiveNotificationEffects;
+  if_sync_recv["grp"] = receiveGroups;
+  if_sync_recv["seg"] = receiveSegmentOptions;
+  if_sync_recv["sb"]  = receiveSegmentBounds;
+
+  JsonObject if_sync_send = if_sync.createNestedObject("send");
+  if_sync_send[F("dir")] = notifyDirect;
+  if_sync_send["btn"] = notifyButton;
+  if_sync_send["va"] = notifyAlexa;
+  if_sync_send["hue"] = notifyHue;
+  if_sync_send["macro"] = notifyMacro;
+  if_sync_send["grp"] = syncGroups;
+  if_sync_send["ret"] = udpNumRetries;
+
+  JsonObject if_nodes = interfaces.createNestedObject("nodes");
+  if_nodes[F("list")] = nodeListEnabled;
+  if_nodes[F("bcast")] = nodeBroadcastEnabled;
+
+  JsonObject if_live = interfaces.createNestedObject("live");
+  if_live["en"] = receiveDirect;
+  if_live[F("mso")] = useMainSegmentOnly;
+  if_live["port"] = e131Port;
+  if_live[F("mc")] = e131Multicast;
+
+  JsonObject if_live_dmx = if_live.createNestedObject("dmx");
+  if_live_dmx[F("uni")] = e131Universe;
+  if_live_dmx[F("seqskip")] = e131SkipOutOfSequence;
+  if_live_dmx[F("e131prio")] = e131Priority;
+  if_live_dmx[F("addr")] = DMXAddress;
+  if_live_dmx[F("dss")] = DMXSegmentSpacing;
+  if_live_dmx["mode"] = DMXMode;
+
+  if_live[F("timeout")] = realtimeTimeoutMs / 100;
+  if_live[F("maxbri")] = arlsForceMaxBri;
+  if_live[F("no-gc")] = arlsDisableGammaCorrection;
+  if_live[F("offset")] = arlsOffset;
+
+#ifndef WLED_DISABLE_ALEXA
+  JsonObject if_va = interfaces.createNestedObject("va");
+  if_va[F("alexa")] = alexaEnabled;
+
+  JsonArray if_va_macros = if_va.createNestedArray("macros");
+  if_va_macros.add(macroAlexaOn);
+  if_va_macros.add(macroAlexaOff);
+
+  if_va["p"] = alexaNumPresets;
+#endif
+
+#ifdef WLED_ENABLE_MQTT
+  JsonObject if_mqtt = interfaces.createNestedObject("mqtt");
+  if_mqtt["en"] = mqttEnabled;
+  if_mqtt[F("broker")] = mqttServer;
+  if_mqtt["port"] = mqttPort;
+  if_mqtt[F("user")] = mqttUser;
+  if_mqtt[F("pskl")] = strlen(mqttPass);
+  if_mqtt[F("cid")] = mqttClientID;
+  if_mqtt[F("rtn")] = retainMqttMsg;
+
+  JsonObject if_mqtt_topics = if_mqtt.createNestedObject(F("topics"));
+  if_mqtt_topics[F("device")] = mqttDeviceTopic;
+  if_mqtt_topics[F("group")] = mqttGroupTopic;
+#endif
+
+#ifndef WLED_DISABLE_ESPNOW
+  JsonObject remote = doc.createNestedObject(F("remote"));
+  remote[F("remote_enabled")] = enable_espnow_remote;
+  remote[F("linked_remote")] = linked_remote;
+#endif
+
+
+#ifndef WLED_DISABLE_HUESYNC
+  JsonObject if_hue = interfaces.createNestedObject("hue");
+  if_hue["en"] = huePollingEnabled;
+  if_hue["id"] = huePollLightId;
+  if_hue[F("iv")] = huePollIntervalMs / 100;
+
+  JsonObject if_hue_recv = if_hue.createNestedObject("recv");
+  if_hue_recv["on"] = hueApplyOnOff;
+  if_hue_recv["bri"] = hueApplyBri;
+  if_hue_recv["col"] = hueApplyColor;
+
+  JsonArray if_hue_ip = if_hue.createNestedArray("ip");
+  for (byte i = 0; i < 4; i++) {
+    if_hue_ip.add(hueIP[i]);
+  }
+#endif
+
+  JsonObject if_ntp = interfaces.createNestedObject("ntp");
+  if_ntp["en"] = ntpEnabled;
+  if_ntp[F("host")] = ntpServerName;
+  if_ntp[F("tz")] = currentTimezone;
+  if_ntp[F("offset")] = utcOffsetSecs;
+  if_ntp[F("ampm")] = useAMPM;
+  if_ntp[F("ln")] = longitude;
+  if_ntp[F("lt")] = latitude;
+
+  JsonObject ol = doc.createNestedObject("ol");
+  ol[F("clock")] = overlayCurrent;
+  ol[F("cntdwn")] = countdownMode;
+
+  ol["min"] = overlayMin;
+  ol[F("max")] = overlayMax;
+  ol[F("o12pix")] = analogClock12pixel;
+  ol[F("o5m")] = analogClock5MinuteMarks;
+  ol[F("osec")] = analogClockSecondsTrail;
+
+  JsonObject timers = doc.createNestedObject(F("timers"));
+
+  JsonObject cntdwn = timers.createNestedObject(F("cntdwn"));
+  JsonArray goal = cntdwn.createNestedArray(F("goal"));
+  goal.add(countdownYear); goal.add(countdownMonth); goal.add(countdownDay);
+  goal.add(countdownHour); goal.add(countdownMin); goal.add(countdownSec);
+  cntdwn["macro"] = macroCountdown;
+
+  JsonArray timers_ins = timers.createNestedArray("ins");
+
+  for (byte i = 0; i < 10; i++) {
+    if (timerMacro[i] == 0 && timerHours[i] == 0 && timerMinutes[i] == 0) continue; // sunrise/sunset get saved always (timerHours=255)
+    JsonObject timers_ins0 = timers_ins.createNestedObject();
+    timers_ins0["en"] = (timerWeekday[i] & 0x01);
+    timers_ins0[F("hour")] = timerHours[i];
+    timers_ins0["min"] = timerMinutes[i];
+    timers_ins0["macro"] = timerMacro[i];
+    timers_ins0[F("dow")] = timerWeekday[i] >> 1;
+    if (i<8) {
+      JsonObject start = timers_ins0.createNestedObject("start");
+      start["mon"] = (timerMonth[i] >> 4) & 0xF;
+      start["day"] = timerDay[i];
+      JsonObject end = timers_ins0.createNestedObject("end");
+      end["mon"] = timerMonth[i] & 0xF;
+      end["day"] = timerDayEnd[i];
+    }
+  }
+
+  JsonObject ota = doc.createNestedObject("ota");
+  ota[F("lock")] = otaLock;
+  ota[F("lock-wifi")] = wifiLock;
+  ota[F("pskl")] = strlen(otaPass);
+  ota[F("aota")] = aOtaEnabled;
+
+  #ifdef WLED_ENABLE_DMX
+  JsonObject dmx = doc.createNestedObject("dmx");
+  dmx[F("chan")] = DMXChannels;
+  dmx[F("gap")] = DMXGap;
+  dmx["start"] = DMXStart;
+  dmx[F("start-led")] = DMXStartLED;
+
+  JsonArray dmx_fixmap = dmx.createNestedArray(F("fixmap"));
+  for (byte i = 0; i < 15; i++) {
+    dmx_fixmap.add(DMXFixtureMap[i]);
+  }
+
+  dmx[F("e131proxy")] = e131ProxyUniverse;
+  #endif
+
+  JsonObject usermods_settings = doc.createNestedObject("um");
+  usermods.addToConfig(usermods_settings);
+
+  File f = WLED_FS.open("/cfg.json", "w");
+  if (f) serializeJson(doc, f);
+  f.close();
+  releaseJSONBufferLock();
+
+  doSerializeConfig = false;
+}
+
+//settings in /wsec.json, not accessible via webserver, for passwords and tokens
+bool deserializeConfigSec() {
+  DEBUG_PRINTLN(F("Reading settings from /wsec.json..."));
+
+  if (!requestJSONBufferLock(3)) return false;
+
+  bool success = readObjectFromFile("/wsec.json", nullptr, &doc);
+  if (!success) {
+    releaseJSONBufferLock();
+    return false;
+  }
+
+  JsonObject nw_ins_0 = doc["nw"]["ins"][0];
+  getStringFromJson(clientPass, nw_ins_0["psk"], 65);
+
+  JsonObject ap = doc["ap"];
+  getStringFromJson(apPass, ap["psk"] , 65);
+
+  [[maybe_unused]] JsonObject interfaces = doc["if"];
+
+#ifdef WLED_ENABLE_MQTT
+  JsonObject if_mqtt = interfaces["mqtt"];
+  getStringFromJson(mqttPass, if_mqtt["psk"], 65);
+#endif
+
+#ifndef WLED_DISABLE_HUESYNC
+  getStringFromJson(hueApiKey, interfaces["hue"][F("key")], 47);
+#endif
+
+  getStringFromJson(settingsPIN, doc["pin"], 5);
+  correctPIN = !strlen(settingsPIN);
+
+  JsonObject ota = doc["ota"];
+  getStringFromJson(otaPass, ota[F("pwd")], 33);
+  CJSON(otaLock, ota[F("lock")]);
+  CJSON(wifiLock, ota[F("lock-wifi")]);
+  CJSON(aOtaEnabled, ota[F("aota")]);
+
+  releaseJSONBufferLock();
+  return true;
+}
+
+void serializeConfigSec() {
+  DEBUG_PRINTLN(F("Writing settings to /wsec.json..."));
+
+  if (!requestJSONBufferLock(4)) return;
+
+  JsonObject nw = doc.createNestedObject("nw");
+
+  JsonArray nw_ins = nw.createNestedArray("ins");
+
+  JsonObject nw_ins_0 = nw_ins.createNestedObject();
+  nw_ins_0["psk"] = clientPass;
+
+  JsonObject ap = doc.createNestedObject("ap");
+  ap["psk"] = apPass;
+
+  [[maybe_unused]] JsonObject interfaces = doc.createNestedObject("if");
+#ifdef WLED_ENABLE_MQTT
+  JsonObject if_mqtt = interfaces.createNestedObject("mqtt");
+  if_mqtt["psk"] = mqttPass;
+#endif
+#ifndef WLED_DISABLE_HUESYNC
+  JsonObject if_hue = interfaces.createNestedObject("hue");
+  if_hue[F("key")] = hueApiKey;
+#endif
+
+  doc["pin"] = settingsPIN;
+
+  JsonObject ota = doc.createNestedObject("ota");
+  ota[F("pwd")] = otaPass;
+  ota[F("lock")] = otaLock;
+  ota[F("lock-wifi")] = wifiLock;
+  ota[F("aota")] = aOtaEnabled;
+
+  File f = WLED_FS.open("/wsec.json", "w");
+  if (f) serializeJson(doc, f);
+  f.close();
+  releaseJSONBufferLock();
+}
+
+
+#endif // ENABLE_DEVFEATURE_ANIMATORLIGHT__WLED_CONFIG_METHODS_TO_BE_REPLACED
 
 
 #ifdef USE_MODULE_CORE_RULES
@@ -1307,8 +2508,11 @@ void mAnimatorLight::SubTask_Segments_Effects()
   
   for (uint16_t seg_i = 0; seg_i < segments.size(); seg_i++) // Not as clean as "for (segment_new &seg : segments)", but does not require a copy/destruction of seg on each loop
   {
+
+SEGMENT_I(seg_i).effect_id = EFFECTS_FUNCTION__MATRIX__2D_SCROLLING_TEXT__ID;
+
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,seg.isActive());
+      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,SEGMENT_I(seg_i).isActive());
       // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].pixel_range.start,_segments[_segment_index_primary].pixel_range.stop);
     // #endif
 
@@ -1330,7 +2534,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       if (SEGMENT_I(seg_i).grouping == 0) SEGMENT_I(seg_i).grouping = 1; //sanity check == move this into wherever it gets used (ie struct functions)
     
-      ALOG_DBM(PSTR("\n\r\n\rseg=%d,rate=%d,%d"),_segment_index_primary, SEGMENT_I(seg_i).transition.rate_ms, SEGMENT_I(seg_i).flags.fForceUpdate);
+      ALOG_INF(PSTR("\n\r\n\rseg=%d,rate=%d,%d"),_segment_index_primary, SEGMENT_I(seg_i).transition.rate_ms, SEGMENT_I(seg_i).flags.fForceUpdate);
 
       // if (!seg.freeze) { //only run effect function if not frozen
 
@@ -1356,7 +2560,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       _now = millis(); // internal millis used for animation to make calculations work correctly (instead of calling millis lots)
 
-      ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, SEGMENT_I(seg_i).effect_id, millis()); 
+      ALOG_INF( PSTR("_segments[%d].effect_id=%d/%d \t%d"),_segment_index_primary, SEGMENT_I(seg_i).effect_id,effects.function.size(), millis()); 
 
       SEGMENT_I(seg_i).performance.effect_build_ns = micros();
 
@@ -2788,16 +3992,22 @@ uint8_t mAnimatorLight::Segment_New::getBrightnessCCT_WithGlobalApplied()
 
 // 2D matrix
 uint16_t mAnimatorLight::Segment_New::virtualWidth() const {
+  // DEBUG_LINE_HERE;
   uint16_t groupLen = groupLength();
   uint16_t vWidth = ((transpose ? height() : width()) + groupLen - 1) / groupLen;
+  // ALOG_INF(PSTR("virtualWidth() %d"), vWidth);
   if (mirror) vWidth = (vWidth + 1) /2;  // divide by 2 if mirror, leave at least a single LED
+  // DEBUG_LINE_HERE;
   return vWidth;
 }
 
 uint16_t mAnimatorLight::Segment_New::virtualHeight() const {
+  // DEBUG_LINE_HERE;
   uint16_t groupLen = groupLength();
   uint16_t vHeight = ((transpose ? width() : height()) + groupLen - 1) / groupLen;
+  // ALOG_INF(PSTR("virtualHeight() %d"), vHeight);
   if (mirror_y) vHeight = (vHeight + 1) /2;  // divide by 2 if mirror, leave at least a single LED
+  // DEBUG_LINE_HERE;
   return vHeight;
 }
 
@@ -2842,102 +4052,224 @@ uint16_t mAnimatorLight::Segment_New::virtualLength() const {
 
 void IRAM_ATTR mAnimatorLight::Segment_New::setPixelColor(int i, uint32_t col)
 {
-//   int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
-//   i &= 0xFFFF;
 
-// Serial.println("ERROR UNSUPPORTED mAnimatorLight::Segment_New::setPixelColor");
+  DEBUG_LINE_HERE;
 
-SetPixelColor(i,col);
+  
+  if (!isActive()) return; // not active
+#ifndef WLED_DISABLE_2D
+  int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
+#endif
+  i &= 0xFFFF;
 
-//   if (i >= virtualLength() || i<0) return;  // if pixel would fall out of segment just exit
+  if (i >= virtualLength() || i<0) return;  // if pixel would fall out of segment just exit
 
-// #ifndef WLED_DISABLE_2D
-//   if (is2D()) {
-//     uint16_t vH = virtualHeight();  // segment height in logical pixels
-//     uint16_t vW = virtualWidth();
-//     switch (map1D2D) {
-//       case M12_Pixels:
-//         // use all available pixels as a long strip
-//         setPixelColorXY(i % vW, i / vW, col);
-//         break;
-//       case M12_pBar:
-//         // expand 1D effect vertically or have it play on virtual strips
-//         if (vStrip>0) setPixelColorXY(vStrip - 1, vH - i - 1, col);
-//         else          for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - i - 1, col);
-//         break;
-//       case M12_pArc:
-//         // expand in circular fashion from center
-//         if (i==0)
-//           setPixelColorXY(0, 0, col);
-//         else {
-//           float step = HALF_PI / (2.85f*i);
-//           for (float rad = 0.0f; rad <= HALF_PI+step/2; rad += step) {
-//             // may want to try float version as well (with or without antialiasing)
-//             int x = roundf(sin_t(rad) * i);
-//             int y = roundf(cos_t(rad) * i);
-//             setPixelColorXY(x, y, col);
-//           }
-//         }
-//         break;
-//       case M12_pCorner:
-//         for (int x = 0; x <= i; x++) setPixelColorXY(x, i, col);
-//         for (int y = 0; y <  i; y++) setPixelColorXY(i, y, col);
-//         break;
-//     }
-//     return;
-//   } else if (mAnimatorLight::Segment_New::maxHeight!=1 && (width()==1 || height()==1)) {
-//     // we have a vertical or horizontal 1D segment (WARNING: virtual...() may be transposed)
-//     int x = 0, y = 0;
-//     if (virtualHeight()>1) y = i;
-//     if (virtualWidth() >1) x = i;
-//     setPixelColorXY(x, y, col);
-//     return;
-//   }
+#ifndef WLED_DISABLE_2D
+  if (is2D()) {
+    uint16_t vH = virtualHeight();  // segment height in logical pixels
+    uint16_t vW = virtualWidth();
+    switch (map1D2D) {
+      case M12_Pixels:
+        // use all available pixels as a long strip
+        setPixelColorXY(i % vW, i / vW, col);
+        break;
+      case M12_pBar:
+        // expand 1D effect vertically or have it play on virtual strips
+        if (vStrip>0) setPixelColorXY(vStrip - 1, vH - i - 1, col);
+        else          for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - i - 1, col);
+        break;
+      case M12_pArc:
+        // expand in circular fashion from center
+        if (i==0)
+          setPixelColorXY(0, 0, col);
+        else {
+          float step = HALF_PI / (2.85f*i);
+          for (float rad = 0.0f; rad <= HALF_PI+step/2; rad += step) {
+            // may want to try float version as well (with or without antialiasing)
+            int x = roundf(sin_t(rad) * i);
+            int y = roundf(cos_t(rad) * i);
+            setPixelColorXY(x, y, col);
+          }
+          // Bresenham’s Algorithm (may not fill every pixel)
+          //int d = 3 - (2*i);
+          //int y = i, x = 0;
+          //while (y >= x) {
+          //  setPixelColorXY(x, y, col);
+          //  setPixelColorXY(y, x, col);
+          //  x++;
+          //  if (d > 0) {
+          //    y--;
+          //    d += 4 * (x - y) + 10;
+          //  } else {
+          //    d += 4 * x + 6;
+          //  }
+          //}
+        }
+        break;
+      case M12_pCorner:
+        for (int x = 0; x <= i; x++) setPixelColorXY(x, i, col);
+        for (int y = 0; y <  i; y++) setPixelColorXY(i, y, col);
+        break;
+    }
+    return;
+  } else if (Segment_New::maxHeight!=1 && (width()==1 || height()==1)) {
+    if (pixel_range.start < Segment_New::maxWidth*Segment_New::maxHeight) {
+      // we have a vertical or horizontal 1D segment (WARNING: virtual...() may be transposed)
+      int x = 0, y = 0;
+      if (virtualHeight()>1) y = i;
+      if (virtualWidth() >1) x = i;
+      setPixelColorXY(x, y, col);
+      return;
+    }
+  }
+#endif
+
+  uint16_t len = length();
+  uint8_t _bri_t = currentBri();
+  if (_bri_t < 255) {
+    byte r = scale8(R(col), _bri_t);
+    byte g = scale8(G(col), _bri_t);
+    byte b = scale8(B(col), _bri_t);
+    byte w = scale8(W(col), _bri_t);
+    col = RGBW32(r, g, b, w);
+  }
+
+  // expand pixel (taking into account start, grouping, spacing [and offset])
+  i = i * groupLength();
+  if (reverse) { // is segment reversed?
+    if (mirror) { // is segment mirrored?
+      i = (len - 1) / 2 - i;  //only need to index half the pixels
+    } else {
+      i = (len - 1) - i;
+    }
+  }
+  i += pixel_range.start; // starting pixel in a group
+
+  uint32_t tmpCol = col;
+  // set all the pixels in the group
+  for (int j = 0; j < grouping; j++) {
+    uint16_t indexSet = i + ((reverse) ? -j : j);
+    if (indexSet >= pixel_range.start && indexSet < pixel_range.stop) {
+      if (mirror) { //set the corresponding mirrored pixel
+        uint16_t indexMir = pixel_range.stop - indexSet + pixel_range.start - 1;
+        indexMir += offset; // offset/phase
+        if (indexMir >= pixel_range.stop) indexMir -= len; // wrap
+// #ifndef WLED_DISABLE_MODE_BLEND
+//         if (_modeBlend) tmpCol = color_blend(strip.getPixelColor(indexMir), col, 0xFFFFU - progress(), true);
 // #endif
+        setPixelColor(indexMir, tmpCol);
+      }
+      indexSet += offset; // offset/phase
+      if (indexSet >= pixel_range.stop) indexSet -= len; // wrap
+// #ifndef WLED_DISABLE_MODE_BLEND
+//       if (_modeBlend) tmpCol = color_blend(strip.getPixelColor(indexSet), col, 0xFFFFU - progress(), true);
+// #endif
+      setPixelColor(indexSet, tmpCol);
+    }
+  }
 
-//   if (leds) leds[i] = col;
 
-//   uint16_t len = length();
-//   uint8_t _bri_t = currentBri(on ? opacity : 0);
-//   if (_bri_t < 255) {
-//     byte r = scale8(R(col), _bri_t);
-//     byte g = scale8(G(col), _bri_t);
-//     byte b = scale8(B(col), _bri_t);
-//     byte w = scale8(W(col), _bri_t);
-//     col = RGBW32(r, g, b, w);
-//   }
 
-//   // expand pixel (taking into account start, grouping, spacing [and offset])
-//   i = i * groupLength();
-//   if (reverse) { // is segment reversed?
-//     if (mirror) { // is segment mirrored?
-//       i = (len - 1) / 2 - i;  //only need to index half the pixels
-//     } else {
-//       i = (len - 1) - i;
-//     }
-//   }
-//   i += start; // starting pixel in a group
 
-//   // set all the pixels in the group
-//   for (int j = 0; j < grouping; j++) {
-//     uint16_t indexSet = i + ((reverse) ? -j : j);
-//     if (indexSet >= start && indexSet < stop) {
-//       if (mirror) { //set the corresponding mirrored pixel
-//         uint16_t indexMir = stop - indexSet + start - 1;          
-//         indexMir += offset; // offset/phase
-//         if (indexMir >= stop) indexMir -= len; // wrap
-//         strip.setPixelColor(indexMir, col);
-//       }
-//       indexSet += offset; // offset/phase
-//       if (indexSet >= stop) indexSet -= len; // wrap
-//       strip.setPixelColor(indexSet, col);
-//     }
-//   }
+
+// //   int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
+// //   i &= 0xFFFF;
+
+// // Serial.println("ERROR UNSUPPORTED mAnimatorLight::Segment_New::setPixelColor");
+
+// SetPixelColor(i,col);
+
+// //   if (i >= virtualLength() || i<0) return;  // if pixel would fall out of segment just exit
+
+// // #ifndef WLED_DISABLE_2D
+// //   if (is2D()) {
+// //     uint16_t vH = virtualHeight();  // segment height in logical pixels
+// //     uint16_t vW = virtualWidth();
+// //     switch (map1D2D) {
+// //       case M12_Pixels:
+// //         // use all available pixels as a long strip
+// //         setPixelColorXY(i % vW, i / vW, col);
+// //         break;
+// //       case M12_pBar:
+// //         // expand 1D effect vertically or have it play on virtual strips
+// //         if (vStrip>0) setPixelColorXY(vStrip - 1, vH - i - 1, col);
+// //         else          for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - i - 1, col);
+// //         break;
+// //       case M12_pArc:
+// //         // expand in circular fashion from center
+// //         if (i==0)
+// //           setPixelColorXY(0, 0, col);
+// //         else {
+// //           float step = HALF_PI / (2.85f*i);
+// //           for (float rad = 0.0f; rad <= HALF_PI+step/2; rad += step) {
+// //             // may want to try float version as well (with or without antialiasing)
+// //             int x = roundf(sin_t(rad) * i);
+// //             int y = roundf(cos_t(rad) * i);
+// //             setPixelColorXY(x, y, col);
+// //           }
+// //         }
+// //         break;
+// //       case M12_pCorner:
+// //         for (int x = 0; x <= i; x++) setPixelColorXY(x, i, col);
+// //         for (int y = 0; y <  i; y++) setPixelColorXY(i, y, col);
+// //         break;
+// //     }
+// //     return;
+// //   } else if (mAnimatorLight::Segment_New::maxHeight!=1 && (width()==1 || height()==1)) {
+// //     // we have a vertical or horizontal 1D segment (WARNING: virtual...() may be transposed)
+// //     int x = 0, y = 0;
+// //     if (virtualHeight()>1) y = i;
+// //     if (virtualWidth() >1) x = i;
+// //     setPixelColorXY(x, y, col);
+// //     return;
+// //   }
+// // #endif
+
+// //   if (leds) leds[i] = col;
+
+// //   uint16_t len = length();
+// //   uint8_t _bri_t = currentBri(on ? opacity : 0);
+// //   if (_bri_t < 255) {
+// //     byte r = scale8(R(col), _bri_t);
+// //     byte g = scale8(G(col), _bri_t);
+// //     byte b = scale8(B(col), _bri_t);
+// //     byte w = scale8(W(col), _bri_t);
+// //     col = RGBW32(r, g, b, w);
+// //   }
+
+// //   // expand pixel (taking into account start, grouping, spacing [and offset])
+// //   i = i * groupLength();
+// //   if (reverse) { // is segment reversed?
+// //     if (mirror) { // is segment mirrored?
+// //       i = (len - 1) / 2 - i;  //only need to index half the pixels
+// //     } else {
+// //       i = (len - 1) - i;
+// //     }
+// //   }
+// //   i += start; // starting pixel in a group
+
+// //   // set all the pixels in the group
+// //   for (int j = 0; j < grouping; j++) {
+// //     uint16_t indexSet = i + ((reverse) ? -j : j);
+// //     if (indexSet >= start && indexSet < stop) {
+// //       if (mirror) { //set the corresponding mirrored pixel
+// //         uint16_t indexMir = stop - indexSet + start - 1;          
+// //         indexMir += offset; // offset/phase
+// //         if (indexMir >= stop) indexMir -= len; // wrap
+// //         strip.setPixelColor(indexMir, col);
+// //       }
+// //       indexSet += offset; // offset/phase
+// //       if (indexSet >= stop) indexSet -= len; // wrap
+// //       strip.setPixelColor(indexSet, col);
+// //     }
+// //   }
 }
 
 // anti-aliased normalized version of setPixelColor()
 void mAnimatorLight::Segment_New::setPixelColor(float i, uint32_t col, bool aa)
 {
+
+  DEBUG_LINE_HERE;
 
   SetPixelColor(i, col);
 
@@ -2973,7 +4305,46 @@ void mAnimatorLight::Segment_New::setPixelColor(float i, uint32_t col, bool aa)
 uint32_t mAnimatorLight::Segment_New::getPixelColor(int i)
 {
 
-  return GetPixelColor(i).getU32();
+  // return GetPixelColor(i).getU32();
+
+  if (!isActive()) return 0; // not active
+#ifndef WLED_DISABLE_2D
+  int vStrip = i>>16;
+#endif
+  i &= 0xFFFF;
+
+#ifndef WLED_DISABLE_2D
+  if (is2D()) {
+    uint16_t vH = virtualHeight();  // segment height in logical pixels
+    uint16_t vW = virtualWidth();
+    switch (map1D2D) {
+      case M12_Pixels:
+        return getPixelColorXY(i % vW, i / vW);
+        break;
+      case M12_pBar:
+        if (vStrip>0) return getPixelColorXY(vStrip - 1, vH - i -1);
+        else          return getPixelColorXY(0, vH - i -1);
+        break;
+      case M12_pArc:
+      case M12_pCorner:
+        // use longest dimension
+        return vW>vH ? getPixelColorXY(i, 0) : getPixelColorXY(0, i);
+        break;
+    }
+    return 0;
+  }
+#endif
+
+  if (reverse) i = virtualLength() - i - 1;
+  i *= groupLength();
+  i += pixel_range.start;
+  /* offset/phase */
+  i += offset;
+  if ((i >= pixel_range.stop) && (pixel_range.stop>0)) i -= length(); // avoids negative pixel index (stop = 0 is a possible value)
+  return getPixelColor(i);
+
+
+
 
 //   int vStrip = i>>16;
 //   i &= 0xFFFF;
@@ -3100,19 +4471,35 @@ void mAnimatorLight::Segment_New::fade_out(uint8_t rate) {
   const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
   const uint16_t rows = virtualHeight(); // will be 1 for 1D
 
+  ALOG_INF(PSTR("Segment::maxHeight3 %d\n\r"), Segment_New::maxHeight);
+
+  ALOG_INF(PSTR("fade_out(%d)"), rate);
+  ALOG_INF(PSTR("cols=%d rows=%d"), cols, rows);
+
+  DEBUG_LINE_HERE;
   rate = (255-rate) >> 1;
   float mappedRate = float(rate) +1.1;
 
+  DEBUG_LINE_HERE;
   uint32_t color = pCONT_lAni->segments[0].rgbcctcolors[1].getU32(); // getPixelColor(0);
   
+  DEBUG_LINE_HERE;
   int w2 = W(color);
   int r2 = R(color);
   int g2 = G(color);
   int b2 = B(color);
 
+  DEBUG_LINE_HERE;
   for (uint16_t y = 0; y < rows; y++){
+  DEBUG_LINE_HERE;
     for (uint16_t x = 0; x < cols; x++) {
+  DEBUG_LINE_HERE;
+
+     ALOG_INF(PSTR("is2D() %d"), is2D() );
+
+  DEBUG_LINE_HERE;
       color = is2D() ? getPixelColorXY(x, y) : getPixelColor(x);
+  DEBUG_LINE_HERE;
       int w1 = W(color);
       int r1 = R(color);
       int g1 = G(color);
@@ -3129,10 +4516,23 @@ void mAnimatorLight::Segment_New::fade_out(uint8_t rate) {
       gdelta += (g2 == g1) ? 0 : (g2 > g1) ? 1 : -1;
       bdelta += (b2 == b1) ? 0 : (b2 > b1) ? 1 : -1;
 
-      if (is2D()) setPixelColorXY(x, y, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
-      else        setPixelColor(x, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
+  DEBUG_LINE_HERE;
+      if (is2D())
+      {
+  DEBUG_LINE_HERE;
+        setPixelColorXY(x, y, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
+  DEBUG_LINE_HERE;
+      }
+      else{
+  DEBUG_LINE_HERE;
+        setPixelColor(x, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
+  DEBUG_LINE_HERE;
+      }        
+  DEBUG_LINE_HERE;
     }
+  DEBUG_LINE_HERE;
   }
+  DEBUG_LINE_HERE;
 }
 
 // fades all pixels to black using nscale8()
@@ -3147,54 +4547,54 @@ void mAnimatorLight::Segment_New::fadeToBlackBy(uint8_t fadeBy) {
 }
 
 
-/*
- * Color conversion & utility methods
- */
+// /*
+//  * Color conversion & utility methods
+//  */
 
-/*
- * color blend function
- */
-uint32_t mAnimatorLight::Segment_New::color_blend(uint32_t color1, uint32_t color2, uint16_t blend, bool b16) {
-  if(blend == 0)   return color1;
-  uint16_t blendmax = b16 ? 0xFFFF : 0xFF;
-  if(blend == blendmax) return color2;
-  uint8_t shift = b16 ? 16 : 8;
+// /*
+//  * color blend function
+//  */
+// uint32_t mAnimatorLight::Segment_New::color_blend(uint32_t color1, uint32_t color2, uint16_t blend, bool b16) {
+//   if(blend == 0)   return color1;
+//   uint16_t blendmax = b16 ? 0xFFFF : 0xFF;
+//   if(blend == blendmax) return color2;
+//   uint8_t shift = b16 ? 16 : 8;
 
-  uint32_t w1 = W(color1);
-  uint32_t r1 = R(color1);
-  uint32_t g1 = G(color1);
-  uint32_t b1 = B(color1);
+//   uint32_t w1 = W(color1);
+//   uint32_t r1 = R(color1);
+//   uint32_t g1 = G(color1);
+//   uint32_t b1 = B(color1);
 
-  uint32_t w2 = W(color2);
-  uint32_t r2 = R(color2);
-  uint32_t g2 = G(color2);
-  uint32_t b2 = B(color2);
+//   uint32_t w2 = W(color2);
+//   uint32_t r2 = R(color2);
+//   uint32_t g2 = G(color2);
+//   uint32_t b2 = B(color2);
 
-  uint32_t w3 = ((w2 * blend) + (w1 * (blendmax - blend))) >> shift;
-  uint32_t r3 = ((r2 * blend) + (r1 * (blendmax - blend))) >> shift;
-  uint32_t g3 = ((g2 * blend) + (g1 * (blendmax - blend))) >> shift; 
-  uint32_t b3 = ((b2 * blend) + (b1 * (blendmax - blend))) >> shift;
+//   uint32_t w3 = ((w2 * blend) + (w1 * (blendmax - blend))) >> shift;
+//   uint32_t r3 = ((r2 * blend) + (r1 * (blendmax - blend))) >> shift;
+//   uint32_t g3 = ((g2 * blend) + (g1 * (blendmax - blend))) >> shift; 
+//   uint32_t b3 = ((b2 * blend) + (b1 * (blendmax - blend))) >> shift;
 
-  return RGBW32(r3, g3, b3, w3);
-}
+//   return RGBW32(r3, g3, b3, w3);
+// }
 
-/*
- * color add function that preserves ratio
- * idea: https://github.com/Aircoookie/WLED/pull/2465 by https://github.com/Proto-molecule
- */
-uint32_t mAnimatorLight::Segment_New::color_add(uint32_t c1, uint32_t c2)
-{
-  uint32_t r = R(c1) + R(c2);
-  uint32_t g = G(c1) + G(c2);
-  uint32_t b = B(c1) + B(c2);
-  uint32_t w = W(c1) + W(c2);
-  uint16_t max = r;
-  if (g > max) max = g;
-  if (b > max) max = b;
-  if (w > max) max = w;
-  if (max < 256) return RGBW32(r, g, b, w);
-  else           return RGBW32(r * 255 / max, g * 255 / max, b * 255 / max, w * 255 / max);
-}
+// /*
+//  * color add function that preserves ratio
+//  * idea: https://github.com/Aircoookie/WLED/pull/2465 by https://github.com/Proto-molecule
+//  */
+// uint32_t mAnimatorLight::Segment_New::color_add(uint32_t c1, uint32_t c2)
+// {
+//   uint32_t r = R(c1) + R(c2);
+//   uint32_t g = G(c1) + G(c2);
+//   uint32_t b = B(c1) + B(c2);
+//   uint32_t w = W(c1) + W(c2);
+//   uint16_t max = r;
+//   if (g > max) max = g;
+//   if (b > max) max = b;
+//   if (w > max) max = w;
+//   if (max < 256) return RGBW32(r, g, b, w);
+//   else           return RGBW32(r * 255 / max, g * 255 / max, b * 255 / max, w * 255 / max);
+// }
 
 void mAnimatorLight::Segment_New::setRandomColor(byte* rgb)
 {
@@ -3557,6 +4957,7 @@ void mAnimatorLight::finalizeInit(void)
 // IS contained within segment so busses etc are known (ie the right pin will be used)
 void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
 {
+  DEBUG_LINE_HERE;
   if (i >= _length) return;
   if (i < customMappingSize) i = customMappingTable[i];
   pCONT_iLight->bus_manager->setPixelColor(i, col);
@@ -3564,8 +4965,8 @@ void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
 
 uint32_t mAnimatorLight::getPixelColor(uint16_t i)
 {
-  // if (i >= _length) return 0;
-  // if (i < customMappingSize) i = customMappingTable[i];
+  if (i >= _length) return 0;
+  if (i < customMappingSize) i = customMappingTable[i];
   return RgbcctColor::GetU32Colour(pCONT_iLight->bus_manager->getPixelColor(i));
 }
 
@@ -3891,10 +5292,13 @@ void mAnimatorLight::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t gro
   }
   if (isMatrix) {
     #ifndef WLED_DISABLE_2D
-    if (i1 < mAnimatorLight::Segment_New::maxWidth) seg.start = i1;
-    seg.stop = i2 > mAnimatorLight::Segment_New::maxWidth ? mAnimatorLight::Segment_New::maxWidth : i2;
+    if (i1 < mAnimatorLight::Segment_New::maxWidth) seg.pixel_range.start = i1;
+    seg.pixel_range.stop = i2 > mAnimatorLight::Segment_New::maxWidth ? mAnimatorLight::Segment_New::maxWidth : i2;
     if (startY < mAnimatorLight::Segment_New::maxHeight) seg.startY = startY;
     seg.stopY = stopY > mAnimatorLight::Segment_New::maxHeight ? mAnimatorLight::Segment_New::maxHeight : MAX(1,stopY);
+
+    ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
+    delay(1000);
     #endif
   } else {
     if (i1 < _length) seg.pixel_range.start = i1;
@@ -3933,8 +5337,8 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
     if (forceReset || getSegmentsNum() == 0) resetSegments2(); // initialises 1 segment
     else if (getActiveSegmentsNum() == 1) {
       size_t i = getLastActiveSegmentId();
-      segments[i].start  = 0;
-      segments[i].stop   = mAnimatorLight::Segment_New::maxWidth;
+      segments[i].pixel_range.start  = 0;
+      segments[i].pixel_range.stop   = mAnimatorLight::Segment_New::maxWidth;
       segments[i].startY = 0;
       segments[i].stopY  = mAnimatorLight::Segment_New::maxHeight;
       segments[i].grouping = 1;
@@ -4085,6 +5489,65 @@ void mAnimatorLight::loadCustomPalettes()
   //     break;
   //   }
   // }
+}
+
+
+//load custom mapping table from JSON file (called from finalizeInit() or deserializeState())
+bool mAnimatorLight::deserializeMap(uint8_t n) {
+  // 2D support creates its own ledmap (on the fly) if a ledmap.json exists it will overwrite built one.
+  
+  ALOG_INF(PSTR("deserializeMap"));
+
+  char fileName[32];
+  strcpy_P(fileName, PSTR("/ledmap"));
+  if (n) sprintf(fileName +7, "%d", n);
+  strcat_P(fileName, PSTR(".json"));
+
+  ALOG_INF(PSTR("deserializeMap: %s"), fileName);
+
+  bool isFile = FILE_SYSTEM.exists(fileName);
+
+  if (!isFile) {
+
+    ALOG_INF(PSTR("deserializeMap: !isFile"));
+
+    // erase custom mapping if selecting nonexistent ledmap.json (n==0)
+    if (!isMatrix && !n && customMappingTable != nullptr) {
+      customMappingSize = 0;
+      delete[] customMappingTable;
+      customMappingTable = nullptr;
+    }
+    return false;
+  }
+
+  if (!requestJSONBufferLock(7)) return false;
+
+  if (!readObjectFromFile(fileName, nullptr, &doc)) {
+    releaseJSONBufferLock();
+    return false; //if file does not exist just exit
+  }
+
+  DEBUG_PRINT(F("Reading LED map from "));
+  DEBUG_PRINTLN(fileName);
+
+  // erase old custom ledmap
+  if (customMappingTable != nullptr) {
+    customMappingSize = 0;
+    delete[] customMappingTable;
+    customMappingTable = nullptr;
+  }
+
+  JsonArray map = doc[F("map")];
+  if (!map.isNull() && map.size()) {  // not an empty map
+    customMappingSize  = map.size();
+    customMappingTable = new uint16_t[customMappingSize];
+    for (unsigned i=0; i<customMappingSize; i++) {
+      customMappingTable[i] = (uint16_t) (map[i]<0 ? 0xFFFFU : map[i]);
+    }
+  }
+
+  releaseJSONBufferLock();
+  return true;
 }
 
 
@@ -4251,6 +5714,8 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
   indexPixel &= 0xFFFF;
   if (indexPixel >= virtualLength() || indexPixel<0) return;  // if pixel would fall out of segment just exit
 
+  uint32_t col = color_internal.getU32();
+
   #ifndef WLED_DISABLE_2D
     if (is2D()) {
       uint16_t vH = virtualHeight();  // segment height in logical pixels
@@ -4258,38 +5723,38 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
       switch (map1D2D) {
         case M12_Pixels:
           // use all available pixels as a long strip
-          setPixelColorXY(i % vW, i / vW, col);
+          setPixelColorXY(indexPixel % vW, indexPixel / vW, col);
           break;
         case M12_pBar:
           // expand 1D effect vertically or have it play on virtual strips
-          if (vStrip>0) setPixelColorXY(vStrip - 1, vH - i - 1, col);
-          else          for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - i - 1, col);
+          if (vStrip>0) setPixelColorXY(vStrip - 1, vH - indexPixel - 1, col);
+          else          for (int x = 0; x < vW; x++) setPixelColorXY(x, vH - indexPixel - 1, col);
           break;
         case M12_pArc:
           // expand in circular fashion from center
-          if (i==0)
+          if (indexPixel==0)
             setPixelColorXY(0, 0, col);
           else {
-            float step = HALF_PI / (2.85f*i);
+            float step = HALF_PI / (2.85f*indexPixel);
             for (float rad = 0.0f; rad <= HALF_PI+step/2; rad += step) {
               // may want to try float version as well (with or without antialiasing)
-              int x = roundf(sin_t(rad) * i);
-              int y = roundf(cos_t(rad) * i);
+              int x = roundf(sin_t(rad) * indexPixel);
+              int y = roundf(cos_t(rad) * indexPixel);
               setPixelColorXY(x, y, col);
             }
           }
           break;
         case M12_pCorner:
-          for (int x = 0; x <= i; x++) setPixelColorXY(x, i, col);
-          for (int y = 0; y <  i; y++) setPixelColorXY(i, y, col);
+          for (int x = 0; x <= indexPixel; x++) setPixelColorXY(x, indexPixel, col);
+          for (int y = 0; y <  indexPixel; y++) setPixelColorXY(indexPixel, y, col);
           break;
       }
       return;
-    } else if (Segment::maxHeight!=1 && (width()==1 || height()==1)) {
+    } else if (Segment_New::maxHeight!=1 && (width()==1 || height()==1)) {
       // we have a vertical or horizontal 1D segment (WARNING: virtual...() may be transposed)
       int x = 0, y = 0;
-      if (virtualHeight()>1) y = i;
-      if (virtualWidth() >1) x = i;
+      if (virtualHeight()>1) y = indexPixel;
+      if (virtualWidth() >1) x = indexPixel;
       setPixelColorXY(x, y, col);
       return;
     }
@@ -4443,16 +5908,16 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment_New::GetPixelColor(uint16_t indexP
     uint16_t vW = virtualWidth();
     switch (map1D2D) {
       case M12_Pixels:
-        return getPixelColorXY(i % vW, i / vW);
+        return getPixelColorXY(indexPixel % vW, indexPixel / vW);
         break;
       case M12_pBar:
-        if (vStrip>0) return getPixelColorXY(vStrip - 1, vH - i -1);
-        else          return getPixelColorXY(0, vH - i -1);
+        if (vStrip>0) return getPixelColorXY(vStrip - 1, vH - indexPixel -1);
+        else          return getPixelColorXY(0, vH - indexPixel -1);
         break;
       case M12_pArc:
       case M12_pCorner:
         // use longest dimension
-        return vW>vH ? getPixelColorXY(i, 0) : getPixelColorXY(0, i);
+        return vW>vH ? getPixelColorXY(indexPixel, 0) : getPixelColorXY(0, indexPixel);
         break;
     }
     return 0;
@@ -4481,7 +5946,215 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment_New::GetPixelColor(uint16_t indexP
 }
 
 
+/*
+ * color blend function
+ */
+uint32_t mAnimatorLight::Segment_New::color_blend(uint32_t color1, uint32_t color2, uint16_t blend, bool b16) {
+  if(blend == 0)   return color1;
+  uint16_t blendmax = b16 ? 0xFFFF : 0xFF;
+  if(blend == blendmax) return color2;
+  uint8_t shift = b16 ? 16 : 8;
 
+  uint32_t w1 = W(color1);
+  uint32_t r1 = R(color1);
+  uint32_t g1 = G(color1);
+  uint32_t b1 = B(color1);
+
+  uint32_t w2 = W(color2);
+  uint32_t r2 = R(color2);
+  uint32_t g2 = G(color2);
+  uint32_t b2 = B(color2);
+
+  uint32_t w3 = ((w2 * blend) + (w1 * (blendmax - blend))) >> shift;
+  uint32_t r3 = ((r2 * blend) + (r1 * (blendmax - blend))) >> shift;
+  uint32_t g3 = ((g2 * blend) + (g1 * (blendmax - blend))) >> shift;
+  uint32_t b3 = ((b2 * blend) + (b1 * (blendmax - blend))) >> shift;
+
+  return RGBW32(r3, g3, b3, w3);
+}
+
+/*
+ * color add function that preserves ratio
+ * idea: https://github.com/Aircoookie/WLED/pull/2465 by https://github.com/Proto-molecule
+ */
+uint32_t mAnimatorLight::Segment_New::color_add(uint32_t c1, uint32_t c2, bool fast)
+{
+  if (fast) {
+    uint8_t r = R(c1);
+    uint8_t g = G(c1);
+    uint8_t b = B(c1);
+    uint8_t w = W(c1);
+    r = qadd8(r, R(c2));
+    g = qadd8(g, G(c2));
+    b = qadd8(b, B(c2));
+    w = qadd8(w, W(c2));
+    return RGBW32(r,g,b,w);
+  } else {
+    uint32_t r = R(c1) + R(c2);
+    uint32_t g = G(c1) + G(c2);
+    uint32_t b = B(c1) + B(c2);
+    uint32_t w = W(c1) + W(c2);
+    uint16_t max = r;
+    if (g > max) max = g;
+    if (b > max) max = b;
+    if (w > max) max = w;
+    if (max < 256) return RGBW32(r, g, b, w);
+    else           return RGBW32(r * 255 / max, g * 255 / max, b * 255 / max, w * 255 / max);
+  }
+}
+
+/*
+ * fades color toward black
+ * if using "video" method the resulting color will never become black unless it is already black
+ */
+uint32_t mAnimatorLight::Segment_New::color_fade(uint32_t c1, uint8_t amount, bool video)
+{
+  uint8_t r = R(c1);
+  uint8_t g = G(c1);
+  uint8_t b = B(c1);
+  uint8_t w = W(c1);
+  if (video) {
+    r = scale8_video(r, amount);
+    g = scale8_video(g, amount);
+    b = scale8_video(b, amount);
+    w = scale8_video(w, amount);
+  } else {
+    r = scale8(r, amount);
+    g = scale8(g, amount);
+    b = scale8(b, amount);
+    w = scale8(w, amount);
+  }
+  return RGBW32(r, g, b, w);
+}
+
+
+#define modd(x, y) ((x) - (int)((x) / (y)) * (y))
+
+float mAnimatorLight::cos_t(float phi)
+{
+  float x = modd(phi, TWO_PI);
+  if (x < 0) x = -1 * x;
+  int8_t sign = 1;
+  if (x > PI)
+  {
+      x -= PI;
+      sign = -1;
+  }
+  float xx = x * x;
+
+  float res = sign * (1 - ((xx) / (2)) + ((xx * xx) / (24)) - ((xx * xx * xx) / (720)) + ((xx * xx * xx * xx) / (40320)) - ((xx * xx * xx * xx * xx) / (3628800)) + ((xx * xx * xx * xx * xx * xx) / (479001600)));
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("cos: %f,%f,%f,(%f)\n",phi,res,cos(x),res-cos(x));
+  #endif
+  return res;
+}
+
+float mAnimatorLight::sin_t(float x) {
+  float res =  cos_t(HALF_PI - x);
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("sin: %f,%f,%f,(%f)\n",x,res,sin(x),res-sin(x));
+  #endif
+  return res;
+}
+
+float mAnimatorLight::tan_t(float x) {
+  float c = cos_t(x);
+  if (c==0.0f) return 0;
+  float res = sin_t(x) / c;
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("tan: %f,%f,%f,(%f)\n",x,res,tan(x),res-tan(x));
+  #endif
+  return res;
+}
+
+//https://stackoverflow.com/questions/3380628
+// Absolute error <= 6.7e-5
+float mAnimatorLight::acos_t(float x) {
+  float negate = float(x < 0);
+  float xabs = std::abs(x);
+  float ret = -0.0187293f;
+  ret = ret * xabs;
+  ret = ret + 0.0742610f;
+  ret = ret * xabs;
+  ret = ret - 0.2121144f;
+  ret = ret * xabs;
+  ret = ret + HALF_PI;
+  ret = ret * sqrt(1.0f-xabs);
+  ret = ret - 2 * negate * ret;
+  float res = negate * PI + ret;
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("acos: %f,%f,%f,(%f)\n",x,res,acos(x),res-acos(x));
+  #endif
+  return res;
+}
+
+float mAnimatorLight::asin_t(float x) {
+  float res = HALF_PI - acos_t(x);
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("asin: %f,%f,%f,(%f)\n",x,res,asin(x),res-asin(x));
+  #endif
+  return res;
+}
+
+// // declare a template with no implementation, and only one specialization
+// // this allows hiding the constants, while ensuring ODR causes optimizations
+// // to still apply.  (Fixes issues with conflicting 3rd party #define's)
+// template <typename T> T mAnimatorLight::atan_t(T x);
+// template<>
+// float mAnimatorLight::atan_t(float x) {
+//   //For A/B/C, see https://stackoverflow.com/a/42542593
+//   static const double A { 0.0776509570923569 };
+//   static const double B { -0.287434475393028 };
+//   static const double C { ((HALF_PI/2) - A - B) };
+//   // polynominal factors for approximation between 1 and 5
+//   static const float C0 {  0.089494f };
+//   static const float C1 {  0.974207f };
+//   static const float C2 { -0.326175f };
+//   static const float C3 {  0.05375f  };
+//   static const float C4 { -0.003445f };
+
+//   #ifdef WLED_DEBUG_MATH
+//   float xinput = x;
+//   #endif
+//   bool neg = (x < 0);
+//   x = std::abs(x);
+//   float res;
+//   if (x > 5.0f) { // atan(x) converges to pi/2 - (1/x) for large values
+//     res = HALF_PI - (1.0f/x);
+//   } else if (x > 1.0f) { //1 < x < 5
+//     float xx = x * x;
+//     res = (C4*xx*xx)+(C3*xx*x)+(C2*xx)+(C1*x)+C0;
+//   } else { // this approximation is only for x <= 1
+//     float xx = x * x;
+//     res = ((A*xx + B)*xx + C)*x;
+//   }
+//   if (neg) {
+//     res = -res;
+//   }
+//   #ifdef WLED_DEBUG_MATH
+//   Serial.printf("atan: %f,%f,%f,(%f)\n",xinput,res,atan(xinput),res-atan(xinput));
+//   #endif
+//   return res;
+// }
+
+float mAnimatorLight::floor_t(float x) {
+  bool neg = x < 0;
+  int val = x;
+  if (neg) val--;
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("floor: %f,%f,%f\n",x,(float)val,floor(x));
+  #endif
+  return val;
+}
+
+float mAnimatorLight::fmod_t(float num, float denom) {
+  int tquot = num / denom;
+  float res = num - tquot * denom;
+  #ifdef WLED_DEBUG_MATH
+  Serial.printf("fmod: %f,%f,(%f)\n",res,fmod(num,denom),res-fmod(num,denom));
+  #endif
+  return res;
+}
 
 /******************************************************************************************************************
  * mInterfaceLight_ConstructJSON.cpp
@@ -6074,5 +7747,12 @@ uint8_t realtimeBroadcast(uint8_t type, IPAddress client, uint16_t length, uint8
 }
 
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
+
+
+
+
+
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR

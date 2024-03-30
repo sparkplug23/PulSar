@@ -151,7 +151,7 @@ Hallway + Understairs
   - dht
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
-#define DEVICE_IMMERSION_CONTROL_PANEL
+// #define DEVICE_IMMERSION_CONTROL_PANEL
 
 /**
 Outside + Garage

@@ -1032,7 +1032,7 @@ void setSat255(uint8_t sat_new);
 
   void debug_print(char* name = nullptr)
   {
-    Serial.printf("%s%s%d,%d,%d,%d,%d\n\r", name==nullptr?"":name, name==nullptr?"":"=",  R, G, B, WC, WW);
+    Serial.printf("%s%s%d,%d,%d,c%d,w%d\n\r", name==nullptr?"":name, name==nullptr?"":"=",  R, G, B, WC, WW);
   }
 
   void debug_print_states(char* name = nullptr)

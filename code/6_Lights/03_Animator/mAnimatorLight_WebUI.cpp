@@ -237,8 +237,8 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   #ifndef WLED_DISABLE_2D
   if (isMatrix) {
     JsonObject matrix = leds.createNestedObject("matrix");
-    matrix["w"] = 1;//mAnimatorLight::Segment_New::maxWidth;
-    matrix["h"] = 2;//mAnimatorLight::Segment_New::maxHeight;
+    matrix["w"] = Segment_New::maxWidth;
+    matrix["h"] = Segment_New::maxHeight;
   }
   #endif
 
@@ -258,7 +258,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   leds[F("wv")]   = totalLC & 0x02;     // deprecated, true if white slider should be displayed for any segment
   leds["cct"]     = totalLC & 0x04;     // deprecated, use info.leds.lc
 
-  #ifdef WLED_DEBUG
+  #ifdef WLED_DEBUG_I2C
   JsonArray i2c = root.createNestedArray(F("i2c"));
   i2c.add(i2c_sda);
   i2c.add(i2c_scl);
@@ -955,12 +955,12 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
     isMatrix = true;
     CJSON(panels, matrix[F("mpc")]);
     panel.clear();
-    JsonArray panels = matrix[F("panels")];
+    JsonArray panels_j = matrix[F("panels")];
     uint8_t s = 0;
-    if (!panels.isNull()) {
+    if (!panels_j.isNull()) {
       panel.reserve(max(1U,min((size_t)panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
-      for (JsonObject pnl : panels) {
-        WS2812FX::Panel p;
+      for (JsonObject pnl : panels_j) {
+        Panel p;
         CJSON(p.bottomStart, pnl["b"]);
         CJSON(p.rightStart,  pnl["r"]);
         CJSON(p.vertical,    pnl["v"]);
@@ -974,7 +974,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
       }
     } else {
       // fallback
-      WS2812FX::Panel p;
+      Panel p;
       panels = 1;
       p.height = p.width = 8;
       p.xOffset = p.yOffset = 0;

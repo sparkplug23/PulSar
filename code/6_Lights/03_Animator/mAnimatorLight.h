@@ -13,7 +13,7 @@
 
 //color mangling macros
 
-#define WLED_DISABLE_2D
+// #define WLED_DISABLE_2D
 
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -269,6 +269,9 @@ class mAnimatorLight :
     void TestCode_Add16ParallelBus1();
 
     bool doInitBusses = false; // debug
+    bool     doSerializeConfig = false; // debug
+    int8_t loadLedmap = -1;
+
 
     void FileSystem_JsonAppend_Save_Module();
     void Module_DataSave();
@@ -944,6 +947,8 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__CANDLE_SINGLE__ID,
     EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
     #endif
@@ -1313,7 +1318,19 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
 
 
+    /******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Specialised: 2D Matrix  ***************************************************************************************************************************************************************************
+    **  Requires:     **************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
     
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+    EFFECTS_FUNCTION__MATRIX__2D_SCROLLING_TEXT__ID,
+    #endif
+
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -1699,6 +1716,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void EffectAnim__Christmas_Musical__01();
   #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+  void EffectAnim__Matrix__2D_Scrolling_Text();
+  #endif
 
 
 
@@ -1877,7 +1897,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
 **/
 typedef struct Segment_New {
   public:
-    struct PIXEL_INDEX_RANGE{
+    struct PIXEL_INDEX_RANGE{ // phase out struct, as it complicates matrix 
         uint16_t start = 0; // start means first led index within segment : start index / start X coordinate 2D (left)
         uint16_t stop  = 0; // stop means total leds within the segment (not the index of last pixel) : stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
     }pixel_range;
@@ -1999,6 +2019,10 @@ typedef struct Segment_New {
     {
       return _brightness_cct;
     };
+    uint8_t currentBri() // WLED method
+    {
+      return getBrightnessRGB(); 
+    }
     /**
      * @brief Brightness applied in most cases should include the final (Segment+global) brightness level
      * 
@@ -2384,8 +2408,11 @@ typedef struct Segment_New {
     void    refreshLightCapabilities(void);
 
     
-uint32_t color_blend(uint32_t color1, uint32_t color2, uint16_t blend, bool b16 = false);
-uint32_t color_add(uint32_t c1, uint32_t c2);
+uint32_t color_blend(uint32_t,uint32_t,uint16_t,bool b16=false);
+uint32_t color_add(uint32_t,uint32_t, bool fast=false);
+uint32_t color_fade(uint32_t c1, uint8_t amount, bool video=false);
+
+
 void setRandomColor(byte* rgb);
 void colorHStoRGB(uint16_t hue, byte sat, byte* rgb);
 void colorKtoRGB(uint16_t kelvin, byte* rgb);
@@ -2493,8 +2520,41 @@ bool colorFromHexString(byte* rgb, const char* in);
     uint16_t virtualHeight(void) const;
     uint16_t nrOfVStrips(void) const;
   #ifndef WLED_DISABLE_2D
-    uint16_t XY(uint16_t x, uint16_t y); // support function to get relative index within segment (for leds[])
+    // uint16_t XY(uint16_t x, uint16_t y); // support function to get relative index within segment (for leds[])
+    // void setPixelColorXY(int x, int y, uint32_t c); // set relative pixel within segment with color
+    // void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    // void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    // void setPixelColorXY(float x, float y, uint32_t c, bool aa = true);
+    // void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColorXY(x, y, RGBW32(r,g,b,w), aa); }
+    // void setPixelColorXY(float x, float y, CRGB c, bool aa = true)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), aa); }
+    // uint32_t getPixelColorXY(uint16_t x, uint16_t y);
+    // // 2D support functions
+    // void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend);
+    // void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), blend); }
+    // void addPixelColorXY(int x, int y, uint32_t color);
+    // void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    // void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+    // void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade);
+    // void box_blur(uint16_t i, bool vertical, fract8 blur_amount); // 1D box blur (with weight)
+    // void blurRow(uint16_t row, fract8 blur_amount);
+    // void blurCol(uint16_t col, fract8 blur_amount);
+    // void moveX(int8_t delta);
+    // void moveY(int8_t delta);
+    // void move(uint8_t dir, uint8_t delta);
+    // void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
+    // void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c);
+    // void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) { drawLine(x0, y0, x1, y1, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    // void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color);
+    // void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    // void wu_pixel(uint32_t x, uint32_t y, CRGB c);
+    // void blur1d(fract8 blur_amount); // blur all rows in 1 dimension
+    // void blur2d(fract8 blur_amount) { blur(blur_amount); }
+    // void fill_solid(CRGB c) { fill(RGBW32(c.r,c.g,c.b,0)); }
+    // void nscale8(uint8_t scale);
+
+    uint16_t XY(uint16_t x, uint16_t y); // support function to get relative index within segment
     void setPixelColorXY(int x, int y, uint32_t c); // set relative pixel within segment with color
+    void setPixelColorXY(unsigned x, unsigned y, uint32_t c)               { setPixelColorXY(int(x), int(y), c); }
     void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
     void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
     void setPixelColorXY(float x, float y, uint32_t c, bool aa = true);
@@ -2504,21 +2564,23 @@ bool colorFromHexString(byte* rgb, const char* in);
     // 2D support functions
     void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend);
     void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), blend); }
-    void addPixelColorXY(int x, int y, uint32_t color);
-    void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
-    void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+    void addPixelColorXY(int x, int y, uint32_t color, bool fast = false);
+    void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0, bool fast = false) { addPixelColorXY(x, y, RGBW32(r,g,b,w), fast); } // automatically inline
+    void addPixelColorXY(int x, int y, CRGB c, bool fast = false)                             { addPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), fast); }
     void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade);
     void box_blur(uint16_t i, bool vertical, fract8 blur_amount); // 1D box blur (with weight)
     void blurRow(uint16_t row, fract8 blur_amount);
     void blurCol(uint16_t col, fract8 blur_amount);
-    void moveX(int8_t delta);
-    void moveY(int8_t delta);
-    void move(uint8_t dir, uint8_t delta);
+    void moveX(int8_t delta, bool wrap = false);
+    void moveY(int8_t delta, bool wrap = false);
+    void move(uint8_t dir, uint8_t delta, bool wrap = false);
+    void draw_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
     void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
     void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c);
     void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) { drawLine(x0, y0, x1, y1, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
-    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color);
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2 = 0, int8_t rotate = 0);
     void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c, CRGB c2, int8_t rotate = 0) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0), RGBW32(c2.r,c2.g,c2.b,0), rotate); } // automatic inline
     void wu_pixel(uint32_t x, uint32_t y, CRGB c);
     void blur1d(fract8 blur_amount); // blur all rows in 1 dimension
     void blur2d(fract8 blur_amount) { blur(blur_amount); }
@@ -2695,6 +2757,8 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       // return true if the strip is being sent pixel updates
       isUpdating(void),
       useLedsArray = false;
+    
+    bool deserializeMap(uint8_t n=0);
 
     inline bool isServicing(void) { return _isServicing; }
     inline bool hasWhiteChannel(void) {return _hasWhiteChannel;}
@@ -2759,34 +2823,62 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 #ifndef WLED_DISABLE_2D
     #define WLED_MAX_PANELS 64
     uint8_t
-      hPanels,
-      vPanels;
+      panels;
 
-    uint16_t
-      panelH,
-      panelW;
-
-    typedef struct panel_bitfield_t {
-      bool bottomStart : 1; // starts at bottom?
-      bool rightStart  : 1; // starts on right?
-      bool vertical    : 1; // is vertical?
-      bool serpentine  : 1; // is serpSentine?
+    typedef struct panel_t {
+      uint16_t xOffset; // x offset relative to the top left of matrix in LEDs
+      uint16_t yOffset; // y offset relative to the top left of matrix in LEDs
+      uint8_t  width;   // width of the panel
+      uint8_t  height;  // height of the panel
+      union {
+        uint8_t options;
+        struct {
+          bool bottomStart : 1; // starts at bottom?
+          bool rightStart  : 1; // starts on right?
+          bool vertical    : 1; // is vertical?
+          bool serpentine  : 1; // is serpentine?
+        };
+      };
+      panel_t()
+        : xOffset(0)
+        , yOffset(0)
+        , width(8)
+        , height(8)
+        , options(0)
+      {}
     } Panel;
-    Panel
-      matrix,
-      panel[WLED_MAX_PANELS];
+    std::vector<Panel> panel;
 #endif
 
-    void
-      setUpMatrix(),
-      setPixelColorXY(int x, int y, uint32_t c);
+    void setUpMatrix();
 
     // outsmart the compiler :) by correctly overloading
-    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
-    inline void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+    inline void setPixelColorXY(int x, int y, uint32_t c)   { 
 
-    uint32_t
-      getPixelColorXY(uint16_t, uint16_t);
+      Serial.println(__LINE__);
+
+      int index = y * Segment_New::maxWidth + x;
+      Serial.print(index);
+      Serial.print(" : ");
+      Serial.println(c);
+
+      setPixelColor(index, c); 
+      
+    }
+
+
+    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) 
+    { 
+      Serial.println(__LINE__);
+      setPixelColorXY(x, y, RGBW32(r,g,b,w)); 
+    }
+    inline void setPixelColorXY(int x, int y, CRGB c)
+    { 
+      Serial.println(__LINE__);
+      setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0));       
+    }
+
+    inline uint32_t STRIPgetPixelColorXY(uint16_t x, uint16_t y) { return getPixelColor(isMatrix ? y * Segment_New::maxWidth + x : x);}
 
   // end 2D support
 
@@ -2998,6 +3090,28 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     //   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
     //   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
     //   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+        
+//wled_math.cpp
+#ifndef WLED_USE_REAL_MATH
+  // template <typename T> T atan_t(T x);
+  static float cos_t(float phi);
+  static float sin_t(float x);
+  static float tan_t(float x);
+  static float acos_t(float x);
+  static float asin_t(float x);
+  static float floor_t(float x);
+  static float fmod_t(float num, float denom);
+#else
+  #include <math.h>
+  #define sin_t sin
+  #define cos_t cos
+  #define tan_t tan
+  #define asin_t asin
+  #define acos_t acos
+  #define atan_t atan
+  #define fmod_t fmod
+  #define floor_t floor
+#endif
 
     #include <map>
     #include <IPAddress.h>
@@ -3488,8 +3602,9 @@ uint16_t pollReplyCount _INIT(0);                     // count number of replies
 // uint16_t serialBaud _INIT(1152); // serial baud rate, multiply by 100
 
 // // Time CONFIG
+time_t localTime _INIT(0);
 // bool ntpEnabled _INIT(false);    // get internet time. Only required if you use clock overlays or time-activated macros
-// bool useAMPM _INIT(false);       // 12h/24h clock format
+bool useAMPM _INIT(false);       // 12h/24h clock format
 // byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
 // int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
 
