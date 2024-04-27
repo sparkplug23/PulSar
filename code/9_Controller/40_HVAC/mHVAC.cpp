@@ -70,6 +70,19 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
       FunctionHandler_Loop();  // Maybe rename into "Scheduler"
     break;
     /************
+     * STORAGE SECTION * 
+    *******************/  
+    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+      Save_Module();
+    break;
+    case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
+      Load_Module();
+    break;
+    #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+    #endif // USE_MODULE_DRIVERS_FILESYSTEM
+    /************
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
@@ -93,6 +106,52 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
   }  
 
 } // END Tasker
+
+
+#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+#ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+void mHVAC::Save_Module()
+{
+
+  ALOG_INF(PSTR("mHVAC::Save_Module()"));
+
+  ALOG_INF(PSTR("%d Save_Module relayA %d"), 0, rt.zone[0].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d Save_Module  %d"), 1, rt.zone[1].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d Save_Module  %d"), 2, rt.zone[2].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d Save_Module  %d"), 3, rt.zone[3].program_timer_method.GetTimer_Seconds());
+
+
+  pCONT_mfile->ByteFile_Save("/hvac" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+
+}
+void mHVAC::Load_Module(bool erase)
+{
+
+  ALOG_INF(PSTR("mHVAC::Load_Module()"  DEBUG_INSERT_PAGE_BREAK));
+
+  uint16_t expected_filesize = sizeof(rt);
+
+  //pass pointer into start of read buffer IF matched length
+
+  
+  ALOG_INF(PSTR("===================================mHVAC::Load_Module() %d"), expected_filesize);
+
+  ALOG_INF(PSTR("%d relayA %d"), 0, rt.zone[0].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d relay %d"), 1, rt.zone[1].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d relay %d"), 2, rt.zone[2].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d relay %d"), 3, rt.zone[3].program_timer_method.GetTimer_Seconds());
+
+  pCONT_mfile->ByteFile_Load("/hvac" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+
+  ALOG_INF(PSTR("%d Load_Module %d"), 0, rt.zone[0].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d Load_Module %d"), 1, rt.zone[1].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d Load_Module %d"), 2, rt.zone[2].program_timer_method.GetTimer_Seconds());
+  ALOG_INF(PSTR("%d Load_Module %d"), 3, rt.zone[3].program_timer_method.GetTimer_Seconds());
+}
+#endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+#endif // USE_MODULE_DRIVERS_FILESYSTEM
+
+
 
 
 /******************************************************************************************************************
@@ -209,10 +268,10 @@ void mHVAC::Init(void)
 
   for(uint8_t id=0; id<settings.active_zones; id++)
   {
-    zone[id].active_mode = ZONE_MODE_HEAT_8BITS;
-    zone[id].bitpacked_modes_enabled = ZONE_MODE_HEAT_8BITS;// | ZONE_MODE_COOL_8BITS;
+    rt.zone[id].active_mode = ZONE_MODE_HEAT_8BITS;
+    rt.zone[id].bitpacked_modes_enabled = ZONE_MODE_HEAT_8BITS;// | ZONE_MODE_COOL_8BITS;
   }
-  zone[0].bitpacked_modes_enabled = ZONE_MODE_HEAT_8BITS | ZONE_MODE_COOL_8BITS;
+  rt.zone[0].bitpacked_modes_enabled = ZONE_MODE_HEAT_8BITS | ZONE_MODE_COOL_8BITS;
 
 
   /**
@@ -220,15 +279,15 @@ void mHVAC::Init(void)
    * */
   for(uint8_t id=0; id<settings.active_zones; id++)
   {
-    zone[id].output.module_ids.push_back(D_UNIQUE_MODULE_DRIVERS_RELAY_ID);
-    zone[id].output.index.push_back(id);
-    zone[id].output.driver_type.push_back(DRIVER_TYPE_HVAC_ID);
+    rt.zone[id].output.module_ids.push_back(D_UNIQUE_MODULE_DRIVERS_RELAY_ID);
+    rt.zone[id].output.index.push_back(id);
+    rt.zone[id].output.driver_type.push_back(DRIVER_TYPE_HVAC_ID);
   }
 
   #ifdef ENABLE_DEVFEATURE_HVAC_COOLING_ON_ZONE0_WITH_RELAY
-  zone[0].output.module_ids.push_back(D_UNIQUE_MODULE_DRIVERS_RELAY_ID);
-  zone[0].output.index.push_back(1);
-  zone[0].output.driver_type.push_back(DRIVER_TYPE_COOLING_ID);
+  rt.zone[0].output.module_ids.push_back(D_UNIQUE_MODULE_DRIVERS_RELAY_ID);
+  rt.zone[0].output.index.push_back(1);
+  rt.zone[0].output.driver_type.push_back(DRIVER_TYPE_COOLING_ID);
   #endif
   
   
@@ -288,22 +347,22 @@ void mHVAC::FunctionHandler_Update_Sensors()
 
   for(int zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
-    if(zone[zone_id].sensor.module_id != 0) // Only if set
+    if(rt.zone[zone_id].sensor.module_id != 0) // Only if set
     {
       sensors_reading_t reading; 
       mTaskerInterface* pMod = nullptr; 
 
-      if((pMod = pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)) != nullptr)
+      if((pMod = pCONT->GetModuleObjectbyUniqueID(rt.zone[zone_id].sensor.module_id)) != nullptr)
       {
         
-        pMod->GetSensorReading(&reading, zone[zone_id].sensor.index);
+        pMod->GetSensorReading(&reading, rt.zone[zone_id].sensor.index);
         
         if(reading.Valid())
         {   
-          zone[zone_id].sensor.temperature = reading.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-          zone[zone_id].sensor.humidity    = reading.GetFloat(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-          // Serial.println(zone[zone_id].sensor.temperature);
-          // Serial.println(zone[zone_id].sensor.humidity);
+          rt.zone[zone_id].sensor.temperature = reading.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
+          rt.zone[zone_id].sensor.humidity    = reading.GetFloat(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+          // Serial.println(rt.zone[zone_id].sensor.temperature);
+          // Serial.println(rt.zone[zone_id].sensor.humidity);
         }
       }
 
@@ -469,16 +528,16 @@ void mHVAC::SetHighestImportance(uint8_t* importanceset, int8_t thisvalue){
 void mHVAC::SetZoneActive(uint8_t zone_id, uint8_t state)
 {
 
-  switch(zone[zone_id].active_mode)
+  switch(rt.zone[zone_id].active_mode)
   {
     default:
     case ZONE_MODE_HEAT_8BITS:{
 
-      // AddLog(LOG_LEVEL_INFO, PSTR("zone[%d].output.index[0]=%d"),zone_id, zone[zone_id].output.index[0]);
+      // AddLog(LOG_LEVEL_INFO, PSTR("rt.zone[%d].output.index[0]=%d"),zone_id, rt.zone[zone_id].output.index[0]);
 
       // Check if mode is permitted
-      // if(zone[zone_id].bitpacked_modes_enabled,)
-      uint8_t subindex_of_driver = zone[zone_id].output.index[0];
+      // if(rt.zone[zone_id].bitpacked_modes_enabled,)
+      uint8_t subindex_of_driver = rt.zone[zone_id].output.index[0];
       
       SetHeater(subindex_of_driver, state);
     }
@@ -807,7 +866,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj[D_JSON_TEMPERATURE].getObject()["StartDesired"]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
-    zone[device_id].program_temp_method.StartDesiredTemperature(jtok.getFloat());
+    rt.zone[device_id].program_temp_method.StartDesiredTemperature(jtok.getFloat());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
@@ -816,7 +875,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
-    zone[device_id].program_temp_method.SetTimer_Running_Limit_Minutes(jtok.getInt());
+    rt.zone[device_id].program_temp_method.SetTimer_Running_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
@@ -825,7 +884,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_MAINTAINING].getObject()[D_JSON_LIMIT]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
-    zone[device_id].program_temp_method.SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
+    rt.zone[device_id].program_temp_method.SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
@@ -877,10 +936,10 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
         {
           AddLog(LOG_LEVEL_ERROR, PSTR("pCONT_set->Settings.device_name_buffer.class_id[device_id_found] = %d,%d"),device_id_found,pCONT_set->Settings.device_name_buffer.class_id[device_id_found]);
         
-          zone[index].sensor.module_id = pCONT_set->Settings.device_name_buffer.class_id[device_id_found];
-          zone[index].sensor.index = pCONT_set->Settings.device_name_buffer.device_id[device_id_found];
+          rt.zone[index].sensor.module_id = pCONT_set->Settings.device_name_buffer.class_id[device_id_found];
+          rt.zone[index].sensor.index = pCONT_set->Settings.device_name_buffer.device_id[device_id_found];
         }
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "module_id,index = %d,%d"),zone[index].sensor.module_id,zone[index].sensor.index);
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "module_id,index = %d,%d"),rt.zone[index].sensor.module_id,rt.zone[index].sensor.index);
 
         index++;
       }
@@ -907,7 +966,7 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint16_t value)
   // check if zone id is valid
   if(zone_id == -1){ return; }
 
-  zone[zone_id].program_timer_method.StartTimer_Minutes(value);
+  rt.zone[zone_id].program_timer_method.StartTimer_Minutes(value);
   
   functionhandler_programs_timers.flags.run_now = true;
   mqtthandler_program_timers_ifchanged.flags.SendNow = true;
@@ -915,7 +974,7 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint16_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method.GetTimer_Minutes());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -926,7 +985,7 @@ void mHVAC::CommandSet_ProgramTimer_AddTimeOn(uint8_t zone_id, uint16_t value)
   // check if zone id is valid
   if(zone_id == -1){ return; }
 
-  zone[zone_id].program_timer_method.StartTimer_Minutes(zone[zone_id].program_timer_method.GetTimer_Minutes()+value);
+  rt.zone[zone_id].program_timer_method.StartTimer_Minutes(rt.zone[zone_id].program_timer_method.GetTimer_Minutes()+value);
   
   functionhandler_programs_timers.flags.run_now = true;
   mqtthandler_program_timers_ifchanged.flags.SendNow = true;
@@ -934,7 +993,7 @@ void mHVAC::CommandSet_ProgramTimer_AddTimeOn(uint8_t zone_id, uint16_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method.GetTimer_Minutes());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -945,9 +1004,9 @@ uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
   // check if zone id is valid
   // if(zone_id == -1){ return; }
 
-  return zone[zone_id].program_timer_method.GetTimer_Minutes();
+  return rt.zone[zone_id].program_timer_method.GetTimer_Minutes();
 
-  // zone[zone_id].program_timer_method.StartTimer_Minutes(value);
+  // rt.zone[zone_id].program_timer_method.StartTimer_Minutes(value);
   
   // functionhandler_programs_timers.flags.run_now = true;
   // mqtthandler_program_timers_ifchanged.flags.SendNow = true;
@@ -955,7 +1014,7 @@ uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
   // // isanychanged_timers = true;
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method.GetTimer_Minutes());
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -963,10 +1022,10 @@ uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
 void mHVAC::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t zone_id, float value)
 {
 
-  zone[zone_id].program_temp_method.SetDesiredTemperature(value);
+  rt.zone[zone_id].program_temp_method.SetDesiredTemperature(value);
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)zone[zone_id].program_temp_method.GetDesiredTemperature());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)rt.zone[zone_id].program_temp_method.GetDesiredTemperature());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -975,10 +1034,10 @@ void mHVAC::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t zone_id, f
 void mHVAC::CommandSet_ProgramTemperature_Mode(uint8_t zone_id, uint8_t value)
 {
 
-  zone[zone_id].program_temp_method.SetMode(value);
+  rt.zone[zone_id].program_temp_method.SetMode(value);
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), zone[zone_id].program_temp_method.GetMode());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), rt.zone[zone_id].program_temp_method.GetMode());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1205,8 +1264,8 @@ uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level, bool json_appendi
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
     JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),zone_id,buffer,sizeof(buffer)));
-      JBI->Add(D_JSON_TIME_ON, zone[zone_id].program_timer_method.GetTimer_Minutes() != -1 ? zone[zone_id].program_timer_method.GetTimer_Minutes() : 0); // If "-1" ie disabled, send zero
-      JBI->Add(D_JSON_TIME_ON_SECS, zone[zone_id].program_timer_method.GetTimer_Seconds());
+      JBI->Add(D_JSON_TIME_ON, rt.zone[zone_id].program_timer_method.GetTimer_Minutes() != -1 ? rt.zone[zone_id].program_timer_method.GetTimer_Minutes() : 0); // If "-1" ie disabled, send zero
+      JBI->Add(D_JSON_TIME_ON_SECS, rt.zone[zone_id].program_timer_method.GetTimer_Seconds());
     JBI->Object_End();
   }
 
@@ -1228,25 +1287,25 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level, bool json_appendin
     JBI->Level_Start_P( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),zone_id,buffer,sizeof(buffer)) );
   
       JBI->Level_Start_P(D_JSON_TEMPERATURE);   
-        JBI->Add(D_JSON_CURRENT, zone[zone_id].program_temp_method.GetCurrentTemperature());
-        JBI->Add(D_JSON_DESIRED, zone[zone_id].program_temp_method.GetDesiredTemperature());
-        JBI->Add(D_JSON_ERROR,   zone[zone_id].program_temp_method.GetErrorTemperature());
+        JBI->Add(D_JSON_CURRENT, rt.zone[zone_id].program_temp_method.GetCurrentTemperature());
+        JBI->Add(D_JSON_DESIRED, rt.zone[zone_id].program_temp_method.GetDesiredTemperature());
+        JBI->Add(D_JSON_ERROR,   rt.zone[zone_id].program_temp_method.GetErrorTemperature());
       JBI->Object_End();
       JBI->Level_Start_P(D_JSON_STATUS);   
         // JBI->Add(D_JSON_MODE, GetTempModeByDeviceIDCtr(zone_id, buffer, sizeof(buffer)));
         // JBI->Add(D_JSON_DATA, program_temps[zone_id].status.data.ctr);
       JBI->Object_End();
       JBI->Level_Start_P(D_JSON_TIME_RUNNING); 
-        JBI->Add(D_JSON_TIME_ON, zone[zone_id].program_temp_method.GetTimer_Running_Minutes() != -1 ? zone[zone_id].program_temp_method.GetTimer_Running_Minutes() : 0);
-        JBI->Add(D_JSON_TIME_ON_SECS, zone[zone_id].program_temp_method.GetTimer_Running_Seconds());  
-        JBI->Add(D_JSON_LIMIT, zone[zone_id].program_temp_method.GetTimer_Running_Limit_Minutes());
-        JBI->Add(D_JSON_LIMIT D_JSON_SECS, zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());        
+        JBI->Add(D_JSON_TIME_ON, rt.zone[zone_id].program_temp_method.GetTimer_Running_Minutes() != -1 ? rt.zone[zone_id].program_temp_method.GetTimer_Running_Minutes() : 0);
+        JBI->Add(D_JSON_TIME_ON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Running_Seconds());  
+        JBI->Add(D_JSON_LIMIT, rt.zone[zone_id].program_temp_method.GetTimer_Running_Limit_Minutes());
+        JBI->Add(D_JSON_LIMIT D_JSON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());        
       JBI->Object_End();  
       JBI->Level_Start_P(D_JSON_TIME_MAINTAINING); 
-        JBI->Add(D_JSON_TIME_ON, zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() != -1 ? zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() : 0);
-        JBI->Add(D_JSON_TIME_ON_SECS, zone[zone_id].program_temp_method.GetTimer_Maintaining_Seconds());  
-        JBI->Add(D_JSON_LIMIT, zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes());
-        JBI->Add(D_JSON_LIMIT D_JSON_SECS, zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());  
+        JBI->Add(D_JSON_TIME_ON, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() != -1 ? rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() : 0);
+        JBI->Add(D_JSON_TIME_ON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Seconds());  
+        JBI->Add(D_JSON_LIMIT, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes());
+        JBI->Add(D_JSON_LIMIT D_JSON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());  
       JBI->Object_End();  
       JBI->Level_Start_P(D_JSON_TIME_TO_HEAT);
         //  time_to_heatobj[D_JSON_SECONDS] = GetHeatingProfilesTimeSeconds(zone_id,program_temps[zone_id].temp.current,program_temps[zone_id].temp.desired);
@@ -1338,10 +1397,10 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level, bool json_appending
 
   for(int zone_id=0;zone_id<settings.active_zones;zone_id++){
     JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), zone_id, buffer, sizeof(buffer)));
-      // if(zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, zone[zone_id].sensor.temperature); }
-      // if(zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, zone[zone_id].sensor.humidity);       }
-      JBI->Add("ModuleID",zone[zone_id].sensor.module_id);
-      JBI->Add("Index",zone[zone_id].sensor.index);
+      // if(rt.zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, rt.zone[zone_id].sensor.temperature); }
+      // if(rt.zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, rt.zone[zone_id].sensor.humidity);       }
+      JBI->Add("ModuleID",rt.zone[zone_id].sensor.module_id);
+      JBI->Add("Index",rt.zone[zone_id].sensor.index);
     JBI->Object_End();
   }
   return JBI->End();
@@ -1389,7 +1448,7 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
         //     JBI->Array_Start_P(PSTR("Zone%d"),zone_id);
         //       for(int8_t bits=0; bits<8; bits++)
         //       {
-        //         JBI->Add(bitRead(zone[zone_id].bitpacked_modes_enabled,bits));
+        //         JBI->Add(bitRead(rt.zone[zone_id].bitpacked_modes_enabled,bits));
         //       }
         //     JBI->Array_End();
         //   }         
@@ -1401,13 +1460,13 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
         JBI->Array_Start("ModuleID");
         for(int8_t i=0; i<settings.active_zones; i++){
-          JBI->Add(zone[i].output.module_ids[0]);
+          JBI->Add(rt.zone[i].output.module_ids[0]);
         }
         JBI->Array_End();
 
         JBI->Array_Start("Index");
         for(int8_t i=0; i<settings.active_zones; i++){
-          JBI->Add(zone[i].output.index[0]);
+          JBI->Add(rt.zone[i].output.index[0]);
         }
         JBI->Array_End();
       
@@ -1418,25 +1477,25 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
         JBI->Array_Start("ModuleID");
         for(int8_t i=0; i<settings.active_zones; i++){
-          JBI->Add(zone[i].sensor.module_id);
+          JBI->Add(rt.zone[i].sensor.module_id);
         }
         JBI->Array_End();
 
         JBI->Array_Start("Index");
         for(int8_t i=0; i<settings.active_zones; i++){
-          JBI->Add(zone[i].sensor.index);
+          JBI->Add(rt.zone[i].sensor.index);
         }
         JBI->Array_End();
         
         JBI->Array_Start("Temperature");
         for(int8_t i=0; i<settings.active_zones; i++){
-          JBI->Add(zone[i].sensor.temperature);
+          JBI->Add(rt.zone[i].sensor.temperature);
         }
         JBI->Array_End();
         
         JBI->Array_Start("Humidity");
         for(int8_t i=0; i<settings.active_zones; i++){
-          JBI->Add(zone[i].sensor.humidity);
+          JBI->Add(rt.zone[i].sensor.humidity);
         }
         JBI->Array_End();
       

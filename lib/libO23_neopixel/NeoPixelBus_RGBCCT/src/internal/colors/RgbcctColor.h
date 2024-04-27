@@ -25,46 +25,48 @@ License along with NeoPixel.  If not, see
 -------------------------------------------------------------------------*/
 #pragma once
 
-// #include <Arduino.h>
-
-// #include "RgbwColor.h"
-// #include "lib8tion/math8.h"
-
+// Forward declarations of used color structures if not included
 struct RgbColor;
-// struct RgbwColor;
+struct RgbwColor;
+struct HtmlColor;
 struct HslColor;
 struct HsbColor;
 
-/**
- * 2023: switch this around, the 4th pixel is most likely to be normal white, have option to set flag that reverses them
- * 
- * 1) if it comes from another colour, it is assumed to be full colour and no change in brightness will be applied
- * 2) A function will be used when conversion on white (change in colour temp) needs to be calculated with argument of 0 to 255 on colour temp (as percentage)
- * 3) Another function will allow setting/getting of colour temp by kelvin
- * 
- * */
-
-
-// CT min and max
 #define CCT_MIN_DEFAULT 153          // 6500K
 #define CCT_MAX_DEFAULT 500          // 2000K
 
-
-// #define ENABLE_RGBCCT_DEBUG
-
-#define ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
-
-
-
-
-// ------------------------------------------------------------------------
-// RgbcctColor represents a color object that is represented by Red, Green, Blue
-// component values and an extra White component.  It contains helpful color 
-// routines to manipulate the color.
-// ------------------------------------------------------------------------
+// RgbcctColor represents a color object with RGB and two white components (warm and cold)
 struct RgbcctColor : RgbColorBase
 {
     typedef NeoRgbcctCurrentSettings SettingsObject;
+  
+    union {
+      struct {
+        union {
+          uint8_t R;
+          uint8_t red;
+        };
+        union {
+          uint8_t G;
+          uint8_t green;
+        };
+        union {
+          uint8_t B;
+          uint8_t blue;
+        };
+        union {
+          uint8_t WC;
+          uint8_t W1;
+          uint8_t white_cold;  // Assume cold is the normal white, its only "warm" when an alternate exists
+        };
+        union {
+          uint8_t WW;
+          uint8_t W2;
+          uint8_t warm_white;
+        };
+      };
+      uint8_t raw[5];
+    };
 
     // ------------------------------------------------------------------------
     // Construct a RgbcctColor using R, G, B, W values (0-255)
@@ -86,6 +88,11 @@ struct RgbcctColor : RgbColorBase
         R(0), G(0), B(0), WW(brightness), WC(brightness)
     {
     };
+
+    // RgbcctColor(uint32_t wrgb_packed) :
+    //     R(byte((wrgb_packed) >> 16)), G(byte((wrgb_packed) >> 8)), B(byte(wrgb_packed)), WW(byte((wrgb_packed) >> 24)), WC(byte((wrgb_packed) >> 24))
+    // {
+    // };
 
     // ------------------------------------------------------------------------
     // Construct a RgbColor using a single brightness value (0-255)
@@ -145,31 +152,25 @@ struct RgbcctColor : RgbColorBase
     {
     };
 
-    // RgbcctColor RgbcctColor(uint32_t color32bit)
-    // {
-    //     return RgbcctColor(color32bit & 0x000F);
-    // }
-
     // ------------------------------------------------------------------------
     // Comparison operators
     // ------------------------------------------------------------------------
-    bool operator==(const RgbcctColor& other) const
-    {
-        return (R == other.R && G == other.G && B == other.B && WW == other.WW && WC == other.WC);
-    };
-
-    bool operator!=(const RgbcctColor& other) const
-    {
+    bool operator==(const RgbcctColor& other) const {
+        return R == other.R && G == other.G && B == other.B && WW == other.WW && WC == other.WC;
+    }
+    bool operator!=(const RgbcctColor& other) const {
         return !(*this == other);
+    }
+
+    // Utility functions
+    bool isMonotone() const { return (R == G && R == B); }
+    // bool isColorLess() const { return (R == 0 && G == 0 && B == 0); }
+
+    bool IsColorLess() const
+    {
+        return (R == 0 && B == 0 && G == 0);
     };
 
-    // ------------------------------------------------------------------------
-    // Returns if the color is grey, all values are equal other than white
-    // ------------------------------------------------------------------------
-    bool IsMonotone() const
-    {
-        return (R == B && R == G);
-    };
 
 
    /// add one RgbcctColor to another, saturating at 0xFF for each channel
@@ -212,15 +213,6 @@ struct RgbcctColor : RgbColorBase
 
 
     // ------------------------------------------------------------------------
-    // Returns if the color components are all zero, the white component maybe 
-    // anything
-    // ------------------------------------------------------------------------
-    bool IsColorLess() const
-    {
-        return (R == 0 && B == 0 && G == 0);
-    };
-
-    // ------------------------------------------------------------------------
     // CalculateBrightness will calculate the overall brightness
     // NOTE: This is a simple linear brightness
     // ------------------------------------------------------------------------
@@ -248,6 +240,13 @@ struct RgbcctColor : RgbColorBase
     void Lighten(uint8_t delta);
 
     // ------------------------------------------------------------------------
+    // Lighten will adjust the color by the given delta toward white
+    // NOTE: This is a simple linear change
+    // delta - (0-255) the amount to lighten the color
+    // ------------------------------------------------------------------------
+    void Variance(uint8_t delta);
+
+    // ------------------------------------------------------------------------
     // LinearBlend between two colors by the amount defined by progress variable
     // left - the color to start the blend at
     // right - the color to end the blend at
@@ -272,42 +271,59 @@ struct RgbcctColor : RgbColorBase
         float x, 
         float y);
 
-    // ------------------------------------------------------------------------
-    // Red, Green, Blue, White color members (0-255) where 
-    // (0,0,0,0) is black and (255,255,255, 0) and (0,0,0,255) is white
-    // Note (255,255,255,255) is extreme bright white
-    // ------------------------------------------------------------------------
-    // enum{
-    // uint8_t R;
-    // uint8_t G;
-    // uint8_t B;
-    // uint8_t WW;
-    // uint8_t WC;
+    // Example implementation of fromUint32
+    // Unpacks a 32-bit unsigned integer into an RgbcctColor object assuming the format RRGGBBWW
+    #define GetRgbcctFromU32Colour fromUint32
+    static RgbcctColor fromUint32(uint32_t color) {
+        uint8_t w = (color >> 24) & 0xFF; // Extract the red component
+        uint8_t r = (color >> 16) & 0xFF; // Extract the green component
+        uint8_t g = (color >> 8) & 0xFF;  // Extract the blue component
+        uint8_t b = color & 0xFF;         // Extract the warm white component
 
-    /**
-     * @brief 
-     * Conversion from Rgbcct into uint32_t (dropping the second white colour)
-     * 
-     */
-    static uint32_t GetU32Colour(RgbcctColor c)
-    {
-        uint32_t c_out =
-            ((uint32_t)c.warm_white << 24) |
-            ((uint32_t)c.red        << 16) |
-            ((uint32_t)c.green      <<  8) |
-            ((uint32_t)c.blue            ) ;
-        return c_out;
+        return RgbcctColor(r, g, b, w);
     }
 
-    static RgbcctColor GetRgbcctFromU32Colour(uint32_t c)
-    {
+    // Example implementation of toUint32
+    // Packs R, G, B, and one white component into a 32-bit unsigned integer
+    #define GetU32Colour toUint32
+    static uint32_t toUint32(const RgbcctColor& color) {
+        return (static_cast<uint32_t>(color.W1) << 24) |
+              (static_cast<uint32_t>(color.R) << 16) |
+              (static_cast<uint32_t>(color.G) << 8)  |
+              (static_cast<uint32_t>(color.B));  // Assume we are packing WW as the white component
+    }
+
+
+
+
+
+
+
+
+    // /**
+    //  * @brief 
+    //  * Conversion from Rgbcct into uint32_t (dropping the second white colour)
+    //  * 
+    //  */
+    // static uint32_t GetU32Colour(RgbcctColor c)
+    // {
+    //     uint32_t c_out =
+    //         ((uint32_t)c.warm_white << 24) |
+    //         ((uint32_t)c.red        << 16) |
+    //         ((uint32_t)c.green      <<  8) |
+    //         ((uint32_t)c.blue            ) ;
+    //     return c_out;
+    // }
+
+    // static RgbcctColor GetRgbcctFromU32Colour(uint32_t c)
+    // {
         
-        uint8_t white = (uint8_t)(c >> 24);
-        uint8_t red   = (uint8_t)(c >> 16);
-        uint8_t green = (uint8_t)(c >> 8);
-        uint8_t blue  = (uint8_t)(c);
-        return RgbcctColor(red,green,blue,white);
-    }
+    //     uint8_t white = (uint8_t)(c >> 24);
+    //     uint8_t red   = (uint8_t)(c >> 16);
+    //     uint8_t green = (uint8_t)(c >> 8);
+    //     uint8_t blue  = (uint8_t)(c);
+    //     return RgbcctColor(red,green,blue,white);
+    // }
     
     uint32_t getU32()
     {
@@ -319,45 +335,22 @@ struct RgbcctColor : RgbColorBase
         return c_out;
     }
 
+    RgbcctColor& setU32(uint32_t c)
+    {
+        W1 = (uint8_t)(c >> 24);
+        R = (uint8_t)(c >> 16);
+        G = (uint8_t)(c >> 8);
+        B = (uint8_t)(c);
+        return *this; 
+    //     return *this;
+    }
 
-// public: // not sure if this is needed?
 
-    // Unions allow overlapping of parameters, size of parameters below is only 5 bytes, but can be accessed by multiple ways
-    union {
-		struct {
-            union {
-                uint8_t R;
-                uint8_t red;
-            };
-            union {
-                uint8_t G;
-                uint8_t green;
-            };
-            union {
-                uint8_t B;
-                uint8_t blue;
-            };
-            union {
-                uint8_t WW;
-                uint8_t W1; // for when the white channel does not matter e.g. rgbw
-                uint8_t warm_white;
-            };
-            union {
-                uint8_t WC;
-                uint8_t W2;
-                uint8_t white_cold;
-            };
-        };
-		uint8_t raw[5];
-	};
 
-    // inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
-    // {
-    //     return raw[x];
-    // }
 
-// Ie merge controller to be directly inside this!
-#ifdef ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
+
+
+
 
 
 
@@ -407,6 +400,45 @@ struct RgbcctColor : RgbColorBase
   void addCCTMode() {
     setColorMode(_color_mode | LIGHT_MODE_CCT);
   }
+
+
+  /***
+   *  Static conversions to add colours
+   * */
+
+  static RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor colour, uint8_t brightness) {
+    RgbcctColor colour_with_brightness;
+
+    // Apply the same brightness to all components
+    colour_with_brightness.R = (colour.R * brightness) / 255;
+    colour_with_brightness.G = (colour.G * brightness) / 255;
+    colour_with_brightness.B = (colour.B * brightness) / 255;
+    colour_with_brightness.WW = (colour.WW * brightness) / 255;
+    colour_with_brightness.WC = (colour.WC * brightness) / 255;
+
+    return colour_with_brightness;
+}
+
+
+
+  static RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor colour, uint8_t brightnessRGB, uint8_t brightnessCCT) {
+    RgbcctColor colour_with_brightness;
+
+    // Apply RGB brightness
+    colour_with_brightness.R = (colour.R * brightnessRGB) / 255;
+    colour_with_brightness.G = (colour.G * brightnessRGB) / 255;
+    colour_with_brightness.B = (colour.B * brightnessRGB) / 255;
+
+    // Apply CCT brightness
+    colour_with_brightness.WW = (colour.WW * brightnessCCT) / 255;
+    colour_with_brightness.WC = (colour.WC * brightnessCCT) / 255;
+
+    return colour_with_brightness;
+}
+
+
+
+
 
   /**
    * UpdateInternalColour
@@ -929,7 +961,14 @@ void setSat255(uint8_t sat_new);
     UpdateInternalColour();
   }
 
-   void setCCT(uint16_t cct) 
+   void setCCT_255Range(uint16_t cct_255) 
+  {
+    uint16_t cct = map(cct_255, 0, 255, _cct_min_range, _cct_max_range);
+    setCCT(cct);
+  }
+
+
+  void setCCT(uint16_t cct) // sets the kelvin value
   {
     
 // Serial.printf("_cct_min_range=%d\n\r",_cct_min_range);
@@ -955,6 +994,9 @@ void setSat255(uint8_t sat_new);
 
   uint16_t getCCT(){
     return _cct; // 153..500, or CT_MIN..CT_MAX
+  }
+  uint8_t getCCT255(){
+    return map(_cct, _cct_min_range, _cct_max_range, 0, 255);
   }
 
   uint16_t getCTifEnabled(){
@@ -1032,7 +1074,7 @@ void setSat255(uint8_t sat_new);
 
   void debug_print(char* name = nullptr)
   {
-    Serial.printf("%s%s%d,%d,%d,c%d,w%d\n\r", name==nullptr?"":name, name==nullptr?"":"=",  R, G, B, WC, WW);
+    Serial.printf("%s%s%d,%d,%d,%d,%d\n\r", name==nullptr?"":name, name==nullptr?"":"=",  R, G, B, WC, WW);
   }
 
   void debug_print_states(char* name = nullptr)
@@ -1043,7 +1085,6 @@ void setSat255(uint8_t sat_new);
 
 
 
-#endif // ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
 
 };
 

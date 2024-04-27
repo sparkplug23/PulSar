@@ -46,9 +46,9 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     // // test end
 
     // DEBUG_LINE_HERE;
-    JBI->Add(PM_JSON_TIME,           pCONT_time->RtcTime.hhmmss_ctr);
+    JBI->Add(PM_JSON_TIME,           pCONT_time->GetDateAndTime(DT_LOCAL_TIME).c_str());
     // DEBUG_LINE_HERE;
-    JBI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JBI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     // DEBUG_LINE_HERE;
     JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JBI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime.sleep ? "Dynamic" : "Unknown");
@@ -105,6 +105,8 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
     JBI->Add(PM_JSON_SETTINGS_HOLDER,pCONT_set->Settings.cfg_holder);
     JBI->Add_FV(PM_JSON_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
     JBI->Add(PM_JSON_SAVECOUNT,      pCONT_set->Settings.save_flag);
+
+    JBI->Add("Textbuffer", pCONT_set->Settings.text_pool);
     
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     JBI->Add(PM_JSON_POWERONSTATE,   pCONT_set->Settings.poweronstate); 
@@ -466,7 +468,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
   JBI->Add(PM_JSON_DEVICE, pCONT_set->Settings.system_name.device);
   JBI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
   JBI->Add_FV(PM_JSON_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
-                      pCONT_time->RtcTime.Mday, pCONT_time->RtcTime.month, pCONT_time->RtcTime.year,
+                      pCONT_time->RtcTime.day_of_month, pCONT_time->RtcTime.month, pCONT_time->RtcTime.year,
                       pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second
                     );
   JBI->Object_Start(PM_JSON_COUNTER);
@@ -509,7 +511,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_ap
   IPAddress localip = WiFi.localIP();
   
   JBI->Start();
-    JBI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JBI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JBI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay_temp);
     JBI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);

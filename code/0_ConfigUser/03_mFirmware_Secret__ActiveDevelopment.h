@@ -30,7 +30,7 @@
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__TREADMILL_01
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__TREADMILL_02
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__KITCHEN_7INCH
-#define DEVICE_TESTBED__LED_MATRIX
+// #define DEVICE_TESTBED__LED_MATRIX
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -197,12 +197,22 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
   /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  /***********************************
    * SECTION: System Configs
   ************************************/     
 
   #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
 
-  #define ENABLE_DEVFEATURE_RTC_SETTINGS
+  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
@@ -228,6 +238,23 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
   #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/    
+
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+
+  #define ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
+
+  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+
+  // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
+  // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
 
 
   /***********************************
@@ -265,6 +292,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
               // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
               #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
               #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+              #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
                           
               #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
               
@@ -326,6 +354,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+  #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
 
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
 
@@ -706,11 +736,12 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
 
   #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
@@ -720,7 +751,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
 
-  #define ENABLE_DEVFEATURE_RTC_SETTINGS
+  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
@@ -771,6 +802,26 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  
+  #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+    #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
+    #define WLED_DEBUG
+    #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+    // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
+  #endif 
+
+  #define ENABLE_DEVFEATURE_LIGHT__SWITCH_TO_JOINT_NAME_AND_DATA_PROGMEM
+
+
+  #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
+
+
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
@@ -784,9 +835,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
-  #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
-  #define WLED_DEBUG
+
   
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
@@ -800,7 +849,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "BusConfig":[
       {
         "Pin":32,
-        "ColourOrder":"RGB",
+        "ColourOrder":"GRB",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":256
@@ -811,17 +860,27 @@ May need to add two power connections too, so its not just the cat5e wire to let
         0,
         256
       ],
-      "ColourPalette":"IceCream Floats",
+      "ColourPalette":"Party 16",
       "PaletteMappingValues":[10,15,20],
       "SegColour0": {
         "Hue": 0,
         "Sat":100,
-        "BrightnessRGB":5
+        "BrightnessRGB":1
+      },
+      "SegColour1": {
+        "Hue": 120,
+        "Sat":20,
+        "BrightnessRGB":1
+      },
+      "SegColour2": {
+        "Hue": 240,
+        "Sat":100,
+        "BrightnessRGB":1
       },
       "Effects": {
         "Function":"Spanned Palette",
         "Speed":127,
-        "Intensity":255,
+        "Intensity":127,
         "Decimate":0,
         "Grouping":1
       },
@@ -1056,8 +1115,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 
-
-
 #ifdef DEVICE_TREADMILL_POWER_MONITOR
   #define DEVICENAME_CTR          "treadmill_power_monitor"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
@@ -1091,7 +1148,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
 
-  #define ENABLE_DEVFEATURE_RTC_SETTINGS
+  
 
   // #define USE_MODULE_DRIVERS_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
@@ -1814,7 +1871,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 #ifdef DEVICE_TESTBED__NEXTION_DISPLAY__TREADMILL_01
-  #define DEVICENAME_C TR            "nextion_treadmill_01"
+  #define DEVICENAME_CTR            "nextion_treadmill_01"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
@@ -1858,7 +1915,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define USE_MODULE_NETWORK_WEBSERVER
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // #define ENABLE_FREERAM_APPENDING_SERIAL
-    #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 230400
+    // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 230400
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
@@ -1870,11 +1927,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
   
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 7 
+  #define NEXTION_DEFAULT_PAGE_NUMBER 6
     #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
     // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
     #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
     #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+    #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
+
+    #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
 
   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   

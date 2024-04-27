@@ -79,7 +79,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     //     data_buffer.isserviced++;
     //   }
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
     }
 
@@ -147,7 +147,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     LogBuffer_Add((char*)jtok.getStr());
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     #endif
   }
 
@@ -206,7 +206,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     CommandSet_DisplayText_Advanced_JSON(obj);
 
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DrawText" ));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DrawText" ));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     // #endif // ENABLE_LOG_LEVEL_DEBUG
 
 
@@ -248,7 +248,7 @@ void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
   pCONT->Tasker_Interface(FUNC_DISPLAY_REFRESH_SHOW_ID);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   #endif
 }
 
@@ -259,7 +259,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 {  
   LogBuffer_Clear(); 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   #endif
 }
 
@@ -272,7 +272,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //   SetDisplayMode(EM_DISPLAY_MODE_LOG_STATIC_ID);
 //   LogBuffer_Add((char*)c);
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
 //   #endif
 // }
 

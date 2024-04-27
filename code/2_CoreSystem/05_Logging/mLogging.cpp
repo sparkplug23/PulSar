@@ -165,7 +165,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
     // sprintf(mxtime, PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
       pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
-      pCONT_time->uptime.Mday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+      pCONT_time->uptime.day_of_month,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
   }
 
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());

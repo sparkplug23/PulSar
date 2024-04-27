@@ -629,8 +629,17 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
     // char* ulltoa(unsigned long long value, char *str, int radix);
     // char* dtostrfd(double number, unsigned char prec, char *s);
     static char* float2CString(float number, unsigned char prec, char *s);
-    char* Unescape(char* buffer, uint16_t* size);
+    
+
+
     char* RemoveSpace(char* p);
+    char* TrimSpace(char *p);
+    char* RemoveControlCharacter(char* p);
+    char* ReplaceChar(char* p, char find, char replace);
+    char* ReplaceCommaWithDot(char* p);
+    char* Unescape(char* buffer, uint32_t* size);
+
+
     char* LowerCase(char* dest, const char* source);
     char* UpperCase(char* dest, const char* source);
     char* UpperCase_P(char* dest, const char* source);
@@ -665,6 +674,7 @@ static bool CheckCommand_P(const char* needle, const char* haystack);
 static int8_t GetCommandID(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
 static int8_t GetCommandID_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
 static int16_t GetCommandID16_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
+static int16_t GetCommandID16_MultipleSubMatches_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
 
 
   int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
@@ -731,7 +741,7 @@ static int16_t GetCommandID16_P(const char* needle, const char* haystack, char* 
 
 void UpdateStatusBlink();
 
-    timereached_t testtime2;
+    // timereached_t testtime2;
 
 
     char* GetStateText(uint8_t state);

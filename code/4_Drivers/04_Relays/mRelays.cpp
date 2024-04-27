@@ -36,7 +36,22 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case FUNC_EVERY_MINUTE:
       SubTask_Every_Minute();
+
+      // Load_Module();
     break;
+    /************
+     * STORAGE SECTION * 
+    *******************/  
+    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+      Save_Module();
+    break;
+    case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
+      Load_Module();
+    break;
+    #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+    #endif // USE_MODULE_DRIVERS_FILESYSTEM
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -77,6 +92,28 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
   } // end switch
 } // END function
 
+
+#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+#ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+
+void mRelays::Save_Module()
+{
+  ALOG_INF(PSTR(D_LOG_RELAYS "Save_Module"));
+  pCONT_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+}
+
+void mRelays::Load_Module(bool erase)
+{
+  ALOG_INF(PSTR(D_LOG_RELAYS "Load_Module"));
+  pCONT_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+}
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+#endif // USE_MODULE_DRIVERS_FILESYSTEM
+
+
+
+
 void mRelays::Pre_Init(void){
   
   module_state.mode = ModuleStatus::Initialising;
@@ -96,7 +133,7 @@ void mRelays::Pre_Init(void){
     {
       uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
       pinMode(pin_number, OUTPUT);
-      bitSet(rt.rel_inverted, driver_index); //temp fix
+      bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
       pCONT_set->runtime.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
     }
@@ -160,6 +197,10 @@ void mRelays::EverySecond()
    **/
   SubTask_UpdateState(); // this function will simply check timeroff, timeron and time restriction. Other functions will set these values
 
+  // ALOG_INF(PSTR("%d timer_decounter %d"), 0, rt.relay_status[0].timer_decounter.seconds);
+  // ALOG_INF(PSTR("%d timer_decounter %d"), 1, rt.relay_status[1].timer_decounter.seconds);
+  // ALOG_INF(PSTR("%d timer_decounter %d"), 2, rt.relay_status[2].timer_decounter.seconds);
+  // ALOG_INF(PSTR("%d timer_decounter %d"), 3, rt.relay_status[3].timer_decounter.seconds);
 }
 
 void mRelays::SubTask_Relay_CycleTimer()
@@ -440,13 +481,13 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
   // power xx11 - toggle REL2 (On)  and REL4 (On)  - device 1 On,  device 2 On
 
   if (state && !pCONT_set->runtime.latching_relay_pulse) {  // Set latching relay to power if previous pulse has finished
-    rt.latching_power = lpower;
+    rt.bitpacked.latching_power = lpower;
     pCONT_set->runtime.latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
   }
 
   for (uint32_t i = 0; i < pCONT_set->runtime.devices_present; i++) {
-    uint32_t port = (i << 1) + ((rt.latching_power >> i) &1);
-    pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.rel_inverted, port) ? !state : state);
+    uint32_t port = (i << 1) + ((rt.bitpacked.latching_power >> i) &1);
+    pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
 }
 
@@ -487,7 +528,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
 DEBUG_LINE;
   
   if (rpower) {                           // Any power set
-    rt.last_power = rpower;
+    rt.bitpacked.last_power = rpower;
   }
 
   // PHASE OUT and replace with something else
@@ -550,14 +591,14 @@ DEBUG_LINE;
 //        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
 
         //tmp fix
-        if(bitRead(rt.rel_inverted, i))
+        if(bitRead(rt.bitpacked.rel_inverted, i))
         { //add the gpio mpin shift back in
           gpio_pin = GPIO_REL1_INV_ID;          
         }else{
           gpio_pin = GPIO_REL1_ID;
         }
 
-        pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.rel_inverted, i) ? !state : state);
+        pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
 
         // pCONT_pins->DigitalWrite(GPIO_REL1_ID +i, bitRead(rel_inverted, i) ? !state : state);
 
@@ -572,8 +613,8 @@ DEBUG_LINE;
 
 void mRelays::RestorePower(bool publish_power, uint32_t source)
 {
-  if (pCONT_set->runtime.power != rt.last_power) {
-    SetDevicePower(rt.last_power, source);
+  if (pCONT_set->runtime.power != rt.bitpacked.last_power) {
+    SetDevicePower(rt.bitpacked.last_power, source);
     if (publish_power) {
       mqtthandler_state_teleperiod.flags.SendNow = true;
       mqtthandler_state_ifchanged.flags.SendNow = true;
@@ -663,7 +704,7 @@ void mRelays::SetPowerOnState(void)
     
   }
 
-  rt.blink_powersave = pCONT_set->runtime.power;
+  rt.bitpacked.blink_powersave = pCONT_set->runtime.power;
 }
 
 
@@ -1392,35 +1433,29 @@ uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level, bool json_appending
     if(rt.relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ rt.relay_status[device_id].ischanged=false;
       
       JBI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-        JBI->Object_Start("enabled_ranges");
+        
+        JBI->Object_Start("scheduled");
+          JBI->Add("enabled", rt.relay_status[device_id].scheduled[0].enabled);
+          JBI->Array_Start("ontime");
+            JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].scheduled[0].ontime, buffer, sizeof(buffer)));
+          JBI->Array_End();
+          JBI->Array_Start("offtime");
+            JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].scheduled[0].offtime, buffer, sizeof(buffer)));
+          JBI->Array_End();
+          JBI->Add("days", rt.relay_status[device_id].scheduled[0].days_of_week_enabled_bitpacked);
+        JBI->Object_End();
 
+        JBI->Object_Start("enabled_ranges");
+          JBI->Add("enabled", rt.relay_status[device_id].enabled_ranges[0].enabled);
           JBI->Array_Start("ontime");
             JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
           JBI->Array_End();
           JBI->Array_Start("offtime");
             JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
           JBI->Array_End();
-
-
           JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
-
-          //  AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
-  
-
-
-
-
         JBI->Object_End();
 
-        // JBI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
-        // JBI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-        // JBI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-        // JBI->Level_Start_P(PM_JSON_LAST);
-        //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
-        //   JBI->Add_P(PM_JSON_ONTIME, buffer);
-        //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
-        //   JBI->Add_P(PM_JSON_OFFTIME, buffer);
-        // JBI->Object_End();
       JBI->Object_End();
       
     }
@@ -1445,7 +1480,7 @@ void mRelays::MQTTHandler_Init()
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->flags.SendNow = true;
   ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;

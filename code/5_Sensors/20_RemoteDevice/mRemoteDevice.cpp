@@ -135,7 +135,7 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     ALOG_DBM( PSTR("Remote Read %d" ), (int)value->data_f[0]);
     //  
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
 
     D_MQTT_COMMAND_HANDLED_COUNT_INC;

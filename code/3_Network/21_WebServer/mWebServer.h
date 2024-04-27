@@ -43,7 +43,7 @@ DEFINE_PGM_CTR(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT) "application/jso
 const char PM_WEB_CONTENT_TYPE_TEXT_CSS[] PROGMEM = "text/css";
 
 // define flash strings once (saves flash memory)
-static const char s_redirecting[] PROGMEM = "Redirecting...";
+// static const char s_redirecting[] PROGMEM = "Redirecting...";
 static const char s_content_enc[] PROGMEM = "Content-Encoding";
 static const char s_unlock_ota [] PROGMEM = "Please unlock OTA in security settings!";
 static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN code!";

@@ -12,6 +12,7 @@
 #include <string.h>
 
 
+#include <ext_printf.h>
 
 
 #define SET_FLAG   true
@@ -291,6 +292,9 @@ enum TaskerID{
   #endif 
   #ifdef USE_MODULE_CORE_TIME
     EM_MODULE_CORE_TIME_ID,
+  #endif 
+  #ifdef USE_MODULE_CORE_TIME2
+    EM_MODULE_CORE_TIME2_ID,
   #endif 
   #ifdef USE_MODULE_CORE_RULES
     EM_MODULE_CORE_RULES_ID,
@@ -678,6 +682,10 @@ enum TaskerID{
 #ifdef USE_MODULE_CORE_TIME
   #include "2_CoreSystem/02_Time/mTime.h"
   #define   pCONT_time                              static_cast<mTime*>(pCONT->pModule[EM_MODULE_CORE_TIME_ID])
+#endif 
+#ifdef USE_MODULE_CORE_TIME2
+  #include "2_CoreSystem/02_Time2/mTime.h"
+  #define   pCONT_time2                              static_cast<mTime2*>(pCONT->pModule[EM_MODULE_CORE_TIME2_ID])
 #endif 
 #ifdef USE_MODULE_CORE_RULES
   #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"

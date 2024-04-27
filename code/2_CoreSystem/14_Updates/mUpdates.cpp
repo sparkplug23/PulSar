@@ -242,7 +242,7 @@ uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_level, bool json_appending
     // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
     // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }

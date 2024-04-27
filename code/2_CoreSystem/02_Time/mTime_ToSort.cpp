@@ -1,5 +1,77 @@
 #include "mTime.h"
 
+#ifdef USE_MODULE_CORE_TIME
+
+
+
+
+/**********************************************************************************************************************************************************************************************************
+ * @brief
+ * 
+ * Functions used to set the time
+ * 
+ * *********************************************************************************************************************************************************************************************************/
+
+/**
+ * @brief Allows GPS to update time when no NTP is available (although with network it is possible..?)
+ * 
+ * 
+ * Add that GPS can be called here
+ * Have the function argument called always when new time is available eg gps receive
+ * but have it that an internal check only sets it as often as I want (eg every 10 minutes even though its called every second). Use flag to force set too if desired from another call (eg new connection)
+ * 
+ */
+// void mTime::SetSystemTime()
+// {
+
+// }
+
+
+
+/**********************************************************************************************************************************************************************************************************
+ * @brief
+ * 
+ * Functions update time
+ * 
+ * *********************************************************************************************************************************************************************************************************/
+
+#ifdef ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+void mTime::SystemTime_NTPUpdate()
+{
+
+  // Get primary network stream
+
+
+  uint32_t ntp_time = 0;
+  bool ntp_get_success = SystemTime_NTPUpdate_GetNTPTime(&ntp_time, stream);
+
+  
+
+
+
+
+}
+
+
+bool mTime::SystemTime_NTPUpdate_GetNTPTime(uint32_t* ntp_time)
+{
+
+
+
+}
+#endif // ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+
+
+
+
+    #ifndef DISABLE_TIME1_OLD_CODE
+uint32_t mTime::UtcTime(void)
+{
+  return Rtc.utc_time;
+}
+    #endif // DISABLE_TIME1_OLD_CODE
+
+
 
 
 /**
@@ -23,7 +95,7 @@ void mTime::SystemTime_Update(
   datetime tm;
   tm.year = year-1970;
   tm.month = month;
-  tm.Mday = day;
+  tm.day_of_month = day;
   tm.hour = hour;
   tm.minute = minute;
   tm.second = second;
@@ -51,7 +123,7 @@ void mTime::SetUTCTime(
   datetime tm;
   tm.year = year-1970;
   tm.month = month;
-  tm.Mday = day;
+  tm.day_of_month = day;
   tm.hour = hour;
   tm.minute = minute;
   tm.second = second;
@@ -63,48 +135,48 @@ void mTime::SetUTCTime(
 
 void mTime::parse_JSONCommand(JsonParserObject obj){}
 
-void mTime::init(void){
+// void mTime::init(void){
   
-  RtcInit();
-  // initUpTime();
+//   RtcInit();
+//   // initUpTime();
 
-  tSavedStoreRTCUpdate = millis()+2000;
+//   tSavedStoreRTCUpdate = millis()+2000;
   
-  memset(&uptime,0,sizeof(uptime));
+//   memset(&uptime,0,sizeof(uptime));
 
-  kDaysInMonth[0] = 31;
-  kDaysInMonth[1] = 28;
-  kDaysInMonth[2] = 31;
-  kDaysInMonth[3] = 30;
-  kDaysInMonth[4] = 31;
-  kDaysInMonth[5] = 30;
-  kDaysInMonth[6] = 31;
-  kDaysInMonth[7] = 31;
-  kDaysInMonth[8] = 30;
-  kDaysInMonth[9] = 31;
-  kDaysInMonth[10] = 30;
-  kDaysInMonth[11] = 31;
+//   kDaysInMonth[0] = 31;
+//   kDaysInMonth[1] = 28;
+//   kDaysInMonth[2] = 31;
+//   kDaysInMonth[3] = 30;
+//   kDaysInMonth[4] = 31;
+//   kDaysInMonth[5] = 30;
+//   kDaysInMonth[6] = 31;
+//   kDaysInMonth[7] = 31;
+//   kDaysInMonth[8] = 30;
+//   kDaysInMonth[9] = 31;
+//   kDaysInMonth[10] = 30;
+//   kDaysInMonth[11] = 31;
 
-  // kDaysInMonth[0] = 1;
-  // kDaysInMonth[1] = 2;
-  // kDaysInMonth[2] = 3;
-  // kDaysInMonth[3] = 4;
-  // kDaysInMonth[4] = 5;
-  // kDaysInMonth[5] = 6;
-  // kDaysInMonth[6] = 7;
-  // kDaysInMonth[7] = 8;
-  // kDaysInMonth[8] = 9;
-  // kDaysInMonth[9] = 10;
-  // kDaysInMonth[10] = 11;
-  // kDaysInMonth[11] = 12;
+//   // kDaysInMonth[0] = 1;
+//   // kDaysInMonth[1] = 2;
+//   // kDaysInMonth[2] = 3;
+//   // kDaysInMonth[3] = 4;
+//   // kDaysInMonth[4] = 5;
+//   // kDaysInMonth[5] = 6;
+//   // kDaysInMonth[6] = 7;
+//   // kDaysInMonth[7] = 8;
+//   // kDaysInMonth[8] = 9;
+//   // kDaysInMonth[9] = 10;
+//   // kDaysInMonth[10] = 11;
+//   // kDaysInMonth[11] = 12;
 
-  // memcpy(kMonthNamesEnglish,"JanFebMarAprMayJunJulAugSepOctNovDec",sizeof("JanFebMarAprMayJunJulAugSepOctNovDec")-1);// = ;
+//   // memcpy(kMonthNamesEnglish,"JanFebMarAprMayJunJulAugSepOctNovDec",sizeof("JanFebMarAprMayJunJulAugSepOctNovDec")-1);// = ;
 
-  // Serial.print("getEpochTime");
-  // Serial.println(timeClient->getEpochTime());
+//   // Serial.print("getEpochTime");
+//   // Serial.println(timeClient->getEpochTime());
 
 
-}
+// }
 
 
 bool mTime::CheckOrStartNTPService(){
@@ -125,7 +197,7 @@ bool mTime::CheckOrStartNTPService(){
 
   if(!settings.timeclient_is_started){
     // fTimeSet = false;
-    RtcTime.isvalid = false;
+    RtcTime.valid = false;
     return false; // failed to start
   }
 
@@ -136,7 +208,7 @@ bool mTime::CheckOrStartNTPService(){
 
 
 uint32_t mTime::GetTimeOfDay_Seconds(void){
-  return RtcTime.Dseconds;
+  return 0;//RtcTime.Dseconds;
 }
 
 const char* mTime::ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds_tod, char* buffer, uint8_t buflen)
@@ -238,26 +310,26 @@ bool mTime::MillisReached(uint32_t* tTarget){
 
 void mTime::UpdateStoredRTCVariables(void){
 
-//phase out or join methods together
-  // setTime(Rtc.utc_time);//timeClient->getEpochTime()); // Set to use conversion to units
+// //phase out or join methods together
+//   // setTime(Rtc.utc_time);//timeClient->getEpochTime()); // Set to use conversion to units
 
-  RtcTime.Yseconds = 0;//timeClient->getEpochTime() - NTP_EPOCH_AT_START_OF_2019;
-  RtcTime.Wseconds = (RtcTime.Wday*SEC2DAY)+(RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
-  RtcTime.Dseconds = (RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
-  RtcTime.seconds_nonreset++; // probably not needed, its just because of uptime sharing struct type
+//   RtcTime.Yseconds = 0;//timeClient->getEpochTime() - NTP_EPOCH_AT_START_OF_2019;
+//   RtcTime.Wseconds = (RtcTime.day_of_week*SEC2DAY)+(RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
+//   RtcTime.Dseconds = (RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
+//   RtcTime.seconds_nonreset++; // probably not needed, its just because of uptime sharing struct type
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,
-    PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
-    RtcTime.Mday,RtcTime.month,RtcTime.year,
-    RtcTime.Wday,RtcTime.hour,RtcTime.minute,RtcTime.second,
-    RtcTime.Dseconds,RtcTime.Wseconds,RtcTime.Yseconds
-  ); 
-  #endif// ENABLE_LOG_LEVEL_INFO
+//   #ifdef ENABLE_LOG_LEVEL_INFO
+//   AddLog(LOG_LEVEL_DEBUG_MORE,
+//     PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
+//     RtcTime.day_of_month,RtcTime.month,RtcTime.year,
+//     RtcTime.day_of_week,RtcTime.hour,RtcTime.minute,RtcTime.second,
+//     RtcTime.Dseconds,RtcTime.Wseconds,RtcTime.Yseconds
+//   ); 
+//   #endif// ENABLE_LOG_LEVEL_INFO
 
-  memset(RtcTime.hhmmss_ctr,0,sizeof(RtcTime.hhmmss_ctr));
-  sprintf_P(RtcTime.hhmmss_ctr, PSTR("%02d:%02d:%02d"),RtcTime.hour,RtcTime.minute,RtcTime.second);
-  // timeClient->getFormattedTime(RtcTime.hhmmss_ctr);
+//   memset(RtcTime.hhmmss_ctr,0,sizeof(RtcTime.hhmmss_ctr));
+//   sprintf_P(RtcTime.hhmmss_ctr, PSTR("%02d:%02d:%02d"),RtcTime.hour,RtcTime.minute,RtcTime.second);
+//   // timeClient->getFormattedTime(RtcTime.hhmmss_ctr);
   
 }
 
@@ -268,8 +340,8 @@ void mTime::TickRTCVariablesWithUptime(void){
 
   // RtcTime.year = year();
   // RtcTime.month = month();
-  // RtcTime.Wday = weekday();
-  // RtcTime.Mday = day();
+  // RtcTime.day_of_week = weekday();
+  // RtcTime.day_of_month = day();
   // RtcTime.hour = hour();
   // RtcTime.minute = minute();
   // RtcTime.second = second();
@@ -285,19 +357,21 @@ void mTime::TickRTCVariablesWithUptime(void){
   // }
   // if(RtcTime.hour>23){
   //   RtcTime.hour = 0;
-  //   RtcTime.Yday++;
+  //   RtcTime.day_of_year++;
   // }
 
+    #ifndef DISABLE_TIME1_OLD_CODE
   RtcTime = uptime;
+    #endif // DISABLE_TIME1_OLD_CODE
 
   // RtcTime.Yseconds = timeClient->getEpochTime() - NTP_EPOCH_AT_START_OF_2019;
-  // RtcTime.Wseconds = (RtcTime.Wday*SEC2DAY)+(RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
+  // RtcTime.Wseconds = (RtcTime.day_of_week*SEC2DAY)+(RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
   // RtcTime.Dseconds = (RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
 
   // AddLog(LOG_LEVEL_DEBUG_MORE,
   //   PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
-  //   RtcTime.Mday,RtcTime.month,RtcTime.year,
-  //   RtcTime.Wday,RtcTime.hour,RtcTime.minute,RtcTime.second,
+  //   RtcTime.day_of_month,RtcTime.month,RtcTime.year,
+  //   RtcTime.day_of_week,RtcTime.hour,RtcTime.minute,RtcTime.second,
   //   RtcTime.Dseconds,RtcTime.Wseconds,RtcTime.Yseconds
   // ); 
 
@@ -307,6 +381,7 @@ void mTime::TickRTCVariablesWithUptime(void){
 }
 
 
+    #ifndef DISABLE_TIME1_OLD_CODE
 /**
  * @brief NOT USED, DELETE???
  * 
@@ -334,6 +409,7 @@ uint32_t mTime::UpTime(void)
   // }
   return uptime.seconds_nonreset;
 }
+    #endif // DISABLE_TIME1_OLD_CODE
 
 
 // -- Internal counters  -- Internal counters  -- Internal counters  -- Internal counters  -- Internal counters
@@ -354,14 +430,6 @@ void mTime::UpdateUpTime(){
 
   uptime.seconds_nonreset++;
 
-  // Consider using boottime and nowtime breakdown and using the seconds difference, add another uptime counter to check it
-  uptime_seconds_nonreset++;
-  // timeClient->getEpochTime()
-
-
-
-
-
   uptime.second++;
   if(uptime.second>59){
     uptime.second = 0;
@@ -373,12 +441,12 @@ void mTime::UpdateUpTime(){
   }
   if(uptime.hour>23){
     uptime.hour = 0;
-    uptime.Yday++;
+    uptime.day_of_year++;
   }
 
   // change to function get
   memset(uptime.hhmmss_ctr,0,sizeof(uptime.hhmmss_ctr));
-  sprintf_P(uptime.hhmmss_ctr, PSTR("%02dT%02d:%02d:%02d"),uptime.Yday,uptime.hour,uptime.minute,uptime.second);
+  sprintf_P(uptime.hhmmss_ctr, PSTR("%02dT%02d:%02d:%02d"),uptime.day_of_year,uptime.hour,uptime.minute,uptime.second);
 
 }
 
@@ -387,7 +455,7 @@ time_short_t mTime::GetTimeShortNow(){
 
   time_short_t now;
 
-  now.Wday = RtcTime.Wday;
+  now.day_of_week = RtcTime.day_of_week;
   now.hour = RtcTime.hour;
   now.minute = RtcTime.minute;
   now.second = RtcTime.second;
@@ -400,12 +468,12 @@ uint32_t mTime::GetTimeShortNowU32(){
 
   // time_short_t now;
 
-  // now.Wday = RtcTime.Wday;
+  // now.day_of_week = RtcTime.day_of_week;
   // now.hour = RtcTime.hour;
   // now.minute = RtcTime.minute;
   // now.second = RtcTime.second;
 
-  uint32_t now = (RtcTime.Wday<<24) | (RtcTime.hour<<16) | (RtcTime.minute<<8) | (RtcTime.second);
+  uint32_t now = (RtcTime.day_of_week<<24) | (RtcTime.hour<<16) | (RtcTime.minute<<8) | (RtcTime.second);
   // uint32_t now2 = reinterpret_cast<uint32_t>(now);
 
   return now;
@@ -440,27 +508,27 @@ const char* mTime::ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8
 const char* mTime::ConvertU32TimetoCtr(uint32_t* _time, char* buffer, uint8_t buflen, bool flag_include_weekday ) //pointer is not needed!
 {
   // typedef struct time_short{
-  //   uint8_t Wday; // week day [0-7]
+  //   uint8_t day_of_week; // week day [0-7]
   //   uint8_t hour;   // [0-23]
   //   uint8_t minute; // [0-59]
   //   uint8_t second; // [0-59]
   // }time_short_t;
 
   uint32_t time = *_time;
-  uint8_t Wday   = (uint8_t)((time & 0xFF000000) >> 24);
+  uint8_t day_of_week   = (uint8_t)((time & 0xFF000000) >> 24);
   uint8_t hour   = (uint8_t)((time & 0x00FF0000) >> 16);
   uint8_t minute = (uint8_t)((time & 0x0000FF00) >>  8);
   uint8_t second = (uint8_t)((time & 0x000000FF)      );
 
   // time_short_t* time = reinterpret_cast<time_short_t*>(_time);
-  // uint8_t Wday = _time
+  // uint8_t day_of_week = _time
   if(flag_include_weekday)
 {
 
 
   snprintf_P(buffer, buflen, 
               PSTR("D%d" D_DATE_TIME_SEPARATOR "%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
-              Wday, hour, minute, second
+              day_of_week, hour, minute, second
   );
 
 }else
@@ -521,12 +589,12 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
   }
 
   if(includes_week){
-    time_s.Wday   = (uint8_t) strtol( &time_ctr[0], NULL, 10);  //days 1-7 so 0 means none set
+    time_s.day_of_week   = (uint8_t) strtol( &time_ctr[0], NULL, 10);  //days 1-7 so 0 means none set
     time_s.hour   = (uint8_t) strtol( &time_ctr[3], NULL, 10);
     time_s.minute = (uint8_t) strtol( &time_ctr[6], NULL, 10);
     time_s.second = (uint8_t) strtol( &time_ctr[9], NULL, 10);
   }else{
-    time_s.Wday   = 0;
+    time_s.day_of_week   = 0;
     time_s.hour   = (uint8_t) strtol( &time_ctr[0], NULL, 10);
     time_s.minute = (uint8_t) strtol( &time_ctr[3], NULL, 10);
     time_s.second = (uint8_t) strtol( &time_ctr[6], NULL, 10);
@@ -586,11 +654,11 @@ uint8_t mTime::CheckBetweenSOD(uint32_t start, uint32_t end){
 
 
 //PROBABLY breaks on week rollover!! Needs fixed
-// New datetime checker for week only (Wday,hours,minutes,seconds)
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
 uint8_t mTime::CheckBetween_Week_DateTimes(datetime_t* start, datetime_t* end){
 
-  uint32_t start_sow = (start->Wday*SEC2DAY)+(start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
-  uint32_t end_sow = (end->Wday*SEC2DAY)+(end->hour*SEC2HOUR)+(end->minute*SEC2MIN)+(end->second);
+  uint32_t start_sow = (start->day_of_week*SEC2DAY)+(start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
+  uint32_t end_sow = (end->day_of_week*SEC2DAY)+(end->hour*SEC2HOUR)+(end->minute*SEC2MIN)+(end->second);
 
   int32_t time_until_start = start_sow-RtcTime.Wseconds;
   int32_t time_until_end = end_sow-RtcTime.Wseconds;
@@ -610,7 +678,7 @@ uint8_t mTime::CheckBetween_Week_DateTimes(datetime_t* start, datetime_t* end){
 
 }
 
-// New datetime checker for week only (Wday,hours,minutes,seconds)
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
 uint8_t mTime::CheckBetween_Day_DateTimes(datetime_t* start, datetime_t* end){
 
   uint32_t start_sod = (start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
@@ -731,7 +799,7 @@ bool mTime::IsShortTimeWithinRange(time_short start, time_short end)
 
 }
 
-// New datetime checker for week only (Wday,hours,minutes,seconds)
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
 int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t* end){
 
   uint32_t start_sod = (start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
@@ -837,10 +905,10 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
 
 
 
-// New datetime checker for week only (Wday,hours,minutes,seconds)
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
 uint8_t mTime::CheckDateTimeWeekIsNow(datetime_t* dt, uint8_t window){ //window default of 0
 
-  uint16_t dt_sow = (dt->Wday*SEC2DAY)+(dt->hour*SEC2HOUR)+(dt->minute*SEC2MIN)+(dt->second);
+  uint16_t dt_sow = (dt->day_of_week*SEC2DAY)+(dt->hour*SEC2HOUR)+(dt->minute*SEC2MIN)+(dt->second);
 
   if(
     (dt_sow == RtcTime.Wseconds)||
@@ -856,8 +924,8 @@ uint8_t mTime::CheckDateTimeWeekIsNow(datetime_t* dt, uint8_t window){ //window 
 // keep method, but add another
 uint8_t mTime::CheckBetweenDateTimes(datetime_t* start, datetime_t* end){
 
-  uint32_t start_soy = (GetDayOfYear(start->Mday,start->month)*86400)+(start->hour*3600)+(start->minute*60)+(start->second);
-  uint32_t end_soy = (GetDayOfYear(end->Mday,end->month)*86400)+(end->hour*3600)+(end->minute*60)+(end->second);
+  uint32_t start_soy = (GetDayOfYear(start->day_of_month,start->month)*86400)+(start->hour*3600)+(start->minute*60)+(start->second);
+  uint32_t end_soy = (GetDayOfYear(end->day_of_month,end->month)*86400)+(end->hour*3600)+(end->minute*60)+(end->second);
 
   #ifdef SERIAL_DEBUG_HIGH_LEVEL
     pCONT->mso->MessagePrint("[f::CheckBetweenDateTimes] ");
@@ -892,8 +960,8 @@ datetime_t mTime::GetDifferenceInDateTimes(datetime_t* dt1, datetime_t* dt2){
   memset(&datetime_new,0,sizeof(datetime_new));
 
   //check if new dt1 > dt2 THEN add day
-  uint32_t dt1_sow = (dt1->Wday*SEC2DAY)+(dt1->hour*SEC2HOUR)+(dt1->minute*SEC2MIN)+(dt1->second);
-  uint32_t dt2_sow = (dt2->Wday*SEC2DAY)+(dt2->hour*SEC2HOUR)+(dt2->minute*SEC2MIN)+(dt2->second);
+  uint32_t dt1_sow = (dt1->day_of_week*SEC2DAY)+(dt1->hour*SEC2HOUR)+(dt1->minute*SEC2MIN)+(dt1->second);
+  uint32_t dt2_sow = (dt2->day_of_week*SEC2DAY)+(dt2->hour*SEC2HOUR)+(dt2->minute*SEC2MIN)+(dt2->second);
   int32_t diff_sow = dt2_sow - dt1_sow;
 
     // pCONT->mso->MessagePrint("dt1_sow");pCONT->mso->MessagePrintln(dt1_sow);
@@ -913,19 +981,19 @@ datetime_t mTime::GetDifferenceInDateTimes(datetime_t* dt1, datetime_t* dt2){
 
   PrintDateTime(datetime_new);
 
-  // datetime_new.Mday = abs(dt1->Mday-dt2->Mday);
-  // datetime_new.Yday = abs(dt1->Yday-dt2->Yday);
+  // datetime_new.day_of_month = abs(dt1->day_of_month-dt2->day_of_month);
+  // datetime_new.day_of_year = abs(dt1->day_of_year-dt2->day_of_year);
   // datetime_new.month = abs(dt1->month-dt2->month);
   // datetime_new.year = abs(dt1->year-dt2->year);
   // datetime_new.hour = abs(dt1->hour-dt2->hour);
   // datetime_new.second = abs(dt1->second-dt2->second);
   // datetime_new.minute = abs(dt1->minute-dt2->minute);
   // //datetime_new.week = abs(dt1->week-dt2->week);
-  // datetime_new.Wday = abs(dt1->Wday-dt2->Wday);
+  // datetime_new.day_of_week = abs(dt1->day_of_week-dt2->day_of_week);
 
-  // pCONT->mso->MessagePrint("dt1->Wday");pCONT->mso->MessagePrintln(dt1->Wday);
-  // pCONT->mso->MessagePrint("dt2->Wday");pCONT->mso->MessagePrintln(dt2->Wday);
-  // pCONT->mso->MessagePrint("datetime_new.Wday");pCONT->mso->MessagePrintln(datetime_new.Wday);
+  // pCONT->mso->MessagePrint("dt1->day_of_week");pCONT->mso->MessagePrintln(dt1->day_of_week);
+  // pCONT->mso->MessagePrint("dt2->day_of_week");pCONT->mso->MessagePrintln(dt2->day_of_week);
+  // pCONT->mso->MessagePrint("datetime_new.day_of_week");pCONT->mso->MessagePrintln(datetime_new.day_of_week);
   //
   // if(start_sow>end_sow){ //tomorrow
   //   pCONT->mso->MessagePrintln("  if(start_sow>end_sow){ //tomorrow");
@@ -941,7 +1009,7 @@ datetime_t mTime::GetDifferenceInDateTimes(datetime_t* dt1, datetime_t* dt2){
 void mTime::DateTimeWeek2HHMMSS(datetime_t* dt, uint8_t* hour, uint8_t* minute, uint8_t* second){
 
   // start_sow
-  uint32_t sec = (dt->Wday*SEC2DAY)+(dt->hour*SEC2HOUR)+(dt->minute*SEC2MIN)+(dt->second);
+  uint32_t sec = (dt->day_of_week*SEC2DAY)+(dt->hour*SEC2HOUR)+(dt->minute*SEC2MIN)+(dt->second);
 
   int hours = sec / SEC2HOUR;
   if (hours){
@@ -967,7 +1035,7 @@ void mTime::PrintDateTime(datetime_t dt){
   #ifdef ENABLE_LOG_LEVEL_INFO
   //[Yxx-Mxx-Dxx-Wxx:H:M:S]
   char ctr[80];memset(ctr,0,sizeof(ctr));
-  sprintf_P(ctr, PSTR("%02d-%02d-%04d W%02d T%02d:%02d:%02d"), dt.Wday, dt.month, dt.year, dt.Wday, dt.hour, dt.minute, dt.second);
+  sprintf_P(ctr, PSTR("%02d-%02d-%04d W%02d T%02d:%02d:%02d"), dt.day_of_week, dt.month, dt.year, dt.day_of_week, dt.hour, dt.minute, dt.second);
   #endif // ENABLE_LOG_LEVEL_INFO
 
 }
@@ -976,7 +1044,7 @@ void mTime::PrintDateTime(time_short_t dt){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[40];memset(buffer,0,sizeof(buffer));
-  sprintf_P(buffer, PSTR("W%02d T%02d:%02d:%02d"), dt.Wday, dt.hour, dt.minute, dt.second);
+  sprintf_P(buffer, PSTR("W%02d T%02d:%02d:%02d"), dt.day_of_week, dt.hour, dt.minute, dt.second);
   AddLog(LOG_LEVEL_TEST,PSTR("PrintDateTime>\"%s\""),buffer);
   #endif // ENABLE_LOG_LEVEL_INFO
   
@@ -1065,7 +1133,7 @@ uint8_t mTime::AddSecondsToDateTime(datetime_t* dt_t, uint32_t sec){
   uint8_t days = sec / SEC2DAY;
   if (days){
     sec = sec % SEC2DAY;
-    dt_t->Wday+=days;
+    dt_t->day_of_week+=days;
   }
 
   uint8_t hours = sec / SEC2HOUR;
@@ -1098,6 +1166,7 @@ uint32_t mTime::GetSecondsOfDayFromDateTime(datetime_t* dt_t){
   return ((dt_t->hour*SEC2HOUR)+(dt_t->minute*SEC2MIN)+(dt_t->second));
 }
 
+    #ifndef DISABLE_TIME1_OLD_CODE
 //format: HH:MM:SS (check with ::)
 datetime_t mTime::GetTimefromCtr(const char* c){
 
@@ -1120,6 +1189,7 @@ datetime_t mTime::GetTimefromCtr(const char* c){
 
   return datetime;
 }
+    #endif // DISABLE_TIME1_OLD_CODE
 
 
 
@@ -1134,7 +1204,7 @@ const char* mTime::getFormattedTime(datetime_t* dt_t, char* buffer, uint8_t bufl
 const char* mTime::getFormattedDateTime(datetime_t* dt_t, char* buffer, uint8_t buflen) {
   if(buffer == nullptr){ return 0; }
   // char time_ctr[24]; memset(time_ctr,0,sizeof(time_ctr));
-  sprintf_P(buffer, PSTR("%02d:%02d:%02dT%02d:%02d:%02d"),dt_t->Mday,dt_t->month,dt_t->year,dt_t->hour,dt_t->minute,dt_t->second);
+  sprintf_P(buffer, PSTR("%02d:%02d:%02dT%02d:%02d:%02d"),dt_t->day_of_month,dt_t->month,dt_t->year,dt_t->hour,dt_t->minute,dt_t->second);
   return buffer;
 }
 
@@ -1143,7 +1213,7 @@ const char* mTime::getFormattedUptime(char* buffer, uint8_t buflen){ //Serial.pr
 if(buffer == nullptr){ return 0; }
   //char uptime_ctr[40]; memset(uptime_ctr,0,sizeof(uptime_ctr));
   sprintf_P(buffer, PSTR("%02dT%02d:%02d:%02d"),
-    (int)uptime.Yday,(int)uptime.hour,(int)uptime.minute,(int)uptime.second);
+    (int)uptime.day_of_year,(int)uptime.hour,(int)uptime.minute,(int)uptime.second);
   return buffer;
 }
 
@@ -1183,12 +1253,13 @@ const char* mTime::GetBuildDateAndTime(char* buffer, uint8_t buflen)
 
 
 
+    #ifndef DISABLE_TIME1_OLD_CODE
 String mTime::GetDuration(uint32_t time)
 {
   char dt[16];
 
   datetime_t ut;
-  // TIME_T ut;
+  // datetime_t ut;
   BreakTime(time, ut);
 
   // "P128DT14H35M44S" - ISO8601:2004 - https://en.wikipedia.org/wiki/ISO_8601 Durations
@@ -1200,6 +1271,7 @@ String mTime::GetDuration(uint32_t time)
 
   return String(dt);  // 128T14:35:44
 }
+    #endif // DISABLE_TIME1_OLD_CODE
 
 const char* mTime::GetDT(uint32_t time, char* buffer, uint8_t buflen)
 {
@@ -1208,13 +1280,13 @@ const char* mTime::GetDT(uint32_t time, char* buffer, uint8_t buflen)
   datetime_t tmpTime;
   BreakTime(time, tmpTime);
   snprintf_P(buffer, buflen, PSTR("%04d-%02d-%02dT%02d:%02d:%02d"),
-    tmpTime.year +1970, tmpTime.month, tmpTime.Mday, tmpTime.hour, tmpTime.minute, tmpTime.second);
+    tmpTime.year +1970, tmpTime.month, tmpTime.day_of_month, tmpTime.hour, tmpTime.minute, tmpTime.second);
 
-  // if(tmpTime.Mday>30)
+  // if(tmpTime.day_of_month>30)
   // {
 
   // AddLog(LOG_LEVEL_TEST, PSTR("GetDT=%d %s"),time, buffer);
-  // AddLog(LOG_LEVEL_TEST, PSTR("...........................tmpTime.Mday=%d"),tmpTime.Mday);
+  // AddLog(LOG_LEVEL_TEST, PSTR("...........................tmpTime.day_of_month=%d"),tmpTime.day_of_month);
 
   // }
 
@@ -1276,6 +1348,7 @@ const char* mTime::GetDT(uint32_t time, char* buffer, uint8_t buflen)
 // }
 
 
+    #ifndef DISABLE_TIME1_OLD_CODE
 bool  mTime::IsDst(void) //is daylight savings time
 {
   if (Rtc.time_timezone == toffset[1]) {
@@ -1316,7 +1389,7 @@ uint32_t mTime::RuleToTime(TimeRule r, int yr)
   tm.hour = r.hour;
   tm.minute = 0;
   tm.second = 0;
-  tm.Mday = 1;
+  tm.day_of_month = 1;
   tm.month = m;
   tm.year = yr - 1970;
 
@@ -1326,14 +1399,14 @@ uint32_t mTime::RuleToTime(TimeRule r, int yr)
     "hour=%d\n\r"
     "minute=%d\n\r"
     "second=%d\n\r"
-    "Wday=%d\n\r"
+    "day_of_week=%d\n\r"
     "month=%d\n\r"
     "year=%d\n\r"
     ),
     tm.hour,// = r.hour;
     tm.minute,// = 0;
     tm.second,// = 0;
-    tm.Wday,// = 1;
+    tm.day_of_week,// = 1;
     tm.month,// = m;
     tm.year// = yr - 1970;
   );
@@ -1342,7 +1415,7 @@ uint32_t mTime::RuleToTime(TimeRule r, int yr)
 
   t = MakeTime(tm);         // First day of the month, or first day of next month for "Last" rules
   BreakTime(t, tm);
-  t += (7 * (w - 1) + (r.dow - tm.Wday + 7) % 7) * SECS_PER_DAY;
+  t += (7 * (w - 1) + (r.dow - tm.day_of_week + 7) % 7) * SECS_PER_DAY;
   if (0 == r.week) {
     t -= 7 * SECS_PER_DAY;  // back up a week if this is a "Last" rule
   }
@@ -1377,16 +1450,17 @@ uint32_t mTime::Midnight(void)
 // }
 
 
+    #endif // DISABLE_TIME1_OLD_CODE
 
-const char* mTime::GetDOWLongctr(uint8_t Wday, char* buffer){
+const char* mTime::GetDOWLongctr(uint8_t day_of_week, char* buffer){
   // if(buffer == nullptr){ return 0; }
-  // return (Wday == 2 ? "Monday" :
-  //     (Wday == 3 ? "Tuesday" :
-  //     (Wday == 4 ? "Wednesday" :
-  //     (Wday == 5 ? "Thursday" :
-  //     (Wday == 6 ? "Friday" :
-  //     (Wday == 7 ? "Saturday" :
-  //     (Wday == 1 ? "Sunday" :
+  // return (day_of_week == 2 ? "Monday" :
+  //     (day_of_week == 3 ? "Tuesday" :
+  //     (day_of_week == 4 ? "Wednesday" :
+  //     (day_of_week == 5 ? "Thursday" :
+  //     (day_of_week == 6 ? "Friday" :
+  //     (day_of_week == 7 ? "Saturday" :
+  //     (day_of_week == 1 ? "Sunday" :
   //     "unk")))))));
   
   memcpy(buffer,"UNK",3);
@@ -1396,20 +1470,20 @@ const char* mTime::GetDOWLongctr(uint8_t Wday, char* buffer){
 }
 
 // Add short and long versions
-const char* mTime::GetDOWShortctr(uint8_t Wday, char* buffer){
+const char* mTime::GetDOWShortctr(uint8_t day_of_week, char* buffer){
   // if(buffer == nullptr){ return 0; }
 
   memcpy(buffer,"UNK",3);
 
 
   return buffer;
-  // return (Wday == 2 ? "Mon" :
-  //     (Wday == 3 ? "Tue" :
-  //     (Wday == 4 ? "Wed" :
-  //     (Wday == 5 ? "Thu" :
-  //     (Wday == 6 ? "Fri" :
-  //     (Wday == 7 ? "Sat" :
-  //     (Wday == 1 ? "Sun" :
+  // return (day_of_week == 2 ? "Mon" :
+  //     (day_of_week == 3 ? "Tue" :
+  //     (day_of_week == 4 ? "Wed" :
+  //     (day_of_week == 5 ? "Thu" :
+  //     (day_of_week == 6 ? "Fri" :
+  //     (day_of_week == 7 ? "Sat" :
+  //     (day_of_week == 1 ? "Sun" :
   //     "unk")))))));
 }
 
@@ -1555,6 +1629,8 @@ char* mTime::GetDateAndTimeCtr(uint8_t time_type, char* buffer, uint8_t buflen)
   return buffer;  // 2017-03-07T11:08:02-07:00
 }
 
+
+#ifndef DISABLE_TIME1_OLD_CODE
 uint32_t UpTime(void)
 {
   // if (Rtc.restart_time) {
@@ -1574,11 +1650,6 @@ String mTime::GetUptime(void)
   return GetDuration(UpTime());
 }
 
-uint32_t mTime::GetUTCTime()
-{
-  return Rtc.utc_time;
-}
-
 uint32_t mTime::MinutesPastMidnight(void)
 {
   uint32_t minutes = 0;
@@ -1593,93 +1664,8 @@ uint32_t mTime::RtcMillis(void) {
   return (millis() - Rtc.millis) % 1000;
 }
 
-// void mTime::BreakTime(uint32_t time_input, struct TIME_T &tm)
-// {
-// // break the given time_input into time components
-// // this is a more compact version of the C library localtime function
-// // note that year is offset from 1970 !!!
 
-//   uint8_t year;
-//   uint8_t month;
-//   uint8_t month_length;
-//   uint32_t time;
-//   unsigned long days;
-
-//   time = time_input;
-//   tm.second = time % 60;
-//   time /= 60;                // now it is minutes
-//   tm.minute = time % 60;
-//   time /= 60;                // now it is hours
-//   tm.hour = time % 24;
-//   time /= 24;                // now it is days
-//   tm.days = time;
-//   tm.day_of_week = ((time + 4) % 7) + 1;  // Sunday is day 1
-
-//   year = 0;
-//   days = 0;
-//   while((unsigned)(days += (LEAP_YEAR(year) ? 366 : 365)) <= time) {
-//     year++;
-//   }
-//   tm.year = year;            // year is offset from 1970
-
-//   days -= LEAP_YEAR(year) ? 366 : 365;
-//   time -= days;              // now it is days in this year, starting at 0
-//   tm.day_of_year = time;
-
-//   for (month = 0; month < 12; month++) {
-//     if (1 == month) { // february
-//       if (LEAP_YEAR(year)) {
-//         month_length = 29;
-//       } else {
-//         month_length = 28;
-//       }
-//     } else {
-//       month_length = kDaysInMonth[month];
-//     }
-
-//     if (time >= month_length) {
-//       time -= month_length;
-//     } else {
-//       break;
-//     }
-//   }
-//   // strlcpy(tm.name_of_month, kMonthNames + (month *3), 4);
-//   tm.month = month + 1;      // jan is month 1
-//   tm.day_of_month = time + 1;         // day of month
-//   tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
-// }
-
-/**
- * Breaking time to return parts of time
- * */
-uint8_t mTime::hour(uint32_t time){
-  datetime_t time_temp;
-  BreakTime(time, time_temp);
-  return time_temp.hour;
-}
-uint8_t mTime::minute(uint32_t time){
-  datetime_t time_temp;
-  BreakTime(time, time_temp);
-  return time_temp.minute;
-}
-uint8_t mTime::second(uint32_t time){
-  datetime_t time_temp;
-  BreakTime(time, time_temp);
-  return time_temp.second;
-}
-int mTime::hourFormat12(time_t time) { // the hour for the given time in 12 hour format
-  // refreshCache(t);
-  datetime_t time_temp;
-  BreakTime(time, time_temp);
-  if( time_temp.hour == 0 )
-    return 12; // 12 midnight
-  else if( time_temp.hour  > 12)
-    return time_temp.hour - 12 ;
-  else
-    return time_temp.hour ;
-}
-
-void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
+void mTime::BreakTime(uint32_t time_input, struct datetime_t &tm)
 {
 // break the given time_input into time components
 // this is a more compact version of the C library localtime function
@@ -1699,7 +1685,7 @@ void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
   tm.hour = time % 24;
   time /= 24;                // now it is days
   tm.days = time;
-  tm.Wday = ((time + 4) % 7) + 1;  // Sunday is day 1
+  tm.day_of_week = ((time + 4) % 7) + 1;  // Sunday is day 1
 
   year = 0;
   days = 0;
@@ -1710,7 +1696,7 @@ void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
 
   days -= LEAP_YEAR(year) ? 366 : 365;
   time -= days;              // now it is days in this year, starting at 0
-  tm.Yday = time;
+  tm.day_of_year = time;
 
   for (month = 0; month < 12; month++) {
     if (1 == month) { // february
@@ -1731,14 +1717,102 @@ void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
   }
   // strlcpy(tm.name_of_month, kMonthNames + (month *3), 4);
   tm.month = month + 1;      // jan is month 1
-  tm.Wday = time + 1;         // day of month
-  tm.Mday = time + 1;         // day of month
+  tm.day_of_month = time + 1;         // day of month
+  tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
+}
+
+/**
+ * Breaking time to return parts of time
+ * */
+uint8_t mTime::hour(uint32_t time){
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  return time_temp.hour;
+}
+uint8_t mTime::minute(uint32_t time){
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  return time_temp.minute;
+}
+uint8_t mTime::second(uint32_t time){
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  return time_temp.second;
+}
+int mTime::hourFormat12(datetime_t time) { // the hour for the given time in 12 hour format
+  // refreshCache(t);
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  if( time_temp.hour == 0 )
+    return 12; // 12 midnight
+  else if( time_temp.hour  > 12)
+    return time_temp.hour - 12 ;
+  else
+    return time_temp.hour ;
+}
+#endif // DISABLE_TIME1_OLD_CODE
+
+    #ifndef DISABLE_TIME1_OLD_CODE
+void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
+{
+// break the given time_input into time components
+// this is a more compact version of the C library localtime function
+// note that year is offset from 1970 !!!
+
+  uint8_t year;
+  uint8_t month;
+  uint8_t month_length;
+  uint32_t time;
+  unsigned long days;
+
+  time = time_input;
+  tm.second = time % 60;
+  time /= 60;                // now it is minutes
+  tm.minute = time % 60;
+  time /= 60;                // now it is hours
+  tm.hour = time % 24;
+  time /= 24;                // now it is days
+  tm.days = time;
+  tm.day_of_week = ((time + 4) % 7) + 1;  // Sunday is day 1
+
+  year = 0;
+  days = 0;
+  while((unsigned)(days += (LEAP_YEAR(year) ? 366 : 365)) <= time) {
+    year++;
+  }
+  tm.year = year;            // year is offset from 1970
+
+  days -= LEAP_YEAR(year) ? 366 : 365;
+  time -= days;              // now it is days in this year, starting at 0
+  tm.day_of_year = time;
+
+  for (month = 0; month < 12; month++) {
+    if (1 == month) { // february
+      if (LEAP_YEAR(year)) {
+        month_length = 29;
+      } else {
+        month_length = 28;
+      }
+    } else {
+      month_length = kDaysInMonth[month];
+    }
+
+    if (time >= month_length) {
+      time -= month_length;
+    } else {
+      break;
+    }
+  }
+  // strlcpy(tm.name_of_month, kMonthNames + (month *3), 4);
+  tm.month = month + 1;      // jan is month 1
+  tm.day_of_week = time + 1;         // day of month
+  tm.day_of_month = time + 1;         // day of month
   tm.valid = (time_input > START_VALID_UTC_TIME);  // 2016-01-01
 }
 
 uint32_t mTime::MakeTime(datetime_t &tm)
 {
-// assemble time elements into time_t
+// assemble time elements into datetime_t
 // note year argument is offset from 1970
 
   int i;
@@ -1760,19 +1834,19 @@ uint32_t mTime::MakeTime(datetime_t &tm)
       seconds += SECS_PER_DAY * kDaysInMonth[i-1];  // monthDay array starts from 0
     }
   }
-  seconds+= (tm.Mday - 1) * SECS_PER_DAY;
+  seconds+= (tm.day_of_month - 1) * SECS_PER_DAY;
   seconds+= tm.hour * SECS_PER_HOUR;
   seconds+= tm.minute * SECS_PER_MIN;
   seconds+= tm.second;
   return seconds;
 }
 
-
 void mTime::RtcSecond(void)
 {
   datetime_t tmpTime;
-  // TIME_T tmpTime;
-// Serial.printf("RtcSecond=%d\n\r",millis());
+  // datetime_t tmpTime;
+  
+  Serial.printf("RtcSecond=%d\n\r",millis());
 
   Rtc.millis = millis();
 
@@ -2222,7 +2296,7 @@ uint32_t mTime::WifiGetNtp(void) {
   return 0;
 }
 
-
+    #endif // DISABLE_TIME1_OLD_CODE
 
 
 
@@ -2247,7 +2321,7 @@ uint32_t mTime::JulianDate(const datetime_t &now) {
 
   uint32_t Year = now.year;             // Year ex:2020
   uint32_t Month = now.month;            // 1..12
-  uint32_t Day = now.Wday;     // 1..31
+  uint32_t Day = now.day_of_week;     // 1..31
   uint32_t Julian;                          // Julian day number
 
   if (Month <= 2) {
@@ -2366,3 +2440,7 @@ uint16_t mTime::SunMinutes(uint32_t dawn)
 
 
 #endif  // USE_SUNRISE
+
+#endif // USE_MODULE_CORE_TIME
+
+

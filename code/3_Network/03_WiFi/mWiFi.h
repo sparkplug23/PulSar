@@ -128,6 +128,9 @@ class mWiFi :
     void MdnsAddServiceHttp(void);
     void MdnsUpdate(void);
 
+    bool WifiHostByName(const char* aHostname, IPAddress& aResult);
+
+    
     struct {
       uint8_t begun = 0;                  // mDNS active
     } Mdns;

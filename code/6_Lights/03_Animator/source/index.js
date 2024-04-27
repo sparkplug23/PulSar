@@ -1242,8 +1242,7 @@ function updateUI()
 	updateTrail(gId('sliderC2'));
 	updateTrail(gId('sliderC3'));
 	
-	updateTrail(gId('sliderTransitionTime'));
-	updateTrail(gId('sliderTransitionRate'));
+	updateTrail(gId('sliderEffectTimePeriod'));
 	updateTrail(gId('sliderGrouping'));
 
 	if (hasRGB) {
@@ -1252,6 +1251,7 @@ function updateUI()
 		updateTrail(gId('sliderB'));	
 	}
 	if (hasWhite) updateTrail(gId('sliderW'));
+	if (hasWhite) updateTrail(gId('slidercctbri'));
 
 	var ccfg = cfg.comp.colors;
 	gId('wwrap').style.display   = (hasWhite) ? "block":"none";               // white channel
@@ -1318,7 +1318,12 @@ function updateSelectedFx()
 			if (fx.dataset.id>0) {
 				if (segLmax==0) fx.classList.add('hide'); // none of the segments selected (hide all effects)
 				else {
-					if ((segLmax==1 && (!opts[3] || opts[3].indexOf("0")<0)) || (!isM && opts[3] && ((opts[3].indexOf("2")>=0 && opts[3].indexOf("1")<0)))) fx.classList.add('hide');
+					if (
+						(segLmax==1 && (!opts[3] || opts[3].indexOf("0")<0)) || 
+						(!isM && opts[3] && (
+							(opts[3].indexOf("2")>=0 && opts[3].indexOf("1")<0)
+						))
+					) fx.classList.add('hide');
 					else fx.classList.remove('hide');
 				}
 			}
@@ -1459,12 +1464,16 @@ function readState(s,command=false)
 	gId('sliderC1').value  = i.c1 ? i.c1 : 0;
 	gId('sliderC2').value  = i.c2 ? i.c2 : 0;
 	gId('sliderC3').value  = i.c3 ? i.c3 : 0;
-	gId('sliderTransitionTime').value = i.tt;
-	gId('sliderTransitionRate').value = i.tr;
+	gId('sliderEffectTimePeriod').value = i.etp;
 	gId('sliderGrouping').value = i.grp;
 	gId('checkO1').checked = !(!i.o1);
 	gId('checkO2').checked = !(!i.o2);
 	gId('checkO3').checked = !(!i.o3);
+
+	
+	gId('sliderrgbbri').value = i.rgbbri;
+	gId('slidercctbri').value = i.cctbri;
+
 
 	if (s.error && s.error != 0) {
 	  var errstr = "";
@@ -1501,7 +1510,7 @@ function readState(s,command=false)
 // If an effect name is followed by an @, slider and color control is effective.
 // If not effective then:
 //      - For AC effects (id<128) 2 sliders and 3 colors and the palette will be shown
-//      - For SR effects (id>128) 7 sliders and 3 colors and the palette will be shown
+//      - For SR effects (id>128) 6 sliders and 3 colors and the palette will be shown
 // If effective (@)
 //      - a ; seperates slider controls (left) from color controls (middle) and palette control (right)
 //      - if left, middle or right is empty no controls are shown
@@ -1534,24 +1543,25 @@ function setEffectParameters(idx)
 	 * Slider 2: Custom 1
 	 * Slider 3: Custom 2
 	 * Slider 4: Custom 3
-	 * Slider 5: TimeMS    // removing
-	 * Slider 6: RateMS    // removing
-	 * Slider 7: Grouping 
+	 * Slider 5: Effect Time Period (ie Cycle Time, previously rate_ms)
+	 * Slider 6: Grouping 
+	 * Checkbox 0: Option 1
+	 * Checkbox 1: Option 2 = layered icon, for layering effects
+	 * Checkbox 2: Option 3
 	 * 
 	 */
 
-	let nSliders = 8; //5+my Three timers
+	let nSliders = 7; // 4+my Three timers
 	for (let i=0; i<nSliders; i++) {
 		var slider = gId("slider" + i);
 		var label = gId("sliderLabel" + i);
 		// if (not controlDefined and for AC speed or intensity and for SR all sliders) or slider has a value
 		if ((!controlDefined && i < ((idx<128)?2:nSliders)) || (slOnOff.length>i && slOnOff[i] != "")) {
 			if (slOnOff.length>i && slOnOff[i]!="!") label.innerHTML = slOnOff[i];
-			else if (i==0)                           label.innerHTML = "Effect speed";
-			else if (i==1)                           label.innerHTML = "Effect intensity";
-			else if (i==5)                           label.innerHTML = "Effect Time(Phaseout)";
-			else if (i==6)                           label.innerHTML = "Effect Rate";
-			else if (i==7)                           label.innerHTML = "Effect Grouping";
+			else if (i==0)                           label.innerHTML = "Speed";
+			else if (i==1)                           label.innerHTML = "Intensity";
+			else if (i==5)                           label.innerHTML = "Cycle Time";
+			else if (i==6)                           label.innerHTML = "Grouping";
 			else                                     label.innerHTML = "Custom" + (i-1);
 			slider.classList.remove('hide');
 		} else {
@@ -2327,16 +2337,9 @@ function setIntensity()
 	requestJson(obj);
 }
 
-
-function setTransitionTime()
+function setEffectTimePeriod()
 {
-	var obj = {"seg": {"tt": parseInt(gId('sliderTransitionTime').value)}};
-	requestJson(obj);
-}
-
-function setTransitionRate()
-{
-	var obj = {"seg": {"tr": parseInt(gId('sliderTransitionRate').value)}};
+	var obj = {"seg": {"etp": parseInt(gId('sliderEffectTimePeriod').value)}};
 	requestJson(obj);
 }
 function setGrouping()
@@ -2640,6 +2643,20 @@ function setColor(sr)
 	setCSL(cd[csel]);
 	var obj = {"seg": {"col": [[],[],[],[],[]]}};
 	obj.seg.col[csel] = [r, g, b, w];
+	requestJson(obj);
+}
+
+
+function setRGBBri(rgb_brightness)
+{
+	var obj = {"seg": {"rgbbri": parseInt(rgb_brightness)}};
+	requestJson(obj);
+}
+
+
+function setCCTBri(cct_brightness)
+{
+	var obj = {"seg": {"cctbri": parseInt(cct_brightness)}};
 	requestJson(obj);
 }
 

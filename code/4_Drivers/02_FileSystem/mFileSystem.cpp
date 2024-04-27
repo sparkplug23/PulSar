@@ -79,13 +79,18 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case FUNC_EVERY_FIVE_SECOND:
     // FileWrite_Test();    
+    
+      #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+      SystemTask__Execute_Module_Data_Save();
+      #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+
     break;
     case FUNC_EVERY_MINUTE:
-      // JsonFile_Save__Stored_Module();
-      // JsonFile_Save__Stored_Secure();
-      #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
-      // SystemTask__Execute_Module_Data_Save();
-      #endif     
+      // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
+      #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+      SystemTask__Execute_Module_Data_Save();
+      #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+      // #endif     
     break;  
     case FUNC_EVERY_FIVE_MINUTE:
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM

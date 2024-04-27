@@ -55,7 +55,7 @@ void mTreadmill::parse_JSONCommand(void){
   //     data_buffer.isserviced++;
   //   }
   // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   // //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
   
@@ -74,7 +74,7 @@ void mTreadmill::parse_JSONCommand(void){
   //     data_buffer.isserviced++;
   //   }
   // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   // //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
   

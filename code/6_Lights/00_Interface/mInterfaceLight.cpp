@@ -5,94 +5,82 @@
 const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
 const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR = D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
 
-#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-
-namespace
+int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 {
-  void commitTaskProcedure(void *arg)
-  {
-    CommitParams *params = (CommitParams *)arg;
+  
+  int8_t function_result = 0;
 
-    while (true) //stop always show
-    {
-      while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != 1);
-      params->handler();
-      xSemaphoreGive(params->semaphore);
-    }
+  // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
+  switch(function){
+    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+      Template_Load();
+    break;
+    case FUNC_POINTER_INIT:
+
+    break;
+    case FUNC_PRE_INIT:
+      Pre_Init();
+    break;
+    case FUNC_INIT:
+      Init();
+    break;
   }
-} // namespace
 
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
-void NeoPixelShowTask::begin(CommitHandler handler, uint8_t core_id)
-{
-  _commit_params.handler = handler;
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_LOOP:
+      EveryLoop();
+    break;
+    /************
+     * STORAGE SECTION * 
+    *******************/    
+    case FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
+      Template_Load_DefaultConfig();
+    break;
+    #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+      Save_Module();
+    break;
+    #endif
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      MQTTHandler_Set_DefaultPeriodRate();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_RefreshAll();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+    /************
+     * WEB SECTION * 
+    *******************/   
+    case FUNC_WEB_ADD_HANDLER:    
+      #ifdef USE_MODULE_NETWORK_WEBSERVER
+      // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
+      #endif
+    break;
 
-  if (core_id < 2)
-  {
-    _commit_params.semaphore = xSemaphoreCreateBinary();
-
-    xTaskCreatePinnedToCore(commitTaskProcedure, /* Task function. */
-                            "NeoPixelShow",      /* name of task. */
-                            10000,               /* Stack size of task */
-                            &_commit_params,     /* parameter of the task */
-                            1,                   /* priority of the task */
-                            &_commit_task,       /* Task handle to keep track of created task */
-                            core_id);            /* pin task to core core_id */
-  }
-}
-
-
-void NeoPixelShowTask::execute()
-{
-  // Trigger the pinned function to run at configured priority and wait for maximum time for it to finish
-  xTaskNotifyGive(_commit_task);
-  while (xSemaphoreTake(_commit_params.semaphore, portMAX_DELAY) != pdTRUE);
-}
-
-
-bool NeoPixelShowTask::IsBusy()
-{
-  if(eTaskGetState(_commit_task) != 3)
-    Serial.println("_task " + (String)eTaskGetState(_commit_task)); 
-
-}
-
-void mInterfaceLight::Init_NeoPixelBus_PinnedTask(void)
-{
-
-  neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
-  // constexpr
-  // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
-  uint8_t kTaskRunnerCore = 1;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
-
-  ALOG_INF(PSTR("kTaskRunnerCore=%d"),kTaskRunnerCore);
-
-  neopixel_runner->begin(
-      [this]() {
-        /**
-         * @brief Actual bit of the code that gets called each time
-         */
-        if(!neopixel_runner->flag_block_show)
-        {
-          if(bus_manager)
-          {
-            bus_manager->show();
-          }
-          // Serial.println("NeoPixelShowTask::Show Y");
-          // delay(10);
-        }else
-        {
-          Serial.println("NeoPixelShowTask::Show --------------");
-        }
-        // I could also try a temporary way of adding a flag to the "runner", so its set when show is called and cleared after. or rahter, the reverse, have it only call show if the animation is now updating
-      },
-      kTaskRunnerCore
-  );
-
-}
-
-#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-
+  } // end switch
+  
+} // END function
 
 
 void mInterfaceLight::Pre_Init(void)
@@ -226,6 +214,13 @@ void mInterfaceLight::Init(void)
   #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
   Init_NeoPixelBus_PinnedTask(void)
   #endif  
+  
+  pCONT_set->Settings.pwm_range = PWM_RANGE;
+  pCONT_set->Settings.light_settings.light_fade = 1;
+  pCONT_set->Settings.light_settings.light_speed = 5*2;
+  pCONT_set->runtime.power = 1;
+
+  module_state.mode = ModuleStatus::Running;
 
 }
 
@@ -238,83 +233,6 @@ void mInterfaceLight::ShowInterface()
 }
 
 
-int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
-{
-  
-  int8_t function_result = 0;
-
-  // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
-  switch(function){
-    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
-      Template_Load();
-    break;
-    case FUNC_POINTER_INIT:
-
-    break;
-    case FUNC_PRE_INIT:
-      Pre_Init();
-    break;
-    case FUNC_INIT:
-      Init();
-    break;
-  }
-
-  switch(function){
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP:
-      EveryLoop();
-    break;
-    /************
-     * STORAGE SECTION * 
-    *******************/    
-    case FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
-      Template_Load_DefaultConfig();
-    break;
-    // case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
-    //   FileSystem_JsonAppend_Save_Module();
-    // break;
-    #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
-      Module_DataSave();
-    break;
-    #endif
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEB SECTION * 
-    *******************/   
-    case FUNC_WEB_ADD_HANDLER:    
-      #ifdef USE_MODULE_NETWORK_WEBSERVER
-      // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
-      #endif
-    break;
-
-  } // end switch
-  
-} // END function
 
 
 void mInterfaceLight::EveryLoop()
@@ -353,10 +271,10 @@ void mInterfaceLight::Template_Load_DefaultConfig()
 }
 
 
-void mInterfaceLight::Module_DataSave()
+void mInterfaceLight::Save_Module()
 {
   
-  ALOG_INF(PSTR("mInterfaceLight::Module_DataSave()"));
+  ALOG_INF(PSTR("mInterfaceLight::Save_Module()"));
 
   char buffer[100] = {0};
 
@@ -390,6 +308,33 @@ void mInterfaceLight::Module_DataSave()
     JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
   #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
+  
+    JBI->Array_Start("BusConfig");
+    for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
+    {    
+      JBI->Object_Start();
+
+        uint8_t pins[5] = {0};
+        uint8_t pin_count = bus_manager->busses[bus_i]->getPins(pins);
+        JBI->Array_Start("Pin");
+          for(uint8_t ii=0;ii<pin_count;ii++){ JBI->Add(pins[ii]); }
+        JBI->Array_End();
+
+        JBI->Add("Start", bus_manager->busses[bus_i]->getStart());
+        JBI->Add("Length", bus_manager->busses[bus_i]->getLength());
+        JBI->Add_P("BusType", bus_manager->busses[bus_i]->getTypeName());
+
+        JBI->Add_P("ColourOrder", bus_manager->getColourOrderName(bus_manager->busses[bus_i]->getColorOrder(), buffer, sizeof(buffer)) );
+
+      JBI->Object_End();
+    }
+    JBI->Array_End();
+
+    JBI->Add("BrightnessRGB", getBriRGB_Global());
+    JBI->Add("BrightnessCCT", getBriCCT_Global());
+
+
+
   //
 
   JBI->End();
@@ -406,42 +351,6 @@ void mInterfaceLight::Module_DataSave()
 
 }
 
-
-
-void mInterfaceLight::FileSystem_JsonAppend_Save_Module()
-{
-
-//delete this, as I Want to have every file as its own thing to make it not matter if its a module or not
-
-  uint8_t bus_appended = 0;
-
-  char buffer[100] = {0};
-
-  JBI->Array_Start("BusConfig");
-  for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
-  {    
-    JBI->Object_Start();
-
-      uint8_t pins[5] = {0};
-      uint8_t pin_count = bus_manager->busses[bus_i]->getPins(pins);
-      JBI->Array_Start("Pin");
-        for(uint8_t ii=0;ii<pin_count;ii++){ JBI->Add(pins[ii]); }
-      JBI->Array_End();
-
-      JBI->Add("Start", bus_manager->busses[bus_i]->getStart());
-      JBI->Add("Length", bus_manager->busses[bus_i]->getLength());
-      JBI->Add_P("BusType", bus_manager->busses[bus_i]->getTypeName());
-
-      JBI->Add_P("ColourOrder", bus_manager->getColourOrderName(bus_manager->busses[bus_i]->getColorOrder(), buffer, sizeof(buffer)) );
-
-    JBI->Object_End();
-  }
-  JBI->Array_End();
-
-  JBI->Add("BrightnessRGB", getBriRGB_Global());
-  JBI->Add("BrightnessCCT", getBriCCT_Global());
-
-}
 
 /********************************************************************************************************************
 *******************************************************************************************************************
@@ -707,7 +616,7 @@ void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
 
 bool mInterfaceLight::isChannelGammaCorrected(uint32_t channel) {
   if (!pCONT_set->Settings.light_settings.light_correction) { return false; }   // Gamma correction not activated
-  if (channel >= pCONT_lAni->subtype) { return false; }     // Out of range
+  // if (channel >= pCONT_lAni->subtype) { return false; }     // Out of range
 #ifdef ESP8266
 //   if (
 //     // (MODULE_PHILIPS__ID == pCONT_set->my_module_type) || 
@@ -890,7 +799,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     else
     if(jtok.isStr())
     {
-      bus_type = Get_BusTypeID_FromName(jtok.getStr());
+      bus_type = Bus::getTypeIDbyName(jtok.getStr());
     }
     ALOG_INF(PSTR("bus_type %d"), bus_type);
   }
@@ -995,41 +904,6 @@ COLOUR_ORDER_T mInterfaceLight::GetColourOrder_FromName(const char* c)
 }
 
 
-int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
-{
-
-  if     (strcmp(c,"WS2812_1CH")==0){ return BUSTYPE_WS2812_1CH; }
-  else if(strcmp(c,"WS2812_1CH_X3")==0){ return BUSTYPE_WS2812_1CH_X3; }
-  else if(strcmp(c,"WS2812_2CH_X3")==0){ return BUSTYPE_WS2812_2CH_X3; }
-  else if(strcmp(c,"WS2812_WWA")==0){ return BUSTYPE_WS2812_WWA; }
-  else if(strcmp(c,"WS2812_RGB")==0){ return BUSTYPE_WS2812_RGB; }
-  else if(strcmp(c,"GS8608")==0){ return BUSTYPE_GS8608; }
-  else if(strcmp(c,"WS2811_400KHZ")==0){ return BUSTYPE_WS2811_400KHZ; }
-  else if(strcmp(c,"TM1829")==0){ return BUSTYPE_TM1829; }
-  else if(strcmp(c,"SK6812_RGBW")==0){ return BUSTYPE_SK6812_RGBW; }
-  else if(strcmp(c,"TM1814")==0){ return BUSTYPE_TM1814; }
-  else if(strcmp(c,"ONOFF")==0){ return BUSTYPE_ONOFF; }
-  else if(strcmp(c,"ANALOG_1CH")==0){ return BUSTYPE_ANALOG_1CH; }
-  else if(strcmp(c,"ANALOG_2CH")==0){ return BUSTYPE_ANALOG_2CH; }
-  else if(strcmp(c,"ANALOG_3CH")==0){ return BUSTYPE_ANALOG_3CH; }
-  else if(strcmp(c,"ANALOG_4CH")==0){ return BUSTYPE_ANALOG_4CH; }
-  else if(strcmp(c,"ANALOG_5CH")==0){ return BUSTYPE_ANALOG_5CH; }
-  else if(strcmp(c,"WS2801")==0){ return BUSTYPE_WS2801; }
-  else if(strcmp(c,"APA102")==0){ return BUSTYPE_APA102; }
-  else if(strcmp(c,"LPD8806")==0){ return BUSTYPE_LPD8806; }
-  else if(strcmp(c,"P9813")==0){ return BUSTYPE_P9813; }
-  else if(strcmp(c,"LPD6803")==0){ return BUSTYPE_LPD6803; }
-  else if(strcmp(c,"NET_DDP_RGB")==0){ return BUSTYPE_NET_DDP_RGB; }
-  else if(strcmp(c,"NET_E131_RGB")==0){ return BUSTYPE_NET_E131_RGB; }
-  else if(strcmp(c,"NET_ARTNET_RGB")==0){ return BUSTYPE_NET_ARTNET_RGB; }
-  else if(strcmp(c,"NET_DDP_RGBW")==0){ return BUSTYPE_NET_DDP_RGBW; }
-  else if(strcmp(c,"RESERVED")==0){ return BUSTYPE_RESERVED; }
-  
-  return BUSTYPE_NONE;
-  
-}
-
-
 /******************************************************************************************************************
  * mInterfaceLight_Commands.cpp
 *******************************************************************************************************************/
@@ -1056,18 +930,16 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   { 
     if(jtok.isArray())
     {      
-  ALOG_INF(PSTR("buffer_writerA ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
       ALOG_INF(PSTR("BusConfig **************  \t%d"), jtok.getType());
       JsonParserArray arrobj = jtok;      
       for(auto value : arrobj) 
       {
-  ALOG_INF(PSTR("buffer_writerB ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
         parseJSONObject__BusConfig(value.getObject());
-  ALOG_INF(PSTR("buffer_writerC ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
       }
     }
   }else{
-    ALOG_DBM(PSTR("BusConfig MISSING"));//, jtok.getType());
+    ALOG_DBM(PSTR("BusConfig MISSING"));
+    
     #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     if(jtok = obj["Segment0"])
     {
@@ -1289,7 +1161,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
   JsonBuilderI->Object_End();
 
 
-  if(pCONT_lAni->SEGMENT_I(0).palette.id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
+  if(pCONT_lAni->SEGMENT_I(0).palette_id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
   {
 
     JBI->Array_AddArray("encoded", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, ARRAY_SIZE(pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map));

@@ -599,12 +599,17 @@ class PolyBus
     if(colour_order.white_warm != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.white_warm]  = colour_internal.WW; }
     #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
     if(pix==0){ // Just first pixel
-      Serial.printf("set colour_order R=%d, G=%d, B=%d, CW=%d, WW=%d\n\r",
+      Serial.printf("set colour R=%d, G=%d, B=%d, CW=%d, WW=%d %d/%d/%d/%d/%d\n\r",
         colour_order.red,
         colour_order.green,
         colour_order.blue,
         colour_order.white_cold,
-        colour_order.white_warm
+        colour_order.white_warm, 
+        colour_internal.R,
+        colour_internal.G,
+        colour_internal.B,
+        colour_internal.WC,
+        colour_internal.WW
       );
     }
     // colour_hardware = RgbcctColor(5,0,0,5,0);
@@ -634,7 +639,7 @@ class PolyBus
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
     #ifdef ESP8266
-    
+    error
       #ifdef ENABLE_NEOPIXELBUS_8266_U0_NEO_TYPES
       case BUSTYPE__8266_U0_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_U0_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
       #endif

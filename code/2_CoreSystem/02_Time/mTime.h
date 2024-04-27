@@ -1,27 +1,36 @@
 #ifndef MTIME_H
 #define MTIME_H 0.21
   
-#include <Arduino.h>
+#include "1_TaskerManager/mTaskerManager.h"
 
-#define D_UNIQUE_MODULE_CORE_TIME_ID 5
+#define D_UNIQUE_MODULE_CORE_TIME_ID 2002
+
+#ifdef USE_MODULE_CORE_TIME
+
+
+#include <Arduino.h>
 
 
 enum WeekInMonthOptions {Last, First, Second, Third, Fourth};
 enum DayOfTheWeekOptions {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
 enum MonthNamesOptions {Jan=1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
 enum HemisphereOptions {North, South};
-enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_LOCALNOTZ, DT_DST, DT_STD, DT_RESTART, DT_ENERGY, DT_BOOTCOUNT, DT_LOCAL_MILLIS, DT_TIMEZONE, DT_SUNRISE, DT_SUNSET };
+enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_LOCALNOTZ, DT_DST, DT_STD, DT_RESTART, DT_ENERGY, DT_BOOTCOUNT, DT_LOCAL_MILLIS, DT_TIMEZONE, DT_SUNRISE, DT_SUNSET, DT_LOCAL_TIME };
 
 typedef struct datetime{
-  uint8_t Wday; // week day [0-7]
-  uint8_t Mday; // month day [0-30]
-  uint16_t Yday; // year day [0-365]
+  uint8_t day_of_week; // week day [0-7]
+  uint8_t day_of_month; // month day [0-30]
+  uint16_t day_of_year; // year day [0-365]
+
+
+
   uint16_t year;  // year 20XX
   uint8_t month;  // [1-12]
   uint8_t week;   // [1-52]
   uint8_t hour;   // [0-23]
   uint8_t minute; // [0-59]
   uint8_t second; // [0-59]
+  uint32_t      nanos;
 
   //generate these with a function START
   uint32_t Dseconds; //seconds into day from midnight [0-86400]
@@ -41,20 +50,25 @@ typedef struct datetime{
   unsigned long valid;
 
 
-  uint8_t isvalid = false;
+  // uint8_t isvalid = false;
+
+  
+      char          name_of_month[4];
+
+
 }datetime_t;
 
-// used for basic time info only for week period - RENAME "time_t"
+// used for basic time info only for week period - RENAME "datetime_t"
 typedef struct time_short{
-  uint8_t Wday; // week day [0-7], weekday 1-7 is Mon to Sun, 0 is all days
+  uint8_t day_of_week; // week day [0-7], weekday 1-7 is Mon to Sun, 0 is all days
   uint8_t hour;   // [0-23]
   uint8_t minute; // [0-59]
   uint8_t second; // [0-59]
 }time_short_t;
 
-// used for basic time info only for week period - RENAME "time_t"
+// used for basic time info only for week period - RENAME "datetime_t"
 typedef struct weektime{
-  uint8_t  Wday; // week day [0-7]
+  uint8_t  day_of_week; // week day [0-7]
   uint8_t  hour;   // [0-23]
   uint8_t  minute; // [0-59]
   uint8_t  second; // [0-59]
@@ -135,26 +149,273 @@ class mTime :
 
   private:
   public:
+  
+  /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mTime(){};
-    void init(void);
-    void UpdateStoredRTCVariables();
-    void initUpTime();
-    void UpdateUpTime();
+    void   Init(void);
+    void   Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-
+    void   parse_JSONCommand(JsonParserObject obj);
+    
     static const char* PM_MODULE_CORE_TIME_CTR;
     static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_TIME_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TIME_ID; }
-    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mTime);
-    };
+    uint16_t GetClassSize(){      return sizeof(mTime);    };
     #endif
-    void parse_JSONCommand(JsonParserObject obj);
 
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = 0;//ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    struct DATA_STORAGE
+    {
+
+    }
+    dt;
+
+
+    struct DATA_RUNTIME
+    {
+
+    } 
+    rt;
+
+
+    /*********************************************************************************************\
+     * Sources: Time by Michael Margolis and Paul Stoffregen (https://github.com/PaulStoffregen/Time)
+     *          Timezone by Jack Christensen (https://github.com/JChristensen/Timezone)
+    \*********************************************************************************************/
+
+    const uint32_t SECS_PER_MIN = 60UL;
+    const uint32_t SECS_PER_HOUR = 3600UL;
+    const uint32_t SECS_PER_DAY = SECS_PER_HOUR * 24UL;
+    const uint32_t MINS_PER_HOUR = 60UL;
+
+    #define LEAP_YEAR(Y)  (((1970+Y)>0) && !((1970+Y)%4) && (((1970+Y)%100) || !((1970+Y)%400)))
+
+    struct RTC {
+      uint32_t utc_time = 0;
+      uint32_t local_time = 0;
+      uint32_t daylight_saving_time = 0;
+      uint32_t standard_time = 0;
+      uint32_t midnight = 0;
+      uint32_t restart_time = 0;
+      uint32_t nanos = 0;
+      uint32_t millis = 0;
+    //  uint32_t last_sync = 0;
+      int32_t time_timezone = 0;
+      bool time_synced = false;
+      bool last_synced = false;
+      bool midnight_now = false;
+      bool user_time_entry = false;               // Override NTP by user setting
+    } Rtc;
+    
+    // struct TIME_T {
+    //   uint32_t      nanos;
+    //   uint8_t       second;
+    //   uint8_t       minute;
+    //   uint8_t       hour;
+    //   uint8_t       day_of_week;               // sunday is day 1
+    //   uint8_t       day_of_month;
+    //   uint8_t       month;
+    //   char          name_of_month[4];
+    //   uint16_t      day_of_year;
+    //   uint16_t      year;
+    //   uint32_t      days;
+    //   uint32_t      valid;
+
+      
+    //   uint32_t Dseconds; //seconds into day from midnight [0-86400]
+    //   uint32_t Wseconds; // seconds into week [0-604800]
+    //   uint32_t Yseconds; // seconds into year [0-31536000]
+    //   uint32_t seconds_nonreset; // seconds counting infinitely [0-1e+32]
+
+    // } RtcTime;
+    
+
+        
+    typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+      uint16_t data;                           // Allow bit manipulation
+      struct {
+        uint16_t system_init : 1;              // Changing layout here needs adjustments in xdrv_10_rules.ino too
+        uint16_t system_boot : 1;
+        uint16_t time_init : 1;
+        uint16_t time_set : 1;
+        uint16_t mqtt_connected : 1;
+        uint16_t mqtt_disconnected : 1;
+        uint16_t wifi_connected : 1;
+        uint16_t wifi_disconnected : 1;
+        uint16_t eth_connected : 1;
+        uint16_t eth_disconnected : 1;
+        uint16_t http_init : 1;
+        uint16_t shutter_moved : 1;
+        uint16_t shutter_moving : 1;
+        uint16_t spare13 : 1;
+        uint16_t spare14 : 1;
+        uint16_t spare15 : 1;
+      };
+    } RulesBitfield;
+
+    struct TasmotaGlobal_t {
+      uint32_t uptime;                          // Counting every second until 4294967295 = 130 year
+      RulesBitfield rules_flag;                 // Rule state flags (16 bits)
+
+      bool ntp_force_sync;                      // Force NTP sync
+    } TasmotaGlobal;
+
+
+    uint32_t UtcTime(void);
+    uint32_t LocalTime(void);
+    uint32_t Midnight(void);
+    bool MidnightNow(void);
+    bool IsDst(void);
+    String GetBuildDateAndTime(void);
+    String GetSyslogDate(char* mxtime);
+    String GetDate(void);
+    String GetMinuteTime(uint32_t minutes);
+    String GetTimeZone(void);
+    String GetDuration(uint32_t time);
+    String GetDT(uint32_t time);
+    String GetDateAndTime(uint8_t time_type);
+    uint32_t UpTime(void);
+    uint32_t MinutesUptime(void);
+    String GetUptime(void);
+    uint32_t MinutesPastMidnight(void);
+    uint32_t RtcMillis(void);
+    void BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &tm);
+    void BreakTime(uint32_t time_input, datetime_t &tm);
+    uint32_t MakeTime(datetime_t &tm);
+    uint32_t RuleToTime(TimeRule r, int yr);
+    void RtcGetDaylightSavingTimes(uint32_t local_time);
+    uint32_t RtcTimeZoneOffset(uint32_t local_time);
+    void RtcSetTimeOfDay(uint32_t local_time);
+    void RtcSecond(void);
+    void RtcSync(const char* source);
+    void RtcSetTime(uint32_t epoch);
+    void RtcInit(void);
+    void RtcPreInit(void);
+    void WifiPollNtp();
+    uint64_t WifiGetNtp(void);
+    inline int32_t TimeDifference(uint32_t prev, uint32_t next);
+    int32_t TimePassedSince(uint32_t timestamp);
+    bool TimeReached(uint32_t timer);
+
+    
+    uint8_t hour(uint32_t time);
+    uint8_t minute(uint32_t time);
+    uint8_t second(uint32_t time);
+    int hourFormat12(time_t t);
+
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_State(uint8_t json_method = 0, bool json_appending = true);
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_RefreshAll();
+    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_Sender();
+
+    std::vector<struct handler<mTime>*> mqtthandler_list;
+    struct handler<mTime> mqtthandler_settings_teleperiod;
+    struct handler<mTime> mqtthandler_state_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // mTime(){};
+    void init(void);
+    void UpdateStoredRTCVariables();
+    void initUpTime();
+    void UpdateUpTime();
+    // int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+
+    // static const char* PM_MODULE_CORE_TIME_CTR;
+    // static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
+    // PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
+    // PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_TIME_FRIENDLY_CTR; }
+    // uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TIME_ID; }
+    
+    // #ifdef USE_DEBUG_CLASS_SIZE
+    // uint16_t GetClassSize(){
+    //   return sizeof(mTime);
+    // };
+    // #endif
+    #ifndef DISABLE_TIME1_OLD_CODE
+    void parse_JSONCommand(JsonParserObject obj);
+    #endif
 
     void  SystemTime_Update(
           uint16_t year,
@@ -213,7 +474,9 @@ class mTime :
       uint16_t SunMinutes(uint32_t dawn);
     #endif //  USE_SUNRISE
 
+    #ifndef DISABLE_TIME1_OLD_CODE
     uint32_t UtcTime(void);
+    #endif// DISABLE_TIME1_OLD_CODE
 
 
     uint32_t tSavedUptime;
@@ -275,7 +538,9 @@ void RtcSync(void);
 
     void ResetRebootCounter();
 
+    #ifndef DISABLE_TIME1_OLD_CODE
     uint32_t UpTime(void);
+    #endif // DISABLE_TIME1_OLD_CODE
     int8_t Tasker_InternetTime(void);
 
     enum MONTH_NUM{MONTH_JANUARY=1,MONTH_FEBRUARY,MONTH_MARCH,MONTH_APRIL,MONTH_MAY,MONTH_JUNE,MONTH_JULY,MONTH_AUGUST,MONTH_SEPTEMBER,MONTH_OCTOBER,MONTH_NOVEMBER,MONTH_DECEMBER};
@@ -295,8 +560,10 @@ void RtcSync(void);
 
     const char* getFormattedUptime(char* buffer, uint8_t buflen);
 
+    // #ifndef DISABLE_TIME1_OLD_CODE
     // datetime_t RtcTime;
     datetime_t RtcTime;
+    // #endif // DISABLE_TIME1_OLD_CODE
 
 
     static bool TimeReached(uint32_t* tSaved, uint32_t ElapsedTime);
@@ -315,6 +582,7 @@ void RtcSync(void);
     //  *          Timezone by Jack Christensen (https://github.com/JChristensen/Timezone)
     // \*********************************************************************************************/
 
+    #ifndef DISABLE_TIME1_OLD_CODE
     const uint32_t SECS_PER_MIN = 60UL;
     const uint32_t SECS_PER_HOUR = 3600UL;
     const uint32_t SECS_PER_DAY = SECS_PER_HOUR * 24UL;
@@ -322,7 +590,6 @@ void RtcSync(void);
 
     void RtcSecond();
     
-    uint32_t GetUTCTime();
     
 typedef union {
   uint16_t data;
@@ -338,8 +605,14 @@ uint32_t RuleToTime(TimeRule r, int yr);
 TimeRule tflag[2];
 int16_t       toffset[2];                // 30E
 
-// void BreakTime(uint32_t time_input, struct TIME_T &tm);
-// uint32_t MakeTime(struct TIME_T &tm);
+    #endif // DISABLE_TIME1_OLD_CODE
+
+
+    uint32_t GetUTCTime();
+
+    #ifndef DISABLE_TIME1_OLD_CODE
+// void BreakTime(uint32_t time_input, struct datetime_t &tm);
+// uint32_t MakeTime(struct datetime_t &tm);
 uint32_t MakeTime(datetime_t &tm);
 
 uint32_t RtcMillis(void) ;
@@ -354,6 +627,7 @@ String GetDuration(uint32_t time);
 
 void WifiPollNtp() ;
 uint32_t WifiGetNtp(void);
+    #endif // DISABLE_TIME1_OLD_CODE
 
     #define LEAP_YEAR(Y)  (((1970+Y)>0) && !((1970+Y)%4) && (((1970+Y)%100) || !((1970+Y)%400)))
     
@@ -362,12 +636,13 @@ uint32_t WifiGetNtp(void);
     uint8_t kDaysInMonth[12];// = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
     // char kMonthNamesEnglish[37];// = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
+    #ifndef DISABLE_TIME1_OLD_CODE
 void BreakTime(uint32_t time_input, datetime_t &tm);
 
 uint8_t hour(uint32_t time);
 uint8_t minute(uint32_t time);
 uint8_t second(uint32_t time);
-int hourFormat12(time_t t);
+int hourFormat12(datetime_t t);
 
 struct RTC {
   uint32_t utc_time = 0;
@@ -387,6 +662,7 @@ struct RTC {
   uint32_t ntp_last_active = 0;
   
 } Rtc;
+    #endif // DISABLE_TIME1_OLD_CODE
 
 
     // uint32_t utc_time = 0;
@@ -400,6 +676,7 @@ struct RTC {
     // uint8_t  midnight_now = 0;
     // uint8_t  ntp_sync_minute = 0;
     
+    #ifndef DISABLE_TIME1_OLD_CODE
     uint32_t LocalTime(void);
     uint32_t Midnight(void);
     
@@ -408,6 +685,7 @@ struct RTC {
 
     void RtcInit(void);
     void RtcPreInit(void);
+    #endif // DISABLE_TIME1_OLD_CODE
 
 
     datetime_t GetTimefromCtr(const char* c);
@@ -458,4 +736,7 @@ struct RTC {
     unsigned long tSavedStoreRTCUpdate;
 
 };
-#endif
+
+#endif // USE_MODULE_CORE_TIME
+
+#endif // header

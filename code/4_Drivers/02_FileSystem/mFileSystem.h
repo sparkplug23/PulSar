@@ -29,6 +29,15 @@
   #include "FS.h"
 #endif  // ESP32
 
+
+
+
+#define FILE_EXTENSION_JSON ".json"
+
+#define FILE_EXTENSION_BIN ".bin" //release version
+// #define FILE_EXTENSION_BIN ".txt"   //debug version so the editor can open the file
+
+
 /*
  * Connect the SD card to the following pins:
  *
@@ -80,7 +89,7 @@ class mFileSystem :
 
 
 void ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
-void ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
+uint32_t ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
 void JSONFile_Save(char* filename_With_extension, char* buffer, uint16_t buflen);
 void JSONFile_Load(char* filename_With_extension, char* buffer, uint16_t buflen);
 

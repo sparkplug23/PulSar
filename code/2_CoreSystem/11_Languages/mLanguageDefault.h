@@ -1508,6 +1508,7 @@
   #define D_LOG_LIGHT "LGT: "         // Light interface
   #define D_LOG_DOORBELL "DRB: "         // Neopixels
   #define D_LOG_RELAYS "RLY: "         // relays
+  #define D_LOG_TIME2 "TIM2: "         // Time testing v2
   #define D_LOG_TIME "TIM: "         // Time
   #define D_LOG_UPTIME "UPT: "         // Uptime
   #define D_LOG_DHT "DHT: "         // Uptime
@@ -1571,6 +1572,7 @@
   #define D_LOG_LIGHT "LGT: "         // Light interface
   #define D_LOG_DOORBELL "DRB: "         // Neopixels
   #define D_LOG_RELAYS "RLY: "         // relays
+  #define D_LOG_TIME2 "TIM2: "         // Time testing v2
   #define D_LOG_TIME "TIM: "         // Time
   #define D_LOG_UPTIME "UPT: "         // Uptime
   #define D_LOG_DHT "DHT: "         // Uptime

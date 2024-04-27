@@ -3,16 +3,17 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
 // setUpMatrix() - constructs ledmap array from matrix of panels with WxH pixels
 // this converts physical (possibly irregular) LED arrangement into well defined
 // array of logical pixels: fist entry corresponds to left-topmost logical pixel
-// followed by horizontal pixels, when mAnimatorLight::Segment_New::maxWidth logical pixels are added they
-// are followed by next row (down) of mAnimatorLight::Segment_New::maxWidth pixels (and so forth)
+// followed by horizontal pixels, when mAnimatorLight::Segment::maxWidth logical pixels are added they
+// are followed by next row (down) of mAnimatorLight::Segment::maxWidth pixels (and so forth)
 // note: matrix may be comprised of multiple panels each with different orientation
 // but ledmap takes care of that. ledmap is constructed upon initialization
 // so matrix should disable regular ledmap processing
 void mAnimatorLight::setUpMatrix() {
-#ifndef WLED_DISABLE_2D
 
 
   // ALOG_INF("?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????setUpMatrix()");
@@ -26,37 +27,37 @@ void mAnimatorLight::setUpMatrix() {
   if (isMatrix) {
 
     // calculate width dynamically because it will have gaps
-    Segment_New::maxWidth = 1;
-    Segment_New::maxHeight = 1;
+    Segment::maxWidth = 1;
+    Segment::maxHeight = 1;
       ALOG_INF("panel.size() = %d", panel.size());
     for (size_t i = 0; i < panel.size(); i++) {
       Panel &p = panel[i];
-      if (p.xOffset + p.width > Segment_New::maxWidth) {
-        Segment_New::maxWidth = p.xOffset + p.width;
+      if (p.xOffset + p.width > Segment::maxWidth) {
+        Segment::maxWidth = p.xOffset + p.width;
       }
-      if (p.yOffset + p.height > Segment_New::maxHeight) {
-        Segment_New::maxHeight = p.yOffset + p.height;
+      if (p.yOffset + p.height > Segment::maxHeight) {
+        Segment::maxHeight = p.yOffset + p.height;
       }
     }
 
-    ALOG_INF(PSTR("Segment::maxHeight %d\n\r"), Segment_New::maxHeight);
+    ALOG_INF(PSTR("Segment::maxHeight %d\n\r"), Segment::maxHeight);
 
     // safety check
-    if (Segment_New::maxWidth * Segment_New::maxHeight > MAX_LEDS || Segment_New::maxWidth <= 1 || Segment_New::maxHeight <= 1) {
+    if (Segment::maxWidth * Segment::maxHeight > MAX_LEDS || Segment::maxWidth <= 1 || Segment::maxHeight <= 1) {
       DEBUG_PRINTLN(F("2D Bounds error."));
       isMatrix = false;
-      Segment_New::maxWidth = _length;
-      Segment_New::maxHeight = 1;
+      Segment::maxWidth = _length;
+      Segment::maxHeight = 1;
       panels = 0;
       panel.clear(); // release memory allocated by panels
       resetSegments2();
       return;
     }
 
-    customMappingTable = new uint16_t[Segment_New::maxWidth * Segment_New::maxHeight];
+    customMappingTable = new uint16_t[Segment::maxWidth * Segment::maxHeight];
 
     if (customMappingTable != nullptr) {
-      customMappingSize = Segment_New::maxWidth * Segment_New::maxHeight;
+      customMappingSize = Segment::maxWidth * Segment::maxHeight;
 
       // fill with empty in case we don't fill the entire matrix
       for (size_t i = 0; i< customMappingSize; i++) {
@@ -109,7 +110,7 @@ void mAnimatorLight::setUpMatrix() {
             y = (p.vertical?p.rightStart:p.bottomStart) ? v-j-1 : j;
             x = (p.vertical?p.bottomStart:p.rightStart) ? h-i-1 : i;
             x = p.serpentine && j%2 ? h-x-1 : x;
-            size_t index = (p.yOffset + (p.vertical?x:y)) * mAnimatorLight::Segment_New::maxWidth + p.xOffset + (p.vertical?y:x);
+            size_t index = (p.yOffset + (p.vertical?x:y)) * mAnimatorLight::Segment::maxWidth + p.xOffset + (p.vertical?y:x);
             if (!gapTable || (gapTable && gapTable[index] >  0)) customMappingTable[index] = pix; // a useful pixel (otherwise -1 is retained)
             if (!gapTable || (gapTable && gapTable[index] >= 0)) pix++; // not a missing pixel
           }
@@ -124,7 +125,7 @@ void mAnimatorLight::setUpMatrix() {
       #ifdef WLED_DEBUG
       DEBUG_PRINT(F("Matrix ledmap:"));
       for (unsigned i=0; i<customMappingSize; i++) {
-        if (!(i%mAnimatorLight::Segment_New::maxWidth)) DEBUG_PRINTLN();
+        if (!(i%mAnimatorLight::Segment::maxWidth)) DEBUG_PRINTLN();
         DEBUG_PRINTF("%4d,", customMappingTable[i]);
       }
       DEBUG_PRINTLN();
@@ -136,47 +137,49 @@ void mAnimatorLight::setUpMatrix() {
       isMatrix = false;
       panels = 0;
       panel.clear();
-      Segment_New::maxWidth = _length;
-      Segment_New::maxHeight = 1;
+      Segment::maxWidth = _length;
+      Segment::maxHeight = 1;
       resetSegments2();
     }
-    ALOG_INF(PSTR("Segment::maxHeight2 %d\n\r"), Segment_New::maxHeight);
+    ALOG_INF(PSTR("Segment::maxHeight2 %d\n\r"), Segment::maxHeight);
       DEBUG_LINE_HERE;
   }
-#else
-  isMatrix = false; // no matter what config says
-#endif
+// #else
+//   isMatrix = false; // no matter what config says
 }
+#endif
 
 
 ///////////////////////////////////////////////////////////
-// mAnimatorLight::Segment_New:: routines
+// mAnimatorLight::Segment:: routines
 ///////////////////////////////////////////////////////////
 
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
 // XY(x,y) - gets pixel index within current segment (often used to reference leds[] array element)
-uint16_t IRAM_ATTR mAnimatorLight::Segment_New::XY(uint16_t x, uint16_t y)
+uint16_t IRAM_ATTR mAnimatorLight::Segment::XY(uint16_t x, uint16_t y)
 {
   uint16_t width  = virtualWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
   uint16_t height = virtualHeight();  // segment height in logical pixels (is always >= 1)
   return isActive() ? (x%width) + (y%height) * width : 0;
 }
 
-void IRAM_ATTR mAnimatorLight::Segment_New::setPixelColorXY(int x, int y, uint32_t col)
+void 
+// IRAM_ATTR 
+mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 {
 
-  ALOG_INF(PSTR("IRAM_ATTR mAnimatorLight::Segment_New::setPixelColorXY(int x, int y, uint32_t col) (%d,%d,%d)"), x, y, col);
+  // ALOG_INF(PSTR("Segment::setPixelColorXY(%d,%d|%d,%d,%d)"), x, y, R(col), G(col), B(col));
 
   DEBUG_LINE_HERE;
 
   if (!isActive()) return; // not active
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) return;  // if pixel would fall out of virtual segment just exit
 
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   uint8_t _bri_t = currentBri();
   if (_bri_t < 255) {
     byte r = scale8(R(col), _bri_t);
@@ -186,83 +189,90 @@ void IRAM_ATTR mAnimatorLight::Segment_New::setPixelColorXY(int x, int y, uint32
     col = RGBW32(r, g, b, w);
   }
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   if (reverse  ) x = virtualWidth()  - x - 1;
   if (reverse_y) y = virtualHeight() - y - 1;
   if (transpose) { uint16_t t = x; x = y; y = t; } // swap X & Y if segment transposed
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   x *= groupLength(); // expand to physical pixels
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   y *= groupLength(); // expand to physical pixels
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   if (x >= width() || y >= height())
   {
     
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
     return;  // if pixel would fall out of segment just exit
   }
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
-  ALOG_INF(PSTR("grouping %d"), grouping);
+  // ALOG_INF(PSTR("grouping %d"), grouping);
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
   uint32_t tmpCol = col;
   for (int j = 0; j < grouping; j++) {   // groupping vertically
   
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
     for (int g = 0; g < grouping; g++) { // groupping horizontally
     
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
       uint16_t xX = (x+g), yY = (y+j);
       if (xX >= width() || yY >= height()){
         
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
  continue; // we have reached one dimension's end
       }
 // #ifndef WLED_DISABLE_MODE_BLEND
 //       // if blending modes, blend with underlying pixel
-//       if (_modeBlend) tmpCol = color_blend(getPixelColorXY(pixel_range.start + xX, startY + yY), col, 0xFFFFU - progress(), true);
+//       if (_modeBlend) tmpCol = color_blend(getPixelColorXY(start + xX, startY + yY), col, 0xFFFFU - progress(), true);
 // #endif
   DEBUG_LINE_HERE;
 
-      setPixelColorXY(pixel_range.start + xX, startY + yY, tmpCol);
+      pCONT_lAni->setPixelColorXY(start + xX, startY + yY, tmpCol);
 
   DEBUG_LINE_HERE;
       if (mirror) { //set the corresponding horizontally mirrored pixel
-        if (transpose) setPixelColorXY(pixel_range.start + xX, startY + height() - yY - 1, tmpCol);
-        else           setPixelColorXY(pixel_range.start + width() - xX - 1, startY + yY, tmpCol);
+        if (transpose) pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol);
+        else           pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);
       }
       if (mirror_y) { //set the corresponding vertically mirrored pixel
-        if (transpose) setPixelColorXY(pixel_range.start + width() - xX - 1, startY + yY, tmpCol);
-        else           setPixelColorXY(pixel_range.start + xX, startY + height() - yY - 1, tmpCol);
+        if (transpose) pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);
+        else           pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol);
       }
       if (mirror_y && mirror) { //set the corresponding vertically AND horizontally mirrored pixel
-        setPixelColorXY(width() - xX - 1, height() - yY - 1, tmpCol);
+        pCONT_lAni->setPixelColorXY(width() - xX - 1, height() - yY - 1, tmpCol);
       }
       
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
     }
     
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   }
 
   DEBUG_LINE_HERE;
 }
 
 // anti-aliased version of setPixelColorXY()
-void mAnimatorLight::Segment_New::setPixelColorXY(float x, float y, uint32_t col, bool aa)
+void mAnimatorLight::Segment::setPixelColorXY(float x, float y, uint32_t col, bool aa)
 {
+  DEBUG_LINE_HERE;
   if (!isActive()) return; // not active
-  if (x<0.0f || x>1.0f || y<0.0f || y>1.0f) return; // not normalized
+  if (x<0.0f || x>1.0f || y<0.0f || y>1.0f)
+  {
+  
+    ALOG_ERR(PSTR("not normalized setPixelColorXY"));//: x=%f, y=%f"), x, y);
+    return; // not normalized
+  }
 
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
-
+DEBUG_LINE_HERE;
   float fX = x * (cols-1);
   float fY = y * (rows-1);
   if (aa) {
+    DEBUG_LINE_HERE;
     uint16_t xL = roundf(fX-0.49f);
     uint16_t xR = roundf(fX+0.49f);
     uint16_t yT = roundf(fY-0.49f);
@@ -291,53 +301,66 @@ void mAnimatorLight::Segment_New::setPixelColorXY(float x, float y, uint32_t col
       setPixelColorXY(xL, yT, col); // exact match (x & y land on a pixel)
     }
   } else {
+    DEBUG_LINE_HERE;
     setPixelColorXY(uint16_t(roundf(fX)), uint16_t(roundf(fY)), col);
   }
+  DEBUG_LINE_HERE;
 }
 
 // returns RGBW values of pixel
-uint32_t mAnimatorLight::Segment_New::getPixelColorXY(uint16_t x, uint16_t y) {
-  DEBUG_LINE_HERE;
+uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y) 
+{
+  // ALOG_ERR(PSTR("getPixelColorXY: x=%d, y=%d"), x, y);
+
+  // Serial.println(__LINE__);
+  // DEBUG_LINE_HERE;
   if (!isActive()) return 0; // not active
-  DEBUG_LINE_HERE;
-  if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) return 0;  // if pixel would fall out of virtual segment just exit
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
+  if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
+  {
+
+    ALOG_ERR(PSTR("OUT OF RANGE getPixelColorXY: x=%d, y=%d, virtualWidth=%d, virtualHeight=%d"), x, y, virtualWidth(), virtualHeight());
+
+    return 0;  // if pixel would fall out of virtual segment just exit
+
+  }
+  // DEBUG_LINE_HERE;
   if (reverse  ) x = virtualWidth()  - x - 1;
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   if (reverse_y) y = virtualHeight() - y - 1;
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   if (transpose) { uint16_t t = x; x = y; y = t; } // swap X & Y if segment transposed
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   x *= groupLength(); // expand to physical pixels
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   y *= groupLength(); // expand to physical pixels
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   if (x >= width() || y >= height()) return 0;
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
-  return pCONT_lAni->STRIPgetPixelColorXY(pixel_range.start + x, startY + y);
-  DEBUG_LINE_HERE;
+  return pCONT_lAni->getPixelColorXY(start + x, startY + y);
+  // DEBUG_LINE_HERE;
 }
 
 // Blends the specified color with the existing pixel color.
-void mAnimatorLight::Segment_New::blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend) {
+void mAnimatorLight::Segment::blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend) {
   setPixelColorXY(x, y, color_blend(getPixelColorXY(x,y), color, blend));
 }
 
 // Adds the specified color with the existing pixel color perserving color balance.
-void mAnimatorLight::Segment_New::addPixelColorXY(int x, int y, uint32_t color, bool fast) {
+void mAnimatorLight::Segment::addPixelColorXY(int x, int y, uint32_t color, bool fast) {
   if (!isActive()) return; // not active
   if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) return;  // if pixel would fall out of virtual segment just exit
   setPixelColorXY(x, y, color_add(getPixelColorXY(x,y), color, fast));
 }
 
-void mAnimatorLight::Segment_New::fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade) {
+void mAnimatorLight::Segment::fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade) {
   if (!isActive()) return; // not active
   setPixelColorXY(x, y, color_fade(getPixelColorXY(x,y), fade, true));
 }
 
 // blurRow: perform a blur on a row of a rectangular matrix
-void mAnimatorLight::Segment_New::blurRow(uint16_t row, fract8 blur_amount) {
+void mAnimatorLight::Segment::blurRow(uint16_t row, fract8 blur_amount) {
   if (!isActive() || blur_amount == 0) return; // not active
   const uint_fast16_t cols = virtualWidth();
   const uint_fast16_t rows = virtualHeight();
@@ -356,16 +379,16 @@ void mAnimatorLight::Segment_New::blurRow(uint16_t row, fract8 blur_amount) {
     cur += carryover;
     if (x>0) {
       CRGB prev = CRGB(getPixelColorXY(x-1, row)) + part;
-      setPixelColorXY(x-1, row, prev);
+      setPixelColorXY_CRGB(x-1, row, prev);
     }
     if (before != cur)         // optimization: only set pixel if color has changed
-      setPixelColorXY(x, row, cur);
+      setPixelColorXY_CRGB(x, row, cur);
     carryover = part;
   }
 }
 
 // blurCol: perform a blur on a column of a rectangular matrix
-void mAnimatorLight::Segment_New::blurCol(uint16_t col, fract8 blur_amount) {
+void mAnimatorLight::Segment::blurCol(uint16_t col, fract8 blur_amount) {
   if (!isActive() || blur_amount == 0) return; // not active
   const uint_fast16_t cols = virtualWidth();
   const uint_fast16_t rows = virtualHeight();
@@ -384,16 +407,16 @@ void mAnimatorLight::Segment_New::blurCol(uint16_t col, fract8 blur_amount) {
     cur += carryover;
     if (y>0) {
       CRGB prev = CRGB(getPixelColorXY(col, y-1)) + part;
-      setPixelColorXY(col, y-1, prev);
+      setPixelColorXY_CRGB(col, y-1, prev);
     }
     if (before != cur)         // optimization: only set pixel if color has changed
-      setPixelColorXY(col, y, cur);
+      setPixelColorXY_CRGB(col, y, cur);
     carryover = part;
   }
 }
 
 // 1D Box blur (with added weight - blur_amount: [0=no blur, 255=max blur])
-void mAnimatorLight::Segment_New::box_blur(uint16_t i, bool vertical, fract8 blur_amount) {
+void mAnimatorLight::Segment::box_blur(uint16_t i, bool vertical, fract8 blur_amount) {
   if (!isActive() || blur_amount == 0) return; // not active
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
@@ -423,7 +446,7 @@ void mAnimatorLight::Segment_New::box_blur(uint16_t i, bool vertical, fract8 blu
   for (int j = 0; j < dim1; j++) {
     uint16_t x = vertical ? i : j;
     uint16_t y = vertical ? j : i;
-    setPixelColorXY(x, y, tmp[j]);
+    setPixelColorXY_CRGB(x, y, tmp[j]);
   }
 }
 
@@ -441,12 +464,12 @@ void mAnimatorLight::Segment_New::box_blur(uint16_t i, bool vertical, fract8 blu
 //         eventually all the way to black; this is by design so that
 //         it can be used to (slowly) clear the LEDs to black.
 
-void mAnimatorLight::Segment_New::blur1d(fract8 blur_amount) {
+void mAnimatorLight::Segment::blur1d(fract8 blur_amount) {
   const uint16_t rows = virtualHeight();
   for (unsigned y = 0; y < rows; y++) blurRow(y, blur_amount);
 }
 
-void mAnimatorLight::Segment_New::moveX(int8_t delta, bool wrap) {
+void mAnimatorLight::Segment::moveX(int8_t delta, bool wrap) {
   if (!isActive()) return; // not active
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
@@ -464,7 +487,7 @@ void mAnimatorLight::Segment_New::moveX(int8_t delta, bool wrap) {
   }
 }
 
-void mAnimatorLight::Segment_New::moveY(int8_t delta, bool wrap) {
+void mAnimatorLight::Segment::moveY(int8_t delta, bool wrap) {
   if (!isActive()) return; // not active
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
@@ -486,7 +509,7 @@ void mAnimatorLight::Segment_New::moveY(int8_t delta, bool wrap) {
 // @param dir direction: 0=left, 1=left-up, 2=up, 3=right-up, 4=right, 5=right-down, 6=down, 7=left-down
 // @param delta number of pixels to move
 // @param wrap around
-void mAnimatorLight::Segment_New::move(uint8_t dir, uint8_t delta, bool wrap) {
+void mAnimatorLight::Segment::move(uint8_t dir, uint8_t delta, bool wrap) {
   if (delta==0) return;
   switch (dir) {
     case 0: moveX( delta, wrap);                      break;
@@ -500,7 +523,7 @@ void mAnimatorLight::Segment_New::move(uint8_t dir, uint8_t delta, bool wrap) {
   }
 }
 
-void mAnimatorLight::Segment_New::draw_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB col) {
+void mAnimatorLight::Segment::draw_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB col) {
   if (!isActive() || radius == 0) return; // not active
   // Bresenham’s Algorithm
   int d = 3 - (2*radius);
@@ -525,7 +548,7 @@ void mAnimatorLight::Segment_New::draw_circle(uint16_t cx, uint16_t cy, uint8_t 
 }
 
 // by stepko, taken from https://editor.soulmatelights.com/gallery/573-blobs
-void mAnimatorLight::Segment_New::fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB col) {
+void mAnimatorLight::Segment::fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB col) {
   if (!isActive() || radius == 0) return; // not active
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
@@ -539,7 +562,7 @@ void mAnimatorLight::Segment_New::fill_circle(uint16_t cx, uint16_t cy, uint8_t 
   }
 }
 
-void mAnimatorLight::Segment_New::nscale8(uint8_t scale) {
+void mAnimatorLight::Segment::nscale8(uint8_t scale) {
   if (!isActive()) return; // not active
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
@@ -549,7 +572,7 @@ void mAnimatorLight::Segment_New::nscale8(uint8_t scale) {
 }
 
 //line function
-void mAnimatorLight::Segment_New::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c) {
+void mAnimatorLight::Segment::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c) {
   if (!isActive()) return; // not active
   const uint16_t cols = virtualWidth();
   const uint16_t rows = virtualHeight();
@@ -580,7 +603,7 @@ void mAnimatorLight::Segment_New::drawLine(uint16_t x0, uint16_t y0, uint16_t x1
 
 // draws a raster font character on canvas
 // only supports: 4x6=24, 5x8=40, 5x12=60, 6x8=48 and 7x9=63 fonts ATM
-void mAnimatorLight::Segment_New::drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2, int8_t rotate) {
+void mAnimatorLight::Segment::drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2, int8_t rotate) {
   if (!isActive()) return; // not active
   if (chr < 32 || chr > 126) return; // only ASCII 32-126 supported
   chr -= 32; // align with font table entries
@@ -614,14 +637,15 @@ void mAnimatorLight::Segment_New::drawCharacter(unsigned char chr, int16_t x, in
       }
       if (x0 < 0 || x0 >= cols || y0 < 0 || y0 >= rows) continue; // drawing off-screen
       if (((bits>>(j+(8-w))) & 0x01)) { // bit set
-        setPixelColorXY(x0, y0, col);
+        // DEBUG_LINE_HERE_MARKER;
+        setPixelColorXY_CRGB(x0, y0, col);
       }
     }
   }
 }
 
 #define WU_WEIGHT(a,b) ((uint8_t) (((a)*(b)+(a)+(b))>>8))
-void mAnimatorLight::Segment_New::wu_pixel(uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu
+void mAnimatorLight::Segment::wu_pixel(uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu
   if (!isActive()) return; // not active
   // extract the fractional parts and derive their inverses
   uint8_t xx = x & 0xff, yy = y & 0xff, ix = 255 - xx, iy = 255 - yy;
@@ -634,7 +658,7 @@ void mAnimatorLight::Segment_New::wu_pixel(uint32_t x, uint32_t y, CRGB c) {    
     led.r = qadd8(led.r, c.r * wu[i] >> 8);
     led.g = qadd8(led.g, c.g * wu[i] >> 8);
     led.b = qadd8(led.b, c.b * wu[i] >> 8);
-    setPixelColorXY(int((x >> 8) + (i & 1)), int((y >> 8) + ((i >> 1) & 1)), led);
+    setPixelColorXY_CRGB(int((x >> 8) + (i & 1)), int((y >> 8) + ((i >> 1) & 1)), led);
   }
 }
 #undef WU_WEIGHT

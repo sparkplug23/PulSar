@@ -1,3 +1,17 @@
+/**
+ * @file mBusManager.h
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-04-06
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ * @note This file is a derivative of the original WLED project.
+ *       The CCT funtionality has been removed, and instead will be handled by effect functions.
+ *       The auto white will remain, where the white channel will be adjusted based on the RGB values when desired, but otherwise will be calculated in the effects. 
+ * 
+ */
 #ifndef BusManager_h
 #define BusManager_h
 
@@ -29,6 +43,34 @@
 #define NUM_ICS_WS2812_2CH_3X(len)    (((len)+1)*2/3) // 2 WS2811 ICs control 3 zones (each zone has 2 LEDs, CW and WW)
 #define IC_INDEX_WS2812_2CH_3X(i)     ((i)*2/3)
 #define WS2812_2CH_3X_SPANS_2_ICS(i)  ((i)&0x01)    // every other LED zone is on two different ICs
+
+
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH__CTR) "WS2812_1CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH_X3__CTR) "WS2812_1CH_X3";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_2CH_X3__CTR) "WS2812_2CH_X3";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_WWA__CTR) "WS2812_WWA";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_RGB__CTR) "WS2812_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__GS8608__CTR) "GS8608";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2811_400KHZ__CTR) "WS2811_400KHZ";
+DEFINE_PGM_CTR(PM_BUSTYPE__TM1829__CTR) "TM1829";
+DEFINE_PGM_CTR(PM_BUSTYPE__SK6812_RGBW__CTR) "SK6812_RGBW";
+DEFINE_PGM_CTR(PM_BUSTYPE__TM1814__CTR) "TM1814";
+DEFINE_PGM_CTR(PM_BUSTYPE__ONOFF__CTR) "ONOFF";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_1CH__CTR) "ANALOG_1CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_2CH__CTR) "ANALOG_2CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_3CH__CTR) "ANALOG_3CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_4CH__CTR) "ANALOG_4CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_5CH__CTR) "ANALOG_5CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2801__CTR) "WS2801";
+DEFINE_PGM_CTR(PM_BUSTYPE__APA102__CTR) "APA102";
+DEFINE_PGM_CTR(PM_BUSTYPE__LPD8806__CTR) "LPD8806";
+DEFINE_PGM_CTR(PM_BUSTYPE__P9813__CTR) "P9813";
+DEFINE_PGM_CTR(PM_BUSTYPE__LPD6803__CTR) "LPD6803";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGB__CTR) "NET_DDP_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_E131_RGB__CTR) "NET_E131_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_ARTNET_RGB__CTR) "NET_ARTNET_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGBW__CTR) "NET_DDP_RGBW";
+DEFINE_PGM_CTR(PM_BUSTYPE__RESERVED__CTR) "RESERVED";
 
 
 // Temporary struct for passing bus configuration to bus
@@ -133,14 +175,15 @@ struct ColorOrderMap
 class Bus {
   public:
     Bus(uint8_t type, uint16_t start, uint8_t aw)
-    : _bri(255)
-    , _len(1)
+    : _len(1)
     , _valid(false)
     , _needsRefresh(false)
     {
       _type = type;
       _start = start;
+      #ifdef ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
       _autoWhiteMode = Bus::hasWhite(_type) ? aw : RGBW_MODE_MANUAL_ONLY;
+      #endif // ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
     };
 
     virtual ~Bus(){}
@@ -151,7 +194,6 @@ class Bus {
     virtual void     setPixelColor(uint16_t pix, RgbcctColor c) = 0;
     virtual RgbcctColor getPixelColor(uint16_t pix) { return 0; }
 
-    virtual void     setBrightness(uint8_t b) { _bri = b; };
     virtual void     cleanup() = 0;
     virtual uint8_t  getPins(uint8_t* pinArray) { return 0; }
     virtual uint16_t getLength() { return _len; }
@@ -161,7 +203,12 @@ class Bus {
     inline  uint16_t getStart() { return _start; }
     inline  void     setStart(uint16_t start) { _start = start; }
     inline  uint8_t  getType() { return _type; }
-    const char* getTypeName();// { return _type; }
+
+    const char* getTypeName();
+    const char* getTypeName(uint8_t id);
+
+    static uint8_t getTypeIDbyName(const char* name);
+
     inline  bool     isOk() { return _valid; }
     inline  bool     isOffRefreshRequired() { return _needsRefresh; }
             bool     containsPixel(uint16_t pix) { return pix >= _start && pix < _start+_len; }
@@ -182,21 +229,13 @@ class Bus {
           _type == BUSTYPE_ANALOG_2CH    || _type == BUSTYPE_ANALOG_5CH) return true;
       return false;
     }
-    static void setCCT(uint16_t cct) {
-      _cct = cct;
-    }
-    static void setCCTBlend(uint8_t b) {
-      if (b > 100) b = 100;
-      _cctBlend = (b * 127) / 100;
-      //compile-time limiter for hardware that can't power both white channels at max
-      #ifdef WLED_MAX_CCT_BLEND
-        if (_cctBlend > WLED_MAX_CCT_BLEND) _cctBlend = WLED_MAX_CCT_BLEND;
-      #endif
-    }
+
+    #ifdef ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES    
     inline        void    setAutoWhiteMode(uint8_t m) { if (m < 5) _autoWhiteMode = m; }
     inline        uint8_t getAutoWhiteMode()          { return _autoWhiteMode; }
     inline static void    setGlobalAWMode(uint8_t m)  { if (m < 5) _gAWM = m; else _gAWM = AW_GLOBAL_DISABLED; }
     inline static uint8_t getGlobalAWMode()           { return _gAWM; }
+    #endif // ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
 
     bool reversed = false;
 
@@ -204,13 +243,13 @@ class Bus {
     uint16_t _len;
   protected:
     uint8_t  _type;
-    uint8_t  _bri;
     bool     _valid;
     bool     _needsRefresh;
+
+    #ifdef ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
     uint8_t  _autoWhiteMode;
     static uint8_t _gAWM;
-    static int16_t _cct;
-    static uint8_t _cctBlend;
+    #endif // ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
 
     uint32_t autoWhiteCalc(uint32_t c);
 };

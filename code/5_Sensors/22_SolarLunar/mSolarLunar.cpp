@@ -119,7 +119,7 @@ void mSolarLunar::Update_Solar_Tracking_Data()
 	/**
 	 * @brief Can only be set when the time has been set first
 	 **/
-	if(pCONT_time->RtcTime.isvalid)
+	if(pCONT_time->RtcTime.valid)
 	{
 		solar_position.isvalid = true;
 	}else{

@@ -419,3 +419,54 @@ void mSettings::SettingsSdkErase(void)
 //   delay(1000);
 }
 
+
+/**
+ * If true, then load important info from settings struct into runtime values, else, remain on old settings
+ * */
+void mSettings::SettingsLoad_CheckSuccessful()
+{
+  
+  // if (Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {
+  //   // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
+  //   if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
+  //     Settings.flag_network.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
+  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
+  //       // for (uint8_t i = 0; i < MAX_RULE_SETS; i++) {
+  //       //   // if (bitRead(Settings.rule_stop, i)) {
+  //       //   //   bitWrite(Settings.rule_enabled, i, 0);  // Disable rules causing boot loop
+  //       //   // }
+  //       // }
+  //     }
+  //     // if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
+  //     //   Settings.rule_enabled = 0;                  // Disable all rules
+  //     // }
+  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
+  //       for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) {
+  //         Settings.module_pins.io[i] = GPIO_NONE_ID;         // Reset user defined GPIO disabling sensors
+  //       }
+  //     }
+  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
+  //       Settings.module = MODULE_WEMOS_ID;             // Reset module to Sonoff Basic
+  //       Settings.last_module = MODULE_WEMOS_ID;
+  //     }
+  //     //reset 7 times, then fail into safe boot awaiting OTA
+  //     // HandleFailedBootFailBack();
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcReboot.fast_reboot_count);
+  //     #endif///   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   }
+  // }
+
+  memset(Settings.mqtt.topic,0,sizeof(Settings.mqtt.topic));
+  memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
+  
+  // Configure hostname 
+  memset(runtime.my_hostname,0,sizeof(runtime.my_hostname));
+  sprintf(runtime.my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
+
+  //Only load wifi here or else set fallback
+
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_PROJECT " %s %s " D_VERSION " %s%s-" ARDUINO_ESP8266_RELEASE), pCONT_set->Settings.system_name.device, Settings.system_name.friendly, my_version, my_image);
+  
+
+}
