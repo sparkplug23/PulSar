@@ -200,7 +200,7 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #error "ENABLE_DEVFEATURE__PIXEL_USE_I2S_FOR_BUS
   #endif
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  #error "ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  #warning "ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   #endif
   #ifdef ENABLE_DEBUG_MULTIPIN
   #error "ENABLE_DEBUG_MULTIPIN
@@ -209,9 +209,6 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #error "DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
   #endif
 
-  #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-  #warning "ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING phase out"
-  #endif
   #ifdef ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
   #error "ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT"
   #endif
@@ -239,7 +236,7 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #error "ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS"
   #endif 
   #ifdef STRIP_SIZE_MAX
-  #warning "STRIP_SIZE_MAX phase out"
+  #error "STRIP_SIZE_MAX is not longer used since multi-pin"
   #endif
   #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
   #warning "ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS should stay, but I dont want this enabled by default until motion bug is fixed"

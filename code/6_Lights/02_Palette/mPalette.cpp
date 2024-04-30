@@ -165,112 +165,98 @@ void mPalette::Init_Palettes()
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGPBO__ID, 
+    PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBO__ID, 
     PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGPBY__ID, 
+    PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBY__ID, 
     PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_ROGPBY__ID, 
+    PALETTELIST_STATIC__FESTIVE_TRADITIONAL_ROGPBY__ID, 
     PM_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGBO__ID, 
+    PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGBO__ID, 
     PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGBY__ID, 
+    PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGBY__ID, 
     PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_COLD_WHITE__ID, 
-    PM_PALETTE__CHRISTMAS_COLD_WHITE__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_COLD_WHITE__DATA),
-    D_PALETTE__CHRISTMAS_COLD_WHITE__ENCODING
-  );
-
-  addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_WARM_WHITE__ID, 
-    PM_PALETTE__CHRISTMAS_WARM_WHITE__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_WARM_WHITE__DATA),
-    D_PALETTE__CHRISTMAS_WARM_WHITE__ENCODING
-  );
-
-  addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_VINTAGE_MINIBELLS__ID, 
+    PALETTELIST_STATIC__FESTIVE_VINTAGE_MINIBELLS__ID, 
     PM_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__DATA),
     D_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_VINTAGE_MERRYLITES__ID, 
+    PALETTELIST_STATIC__FESTIVE_VINTAGE_MERRYLITES__ID, 
     PM_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__DATA),
     D_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_VINTAGE_AGED_BULBS__ID, 
+    PALETTELIST_STATIC__FESTIVE_VINTAGE_AGED_BULBS__ID, 
     PM_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__DATA),
     D_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_01__ID, 
+    PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_01__ID, 
     PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__DATA),
     D_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID, 
+    PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID, 
     PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__DATA),
     D_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_03__ID, 
+    PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_03__ID, 
     PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__DATA),
     D_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_BERRY_YELLOW__ID, 
+    PALETTELIST_STATIC__FESTIVE_BERRY_YELLOW__ID, 
     PM_PALETTE__CHRISTMAS_BERRY_YELLOW__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_BERRY_YELLOW__DATA),
     D_PALETTE__CHRISTMAS_BERRY_YELLOW__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_BERRY_ORANGE__ID, 
+    PALETTELIST_STATIC__FESTIVE_BERRY_ORANGE__ID, 
     PM_PALETTE__CHRISTMAS_BERRY_ORANGE__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_BERRY_ORANGE__DATA),
     D_PALETTE__CHRISTMAS_BERRY_ORANGE__ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC__CHRISTMAS_BERRY_GREEN__ID, 
+    PALETTELIST_STATIC__FESTIVE_BERRY_GREEN__ID, 
     PM_PALETTE__CHRISTMAS_BERRY_GREEN__DATA, 
     sizeof(PM_PALETTE__CHRISTMAS_BERRY_GREEN__DATA),
     D_PALETTE__CHRISTMAS_BERRY_GREEN__ENCODING
@@ -462,41 +448,6 @@ void mPalette::Init_Palettes()
   /****************
    * DynamicPalettes : Do all dynamic palettes have no data? actually, I may want to encode data to be used for these (not RGB data, but byte encoded data), so keep
    ****************/
-
-  addDynamicPalette(
-    PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
-  );
-
-  addDynamicPalette(
-    PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
-  );
-  
-  addDynamicPalette(
-    PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
-  );
-  
-  addDynamicPalette(
-    PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
-  );
-  
-  addDynamicPalette(
-    PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
-  );
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID, 
@@ -530,7 +481,7 @@ void mPalette::Init_Palettes()
    * CustomPalettes
    ****************/
 
-    DEBUG_LINE_HERE;
+    
 
   addCustomPalette(
     0, 
@@ -538,7 +489,7 @@ void mPalette::Init_Palettes()
     sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_01__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_01_ENCODING
   );
-    DEBUG_LINE_HERE;
+    
   
   addCustomPalette(
     1, 
@@ -627,7 +578,7 @@ void mPalette::addStaticPalette(uint16_t id, const uint8_t* data, const uint8_t 
   uint8_t encoded_colour_width  = GetEncodedColourWidth( palette_tmp.encoding );  
   palette_tmp.number_of_colours = length / encoded_colour_width;
 
-  uint16_t id_adj = id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID; // First static ID
+  uint16_t id_adj = id - PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID; // First static ID
 
   if (id_adj < custom_palettes.size()) {
     static_palettes[id_adj] = palette_tmp;
@@ -667,7 +618,7 @@ void mPalette::addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t
   }
 
   // dynamic id is offset by the number of static palettes
-  uint8_t id_adj = id - PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID;
+  uint8_t id_adj = id - PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
 
   if (id_adj < dynamic_palettes.size()) {
     dynamic_palettes[id_adj] = palette_tmp;
@@ -750,15 +701,16 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   // ALOG_INF(PSTR("palette_id  = %d %d"), palette_id, palette_id);
   RgbcctColor colour = RgbcctColor(0);
 
-  // DEBUG_LINE_HERE;
+  // 
 
   #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
   Serial.println(palette_id);
-  DEBUG_LINE_HERE;
+  
   #endif
 
   // ALOG_INF(PSTR("Bflag_crgb_exact_colour=%d"), flag_crgb_exact_colour);
     
+  
   /**************************************************************
    * 
    * "CRGBPALETTE16"
@@ -771,8 +723,9 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   if(
     ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
     ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
-    ((palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (palette_id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))
   ){
+  
 
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
     if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
@@ -792,10 +745,21 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
       }
     }
     
+  
     if(flag_spanned_segment)
     {
-      pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+
+      if(pCONT_lAni->_virtualSegmentLength==1)
+      {
+        pixel_position_adjust = 0;
+      }else{
+        pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+      }
+
+      
+      // pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
     }
+  
 
     if(flag_wrap_hard_edge==true) // If OFF, then cut end of palette off (rescale to 240)
     {
@@ -822,6 +786,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     (palette_id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
   ){  
 
+  
     uint8_t adjusted_id  = palette_id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
     const uint8_t* data  = PM_STATIC_SINGLE_COLOURS__DATA;
     uint8_t adjust_buf_i =  adjusted_id*3;
@@ -831,15 +796,16 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
 
   /**************************************************************
    * 
-   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * PALETTELIST_SEGMENT__RGBCCT_COLOUR__IDS
    * 
   ***************************************************************/
   else
   if(
-    (palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+    (palette_id >= PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)
   ){  
+  
 
-    uint8_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    uint8_t adjusted_id = palette_id - PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
     if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
@@ -847,6 +813,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     {
       colour = pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
     }
+    colour.debug_print("rgbcctcolors");
   }
 
   /**************************************************************
@@ -858,6 +825,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   if(
     ((palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC_LENGTH__ID))
   ){  
+  
 
     uint16_t palette_adjusted_id = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; // adjust back into correct indexing
 
@@ -882,10 +850,11 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   ***************************************************************/
   else
   if(
-    ((palette_id >= PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
+    ((palette_id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
   ){  
-
-    uint16_t palette_adjusted_id = palette_id - PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID; // adjust back into correct indexing
+  
+    
+    uint16_t palette_adjusted_id = palette_id;// - PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID; // adjust back into correct indexing
 
     colour = Get_Encoded_DynamicPalette_Colour(
         palette_adjusted_id,
@@ -910,6 +879,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     ((palette_id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED)  && (palette_id < GetPaletteListLength())) // Custom palettes
   ){   
     
+  
     uint16_t palette_adjusted_id = palette_id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;        
 
     colour = SubGet_Encoded_CustomPalette_Colour(
@@ -935,7 +905,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     ALOG_INF(PSTR("Missing %d"), palette_id);
   }
 
-  // DEBUG_LINE_HERE;
+  
 
 
   DEBUG_PIN4_SET(1);
@@ -982,10 +952,12 @@ mPalette::Get_Encoded_StaticPalette_Colour(
     
   // ALOG_ERR(PSTR("Get_Encoded_StaticPalette_Colour (%d,%d,%d,%d,%d,%d,%d)"), palette_adjusted_id, palette_buffer, _pixel_position, encoded_value, flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_colour, flag_force_gradient );
 
+  
   uint8_t encoded_colour_width  = GetEncodedColourWidth(static_palettes[palette_adjusted_id].encoding);   
   uint8_t colours_in_palette = static_palettes[palette_adjusted_id].data.size()/encoded_colour_width;
   palette_buffer = &static_palettes[palette_adjusted_id].data[0];
   PALETTE_ENCODING_DATA encoding = static_palettes[palette_adjusted_id].encoding;
+  
 
   return Get_Encoded_Palette_Colour(
     palette_buffer,
@@ -1016,6 +988,16 @@ mPalette::Get_Encoded_StaticPalette_Colour(
  * @param palette_id 
  * @param seg_i 
  * @return RgbcctColor 
+ * 
+ * Only static palettes should be within the palette class, the dynamic and custom palettes should be in the main code ?
+ * Or, the parts that control the dynamic palettes (aux values) if moved into palettes probably makes it totally sustainable.
+ * But then we have multiple for different segments, but if done right then the effect will just need to respect the single use palette
+ * But then we have RGBCCT colours, which are all different per segment.
+ * But that spans 1/2/3/4/5 grouped from those, which use these unique palettes and are therefore unique to the segment.
+ * 
+ * For now, I think dynamic should be made internal to the palette class and use an internal parameter in the place of aux
+ * 
+ * 
  */
 RgbcctColor mPalette::Get_Encoded_DynamicPalette_Colour(
   uint16_t palette_adjusted_id,
@@ -1031,7 +1013,7 @@ RgbcctColor mPalette::Get_Encoded_DynamicPalette_Colour(
 // Here, I likely want to work conversions, then call the other methods that are needed.
 // For simplicity, the required colours will be requested from the static options that are in progmem.
 
-// ALOG_INF(PSTR("HERE %d"), palette_adjusted_id);
+ALOG_INF(PSTR("HERE %d"), palette_adjusted_id);
 
 /*
 // Should I make it here that one of the matlab colourmaps can be loaded into here, and then some the float vector is actually saved with the palettes
@@ -1049,14 +1031,10 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
 
 */
 
-  switch(palette_adjusted_id + PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) //switch back to palette_NOT_adjusted_id
+  switch(palette_adjusted_id) //switch back to palette_NOT_adjusted_id
   { 
     default:
-
-ALOG_ERR(PSTR("Get_Encoded_DynamicPalette_Colour: The other randomise palettes should be loaded here instead of the other function"));
-      
-      
-
+      ALOG_ERR(PSTR("Bad Palette ID"));
     case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:{
 
       float azimuth = pCONT_solar->solar_position.azimuth;
@@ -1215,7 +1193,7 @@ ALOG_ERR(PSTR("Get_Encoded_DynamicPalette_Colour: The other randomise palettes s
     break;
   }
 
-  return RgbcctColor(10);
+  return RgbcctColor(255,0,0,0,0);
 
 }
 
@@ -1281,27 +1259,30 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     return -1;
   }
 
-  DEBUG_LINE_HERE
+  
 
   char buffer[100] = {0};
   int16_t index_found = -1;
   int16_t id = -1;
 
+  ALOG_INF( PSTR("Get_Static_PaletteIDbyName A") ); 
+
 
   for(
     uint8_t ii=0;
-            ii<(PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
+            ii<(PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID-PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_MODIFIABLE__RGBCCT_SOLID_COLOUR__NAMES_CTR ); 
-    if((id=mSupport::GetCommandID16_P(c, PM_MODIFIABLE__RGBCCT_SOLID_COLOUR__NAMES_CTR))>=0)
+    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR))>=0)
     {
       ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;            
+      return id+PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;            
     }
   }
 
 
+  ALOG_INF( PSTR("Get_Static_PaletteIDbyName B") ); 
 
   /**************************************************************
    * 
@@ -1312,14 +1293,14 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
 
   for(
     uint8_t ii=0;
-            ii<(PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID-PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID);
+            ii<(PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID-PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR ); 
-    if((id=mSupport::GetCommandID16_P(c, PM_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR))>=0)
+    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR))>=0)
     {
       ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID;            
+      return id+PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID;            
     }
   }
 
@@ -1389,8 +1370,8 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
             ii<(PALETTELIST_STATIC_LENGTH__ID - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID);
             ii++
   ){
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC__PALETTES_NAMES_CTR ); 
-    if((id=mSupport::GetCommandID16_P(c, PM_STATIC__PALETTES_NAMES_CTR))>=0)
+    // ALOG_INF( PSTR("s> %d %s \"%S\"\n\r\n\r"), ii, c, PM_STATIC__PALETTES_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_MultipleSubMatches_P(c, PM_STATIC__PALETTES_NAMES_CTR))>=0)
     {
       ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
       return id+PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;            
@@ -1404,14 +1385,14 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
   ***************************************************************/
   for(
     uint8_t ii=0;
-            ii<(PALETTELIST_DYNAMIC__LENGTH__ID-PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID);
+            ii<(PALETTELIST_DYNAMIC__LENGTH__ID-PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID);
             ii++
   ){    
     ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC_PALETTES_NAMES_CTR ); 
     if((id=mSupport::GetCommandID16_P(c, PM_DYNAMIC_PALETTES_NAMES_CTR))>=0)
     {
       ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID;            
+      return id+PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;            
     }
   }
 
@@ -1463,10 +1444,10 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * 
   ***************************************************************/
   if(
-    ((palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID))
   ){  
-    uint16_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
-    mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_MODIFIABLE__RGBCCT_SOLID_COLOUR__NAMES_CTR);   
+    uint16_t adjusted_id = palette_id - PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;
+    mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR);   
   }
 
 
@@ -1476,10 +1457,10 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * 
   ***************************************************************/
   if(
-    ((palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))
   ){  
-    uint16_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID;
-    mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR);   
+    uint16_t adjusted_id = palette_id - PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID;
+    mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR);   
   }
 
   /**************************************************************
@@ -1513,9 +1494,9 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * 
   ***************************************************************/
   if(
-    ((palette_id >= PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
+    ((palette_id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
   ){           
-    uint16_t adjusted_id = palette_id - PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID;
+    uint16_t adjusted_id = palette_id - PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_DYNAMIC_PALETTES_NAMES_CTR);
   }
 
@@ -1547,14 +1528,14 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
 
   /**************************************************************
    * 
-   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
+   * PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID
    * 
   ***************************************************************/
   if(
-    ((palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)    && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID)    && (palette_id < PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID))
   ){  
-    uint16_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
-    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), adjusted_id); // names are 1-10
+    uint16_t adjusted_id = palette_id - PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;
+    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), adjusted_id + 1); // names are 1-10
   }
 
   /**************************************************************
@@ -1585,7 +1566,7 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
   
   uint8_t new_size = 1; // assumed 1 at least
   
-  if((palette_id>=PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
+  if((palette_id>=PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID)&&(palette_id<PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)){
 
     mPalette::PALETTE_DATA *ptr_tmp = &static_palettes[palette_id];
 
@@ -1610,7 +1591,7 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
 
     new_size = 1;//ptr_tmp->data_length;
     ALOG_INF(PSTR("GetColourMapSizeByPaletteID ELSE  ERORRRRRRRRRRRRRRRRRRRRRRR"));
-    DEBUG_LINE_HERE;
+    
 
   }
 
@@ -1736,7 +1717,7 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
   if(
     ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
     ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
-    ((palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (palette_id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))
   ){
     return 16;
   } // END of CRGBPalette's
@@ -1786,12 +1767,12 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
 
   /**************************************************************
    * 
-   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * PALETTELIST_SEGMENT__RGBCCT_COLOUR__IDS
    * 
   ***************************************************************/
   else
   if(
-    (palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+    (palette_id >= PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)
   ){  
     return 1;
   }
@@ -1855,6 +1836,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
   #endif // ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
   
 
+  
   if( // Switch to bit masking
     (encoding.red_enabled)||
     (encoding.green_enabled)||
@@ -1870,6 +1852,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
     // Get Start of Colour Information by adjusting for indexing
     index_relative = pixel_position*encoded_colour_width; // get expected pixel position
       
+  
     // ALOG_INF(PSTR("index_relativeA=%d"),index_relative);
 
     if(encoding.index_gradient)
@@ -1881,6 +1864,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
       // Set the index to move beyond the indexing information
       index_relative++;
     }
+  
     
     return RgbcctColor(
       encoding.red_enabled         ? palette_buffer[index_relative  ] : 0,
@@ -1994,6 +1978,7 @@ mPalette::Get_Encoded_Palette_Colour(
 
   // ALOG_INF(PSTR("flags %d %d %d"), is_forced_to_get_discrete, is_not_gradient, is_basic_sequence_palette_with_increasing_indexing);
 
+  
   if(is_basic_sequence_palette_with_increasing_indexing) // forced, or originally normal discrete
   {
     // 0-SEGLEN would need to become iterative of the palette    0-100    what if 0-100*pixels  so 0-500, then modulo by 100
@@ -2015,9 +2000,13 @@ mPalette::Get_Encoded_Palette_Colour(
     
     uint16_t before = pixel_position_adjust;
     // if(not gradient)
+  //   ALOG_INF(PSTR("colours_in_palette %d"), colours_in_palette);
+  // 
+  // delay(3000);
     pixel_position_adjust %= colours_in_palette; // convert incoming pixels into repeating 0-15 numbers.
     // else // if gradient, then this same thing should happen but scale into 255 range
     // ALOG_INF(PSTR("pixel_position_adjust %d/%d"), before, pixel_position_adjust);
+  
     colour = Get_Encoded_Colour_ReadBuffer_Fast(
       palette_buffer,
       pixel_position_adjust,  
@@ -2029,6 +2018,7 @@ mPalette::Get_Encoded_Palette_Colour(
     return colour;
 
   }
+  
 
   /******************************************************************************************************************************************************
    * *******************************************************************************************************************************************************************************
@@ -2046,7 +2036,13 @@ mPalette::Get_Encoded_Palette_Colour(
      **/
     if(flag_spanned_segment)
     {
-      pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+      if(pCONT_lAni->_virtualSegmentLength==1)
+      {
+        pixel_position_adjust = 0;
+      }else{
+        pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+      }
+      // pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
     }
 
       
@@ -2115,6 +2111,7 @@ mPalette::Get_Encoded_Palette_Colour(
     // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
 
 
+  
     // Search for lower boundary
     uint8_t desired_pixel_scaled = pixel_position_adjust;
     uint8_t lower_boundary_i = 0;
@@ -2210,6 +2207,7 @@ mPalette::Get_Encoded_Palette_Colour(
     // Serial.print("gradient_palettes"); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,",gradient_palettes[v]); } Serial.println();
     // ALOG_INF(PSTR("v>>>>>>>> [%d|%d]  %d|%d p%d"), _pixel_position, desired_pixel_scaled, lower_boundary_v, upper_boundary_v, (int)(progress*100));
 
+  
     // RgbcctColor lower_colour = Get_StaticPalette_Encoded_Colour_ReadBuffer(palette_adjusted_id, palette_buffer, lower_boundary_i); 
     // RgbcctColor upper_colour = Get_StaticPalette_Encoded_Colour_ReadBuffer(palette_adjusted_id, palette_buffer, upper_boundary_i);
     
@@ -2239,6 +2237,7 @@ mPalette::Get_Encoded_Palette_Colour(
   } // if(ptr->encoding.index_gradient || flag_force_gradient) 
 
   
+  
   /******************************************************************************************************************************************************
    * *******************************************************************************************************************************************************************************
    * 
@@ -2251,9 +2250,15 @@ mPalette::Get_Encoded_Palette_Colour(
       
   if(flag_spanned_segment)
   {
-    pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+    if(pCONT_lAni->_virtualSegmentLength==1)
+    {
+      pixel_position_adjust = 0;
+    }else{
+      pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+    }
   }
 
+  
   // PALETTE_DATA *ptr = &static_palettes[palette_adjusted_id];
   // uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_adjusted_id);  
 

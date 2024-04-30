@@ -195,9 +195,13 @@ void mSettings::SystemSettings_DefaultBody(void)
   if (((APP_TIMEZONE > -14) && (APP_TIMEZONE < 15)) || (99 == APP_TIMEZONE)) {
     Settings.timezone = APP_TIMEZONE;
     Settings.timezone_minutes = 0;
+    Settings.timezone2 = APP_TIMEZONE;
+    Settings.timezone_minutes2 = 0;
   } else {
     Settings.timezone = APP_TIMEZONE / 60;
     Settings.timezone_minutes = abs(APP_TIMEZONE % 60);
+    Settings.timezone2 = APP_TIMEZONE / 60;
+    Settings.timezone_minutes2 = abs(APP_TIMEZONE % 60);
   }
 
   SettingsResetStd();
@@ -213,6 +217,14 @@ void mSettings::SystemSettings_DefaultBody(void)
   //     }
   //   }
   // }
+  #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
+  SettingsUpdateText(SET_NTPSERVER1, PSTR(NTP_SERVER1));
+  SettingsUpdateText(SET_NTPSERVER2, PSTR(NTP_SERVER2));
+  SettingsUpdateText(SET_NTPSERVER3, PSTR(NTP_SERVER3));
+  for (uint32_t i = 0; i < MAX_NTP_SERVERS; i++) {
+    SettingsUpdateText(SET_NTPSERVER1 +i, pCONT_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 +i)));
+  }
+  #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
   /*********************************************************************************************
    ******* Lighting ****************************************************************************
@@ -355,12 +367,14 @@ void mSettings::SystemSettings_DefaultBody(void)
 
 void mSettings::SettingsResetStd(void)
 {
-  pCONT_time->tflag[0].hemis = TIME_STD_HEMISPHERE;
-  pCONT_time->tflag[0].week  = TIME_STD_WEEK;
-  pCONT_time->tflag[0].dow   = TIME_STD_DAY;
-  pCONT_time->tflag[0].month = TIME_STD_MONTH;
-  pCONT_time->tflag[0].hour  = TIME_STD_HOUR;
-  pCONT_time->toffset[0]     = TIME_STD_OFFSET;
+  
+  Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
+  Settings.tflag[0].week  = TIME_STD_WEEK;
+  Settings.tflag[0].dow   = TIME_STD_DAY;
+  Settings.tflag[0].month = TIME_STD_MONTH;
+  Settings.tflag[0].hour  = TIME_STD_HOUR;
+  Settings.toffset[0]     = TIME_STD_OFFSET;
+
 }
 
 
@@ -368,10 +382,10 @@ void mSettings::SettingsResetStd(void)
 
 void mSettings::SettingsResetDst(void)
 {
-  pCONT_time->tflag[1].hemis = TIME_DST_HEMISPHERE;
-  pCONT_time->tflag[1].week = TIME_DST_WEEK;
-  pCONT_time->tflag[1].dow = TIME_DST_DAY;
-  pCONT_time->tflag[1].month = TIME_DST_MONTH;
-  pCONT_time->tflag[1].hour = TIME_DST_HOUR;
-  pCONT_time->toffset[1] = TIME_DST_OFFSET;
+  Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
+  Settings.tflag[1].week = TIME_DST_WEEK;
+  Settings.tflag[1].dow = TIME_DST_DAY;
+  Settings.tflag[1].month = TIME_DST_MONTH;
+  Settings.tflag[1].hour = TIME_DST_HOUR;
+  Settings.toffset[1] = TIME_DST_OFFSET;
 }

@@ -62,6 +62,10 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_RGB_CLOCK1_ID, GPIO_RGB_CLOCK2_ID, GPIO_RGB_CLOCK3_ID, GPIO_RGB_CLOCK4_ID,
 
   #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+  /*
+  These are actually handle by the lighting template, but to show certain pins are locked from other uses, this lighting class can directly assert these values to show they are in use. 
+  Setting these by device template is possible, but does not currently configure the busses (unless later added to the lighting class to configure defaults based on this list).
+  */
   // PixelBus Options
   GPIO_PIXELBUS_01_A_ID, GPIO_PIXELBUS_01_B_ID, GPIO_PIXELBUS_01_C_ID, GPIO_PIXELBUS_01_D_ID, GPIO_PIXELBUS_01_E_ID, 
   GPIO_PIXELBUS_02_A_ID, GPIO_PIXELBUS_02_B_ID, GPIO_PIXELBUS_02_C_ID, GPIO_PIXELBUS_02_D_ID, GPIO_PIXELBUS_02_E_ID, 

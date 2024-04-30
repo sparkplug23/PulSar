@@ -109,7 +109,7 @@ Created for the merge of all lighting branches into unified development branch f
 
 ### Changed
 - move rgb variable user names to be part of device list 
-- `internal_scene_colour` is now an pointer, which points to a user variable RgbcctColor. This can be switched, with a new variable tracking which is active (needs to change with palette.id setting)
+- `internal_scene_colour` is now an pointer, which points to a user variable RgbcctColor. This can be switched, with a new variable tracking which is active (needs to change with palette_id setting)
 - `Scene` and `Flasher` to become a new ``AnimationMode`` (ex. `Palettes`, `Effects`, `Animations`)
 - `Effects` is the new animation of any effects
 

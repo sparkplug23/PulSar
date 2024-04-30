@@ -2050,7 +2050,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_a
 // */
 
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -2202,7 +2202,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json
 
 
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -2228,7 +2228,7 @@ uint8_t mGPS_Serial::ConstructJSON_Settings(uint8_t json_level, bool json_append
     // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
     // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -2255,7 +2255,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Required(uint8_t json_level, bool j
     // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
     // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }

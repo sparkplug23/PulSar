@@ -677,7 +677,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   //   releaseJSONBufferLock();
   // }
 
-  // #ifndef WLED_DISABLE_2D
+  // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   // //2D panels
   // if (subPage == SUBPAGE_2D)
   // {

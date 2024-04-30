@@ -223,8 +223,8 @@ uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
     void CommandSet_Relay_Power(uint8_t state, uint8_t relay_id = 0);
     uint8_t CommandGet_Relay_Power(uint8_t num);
 
-    const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
-    const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
+    const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);
+    const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);
     int8_t GetRelayIDbyName(const char* c);
 
     int8_t GetDeviceIDbyName(const char* c);

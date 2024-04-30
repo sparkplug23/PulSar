@@ -1082,7 +1082,7 @@ uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_level, bool json_appe
 
 
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }

@@ -7,6 +7,7 @@
 
 #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
 
+#include "2_CoreSystem/02_Time/mTime.h"
 
 class mRelayStateLEDStrip :
   public mTaskerInterface

@@ -88,7 +88,7 @@ struct STATUS_LEDs{
 
 
 
-#define MAX_LEDS 8
+#define MAX_DIGITAL_LEDS 8
 
 /**
  * @brief Bitpacked LEDs
@@ -108,7 +108,7 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
     
       int8_t pin = -1; // -1 is not active
 
-    }leds[MAX_LEDS];
+    }leds[MAX_DIGITAL_LEDS];
 
 
     void EveryLoop();

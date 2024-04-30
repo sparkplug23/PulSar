@@ -33,6 +33,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
+#include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #else
   // #error "error"
@@ -55,6 +56,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_TIME
 #define USE_MODULE_CORE_RULES
 #define USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
+
+#define USE_MODULE_SENSORS_SOLAR_LUNAR
 
 // #ifndef DISABLE_NETWORK
 // #define USE_MODULE_NETWORK_MQTT
@@ -102,6 +105,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
+#define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023  
 
 /**
  * Going forward, here will support define that simply insert in firmwarecustom
@@ -127,7 +131,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -257,7 +261,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     // #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -304,7 +308,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     // // #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     // #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     // #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    // #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // 
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -377,7 +381,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
     #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
@@ -462,11 +466,11 @@ void WifiWpsStatusCallback(wps_cb_status status);
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_LINE_HERE
+    // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
 
     
@@ -501,7 +505,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_LINE_HERE
+    // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
 
     
@@ -511,10 +515,13 @@ void WifiWpsStatusCallback(wps_cb_status status);
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
 
     
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
   #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
   #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
   #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
   // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS
   #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
   #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
@@ -615,9 +622,33 @@ void WifiWpsStatusCallback(wps_cb_status status);
     #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
     #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
-
-
 #endif // ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+
+// Until fully working, just enable by group [CORE / NETWORKING / LIGHTING / DRIVERS / SENSORS]
+#ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+    #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+    #define WLED_ENABLE_FS_EDITOR
+
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+#ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__LIGHTING
+
+
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__LIGHTING
+
+// Until fully working, just enable by group [CORE / NETWORKING / LIGHTING / DRIVERS / SENSORS]
+#ifdef ENABLE_DEVFEATURE_STORAGE__RESTORE_MODULE__LIGHTING
+// For much later. After saving works and is testing with the webui, I can start loading it on reboot.
+// This loading will only work after proper validation can be done.
+
+
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__LIGHTING
+
 
 
 

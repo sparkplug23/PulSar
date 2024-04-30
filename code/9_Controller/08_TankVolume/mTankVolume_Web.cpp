@@ -33,8 +33,8 @@
 //         case 0: JsonBuilderI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
 //         // case 1:
 //         //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
-//         //     animation.transition.rate_ms/1000, 
-//         //     animation.transition.time_ms.val/1000
+//         //     animation.cycle_time__rate_ms/1000, 
+//         //     animation.time_ms.val/1000
 //         //   );
 //         // break;
 //         // case 2: 

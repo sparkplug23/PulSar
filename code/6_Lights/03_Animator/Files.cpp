@@ -455,27 +455,19 @@ String mAnimatorLight::getContentType(AsyncWebServerRequest* request, String fil
 
 
 bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path){
-  DEBUG_PRINTLN("WS FileRead: " + path);
-  DEBUG_LINE_HERE;
+  
+  ALOG_DBG(PSTR("WS FileRead: %s"), path);
+  
   if(path.endsWith("/")) path += "index.htm";
-  DEBUG_LINE_HERE;
   if(path.indexOf("sec") > -1) return false;
-  DEBUG_LINE_HERE;
   String contentType = getContentType(request, path);
-  DEBUG_LINE_HERE;
-  /*String pathWithGz = path + ".gz";
-  if(FILE_SYSTEM.exists(pathWithGz)){
-    request->send(FILE_SYSTEM, pathWithGz, contentType);
-    return true;
-  }*/
-  ALOG_INF(PSTR("mAnimatorLight::handleFileReadA %s"), path.c_str());
   if(FILE_SYSTEM.exists(path)) {
-    ALOG_INF(PSTR("mAnimatorLight::handleFileRead request->send(FILE_SYSTEM"));
+    ALOG_INF(PSTR("Sending file %s from FILE_SYSTEM"), path.c_str());
     request->send(FILE_SYSTEM, path, contentType);
     return true;
   }
-  ALOG_INF(PSTR("mAnimatorLight::handleFileReadC"));
   return false;
+  
 }
 
 

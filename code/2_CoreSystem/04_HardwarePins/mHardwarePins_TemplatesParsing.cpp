@@ -19,6 +19,8 @@ bool mHardwarePins::ReadModuleTemplateFromProgmem(){
     char buffer[progmem_size];
     // Read into local
     memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
+    
+    pCONT_set->runtime.template_loading.status.module = mSettings::TemplateSource::HEADER_TEMPLATE;
 
     #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -83,7 +85,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
    */
   if((rootObj[PM_JSON_GPIOC])||(rootObj[D_JSON_GPIO_FUNCTION]))
   {
-    pCONT_set->runtime.boot_status.module_template_parse_success = true;
+    // pCONT_set->runtime.boot_status.module_template_parse_success = true;
     for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
       pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
     }
@@ -852,6 +854,7 @@ void mHardwarePins::GpioInit(void)
       #ifdef ESP32
       analogAttach(Pin(GPIO_PWM1_ID, i),i);
       // analogWriteFreqRange(i,pCONT_set->Settings.pwm_frequency,pCONT_set->Settings.pwm_range);
+        analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->runtime.pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
       pCONT_set->runtime.pwm_present = true;
       #endif
 
@@ -887,23 +890,3 @@ void mHardwarePins::GpioInit(void)
 
 }
 
-
-
-// void GpioInitPwm(void) {
-//   for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
-//     if (PinUsed(GPIO_PWM1, i)) {
-//       pinMode(Pin(GPIO_PWM1, i), OUTPUT);
-//       if (i < TasmotaGlobal.light_type) {
-//         // force PWM GPIOs to low or high mode if belongs to the light (always <5), see #7165
-//         analogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range : 0);
-//       } else {
-//         TasmotaGlobal.pwm_present = true;
-//         if (i < MAX_PWMS_LEGACY) {
-//           analogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range - Settings->pwm_value[i] : Settings->pwm_value[i]);
-//         } else {
-//           analogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range - Settings->pwm_value_ext[i] : Settings->pwm_value_ext[i]);
-//         }
-//       }
-//     }
-//   }
-// }

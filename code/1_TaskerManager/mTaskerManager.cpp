@@ -257,6 +257,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_TIME
   addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
   #endif 
+  #ifdef USE_MODULE_CORE_TIME2
+  addTasker(EM_MODULE_CORE_TIME2_ID, new mTime2());
+  #endif 
   #ifdef USE_MODULE_CORE_RULES
   addTasker(EM_MODULE_CORE_RULES_ID, new mRuleEngine());
   #endif

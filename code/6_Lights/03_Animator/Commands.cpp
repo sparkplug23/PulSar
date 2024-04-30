@@ -201,7 +201,17 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   { 
     if(jtok.isArray())
     {
-      uint8_t array[16];
+/*
+      custom_palette 
+      going back, I may want to use my basic custom palette direct encoding
+      struct{
+        encoding  (rgb,rgbcct,crgb16palette bytes)
+        data
+        length
+      }
+
+
+  */    uint8_t array[16];
       uint8_t arrlen = 0;
       
       SEGMENT_I(segment_index).palette_container->mapping_values.clear(); // reset old map
@@ -233,23 +243,23 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
        * @brief First check if it is simple commands
        **/
       if(strcmp(jtok.getStr(),"+")==0){
-        SEGMENT_I(segment_index).palette.id++;
+        SEGMENT_I(segment_index).palette_id++;
       }else
       if(strcmp(jtok.getStr(),"-")==0){
-        SEGMENT_I(segment_index).palette.id--;
+        SEGMENT_I(segment_index).palette_id--;
       }else
       if((tmp_id=GetPaletteIDbyName((char*)jtok.getStr()))>=0){
         ALOG_DBG(PSTR("tmp_id=%d"),tmp_id);
         CommandSet_PaletteID(tmp_id, segment_index);
         data_buffer.isserviced++;
-        ALOG_DBG(PSTR("SEGMENT_I(segment_index).palette.id=%d"), SEGMENT_I(segment_index).palette.id);
+        ALOG_DBG(PSTR("SEGMENT_I(segment_index).palette_id=%d"), SEGMENT_I(segment_index).palette_id);
       }
     }else
     if(jtok.isNum()){
       CommandSet_PaletteID(jtok.getInt(), segment_index);
       data_buffer.isserviced++;
     }
-    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(SEGMENT_I(segment_index).palette.id, buffer, sizeof(buffer)) );
+    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(SEGMENT_I(segment_index).palette_id, buffer, sizeof(buffer)) );
   }
 
   
@@ -259,16 +269,16 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     if(jtok.isArray())
     {
       JsonParserArray arrobj = jtok;
-      SEGMENT_I(segment_index).pixel_range.start = arrobj[0].getInt();
-      SEGMENT_I(segment_index).pixel_range.stop  = arrobj[1].getInt();
+      SEGMENT_I(segment_index).start = arrobj[0].getInt();
+      SEGMENT_I(segment_index).stop  = arrobj[1].getInt();
       
-      if(SEGMENT_I(segment_index).pixel_range.stop > PIXEL_RANGE_LIMIT)
+      if(SEGMENT_I(segment_index).stop > PIXEL_RANGE_LIMIT)
       {
-        ALOG_ERR( PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, PIXEL_RANGE_LIMIT);
-        SEGMENT_I(segment_index).pixel_range.stop = PIXEL_RANGE_LIMIT;
+        ALOG_ERR( PSTR("SEGMENT_I(segment_index).stop exceeds max %d %d"),SEGMENT_I(segment_index).stop, PIXEL_RANGE_LIMIT);
+        SEGMENT_I(segment_index).stop = PIXEL_RANGE_LIMIT;
       }
 
-      ALOG_COM( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).pixel_range.start, SEGMENT_I(segment_index).pixel_range.stop );
+      ALOG_COM( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).start, SEGMENT_I(segment_index).stop );
       data_buffer.isserviced++;
     }else{
       ErrorMessage_P(ERROR_MESSAGE_TYPE_INVALID_FORMAT, PM_JSON_PIXELRANGE);
@@ -561,8 +571,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   
         switch(arrlen)
         {
-          case 0:SEGMENT_I(segment_index).pixel_range.start = v.getInt(); break;
-          case 1:SEGMENT_I(segment_index).pixel_range.stop  = v.getInt(); break;
+          case 0:SEGMENT_I(segment_index).start = v.getInt(); break;
+          case 1:SEGMENT_I(segment_index).stop  = v.getInt(); break;
         }
   
 
@@ -571,8 +581,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL "PixelRange Segment[%d] = %d -> %d"),
           segment_index,
-         SEGMENT_I(segment_index).pixel_range.start,
-         SEGMENT_I(segment_index).pixel_range.stop
+         SEGMENT_I(segment_index).start,
+         SEGMENT_I(segment_index).stop
         );
         #endif
 
@@ -581,12 +591,12 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         // #endif// ENABLE_LOG_LEVEL_DEBUG          
       }
 
-      if(SEGMENT_I(segment_index).pixel_range.stop > PIXEL_RANGE_LIMIT+1)
+      if(SEGMENT_I(segment_index).stop > PIXEL_RANGE_LIMIT+1)
       {
     #ifdef ENABLE_LOG_LEVEL_ERROR
-        AddLog(LOG_LEVEL_ERROR, PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, PIXEL_RANGE_LIMIT);
+        AddLog(LOG_LEVEL_ERROR, PSTR("SEGMENT_I(segment_index).stop exceeds max %d %d"),SEGMENT_I(segment_index).stop, PIXEL_RANGE_LIMIT);
     #endif //ef ENABLE_LOG_LEVEL_INFO
-       SEGMENT_I(segment_index).pixel_range.stop = PIXEL_RANGE_LIMIT+1;
+       SEGMENT_I(segment_index).stop = PIXEL_RANGE_LIMIT+1;
       }
 
 
@@ -686,7 +696,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000, segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), SEGMENT_I(segment_index).transition.time_ms);  
+    #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), SEGMENT_I(segment_index).time_ms);  
+    #endif
     #endif
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME_MS]){
@@ -702,7 +714,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)), SEGMENT_I(segment_index).transition.time_ms);  
+    #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)), SEGMENT_I(segment_index).time_ms);  
+    #endif
     #endif
   }
   
@@ -711,14 +725,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000, segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)), SEGMENT_I(segment_index).transition.rate_ms);  
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
     #endif
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE_MS]){
     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)), SEGMENT_I(segment_index).transition.rate_ms);  
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
     #endif
   }
   
@@ -1124,7 +1138,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     Segment_AppendNew(start, stop, jtok.getInt());
 
     // for (size_t s = 0; s < getSegmentsNum(); s++) {
-    //     Segment_New &sg = getSegment(s);
+    //     Segment &sg = getSegment(s);
     //     
     //     // if (sg.isSelected()) 
     //     // {
@@ -1132,14 +1146,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     //       
     //       // deserializeSegment(segVar, s, presetId);
 
-    //       Segment_New& seg = getSegment(s);
-    //       Segment_New prev = seg; //make a backup so we can tell if something changed
+    //       Segment& seg = getSegment(s);
+    //       Segment prev = seg; //make a backup so we can tell if something changed
 
     //       // if using vectors use this code to append segment
     //       if (id >= getSegmentsNum()) {
     //         
     //         if (stop <= 0) return 0; // ignore empty/inactive segments
-    //         appendSegment(Segment_New(0+id, getLengthTotal()));
+    //         appendSegment(Segment(0+id, getLengthTotal()));
     //         id = getSegmentsNum()-1; // segments are added at the end of list
     //         ALOG_INF(PSTR("new ID %d"), id);
     //       }
@@ -1164,9 +1178,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
     Serial.println();
 
-    segments[jtok.getInt()].pixel_range.stop = 0; // to disable segment
+    segments[jtok.getInt()].stop = 0; // to disable segment
 
-    ALOG_INF(PSTR("getSegmentsNum() %d|%d %d"), id, getSegmentsNum(), segments[jtok.getInt()].pixel_range.stop);
+    ALOG_INF(PSTR("getSegmentsNum() %d|%d %d"), id, getSegmentsNum(), segments[jtok.getInt()].stop);
 
     // remove all inactive segments (from the back)
     if(id==255){ purgeSegments(true); }
@@ -1190,7 +1204,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
     Serial.println();
 
-    segments[jtok.getInt()].pixel_range.stop = 0; // to disable segment
+    segments[jtok.getInt()].stop = 0; // to disable segment
 
     ALOG_INF(PSTR("getSegmentsNum() %d|%d"), id, getSegmentsNum());
 
@@ -1198,7 +1212,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     int deleted = 0;
     if (segments.size() <= 1) return 0;
     for (size_t i = segments.size()-1; i > 0; i--)
-      if (segments[i].pixel_range.stop == 0 || force) {
+      if (segments[i].stop == 0 || force) {
         DEBUG_PRINT(F("Purging segment segment: ")); DEBUG_PRINTLN(i);
         deleted++;
         segments.erase(segments.begin() + i);
@@ -1296,12 +1310,12 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
             SEGMENT_I(segment_index).params_internal.aux2,
             SEGMENT_I(segment_index).params_internal.aux3
           );
-      //   if(SEGMENT_I(segment_index).pixel_range.stop > STRIP_SIZE_MAX+1)
+      //   if(SEGMENT_I(segment_index).stop > STRIP_SIZE_MAX+1)
       //   {
       // #ifdef ENABLE_LOG_LEVEL_ERROR
-      //     AddLog(LOG_LEVEL_ERROR, PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, STRIP_SIZE_MAX);
+      //     AddLog(LOG_LEVEL_ERROR, PSTR("SEGMENT_I(segment_index).stop exceeds max %d %d"),SEGMENT_I(segment_index).stop, STRIP_SIZE_MAX);
       // #endif //ef ENABLE_LOG_LEVEL_INFO
-      //    SEGMENT_I(segment_index).pixel_range.stop = STRIP_SIZE_MAX+1;
+      //    SEGMENT_I(segment_index).stop = STRIP_SIZE_MAX+1;
       //   }
 
 
@@ -1445,560 +1459,11 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 } // END PARSE COMMANDS
 
 
-void mAnimatorLight::TestCode_AddBus1()
-{
-  // pCONT_iLight->busConfigs
-  uint8_t bus_index = 0;
-
-  uint8_t defPin[] = {4};
-  uint16_t start = 0;
-  uint16_t length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
-  bus_index++;
-
-  defPin[0] = 13;
-  start = 10;
-  length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
-  bus_index++;
-
-  defPin[0] = 14;
-  start = 20;
-  length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
-  bus_index++;
-
-  defPin[0] = 27;
-  start = 30;
-  length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_SK6812_RGBW, defPin, start, length);    
-  bus_index++;
-
-  uint8_t defPin_pwm[] = {16, 17, 5, 21, 22};
-  start = 41;
-  length = 1;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_5CH, defPin_pwm, start, length);    
-  bus_index++;
-
-  // uint8_t defPin_pwm2[] = {23};
-  // start = 42;
-  // length = 1;
-  // if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  // pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_1CH, defPin_pwm2, start, length, DEFAULT_LED_COLOR_ORDER);    
-  // bus_index++;
-
-  //13,14,27,4
-
-}
-
-
-void mAnimatorLight::TestCode_Add16ParallelBus1()
-{
-
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1"));
-
-  uint8_t pins[16] = {4,16,17,18,19,21,22,23,2,13,14,27,26,25,33,32};
-
-  for(uint8_t p=0;p<16;p++){
-    pinMode(pins[p], OUTPUT); digitalWrite(pins[p], HIGH); //disable all
-  }
-
-
-
-  // pCONT_iLight->busConfigs
-  uint8_t bus_index = 0;
-
-  COLOUR_ORDER_T colord = {COLOUR_ORDER_INIT_DISABLED};
-
-  colord.red   = 1;
-  colord.green = 0;
-  colord.blue  = 2;
-
-  uint8_t defPin[] = {4};
-  uint16_t start = 0;
-  uint16_t length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {16};
-  start = 100;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {17};
-  start = 200;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {18};
-  start = 300;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {19};
-  start = 400;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {21};
-  start = 500;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {22};
-  start = 600;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {23};
-  start = 700;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {2};
-  start = 800;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {13};
-  start = 900;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  colord.red   = 0;
-  colord.green = 1;
-  colord.blue  = 2;
-
-
-  defPin[0] = {14};
-  start = 1000;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {27};
-  start = 1100;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {26};
-  start = 1200;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {25};
-  start = 1300;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {33};
-  start = 1400;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-  defPin[0] = {32};
-
-  start = 1500;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
-
-
-}
         
 
 
 
 
-#ifdef ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
-void mAnimatorLight::BusConfig_ManualLoad_16Pin()
-{
-
-  ALOG_INF(PSTR("BusConfig_ManualLoad_16Pin"));
-
-  uint8_t pins[16] = {4,16,17,18,19,21,22,23,2,13,14,27,26,25,33,32};
-
-  for(uint8_t p=0;p<16;p++){
-    pinMode(pins[p], OUTPUT); digitalWrite(pins[p], HIGH); //disable all
-  }
-
-  uint8_t bus_index = 0;
-
-  COLOUR_ORDER_T colord = {COLOUR_ORDER_INIT_DISABLED};
-
-  colord.red   = 1;
-  colord.green = 0;
-  colord.blue  = 2;
-
-  uint8_t defPin[] = {4};
-  uint16_t start = 0;
-  uint16_t length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {16};
-  start = 100;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {17};
-  start = 200;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {18};
-  start = 300;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {19};
-  start = 400;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {21};
-  start = 500;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {22};
-  start = 600;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {23};
-  start = 700;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {2};
-  start = 800;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {13};
-  start = 900;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  colord.red   = 0;
-  colord.green = 1;
-  colord.blue  = 2;
-
-
-  defPin[0] = {14};
-  start = 1000;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {27};
-  start = 1100;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {26};
-  start = 1200;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {25};
-  start = 1300;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {33};
-  start = 1400;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-
-  defPin[0] = {32};
-
-  start = 1500;
-  length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
-  bus_index++;
-
-  doInitBusses = true;
-
-}
-#endif // ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
-
-
-
-
-
-
-void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject obj)
-{
-
-    if(segments.size()>0){
-      ALOG_DBG(PSTR("parsestart Segment Range [%d,%d] "), segments[0].pixel_range.start, segments[0].pixel_range.stop);
-      segments[0].rgbcctcolors[0].debug_print("Segment 0 colour");
-    }
-
-    if(segments.size()>1){
-      ALOG_DBG(PSTR("Segment Range [%d,%d] "), segments[1].pixel_range.start, segments[1].pixel_range.stop);
-      segments[1].rgbcctcolors[0].debug_print("Segment 1 colour");
-    }
-
-    if(segments.size()>2){
-      ALOG_DBG(PSTR("Segment Range [%d,%d] "), segments[2].pixel_range.start, segments[2].pixel_range.stop);
-      segments[2].rgbcctcolors[0].debug_print("Segment 2 colour");
-    }
-
-    if(segments.size()>3){
-      ALOG_DBG(PSTR("Segment Range [%d,%d] "), segments[3].pixel_range.start, segments[3].pixel_range.stop);
-      segments[3].rgbcctcolors[0].debug_print("Segment 3 colour");
-    }
-
-  // JsonParserArray arrobj = jtok;
-  // for(auto v : arrobj) 
-  // {
-  //   // bool result = v.isObject();
-  //   Serial.println(v.isObject());
-
-  
-  
-
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(0).rgbcctcolors[0].getHue360());
-
-
-
-  //   parsesub_json_object_notification_shortcut()
-
-  //   JsonParserObject obj1 = v.getObject();
-    JsonParserToken jtok1 = 0;
-
-
-    // JsonParserObject obj1 = v.getObject();
-    // JsonParserToken jtok1 = 0;
-
-  uint16_t segment_index = 0;
-  if(jtok1 = obj["Segment"])
-  {
-    std::vector<uint16_t> data;
-    for(auto v : jtok1.getArray()) 
-    {
-      data.push_back(v.getInt());
-    }
-    Serial.println(data[0]);
-    Serial.println(data[1]);
-    Serial.println(data[2]);
-
-    segment_index = data[0];//jtok1.getInt();
-    ALOG_INF(PSTR("SegIndex segment_index===============================%d"), segment_index);
-
-    // Create segment if needed
-    // Segment_AppendNew(data[1],data[2],data[0]);
-
-    if(segment_index > segments.size()-1)
-    { 
-      ALOG_HGL(PSTR("Creating new segment %d|%d"), segment_index, segments.size());
-      segments[0].rgbcctcolors[0].debug_print(">>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-      Segment_AppendNew(data[1],data[2], segment_index+1);
-      segments[0].rgbcctcolors[0].debug_print("<<<<<<<<<<<<<<<<<<post segment Segment 0 colour");
-    }
-
-
-    // Just in case it was made already, set the range directly
-    SEGMENT_I(segment_index).pixel_range.start = data[1];
-    SEGMENT_I(segment_index).pixel_range.stop = data[2];
-
-  }
-
-
-  if(jtok1 = obj["Params"])
-  {
-    std::vector<uint16_t> data;
-    for(auto v : jtok1.getArray()) 
-    {
-      data.push_back(v.getInt());
-    }
-    Serial.println(data[0]);
-    Serial.println(data[1]);
-    Serial.println(data[2]);
-    Serial.println(data[3]);
-    Serial.println(data[4]);
-
-    CommandSet_Flasher_FunctionID(data[0], segment_index);
-
-    SEGMENT_I(segment_index).params_user.val0 = data[1];
-    SEGMENT_I(segment_index).params_user.val1 = data[2];
-    SEGMENT_I(segment_index).params_user.val2 = data[3];
-    SEGMENT_I(segment_index).params_user.val3 = data[4];
-  }
-  
-  if(jtok1 = obj["Colour"])
-  {
-    std::vector<uint16_t> data;
-    for(auto v : jtok1.getArray()) {
-      data.push_back(v.getInt());
-    }
-    Serial.println(data[0]);
-    Serial.println(data[1]);
-    Serial.println(data[2]);
-    Serial.println(data[3]);
-    Serial.println(data[4]);
-
-    ALOG_INF(PSTR("SegIndex Colour segment_index%d"),segment_index);
-
-    /**
-     * @brief To fix error with lack of proper config on new colour, in this case, clear it prior to setting
-     **/
-    // SEGMENT_I(segment_index).rgbcctcolors[0].setChannelsRaw(0,0,0,0,0);
-    segments[0].rgbcctcolors[0].debug_print("pre colour Segment 0 colour");
-    SEGMENT_I(segment_index).rgbcctcolors[0].setChannelsRaw(data[0],data[1],data[2],data[3],data[4]);
-    segments[0].rgbcctcolors[0].debug_print("post colour Segment 0 colour");
-
-    // CommandSet_SegColour_RgbcctColour_Hue_360                (data[0],                0, segment_index);
-    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(segment_index).rgbcctcolors[0].getHue360());
-    // CommandSet_SegColour_RgbcctColour_Sat_255      (mapvalue (data[1], 0,100, 0,255), 0, segment_index);
-    // CommandSet_SegColour_RgbcctColour_BrightnessRGB(mapvalue (data[2], 0,100, 0,255), 0, segment_index);
-    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).rgbcctcolors[0].getBrightnessRGB());
-  }
-
-  
-
-    // Serial.println(SEGMENT_I(segment_index).rgbcctcolors[0].raw[0]);
-    // Serial.println(SEGMENT_I(segment_index).rgbcctcolors[0].raw[1]);
-    // Serial.println(SEGMENT_I(segment_index).rgbcctcolors[0].raw[2]);
-    // Serial.println(SEGMENT_I(segment_index).rgbcctcolors[0].raw[3]);
-    // Serial.println(SEGMENT_I(segment_index).rgbcctcolors[0].raw[4]);
-
-    if(segments.size()>0){
-      ALOG_DBG(PSTR("parse end Segment Range [%d,%d] "), segments[0].pixel_range.start, segments[0].pixel_range.stop);
-      segments[0].rgbcctcolors[0].debug_print("Segment 0 colour");
-    }
-
-    if(segments.size()>1){
-      ALOG_DBG(PSTR("Segment Range [%d,%d] "), segments[1].pixel_range.start, segments[1].pixel_range.stop);
-      segments[1].rgbcctcolors[0].debug_print("Segment 1 colour");
-    }
-
-    if(segments.size()>2){
-      ALOG_DBG(PSTR("Segment Range [%d,%d] "), segments[2].pixel_range.start, segments[2].pixel_range.stop);
-      segments[2].rgbcctcolors[0].debug_print("Segment 2 colour");
-    }
-
-    if(segments.size()>3){
-      ALOG_DBG(PSTR("Segment Range [%d,%d] "), segments[3].pixel_range.start, segments[3].pixel_range.stop);
-      segments[3].rgbcctcolors[0].debug_print("Segment 3 colour");
-    }
-
-}
 
 
 
@@ -2125,8 +1590,6 @@ void mAnimatorLight::CommandSet_AnimationModeID(uint8_t value){
   #endif
 
 }
-
-
 const char* mAnimatorLight::GetAnimationModeName(char* buffer, uint16_t buflen){
   return GetAnimationModeNameByID(  SEGMENT_I(0).animation_mode_id, buffer, buflen);
 }
@@ -2173,29 +1636,10 @@ int8_t mAnimatorLight::GetAnimationModeIDbyName(const char* c){
 }
 
 
-
-// const char* mAnimatorLight::GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index)
-// {
-//   return GetHardwareColourTypeNameByID(SEGMENT_I(segment_index).mode_id, buffer, buflen, segment_index);
-// }
-// const char* mAnimatorLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index){
-//   sprintf(buffer, PM_SEARCH_NOMATCH);
-//   // switch(id){
-//   //   default:
-//   //   case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
-//   //   case PIXEL_HARDWARE_COLOR_ORDER_RGB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)); break;
-//   //   case PIXEL_HARDWARE_COLOR_ORDER_BRG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)); break;
-//   //   case PIXEL_HARDWARE_COLOR_ORDER_RBG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)); break;
-//   // }
-//   return buffer;
-// }
-
-
-
 void mAnimatorLight::CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index)
 {
 
-  SEGMENT_I(segment_index).set_intensity(value);
+  SEGMENT_I(segment_index).intensity = value;
 
 }
 
@@ -2203,7 +1647,7 @@ void mAnimatorLight::CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_
 void mAnimatorLight::CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index)
 {
 
-  SEGMENT_I(segment_index).set_speed(value);
+  SEGMENT_I(segment_index).speed = value;
 
 }
 
@@ -2219,19 +1663,19 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 
   char buffer[50];
 
-  SEGMENT_I(segment_index).palette.id = value < mPaletteI->GetPaletteListLength() ? value : 0;
+  SEGMENT_I(segment_index).palette_id = value < mPaletteI->GetPaletteListLength() ? value : 0;
   
   _segment_index_primary = segment_index;
-  LoadPalette(segments[segment_index].palette.id, segment_index);
+  SEGMENT.LoadPalette(segments[segment_index].palette_id);
 
   // //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
-  // if((value>=mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)
-  // &&(value<mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
+  // if((value>=mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID)
+  // &&(value<mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID))
   // {
   //   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
   // }
 
-  // ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(SEGMENT_I(segment_index).palette.id, buffer, sizeof(buffer)));
+  // ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(SEGMENT_I(segment_index).palette_id, buffer, sizeof(buffer)));
   
 }
 
@@ -2244,9 +1688,11 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 // YES , remove logging inside CommandSet (just leave in json parse) so internal use will not always use serial
 void mAnimatorLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index){
     
-  SEGMENT_I(segment_index).transition.time_ms = value;
+  #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+  SEGMENT_I(segment_index).time_ms = value;
 
-  ALOG_DBM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)), SEGMENT_I(segment_index).transition.time_ms );  
+  ALOG_DBM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)), SEGMENT_I(segment_index).time_ms );  
+  #endif
 
 }
 
@@ -2258,13 +1704,15 @@ void mAnimatorLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value, uin
 
 void mAnimatorLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index){
     
-  SEGMENT_I(segment_index).transition.rate_ms = value;
+  SEGMENT_I(segment_index).cycle_time__rate_ms = value;
 
-  if(SEGMENT_I(segment_index).transition.rate_ms < SEGMENT_I(segment_index).transition.time_ms){ 
-    SEGMENT_I(segment_index).transition.time_ms = SEGMENT_I(segment_index).transition.rate_ms;
+  #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+  if(SEGMENT_I(segment_index).cycle_time__rate_ms < SEGMENT_I(segment_index).time_ms){ 
+    SEGMENT_I(segment_index).time_ms = SEGMENT_I(segment_index).cycle_time__rate_ms;
   }
+  #endif
 
-  ALOG_DBM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)), SEGMENT_I(segment_index).transition.rate_ms );  
+  ALOG_DBM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms );  
 
 }
 
@@ -2344,7 +1792,7 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
   if(state == LIGHT_POWER_STATE_OFF_ID) // turn off
   {
     // CommandSet_Animation_Transition_Rate_Ms(10000);
-    SEGMENT_I(0).set_intensity(255);
+    SEGMENT_I(0).intensity = 255;
     
     SEGMENT_I(0).single_animation_override.time_ms =  SEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
 
@@ -2480,11 +1928,11 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
   //   SEGMENT_I(0).flags.fForceUpdate = true;
 
   // }else
-  if((palette_id>=mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
+  if((palette_id>=mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)){
  
 
-    // palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;    
-    // palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
+    // palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;    
+    // palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
     // memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
 
     // // Add to select correct buffer depending on palette type

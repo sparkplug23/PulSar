@@ -27,7 +27,7 @@
  * 
  */
 
-#include "mAnimatorLight.h"
+#include "6_Lights/03_Animator/mAnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 

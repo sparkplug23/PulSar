@@ -57,13 +57,13 @@ void mHVAC::FunctionHandler_Programs_Timers(void){
   {
 
     // Servicing program timers every second
-    zone[zone_id].program_timer_method.EverySecond();
+    rt.zone[zone_id].program_timer_method.EverySecond();
 
     //  React if timer has started or ended
-    if(zone[zone_id].program_timer_method.IsChangedThenReset())
+    if(rt.zone[zone_id].program_timer_method.IsChangedThenReset())
     {
       ALOG_DBM( PSTR("program_timer_method IsChangedThenReset %d"), zone_id);
-      if(zone[zone_id].program_timer_method.OutputDesiredState())
+      if(rt.zone[zone_id].program_timer_method.OutputDesiredState())
       {
         SetZoneActive(zone_id, 1); // This can be changed to "FUNC_SET_POWER" for internal relay driver control
       }
@@ -79,7 +79,7 @@ void mHVAC::FunctionHandler_Programs_Timers(void){
   // Update mqtt faster if active  
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
-    if(zone[zone_id].program_timer_method.IsRunning())
+    if(rt.zone[zone_id].program_timer_method.IsRunning())
     {
       mqtthandler_program_timers_ifchanged.tRateSecs = 1;
       break; // Stop if any are true

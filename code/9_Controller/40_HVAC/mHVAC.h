@@ -136,9 +136,13 @@ class mHVAC :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-    void Load_Module(bool erase);
+    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+    void Load_Module(bool erase = false);
     void Save_Module(void);
     bool Restore_Module(void);
+    #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+    #endif // USE_MODULE_DRIVERS_FILESYSTEM
 
     /************************************************************************************************
      * SECTION: Internal Functions
@@ -159,57 +163,59 @@ class mHVAC :
      * SECITON: MQTT
      ************************************************************************************************/
     
+    struct MODULE_RUNTIME{ // these will be saved and recovered on boot
+      struct Zone{
 
-    // Leave as single zone for now, scale to array
+        ProgramTemperature program_temp_method;   // Should these be pointers, or just make them so they can load and save?
+        
+        ProgramTimer       program_timer_method;// = nullptr; 
+        /**
+         * @brief active mode set, heating, cool, off
+         * */
+        uint8_t active_mode = 0;
+        /**
+         * @brief modes that are allowed.. maybe contain by driver type?
+         * bit0 - heating
+         * bit1 - cool
+         * bit2 - ?
+         * */
+        uint8_t bitpacked_modes_enabled = 0x00;
 
-    struct Zone{
+        struct SENSOR_STATE
+        {
+          //Add ROC here?
+          float temperature = 0; // delete these? inside programtemperature, why twice?
+          float humidity = 0;
+          /**
+           * @brief This is the sensor module id (ie dht, db18s20, bme) so it knows which class to ask for temp readings 
+           * */
+          int16_t module_id = -1; // -1 not set
+          /**
+           * @brief The index within the module I am using. This will need to be found using the unique name
+           * */
+          int8_t index = -1; // -1 not set
+        }sensor;
+        struct DRIVER_STATE
+        {
+          /**
+           * @brief Store multiple modules (Drivers) incase the devices are not the same type (eg, Relays, PWM, iFans03)
+           * */
+          std::vector<uint16_t> module_ids;
+          /**
+           * @brief Store multiple indexes if more than one driver is needed per zone (ie, relay for heating and another for cooling)
+           * */
+          std::vector<uint8_t> index;
+          /**
+           * @brief Driver type, what the thing attempts to control not what it is (ie, Relay can control lights, heaters, coolers etc, so I want to know what the purpose of the relay is)
+           * */
+          std::vector<uint8_t> driver_type;
+        }output;
+      }zone[HEATING_DEVICE_MAX]; // keep hard coded so it can be saved/loaded
+    }rt;
 
-      ProgramTemperature program_temp_method;   // Should these be pointers, or just make them so they can load and save?
-      
-      ProgramTimer       program_timer_method;// = nullptr; 
-      /**
-       * @brief active mode set, heating, cool, off
-       * */
-      uint8_t active_mode = 0;
-      /**
-       * @brief modes that are allowed.. maybe contain by driver type?
-       * bit0 - heating
-       * bit1 - cool
-       * bit2 - ?
-       * */
-      uint8_t bitpacked_modes_enabled = 0x00;
-
-      struct SENSOR_STATE
-      {
-        //Add ROC here?
-        float temperature = 0; // delete these? inside programtemperature, why twice?
-        float humidity = 0;
-        /**
-         * @brief This is the sensor module id (ie dht, db18s20, bme) so it knows which class to ask for temp readings 
-         * */
-        int16_t module_id = -1; // -1 not set
-        /**
-         * @brief The index within the module I am using. This will need to be found using the unique name
-         * */
-        int8_t index = -1; // -1 not set
-      }sensor;
-      struct DRIVER_STATE
-      {
-        /**
-         * @brief Store multiple modules (Drivers) incase the devices are not the same type (eg, Relays, PWM, iFans03)
-         * */
-        std::vector<uint16_t> module_ids;
-        /**
-         * @brief Store multiple indexes if more than one driver is needed per zone (ie, relay for heating and another for cooling)
-         * */
-        std::vector<uint8_t> index;
-        /**
-         * @brief Driver type, what the thing attempts to control not what it is (ie, Relay can control lights, heaters, coolers etc, so I want to know what the purpose of the relay is)
-         * */
-        std::vector<uint8_t> driver_type;
-      }output;
-    }zone[HEATING_DEVICE_MAX]; // keep hard coded so it can be saved/loaded
-
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
 
     struct SETTINGS{
       uint8_t  fEnableModule = true;
@@ -295,15 +301,6 @@ class mHVAC :
     const char* GetSensorNameByID(uint8_t sensor_id, char* buffer, uint8_t buflen);
     const char* GetSensorNameLongbyID(uint8_t sensor_id, char* buffer, uint8_t buflen);
 
-    uint8_t ConstructJSON_ProgramTimers(uint8_t json_level = 0, bool json_appending = false);
-    uint8_t ConstructJSON_ProgramTemps(uint8_t json_level = 0, bool json_appending = false);
-
-    uint8_t ConstructJSON_ZoneSensors(uint8_t json_level = 0, bool json_appending = false);
-    uint8_t ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level = 0, bool json_appending = false);
-    uint8_t ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level = 0, bool json_appending = false);
-
-    uint8_t ConstructJSON_ProgramActive(uint8_t json_level = 0, bool json_appending = false);
-    uint8_t ConstructJSON_HardwareInfo(uint8_t json_level = 0, bool json_appending = false);
 
     uint32_t tSavedSendRateOfChange10s;
 
@@ -338,17 +335,35 @@ class mHVAC :
 
     std::vector<struct functionhandler<mHVAC>*> functionhandler_list;
 
-  
-  #ifdef USE_MODULE_NETWORK_MQTT
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
 
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+  
+    uint8_t ConstructJSON_ProgramTimers(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_ProgramTemps(uint8_t json_level = 0, bool json_appending = false);
+
+    uint8_t ConstructJSON_ZoneSensors(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level = 0, bool json_appending = false);
+
+    uint8_t ConstructJSON_ProgramActive(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_HardwareInfo(uint8_t json_level = 0, bool json_appending = false);
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    
+    void MQTTHandler_Set_DefaultPeriodRate();    
     void MQTTHandler_Sender();
     
     std::vector<struct handler<mHVAC>*> mqtthandler_list;
-
     struct handler<mHVAC> mqtthandler_settings_teleperiod;
     struct handler<mHVAC> mqtthandler_program_timers_ifchanged;
     struct handler<mHVAC> mqtthandler_program_timers_teleperiod;
@@ -361,9 +376,8 @@ class mHVAC :
     struct handler<mHVAC> mqtthandler_sensor_zone_roc1m;
     struct handler<mHVAC> mqtthandler_sensor_zone_roc10m;
     struct handler<mHVAC> mqtthandler_relays_ifchanged;
-    struct handler<mHVAC> mqtthandler_relays_teleperiod;
-  
-  #endif // USE_MODULE_NETWORK_MQTT
+    struct handler<mHVAC> mqtthandler_relays_teleperiod;  
+    #endif // USE_MODULE_NETWORK_MQTT
 
 
 };

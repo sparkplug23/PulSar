@@ -1413,7 +1413,7 @@ void mWebServer::initServer()
   // releaseJSONBufferLock();
 
   // #ifdef WLED_ENABLE_WEBSOCKETS
-  // #ifndef WLED_DISABLE_2D
+  // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   // pCONT_web->server->on("/liveview2D", HTTP_GET, [](AsyncWebServerRequest *request){
   //   if (handleIfNoneMatchCacheHeader(request)) return;
   //   AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_liveviewws2D, PAGE_liveviewws2D_length);

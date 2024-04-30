@@ -151,7 +151,7 @@ Hallway + Understairs
   - dht
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
-#define DEVICE_IMMERSION_CONTROL_PANEL
+// #define DEVICE_IMMERSION_CONTROL_PANEL
 
 /**
 Outside + Garage
@@ -1338,7 +1338,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -2947,7 +2947,7 @@ R"=====(
   //   #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
   //   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
   //   #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-  //   #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+  //   
   //   // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
   //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
   //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -4443,7 +4443,7 @@ R"=====(
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -4745,7 +4745,7 @@ R"=====(
  * 
  * *********************************************************************************************************************************************************************************
 */
-#ifdef DEVICE_IMMERSION_CONTROL_PANEL // New 2023 system unified
+#ifdef DEVICE_IMMERSION_CONTROL_PANEL
   #define DEVICENAME_CTR          "immersion_controller"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Heater Panel"
   #define DEVICENAME_ROOMHINT_CTR "Landing"

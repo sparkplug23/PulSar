@@ -54,6 +54,7 @@ void WDT_Reset(){};
 
 uint32_t ResetReason_g(void)
 {
+  DEBUG_LINE_HERE
 //   /*
 //     user_interface.h
 //     REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
@@ -84,6 +85,7 @@ uint32_t ResetReason_g(void)
     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
   */
 
+  DEBUG_LINE_HERE
 #ifdef ESP32
 
  RESET_REASON reason = rtc_get_reset_reason(0);
@@ -101,10 +103,12 @@ uint32_t ResetReason_g(void)
 
 #endif 
 
+  DEBUG_LINE_HERE
 #ifdef ESP8266
- return resetInfo.reason;
+ return 0;// resetInfo.reason;  // causing crasg exception 3
 
 #endif
+  DEBUG_LINE_HERE
 
 
   // return ESP_ResetInfoReason();
@@ -912,6 +916,147 @@ char* mSupport::float2CString(float number, unsigned char prec, char *s)
     return dtostrf(number, 1, prec, s);
   // }
 }
+
+
+
+
+char* mSupport::Unescape(char* buffer, uint32_t* size)
+{
+  uint8_t* read = (uint8_t*)buffer;
+  uint8_t* write = (uint8_t*)buffer;
+  int32_t start_size = *size;
+  int32_t end_size = *size;
+  uint8_t che = 0;
+
+//  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: UnescapeIn %*_H"), *size, (uint8_t*)buffer);
+
+  while (start_size > 0) {
+    uint8_t ch = *read++;
+    start_size--;
+    if (ch != '\\') {
+      *write++ = ch;
+    } else {
+      if (start_size > 0) {
+        uint8_t chi = *read++;
+        start_size--;
+        end_size--;
+        switch (chi) {
+          case '\\': che = '\\'; break;  // 5C Backslash
+          case 'a': che = '\a'; break;   // 07 Bell (Alert)
+          case 'b': che = '\b'; break;   // 08 Backspace
+          case 'e': che = '\e'; break;   // 1B Escape
+          case 'f': che = '\f'; break;   // 0C Formfeed
+          case 'n': che = '\n'; break;   // 0A Linefeed (Newline)
+          case 'r': che = '\r'; break;   // 0D Carriage return
+          case 's': che = ' ';  break;   // 20 Space
+          case 't': che = '\t'; break;   // 09 Horizontal tab
+          case 'v': che = '\v'; break;   // 0B Vertical tab
+          case 'x': {
+            uint8_t* start = read;
+            che = (uint8_t)strtol((const char*)read, (char**)&read, 16);
+            start_size -= (uint16_t)(read - start);
+            end_size -= (uint16_t)(read - start);
+            break;
+          }
+          case '"': che = '\"'; break;   // 22 Quotation mark
+//          case '?': che = '\?'; break;   // 3F Question mark
+          default : {
+            che = chi;
+            *write++ = ch;
+            end_size++;
+          }
+        }
+        *write++ = che;
+      }
+    }
+  }
+  *size = end_size;
+  *write++ = 0;   // add the end string pointer reference
+//  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: UnescapeOut %*_H"), *size, (uint8_t*)buffer);
+
+  return buffer;
+}
+
+char* mSupport::RemoveSpace(char* p) {
+  // Remove white-space character (' ','\t','\n','\v','\f','\r')
+  char* write = p;
+  char* read = p;
+  char ch = '.';
+
+  while (ch != '\0') {
+    ch = *read++;
+    if (!isspace(ch)) {
+      *write++ = ch;
+    }
+  }
+  return p;
+}
+
+// remove spaces at the beginning and end of the string (but not in the middle)
+char* mSupport::TrimSpace(char *p) {
+  // Remove white-space character (' ','\t','\n','\v','\f','\r')
+  char* write = p;
+  char* read = p;
+  char ch = '.';
+
+  // skip all leading spaces
+  while (isspace(*read)) {
+    read++;
+  }
+  // copy the rest
+  do {
+    ch = *read++;
+    *write++ = ch;
+  } while (ch != '\0');
+  // move to end
+  read = p + strlen(p);
+  // move backwards
+  while (p != read) {
+    read--;
+    if (isspace(*read)) {
+      *read = '\0';
+    } else {
+      break;
+    }
+  }
+  return p;
+}
+
+char* mSupport::RemoveControlCharacter(char* p) {
+  // Remove control character (0x00 .. 0x1F and 0x7F)
+  char* write = p;
+  char* read = p;
+  char ch = '.';
+
+  while (ch != '\0') {
+    ch = *read++;
+    if (!iscntrl(ch)) {
+      *write++ = ch;
+    }
+  }
+  *write++ = '\0';
+  return p;
+}
+
+char* mSupport::ReplaceChar(char* p, char find, char replace) {
+  char* write = (char*)p;
+  char* read = (char*)p;
+  char ch = '.';
+
+  while (ch != '\0') {
+    ch = *read++;
+    if (ch == find) {
+      ch = replace;
+    }
+    *write++ = ch;
+  }
+  return p;
+}
+
+char* mSupport::ReplaceCommaWithDot(char* p) {
+  return ReplaceChar(p, ',', '.');
+}
+
 
 
 //make template later
@@ -1838,116 +1983,45 @@ int mSupport::TextToInt(char *str)
 
 
 
-char* mSupport::Unescape(char* buffer, uint16_t* size)
-{
-//   uint8_t* read = (uint8_t*)buffer;
-//   uint8_t* write = (uint8_t*)buffer;
-//   int16_t start_size = *size;
-//   int16_t end_size = *size;
-//   uint8_t che = 0;
 
-// //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t*)buffer, *size);
-
-//   while (start_size > 0) {
-//     uint8_t ch = *read++;
-//     start_size--;
-//     if (ch != '\\') {
-//       *write++ = ch;
-//     } else {
-//       if (start_size > 0) {
-//         uint8_t chi = *read++;
-//         start_size--;
-//         end_size--;
-//         switch (chi) {
-//           case '\\': che = '\\'; break;  // 5C Backslash
-//           case 'a': che = '\a'; break;   // 07 Bell (Alert)
-//           case 'b': che = '\b'; break;   // 08 Backspace
-//           case 'e': che = '\e'; break;   // 1B Escape
-//           case 'f': che = '\f'; break;   // 0C Formfeed
-//           case 'n': che = '\n'; break;   // 0A Linefeed (Newline)
-//           case 'r': che = '\r'; break;   // 0D Carriage return
-//           case 's': che = ' ';  break;   // 20 Space
-//           case 't': che = '\t'; break;   // 09 Horizontal tab
-//           case 'v': che = '\v'; break;   // 0B Vertical tab
-//           case 'x': {
-//             uint8_t* start = read;
-//             che = (uint8_t)strtol((const char*)read, (char**)&read, 16);
-//             start_size -= (uint16_t)(read - start);
-//             end_size -= (uint16_t)(read - start);
-//             break;
-//           }
-//           case '"': che = '\"'; break;   // 22 Quotation mark
-// //          case '?': che = '\?'; break;   // 3F Question mark
-//           default : {
-//             che = chi;
-//             *write++ = ch;
-//             end_size++;
-//           }
-//         }
-//         *write++ = che;
-//       }
-//     }
-//   }
-//   *size = end_size;
-
-// //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t*)buffer, *size);
-
-//   return buffer;
-}
-
-char* mSupport::RemoveSpace(char* p)
-{
-//   char* write = p;
-//   char* read = p;
-//   char ch = '.';
-
-//   while (ch != '\0') {
-//     ch = *read++;
-//     if (!isspace(ch)) {
-//       *write++ = ch;
-//     }
-//   }
-// //  *write = '\0';  // Removed 20190223 as it buffer overflows on no isspace found - no need either
-//   return p;
-}
 
 char* mSupport::LowerCase(char* dest, const char* source)
 {
-  // char* write = dest;
-  // const char* read = source;
-  // char ch = '.';
+  char* write = dest;
+  const char* read = source;
+  char ch = '.';
 
-  // while (ch != '\0') {
-  //   ch = *read++;
-  //   *write++ = tolower(ch);
-  // }
-  // return dest;
+  while (ch != '\0') {
+    ch = *read++;
+    *write++ = tolower(ch);
+  }
+  return dest;
 }
 
 char* mSupport::UpperCase(char* dest, const char* source)
 {
-  // char* write = dest;
-  // const char* read = source;
-  // char ch = '.';
+  char* write = dest;
+  const char* read = source;
+  char ch = '.';
 
-  // while (ch != '\0') {
-  //   ch = *read++;
-  //   *write++ = toupper(ch);
-  // }
-  // return dest;
+  while (ch != '\0') {
+    ch = *read++;
+    *write++ = toupper(ch);
+  }
+  return dest;
 }
 
 char* mSupport::UpperCase_P(char* dest, const char* source)
 {
-  // char* write = dest;
-  // const char* read = source;
-  // char ch = '.';
+  char* write = dest;
+  const char* read = source;
+  char ch = '.';
 
-  // while (ch != '\0') {
-  //   ch = pgm_read_byte(read++);
-  //   *write++ = toupper(ch);
-  // }
-  // return dest;
+  while (ch != '\0') {
+    ch = pgm_read_byte(read++);
+    *write++ = toupper(ch);
+  }
+  return dest;
 }
 
 char* mSupport::Trim(char* p)
@@ -2578,6 +2652,58 @@ int16_t mSupport::GetCommandID16_P(const char* needle, const char* haystack, cha
   }
   return result;
 
+}
+
+/*
+
+ * I also want to check if the entire thing matches, ie "one|two" should allow "one", "two" AND "one|two"
+ */
+int16_t mSupport::GetCommandID16_MultipleSubMatches_P(const char* needle, const char* haystack, char* destination, size_t destination_size)
+{
+    if ((needle == nullptr) || (haystack == nullptr)) return -1;
+    
+    char buffer_tmp[100];  // Temporary buffer if destination is not provided
+    if (destination == nullptr) {
+        destination = buffer_tmp;
+        destination_size = sizeof(buffer_tmp);
+    }
+
+    int segmentIndex = -1;  // Index of the segment containing a match
+    const char* read = haystack;
+    char* write = destination;
+    int count = 0;  // Segment counter
+
+    while (true) {
+        char ch = pgm_read_byte(read);
+        if (ch == '\0' || ch == '|') {
+            *write = '\0';  // Null-terminate the current segment
+            
+            // Check if any part of the segment matches the needle
+            char* part = strtok(destination, "/");
+            while (part != NULL) {
+                if (strstr(part, needle) != NULL) {  // Using strstr to find the needle as a substring
+                    segmentIndex = count;
+                    break;
+                }
+                part = strtok(NULL, "/");
+            }
+
+            if (segmentIndex != -1 || ch == '\0') {
+                break;  // If match found or end of haystack
+            }
+
+            count++;  // Move to the next segment
+            write = destination;  // Reset write pointer for the next segment
+            read++;  // Skip the '|' character
+        } else {
+            if (write < destination + destination_size - 1) {
+                *write++ = ch;  // Copy character to destination
+            }
+            read++;  // Move read pointer
+        }
+    }
+
+    return segmentIndex;  // Return the index of the segment containing the match or -1
 }
 
 

@@ -293,11 +293,11 @@ void mOLED_SH1106::ShowUTCTime(void)
   pCONT_iDisp->renderer->setTextSize(pCONT_set->Settings.display.size);
   pCONT_iDisp->renderer->setTextFont(pCONT_set->Settings.display.font);
   pCONT_iDisp->renderer->setCursor(0, 0);
-  snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), pCONT_time->RtcTime.hour,  pCONT_time->RtcTime.minute,  pCONT_time->RtcTime.second);  // [ 12:34:56 ]
-  pCONT_iDisp->renderer->println(line);
+  // snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), pCONT_time->RtcTime.hour,  pCONT_time->RtcTime.minute,  pCONT_time->RtcTime.second);  // [ 12:34:56 ]
+  pCONT_iDisp->renderer->println( pCONT_time->GetTime().c_str() );
   pCONT_iDisp->renderer->println(pCONT_time->GetUptime());
-  snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  pCONT_time->RtcTime.Mday,  pCONT_time->RtcTime.month,  pCONT_time->RtcTime.year);   // [01-02-2018]
-  pCONT_iDisp->renderer->println(line);
+  // snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  pCONT_time->RtcTime.Mday,  pCONT_time->RtcTime.month,  pCONT_time->RtcTime.year);   // [01-02-2018]
+  // pCONT_iDisp->renderer->println(line);
   pCONT_iDisp->renderer->Updateframe();
 
 }
