@@ -367,15 +367,6 @@ void mSettings::SystemSettings_DefaultBody(void)
 
 void mSettings::SettingsResetStd(void)
 {
-#ifndef DISABLE_TIME1_OLD_CODE
-  pCONT_time->tflag[0].hemis = TIME_STD_HEMISPHERE;
-  pCONT_time->tflag[0].week  = TIME_STD_WEEK;
-  pCONT_time->tflag[0].dow   = TIME_STD_DAY;
-  pCONT_time->tflag[0].month = TIME_STD_MONTH;
-  pCONT_time->tflag[0].hour  = TIME_STD_HOUR;
-  pCONT_time->toffset[0]     = TIME_STD_OFFSET;
-  #endif
-
   
   Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
   Settings.tflag[0].week  = TIME_STD_WEEK;
@@ -384,7 +375,6 @@ void mSettings::SettingsResetStd(void)
   Settings.tflag[0].hour  = TIME_STD_HOUR;
   Settings.toffset[0]     = TIME_STD_OFFSET;
 
-
 }
 
 
@@ -392,16 +382,6 @@ void mSettings::SettingsResetStd(void)
 
 void mSettings::SettingsResetDst(void)
 {
-#ifndef DISABLE_TIME1_OLD_CODE
-  pCONT_time->tflag[1].hemis = TIME_DST_HEMISPHERE;
-  pCONT_time->tflag[1].week = TIME_DST_WEEK;
-  pCONT_time->tflag[1].dow = TIME_DST_DAY;
-  pCONT_time->tflag[1].month = TIME_DST_MONTH;
-  pCONT_time->tflag[1].hour = TIME_DST_HOUR;
-  pCONT_time->toffset[1] = TIME_DST_OFFSET;
-  #endif
-
-
   Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
   Settings.tflag[1].week = TIME_DST_WEEK;
   Settings.tflag[1].dow = TIME_DST_DAY;

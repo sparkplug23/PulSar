@@ -1,81 +1,10 @@
 #include "mTime.h"
 
-#ifdef USE_MODULE_CORE_TIME
+// #ifdef USE_MODULE_CORE_TIME
 
 const char* mTime::PM_MODULE_CORE_TIME_CTR = D_MODULE_CORE_TIME_CTR;
 const char* mTime::PM_MODULE_CORE_TIME_FRIENDLY_CTR = D_MODULE_CORE_TIME_FRIENDLY_CTR;
 
-// int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
-// {
-
-//   switch(function){
-//     case FUNC_INIT:
-//       init();
-//       testtime.millis = millis();
-//       testtime.run = false;
-//     break;
-//   }
-
-//   switch(function){
-//     case FUNC_EVERY_SECOND:{
-      
-//       UpdateStoredRTCVariables();
-//       UpdateUpTime();
-      
-//       #ifndef DISABLE_SERIAL0_CORE
-//         #ifdef DEBUG_MODULE_TIME_STD
-//         char buffer[40];
-//         AddLog(LOG_LEVEL_TEST, PSTR("DT_DST=%s"), pCONT_time->GetDateAndTimeCtr(DT_DST, buffer, sizeof(buffer)));
-//         AddLog(LOG_LEVEL_TEST, PSTR("DT_STD=%s"), pCONT_time->GetDateAndTimeCtr(DT_STD, buffer, sizeof(buffer)));
-//         AddLog(LOG_LEVEL_TEST, PSTR("DT_TIMEZONE=%s IsDst=%d"), pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)), IsDst());
-//         #endif
-//       #endif
-
-//       #ifdef ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//       Serial.println(GetUptime());
-//       #endif // ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-
-//     }break;
-//     case FUNC_EVERY_FIVE_SECOND:
-
-//       #ifdef ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
-
-//       SystemTime_NTPUpdate();
-
-//       #else
-//       #ifdef USE_MODULE_NETWORK_WIFI
-//       // if(pCONT_interface_network->Connected(mInterfaceNetwork::NETWORK_TYPE_WIFI))
-//       // {
-// #ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-//         WifiPollNtp();
-// #endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-//       // }
-//       #endif // USE_MODULE_NETWORK_WIFI
-//       #endif // ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
-
-//     break;
-//     case FUNC_EVERY_MINUTE:
-
-
-//     break;
-//   }
-
-// }//end
-
-
-
-
-
-
-
-#include <Ticker.h>
-
-Ticker TickerRtc2;
-
-static const uint8_t kDaysInMonth2[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
-static const char kMonthNamesEnglish2[] PROGMEM = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-const uint32_t START_VALID_TIME = 1451602800;  // Time is synced and after 2016-01-01
 
 /**
  * @brief: Module Interface
@@ -106,10 +35,7 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:
       // EverySecond();
       WifiPollNtp();
-
-      
-      UpdateStoredRTCVariables();
-      UpdateUpTime();
+      uptime_seconds_nonreset++;
     break;
     /************
      * STORAGE SECTION * 
@@ -117,77 +43,58 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
+   case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
     /************
      * RULES SECTION * 
     *******************/
     /************
      * MQTT SECTION * 
     *******************/
+    #ifdef ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+      MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
+      MQTTHandler_Sender();
     break;
     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_DefaultPeriodRate();
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif // USE_MODULE_NETWORK_MQTT
+    #endif // ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
   } // end switch
 } // END function
 
 
-
-void mTime::Pre_Init(void){}
-
-void mTime::Init(void)
+void mTime::Pre_Init(void)
 {
-  module_state.mode = ModuleStatus::Running;
-  RtcInit();
-
-
-  
-  tSavedStoreRTCUpdate = millis()+2000;
-  
-  memset(&uptime,0,sizeof(uptime));
-
-  kDaysInMonth[0] = 31;
-  kDaysInMonth[1] = 28;
-  kDaysInMonth[2] = 31;
-  kDaysInMonth[3] = 30;
-  kDaysInMonth[4] = 31;
-  kDaysInMonth[5] = 30;
-  kDaysInMonth[6] = 31;
-  kDaysInMonth[7] = 31;
-  kDaysInMonth[8] = 30;
-  kDaysInMonth[9] = 31;
-  kDaysInMonth[10] = 30;
-  kDaysInMonth[11] = 31;
-
-
-
+  Rtc.millis = millis();
 }
 
 
-
-
-uint32_t mTime::UtcTime(void) {
+uint32_t mTime::UtcTime(void) 
+{
   return Rtc.utc_time;
 }
 
-uint32_t mTime::LocalTime(void) {
+uint32_t mTime::LocalTime(void) 
+{
   return Rtc.local_time;
 }
 
-uint32_t mTime::Midnight(void) {
+uint32_t mTime::Midnight(void) 
+{
   return Rtc.midnight;
 }
 
-bool mTime::MidnightNow(void) {
+bool mTime::MidnightNow(void) 
+{
   if (Rtc.midnight_now) {
     Rtc.midnight_now = false;
     return true;
@@ -195,11 +102,13 @@ bool mTime::MidnightNow(void) {
   return false;
 }
 
-bool mTime::IsDst(void) {
+bool mTime::IsDst(void) 
+{
   return (Rtc.time_timezone == pCONT_set->Settings.toffset[1]);
 }
 
-String mTime::GetBuildDateAndTime(void) {
+String mTime::GetBuildDateAndTime(void) 
+{
   // "2017-03-07T11:08:02" - ISO8601:2004
   char bdt[21];
   char *p;
@@ -224,8 +133,8 @@ String mTime::GetBuildDateAndTime(void) {
       year = atoi(str);
     }
   }
-  char MonthNamesEnglish[sizeof(kMonthNamesEnglish2)];
-  strcpy_P(MonthNamesEnglish, kMonthNamesEnglish2);
+  char MonthNamesEnglish[sizeof(kMonthNamesEnglish)];
+  strcpy_P(MonthNamesEnglish, kMonthNamesEnglish);
   int month = (strstr(MonthNamesEnglish, smonth) -MonthNamesEnglish) /3 +1;
   snprintf_P(bdt, sizeof(bdt), PSTR("%d" D_YEAR_MONTH_SEPARATOR "%02d" D_MONTH_DAY_SEPARATOR "%02d" D_DATE_TIME_SEPARATOR "%s"), year, month, day, PSTR(__TIME__));
   return String(bdt);  // 2017-03-07T11:08:02
@@ -250,47 +159,65 @@ String mTime::GetDate(void) {
   return String(dt);
 }
 
-String mTime::GetMinuteTime(uint32_t minutes) {
+String mTime::GetMinuteTime(uint32_t minutes) 
+{
   char tm[6];
   snprintf_P(tm, sizeof(tm), PSTR("%02d:%02d"), minutes / 60, minutes % 60);
-
   return String(tm);  // 03:45
 }
 
-String mTime::GetTimeZone(void) {
+String mTime::GetTimeZone(void) 
+{
   char tz[7];
   snprintf_P(tz, sizeof(tz), PSTR("%+03d:%02d"), Rtc.time_timezone / 60, abs(Rtc.time_timezone % 60));
-
   return String(tz);  // -03:45
 }
 
-String mTime::GetDuration(uint32_t time) {
+String mTime::GetDuration(uint32_t time) 
+{
   char dt[16];
-
   datetime_t ut;
+  DEBUG_LINE_HERE
   BreakTime(time, ut);
-
   // "P128DT14H35M44S" - ISO8601:2004 - https://en.wikipedia.org/wiki/ISO_8601 Durations
-//  snprintf_P(dt, sizeof(dt), PSTR("P%dDT%02dH%02dM%02dS"), ut.days, ut.hour, ut.minute, ut.second);
-
-  // "128 14:35:44" - OpenVMS
-  // "128T14:35:44" - Tasmota
+  DEBUG_LINE_HERE
   snprintf_P(dt, sizeof(dt), PSTR("%dT%02d:%02d:%02d"), ut.days, ut.hour, ut.minute, ut.second);
-
+  DEBUG_LINE_HERE
   return String(dt);  // 128T14:35:44
 }
 
-String mTime::GetDT(uint32_t time) {
+String mTime::GetDT(uint32_t time) 
+{
   // "2017-03-07T11:08:02" - ISO8601:2004
-
   char dt[20];
   datetime_t tmpTime;
-
   BreakTime(time, tmpTime);
   snprintf_P(dt, sizeof(dt), PSTR("%04d-%02d-%02dT%02d:%02d:%02d"),
     tmpTime.year +1970, tmpTime.month, tmpTime.day_of_month, tmpTime.hour, tmpTime.minute, tmpTime.second);
-
   return String(dt);  // 2017-03-07T11:08:02
+}
+
+String mTime::GetTime(uint8_t time_type)
+{
+  // "2017-03-07T11:08:02-07:00" - ISO8601:2004
+  uint32_t time = Rtc.local_time;
+
+  switch (time_type)
+  {
+    default:
+    case DT_LOCAL_TIME:{
+      
+      // make another GetTime (no date function)
+      time = Rtc.local_time;
+      char dt[20];
+      datetime_t tmpTime;
+      BreakTime(time, tmpTime);
+      snprintf_P(dt, sizeof(dt), PSTR("%02d:%02d:%02d"), tmpTime.hour, tmpTime.minute, tmpTime.second);
+      return String(dt);  // 11:08:02
+    }
+    break;
+  }
+  
 }
 
 /*
@@ -304,22 +231,11 @@ String mTime::GetDT(uint32_t time) {
  *  "2017-03-07T11:08:02-07:00" - if DT_LOCAL and SetOption52 = 1
  *  "2017-03-07T11:08:02"       - otherwise
  */
-String mTime::GetDateAndTime(uint8_t datetime_type) {
+String mTime::GetDateAndTime(uint8_t datetime_type) 
+{
   // "2017-03-07T11:08:02-07:00" - ISO8601:2004
   uint32_t time = Rtc.local_time;
   
-
-  if(datetime_type == DT_LOCAL_TIME){
-    // make another GetTime (no date function)
-    time = Rtc.local_time;
-    char dt[20];
-    datetime_t tmpTime;
-    BreakTime(time, tmpTime);
-    snprintf_P(dt, sizeof(dt), PSTR("%02d:%02d:%02d"), tmpTime.hour, tmpTime.minute, tmpTime.second);
-    return String(dt);  // 11:08:02
-  }  
-
-
   switch (datetime_type) {
     case DT_LOCAL_TIME:
       time = Rtc.local_time;
@@ -364,23 +280,27 @@ String mTime::GetDateAndTime(uint8_t datetime_type) {
   return dt;                // 2017-03-07T11:08:02-07:00 or 2017-03-07T11:08:02.123-07:00
 }
 
-uint32_t mTime::UpTime(void) {
+uint32_t mTime::UpTime(void) 
+{
   if (Rtc.restart_time) {
     return Rtc.utc_time - Rtc.restart_time;
   } else {
-    return TasmotaGlobal.uptime;
+    return uptime_seconds_nonreset;
   }
 }
 
-uint32_t mTime::MinutesUptime(void) {
+uint32_t mTime::MinutesUptime(void) 
+{
   return (UpTime() / 60);
 }
 
-String mTime::GetUptime(void) {
+String mTime::GetUptime(void) 
+{
   return GetDuration(UpTime());
 }
 
-uint32_t mTime::MinutesPastMidnight(void) {
+uint32_t mTime::MinutesPastMidnight(void) 
+{
   uint32_t minutes = 0;
 
   if (RtcTime.valid) {
@@ -389,11 +309,13 @@ uint32_t mTime::MinutesPastMidnight(void) {
   return minutes;
 }
 
-uint32_t mTime::RtcMillis(void) {
+uint32_t mTime::RtcMillis(void) 
+{
   return (millis() - Rtc.millis) % 1000;
 }
 
-void mTime::BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &tm) {
+void mTime::BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &tm) 
+{
 // break the given time_input into time components
 // this is a more compact version of the C library localtime function
 // note that year is offset from 1970 !!!
@@ -445,17 +367,25 @@ void mTime::BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &
       break;
     }
   }
+  
+  #ifdef ESP32
   strlcpy(tm.name_of_month, kMonthNames + (month *3), 4);
+  #else
+  strncpy(tm.name_of_month, kMonthNames + (month *3), 3);   // fix for esp8266, as strlcpy causes Exception (3). Should be fixable. 
+  #endif 
+  
   tm.month = month + 1;      // jan is month 1
   tm.day_of_month = time + 1;         // day of month
   tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
 }
 
-void mTime::BreakTime(uint32_t time_input, datetime_t &tm) {
+void mTime::BreakTime(uint32_t time_input, datetime_t &tm) 
+{
   BreakNanoTime(time_input, 0, tm);
 }
 
-uint32_t mTime::MakeTime(datetime_t &tm) {
+uint32_t mTime::MakeTime(datetime_t &tm) 
+{
 // assemble time elements into datetime_t
 // note year argument is offset from 1970
 
@@ -490,7 +420,8 @@ uint32_t mTime::GetUTCTime()
   return Rtc.utc_time;
 }
 
-uint32_t mTime::RuleToTime( TimeRule r, int yr) {
+uint32_t mTime::RuleToTime( TimeRule r, int yr) 
+{
   datetime_t tm;
   uint32_t t;
   uint8_t m;
@@ -521,12 +452,16 @@ uint32_t mTime::RuleToTime( TimeRule r, int yr) {
   return t;
 }
 
-void mTime::RtcGetDaylightSavingTimes(uint32_t local_time) {
+void mTime::RtcGetDaylightSavingTimes(uint32_t local_time) 
+{
   datetime_t tmpTime;
   BreakTime(local_time, tmpTime);
   tmpTime.year += 1970;
 
-
+  /**
+   * @brief Temporary fix for the time rules, since loading of settings is erasing these values.
+   * 
+   */
   pCONT_set->Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
   pCONT_set->Settings.tflag[0].week = TIME_STD_WEEK;
   pCONT_set->Settings.tflag[0].dow = TIME_STD_DAY;
@@ -549,7 +484,8 @@ void mTime::RtcGetDaylightSavingTimes(uint32_t local_time) {
 
 }
 
-uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time) {
+uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time) 
+{
   
   // ALOG_INF(PSTR(D_LOG_TIME2 "RtcTimeZoneOffset"));
   //FORCED TO TEST
@@ -591,7 +527,8 @@ uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time) {
   return timezone;
 }
 
-void mTime::RtcSetTimeOfDay(uint32_t local_time) {
+void mTime::RtcSetTimeOfDay(uint32_t local_time) 
+{
   // Sync Core/RTOS time to be used by file system time stamps
   struct timeval tv;
   tv.tv_sec = local_time;
@@ -599,7 +536,8 @@ void mTime::RtcSetTimeOfDay(uint32_t local_time) {
   settimeofday(&tv, nullptr);
 }
 
-void mTime::RtcSecond(void) {
+void mTime::RtcSecond(void) 
+{
   static uint32_t last_sync = 0;
   static bool mutex = false;
 
@@ -613,18 +551,18 @@ void mTime::RtcSecond(void) {
     last_sync = Rtc.utc_time;
 
     if (Rtc.restart_time == 0) {
-      Rtc.restart_time = Rtc.utc_time - TasmotaGlobal.uptime;  // save first synced time as restart time
+      Rtc.restart_time = Rtc.utc_time - uptime_seconds_nonreset;  // save first synced time as restart time
     }
 
     RtcGetDaylightSavingTimes(Rtc.utc_time);
 
-    AddLog(LOG_LEVEL_INFO, PSTR("RTC: " D_UTC_TIME " %s, " D_DST_TIME " %s, " D_STD_TIME " %s"),
+    ALOG_INF(PSTR("RTC: " D_UTC_TIME " %s, " D_DST_TIME " %s, " D_STD_TIME " %s"),
       GetDateAndTime(DT_UTC).c_str(), GetDateAndTime(DT_DST).c_str(), GetDateAndTime(DT_STD).c_str());
 
     if (Rtc.local_time < START_VALID_TIME) {  // 2016-01-01
-      TasmotaGlobal.rules_flag.time_init = 1;
+      pCONT_set->Settings.rules_flag.time_init = 1;
     } else {
-      TasmotaGlobal.rules_flag.time_set = 1;
+      pCONT_set->Settings.rules_flag.time_set = 1;
     }
   } else {
     if (Rtc.last_synced) {
@@ -638,7 +576,7 @@ void mTime::RtcSecond(void) {
   Rtc.millis = millis();
 
   if ((Rtc.utc_time > (2 * 60 * 60)) && (last_sync < Rtc.utc_time - (2 * 60 * 60))) {  // Every two hours a warning
-    AddLog(LOG_LEVEL_INFO, PSTR("RTC: Not synced"));
+    ALOG_INF(PSTR("RTC: Not synced"));
     last_sync = Rtc.utc_time;
   }
 
@@ -674,45 +612,42 @@ void mTime::RtcSecond(void) {
   mutex = false;
 }
 
-void mTime::RtcSync(const char* source) {
+void mTime::RtcSync(const char* source) 
+{
 
   Rtc.time_synced = true;
   RtcSecond();
-  AddLog(LOG_LEVEL_INFO, PSTR("RTC: Synced by %s"), source);
+  ALOG_INF(PSTR("RTC: Synced by %s"), source);
 
   pCONT->Tasker_Interface(FUNC_TIME_SYNCED);
   
 }
 
-void mTime::RtcSetTime(uint32_t epoch) {
+void mTime::RtcSetTime(uint32_t epoch) 
+{
   if (epoch < START_VALID_TIME) {  // 2016-01-01
     Rtc.user_time_entry = false;
-    TasmotaGlobal.ntp_force_sync = true;
+    ntp_force_sync = true;
   } else {
     Rtc.user_time_entry = true;
-//    Rtc.utc_time = epoch -1;    // Will be corrected by RtcSecond
     Rtc.utc_time = epoch;
     RtcSync("Time");
   }
 }
 
-void mTime::RtcInit(void) 
+void mTime::Init(void) 
 {
 
-  ALOG_HGL(PSTR("================================================================== RTCINIT =================================================================="));
-
+  TickerRtc = new Ticker();
 
   Rtc.utc_time = 0;
   BreakTime(Rtc.utc_time, RtcTime);
-  // TickerRtc.attach(1, RtcSecond);
-  // TickerRtc.attach(1, 
-  //     [this](void){
-  //       this->RtcSecond();
-  //     }
-  //   );
-  TickerRtc2.attach_ms(1000, 
-      +[](mTime* instance){ instance->RtcSecond(); }, this
-    );
+  
+  #ifdef ESP32
+    TickerRtc->attach_ms(1000, +[](mTime* instance){ instance->RtcSecond(); }, this);
+  #else
+    TickerRtc->attach   (1,            [this](void){ this->RtcSecond(); });
+  #endif
 
   if (pCONT_set->Settings.cfg_timestamp > START_VALID_TIME) {
     // Fix file timestamp while utctime is not synced
@@ -724,13 +659,13 @@ void mTime::RtcInit(void)
     RtcGetDaylightSavingTimes(utc_time);
     uint32_t local_time = utc_time + RtcTimeZoneOffset(utc_time);
     RtcSetTimeOfDay(local_time);
-   AddLog(LOG_LEVEL_INFO, PSTR("RTC: Timestamp %s"), GetDT(local_time).c_str());
+   ALOG_INF(PSTR("RTC: Timestamp %s"), GetDT(local_time).c_str());
   }
+  
+  module_state.mode = ModuleStatus::Running;
+
 }
 
-void mTime::RtcPreInit(void) {
-  Rtc.millis = millis();
-}
 
 inline int32_t mTime::TimeDifference(uint32_t prev, uint32_t next)
 {
@@ -752,54 +687,49 @@ bool mTime::TimeReached(uint32_t timer)
 }
 
 
-void mTime::WifiPollNtp() {
+void mTime::WifiPollNtp() 
+{
   static uint8_t ntp_sync_minute = 0;
   static uint32_t ntp_run_time = 0;
 
-    ALOG_INF(PSTR("WifiPollNtp: pCONT_set->runtime.global_state.wifi_down || Rtc.user_time_entry %d %d"), pCONT_set->runtime.global_state.wifi_down, Rtc.user_time_entry);
-  if (pCONT_set->runtime.global_state.wifi_down || Rtc.user_time_entry) { 
-    
-    ALOG_INF(PSTR("WifiPollNtp: pCONT_set->runtime.global_state.wifi_down || Rtc.user_time_entry %d %d"), pCONT_set->runtime.global_state.wifi_down, Rtc.user_time_entry);
-    return; }
+  if (pCONT_set->runtime.global_state.wifi_down || Rtc.user_time_entry) { return; }
 
-    TasmotaGlobal.ntp_force_sync = true; // tmp, forced to test
-
-  uint8_t uptime_minute = (TasmotaGlobal.uptime / 60) % 60;  // 0 .. 59
+  uint8_t uptime_minute = (uptime_seconds_nonreset / 60) % 60;  // 0 .. 59
   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
     ntp_sync_minute = 1;                 // If sync prepare for a new cycle
   }
   // First try ASAP to sync. If fails try once every 60 seconds based on chip id
-  uint8_t offset = (TasmotaGlobal.uptime < 30) ? RtcTime.second + ntp_run_time : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
+  uint8_t offset = (uptime_seconds_nonreset < 30) ? RtcTime.second + ntp_run_time : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
 
   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
-       TasmotaGlobal.ntp_force_sync ) ) {                                          // Forced sync
+       ntp_force_sync ) ) {                                          // Forced sync
 
-    TasmotaGlobal.ntp_force_sync = false;
+    ntp_force_sync = false;
 
-    AddLog(LOG_LEVEL_INFO, PSTR("NTP: Sync time..."));
+    ALOG_INF(PSTR("NTP: Sync time..."));
 
     ntp_run_time = millis();
     uint64_t ntp_nanos = WifiGetNtp();
     uint32_t ntp_time = ntp_nanos / 1000000000;
     ntp_run_time = (millis() - ntp_run_time) / 1000;
 
-    AddLog(LOG_LEVEL_INFO, PSTR("NTP: Runtime %d"), ntp_run_time);
+    ALOG_INF(PSTR("NTP: Runtime %d"), ntp_run_time);
 
     if (ntp_run_time < 5) { ntp_run_time = 0; }  // DNS timeout is around 10s
 
-    ALOG_INF(PSTR("ntp_time %d"), ntp_time);
-    ALOG_INF(PSTR("START_VALID_TIME %d"), START_VALID_TIME);
-
-    if (ntp_time > START_VALID_TIME) {
-    ALOG_INF(PSTR("ntp_time > START_VALID_TIME %d"), START_VALID_TIME);
+    if (ntp_time > START_VALID_TIME) 
+    {
       Rtc.utc_time = ntp_time;
       Rtc.nanos = ntp_nanos % 1000000000;
       ntp_sync_minute = 60;             // Sync so block further requests
       RtcSync("NTP");
-    } else {
+    } 
+    else 
+    {
       ntp_sync_minute++;                // Try again in next minute
     }
+    
   }
 }
 
@@ -807,7 +737,7 @@ uint64_t mTime::WifiGetNtp(void)
 {
   static uint8_t ntp_server_id = 0;
 
- AddLog(LOG_LEVEL_INFO, PSTR("NTP: Start NTP Sync %d ..."), ntp_server_id);
+ ALOG_INF(PSTR("NTP: Start NTP Sync %d ..."), ntp_server_id);
 
   IPAddress time_server_ip;
 
@@ -826,7 +756,7 @@ uint64_t mTime::WifiGetNtp(void)
   }
   if (!pCONT_wif->WifiHostByName(ntp_server, time_server_ip)) {
     ntp_server_id++;
-    AddLog(LOG_LEVEL_DEBUG, PSTR("NTP: Unable to resolve '%s'"), ntp_server);
+    ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
     return 0;
   }
   
@@ -884,7 +814,7 @@ uint64_t mTime::WifiGetNtp(void)
       if ((packet_buffer[0] & 0b11000000) == 0b11000000) {
         // Leap-Indicator: unknown (clock unsynchronized)
         // See: https://github.com/letscontrolit/ESPEasy/issues/2886#issuecomment-586656384
-        AddLog(LOG_LEVEL_INFO, PSTR("NTP: IP %_I unsynced"), (uint32_t)time_server_ip);
+        ALOG_INF(PSTR("NTP: IP %_I unsynced"), (uint32_t)time_server_ip);
         ntp_server_id++;                            // Next server next time
         return 0;
       }
@@ -909,34 +839,36 @@ uint64_t mTime::WifiGetNtp(void)
     delay(10);
   }
   // Timeout.
-  AddLog(LOG_LEVEL_INFO, PSTR("NTP: No reply from %_I"), (uint32_t)time_server_ip);
+  ALOG_INF(PSTR("NTP: No reply from %_I"), (uint32_t)time_server_ip);
   udp.stop();
   ntp_server_id++;                                  // Next server next time
   return 0;
 }
 
 
-
-
 /**
  * Breaking time to return parts of time
  * */
-uint8_t mTime::hour(uint32_t time){
+uint8_t mTime::hour(uint32_t time)
+{
   datetime_t time_temp;
   BreakTime(time, time_temp);
   return time_temp.hour;
 }
-uint8_t mTime::minute(uint32_t time){
+uint8_t mTime::minute(uint32_t time)
+{
   datetime_t time_temp;
   BreakTime(time, time_temp);
   return time_temp.minute;
 }
-uint8_t mTime::second(uint32_t time){
+uint8_t mTime::second(uint32_t time)
+{
   datetime_t time_temp;
   BreakTime(time, time_temp);
   return time_temp.second;
 }
-int mTime::hourFormat12(time_t time) { // the hour for the given time in 12 hour format
+int mTime::hourFormat12(time_t time) 
+{ // the hour for the given time in 12 hour format
   // refreshCache(t);
   datetime_t time_temp;
   BreakTime(time, time_temp);
@@ -948,13 +880,814 @@ int mTime::hourFormat12(time_t time) { // the hour for the given time in 12 hour
     return time_temp.hour ;
 }
 
+void mTime::parse_JSONCommand(JsonParserObject obj){}
+
+// Time elapsed function that updates the time when true
+bool mTime::TimeReached(uint32_t* tSaved, uint32_t ElapsedTime){
+
+  unsigned long long elapsed = millis()-*tSaved;
+
+  if(
+    llabs(elapsed)>=ElapsedTime
+  ){ *tSaved=millis();
+    return true;
+  }
+  return false;
+}
+
+
+bool mTime::TimeReached(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime){
+  if(
+    (ABS_FUNCTION(millis()-tSaved->millis)>=ElapsedTime)
+    ||(tSaved->run == true)    
+    ){ 
+      tSaved->millis=millis();
+      tSaved->run = false;
+    return true;
+  }
+  return false;
+}
+
+
+bool mTime::TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime){
+  if(
+    (ABS_FUNCTION(millis()-tSaved->millis)>=ElapsedTime)
+    ||(tSaved->run == true)    
+    ){ 
+      //tSaved->millis=millis();
+      tSaved->run = false;
+    return true;
+  }
+  return false;
+}
+
+
+// Time elapsed function that updates the time when true
+bool mTime::TimeReachedNonReset(uint32_t* tSaved, uint32_t ElapsedTime){
+  if(ABS_FUNCTION(millis()-*tSaved)>=ElapsedTime){
+    return true;
+  }
+  return false;
+}
+
+
+// Time elapsed function that updates the time when true
+uint32_t mTime::MillisElapsed(uint32_t* tSaved){
+  return labs(millis()-*tSaved);
+}
+
+/**
+ * @brief Get the millis from saved millis count to now
+ * */
+uint32_t mTime::MillisElapsed(uint32_t tSaved)
+{
+  // uint64_t time = millis()-tSaved;
+  if(millis()<=tSaved)
+    return 0;
+  return labs(millis()-tSaved);
+}
+
+
+// Time elapsed function that updates the time when true
+// WARNING: doesnt allow for wrap around
+bool mTime::MillisReached(uint32_t* tTarget){
+  if(millis()>*tTarget){
+    return true;
+  }
+  return false;
+}
 
 
 
 
+#ifdef USE_SUNRISE
+/*********************************************************************************************\
+ * Sunrise and sunset (+13k code)
+ *
+ * https://forum.arduino.cc/index.php?topic=218280.0
+ * Source: C-Programm von http://lexikon.astronomie.info/equation_of_time/neu.html
+ *         Rewrite for Arduino by 'jurs' for German Arduino forum
+\*********************************************************************************************/
+
+const float pi2 = TWO_PI;
+const float pi = PI;
+const float RAD = DEG_TO_RAD;
+
+// Compute the Julian date from the Calendar date, using only unsigned ints for code compactness
+// Warning this formula works only from 2000 to 2099, after 2100 we get 1 day off per century.
+// In astronomy, a Julian year (symbol: a) is a unit of measurement of time defined as exactly 365.25 days of 86400 SI seconds each
+uint32_t mTime::JulianDate(const datetime_t &now) {
+  // https://en.wikipedia.org/wiki/Julian_day
+
+  uint32_t Year = now.year;             // Year ex:2020
+  uint32_t Month = now.month;            // 1..12
+  uint32_t Day = now.day_of_week;     // 1..31
+  uint32_t Julian;                          // Julian day number
+
+  if (Month <= 2) {
+    Month += 12;
+    Year -= 1;
+  }
+  // Warning, this formula works only for the 20th century, afterwards be are off by 1 day - which does not impact Sunrise much
+  // Julian = (1461 * Year + 6884472) / 4 + (153 * Month - 457) / 5 + Day -1 -13;
+  Julian = (1461 * Year + 6884416) / 4 + (153 * Month - 457) / 5 + Day;   // -1 -13 included in 6884472 - 14*4 = 6884416
+  return Julian;
+}
+
+// Force value in the 0..pi2 range
+float mTime::InPi(float x)
+{
+  return pCONT_sup->ModulusRangef(x, 0.0f, pi2);
+}
+
+// Time formula
+// Tdays is the number of days since Jan 1 2000, and replaces T as the Tropical Century. T = Tdays / 36525.0
+float mTime::TimeFormula(float *declination_of_sun, uint32_t Tdays) {
+  float RA_Mean = 18.71506921f + (2400.0513369f / 36525.0f) * Tdays;    // we keep only first order value as T is between 0.20 and 0.30
+  float M = InPi( (pi2 * 0.993133f) + (pi2 * 99.997361f / 36525.0f) * Tdays);
+  float L = InPi( (pi2 * 0.7859453f) + M + (6893.0f * sinf(M) + 72.0f * sinf(M+M) + (6191.2f / 36525.0f) * Tdays) * (pi2 / 1296.0e3f));
+
+  float cos_eps = 0.91750f;     // precompute cos(eps)
+  float sin_eps = 0.39773f;     // precompute sin(eps)
+
+  float RA = atanf(tanf(L) * cos_eps);
+  if (RA < 0.0f) RA += pi;
+  if (L > pi) RA += pi;
+  RA = RA * (24.0f/pi2);
+  *declination_of_sun = asinf(sin_eps * sinf(L));
+  RA_Mean = pCONT_sup->ModulusRangef(RA_Mean, 0.0f, 24.0f);
+  float dRA = pCONT_sup->ModulusRangef(RA_Mean - RA, -12.0f, 12.0f);
+  dRA = dRA * 1.0027379f;
+  return dRA;
+}
+
+void mTime::DuskTillDawn(uint8_t *hour_up,uint8_t *minute_up, uint8_t *hour_down, uint8_t *minute_down)
+{
+  const uint32_t JD2000 = 2451545;
+  uint32_t JD = JulianDate(RtcTime);
+  uint32_t Tdays = JD - JD2000;           // number of days since Jan 1 2000 (n)
+
+  const float h = SUNRISE_DAWN_ANGLE * RAD;
+  const float sin_h = sinf(h);    // let GCC pre-compute the sin() at compile time // \phi  is the north latitude of the observer (north is positive, south is negative) on the Earth.
+
+  float lat = pCONT_set->Settings.sensors.latitude / (1000000.0f / RAD); // geographische Breite
+  float lon = ((float) pCONT_set->Settings.sensors.longitude)/1000000;
+  
+  /**
+   * The Earth rotates at an angular velocity of 15°/hour. 
+   * Therefore, the expression {\displaystyle \omega _{\circ }\times {\frac {\mathrm {15} ^{\circ }}{hour}}}{\displaystyle \omega _{\circ }\times {\frac {\mathrm {15} ^{\circ }}{hour}}} 
+   * gives the interval of time before and after local solar noon that sunrise or sunset will occur.
+   * https://en.wikipedia.org/wiki/Sunrise_equation
+   * */
+
+  float timezone = ((float)Rtc.time_timezone) / 60;
+
+  float declination_of_sun;
+  // https://en.wikipedia.org/wiki/Equation_of_time ie. difference between "calender time" and "true sun position time"
+  float equation_of_time = TimeFormula(&declination_of_sun, Tdays);  //declination_of_sun = \delta  is the declination of the sun.
+  // This is the equation from above with corrections for atmospherical refraction and solar disc diameter.
+  float time_difference = acosf((sin_h - sinf(lat)*sinf(declination_of_sun)) / (cosf(lat)*cosf(declination_of_sun))) * (12.0f / pi); //hour angle //ωo is the hour angle from the observer's zenith;
+  
+  //local time = midday, downfall = sun transition
+  float local_time = 12.0f - time_difference - equation_of_time; //12 hours = transition times (twice a day)
+  float downfall_local_time = 12.0f + time_difference - equation_of_time;
+
+  // Sunrise/Sunset transitions which are related by degrees of rotation
+  float rise_world_time = local_time - lon / 15.0f;
+  float downfall_world_time = downfall_local_time - lon / 15.0f;
+
+  float rise = rise_world_time + timezone + (1/120.0f);         // In hours, with rounding to nearest minute (1/60 * .5)
+  rise = pCONT_sup->ModulusRangef(rise, 0.0f, 24.0f);        // force 0 <= x < 24.0
+  int rise_hours = (int)rise;
+  int rise_minutes = (int)(60.0f * fmodf(rise, 1.0f));
+
+  float downfall = downfall_world_time + timezone;
+  downfall = pCONT_sup->ModulusRangef(downfall, 0.0f, 24.0f);
+  int downfall_hours = (int)downfall;
+  int downfall_minutes = (int)(60.0f * fmodf(downfall, 1.0f));
+
+  // Return transit times
+  *hour_up = rise_hours;
+  *minute_up = rise_minutes;
+  *hour_down = downfall_hours;
+  *minute_down = downfall_minutes;
+}
 
 
-uint8_t mTime::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
+char* mTime::GetSunTimeAtHorizon(uint32_t dawn, char* buffer, uint8_t buflen)
+{
+
+  uint8_t hour[2];
+  uint8_t minute[2];
+
+  DuskTillDawn(&hour[0], &minute[0], &hour[1], &minute[1]);
+  dawn &= 1;
+  snprintf_P(buffer, buflen, PSTR("%02d:%02d"), hour[dawn], minute[dawn]);
+  return buffer;
+
+}
+
+uint16_t mTime::SunMinutes(uint32_t dawn)
+{
+  uint8_t hour[2];
+  uint8_t minute[2];
+
+  DuskTillDawn(&hour[0], &minute[0], &hour[1], &minute[1]);
+  dawn &= 1;
+  return (hour[dawn] *60) + minute[dawn];
+
+}
+
+
+#endif  // USE_SUNRISE
+
+
+#ifdef ENABLE_PHASEOUT_TIME__LEGACY_CODE
+
+uint32_t mTime::GetTimeOfDay_Seconds(void){
+  return 0;//RtcTime.Dseconds;
+}
+
+const char* mTime::ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds_tod, char* buffer, uint8_t buflen)
+{
+  
+  seconds_tod = seconds_tod % (24 * 3600);
+  int hours = seconds_tod / 3600;
+
+  seconds_tod %= 3600;
+  int minutes = seconds_tod / 60;
+
+  seconds_tod %= 60;
+  int seconds = seconds_tod;
+
+  snprintf_P(buffer, buflen, 
+              PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              hours, minutes, seconds
+  );
+  return buffer;
+
+}
+
+
+time_short_t mTime::GetTimeShortNow(){
+
+  time_short_t now;
+
+  now.day_of_week = RtcTime.day_of_week;
+  now.hour = RtcTime.hour;
+  now.minute = RtcTime.minute;
+  now.second = RtcTime.second;
+
+  return now;
+
+}
+
+uint32_t mTime::GetTimeShortNowU32(){
+
+  // time_short_t now;
+
+  // now.day_of_week = RtcTime.day_of_week;
+  // now.hour = RtcTime.hour;
+  // now.minute = RtcTime.minute;
+  // now.second = RtcTime.second;
+
+  uint32_t now = (RtcTime.day_of_week<<24) | (RtcTime.hour<<16) | (RtcTime.minute<<8) | (RtcTime.second);
+  // uint32_t now2 = reinterpret_cast<uint32_t>(now);
+
+  return now;
+
+}
+
+const char* mTime::ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8_t buflen)
+{
+  
+  snprintf_P(buffer, buflen, 
+              PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              time->hour, time->minute, time->second
+  );
+  return buffer;
+}
+
+// const char* mTime::ConvertShortTimetoCtr(time_short_t time, char* buffer, uint8_t buflen)
+// {
+  
+//   snprintf_P(buffer, buflen, 
+//               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+//               time.hour, time.minute, time.second
+//   );
+//   return buffer;
+// }
+
+
+
+/**
+ * @brief 
+ * */
+const char* mTime::ConvertU32TimetoCtr(uint32_t* _time, char* buffer, uint8_t buflen, bool flag_include_weekday ) //pointer is not needed!
+{
+  // typedef struct time_short{
+  //   uint8_t day_of_week; // week day [0-7]
+  //   uint8_t hour;   // [0-23]
+  //   uint8_t minute; // [0-59]
+  //   uint8_t second; // [0-59]
+  // }time_short_t;
+
+  uint32_t time = *_time;
+  uint8_t day_of_week   = (uint8_t)((time & 0xFF000000) >> 24);
+  uint8_t hour   = (uint8_t)((time & 0x00FF0000) >> 16);
+  uint8_t minute = (uint8_t)((time & 0x0000FF00) >>  8);
+  uint8_t second = (uint8_t)((time & 0x000000FF)      );
+
+  // time_short_t* time = reinterpret_cast<time_short_t*>(_time);
+  // uint8_t day_of_week = _time
+  if(flag_include_weekday)
+{
+
+
+  snprintf_P(buffer, buflen, 
+              PSTR("D%d" D_DATE_TIME_SEPARATOR "%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              day_of_week, hour, minute, second
+  );
+
+}else
+{
+
+  snprintf_P(buffer, buflen, 
+              PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              hour, minute, second
+  );
+}
+  return buffer;
+}
+
+
+
+// const char* mTime::ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8_t buflen)
+// {
+
+//   // time_short_t* time = reinterpret_cast<time_short_t*>(_time);
+  
+//   snprintf_P(buffer, buflen, 
+//               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+//               time->hour, time->minute, time->second
+//   );
+//   return buffer;
+// }
+
+
+time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
+
+  bool includes_week = false;
+  time_short_t time_s = {255, 255, 255, 255}; //invalid time of 255 max range
+
+  if(strstr(time_ctr, "D")){
+    //wwDHH:MM:SS // 11 bytes
+    includes_week = true;
+    if(
+      (strlen(time_ctr)!=11) && 
+      (time_ctr[2]!='D')
+    ){
+      
+    #ifdef ENABLE_LOG_LEVEL_ERROR
+      AddLog(LOG_LEVEL_TEST, PSTR("Invalid time"));
+    #endif // ENABLE_LOG_LEVEL_INFO
+      return time_s;
+    }
+  }else{
+    //HH:MM:SS // 8 bytes
+    if(
+      (strlen(time_ctr)!=8)
+    ){
+      return time_s;
+    }
+    includes_week = false;
+    #ifdef ENABLE_LOG_LEVEL_ERROR
+    AddLog(LOG_LEVEL_TEST, PSTR("Parse_Time_TimeShortCtr_To_TimeShort NOT D found"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
+  }
+
+  if(includes_week){
+    time_s.day_of_week   = (uint8_t) strtol( &time_ctr[0], NULL, 10);  //days 1-7 so 0 means none set
+    time_s.hour   = (uint8_t) strtol( &time_ctr[3], NULL, 10);
+    time_s.minute = (uint8_t) strtol( &time_ctr[6], NULL, 10);
+    time_s.second = (uint8_t) strtol( &time_ctr[9], NULL, 10);
+  }else{
+    time_s.day_of_week   = 0;
+    time_s.hour   = (uint8_t) strtol( &time_ctr[0], NULL, 10);
+    time_s.minute = (uint8_t) strtol( &time_ctr[3], NULL, 10);
+    time_s.second = (uint8_t) strtol( &time_ctr[6], NULL, 10);
+  }
+
+  return time_s;
+
+}
+
+
+uint32_t mTime::ConvertHHMMSStoSOD(uint8_t hh, uint8_t mm, uint8_t ss){
+  return ((hh*3600)+(mm*60)+(ss));
+}
+
+
+uint8_t mTime::CheckBetweenSOD(uint32_t start, uint32_t end){
+
+  if((RtcTime.Dseconds > start)&&(RtcTime.Dseconds < end)){
+    return 1;
+  }
+
+  return 0;
+  //return ((start > RtcTime.SOD)&&(RtcTime.SOD < end)) ? true : false;
+}
+
+
+//PROBABLY breaks on week rollover!! Needs fixed
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
+uint8_t mTime::CheckBetween_Week_DateTimes(datetime_t* start, datetime_t* end){
+
+  uint32_t start_sow = (start->day_of_week*SEC2DAY)+(start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
+  uint32_t end_sow = (end->day_of_week*SEC2DAY)+(end->hour*SEC2HOUR)+(end->minute*SEC2MIN)+(end->second);
+
+  int32_t time_until_start = start_sow-RtcTime.Wseconds;
+  int32_t time_until_end = end_sow-RtcTime.Wseconds;
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+  ALOG_DBG(PSTR(D_LOG_TIME "CheckBetween_Week_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+    start->hour,start->minute,start->second,time_until_start,
+    RtcTime.Dseconds,
+    time_until_end,end->hour,end->minute,end->second
+  ); 
+    #endif// ENABLE_LOG_LEVEL_INFO
+
+  if((start_sow < RtcTime.Wseconds)&&(RtcTime.Wseconds < end_sow)){
+    return 1;
+  }
+  return 0;
+
+}
+
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
+uint8_t mTime::CheckBetween_Day_DateTimes(datetime_t* start, datetime_t* end){
+
+  uint32_t start_sod = (start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
+  uint32_t end_sod =   (end->hour*SEC2HOUR)+(end->minute*SEC2MIN)+(end->second);
+
+  int32_t time_until_start = RtcTime.Dseconds-start_sod; 
+  int32_t time_until_end = end_sod-RtcTime.Dseconds;
+
+  //need to add check if start>end, then add 24 hours
+
+  // #ifdef SERIAL_DEBUG_HIGH_LEVEL
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    ALOG_DBG(PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+      start->hour,start->minute,start->second,time_until_start,
+      RtcTime.Dseconds,
+      time_until_end,end->hour,end->minute,end->second
+    ); 
+    
+    ALOG_DBG(PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d<%02d (%02d) | %02d<%02d (%02d)"),
+      start_sod,RtcTime.Dseconds,(start_sod < RtcTime.Dseconds?1:0),
+      RtcTime.Dseconds,end_sod,(RtcTime.Dseconds < end_sod)?1:0
+    );
+    #endif// ENABLE_LOG_LEVEL_INFO
+    
+   if((start_sod < RtcTime.Dseconds)&&(RtcTime.Dseconds < end_sod)){ //now>start AND now<END
+     return 1;
+   }
+  return 0;
+
+}
+
+
+bool mTime::IsShortTimeWithinRange(time_short start, time_short end)
+{
+
+  uint32_t start_sod = (start.hour*SEC2HOUR)+(start.minute*SEC2MIN)+(start.second);
+  uint32_t end_sod =   (end.hour*SEC2HOUR)+(end.minute*SEC2MIN)+(end.second);
+
+  uint32_t time_of_day_secs_now = RtcTime.Dseconds;
+  int32_t time_until_start = time_of_day_secs_now-start_sod; 
+  int32_t time_until_end = end_sod-time_of_day_secs_now;
+
+  bool flag_24hrs_added = false;
+  bool flag_time_period_over_midnight = false;
+  bool flag_within_time_window = false;
+
+  // if times are equal, return early as false
+  if(start_sod == end_sod) return false;
+
+  /**
+   * Check if condition has time going over midnight into next day
+   * */
+  if(end_sod < start_sod)
+  {
+    flag_time_period_over_midnight = true;
+  }
+  
+  // ALOG_INF(PSTR(D_LOG_TIME "end<start, flag_time_period_over_midnight = %d"), flag_time_period_over_midnight);
+
+  if(flag_time_period_over_midnight)
+  {
+    /**
+     * Check if current time is within current, or next day (after midnight)
+     * If tod < end, it is already inside time window
+     * */
+    if(time_of_day_secs_now < end_sod)
+    {
+      flag_within_time_window = true;
+    }
+    /**
+     * If not inside next day window, lets check previous day (ie from start to midnight)
+     * */
+    else
+    if(time_of_day_secs_now > start_sod)
+    {
+      flag_within_time_window = true;
+    }
+  }
+  /**
+   * time window spans same day ie start before end, on same day
+   * */
+  else
+  {
+
+    if((start_sod < time_of_day_secs_now)&&(time_of_day_secs_now < end_sod)){ //now>start AND now<END
+      flag_within_time_window = true;
+    }else{
+      flag_within_time_window = false;
+    }
+
+  }
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  // ALOG_INF(PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+  //   start.hour,start.minute,start.second,time_until_start,
+  //   RtcTime.Dseconds,
+  //   time_until_end,end.hour,end.minute,end.second
+  // );
+  
+  ALOG_INF(PSTR(D_LOG_TIME 
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d %d)"
+    "\n\r\t%02d:%02d:%02d (%d seconds)"
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d) %s %s"),   
+    start.hour,start.minute,start.second, start_sod, time_until_start,
+    RtcTime.hour,RtcTime.minute,RtcTime.second, RtcTime.Dseconds, time_of_day_secs_now,
+    end.hour,end.minute,end.second, end_sod, time_until_end,
+    // flag_24hrs_added?"+24hrs added":"",
+    flag_time_period_over_midnight?"Window Across Midnight":"",
+    flag_within_time_window?"WITHIN":"OUTSIDE"
+  );
+  #endif// ENABLE_LOG_LEVEL_INFO
+
+  return flag_within_time_window;
+
+
+
+
+}
+
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
+int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t* end){
+
+  uint32_t start_sod = (start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
+  uint32_t end_sod =   (end->hour*SEC2HOUR)+(end->minute*SEC2MIN)+(end->second);
+
+  uint32_t time_of_day_secs_now = RtcTime.Dseconds;
+  int32_t time_until_start = time_of_day_secs_now-start_sod; 
+  int32_t time_until_end = end_sod-time_of_day_secs_now;
+
+  bool flag_24hrs_added = false;
+  bool flag_time_period_over_midnight = false;
+  bool flag_within_time_window = false;
+
+  //if times are equal, return early as false
+  if(start_sod == end_sod) return false;
+
+  /**
+   * Check if condition has time going over midnight into next day
+   * */
+  if(end_sod < start_sod)
+  {
+    flag_time_period_over_midnight = true;
+  }
+  
+  // ALOG_INF(PSTR(D_LOG_TIME "end<start, flag_time_period_over_midnight = %d"), flag_time_period_over_midnight);
+
+  if(flag_time_period_over_midnight)
+  {
+    /**
+     * Check if current time is within current, or next day (after midnight)
+     * If tod < end, it is already inside time window
+     * */
+    if(time_of_day_secs_now < end_sod)
+    {
+      flag_within_time_window = true;
+    }
+    /**
+     * If not inside next day window, lets check previous day (ie from start to midnight)
+     * */
+    else
+    if(time_of_day_secs_now > start_sod)
+    {
+      flag_within_time_window = true;
+    }
+  }
+  /**
+   * time window spans same day ie start before end, on same day
+   * */
+  else
+  {
+
+    if((start_sod < time_of_day_secs_now)&&(time_of_day_secs_now < end_sod)){ //now>start AND now<END
+      flag_within_time_window = true;
+    }else{
+      flag_within_time_window = false;
+    }
+
+  }
+
+
+  /**
+   * If end of window is less than start of window, assume its the next day, so add 24hrs
+   * need to add check if start>end, then add 24 hours
+   * */
+  // if(end_sod < start_sod){
+  //   /**
+  //    * TOD now should only be added to "now" if it has went beyond midnight
+  //    * eg 9pm to 3am, 9pm check time should be after, but tod_now is only +24 when after 0am
+  //    * */
+  //   if(time_of_day_secs_now < end_sod){
+  //     time_of_day_secs_now += SECS_PER_DAY; // Also need the time_now needs moved forward into next bracket
+  //     end_sod += SECS_PER_DAY; // bring start to be the next day by adding 24 hours
+  //   }
+
+  //   flag_24hrs_added = true;
+  //   ALOG_INF(PSTR(D_LOG_TIME "end<start, Add 24 hours"));
+  // }
+
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  // ALOG_INF(PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+  //   start->hour,start->minute,start->second,time_until_start,
+  //   RtcTime.Dseconds,
+  //   time_until_end,end->hour,end->minute,end->second
+  // );
+  
+  ALOG_INF(PSTR(D_LOG_TIME 
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d %d)"
+    "\n\r\t%02d:%02d:%02d (%d seconds)"
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d) %s %s"),   
+    start->hour,start->minute,start->second, start_sod, time_until_start,
+    RtcTime.hour,RtcTime.minute,RtcTime.second, RtcTime.Dseconds, time_of_day_secs_now,
+    end->hour,end->minute,end->second, end_sod, time_until_end,
+    // flag_24hrs_added?"+24hrs added":"",
+    flag_time_period_over_midnight?"Window Across Midnight":"",
+    flag_within_time_window?"WITHIN":"OUTSIDE"
+  );
+  #endif// ENABLE_LOG_LEVEL_INFO
+
+  return flag_within_time_window;
+  
+}
+
+
+
+// New datetime checker for week only (day_of_week,hours,minutes,seconds)
+uint8_t mTime::CheckDateTimeWeekIsNow(datetime_t* dt, uint8_t window){ //window default of 0
+
+  uint16_t dt_sow = (dt->day_of_week*SEC2DAY)+(dt->hour*SEC2HOUR)+(dt->minute*SEC2MIN)+(dt->second);
+
+  if(
+    (dt_sow == RtcTime.Wseconds)||
+    (((dt_sow-window) > RtcTime.Wseconds))&&(((dt_sow+window) < RtcTime.Wseconds))
+    ){
+    return 1;
+  }
+  return 0;
+
+}
+
+
+// keep method, but add another
+uint8_t mTime::CheckBetweenDateTimes(datetime_t* start, datetime_t* end){
+
+  // uint32_t start_soy = (GetDayOfYear(start->day_of_month,start->month)*86400)+(start->hour*3600)+(start->minute*60)+(start->second);
+  // uint32_t end_soy = (GetDayOfYear(end->day_of_month,end->month)*86400)+(end->hour*3600)+(end->minute*60)+(end->second);
+
+  //  if((RtcTime.Yseconds > start_soy)&&(RtcTime.Yseconds < end_soy)){
+  //    return 1;
+  //  }
+
+  return 0;
+  //return ((start > RtcTime.SOD)&&(RtcTime.SOD < end)) ? true : false;
+}
+
+
+// now > future
+datetime_t mTime::GetDifferenceInDateTimes(datetime_t* dt1, datetime_t* dt2){
+
+  datetime_t datetime_new;
+  memset(&datetime_new,0,sizeof(datetime_new));
+
+  //check if new dt1 > dt2 THEN add day
+  uint32_t dt1_sow = (dt1->day_of_week*SEC2DAY)+(dt1->hour*SEC2HOUR)+(dt1->minute*SEC2MIN)+(dt1->second);
+  uint32_t dt2_sow = (dt2->day_of_week*SEC2DAY)+(dt2->hour*SEC2HOUR)+(dt2->minute*SEC2MIN)+(dt2->second);
+  int32_t diff_sow = dt2_sow - dt1_sow;
+
+    // pCONT->mso->MessagePrint("dt1_sow");pCONT->mso->MessagePrintln(dt1_sow);
+    //   pCONT->mso->MessagePrint("dt2_sow");pCONT->mso->MessagePrintln(dt2_sow);
+    //   pCONT->mso->MessagePrint("Bdiff_sow");pCONT->mso->MessagePrintln(diff_sow);
+
+  if(diff_sow<0){ //tomorrow = future < now //if negative, add day
+      //pCONT->mso->MessagePrintln("dt1_sow > dt2_sow");
+    diff_sow += SEC2DAY; //add day
+  }
+
+  // pCONT->mso->MessagePrint("Adiff_sow");
+  // pCONT->mso->MessagePrintln(diff_sow);
+
+  // break new seconds into datetime
+  AddSecondsToDateTime(&datetime_new,(uint32_t)diff_sow);
+
+  // datetime_new.day_of_month = abs(dt1->day_of_month-dt2->day_of_month);
+  // datetime_new.day_of_year = abs(dt1->day_of_year-dt2->day_of_year);
+  // datetime_new.month = abs(dt1->month-dt2->month);
+  // datetime_new.year = abs(dt1->year-dt2->year);
+  // datetime_new.hour = abs(dt1->hour-dt2->hour);
+  // datetime_new.second = abs(dt1->second-dt2->second);
+  // datetime_new.minute = abs(dt1->minute-dt2->minute);
+  // //datetime_new.week = abs(dt1->week-dt2->week);
+  // datetime_new.day_of_week = abs(dt1->day_of_week-dt2->day_of_week);
+
+  // pCONT->mso->MessagePrint("dt1->day_of_week");pCONT->mso->MessagePrintln(dt1->day_of_week);
+  // pCONT->mso->MessagePrint("dt2->day_of_week");pCONT->mso->MessagePrintln(dt2->day_of_week);
+  // pCONT->mso->MessagePrint("datetime_new.day_of_week");pCONT->mso->MessagePrintln(datetime_new.day_of_week);
+  //
+  // if(start_sow>end_sow){ //tomorrow
+  //   pCONT->mso->MessagePrintln("  if(start_sow>end_sow){ //tomorrow");
+  //   AddSecondsToDateTime(&datetime_new,SEC2DAY); //add day
+  // }
+
+  return datetime_new;
+
+}
+
+
+uint8_t mTime::AddSecondsToDateTime(datetime_t* dt_t, uint32_t sec){
+
+  uint8_t years = sec / SEC2YR;
+  if (years){
+    sec = sec % SEC2YR;
+    dt_t->year+=years;
+  }
+
+  uint8_t months = sec / SEC2MONTH;
+  if (months){
+    sec = sec % SEC2MONTH;
+    dt_t->month+=months;
+  }
+
+  uint8_t weeks = sec / SEC2WEEK;
+  if (weeks){
+    sec = sec % SEC2WEEK;
+    dt_t->week+=weeks;
+  }
+
+  uint8_t days = sec / SEC2DAY;
+  if (days){
+    sec = sec % SEC2DAY;
+    dt_t->day_of_week+=days;
+  }
+
+  uint8_t hours = sec / SEC2HOUR;
+  if (hours){
+    sec = sec % SEC2HOUR;
+    dt_t->hour+=hours;
+  }
+
+  uint8_t minutes = sec / SEC2MIN;
+  if (minutes){
+    sec = sec % SEC2MIN;
+    dt_t->minute+=minutes;
+  }
+
+  int seconds = sec; //seconds should now be less than 60 because of minutes
+  dt_t->second += seconds;
+
+  return 0;
+}
+
+
+uint32_t mTime::GetSecondsOfDayFromDateTime(datetime_t* dt_t){
+  return ((dt_t->hour*SEC2HOUR)+(dt_t->minute*SEC2MIN)+(dt_t->second));
+}
+
+#endif // ENABLE_PHASEOUT_TIME__LEGACY_CODE
+
+
+#ifdef ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
+
+uint8_t mTime::ConstructJSON_Settings(uint8_t json_method, bool json_appending)
+{
 
   JBI->Start();
 
@@ -965,7 +1698,8 @@ uint8_t mTime::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 }
 
 
-uint8_t mTime::ConstructJSON_State(uint8_t json_level, bool json_appending){
+uint8_t mTime::ConstructJSON_State(uint8_t json_level, bool json_appending)
+{
 
   char buffer[100];
 
@@ -1080,30 +1814,9 @@ void mTime::MQTTHandler_Sender()
 
 #endif // USE_MODULE_NETWORK_MQTT
 
+#endif // ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif // USE_MODULE_CORE_TIME
+// #endif // USE_MODULE_CORE_TIME
 
 

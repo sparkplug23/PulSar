@@ -397,6 +397,27 @@ typedef union {
   };
 } WebCamCfg2;
 
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+  uint16_t data;                           // Allow bit manipulation
+  struct {
+    uint16_t system_init : 1;              // Changing layout here needs adjustments in xdrv_10_rules.ino too
+    uint16_t system_boot : 1;
+    uint16_t time_init : 1;
+    uint16_t time_set : 1;
+    uint16_t mqtt_connected : 1;
+    uint16_t mqtt_disconnected : 1;
+    uint16_t wifi_connected : 1;
+    uint16_t wifi_disconnected : 1;
+    uint16_t eth_connected : 1;
+    uint16_t eth_disconnected : 1;
+    uint16_t http_init : 1;
+    uint16_t shutter_moved : 1;
+    uint16_t shutter_moving : 1;
+    uint16_t spare13 : 1;
+    uint16_t spare14 : 1;
+    uint16_t spare15 : 1;
+  };
+} RulesBitfield;
 
 struct LoggingSettings{
   uint8_t       serial_level;           // 09E
@@ -425,6 +446,7 @@ struct SETTINGS {
   SystemName      system_name;
   char room_hint[50];
   SysBitfield_System   flag_system;                      // 010
+  RulesBitfield rules_flag;                 // Rule state flags (16 bits)
   int16_t       save_data;                 // 014
   myio          module_pins;                     // 484     
   uint8_t       baudrate;                  // 09D  // saved as (/300) value. ie 9600/300 => 32, 115200=>384?? I want to change this to full uint32_t for higher speed bauds

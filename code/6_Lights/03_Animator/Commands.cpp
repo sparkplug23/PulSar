@@ -201,7 +201,17 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   { 
     if(jtok.isArray())
     {
-      uint8_t array[16];
+/*
+      custom_palette 
+      going back, I may want to use my basic custom palette direct encoding
+      struct{
+        encoding  (rgb,rgbcct,crgb16palette bytes)
+        data
+        length
+      }
+
+
+  */    uint8_t array[16];
       uint8_t arrlen = 0;
       
       SEGMENT_I(segment_index).palette_container->mapping_values.clear(); // reset old map

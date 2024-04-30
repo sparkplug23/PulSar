@@ -78,7 +78,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
       Save_Module();
     break;
     case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
-      Load_Module();
+      // Load_Module();
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
     #endif // USE_MODULE_DRIVERS_FILESYSTEM
@@ -913,14 +913,14 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["HVACZone"].getObject()["SetSensor"])
   { 
     
-    ALOG_DBM(PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
+    // ALOG_HGL(PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"), arr.getStr()); 
   
     JsonParserArray array = jtok;
     uint8_t index = 0;
     for(auto& arr:array)
     {
 
-      AddLog(LOG_LEVEL_DEBUG, PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
+      ALOG_HGL( PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "SetSensor device_name_ctr1 = %s"),arr.getStr()); 
 
       int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr(),GetModuleUniqueID());
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);

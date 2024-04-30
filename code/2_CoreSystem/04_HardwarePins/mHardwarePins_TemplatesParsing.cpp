@@ -19,6 +19,8 @@ bool mHardwarePins::ReadModuleTemplateFromProgmem(){
     char buffer[progmem_size];
     // Read into local
     memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
+    
+    pCONT_set->runtime.template_loading.status.module = mSettings::TemplateSource::HEADER_TEMPLATE;
 
     #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -83,7 +85,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
    */
   if((rootObj[PM_JSON_GPIOC])||(rootObj[D_JSON_GPIO_FUNCTION]))
   {
-    pCONT_set->runtime.boot_status.module_template_parse_success = true;
+    // pCONT_set->runtime.boot_status.module_template_parse_success = true;
     for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
       pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
     }

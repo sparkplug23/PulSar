@@ -121,7 +121,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
   char buffer_f[100] = {0};
   char buffer_n[100] = {0};
   
-  snprintf(buffer, sizeof(buffer), "%s", pCONT_time->RtcTime.hhmmss_ctr);
+  snprintf(buffer, sizeof(buffer), "%s", pCONT_time->GetTime().c_str() );
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
 
   // #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306

@@ -106,6 +106,8 @@ void mTelemetry::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Health;
   mqtthandler_list.push_back(ptr);
+
+  #ifndef FIRMWARE_MINIMAL2
   
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = millis();
@@ -190,19 +192,7 @@ void mTelemetry::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_TIME_CTR;
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Time;
   mqtthandler_list.push_back(ptr);
-  
-  ptr = &mqtthandler_devices;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_HOUR; 
-  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEVICES_CTR;
-  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Devices;
-  mqtthandler_list.push_back(ptr);
-  
+    
   ptr = &mqtthandler_reboot;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
@@ -228,6 +218,19 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+  
+  ptr = &mqtthandler_devices;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = SEC_IN_HOUR; 
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_DEVICES_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Devices;
+  mqtthandler_list.push_back(ptr);
+
   ptr = &mqtthandler_debug_pins;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
@@ -318,6 +321,8 @@ void mTelemetry::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Minimal;
   mqtthandler_list.push_back(ptr);
+
+  #endif // FIRMWARE_MINIMAL2
 
 } //end "MQTTHandler_Init"
 

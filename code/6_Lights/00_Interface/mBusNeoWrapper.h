@@ -639,7 +639,6 @@ class PolyBus
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
     #ifdef ESP8266
-    error
       #ifdef ENABLE_NEOPIXELBUS_8266_U0_NEO_TYPES
       case BUSTYPE__8266_U0_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_U0_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
       #endif

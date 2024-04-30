@@ -452,16 +452,16 @@ bool mRelays::IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id){
   //if range_id == 255, then check all, else check only it
 
   //check all, one for now
-  for(int range_id=0;range_id<D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT;range_id++){
-    if(
-      pCONT_time->CheckBetween_Day_DateTimesShort(
-        &rt.relay_status[relay_id].enabled_ranges[range_id].ontime,
-        &rt.relay_status[relay_id].enabled_ranges[range_id].offtime
-      )
-    ){
+  // for(int range_id=0;range_id<D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT;range_id++){
+  //   if(
+  //     pCONT_time->CheckBetween_Day_DateTimesShort(
+  //       &rt.relay_status[relay_id].enabled_ranges[range_id].ontime,
+  //       &rt.relay_status[relay_id].enabled_ranges[range_id].offtime
+  //     )
+  //   ){
       isenabled = true;
-    }
-  }
+  //   }
+  // }
 
 
   return isenabled;
@@ -1088,21 +1088,21 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
       index = jtok.getInt();    
     }
     
-    if(jtok = jobj[PM_JSON_ONTIME]){
-      ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
-      rt.relay_status[relay_id].enabled_ranges[index].ontime = ontime;
-    }
-    if(jtok = jobj[PM_JSON_OFFTIME]){
-      offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
-      rt.relay_status[relay_id].enabled_ranges[index].offtime = offtime;
-    }
-    if(jtok = jobj[PM_JSON_ENABLED]){
-      rt.relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
-    }
+    // if(jtok = jobj[PM_JSON_ONTIME]){
+    //   ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
+    //   rt.relay_status[relay_id].enabled_ranges[index].ontime = ontime;
+    // }
+    // if(jtok = jobj[PM_JSON_OFFTIME]){
+    //   offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
+    //   rt.relay_status[relay_id].enabled_ranges[index].offtime = offtime;
+    // }
+    // if(jtok = jobj[PM_JSON_ENABLED]){
+    //   rt.relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
+    // }
 
 
-    pCONT_time->PrintDateTime(ontime);
-    pCONT_time->PrintDateTime(offtime);
+    // pCONT_time->PrintDateTime(ontime);
+    // pCONT_time->PrintDateTime(offtime);
 
 
   // }
@@ -1378,13 +1378,13 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
       for(int ii=0;ii<D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT;ii++){
         JBI->Level_Start_P("Range%d",ii);
 
-          time_short_t t = rt.relay_status[device_id].enabled_ranges[ii].ontime;
-          snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-          JBI->Add_P(PM_JSON_ONTIME, buffer);
+          // time_short_t t = rt.relay_status[device_id].enabled_ranges[ii].ontime;
+          // snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
+          // JBI->Add_P(PM_JSON_ONTIME, buffer);
 
-          t = rt.relay_status[device_id].enabled_ranges[ii].offtime;
-          snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-          JBI->Add_P(PM_JSON_OFFTIME, buffer);
+          // t = rt.relay_status[device_id].enabled_ranges[ii].offtime;
+          // snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
+          // JBI->Add_P(PM_JSON_OFFTIME, buffer);
 
           // Add if relay is within window etc here
           JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
@@ -1434,27 +1434,27 @@ uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level, bool json_appending
       
       JBI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
         
-        JBI->Object_Start("scheduled");
-          JBI->Add("enabled", rt.relay_status[device_id].scheduled[0].enabled);
-          JBI->Array_Start("ontime");
-            JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].scheduled[0].ontime, buffer, sizeof(buffer)));
-          JBI->Array_End();
-          JBI->Array_Start("offtime");
-            JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].scheduled[0].offtime, buffer, sizeof(buffer)));
-          JBI->Array_End();
-          JBI->Add("days", rt.relay_status[device_id].scheduled[0].days_of_week_enabled_bitpacked);
-        JBI->Object_End();
+        // JBI->Object_Start("scheduled");
+        //   JBI->Add("enabled", rt.relay_status[device_id].scheduled[0].enabled);
+        //   JBI->Array_Start("ontime");
+        //     JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].scheduled[0].ontime, buffer, sizeof(buffer)));
+        //   JBI->Array_End();
+        //   JBI->Array_Start("offtime");
+        //     JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].scheduled[0].offtime, buffer, sizeof(buffer)));
+        //   JBI->Array_End();
+        //   JBI->Add("days", rt.relay_status[device_id].scheduled[0].days_of_week_enabled_bitpacked);
+        // JBI->Object_End();
 
-        JBI->Object_Start("enabled_ranges");
-          JBI->Add("enabled", rt.relay_status[device_id].enabled_ranges[0].enabled);
-          JBI->Array_Start("ontime");
-            JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
-          JBI->Array_End();
-          JBI->Array_Start("offtime");
-            JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
-          JBI->Array_End();
-          JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
-        JBI->Object_End();
+        // JBI->Object_Start("enabled_ranges");
+        //   JBI->Add("enabled", rt.relay_status[device_id].enabled_ranges[0].enabled);
+        //   JBI->Array_Start("ontime");
+        //     JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
+        //   JBI->Array_End();
+        //   JBI->Array_Start("offtime");
+        //     JBI->Add(mTime::ConvertShortTimetoCtr(&rt.relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
+        //   JBI->Array_End();
+        //   JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
+        // JBI->Object_End();
 
       JBI->Object_End();
       

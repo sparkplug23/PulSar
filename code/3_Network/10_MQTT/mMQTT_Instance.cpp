@@ -10,7 +10,7 @@ void MQTTConnection::MqttConnected(void)
   cConnectionAttempts = 0; // reset
 
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"), pCONT_sup->GetResetReason().c_str(), pCONT_time->uptime.hhmmss_ctr);
+  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"), pCONT_sup->GetResetReason().c_str(), pCONT_time->GetUptime().c_str() );
   
   #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
     pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, lwt_message_ondisconnect_ctr, true); // onconnect message
@@ -127,7 +127,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
+  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->GetUptime().c_str());
 
   uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
   // #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT

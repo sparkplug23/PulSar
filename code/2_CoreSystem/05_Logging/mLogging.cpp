@@ -90,6 +90,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
      * 
      */
 
+  DEBUG_LINE_HERE
 
   #ifdef DEBUG_FOR_FAULT
     pCONT_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
@@ -123,14 +124,14 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
 
-  // DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE 
 
   va_list arg;
   va_start(arg, formatP);
   vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
   va_end(arg);
 
-  // DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE
 
   //AddLogAddLog(loglevel);
 
@@ -142,32 +143,33 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   memset(mxtime,0,sizeof(mxtime));
   // if time is short, ie debugging, them only show uptime (not RTCTime)
-  if(pCONT_set->Settings.logging.time_isshort){
-    #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
-      // Only show hour
-      if(pCONT_time->uptime.hour<1){
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.minute,pCONT_time->uptime.second);
-      }else{
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-      }
-    #else
-      if(pCONT_time->uptime.hour<1){
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
-          pCONT_time->uptime.minute,pCONT_time->uptime.second
-        );
-      }else{
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
-          pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-      }
-    #endif
+  // if(pCONT_set->Settings.logging.time_isshort){
+  //   #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
+  //     // Only show hour
+  //     if(pCONT_time->uptime.hour<1){
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.minute,pCONT_time->uptime.second);
+  //     }else{
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+  //     }
+  //   #else
+  //     if(pCONT_time->uptime.hour<1){
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
+  //         pCONT_time->uptime.minute,pCONT_time->uptime.second
+  //       );
+  //     }else{
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
+  //         pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+  //     }
+  //   #endif
     
-  }else{
-    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
+  // }else{
+    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %s "),
     // sprintf(mxtime, PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
       pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
-      pCONT_time->uptime.day_of_month,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-  }
+      pCONT_time->GetUptime().c_str());
+  // }
 
+  DEBUG_LINE_HERE
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
   char level_buffer[10];
 

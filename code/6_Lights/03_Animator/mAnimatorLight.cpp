@@ -118,7 +118,7 @@ void mAnimatorLight::Save_Module()
   JBI->Start();
 
   #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
   #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
   uint8_t bus_appended = 0;
@@ -412,7 +412,7 @@ void mAnimatorLight::Init(void)
 
   #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
   char buffer[30];
-  snprintf(serverDescription, sizeof(serverDescription), "%s - %s", pCONT_set->Settings.system_name.friendly, pCONT_time->GetBuildDateAndTime(buffer, sizeof(buffer)));
+  snprintf(serverDescription, sizeof(serverDescription), "%s - %s", pCONT_set->Settings.system_name.friendly, pCONT_time->GetBuildDateAndTime().c_str() );
   #else
   snprintf(serverDescription, sizeof(serverDescription), pCONT_set->Settings.system_name.friendly);
   #endif

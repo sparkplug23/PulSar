@@ -117,8 +117,13 @@ typedef double real64_t;
 
 #define os_delay_us ets_delay_us
 // Serial minimal type to hold the config
+
+#if !defined(SerialConfig)
+
+// typedef int SerialConfig; 
+#endif
+
 typedef int SerConfu8;
-typedef int SerialConfig;
 //#define analogWrite(a, b)
 
 //

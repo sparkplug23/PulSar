@@ -62,6 +62,7 @@
   #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #endif // D_USER_MICHAEL
 

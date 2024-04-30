@@ -246,13 +246,16 @@ void setup(void)
 
   pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;
-  
 
+  DEBUG_LINE_HERE
+  
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
  
   ALOG_DBM(PSTR("AddLog Started"));
+
+  DEBUG_LINE_HERE
 
 /********************************************************************************************
  ** Splash boot reason ***************************************************************************
@@ -276,12 +279,8 @@ void setup(void)
   #else // ESP32
     // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
   #endif // ESP32
+  DEBUG_LINE_HERE
 
-/********************************************************************************************
- ** Internal RTC Time PreInit ***************************************************************
- ********************************************************************************************/
-
-  pCONT_time->RtcPreInit();
 
 /********************************************************************************************
  ** File System : Init *****************************************************************************
@@ -534,7 +533,7 @@ void LoopTasker()
    
   pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
  
-  if(pCONT_time->uptime.seconds_nonreset > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
+  if(pCONT_time->UpTime() > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
  
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
@@ -544,7 +543,7 @@ void LoopTasker()
 
     /**Since this only gets checked every second, we can use the uptime ticking to make sure it runs just once*/
     #ifdef ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
-    if(pCONT_time->uptime.seconds_nonreset==ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS){
+    if(pCONT_time->UpTime()==ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS){
       pCONT->Tasker_Interface(FUNC_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
       pCONT->Tasker_Interface(FUNC_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
       pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT_DELAYED);
@@ -554,24 +553,24 @@ void LoopTasker()
 
     pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
 
-    if((pCONT_time->uptime.seconds_nonreset%60)==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    if((pCONT_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
     
     if(
-      ((pCONT_time->uptime.seconds_nonreset%5)==0)&&
-      (pCONT_time->uptime.seconds_nonreset>20)
+      ((pCONT_time->UpTime()%5)==0)&&
+      (pCONT_time->UpTime()>20)
     ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
 
     if(
-      ((pCONT_time->uptime.seconds_nonreset%300)==0)&&
-      (pCONT_time->uptime.seconds_nonreset>60)
+      ((pCONT_time->UpTime()%300)==0)&&
+      (pCONT_time->UpTime()>60)
     ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
     // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
-    if(pCONT_time->uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
-    if(pCONT_time->uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
-    if(pCONT_time->uptime.seconds_nonreset == 60){   pCONT->Tasker_Interface(FUNC_UPTIME_1_MINUTES); }
-    if(pCONT_time->uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
-    if(pCONT_time->uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+    if(pCONT_time->UpTime() == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
+    if(pCONT_time->UpTime() == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
+    if(pCONT_time->UpTime() == 60){   pCONT->Tasker_Interface(FUNC_UPTIME_1_MINUTES); }
+    if(pCONT_time->UpTime() == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
+    if(pCONT_time->UpTime() == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
 
     // Check for midnight
     if((pCONT_time->RtcTime.hour==0)&&(pCONT_time->RtcTime.minute==0)&&(pCONT_time->RtcTime.second==0)&&(pCONT_time->lastday_run != pCONT_time->RtcTime.day_of_year)){
@@ -579,9 +578,9 @@ void LoopTasker()
       pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
     }
 
-    if(pCONT_time->uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+    if(pCONT_time->UpTime()==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
 
-    if(pCONT_time->uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+    if(pCONT_time->UpTime()==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
       
     pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
 

@@ -826,13 +826,16 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     void EffectAnim__Stepping_Palette();
     #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    void EffectAnim__TimeBased__HourProgress();
+    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     void EffectAnim__Static_Palette_Vintage();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     void EffectAnim__Stepping_Palette_With_Background();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     void EffectAnim__Popping_Decay_Palette_To_Black();
     void EffectAnim__Popping_Decay_Random_To_Black();
     void EffectAnim__Popping_Decay_Palette_To_White();
@@ -1027,9 +1030,9 @@ class mAnimatorLight :
     void EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01();
     void EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01();
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
     void EffectAnim__Manual__PixelSetElsewhere();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
     void SubTask_Flasher_Animate_Function_Tester_01();
     void SubTask_Flasher_Animate_Function_Tester_02();
@@ -1288,6 +1291,9 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
     #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,
+    #endif    
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__STATIC_PALETTE_VINTAGE__ID,
     #endif
@@ -1644,11 +1650,9 @@ class mAnimatorLight :
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
-
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
     EFFECTS_FUNCTION__MANUAL__PIXEL_SET_ELSEWHERE__ID,
-
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
 
 
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE_TODO

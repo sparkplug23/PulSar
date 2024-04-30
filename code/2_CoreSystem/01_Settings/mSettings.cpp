@@ -243,9 +243,6 @@ void mSettings::Function_Template_Load(){
   //DEBUG_PRINTF("mSettings::Function_Template_Load"); Serial.flush();
   #endif
 
-  runtime.boot_status.function_template_parse_success = 0;
-  runtime.boot_status.rules_template_parse_success = 0;
-
   #ifdef USE_FUNCTION_TEMPLATE  
   // Read into local
   D_DATA_BUFFER_CLEAR();
@@ -253,15 +250,13 @@ void mSettings::Function_Template_Load(){
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+  //ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
-  // delay(1000);
+  runtime.template_loading.status.function = TemplateSource::HEADER_TEMPLATE;
 
-  runtime.boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
   
 }

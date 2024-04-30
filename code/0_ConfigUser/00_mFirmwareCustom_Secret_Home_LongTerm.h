@@ -4745,7 +4745,7 @@ R"=====(
  * 
  * *********************************************************************************************************************************************************************************
 */
-#ifdef DEVICE_IMMERSION_CONTROL_PANEL // New 2023 system unified
+#ifdef DEVICE_IMMERSION_CONTROL_PANEL
   #define DEVICENAME_CTR          "immersion_controller"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Heater Panel"
   #define DEVICENAME_ROOMHINT_CTR "Landing"

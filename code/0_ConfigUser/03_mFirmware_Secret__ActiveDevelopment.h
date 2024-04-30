@@ -22,7 +22,7 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+#define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
 // #define DEVICE_TREADMILL_POWER_MONITOR
 // #define DEVICE_LIGHTING__LED_MATRIX_BOX_01
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI
@@ -31,6 +31,7 @@
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__TREADMILL_02
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__KITCHEN_7INCH
 // #define DEVICE_TESTBED__LED_MATRIX
+// #define DEVICE_CAMERA_XIAO_TESTBED
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -293,6 +294,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
               #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
               #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
               #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
+    
+              #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
                           
               #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
               
@@ -354,6 +357,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
 
   #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
 
@@ -439,7 +444,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
     },
-    "BrightnessRGB": 24,
+    "BrightnessRGB": 100,
     "BrightnessCCT": 0
   }
   )=====";
@@ -1320,6 +1325,220 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
   "}";
+
+
+
+  
+#endif
+
+
+#ifdef DEVICE_CAMERA_XIAO_TESTBED
+  #define DEVICENAME_CTR          "treadmill_power_monitor"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
+    #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+
+  
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+
+
+//   /***********************************
+//    * SECTION: Network Configs
+//   ************************************/    
+
+//   /***********************************
+//    * SECTION: Sensor Configs
+//   ************************************/  
+
+//   #define USE_MODULE_SENSORS_INTERFACE  
+//   #define USE_MODULE_SENSORS_SWITCHES
+//     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+//   /***********************************
+//    * SECTION: Display Configs
+//   ************************************/  
+
+//   #define USE_MODULE_DISPLAYS_INTERFACE
+//   #define USE_MODULE_DISPLAYS_OLED_SH1106
+//     #define SHOW_SPLASH
+
+//   // Add this, 4 rows so show the power, current, voltage and energy
+
+//   /***********************************
+//    * SECTION: Driver Configs
+//   ************************************/  
+
+//   /***********************************
+//    * SECTION: Lighting Configs
+//   ************************************/  
+
+//   /***********************************
+//    * SECTION: Energy Configs
+//   ************************************/  
+
+//   #define USE_MODULE_ENERGY_INTERFACE
+//   #define USE_MODULE_ENERGY_PZEM004T_V3
+//     #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+//   #define MAX_ENERGY_SENSORS 1
+//   #define MAX_PZEM004T_DEVICES 1
+
+//   /***********************************
+//    * SECTION: Controller Configs
+//   ************************************/  
+
+// //  #define USE_MODULE_CONTROLLER__ENERGY_OLED
+//  #define USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"23\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      #endif
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      // 32 - LED Strip External
+      // 21 - LED Strip Onboard
+      // 25?
+      // 
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+//   /**
+//    * @brief Drivers and Sensors for HVAC zones
+//    **/
+//   #define D_DEVICE_HEATER_0_NAME "Dryer"
+//   #define D_DEVICE_HEATER_1_NAME "FloorMat"
+//   #define D_DEVICE_HEATER_2_NAME "FanHeater"
+//   #define D_DEVICE_HEATER_3_NAME "OilRadiator"
+
+//   #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
+
+// // {"NumDevices":4,"DeviceNameIndex":[-1,-1,-1,-1],"AddressList":[[40,140,131,47,0,0,0,230],[40,18,77,49,0,0,0,233],[40,233,112,49,0,0,0,11],[40,165,161,47,0,0,0,189]]}
+
+//   /** 
+//    * MainBoard
+//    * */
+//   #define D_DEVICE_SENSOR_DB18S20_01_NAME        "MainBoard-1"
+//   #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,165,161,47,0,0,0,189]"
+
+//   #define D_DEVICE_SENSOR_DB18S20_02_NAME        "MainBoard-2"
+//   #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,233,112,49,0,0,0,11]"
+
+//   #define D_DEVICE_SENSOR_DB18S20_03_NAME        "MainBoard-3"
+//   #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,140,131,47,0,0,0,230]"
+
+//   #define D_DEVICE_SENSOR_DB18S20_04_NAME        "MainBoard-4"
+//   #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,18,77,49,0,0,0,233]" //233 4
+
+//   #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
+//   #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
+
+//   #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
+
+//   #define D_DEVICE_SENSOR_CURRENT "LEDStrip"
+
+  
+//   #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "1"
+
+//   #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Treadmill"
+  
+  
+//   #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR
+
+//   #define USE_FUNCTION_TEMPLATE
+//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//   "{"
+//     "\"" D_JSON_ENERGY "\":{"
+//         "\"DeviceCount\":1"    
+//     "},"
+//     "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":{"
+//         "\"DeviceCount\":1"    
+//     "},"
+//     "\"" D_JSON_DEVICENAME "\":{"
+//       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
+//         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
+//       "],"
+//       "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+//         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
+//       "],"
+//       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+//         "\"" "TrackingActive" "\""
+//       "]"
+//     "},"
+//     "\"" D_JSON_SENSORADDRESS "\":{"
+//       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
+//         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+//       "]"  
+//     "},"
+//     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+//   "}";
 
 
 

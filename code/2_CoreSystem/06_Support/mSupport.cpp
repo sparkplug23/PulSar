@@ -54,6 +54,7 @@ void WDT_Reset(){};
 
 uint32_t ResetReason_g(void)
 {
+  DEBUG_LINE_HERE
 //   /*
 //     user_interface.h
 //     REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
@@ -84,6 +85,7 @@ uint32_t ResetReason_g(void)
     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
   */
 
+  DEBUG_LINE_HERE
 #ifdef ESP32
 
  RESET_REASON reason = rtc_get_reset_reason(0);
@@ -101,10 +103,12 @@ uint32_t ResetReason_g(void)
 
 #endif 
 
+  DEBUG_LINE_HERE
 #ifdef ESP8266
- return resetInfo.reason;
+ return 0;// resetInfo.reason;  // causing crasg exception 3
 
 #endif
+  DEBUG_LINE_HERE
 
 
   // return ESP_ResetInfoReason();

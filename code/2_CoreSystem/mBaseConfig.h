@@ -36,6 +36,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #else
 // #error"here"
@@ -369,6 +370,7 @@ With latest version, all longer term shared debug features should be added here 
 
 
 #define ENABLE_DEVFEATURE_RTC_SETTINGS
+#define ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 // -- Time - Up to three NTP servers in your region
 #define NTP_SERVER1            "pool.ntp.org"       // [NtpServer1] Select first NTP server by name or IP address (129.250.35.250)

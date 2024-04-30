@@ -3183,8 +3183,11 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   pCONT_web->server->onNotFound([this](AsyncWebServerRequest *request)
   {
   
+    #ifdef ESP32
     ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url());
-  
+    #endif 
+
+    
     if (this->captivePortal(request)) return;
 
     //make API CORS compatible

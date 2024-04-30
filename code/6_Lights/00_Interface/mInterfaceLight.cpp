@@ -139,6 +139,8 @@ void mInterfaceLight::Template_Load()
       pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
       ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
+      
+      runtime.template_loading.status.lighting = TemplateSource::HEADER_TEMPLATE;
 
     }
 
@@ -305,7 +307,7 @@ void mInterfaceLight::Save_Module()
   JBI->Start();
 
   #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
   #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
   

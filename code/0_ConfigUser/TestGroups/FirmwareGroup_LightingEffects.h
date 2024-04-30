@@ -17,28 +17,30 @@
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__01__ESP32_1CH                               // original, no parallel
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__02__ESP32_PARALLEL_4CH                      // garage (100 x4) - this could become the garden lights for a practical test                     
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__03__ESP32_PARALLEL_8CH                      // garage (100 x8)                         
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__04__ESP32_PARALLEL_16CH                     // garage (100 x16)                        
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__02__ESP32_PARALLEL_4CH                      // garage (100 x4) - this could become the garden lights for a practical test                     
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__03__ESP32_PARALLEL_8CH                      // garage (100 x8)                         
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__04__ESP32_PARALLEL_16CH                     // garage (100 x16)                        
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__05__ESP32_PARALLEL_4CH_VARIED_BUSTYPE       // varied strings (ws2812, sk6812)
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__06__ESP32_1CH_WS2805_3X                     // new RGBCCT 3X 12V pixels
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__07__ESP32_1CH_7SEGMENTCLOCK                 // ESP32 testing 3D printed 7 segment clock
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__08__ESP32_1CH_NOWEBUI                       // ESP32 - Single Bus - Single Segment - 100 rgb leds 
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__07__ESP32_1CH_7SEGMENTCLOCK                 // ESP32 testing 3D printed 7 segment clock
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__08__ESP32_1CH_NOWEBUI                       // ESP32 - Single Bus - Single Segment - 100 rgb leds 
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__20__ESP32_1CH_MATRIX_16X16                  // ESP32 testing 16x16 matrix
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__21__ESP32_1CH_MATRIX_32X8                   // ESP32 testing 32x8 matrix
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__21__ESP32_1CH_MATRIX_32X8                   // ESP32 testing 32x8 matrix
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__30__ESP32_PWM_RGBCCT_5CH_RGBCCT              // Garage as lighting at night, long term tester
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__31__ESP32_PWM_RGBCCT_2x2CH_WHITE_CHANNELS   // For testing the dual white channels
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__32__ESP32_PWM_RGBCCT_5x1CH_WHITE_CHANNELS   // For testing single white channels
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__41__ESP32_PARALLEL_4CH_DEV                  // desk/wall testbed (10 leds per channel) 
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__42__ESP32_PWM_RGBCCT_5CH_RGBWW_DEV          // Desk/under Testbed - do sun elevation white control
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__31__ESP32_PWM_RGBCCT_2x2CH_WHITE_CHANNELS   // For testing the dual white channels
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__32__ESP32_PWM_RGBCCT_5x1CH_WHITE_CHANNELS   // For testing single white channels
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__41__ESP32_PARALLEL_4CH_DEV                  // desk/wall testbed (10 leds per channel) 
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__42__ESP32_PWM_RGBCCT_5CH_RGBWW_DEV          // Desk/under Testbed - do sun elevation white control
 
 //    ;;;;;;;;;;;; ESP8266 ;;;;;;;;;;;;;;;;
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__50__ESP82_1CH                               // ESP8266 - Single Bus - Single Segment - 100 rgb leds
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__50__ESP82_1CH                               // ESP8266 - Single Bus - Single Segment - 100 rgb leds
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__51__ESP82_1CH_NOWEB                         // ESP8266 - Single Bus - Single Segment - 100 rgb leds
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__52__ESP82_H801_5CH_PWM_RGBCCT               // normal H801
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__53__ESP82_LOW_MEMORY                        // for developing the lighting module with low memory, this will enable it to be used in complex systems with many other modules
-    
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE
+        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__53__ESP82_LOW_MEMORY                        // for developing the lighting module with low memory, this will enable it to be used in complex systems with many other modules
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__54__ESP82_MINIMAL_OTA_MIDSTAGE
+
+
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -248,9 +250,7 @@
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-
-  
+  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
@@ -275,9 +275,6 @@
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  
-
-
   /***********************************
    * SECTION: Network Configs
   ************************************/    
@@ -300,6 +297,8 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/  
+
+ #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -331,9 +330,9 @@
         0,
         60
       ],
-      "ColourPalette":"Snowy 02",
+      "ColourPalette":"Sunset",
       "Effects": {
-        "Function":"Spanned Palette",
+        "Function":"Hour Progress",
         "Speed":127,
         "Intensity":127,
         "Grouping":1
@@ -840,11 +839,8 @@
    * SECTION: Core Configs
   ************************************/    
 
-  #define USE_MODULE_CORE_TIME
   // #define USE_MODULE_CORE_TIME2 // for now, time2 will be used at the same time as time1. If time1 is not defined, then "#define time2 time" style command will be used to switch to the new system.
     // for now, attempt to get full tasmota style time working with its own module and mqtt telemetry. If it works, then it can be integrated into the core time module.
-
-  #define DISABLE_TIME1_OLD_CODE
 
 
   /***********************************
@@ -1022,22 +1018,22 @@
 //    * SECTION: Lighting Configs
 //   ************************************/  
 
-//   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
   
-//   #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
-//   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
-//     #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
-//     #define WLED_DEBUG
-//     #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
-//     // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
-//   #endif 
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+    #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
+    #define WLED_DEBUG
+    #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+    // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
+  #endif 
 
 //   #define ENABLE_DEVFEATURE_LIGHT__SWITCH_TO_JOINT_NAME_AND_DATA_PROGMEM
 
@@ -1700,6 +1696,8 @@
 
   #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
 
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+
   /***********************************
    * SECTION: System Configs
   ************************************/    
@@ -1717,15 +1715,15 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-
+  #define DEBUG_FASTBOOT
 
   /***********************************
    * SECTION: Network Configs
@@ -1736,6 +1734,7 @@
   // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
   // #define USE_MODULE_NETWORK_WEBSERVER
   // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
   
 
   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -1762,46 +1761,40 @@
   "}";
 
   #define USE_LIGHTING_TEMPLATE
-  #define STRIP_SIZE_MAX 1
-  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+
+  #define STRIP_SIZE_MAX 600
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
     "BusConfig":[
       {
-        "Pin":[15,13,12,14,4],
-        "ColourOrder":"RGBCW",
-        "BusType":"ANALOG_5CH",
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
         "Start":0,
-        "Length":1
+        "Length":60
       }
-    ],    
-    "Segment0":{
+    ],
+    "Segment0": {
       "PixelRange": [
         0,
-        1
+        60
       ],
-      "ColourPalette":0,
-      "SegColour0": {
-        "Hue": 0,
-        "Sat": 100,
-        "BrightnessRGB": 100,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100,
-        "ColourType":4
-      },
+      "ColourPalette":"Sunset",
       "Effects": {
-        "Function":0
+        "Function":"Hour Progress",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1
       },
       "Transition": {
-        "TimeMs": 900,
+        "TimeMs": 0,
         "RateMs": 1000
       },
-      "BrightnessRGB":100,
-      "BrightnessCCT":100
+      "BrightnessRGB": 100
     },
-    "BrightnessRGB":100,
-    "BrightnessCCT":100
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
   }
   )=====";
 
@@ -1955,6 +1948,325 @@
     "BrightnessCCT":100
   }
   )=====";
+
+
+#endif
+
+
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__53__ESP82_LOW_MEMORY 
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP8266 NoWEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP8266 NoWEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
+  // #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
+
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+  
+
+  // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  // #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // // #define DISABLE_NETWORK
+  // // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_WIFI
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  #define STRIP_SIZE_MAX 1
+  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":[15,13,12,14,4],
+        "ColourOrder":"RGBCW",
+        "BusType":"ANALOG_5CH",
+        "Start":0,
+        "Length":1
+      }
+    ],    
+    "Segment0":{
+      "PixelRange": [
+        0,
+        1
+      ],
+      "ColourPalette":0,
+      "SegColour0": {
+        "Hue": 0,
+        "Sat": 100,
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100,
+        "CCT_TempPercentage":100,
+        "ColourType":4
+      },
+      "Effects": {
+        "Function":0
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB":100,
+      "BrightnessCCT":100
+    },
+    "BrightnessRGB":100,
+    "BrightnessCCT":100
+  }
+  )=====";
+
+
+#endif
+
+
+/**
+ * @brief OTA to be used when a device does not have enough memory to allow full OTA.
+ * Flash this first, it should have recovery but otherwise no other features.
+ * A full OTA should then be possible.
+ * 
+ */
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__54__ESP82_MINIMAL_OTA_MIDSTAGE 
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP8266 NoWEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP8266 NoWEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
+  // #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define ENABLE_DEBUG_LINE_HERE_TRACE
+  #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  #define FIRMWARE_MINIMAL2
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
+
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+
+  // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  // #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // // #define DISABLE_NETWORK
+  // // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_WIFI
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  // #define USE_MODULE_TEMPLATE
+  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  //   "\"" D_JSON_GPIO_FUNCTION "\":{},"
+  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+  //   "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  // "}";
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  // #define USE_LIGHTING_TEMPLATE
+  // #define STRIP_SIZE_MAX 1
+  // #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":[15,13,12,14,4],
+  //       "ColourOrder":"RGBCW",
+  //       "BusType":"ANALOG_5CH",
+  //       "Start":0,
+  //       "Length":1
+  //     }
+  //   ],    
+  //   "Segment0":{
+  //     "PixelRange": [
+  //       0,
+  //       1
+  //     ],
+  //     "ColourPalette":0,
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat": 100,
+  //       "BrightnessRGB": 100,
+  //       "BrightnessCCT": 100,
+  //       "CCT_TempPercentage":100,
+  //       "ColourType":4
+  //     },
+  //     "Effects": {
+  //       "Function":0
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 900,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB":100,
+  //     "BrightnessCCT":100
+  //   },
+  //   "BrightnessRGB":100,
+  //   "BrightnessCCT":100
+  // }
+  // )=====";
 
 
 #endif

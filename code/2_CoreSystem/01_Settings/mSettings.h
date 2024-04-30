@@ -13,7 +13,11 @@
   #endif
 #else
   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
-    #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
+    #ifdef ESP32
+      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
+    #else
+      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
+    #endif
   #endif
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
@@ -511,22 +515,45 @@ class mSettings :
     };
   } Timer;
 
+  /**
+   * SECTION
+   * Templates
+   * - MODULE_TEMPLATE
+   * - FUNCTION_TEMPLATE
+   * - LIGHTING_TEMPLATE
+   * - NEXTION_HMI_CONTROL_MAP
+   * 
+   */
 
   // a flag status group showing how succesful the boot was
   // 3 state template, used, succuss, fail, none
-  typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-    uint16_t data;                           // Allow bit manipulation using SetOption
-    struct {                                 // SetOption0 .. SetOption31
-      uint8_t module_template_used : 1;               // bit 0              - SetOption0  - Save power state and use after restart
-      uint8_t module_template_parse_success : 1;          // bit 1              - SetOption1  - Control button multipress
-      uint8_t function_template_parse_success : 2;          // bit 1              - SetOption1  - Control button multipress
-      uint8_t decimal_precision : 2;        // bit 2,3   4 levels [0,1,2,3]
-      uint8_t mdns_started_succesfully: 1;
-      uint8_t rules_template_parse_success : 1;
-    };
-  } SysBitfield_BootStatus;
 
   #define MODULE_TEMPLATE_MAX_SIZE 500
+  enum TemplateSource
+  {
+    NONE,
+    HEADER_CUSTOM,   // custom
+    HEADER_TEMPLATE, // from a predefined template
+    FILE,            // from a file (loading into internal storage with webui or mqtt command)
+    FAILED_LOAD      // error occurs when loaded
+  };
+  struct TemplateLoading
+  {
+    struct STATUS{
+      uint8_t module                = TemplateSource::NONE;
+      uint8_t function              = TemplateSource::NONE;
+      uint8_t lighting              = TemplateSource::NONE;
+      uint8_t nextion_hmi_input_map = TemplateSource::NONE;
+      uint8_t rules                 = TemplateSource::NONE;
+    }status;
+
+    // Other
+  };
+
+
+
+
+
 
   #include "Sub_mSettings_Stored.h"
 
@@ -561,7 +588,7 @@ class mSettings :
     uint8_t energy_driver;                    // Energy monitor configured    // phase this out, more than one can exist
     uint8_t light_driver;                     // Light module configured
     uint8_t light_type;                       // Light types
-    SysBitfield_BootStatus boot_status;
+    TemplateLoading template_loading;
     FIRMWARE_VERSION firmware_version;    
     power_t power = 0;                          // Current copy of Settings.power
     int ota_state_flag = 0;                     // OTA state flag
