@@ -1276,10 +1276,10 @@ Bathroom
   "}";
 
   
-  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
   R"=====(
   {
-    "ObjectNameIDList": {
+    "ObjectNameID": {
       "hIconUS": 2,
       "hTimeUS": 6,
       "hBoostUS": 11,
@@ -2536,8 +2536,6 @@ R"=====(
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
 
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
@@ -4813,10 +4811,10 @@ R"=====(
     #define USE_MODULE_NETWORK_WEBSERVER
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 
-  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
   R"=====(
   {
-    "ObjectNameIDList": {
+    "ObjectNameID": {
       "hIconUS": 2,
       "hTimeUS": 6,
       "hBoostUS": 11,

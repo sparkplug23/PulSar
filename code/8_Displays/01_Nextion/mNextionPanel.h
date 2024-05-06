@@ -489,6 +489,14 @@ class mNextionPanel :
 
     HardwareSerial* display = nullptr;
 
+    uint8_t splash_page_seconds = 0; // if set, the page will hold on another page set, before returning to the default
+    uint8_t splash_page_saved_page = 0; // remember the page to return to after splash page
+
+    void Command_SplashPage(char* pagename, uint8_t time_on_page);
+    void Command_SetPage(char* pagename);
+
+    void MQTTSubscribe();
+
     int8_t pin_tx = -1;
     int8_t pin_rx = -1;
     uint8_t status_enabled = false; //new module flag that all will have to signify they are working
@@ -631,7 +639,9 @@ class mNextionPanel :
     void webHandleLcdUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
     uint32_t transmitted_bytes = 0;
     void webHandleFirmware(AsyncWebServerRequest *request);
+    #ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
     void webHandleLcdDownload(AsyncWebServerRequest *request);
+    #endif
     void nextionOtaStartDownload(AsyncWebServerRequest *request, const String &lcdOtaUrl);
     void webHandleLcdUpdateSuccess(AsyncWebServerRequest *request);
     void webHandleLcdUpdateFailure(AsyncWebServerRequest *request);

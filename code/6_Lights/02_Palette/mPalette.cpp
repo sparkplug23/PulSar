@@ -469,6 +469,47 @@ void mPalette::Init_Palettes()
     0, 
     PALETTE_ENCODING_TYPE_CRGBPalette16
   );
+
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT  
+  uint8_t test_data[] = { // later use one of the static as a preload/default
+    1,1,10, // 0
+    2,2,20, // 1
+    3,3,30, // 2
+    4,4,40, // 3
+    5,5,50, // 4
+  };
+  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
+    PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID, 
+    test_data, 
+    sizeof(test_data), 
+    PALETTE_ENCODING_TYPE_RGB_NO_INDEX
+  );
+  #elif defined(ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT)
+  uint8_t test_data[] = { // later use one of the static as a preload/default
+    0,   255,0,0, // 0
+    1,   0,255,0, // 0
+    2,   0,0,255, // 0
+    49,  255,0,0, // 1
+    55,  0,255,0, // 1
+    150, 0,0,255, // 2
+    200, 255,0,255, // 3
+    255, 0,255,255, // 4
+  };
+  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
+    PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID, 
+    test_data, 
+    sizeof(test_data), 
+    PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT
+  );
+  #else
+  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
+    PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID, 
+    PM_PALETTE_COMPRESSED_RAINBOW__DATA, 
+    sizeof(PM_PALETTE_COMPRESSED_RAINBOW__DATA), 
+    D_PALETTE_COMPRESSED_RAINBOW_ENCODING
+  );
+  #endif
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID, 
@@ -547,12 +588,49 @@ void mPalette::Init_Palettes()
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_09_ENCODING
   );
   
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT  
+  uint8_t test_data2[] = { // later use one of the static as a preload/default
+    1,1,10, // 0
+    2,2,20, // 1
+    3,3,30, // 2
+    4,4,40, // 3
+    5,5,50, // 4
+  };
+  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
+    9, 
+    test_data, 
+    sizeof(test_data), 
+    PALETTE_ENCODING_TYPE_RGB_NO_INDEX
+  );
+  #elif defined(ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT)
+  uint8_t test_data2[] = { // later use one of the static as a preload/default
+    0,   255,0,0, // 0
+    1,   0,255,0, // 0
+    2,   0,0,255, // 0
+    49,  255,0,0, // 1
+    55,  0,255,0, // 1
+    150, 0,0,255, // 2
+    200, 255,0,255, // 3
+    255, 0,255,255, // 4
+  };
+  addCustomPalette(                           // init this always with something basic, later to be changed and reloaded
+    9, 
+    test_data2, 
+    sizeof(test_data2), 
+    PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT
+  );
+  #else
   addCustomPalette(
     9, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_10__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_10__DATA), 
-    D_PALETTE_CUSTOM_PALETTE_DEFAULT_10_ENCODING
+    PM_PALETTE_COMPRESSED_RAINBOW__DATA, 
+    sizeof(PM_PALETTE_COMPRESSED_RAINBOW__DATA), 
+    D_PALETTE_COMPRESSED_RAINBOW_ENCODING
   );
+  #endif
+
+
+  
+  
 
 }
 
@@ -591,6 +669,8 @@ void mPalette::addStaticPalette(uint16_t id, const uint8_t* data, const uint8_t 
 void mPalette::addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding)
 {
 
+  // ALOG_INF(PSTR("addDynamicPalette %d"), id);
+
   PALETTE_DATA palette_tmp;
 
   #ifdef ESP32
@@ -599,6 +679,10 @@ void mPalette::addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t
   uint8_t data_t[length];
   memcpy_P(data_t, data, length);
   for(int i=0;i<length;i++){ palette_tmp.data.push_back(data_t[i]); }
+  #endif
+  
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+  ALOG_INF(PSTR("addDynamicPalette bytes added %d"), palette_tmp.data.size());
   #endif
 
   palette_tmp.encoding = {encoding};
@@ -625,6 +709,11 @@ void mPalette::addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t
   } else {
     dynamic_palettes.push_back(palette_tmp);
   }
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+  ALOG_INF(PSTR("addDynamicPalette bytes added[3] %d"), dynamic_palettes[3].data.size());
+  for(int i=0;i<length;i++){ Serial.print( dynamic_palettes[3].data[i]);Serial.print( "," ); } Serial.println();
+  #endif
 
 }
 
@@ -1013,7 +1102,17 @@ RgbcctColor mPalette::Get_Encoded_DynamicPalette_Colour(
 // Here, I likely want to work conversions, then call the other methods that are needed.
 // For simplicity, the required colours will be requested from the static options that are in progmem.
 
-ALOG_INF(PSTR("HERE %d"), palette_adjusted_id);
+// // #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+// ALOG_INF(PSTR("Get_Encoded_DynamicPalette_Colour %d"), palette_adjusted_id);
+// #endif 
+
+// if(encoded_value != nullptr)
+// {
+//   ALOG_INF(PSTR("encoded_value != nullptr"));
+// }
+// else{
+//   ALOG_INF(PSTR("encoded_value == nullptr"));
+// }
 
 /*
 // Should I make it here that one of the matlab colourmaps can be loaded into here, and then some the float vector is actually saved with the palettes
@@ -1191,6 +1290,222 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
 
     }
     break;
+    /***
+     * 
+     * New way to show temps as colours
+     * 
+     * Encoded my way
+     *  - list of colours, with gradient position evening divided by how many there is
+     *  - this may simply be a loaded normal RGB palette, but with gradient position conversion working
+     *  - though, I may wish to set the inflection points, ie my X sensors may not be evening spaced. So in this case, may be best to manually work out the even conversion myself
+     *  - grad,R,G,B, ( may wish to add white channels here), so really, back to my original palettes that are "encoded" with the first 6 bytes describing what the data holds.
+     * 
+     * CRGB16Palette
+     *  - this will only permit 16 or 4 colours, and must be evenly spaced
+     *  - so not going to work for this case 
+     * 
+     * 
+     * PALETTELIST_VARIABLE_GENERIC_01__ID was the old name
+     * 
+     * 
+     * 
+     * 
+     * 
+    */
+    /**
+     * Using sensor readings, to generate colour palettes
+     * This will be part of the new "sensor_struct" to hold all types
+     *   Should it do like wled effects, memory buffer with different struct types?
+     *    GetSensor(ptr,TEMP_ID) which will use memory location 0, to know how the struct is encoded and return the temperature from bytes 1-5 as float for example
+     * This way, one struct pointer can be used to pass "sensor X" as a task source for this custom controller
+     * */
+    case PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
+      
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+      ALOG_INF(PSTR("Get_Encoded_DynamicPalette_Colour::ENCODED %d"), palette_adjusted_id);
+      #endif 
+
+      #ifdef ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
+      uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
+      uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+
+      uint8_t encoded_colour_width  = GetEncodedColourWidth(dynamic_palettes[palette_id_adj].encoding);   
+      uint8_t colours_in_palette = dynamic_palettes[palette_id_adj].data.size()/encoded_colour_width;
+      palette_buffer = &dynamic_palettes[palette_id_adj].data[0];
+      PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_id_adj].encoding;
+
+      // uint8_t flag_map_scaling = true;//??
+
+      // ALOG_INF(PSTR("encoded_colour_width \t%d"),encoded_colour_width);
+      // ALOG_INF(PSTR("addDynamicPalette bytes added[3] %d"), dynamic_palettes[3].data.size());
+      // for(int i=0;i<dynamic_palettes[3].data.size();i++){ Serial.print( dynamic_palettes[3].data[i]);Serial.print( "," ); } Serial.println();
+  
+
+      RgbcctColor colour;
+      
+
+      colour =  Get_Encoded_Palette_Colour(
+        palette_buffer,
+        _pixel_position,
+        encoded_colour_width,
+        colours_in_palette,
+        encoding,
+        encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+        flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+        flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+        flag_crgb_exact_colour,
+        flag_force_gradient
+      );
+
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+      if(encoded_value != nullptr)
+      {
+        ALOG_INF(PSTR("Get_Encoded_Palette_Colour encoded_value != nullptr %d"), *encoded_value);
+      }
+      else{
+        ALOG_INF(PSTR("encoded_value == nullptr"));
+      }
+      #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+
+
+      return colour;
+
+
+
+
+
+
+      #else
+
+      RgbcctColor colour_out = RgbcctColor(255,0,255,0,0);
+      RgbcctColor colour;
+
+      // uint8_t test_data[] = { //if vector, then data length is inherited from vector
+      //   // 6,5,
+      //   0,0,0, // 0
+      //   255,0,0, // 1
+      //   0,255,0, // 2
+      //   0,0,255, // 3
+      //   255,255,0, // 4
+      //   255,0,255, // 5
+      // };
+
+      
+        uint16_t encoded_colour_width = 0;
+
+        uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
+        uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+
+
+        mPalette::PALETTE_DATA pal = mPaletteI->dynamic_palettes[constrain(palette_id_adj,0,mPaletteI->dynamic_palettes.size()-1)];
+
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+        ALOG_INF(PSTR("--------------palette_id_adj %d"), palette_id_adj);
+        Serial.println(pal.encoding.data, BIN);
+        #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+
+        // PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_adjusted_id].encoding;
+
+        // /**
+        //  * @brief temp force load the data in
+        //  * 
+        //  */
+        // pal.data.clear();
+        // pal.data.assign(test_data, test_data + sizeof(test_data) / sizeof(test_data[0])); // load the data in
+        // pal.encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX}; // force the encoding in
+
+
+
+
+        if(pal.encoding.red_enabled){ encoded_colour_width++; }
+        if(pal.encoding.green_enabled){ encoded_colour_width++; }
+        if(pal.encoding.blue_enabled){ encoded_colour_width++; }
+        if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
+
+        if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
+        if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
+
+        // if(pal.encoding.index_exact){ encoded_colour_width++; }
+        if(pal.encoding.index_gradient){ encoded_colour_width++; }
+        if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
+        if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
+        
+        // if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
+        if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
+        if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
+        if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
+
+
+        if(encoded_colour_width==0)
+        {
+          // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
+          return 0;
+        }
+        // ALOG_INF(PSTR("============  %d %d %d"),  pal.data.size(), encoded_colour_width, palette_colour_count);
+
+            
+      
+        uint8_t  palette_colour_count = pal.data.size()/encoded_colour_width; 
+
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+        ALOG_INF(PSTR("============  %d %d %d"),  pal.data.size(), encoded_colour_width, palette_colour_count);
+        #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+
+        
+      
+      /**
+       * [0] colour_count, used with map_type to generate map_size (ie colour_map_size = pixel_width*pixel_count)
+       * [1] colour_encoded_length      eg (6=rgb no_index, )
+       * [2] data field 0
+        * */
+
+      uint16_t before = _pixel_position;
+      uint16_t pixel_position_adjust = _pixel_position;
+      uint8_t colours_in_palette = 5;
+
+
+
+      // uint16_t before = pixel_position_adjust;
+      // if(not gradient)
+    //   ALOG_INF(PSTR("colours_in_palette %d"), colours_in_palette);
+    // 
+    // delay(3000);
+      // pixel_position_adjust %= colours_in_palette; // convert incoming pixels into repeating 0-15 numbers.
+      pixel_position_adjust %= colours_in_palette; 
+      // else // if gradient, then this same thing should happen but scale into 255 range
+      // ALOG_INF(PSTR("pixel_position_adjust %d/%d"), before, pixel_position_adjust);
+    
+      colour = Get_Encoded_Colour_ReadBuffer_Fast(
+        palette_buffer,
+        pixel_position_adjust,  
+        encoded_value,
+        pal.encoding,
+        encoded_colour_width
+      );
+
+
+
+      // if(not gradient)
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+      ALOG_INF(PSTR("encoding %x"), pal.encoding);
+      ALOG_INF(PSTR("encoded_value %d"), encoded_value);
+      ALOG_INF(PSTR("pixel_position_adjust %d|%d %d,%d,%d"), before, pixel_position_adjust, colour.R, colour.G, colour.B);
+      #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // 
+    // delay(3000);
+
+      // if(pixel_position_adjust < colours_in_palette)
+      // {
+      //   uint8_t colour_index = pixel_position_adjust*3 + 2;
+      //   colour_out = RgbcctColor(test_data[colour_index], test_data[colour_index+1], test_data[colour_index+2]);
+      // }
+  
+
+      return colour;
+      #endif // ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
+    }break;
   }
 
   return RgbcctColor(255,0,0,0,0);
@@ -1831,10 +2146,20 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
 
   #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
   Serial.println(encoding.data, BIN);
-  Serial.println(encoding.encoded_as_hsb_ids);
+  // Serial.println(encoding.encoded_as_hsb_ids);
   Serial.println(encoding.index_gradient);
   #endif // ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
   
+//       DEBUG_LINE_HERE2;
+
+// if(return_encoded_value != nullptr)
+// {
+//   ALOG_INF(PSTR("encoded_valuec != nullptr"));
+// }
+// else{
+//   ALOG_INF(PSTR("encoded_valuec == nullptr"));
+
+// }
 
   
   if( // Switch to bit masking
@@ -1855,15 +2180,20 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
   
     // ALOG_INF(PSTR("index_relativeA=%d"),index_relative);
 
+    if(palette_buffer == nullptr){ ALOG_ERR(PSTR("palette_buffer is null")); return RgbcctColor(0); }
+
+      // DEBUG_LINE_HERE2;
     if(encoding.index_gradient)
     {
       // ALOG_INF(PSTR("index_relativeB=%d"),index_relative);
       if(return_encoded_value != nullptr){
         *return_encoded_value = palette_buffer[index_relative];
+        // ALOG_INF(PSTR("return_encoded_value=%d"),*return_encoded_value);
       }
       // Set the index to move beyond the indexing information
       index_relative++;
     }
+      // DEBUG_LINE_HERE2;
   
     
     return RgbcctColor(
@@ -1917,7 +2247,19 @@ mPalette::Get_Encoded_Palette_Colour(
   bool     flag_force_gradient
 ){
     
-  // ALOG_ERR(PSTR("Get_Encoded_StaticPalette_Colour (%d,%d,%d,%d,%d,%d,%d)"), palette_adjusted_id, palette_buffer, _pixel_position, encoded_value, flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_colour, flag_force_gradient );
+// if(encoded_value != nullptr)
+// {
+//   ALOG_INF(PSTR("encoded_valueA != nullptr"));
+// }
+// else{
+//   ALOG_INF(PSTR("encoded_valueA == nullptr"));
+
+// }
+
+// ALOG_INF(PSTR("flag_spanned_segment=%d"), flag_spanned_segment);
+
+
+  // ALOG_ERR(PSTR("Get_Encoded_StaticPalette_Colour (%d,%d,%d,%d,%d)"), _pixel_position, encoded_value, flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_colour, flag_force_gradient );
 
 
 // The issue now is that "SPAN" should not be forcing my palettes to show across the thing, but react based on their type. If they are gradient, then span, if they are not, then should still be sequential
@@ -1935,6 +2277,7 @@ mPalette::Get_Encoded_Palette_Colour(
    * the effect is visually correct. So no "FORCE it" should happen.
    * 
    */
+      DEBUG_LINE_HERE2;
 
   RgbcctColor colour;
   // if(palette_adjusted_id>static_palettes.size())
@@ -1978,9 +2321,11 @@ mPalette::Get_Encoded_Palette_Colour(
 
   // ALOG_INF(PSTR("flags %d %d %d"), is_forced_to_get_discrete, is_not_gradient, is_basic_sequence_palette_with_increasing_indexing);
 
+      DEBUG_LINE_HERE2;
   
   if(is_basic_sequence_palette_with_increasing_indexing) // forced, or originally normal discrete
   {
+      DEBUG_LINE_HERE2;
     // 0-SEGLEN would need to become iterative of the palette    0-100    what if 0-100*pixels  so 0-500, then modulo by 100
     // o,1,2,3,4, 0,1,2,3,4, 0,1,2,3,4
     // but because of 255 range, these values should be scaled into 255
@@ -2029,7 +2374,9 @@ mPalette::Get_Encoded_Palette_Colour(
    * ******************************************************************************************************************************************************************************* */
   if(encoding.index_gradient || flag_force_gradient) // if spanned, inside checks for gradient handling
   {
+
     
+      // DEBUG_LINE_HERE2;
     /**
      * @brief Convert incoming indes (0-SEGLEN) back into 255 range (0-255)
      * If it is mine, no matter what, convert into 255 range
@@ -2087,9 +2434,10 @@ mPalette::Get_Encoded_Palette_Colour(
      */
     if(encoding.index_gradient)
     {
+      // ALOG_INF(PSTR("colours_in_palette %d"), colours_in_palette);
       for(uint8_t pix_i=0; pix_i<colours_in_palette; pix_i++)
       {
-        Get_Encoded_Colour_ReadBuffer_Fast(
+        Get_Encoded_Colour_ReadBuffer_Fast( // since the gradient exists already, this is some recursive call
             palette_buffer,
             pix_i,  
             &encoded_value2,
@@ -2098,19 +2446,19 @@ mPalette::Get_Encoded_Palette_Colour(
           );
         gradient_palettes.push_back(encoded_value2);
       }
-      // Serial.println("Aencoded_value2"); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,",gradient_palettes[v]); }
+      // Serial.print("Read existing encoded values: "); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,",gradient_palettes[v]); } Serial.println();
     }else{
       for(uint8_t pix_i=0; pix_i<colours_in_palette; pix_i++)
       {
         gradient_palettes.push_back(map(pix_i, 0,colours_in_palette-1, lower_limit,upper_limit));
       }
-      // Serial.print("B!!!!!!!!!!!!!!!!!!!!!!!encoded_value2==="); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,%s",gradient_palettes[v], v<gradient_palettes.size()-1?"":"\n\r"); }
+      // Serial.print("No existing gradients, create equidistant values: "); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,%s",gradient_palettes[v], v<gradient_palettes.size()-1?"":"\n\r"); } Serial.println();
     }
     
-    // ALOG_INF(PSTR("###################################_pixel_position pixel_position_adjust %d %d"), _pixel_position), pixel_position_adjust;
-    // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
+    // ALOG_INF(PSTR("pixel_position (adjusted) %d(%d)"), _pixel_position, pixel_position_adjust);
 
 
+      // DEBUG_LINE_HERE2;
   
     // Search for lower boundary
     uint8_t desired_pixel_scaled = pixel_position_adjust;
@@ -2207,6 +2555,7 @@ mPalette::Get_Encoded_Palette_Colour(
     // Serial.print("gradient_palettes"); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,",gradient_palettes[v]); } Serial.println();
     // ALOG_INF(PSTR("v>>>>>>>> [%d|%d]  %d|%d p%d"), _pixel_position, desired_pixel_scaled, lower_boundary_v, upper_boundary_v, (int)(progress*100));
 
+      // DEBUG_LINE_HERE2;
   
     // RgbcctColor lower_colour = Get_StaticPalette_Encoded_Colour_ReadBuffer(palette_adjusted_id, palette_buffer, lower_boundary_i); 
     // RgbcctColor upper_colour = Get_StaticPalette_Encoded_Colour_ReadBuffer(palette_adjusted_id, palette_buffer, upper_boundary_i);
@@ -2228,15 +2577,38 @@ mPalette::Get_Encoded_Palette_Colour(
 
     colour = RgbcctColor::LinearBlend(lower_colour, upper_colour, progress);
 
-    // lower_colour.debug_print("lower_colour");
-    // upper_colour.debug_print("upper_colour");
-    // out.debug_print("  out_colour");
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+    lower_colour.debug_print("lower_colour");
+    upper_colour.debug_print("upper_colour");
+    colour.debug_print("  out_colour");
+    ALOG_INF(PSTR("lower_boundary_i|upper_boundary_i %d|%d"), lower_boundary_i, upper_boundary_i);
+    ALOG_INF(PSTR("lower_boundary_v|upper_boundary_v %d|%d"), lower_boundary_v, upper_boundary_v);
+    #endif 
+
+    if(encoded_value != nullptr)
+    {
+      if(desired_pixel_scaled < 255)
+        *encoded_value = lower_boundary_v;
+      else
+        *encoded_value = upper_boundary_v; //final one should be the last, ie, 255
+    }
+
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+    if(encoded_value != nullptr)
+    {
+      ALOG_INF(PSTR("!!!!!!!!!!!!!!!!!!!!!!!!!!!!encoded_valueF != nullptr %d"), *encoded_value);
+    }
+    else{
+      ALOG_INF(PSTR("encoded_valueF == nullptr"));
+    }
+    #endif
 
     return colour;
 
   } // if(ptr->encoding.index_gradient || flag_force_gradient) 
 
   
+      // DEBUG_LINE_HERE2;
   
   /******************************************************************************************************************************************************
    * *******************************************************************************************************************************************************************************
@@ -2250,6 +2622,7 @@ mPalette::Get_Encoded_Palette_Colour(
       
   if(flag_spanned_segment)
   {
+      DEBUG_LINE_HERE2;
     if(pCONT_lAni->_virtualSegmentLength==1)
     {
       pixel_position_adjust = 0;
@@ -2258,6 +2631,7 @@ mPalette::Get_Encoded_Palette_Colour(
     }
   }
 
+      // DEBUG_LINE_HERE2;
   
   // PALETTE_DATA *ptr = &static_palettes[palette_adjusted_id];
   // uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_adjusted_id);  
@@ -2266,6 +2640,9 @@ mPalette::Get_Encoded_Palette_Colour(
 
   // ALOG_INF(PSTR("pixel_position|palette_index %d->%d  %d %d"), pixel_position_adjust, palette_index, pixels_in_map, palette_index % 5);
   
+      DEBUG_LINE_HERE2;
+
+
   colour = Get_Encoded_Colour_ReadBuffer_Fast(
     palette_buffer,
     palette_index,  
@@ -2273,6 +2650,19 @@ mPalette::Get_Encoded_Palette_Colour(
     encoding,
     encoded_colour_width
   );
+      DEBUG_LINE_HERE2;
+
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+    if(encoded_value != nullptr)
+    {
+      ALOG_INF(PSTR("encoded_valueD != nullptr %d"), *encoded_value);
+    }
+    else{
+      ALOG_INF(PSTR("encoded_valueD == nullptr"));
+    }
+    #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+
+      
   
 
   return colour;

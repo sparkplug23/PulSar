@@ -2221,7 +2221,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     // DEBUG_LINE_HERE_TRACE;
     uint16_t colours_in_palette = GetNumberOfColoursInPalette(palette_id);
    
-    // ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
+    ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
 
     // DEBUG_LINE_HERE_TRACE;
     JsonArray curPalette_obj = palettes.createNestedArray(String(palette_id));
@@ -2381,7 +2381,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         else
         {
 
-          // ALOG_INF(PSTR("palette_id=%d"),palette_id);
+          ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "palette_id=%d"),palette_id);
 
           for (int j = 0; j < colours_in_palette; j++) 
           {
@@ -2396,7 +2396,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
               PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colours, without gradients
               &encoded_gradient
             );
-            // Serial.println(encoded_gradient);
+            Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient");Serial.println(encoded_gradient);
             DEBUG_LINE_HERE_TRACE;
 
             /**
@@ -2451,7 +2451,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
             colors.add(color.green);
             colors.add(color.blue);
 
-            // ALOG_HGL(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"),j,encoded_gradient,color.red,color.green,color.blue);
+            // #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+            ALOG_HGL(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"),j,encoded_gradient,color.red,color.green,color.blue);
+            // #endif
 
           }
 

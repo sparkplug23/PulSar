@@ -831,11 +831,29 @@ mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPaletteLoaded* _palett
     #endif // ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
 
   }else
+  // Only some dynamic needs loading
+  // The colours should have been placed into the dynamic_palette memory, then here it gets copied/loaded again
+  if(
+    ((palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID))     
+  ){      
+  // DEBUG_LINE_HERE
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+    
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    ALOG_HGL(PSTR("LOADING PALETTELIST_DYNAMIC palette_id_adj %d %d %d"),palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID); 
+    #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    
+    mPalette::PALETTE_DATA *ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
+    _palette_container->pData = ptr->data;
+    
+  }else
   if(
     ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
   ){
   // DEBUG_LINE_HERE
     // Preloading is not needed, already in ram
+  
+    
   }else
   if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)
@@ -1781,8 +1799,96 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
   if(
     (palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
   ){  
-    ALOG_DBM(PSTR("Temporary fix, needs its own palette count"));
+    ALOG_INF(PSTR("Temporary fix, needs its own palette count"));
     palette_colour_count = 1;    
+    /**
+     * @brief These are all different, doing a temporary fix for now
+     * 
+     */
+    switch(palette_id)
+    {
+      default:
+      case mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:
+        palette_colour_count = 1;
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
+        palette_colour_count = 1;
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
+        palette_colour_count = 1;
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
+        // if(SEGMENT.palette_container->pData.size())
+        // {
+        //   palette_colour_count = (SEGMENT.palette_container->pData.size()-2)/3;
+        // }else{
+          palette_colour_count = 1;
+        // }
+            
+        uint16_t encoded_colour_width = 0;
+
+        uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+        uint8_t index = constrain(palette_id_adj,0,mPaletteI->dynamic_palettes.size()-1);
+        
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+        ALOG_INF(PSTR("addDynamicPalette bytes added[3] %d"), mPaletteI->dynamic_palettes[3].data.size());
+        for(int i=0;i<mPaletteI->dynamic_palettes[3].data.size();i++){ Serial.print( mPaletteI->dynamic_palettes[3].data[i]); Serial.print( "," ); } Serial.println();
+        ALOG_INF(PSTR("index = %d"), index);
+        #endif
+
+        mPalette::PALETTE_DATA pal = mPaletteI->dynamic_palettes[index];
+
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+        for(int i=0;i<pal.data.size();i++)
+        {
+          Serial.print(i, DEC);
+          Serial.print("\t");
+          Serial.print(pal.data[i], DEC);
+          Serial.println();
+        }
+        Serial.println();
+        Serial.println(pal.encoding.data, BIN);
+        #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+
+        if(pal.encoding.red_enabled){ encoded_colour_width++; }
+        if(pal.encoding.green_enabled){ encoded_colour_width++; }
+        if(pal.encoding.blue_enabled){ encoded_colour_width++; }
+        if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
+
+        if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
+        if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
+
+        // if(pal.encoding.index_exact){ encoded_colour_width++; }
+        if(pal.encoding.index_gradient){ encoded_colour_width++; }
+        if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
+        if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
+        
+        // if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
+        if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
+        if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
+        if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
+
+
+        if(encoded_colour_width==0)
+        {
+          // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
+          return palette_colour_count;
+        }
+
+            
+      
+        palette_colour_count = pal.data.size()/encoded_colour_width; 
+
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+        ALOG_INF(PSTR("============  pal.data.SIZE/width/count %d %d %D"),  pal.data.size(), encoded_colour_width, palette_colour_count);
+        #endif
+
+
+      }break;
+      case mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID:
+        palette_colour_count = 1;
+      break;
+    }
   }
   else
   if(

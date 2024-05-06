@@ -27,7 +27,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
 
   JBI->Start();
     JBI->Add(PM_JSON_TIME,           pCONT_time->GetTime().c_str());
-    JBI->Add_FV(PM_JSON_UPTIME,      pCONT_time->GetUptime().c_str());
+    JBI->Add(PM_JSON_UPTIME,         pCONT_time->GetUptime().c_str());
     JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->UpTime());
     JBI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime.sleep ? "Dynamic" : "Unknown");
     JBI->Add(PM_JSON_SLEEP,          pCONT_set->runtime.sleep); // typ. 20
@@ -455,7 +455,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_ap
   IPAddress localip = WiFi.localIP();
   
   JBI->Start();
-    JBI->Add_FV(PM_JSON_UPTIME,      pCONT_time->GetUptime().c_str());// PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JBI->Add(PM_JSON_UPTIME,         pCONT_time->GetUptime().c_str());// PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->UpTime());//uptime.seconds_nonreset);
     JBI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay_temp);
     JBI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);

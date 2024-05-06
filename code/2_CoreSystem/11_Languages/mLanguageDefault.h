@@ -450,8 +450,8 @@
 #define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_FRIENDLY_CTR  "printer_enclosure"
 #define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_CTR "printer_enclosure"
 
-#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR "4pzem_with_inia_energy_oled"
-#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR "4pzem_with_inia_energy_oled"
+#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR  "oled_show_power"
+#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR           "oled_show_power"
 
 #define D_MODULE_CONTROLLER__ENERGY_OLED_FRIENDLY_CTR "energy_oled"
 #define D_MODULE_CONTROLLER__ENERGY_OLED_CTR          "energy_oled"

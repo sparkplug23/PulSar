@@ -198,6 +198,7 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_DOOR_LOCK_ID, GPIO_DOOR_OPEN_ID,
   // Nextion Touch panels 
   GPIO_NEXTION_RX_ID, GPIO_NEXTION_TX_ID, GPIO_BACKLIGHT_ID,      // Display backlight control
+  GPIO_NEXTION_RX2_ID, GPIO_NEXTION_TX2_ID,      // Serial2 for Nextion
   // Door bell chime (basic relay controls) - // Should be replaced as switch maybe?
   GPIO_CHIME_INPUT_ID, GPIO_CHIME_RINGER_ID,   // Relay silenoid
   // L9110 chip H-brige motor driver

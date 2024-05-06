@@ -101,6 +101,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       #endif
     #endif // ENABLE_DEBUG_FUNCTION_NAMES
     #endif // ENABLE_ADVANCED_DEBUGGING    
+    #ifdef ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS
+    uint32_t long_start_millis = millis();
+    #endif
 
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t start_millis = millis();
@@ -130,6 +133,18 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       }
     #endif
     #endif // ENABLE_ADVANCED_DEBUGGING
+    #ifdef ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS
+    uint32_t long_end_millis = millis() - long_start_millis;
+    if(long_end_millis > ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS)
+    {
+      #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+      char buffer_taskname2[50];
+      ALOG_WRN(PSTR(D_LOG_CLASSLIST "TASKER LONG: %d-%s %d-%S %d"), function,GetTaskName(function, buffer_taskname2), switch_index,GetModuleFriendlyName(switch_index), long_end_millis);
+      #else
+      ALOG_WRN(PSTR(D_LOG_CLASSLIST "TASKER LONG LOOP %d %d %d"), switch_index, function, long_end_millis);      
+      #endif
+    }
+    #endif
 
     if(target_tasker!=0)
     {

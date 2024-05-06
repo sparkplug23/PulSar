@@ -29,7 +29,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__30__ESP32_PWM_RGBCCT_5CH_RGBCCT              // Garage as lighting at night, long term tester
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__31__ESP32_PWM_RGBCCT_2x2CH_WHITE_CHANNELS   // For testing the dual white channels
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__32__ESP32_PWM_RGBCCT_5x1CH_WHITE_CHANNELS   // For testing single white channels
-        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__41__ESP32_PARALLEL_4CH_DEV                  // desk/wall testbed (10 leds per channel) 
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__41__ESP32_PARALLEL_4CH_DEV                  // desk/wall testbed (10 leds per channel) 
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__42__ESP32_PWM_RGBCCT_5CH_RGBWW_DEV          // Desk/under Testbed - do sun elevation white control
 
 //    ;;;;;;;;;;;; ESP8266 ;;;;;;;;;;;;;;;;
@@ -299,6 +299,13 @@
   ************************************/  
 
  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+ 
+    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -312,7 +319,6 @@
 
   #define USE_LIGHTING_TEMPLATE
 
-  #define STRIP_SIZE_MAX 600
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -1360,7 +1366,8 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
@@ -1380,7 +1387,7 @@
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
 
   /***********************************
    * SECTION: System Configs
@@ -1432,6 +1439,15 @@
    * SECTION: Lighting Configs
   ************************************/  
 
+ 
+    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1444,7 +1460,6 @@
 
   #define USE_LIGHTING_TEMPLATE
 
-  #define STRIP_SIZE_MAX 600
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {

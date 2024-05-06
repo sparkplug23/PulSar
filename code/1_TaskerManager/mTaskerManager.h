@@ -192,6 +192,7 @@ enum FUNCTION_RESULT_IDS{
 
 enum ModuleStatus{
   Disabled,
+  NoGPIOConfigured,
   Initialising,
   Running,
 };

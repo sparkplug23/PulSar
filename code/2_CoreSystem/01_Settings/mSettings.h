@@ -521,7 +521,7 @@ class mSettings :
    * - MODULE_TEMPLATE
    * - FUNCTION_TEMPLATE
    * - LIGHTING_TEMPLATE
-   * - NEXTION_HMI_CONTROL_MAP
+   * - DISPLAY_TEMPLATE
    * 
    */
 

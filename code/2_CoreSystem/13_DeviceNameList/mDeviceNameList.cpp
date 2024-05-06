@@ -405,8 +405,6 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 
 
 
-// #if defined(ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3)
-
 char* DeviceNameList::GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack)
 {
 

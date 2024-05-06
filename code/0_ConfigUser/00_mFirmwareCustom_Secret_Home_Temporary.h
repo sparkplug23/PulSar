@@ -1240,10 +1240,10 @@
   "}";
 
 
-  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
   R"=====(
   {
-    "ObjectNameIDList": {
+    "ObjectNameID": {
       "hIconUS": 2,
       "hTimeUS": 6,
       "hBoostUS": 11,

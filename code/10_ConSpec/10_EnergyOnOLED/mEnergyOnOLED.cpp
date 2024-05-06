@@ -140,6 +140,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
   {
     line = -1;
     sensors_reading_t val;
+    #ifdef USE_MODULE_ENERGY_PZEM004T_V3
     pCONT_pzem->GetSensorReading(&val, sensor_id);
     if(val.Valid())
     {
@@ -154,7 +155,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
       if(strcmp(buffer_n, D_DEVICE_HEATER_0_NAME)==0)
       {
         memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "Hdr");
+        sprintf(buffer_n, "%s", "Hai");
         line = 0;
       }else 
       if(strcmp(buffer_n, D_DEVICE_HEATER_1_NAME)==0)
@@ -164,11 +165,17 @@ void mEnergyOLED::SubTask_UpdateOLED()
         line = 1;
       }
       else 
+      if(strcmp(buffer_n, D_DEVICE_HEATER_2_NAME)==0)
+      {
+        memset(buffer_n, 0, sizeof(buffer_n));
+        sprintf(buffer_n, "%s", "Fan");
+        line = 2;
+      }else 
       if(strcmp(buffer_n, D_DEVICE_HEATER_3_NAME)==0)
       {
         memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "Rad");
-        line = 2;
+        sprintf(buffer_n, "%s", "Oil");
+        line = 3;
       }
 
       if(line >= 0)
@@ -178,39 +185,40 @@ void mEnergyOLED::SubTask_UpdateOLED()
       }
 
     }
+    #endif
 
   }
 
 
   
-  for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-  {
-    sensors_reading_t val;
-    pCONT_mina219->GetSensorReading(&val, sensor_id);
-    if(val.Valid())
-    {
+  // for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+  // {
+  //   sensors_reading_t val;
+  //   pCONT_mina219->GetSensorReading(&val, sensor_id);
+  //   if(val.Valid())
+  //   {
 
-      sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT_mina219->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+  //     sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
+  //     DLI->GetDeviceName_WithModuleUniqueID( pCONT_mina219->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
-      /**
-       * @brief Check for name and replace with OLED friendly short name
-       * 
-       */
-      if(strcmp(buffer_n, D_DEVICE_SENSOR_CURRENT)==0)
-      {
-        memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "LED");
-        line = 3;
-      }
+  //     /**
+  //      * @brief Check for name and replace with OLED friendly short name
+  //      * 
+  //      */
+  //     if(strcmp(buffer_n, D_DEVICE_SENSOR_CURRENT)==0)
+  //     {
+  //       memset(buffer_n, 0, sizeof(buffer_n));
+  //       sprintf(buffer_n, "%s", "LED");
+  //       line = 3;
+  //     }
       
 
-      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-      pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+  //     snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
+  //     pCONT_iDisp->LogBuffer_AddRow(buffer, line);
     
-    }
+  //   }
 
-  }
+  // }
 
   // #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 

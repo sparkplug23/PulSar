@@ -291,6 +291,60 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":250,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":500,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":750,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       1000
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Static Palette"
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -304,31 +358,17 @@
         "Length":250
       },
       {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":250,
-        "Length":250
-      },
-      {
-        "Pin":18,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":500,
-        "Length":250
-      },
-      {
         "Pin":19,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":750,
+        "Start":250,
         "Length":250
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        1000
+        500
       ],
       "ColourPalette":"Snowy 02",
       "Effects": {
@@ -344,7 +384,6 @@
     "BrightnessCCT": 0
   }
   )=====";
-  
 
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L2__ESP32_I2S_PARALLEL_4CH
 

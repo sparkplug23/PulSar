@@ -2,13 +2,7 @@
 #define _MCUSE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_H
 
 #define D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID     ((10*1000)+01)
-/**
- * Using sensor readings, to generate colour palettes
- * This will be part of the new "sensor_struct" to hold all types
- *   Should it do like wled effects, memory buffer with different struct types?
- *    GetSensor(ptr,TEMP_ID) which will use memory location 0, to know how the struct is encoded and return the temperature from bytes 1-5 as float for example
- * This way, one struct pointer can be used to pass "sensor X" as a task source for this custom controller
- * */
+
 
 #include "1_TaskerManager/mTaskerManager.h"
 

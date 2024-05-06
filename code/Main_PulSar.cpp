@@ -680,7 +680,7 @@ void loop(void)
 
   if(pCONT_sup->loop_runtime_millis > 500)
   {
-    ALOG_ERR(PSTR("LONG_LOOP =============================================== %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+    ALOG_ERR(PSTR("LONG_LOOP ============= %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
   }
 
   #ifdef ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY

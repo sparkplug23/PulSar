@@ -2609,7 +2609,7 @@ DEFINE_PGM_CTR(PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR)
 
 DEFINE_PGM_CTR(PM_DYNAMIC_PALETTES_NAMES_CTR)
 {
-  "Dynamic SunAZ CCT|Dynamic SunEL CCT|Dynamic SunEL PreSec|Dynamic Time Secs PreSec"
+  "Dynamic SunAZ CCT|Dynamic SunEL CCT|Dynamic SunEL PreSec|Encoded|Dynamic Time Secs PreSec"
 };
 
 
