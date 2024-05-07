@@ -189,26 +189,23 @@ void mNextionPanel::Pre_Init(void)
 
   display = new HardwareSerial(serial_port);
   
-  if(pCONT_pins->PinUsed(GPIO_NEXTION_RX_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX_ID))
-  {
-    ALOG_COM(PSTR(D_LOG_NEXTION "Using GPIO%d for Nextion RX"), pCONT_pins->GetPin(GPIO_NEXTION_RX_ID));
+  ALOG_COM(PSTR(D_LOG_NEXTION "Using GPIO%d for Nextion RX"), rx_pin);
 
-    pinMode( pCONT_pins->GetPin(GPIO_NEXTION_RX_ID) , OUTPUT); // RX - try forcing these to GPIO to stop serial comms
-    pinMode( pCONT_pins->GetPin(GPIO_NEXTION_TX_ID) , OUTPUT); // TX - try forcing these to GPIO to stop serial comms
+  pinMode( rx_pin, OUTPUT); // RX - try forcing these to GPIO to stop serial comms
+  pinMode( tx_pin, OUTPUT); // TX - try forcing these to GPIO to stop serial comms
 
-    /**
-     * @brief ESP32 is hanging when starting Serial 1 or 2.
-     * A work around is to start at a low baud, then switch to the desired baud to avoid hanging
-     **/
-    display->begin(
-      9600,
-      SERIAL_8N1,
-      pCONT_pins->GetPin(GPIO_NEXTION_RX_ID), // RX
-      pCONT_pins->GetPin(GPIO_NEXTION_TX_ID)  // TX
-    );
-    display->updateBaudRate(ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT);
+  /**
+   * @brief ESP32 is hanging when starting Serial 1 or 2.
+   * A work around is to start at a low baud, then switch to the desired baud to avoid hanging
+   **/
+  display->begin(
+    9600,
+    SERIAL_8N1,
+    rx_pin, // RX
+    tx_pin  // TX
+  );
+  display->updateBaudRate(ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT);
 
-  }
 
   module_state.mode = ModuleStatus::Initialising; 
   
@@ -428,6 +425,29 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
   {
     ALOG_COM(PSTR("display->baudRate=%d"), display->baudRate());
   }
+
+  /***
+   * 
+   * Create new functions below that assume they are under "Nextion" json, but just parse that one bit out here for each the once
+   * 
+   * 
+  */
+  JsonParserObject obj1 = 0;
+  JsonParserToken jtok_nextion = 0;
+  JsonParserToken jtok_parse = 0;
+
+  if(jtok_nextion = obj["Nextion"])
+  {
+    JsonParserObject json_obj = jtok_nextion.getObject();
+
+    if(jtok_parse = json_obj["SetBrightness"])
+    {
+      Command_SetBrightness255(jtok_parse.getInt());
+    }
+
+  }
+
+
 
 
 }

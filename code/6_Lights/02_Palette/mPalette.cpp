@@ -469,47 +469,6 @@ void mPalette::Init_Palettes()
     0, 
     PALETTE_ENCODING_TYPE_CRGBPalette16
   );
-
-
-  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT  
-  uint8_t test_data[] = { // later use one of the static as a preload/default
-    1,1,10, // 0
-    2,2,20, // 1
-    3,3,30, // 2
-    4,4,40, // 3
-    5,5,50, // 4
-  };
-  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
-    PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID, 
-    test_data, 
-    sizeof(test_data), 
-    PALETTE_ENCODING_TYPE_RGB_NO_INDEX
-  );
-  #elif defined(ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT)
-  uint8_t test_data[] = { // later use one of the static as a preload/default
-    0,   255,0,0, // 0
-    1,   0,255,0, // 0
-    2,   0,0,255, // 0
-    49,  255,0,0, // 1
-    55,  0,255,0, // 1
-    150, 0,0,255, // 2
-    200, 255,0,255, // 3
-    255, 0,255,255, // 4
-  };
-  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
-    PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID, 
-    test_data, 
-    sizeof(test_data), 
-    PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT
-  );
-  #else
-  addDynamicPalette(                           // init this always with something basic, later to be changed and reloaded
-    PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID, 
-    PM_PALETTE_COMPRESSED_RAINBOW__DATA, 
-    sizeof(PM_PALETTE_COMPRESSED_RAINBOW__DATA), 
-    D_PALETTE_COMPRESSED_RAINBOW_ENCODING
-  );
-  #endif
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID, 
@@ -741,6 +700,13 @@ void mPalette::addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t 
 
   if (id_adj < custom_palettes.size()) {
     custom_palettes[id_adj] = palette_tmp;
+    ALOG_INF(PSTR("addCustomPalette %d"), id_adj);
+    
+    // #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    ALOG_INF(PSTR("addCustomPalette bytes added[3] %d"), custom_palettes[id_adj].data.size());
+    for(int i=0;i<length;i++){ Serial.print( custom_palettes[id_adj].data[i]); Serial.print( "," ); } Serial.println();
+    // #endif
+
   } else {
     custom_palettes.push_back(palette_tmp);
   }
@@ -1319,193 +1285,193 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
      *    GetSensor(ptr,TEMP_ID) which will use memory location 0, to know how the struct is encoded and return the temperature from bytes 1-5 as float for example
      * This way, one struct pointer can be used to pass "sensor X" as a task source for this custom controller
      * */
-    case PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
+    // case PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
       
-      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
-      ALOG_INF(PSTR("Get_Encoded_DynamicPalette_Colour::ENCODED %d"), palette_adjusted_id);
-      #endif 
+    //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+    //   ALOG_INF(PSTR("Get_Encoded_DynamicPalette_Colour::ENCODED %d"), palette_adjusted_id);
+    //   #endif 
 
-      #ifdef ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+    //   #ifdef ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
-      uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
-      uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+    //   uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
+    //   uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
 
-      uint8_t encoded_colour_width  = GetEncodedColourWidth(dynamic_palettes[palette_id_adj].encoding);   
-      uint8_t colours_in_palette = dynamic_palettes[palette_id_adj].data.size()/encoded_colour_width;
-      palette_buffer = &dynamic_palettes[palette_id_adj].data[0];
-      PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_id_adj].encoding;
+    //   uint8_t encoded_colour_width  = GetEncodedColourWidth(dynamic_palettes[palette_id_adj].encoding);   
+    //   uint8_t colours_in_palette = dynamic_palettes[palette_id_adj].data.size()/encoded_colour_width;
+    //   palette_buffer = &dynamic_palettes[palette_id_adj].data[0];
+    //   PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_id_adj].encoding;
 
-      // uint8_t flag_map_scaling = true;//??
+    //   // uint8_t flag_map_scaling = true;//??
 
-      // ALOG_INF(PSTR("encoded_colour_width \t%d"),encoded_colour_width);
-      // ALOG_INF(PSTR("addDynamicPalette bytes added[3] %d"), dynamic_palettes[3].data.size());
-      // for(int i=0;i<dynamic_palettes[3].data.size();i++){ Serial.print( dynamic_palettes[3].data[i]);Serial.print( "," ); } Serial.println();
+    //   // ALOG_INF(PSTR("encoded_colour_width \t%d"),encoded_colour_width);
+    //   // ALOG_INF(PSTR("addDynamicPalette bytes added[3] %d"), dynamic_palettes[3].data.size());
+    //   // for(int i=0;i<dynamic_palettes[3].data.size();i++){ Serial.print( dynamic_palettes[3].data[i]);Serial.print( "," ); } Serial.println();
   
 
-      RgbcctColor colour;
+    //   RgbcctColor colour;
       
 
-      colour =  Get_Encoded_Palette_Colour(
-        palette_buffer,
-        _pixel_position,
-        encoded_colour_width,
-        colours_in_palette,
-        encoding,
-        encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-        flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-        flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-        flag_crgb_exact_colour,
-        flag_force_gradient
-      );
+    //   colour =  Get_Encoded_Palette_Colour(
+    //     palette_buffer,
+    //     _pixel_position,
+    //     encoded_colour_width,
+    //     colours_in_palette,
+    //     encoding,
+    //     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    //     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    //     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    //     flag_crgb_exact_colour,
+    //     flag_force_gradient
+    //   );
 
-      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
-      if(encoded_value != nullptr)
-      {
-        ALOG_INF(PSTR("Get_Encoded_Palette_Colour encoded_value != nullptr %d"), *encoded_value);
-      }
-      else{
-        ALOG_INF(PSTR("encoded_value == nullptr"));
-      }
-      #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
-
-
-      return colour;
+    //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+    //   if(encoded_value != nullptr)
+    //   {
+    //     ALOG_INF(PSTR("Get_Encoded_Palette_Colour encoded_value != nullptr %d"), *encoded_value);
+    //   }
+    //   else{
+    //     ALOG_INF(PSTR("encoded_value == nullptr"));
+    //   }
+    //   #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
 
 
+    //   return colour;
 
 
 
 
-      #else
 
-      RgbcctColor colour_out = RgbcctColor(255,0,255,0,0);
-      RgbcctColor colour;
 
-      // uint8_t test_data[] = { //if vector, then data length is inherited from vector
-      //   // 6,5,
-      //   0,0,0, // 0
-      //   255,0,0, // 1
-      //   0,255,0, // 2
-      //   0,0,255, // 3
-      //   255,255,0, // 4
-      //   255,0,255, // 5
-      // };
+    //   #else
+
+    //   RgbcctColor colour_out = RgbcctColor(255,0,255,0,0);
+    //   RgbcctColor colour;
+
+    //   // uint8_t test_data[] = { //if vector, then data length is inherited from vector
+    //   //   // 6,5,
+    //   //   0,0,0, // 0
+    //   //   255,0,0, // 1
+    //   //   0,255,0, // 2
+    //   //   0,0,255, // 3
+    //   //   255,255,0, // 4
+    //   //   255,0,255, // 5
+    //   // };
 
       
-        uint16_t encoded_colour_width = 0;
+    //     uint16_t encoded_colour_width = 0;
 
-        uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
-        uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
-
-
-        mPalette::PALETTE_DATA pal = mPaletteI->dynamic_palettes[constrain(palette_id_adj,0,mPaletteI->dynamic_palettes.size()-1)];
-
-        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-        ALOG_INF(PSTR("--------------palette_id_adj %d"), palette_id_adj);
-        Serial.println(pal.encoding.data, BIN);
-        #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-
-        // PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_adjusted_id].encoding;
-
-        // /**
-        //  * @brief temp force load the data in
-        //  * 
-        //  */
-        // pal.data.clear();
-        // pal.data.assign(test_data, test_data + sizeof(test_data) / sizeof(test_data[0])); // load the data in
-        // pal.encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX}; // force the encoding in
+    //     uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
+    //     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
 
 
+    //     mPalette::PALETTE_DATA pal = mPaletteI->dynamic_palettes[constrain(palette_id_adj,0,mPaletteI->dynamic_palettes.size()-1)];
+
+    //     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    //     ALOG_INF(PSTR("--------------palette_id_adj %d"), palette_id_adj);
+    //     Serial.println(pal.encoding.data, BIN);
+    //     #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+
+    //     // PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_adjusted_id].encoding;
+
+    //     // /**
+    //     //  * @brief temp force load the data in
+    //     //  * 
+    //     //  */
+    //     // pal.data.clear();
+    //     // pal.data.assign(test_data, test_data + sizeof(test_data) / sizeof(test_data[0])); // load the data in
+    //     // pal.encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX}; // force the encoding in
 
 
-        if(pal.encoding.red_enabled){ encoded_colour_width++; }
-        if(pal.encoding.green_enabled){ encoded_colour_width++; }
-        if(pal.encoding.blue_enabled){ encoded_colour_width++; }
-        if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
 
-        if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
-        if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
 
-        // if(pal.encoding.index_exact){ encoded_colour_width++; }
-        if(pal.encoding.index_gradient){ encoded_colour_width++; }
-        if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
-        if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
+    //     if(pal.encoding.red_enabled){ encoded_colour_width++; }
+    //     if(pal.encoding.green_enabled){ encoded_colour_width++; }
+    //     if(pal.encoding.blue_enabled){ encoded_colour_width++; }
+    //     if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
+
+    //     if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
+    //     if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
+
+    //     // if(pal.encoding.index_exact){ encoded_colour_width++; }
+    //     if(pal.encoding.index_gradient){ encoded_colour_width++; }
+    //     if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
+    //     if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
         
-        // if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
-        if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
-        if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
-        if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
+    //     // if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
+    //     if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
+    //     if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
+    //     if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
 
 
-        if(encoded_colour_width==0)
-        {
-          // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
-          return 0;
-        }
-        // ALOG_INF(PSTR("============  %d %d %d"),  pal.data.size(), encoded_colour_width, palette_colour_count);
+    //     if(encoded_colour_width==0)
+    //     {
+    //       // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
+    //       return 0;
+    //     }
+    //     // ALOG_INF(PSTR("============  %d %d %d"),  pal.data.size(), encoded_colour_width, palette_colour_count);
 
             
       
-        uint8_t  palette_colour_count = pal.data.size()/encoded_colour_width; 
+    //     uint8_t  palette_colour_count = pal.data.size()/encoded_colour_width; 
 
-        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-        ALOG_INF(PSTR("============  %d %d %d"),  pal.data.size(), encoded_colour_width, palette_colour_count);
-        #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    //     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    //     ALOG_INF(PSTR("============  %d %d %d"),  pal.data.size(), encoded_colour_width, palette_colour_count);
+    //     #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
 
         
       
-      /**
-       * [0] colour_count, used with map_type to generate map_size (ie colour_map_size = pixel_width*pixel_count)
-       * [1] colour_encoded_length      eg (6=rgb no_index, )
-       * [2] data field 0
-        * */
+    //   /**
+    //    * [0] colour_count, used with map_type to generate map_size (ie colour_map_size = pixel_width*pixel_count)
+    //    * [1] colour_encoded_length      eg (6=rgb no_index, )
+    //    * [2] data field 0
+    //     * */
 
-      uint16_t before = _pixel_position;
-      uint16_t pixel_position_adjust = _pixel_position;
-      uint8_t colours_in_palette = 5;
+    //   uint16_t before = _pixel_position;
+    //   uint16_t pixel_position_adjust = _pixel_position;
+    //   uint8_t colours_in_palette = 5;
 
 
 
-      // uint16_t before = pixel_position_adjust;
-      // if(not gradient)
-    //   ALOG_INF(PSTR("colours_in_palette %d"), colours_in_palette);
-    // 
-    // delay(3000);
-      // pixel_position_adjust %= colours_in_palette; // convert incoming pixels into repeating 0-15 numbers.
-      pixel_position_adjust %= colours_in_palette; 
-      // else // if gradient, then this same thing should happen but scale into 255 range
-      // ALOG_INF(PSTR("pixel_position_adjust %d/%d"), before, pixel_position_adjust);
+    //   // uint16_t before = pixel_position_adjust;
+    //   // if(not gradient)
+    // //   ALOG_INF(PSTR("colours_in_palette %d"), colours_in_palette);
+    // // 
+    // // delay(3000);
+    //   // pixel_position_adjust %= colours_in_palette; // convert incoming pixels into repeating 0-15 numbers.
+    //   pixel_position_adjust %= colours_in_palette; 
+    //   // else // if gradient, then this same thing should happen but scale into 255 range
+    //   // ALOG_INF(PSTR("pixel_position_adjust %d/%d"), before, pixel_position_adjust);
     
-      colour = Get_Encoded_Colour_ReadBuffer_Fast(
-        palette_buffer,
-        pixel_position_adjust,  
-        encoded_value,
-        pal.encoding,
-        encoded_colour_width
-      );
+    //   colour = Get_Encoded_Colour_ReadBuffer_Fast(
+    //     palette_buffer,
+    //     pixel_position_adjust,  
+    //     encoded_value,
+    //     pal.encoding,
+    //     encoded_colour_width
+    //   );
 
 
 
-      // if(not gradient)
-      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-      ALOG_INF(PSTR("encoding %x"), pal.encoding);
-      ALOG_INF(PSTR("encoded_value %d"), encoded_value);
-      ALOG_INF(PSTR("pixel_position_adjust %d|%d %d,%d,%d"), before, pixel_position_adjust, colour.R, colour.G, colour.B);
-      #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-    // 
-    // delay(3000);
+    //   // if(not gradient)
+    //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    //   ALOG_INF(PSTR("encoding %x"), pal.encoding);
+    //   ALOG_INF(PSTR("encoded_value %d"), encoded_value);
+    //   ALOG_INF(PSTR("pixel_position_adjust %d|%d %d,%d,%d"), before, pixel_position_adjust, colour.R, colour.G, colour.B);
+    //   #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // // 
+    // // delay(3000);
 
-      // if(pixel_position_adjust < colours_in_palette)
-      // {
-      //   uint8_t colour_index = pixel_position_adjust*3 + 2;
-      //   colour_out = RgbcctColor(test_data[colour_index], test_data[colour_index+1], test_data[colour_index+2]);
-      // }
+    //   // if(pixel_position_adjust < colours_in_palette)
+    //   // {
+    //   //   uint8_t colour_index = pixel_position_adjust*3 + 2;
+    //   //   colour_out = RgbcctColor(test_data[colour_index], test_data[colour_index+1], test_data[colour_index+2]);
+    //   // }
   
 
-      return colour;
-      #endif // ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+    //   return colour;
+    //   #endif // ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
-    }break;
+    // }break;
   }
 
   return RgbcctColor(255,0,0,0,0);

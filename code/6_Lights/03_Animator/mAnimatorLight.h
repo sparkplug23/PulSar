@@ -309,7 +309,7 @@ class mAnimatorLight :
     uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 255);    
     void parsesub_json_object_notification_shortcut(JsonParserObject obj);
       
-
+    void CommandSet_CustomPalette(uint8_t index, uint16_t encoding, uint8_t* data, uint8_t data_length);
 
 
 

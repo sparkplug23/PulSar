@@ -347,10 +347,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Grouping"])
   { 
-
-
     ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
-   SEGMENT_I(segment_index).grouping = jtok.getInt();  
+    SEGMENT_I(segment_index).grouping = jtok.getInt();  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
@@ -405,7 +403,89 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
+  /**
+   * @brief Construct a new if object
+   * 
+    {
+      "CustomPalette": {
+        "Data": [
+          0,      255,      255,      255,
+          150,      0,      255,      0,
+          255,      0,      0,      255
+        ],
+        "Encoding": "gRGB",
+        "Index": 9
+      }
+    }
+    {
+      "CustomPalette": {
+        "Data": [
+          255,      255,      255,
+          0,      255,      0,
+          0,      0,      255
+        ],
+        "Encoding": "RGB",
+        "Index": 8
+      }
+    }
+   * 
+   */
+  if(jtok = obj["CustomPalette"])
+  {
+    JsonParserToken jtok_sub = 0;
 
+    uint8_t index = 0;
+    if(jtok_sub = jtok.getObject()["Index"])
+    {
+      index = jtok_sub.getInt();
+      ALOG_INF(PSTR("Index %d"), index);
+    }
+
+    mPalette::PALETTE_ENCODING_DATA encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX}; // 0b00000111 0x07
+    if(jtok_sub = jtok.getObject()["Encoding"])
+    {
+      if(jtok_sub.isStr())
+      {
+        if(strcmp(jtok_sub.getStr(),"RGB")==0)
+        {
+          encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX};
+        }
+        else
+        if(strcmp(jtok_sub.getStr(),"gRGB")==0)
+        {
+          encoding = {PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT};
+        }
+      }
+      else
+      {
+        uint16_t enc = jtok_sub.getInt();
+        encoding = {enc};
+      }
+      ALOG_INF(PSTR("Encoding %d"), encoding);
+    }
+
+    if(jtok_sub = jtok.getObject()["Data"])
+    {
+      if(jtok_sub.isArray())
+      {
+        ALOG_INF(PSTR("jtok_sub length %d"), jtok_sub.size());
+        uint8_t data_length = jtok_sub.size() < 255 ? jtok_sub.size() : 0;
+        uint8_t array[data_length];
+        uint8_t arrlen = 0;
+        JsonParserArray arrobj = jtok_sub;
+        for(auto v : arrobj) 
+        {
+          if(arrlen > 255){ break; }
+          array[arrlen++] = v.getInt();
+        }
+        CommandSet_CustomPalette(index, encoding.data, array, data_length);
+        data_buffer.isserviced++;
+      }
+    }
+
+
+
+  }
   
   
   if(jtok = obj["Effects"].getObject()["Params"])
@@ -1651,6 +1731,10 @@ void mAnimatorLight::CommandSet_Effect_Speed(uint8_t value, uint8_t segment_inde
 
 }
 
+void mAnimatorLight::CommandSet_CustomPalette(uint8_t index, uint16_t encoding, uint8_t* data, uint8_t data_length)
+{
+  mPaletteI->addCustomPalette(index, data, data_length, encoding);
+}
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************

@@ -25,7 +25,7 @@
 // #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
 // #define DEVICE_TREADMILL_POWER_MONITOR
 // #define DEVICE_LIGHTING__LED_MATRIX_BOX_01
-// #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI
+// #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__10INCH
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__7INCH
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__TREADMILL_01
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__TREADMILL_02
@@ -411,6 +411,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+
+    
+    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
     // 13, 18, 19, 22, 23, 25, 26, 27       USED
     // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -1771,7 +1778,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 
-#ifdef DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI
+#ifdef DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__10INCH //10inch display
   #define DEVICENAME_CTR            "nextion_testbed"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
@@ -1789,7 +1796,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define   ENABLE_DEBUG_LINE_HERE
+  // #define   ENABLE_DEBUG_LINE_HERE
 
 
   #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
@@ -1806,13 +1813,25 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define USE_MODULE_SENSORS_BME
   // #define USE_MODULE_SENSORS_MOTION
 
+    // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
+    #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
+
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+        #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+        #define USE_MODULE_NETWORK_WEBSERVER
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+
 
   
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+  #define NEXTION_DEFAULT_PAGE_NUMBER 6  
     #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
     // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
     #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
@@ -1871,6 +1890,15 @@ May need to add two power connections too, so its not just the cat5e wire to let
   }
   )=====";
 
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "\"MQTTSubscribe\":["
+      "\"openhab_broadcast/nextion/group/#\""
+    "],"
+  "}";
+
 
 #endif
 
@@ -1896,7 +1924,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
 
   /***********************************
    * SECTION: System Configs
@@ -2025,7 +2053,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_DEBUG_LINE_HERE
 
-  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
 
   /***********************************
    * SECTION: System Configs
@@ -2067,6 +2095,15 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
 
     #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+        #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+        #define USE_MODULE_NETWORK_WEBSERVER
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+
 
   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   
@@ -2132,12 +2169,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 
+  
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
     "\"MQTTSubscribe\":["
-        "\"openhab_broadcast/nextion/group/hvac_home\""
-    "]"
+      "\"openhab_broadcast/nextion/group/#\""
+    "],"
   "}";
 
 
@@ -2200,7 +2239,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
 
-  
+
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   #define NEXTION_DEFAULT_PAGE_NUMBER 6
