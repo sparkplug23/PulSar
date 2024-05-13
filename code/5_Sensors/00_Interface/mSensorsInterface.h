@@ -50,6 +50,11 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)             
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR) "motion_event";
 
+#ifdef USE_MODULE_LIGHTS_INTERFACE
+#include <NeoPixelBus.h>
+#include <NeoPixelAnimator.h>
+#endif // USE_MODULE_LIGHTS_INTERFACE
+
 class mSensorsInterface :
   public mTaskerInterface
 {

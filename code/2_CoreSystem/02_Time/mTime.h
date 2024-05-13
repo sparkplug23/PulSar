@@ -57,6 +57,19 @@ typedef struct weektime{ // used for basic time info only for week period - RENA
 typedef struct TIMEREACHED_HANDLER{
   uint32_t millis = 0;
   uint8_t run = false;
+  void trigger()
+  {
+    run = true;
+  }
+  // void reset()
+  // {
+  //   millis = millis();
+  //   run = false;
+  // }
+  void trigger_with_backoff_ms(uint32_t backoff_ms)
+  {
+    millis = backoff_ms;
+  }
 }timereached_t;
 
 

@@ -372,10 +372,6 @@
   #define D_MODULE_CONTROLLER_TANKVOLUME_CTR              "mTankVolume"
   #define D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR              "tankvolume"
 //#endif
-//#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
-  #define D_MODULE_CONTROLLER_EXERCISEBIKE_CTR              "mExerciseBike"
-  #define D_MODULE_CONTROLLER_EXERCISEBIKE_FRIENDLY_CTR              "exercisebike"
-//#endif
 
 
 

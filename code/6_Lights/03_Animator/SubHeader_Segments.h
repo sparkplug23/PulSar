@@ -105,12 +105,12 @@ typedef struct Segment {
     uint8_t _brightness_cct = 255;
     void setBrightnessRGB(uint8_t bri_rgb) 
     {
-      Serial.printf("Setting brightness RGB: %d\n", bri_rgb);
+      // Serial.printf("Setting brightness RGB: %d\n", bri_rgb);
       _brightness_rgb = bri_rgb;
     }
     void setBrightnessCCT(uint8_t bri_ct) 
     {
-      Serial.printf("Setting brightness CCT: %d\n", bri_ct);
+      // Serial.printf("Setting brightness CCT: %d\n", bri_ct);
       _brightness_cct = bri_ct;
     }
     uint8_t getBrightnessRGB()

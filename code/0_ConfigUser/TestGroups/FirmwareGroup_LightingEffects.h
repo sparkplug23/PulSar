@@ -845,9 +845,6 @@
    * SECTION: Core Configs
   ************************************/    
 
-  // #define USE_MODULE_CORE_TIME2 // for now, time2 will be used at the same time as time1. If time1 is not defined, then "#define time2 time" style command will be used to switch to the new system.
-    // for now, attempt to get full tasmota style time working with its own module and mqtt telemetry. If it works, then it can be integrated into the core time module.
-
 
   /***********************************
    * SECTION: Network Configs

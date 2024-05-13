@@ -251,7 +251,7 @@ void mTaskerManager::addTasker(TaskerID id, mTaskerInterface* mod)
 }
 
 
-uint8_t mTaskerManager::Instance_Init(){
+uint8_t mTaskerManager::Instance_Init(){ //TOSORT
 
   // Core
   #ifdef USE_MODULE_CORE_HARDWAREPINS
@@ -271,9 +271,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif 
   #ifdef USE_MODULE_CORE_TIME
   addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
-  #endif 
-  #ifdef USE_MODULE_CORE_TIME2
-  addTasker(EM_MODULE_CORE_TIME2_ID, new mTime2());
   #endif 
   #ifdef USE_MODULE_CORE_RULES
   addTasker(EM_MODULE_CORE_RULES_ID, new mRuleEngine());
@@ -431,9 +428,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
     addTasker(EM_MODULE_SENSORS_LDR_BASIC_ID, new mLDRBasic());
   #endif
-  #ifdef USE_MODULE_SENSORS_ANALOG
-    addTasker(EM_MODULE_SENSORS_ANALOG_ID, new mSensorsAnalog());
-  #endif
   #ifdef USE_MODULE_SENSORS_DHT
     addTasker(EM_MODULE_SENSORS_DHT_ID, new mSensorsDHT());
   #endif
@@ -469,9 +463,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
     addTasker(EM_MODULE_SENSORS_ADC_INTERNAL_ID, new mADCInternal());
-  #endif
-  #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
-    addTasker(EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID, new mADC_I2S_Sampler());
   #endif
   #ifdef USE_MODULE_SENSORS_LSM303D
     addTasker(EM_MODULE_SENSORS_LSM303D_ID, new mSensorsLSM303D());
@@ -520,23 +511,14 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
     addTasker(EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, new mRelayStateLEDStrip());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
-    addTasker(EM_MODULE_CONTROLLER_IRTRANSMITTER_ID, new X());
-  #endif
   #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
     addTasker(EM_MODULE_CONTROLLER_TANKVOLUME_ID, new mTankVolume());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
-    addTasker(EM_MODULE_CONTROLLER_EXERCISEBIKE_ID, new X());
   #endif
   #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
     addTasker(EM_MODULE_CONTROLLER_SONOFF_IFAN_ID, new mSonoffIFan());
   #endif
   #ifdef USE_MODULE_CONTROLLER_FAN
     addTasker(EM_MODULE_CONTROLLER_FAN_ID, new mFan());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_TREADMILL
-    addTasker(EM_MODULE_CONTROLLER_TREADMILL_ID, new X());
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     addTasker(EM_MODULE_CONTROLLER_DOORBELL_ID, new mDoorBell());
@@ -576,9 +558,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
     addTasker(EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID, new mImmersionTankColour());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-    addTasker(EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID, new mHeatingStripColour_Understairs());
-  #endif
   #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
     addTasker(EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID, new mLouvoliteHub());
   #endif
@@ -590,12 +569,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
     addTasker(EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID, new mTempSensorOLEDBath());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_TESTER__ID, new mWLEDWebUI());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__ID, new mWLEDWebUI());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE
     addTasker(EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID, new mPrinter3D());

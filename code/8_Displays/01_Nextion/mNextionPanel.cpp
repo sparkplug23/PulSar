@@ -95,7 +95,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_JSON_COMMAND_ID:
     
-      if(!update_in_progress)
+      if(!update_in_progress && !pCONT_sup->arduino_ota_triggered)
         parse_JSONCommand(obj);
 
     break;

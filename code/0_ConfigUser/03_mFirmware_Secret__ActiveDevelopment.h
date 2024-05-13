@@ -22,7 +22,7 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+#define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
 // #define DEVICE_TREADMILL_POWER_MONITOR
 // #define DEVICE_LIGHTING__LED_MATRIX_BOX_01
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__10INCH
@@ -441,6 +441,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "BusType":"SK6812_RGBW",
           "Start":144,
           "Length":4
+        },
+        {
+          "Pin":4,
+          "ColourOrder":"GRBC",
+          "BusType":"SK6812_RGBW",
+          "Start":148,
+          "Length":144
         }
       ],
       "Segment0": {
@@ -492,7 +499,33 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "TimeMs": 200,
           "RateMs": 1000
         },
-        "BrightnessRGB": 100,
+        "BrightnessRGB": 0,
+        "BrightnessCCT": 0
+      },
+      "Segment2": {
+        "PixelRange": [
+          148,
+          292
+        ],
+        "ColourPalette":"Christmas RGPBO",
+        "PaletteMappingValues":[10,15,20],
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":100,
+          "BrightnessRGB":5
+        },
+        "Effects": {
+          "Function":"Static Palette",
+          "Speed":127,
+          "Intensity":255,
+          "Decimate":0,
+          "Grouping":1
+        },
+        "Transition": {
+          "TimeMs": 200,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 0,
         "BrightnessCCT": 0
       },
       "BrightnessRGB": 100,
@@ -515,6 +548,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
     #define MAX_ENERGY_SENSORS 4
     #define MAX_PZEM004T_DEVICES 4
+    #define ENABLE_DEVFEATURE_PZEM004T__AUTOSEARCH
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__ENERGY__INA219
     #define USE_MODULE_ENERGY_INA219

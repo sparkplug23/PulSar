@@ -2845,7 +2845,7 @@ void mSupport::SetSerialBaudrate(int baudrate)
 void mSupport::ClaimSerial(void)
 {
   // serial_local = true;
-  // AddLog(LOG_LEVEL_INFO, PSTR("SNS: Hardware Serial"));
+  AddLog(LOG_LEVEL_INFO, PSTR("SNS: Hardware Serial"));
   // SetSeriallog(LOG_LEVEL_NONE);
   // baudrate = Serial.baudRate();
   // Settings.baudrate = baudrate / 1200;
