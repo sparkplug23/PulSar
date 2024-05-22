@@ -210,6 +210,28 @@ void RgbcctColor::Lighten(uint8_t delta)
     }
 }
 
+/**
+ * @brief Use signed then constrain to stop rolling over causing colours to change
+ * 
+ * @param variance 
+ */
+void RgbcctColor::Variance(uint8_t variance)
+{
+    int16_t R_tmp = R + random(-variance, variance);
+    int16_t G_tmp = G + random(-variance, variance);
+    int16_t B_tmp = B + random(-variance, variance);
+    int16_t WW_tmp = WW + random(-variance, variance);
+    int16_t WC_tmp = WC + random(-variance, variance);
+
+    R = constrain(R_tmp, 0, 255);
+    G = constrain(G_tmp, 0, 255);
+    B = constrain(B_tmp, 0, 255);
+    WW = constrain(WW_tmp, 0, 255);
+    WC = constrain(WC_tmp, 0, 255);
+    
+}
+
+
 RgbcctColor RgbcctColor::LinearBlend(const RgbcctColor& left, const RgbcctColor& right, float progress)
 {
     return RgbcctColor( 
@@ -240,7 +262,6 @@ RgbcctColor RgbcctColor::BilinearBlend(const RgbcctColor& c00,
         c00.WW * v00 + c10.WW * v10 + c01.WW * v01 + c11.WW * v11 );
 }
 
-#ifdef ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
 
 HsbColor RgbcctColor::getHsbColor(void)
 {
@@ -292,12 +313,3 @@ void RgbcctColor::setHsbColor(HsbColor hsb)
   }
 
   
-//   void RgbcctColor::debug_print(char name*)
-//   {
-//     Serial.printf("%s = %d,%d,%d,%d,%d\n\r", name==nullptr?"":name, G, B, WC, WW);
-//   }
-
-
-
-
-#endif // ENABLE_DEVFEATURE_RGBCCT_MANIPULATION

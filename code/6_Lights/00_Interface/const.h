@@ -241,12 +241,32 @@
   #endif
 #endif
 
+// According to this post by Boris Lobo who is quite an expert in the ESP32:
+
+// The available duty levels are (2bit_num)-1, where bit_num can be 1-15.
+
+// The maximal frequency is 80000000 / 2bit_num
+
+// I made this table for you:
+
+// bits	frequency (Hz)
+// 8	312500
+// 9	156250
+// 10	78125
+// 11	39062.5
+// 12	19531.25
+// 13	9765.625
+// 14	4882.8125
+// 15	2441.40625
+// 16	1220.703125
+
+
 // PWM settings
 #ifndef WLED_PWM_FREQ
 #ifdef ESP8266
   #define WLED_PWM_FREQ    880 //PWM frequency proven as good for LEDs
 #else
-  #define WLED_PWM_FREQ  19531
+  #define WLED_PWM_FREQ  1000//78125 //19531
 #endif
 #endif
 

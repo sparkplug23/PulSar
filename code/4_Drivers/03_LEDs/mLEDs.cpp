@@ -305,7 +305,7 @@ void mLEDs::UpdateStatusBlink()
     if (pCONT_set->runtime.restart_flag || pCONT_set->runtime.ota_state_flag) {                 // Overrule blinks and keep led lit
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_WARN, PSTR("blinkstate phasing out for new method"));
+      AddLog(LOG_LEVEL_WARNING, PSTR("blinkstate phasing out for new method"));
       
 
     #endif //  ENABLE_LOG_LEVEL_INFO
@@ -597,10 +597,10 @@ void mLEDs::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mLEDs::MQTTHandler_Sender(uint8_t id)
+void mLEDs::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_LEDS_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_LEDS_ID, handle);
   }
 }
 

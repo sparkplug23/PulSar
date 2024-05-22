@@ -64,7 +64,7 @@ RgbwColor::RgbwColor(const RgbcctColor& color)
     R = color.R;
     G = color.G;
     B = color.B;
-    W = color.WW;
+    W = color.W1 > color.W2 ? color.W1 : color.W2; // Keep the maximum brightness
 }
 
 

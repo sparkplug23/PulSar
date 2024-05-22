@@ -213,6 +213,7 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
 bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
 {
 
+  if(!wire){ return false; } // Not started
   
   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
 

@@ -28,7 +28,8 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
       CallMQTTSenders();
     break;
     case FUNC_MQTT_CONNECTED:
-      // Load_New_Subscriptions_From_Function_Template();
+    ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
+      Load_New_Subscriptions_From_Function_Template();
     break;
     case FUNC_NETWORK_CONNECTION_ESTABLISHED:
 
@@ -61,17 +62,68 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
     case FUNC_UPTIME_10_MINUTES:
       flag_uptime_reached_reduce_frequency = true;
     break;     
+    case FUNC_MQTT_SUBSCRIBE:
+      MQTTSubscribe();
+    break;
   } // END switch
 
 } // END function
 
 
+void mMQTT::MQTTSubscribe()
+{
+
+  // Probably needs moved into main parsing, if this does not need redoing with each new connection, parsing it once may be enough. Or else, reparsing again.
+  
+  uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
+  char buffer[progmem_size];
+  memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+
+  JsonParser parser(buffer);
+  JsonParserObject rootObj = parser.getRootObject();   
+  if (!rootObj) 
+  {
+    ALOG_ERR(PSTR("DeserializationError with \"%s\""), buffer);
+    return;
+  } 
+  else
+  {
+    // ALOG_DBG(PSTR("Deserialization Success with \"%s\""), buffer);
+  }
+  
+  JsonParserToken jtok = 0;
+  JsonParserObject obj1 = 0;
+  char item_name[100] = {0};
+
+  // ALOG_INF(PSTR("ObjectNameID size %d"), rootObj["ObjectNameID"].size());
+
+  if(jtok = rootObj["MQTTSubscribe"])
+  {
+
+    for(auto val : jtok.getArray()) 
+    {
+      const char* val_string = val.getStr();
+      ALOG_HGL(PSTR("val = %s"), val_string);
+  
+      Subscribe(val_string, 0);
+
+    }
+      
+  }
+
+
+
+}
+
+
 void mMQTT::Load_New_Subscriptions_From_Function_Template()
 {
 
+  DEBUG_LINE_HERE
+
   #ifdef USE_FUNCTION_TEMPLATE  
   D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+  memcpy_P(data_buffer.payload.ctr, FUNCTION_TEMPLATE, sizeof(FUNCTION_TEMPLATE));
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
   ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif //USE_FUNCTION_TEMPLATE
@@ -90,12 +142,13 @@ void mMQTT::Load_New_Subscriptions_From_Function_Template()
       {
         const char* new_topic = v.getStr();
         ALOG_INF(PSTR("New Subscribe = \"%s\""), new_topic);
+        
+
       }
 
     }
 
   }
-
 }
 
 
@@ -207,9 +260,38 @@ boolean mMQTT::Publish(const char* topic, const char* payload, boolean retained)
     }
   }
 
+}
 
+
+
+/**
+ * @brief Transmit on any connected brokers with connection checking
+ * 
+ * @param topic 
+ * @param payload 
+ * @param retained 
+ * @return boolean 
+ */
+boolean mMQTT::Subscribe(const char* topic, uint8_t qos)
+{
+  
+  if(brokers.size())
+  {
+    // if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
+    // {
+      for (auto& broker : brokers)
+      {
+        if(broker->pubsub->connected())
+        {
+          return broker->pubsub->subscribe(topic);
+        }
+      }
+    }
+  // }
 
 }
+
+
 
 
 void mMQTT::setprefixtopic(const char* _prefixtopic){

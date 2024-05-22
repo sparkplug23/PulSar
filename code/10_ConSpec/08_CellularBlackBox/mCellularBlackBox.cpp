@@ -298,10 +298,10 @@ void mCellularBlackBox::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mCellularBlackBox::MQTTHandler_Sender(uint8_t id)
+void mCellularBlackBox::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID, handle);
   }
 }
 

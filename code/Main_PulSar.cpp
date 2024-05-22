@@ -2,7 +2,7 @@
  * @file    HomeControlSystem.cpp
  * @author  Michael Doone (michaeldoonehub@gmail.com)
  * @brief   Primary code setup() and loop()
- * @version 1.0
+ * @version 0.1
  * @date    2022-04-20
  * 
  * @copyright Copyright (c) 2022
@@ -22,7 +22,6 @@
  **/
 
 #include "1_TaskerManager/mTaskerManager.h"
-
 
 /*********************************************************************************************
  * Hardware related
@@ -211,7 +210,9 @@ void setup(void)
   Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
   #endif
   #ifdef USE_SERIAL_ALTERNATE_TX
-    Serial.set_tx(2);
+    #ifndef ESP32
+      Serial.set_tx(2);
+    #endif
   #endif
   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
   #ifndef DISABLE_SERIAL_LOGGING
@@ -245,13 +246,16 @@ void setup(void)
 
   pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;
-  
 
+  DEBUG_LINE_HERE
+  
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
  
   ALOG_DBM(PSTR("AddLog Started"));
+
+  DEBUG_LINE_HERE
 
 /********************************************************************************************
  ** Splash boot reason ***************************************************************************
@@ -275,12 +279,8 @@ void setup(void)
   #else // ESP32
     // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
   #endif // ESP32
+  DEBUG_LINE_HERE
 
-/********************************************************************************************
- ** Internal RTC Time PreInit ***************************************************************
- ********************************************************************************************/
-
-  pCONT_time->RtcPreInit();
 
 /********************************************************************************************
  ** File System : Init *****************************************************************************
@@ -326,11 +326,15 @@ void setup(void)
   pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;
 
+  ALOG_INF(PSTR("Log level for boot: %d"), saved_serial_loglevel);
+
 /********************************************************************************************
- ** OsWatch: To detect loop hangs that might happen during (OTA) upgrades  ******************
+ ** System OSWatch: To detect loop hangs that might happen during (OTA) upgrades  ******************
  ********************************************************************************************/
 
+#ifdef ENABLE_FEATURE_SYSTEM__OSWATCH_FOR_LOOP_HANGS
   // OsWatchInit();
+#endif
 
 /********************************************************************************************
  ** Fastboot ********************************************************************************
@@ -386,20 +390,24 @@ void setup(void)
  ** SERIAL: Change baud to module default if module has changed ****************************************
  ********************************************************************************************/
 
+#ifdef ENABLE_FEATURE_BOOT__RESET_BAUDRATE_ON_BOOT_WITH_MODULE_CHANGE
   // TasmotaGlobal.module_changed = (Settings->module != Settings->last_module);
   // if (TasmotaGlobal.module_changed) {
   //   Settings->baudrate = APP_BAUDRATE / 300;
   //   Settings->serial_config = TS_SERIAL_8N1;
   // }
   // SetSerialBaudrate(Settings->baudrate * 300);  // Reset serial interface if current baudrate is different from requested baudrate
+#endif // ENABLE_FEATURE_BOOT__RESET_BAUDRATE_ON_BOOT_WITH_MODULE_CHANGE
 
 /********************************************************************************************
  ** Quick Power Cycle ***********************************************************************
  ********************************************************************************************/
 
+#ifdef ENABLE_FEATURE_BOOT__QUICK_POWER_CYCLE_TO_CAUSE_MANUAL_RESET
   // if (1 == RtcReboot.fast_reboot_count) {      // Allow setting override only when all is well
   //   UpdateQuickPowerCycle(true);
   // }
+#endif // ENABLE_FEATURE_BOOT__QUICK_POWER_CYCLE_TO_CAUSE_MANUAL_RESET
 
 /********************************************************************************************
  ** Load Templates **************************************************************************
@@ -455,6 +463,9 @@ void setup(void)
     pCONT_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
   #endif
   #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
+  #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
+  pCONT->Tasker_Interface(FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID);
+  #endif // ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
 
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
@@ -488,7 +499,6 @@ void setup(void)
 
   pCONT_set->Settings.logging.serial_level = saved_serial_loglevel;
 
-
   /********************************************************************************************
    ** // For debugging, allow method to override init/loaded values **************************************************************************
   ********************************************************************************************/
@@ -509,8 +519,7 @@ void setup(void)
 
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
-  #endif
-  
+  #endif  
 
 }
 
@@ -524,46 +533,54 @@ void LoopTasker()
    
   pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
  
-  if(pCONT_time->uptime.seconds_nonreset > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
+  if(pCONT_time->UpTime() > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
  
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000))
   {
-    
+
+    /**Since this only gets checked every second, we can use the uptime ticking to make sure it runs just once*/
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
+    if(pCONT_time->UpTime()==ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS){
+      pCONT->Tasker_Interface(FUNC_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
+      pCONT->Tasker_Interface(FUNC_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
+      pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT_DELAYED);
+    }
+    #endif // ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
+
+
     pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
 
-    // if(pCONT_time->RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
-    // Make every minute trigger with uptime, not RTC time, this will make all firmware/devices trigger randomly at 1 minute intervals and stop race conditions with openhab
-    if((pCONT_time->uptime.seconds_nonreset%60)==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    if((pCONT_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
     
     if(
-      ((pCONT_time->uptime.seconds_nonreset%5)==0)&&
-      (pCONT_time->uptime.seconds_nonreset>20)
+      ((pCONT_time->UpTime()%5)==0)&&
+      (pCONT_time->UpTime()>20)
     ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
 
     if(
-      ((pCONT_time->uptime.seconds_nonreset%300)==0)&&
-      (pCONT_time->uptime.seconds_nonreset>60)
+      ((pCONT_time->UpTime()%300)==0)&&
+      (pCONT_time->UpTime()>60)
     ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
-    // Uptime triggers
-    if(pCONT_time->uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
-    if(pCONT_time->uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
-    if(pCONT_time->uptime.seconds_nonreset == 60){   pCONT->Tasker_Interface(FUNC_UPTIME_1_MINUTES); }
-    if(pCONT_time->uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
-    if(pCONT_time->uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+    // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
+    if(pCONT_time->UpTime() == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
+    if(pCONT_time->UpTime() == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
+    if(pCONT_time->UpTime() == 60){   pCONT->Tasker_Interface(FUNC_UPTIME_1_MINUTES); }
+    if(pCONT_time->UpTime() == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
+    if(pCONT_time->UpTime() == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
 
     // Check for midnight
-    if((pCONT_time->RtcTime.hour==0)&&(pCONT_time->RtcTime.minute==0)&&(pCONT_time->RtcTime.second==0)&&(pCONT_time->lastday_run != pCONT_time->RtcTime.Yday)){
-      pCONT_time->lastday_run = pCONT_time->RtcTime.Yday;
+    if((pCONT_time->RtcTime.hour==0)&&(pCONT_time->RtcTime.minute==0)&&(pCONT_time->RtcTime.second==0)&&(pCONT_time->lastday_run != pCONT_time->RtcTime.day_of_year)){
+      pCONT_time->lastday_run = pCONT_time->RtcTime.day_of_year;
       pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
     }
 
-    if(pCONT_time->uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+    if(pCONT_time->UpTime()==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
 
-    if(pCONT_time->uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+    if(pCONT_time->UpTime()==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
       
     pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
 
@@ -608,9 +625,11 @@ void LoopTasker()
 /*********************loop*******************************************************************/
 /********************************************************************************************/
 
-
+#ifdef ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
 void SmartLoopDelay()
 {
+  pCONT_sup->SleepDelay(20);
+
   // #ifndef DISABLE_SLEEP
   // if(pCONT_set->Settings.enable_sleep){
   //   if (pCONT_set->Settings.flag_network.sleep_normal) {
@@ -633,10 +652,9 @@ void SmartLoopDelay()
   // }
 
   
-  pCONT_sup->SleepDelay(20);
-
   // #endif
 }
+#endif // ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
 
 
 void loop(void)
@@ -662,18 +680,13 @@ void loop(void)
 
   // if(pCONT_sup->loop_runtime_millis > 500)
   // {
-  //   ALOG_ERR(PSTR("LONG_LOOP =============================================== %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+  //   ALOG_ERR(PSTR("LONG_LOOP ============= %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
   // }
 
-  /**
-   * @brief Until code has been stress tested, removing all delays to stop starving resources. This will need to be introduced later one device at a time.
-   * 
-   */
-  // #ifndef USE_MODULE_LIGHTS_INTERFACE // Temporarily remove delay, long term enable pausing delays while animations are running
-  // SmartLoopDelay();
-  // #endif // USE_MODULE_LIGHTS_INTERFACE
+  #ifdef ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
+  SmartLoopDelay();
+  #endif
 
-  DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; } // We cannot divide by 0
   pCONT_sup->loop_delay_temp = pCONT_set->runtime.sleep; 
   if (!pCONT_sup->loop_delay_temp) { pCONT_sup->loop_delay_temp++; }              // We cannot divide by 0

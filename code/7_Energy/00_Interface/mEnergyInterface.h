@@ -9,6 +9,9 @@
 
 #ifdef USE_MODULE_ENERGY_INTERFACE
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR)                 "unified";
+
+
 class mEnergyInterface :
   public mTaskerInterface
 {
@@ -59,17 +62,12 @@ class mEnergyInterface :
     
     std::vector<struct handler<mEnergyInterface>*> mqtthandler_list;
 
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mEnergyInterface> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mEnergyInterface> mqtthandler_sensor_ifchanged;
     struct handler<mEnergyInterface> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
-
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-    };
     
     #endif // USE_MODULE_NETWORK_MQTT
 
@@ -454,7 +452,7 @@ class mEnergyInterface :
 //     void MQTTHandler_Set_RefreshAll();
 //     void MQTTHandler_Set_DefaultPeriodRate();
     
-//     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+//     void MQTTHandler_Sender();
 
 //     struct handler<mEnergyInterface> mqtthandler_settings_teleperiod;
 //     struct handler<mEnergyInterface> mqtthandler_sensor_ifchanged;

@@ -12,17 +12,20 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     ALOG_INF(PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
   }
 
+  DEBUG_LINE_HERE;
   JsonParserObject obj = 0;
   
+  DEBUG_LINE_HERE;
   if(function == FUNC_JSON_COMMAND_ID)
   { 
     
-  ALOG_INF(PSTR("buffer_writer before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+  ALOG_DBM(PSTR("buffer_writer before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
   // Serial.println(data_buffer.payload.ctr);
   // delay(1000);
     JsonParser parser(data_buffer.payload.ctr);
-  ALOG_INF(PSTR("buffer_writer after parser ------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
+  ALOG_DBM(PSTR("buffer_writer after parser ------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
 
+  DEBUG_LINE_HERE;
   if(JBI->GetBufferSize()==0)
   {
     Serial.println("error occured");
@@ -30,14 +33,17 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     return 0;
   }
     
+  DEBUG_LINE_HERE;
     // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
     obj = parser.getRootObject();   
     if (!obj) {
       ALOG_ERR(PM_JSON_DESERIALIZATION_ERROR);
+  DEBUG_LINE_HERE;
       return 0;
     }else{
-      ALOG_HGL(PSTR("JSON PARSED OK"));
+      ALOG_DBG(PSTR("JSON PARSED OK"));
 
+  DEBUG_LINE_HERE;
       // JsonParserToken jtok = 0; 
       // if(jtok = obj["Segment0"])
       // {
@@ -48,38 +54,48 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
     }
 
+  DEBUG_LINE_HERE;
     for(uint8_t i=0;i<GetClassCount();i++)
     { 
       
+  DEBUG_LINE_HERE;
       switch_index = target_tasker ? GetEnumNumber_UsingModuleUniqueID(target_tasker) : i; // passed value module is in unique_module_id format
       
+  DEBUG_LINE_HERE;
       pModule[switch_index]->Tasker(function, obj);
 
+  DEBUG_LINE_HERE;
       if(target_tasker) {
         ALOG_DBG( PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"), target_tasker, GetModuleFriendlyName_WithUniqueID(target_tasker) );
         break; 
       }
+  DEBUG_LINE_HERE;
 
     }
     
+  DEBUG_LINE_HERE;
     return 0; // needs to return via "Tasker"
   } 
 
+  DEBUG_LINE_HERE;
   #ifdef  ENABLE_DEBUG_FUNCTION_NAMES
     char buffer_taskname[50];
   #endif
 
+  DEBUG_LINE_HERE;
   /**
    * @brief ==============================================================================================================================
    **/
   for(uint8_t i=0;i<GetClassCount();i++)
   {     
         
+  DEBUG_LINE_HERE;
     // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
     
     // If target_tasker != 0, then use it, else, use indexed array
     switch_index = target_tasker ? GetEnumNumber_UsingModuleUniqueID(target_tasker) : i; // passed value module is in unique_module_id format
       
+  DEBUG_LINE_HERE;
     #ifdef ENABLE_ADVANCED_DEBUGGING
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
@@ -90,9 +106,11 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       if(pCONT_time->uptime_seconds_nonreset<ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS)
       {
       #endif
+  DEBUG_LINE_HERE;
         AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIS_%d\t %02d %02d T:%S\tM:%S"), millis(), switch_index, i, 
         GetTaskName(function, buffer_taskname), 
-        GetModuleFriendlyName(switch_index));      
+        GetModuleFriendlyName(switch_index));  
+  DEBUG_LINE_HERE;    
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       }
       #endif
@@ -101,13 +119,19 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       #endif
     #endif // ENABLE_DEBUG_FUNCTION_NAMES
     #endif // ENABLE_ADVANCED_DEBUGGING    
+    #ifdef ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS
+    uint32_t long_start_millis = millis();
+    #endif
 
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t start_millis = millis();
     ALOG_INF(PSTR("buffer_writer START ------------------------------- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif
-    
+
     pModule[switch_index]->Tasker(function, obj);    
+
+    // if(millis()-long_start_millis > 100)
+    //   Serial.printf("time %d %d %d\n\r", millis()-long_start_millis, switch_index, function);
 
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t end_millis = millis(); // Remember start millis
@@ -120,6 +144,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       debug_module_time[switch_index].max_function_id = function;
     }
     #endif 
+  DEBUG_LINE_HERE;
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
     ALOG_INF(PSTR("buffer_writerT ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
@@ -130,6 +155,18 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       }
     #endif
     #endif // ENABLE_ADVANCED_DEBUGGING
+    #ifdef ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS
+    uint32_t long_end_millis = millis() - long_start_millis;
+    if(long_end_millis > ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS)
+    {
+      #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+      char buffer_taskname2[50];
+      ALOG_WRN(PSTR(D_LOG_CLASSLIST "LONG: %d|%d-%S %d-%s %d"), switch_index,i,GetModuleFriendlyName(switch_index), function,GetTaskName(function, buffer_taskname2), long_end_millis);
+      #else
+      ALOG_WRN(PSTR(D_LOG_CLASSLIST "TASKER LONG LOOP %d %d %d"), switch_index, function, long_end_millis);      
+      #endif
+    }
+    #endif
 
     if(target_tasker!=0)
     {
@@ -137,6 +174,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       break; //only run for loop for the class set. if 0, rull all
     }
     
+  DEBUG_LINE_HERE;
     // Special flag that can be set to end interface ie event handled, no need to check others
     if(fExitTaskerWithCompletion)
     {
@@ -147,6 +185,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   
   } // end for
 
+  DEBUG_LINE_HERE;
 
   #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
   if(!pCONT_set->flag_boot_complete){
@@ -236,46 +275,59 @@ void mTaskerManager::addTasker(TaskerID id, mTaskerInterface* mod)
 }
 
 
-uint8_t mTaskerManager::Instance_Init(){
-
-  // Core
-  #ifdef USE_MODULE_CORE_HARDWAREPINS
-  addTasker(EM_MODULE_CORE_HARDWAREPINS_ID, new mHardwarePins());
-  #endif 
+uint8_t mTaskerManager::Instance_Init()
+{
+    
+  /**
+   * @brief Core Modules
+   **/
   #ifdef USE_MODULE_CORE_SETTINGS
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif 
-  #ifdef USE_MODULE_CORE_SUPPORT
-  addTasker(EM_MODULE_CORE_SUPPORT_ID, new mSupport());
+  #ifdef USE_MODULE_CORE_TIME
+  addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
+  #endif 
+  #ifdef USE_MODULE_CORE_HARDWAREPINS
+  addTasker(EM_MODULE_CORE_HARDWAREPINS_ID, new mHardwarePins());
   #endif 
   #ifdef USE_MODULE_CORE_LOGGING
   addTasker(EM_MODULE_CORE_LOGGING_ID, new mLogging());
   #endif 
+  #ifdef USE_MODULE_CORE_SUPPORT
+  addTasker(EM_MODULE_CORE_SUPPORT_ID, new mSupport());
+  #endif 
   #ifdef USE_MODULE_CORE_TELEMETRY
   addTasker(EM_MODULE_CORE_TELEMETRY_ID, new mTelemetry());
-  #endif 
-  #ifdef USE_MODULE_CORE_TIME
-  addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
   #endif 
   #ifdef USE_MODULE_CORE_RULES
   addTasker(EM_MODULE_CORE_RULES_ID, new mRuleEngine());
   #endif
   #ifdef USE_MODULE_CORE_UPDATES
-  addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());  // this should be enabled by default and OTA/HTTP flashing moved here
+  addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());
+  #endif
+  #ifdef USE_MODULE_CORE_SERIAL_UART
+  addTasker(EM_MODULE_CORE_SERIAL_UART_ID, new mSerialUART());
   #endif
   #ifdef USE_MODULE_CORE__SERIAL
-  addTasker(TaskerID::CORE__SERIAL, new mSerial());  // this should be enabled by default and OTA/HTTP flashing moved here
+    INCLUDE_FIX"2_CoreSystem/15_SerialUART/mSerial.h"
+    #define   tkr_Serial                              static_cast<mSerial*>(pCONT->pModule[TaskerID::CORE__SERIAL])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID, new mDevelopmentDebugging());
-  #endif
-  
-  // Network  
+  #endif 
+  /**
+   * @brief Network
+   **/
   #ifdef USE_MODULE_NETWORK_INTERFACE
   addTasker(EM_MODULE__NETWORK_INTERFACE__ID, new mInterfaceNetwork());
   #endif 
   #ifdef USE_MODULE_NETWORK_WIFI
   addTasker(EM_MODULE_NETWORK_WIFI_ID, new mWiFi());
+  #endif 
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+    //EM_MODULE_NETWORK_ETHERNET_ID,
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif 
   #ifdef USE_MODULE_NETWORK_CELLULAR
   addTasker(EM_MODULE__NETWORK_CELLULAR__ID, new mCellular());
@@ -286,299 +338,444 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   addTasker(EM_MODULE_NETWORK_WEBSERVER_ID, new mWebServer());
   #endif
-
-  // Displays
-  #ifdef USE_MODULE_DISPLAYS_INTERFACE
-    addTasker(EM_MODULE_DISPLAYS_INTERFACE_ID, new mDisplaysInterface());
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
-    addTasker(EM_MODULE_DISPLAYS_NEXTION_ID, new mNextionPanel());
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
-    addTasker(EM_MODULE_DISPLAYS_OLED_SSD1306_ID, new mOLED_SSD1306());
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-    addTasker(EM_MODULE_DISPLAYS_OLED_SH1106_ID, new mOLED_SH1106());
-  #endif
-
-  // Drivers
+  /**
+   * @brief Displays
+   **/
   #ifdef USE_MODULE_DRIVERS_INTERFACE
-    addTasker(EM_MODULE_DRIVERS_INTERFACE_ID, new mDriverInterface());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_HBRIDGE
-    addTasker(EM_MODULE_DRIVERS_HBRIDGE_ID, new X());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-    addTasker(EM_MODULE_DRIVERS_IRTRANSCEIVER_ID, new X());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
-    addTasker(EM_MODULE_DRIVERS_RELAY_ID, new mRelays());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_PWM
-    addTasker(EM_MODULE_DRIVERS_PWM_ID, new mPWM());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-    addTasker(EM_MODULE_DRIVERS_SDCARD_ID, new mSDCard());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    addTasker(EM_MODULE_DRIVERS_SERIAL_UART_ID, new mSerialUART());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-    addTasker(EM_MODULE_DRIVERS_SHELLY_DIMMER_ID, new mShellyDimmer());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-    addTasker(EM_MODULE_DRIVERS_CAMERA_OV2640_ID, new mCameraOV2640());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
-    addTasker(EM_MODULE_DRIVERS_CAMERA_OV2640_ID, new mCameraOV2640());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
-    addTasker(EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID, new mWebCamera());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_LEDS
-    addTasker(EM_MODULE_DRIVERS_LEDS_ID, new mLEDs());
+  addTasker(EM_MODULE_DRIVERS_INTERFACE_ID, new mDriverInterface());
   #endif
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-    addTasker(EM_MODULE_DRIVERS_FILESYSTEM_ID, new mFileSystem());
+  addTasker(EM_MODULE_DRIVERS_FILESYSTEM_ID, new mFileSystem());
   #endif
-  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-    addTasker(EM_MODULE__DRIVERS_BUZZER_BASIC__ID, new mBuzzer());
+  #ifdef USE_MODULE_DRIVERS_LEDS
+  INCLUDE_FIX"4_Drivers/03_LEDs/mLEDs.h"
+    #define pCONT_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_DRIVERS_BUZZER
-    addTasker(EM_MODULE_DRIVERS_BUZZER_ID, new mBuzzer());
+  #ifdef USE_MODULE_DRIVERS_RELAY
+  addTasker(EM_MODULE_DRIVERS_RELAY_ID, new mRelays());
   #endif
-  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
-    addTasker(EM_MODULE_DRIVERS_RF433_RCSWITCH_ID, new mRCSwitch());
+  #ifdef USE_MODULE_DRIVERS_PWM
+    INCLUDE_FIX"4_Drivers/PWM/mPWM.h"
+    #define pCONT_pwm                                 static_cast<mPWM*>(pCONT->pModule[EM_MODULE_DRIVERS_PWM_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-    addTasker(EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID, new mRCSwitch());
+  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+    INCLUDE_FIX"4_Drivers/IRDevices/mIRtransceiver.h"
+    #define pCONT_mdirt                               static_cast<mIRtransceiver*>(pCONT->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS_IRREMOTE
-    addTasker(EM_MODULE_DRIVERS_IRREMOTE_ID, new mIRRemote());
+  INCLUDE_FIX"4_Drivers/IRRemote/mIRRemote.h"
+    #define pCONT_ir_remote                           static_cast<mIRRemote*>(pCONT->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-    addTasker(EM_MODULE_DRIVERS_FONA_CELLULAR_ID, new mFona_Cellular());
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+    INCLUDE_FIX"4_Drivers/09_RCSwitch/mRCSwitch.h"
+    #define pCONT_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
-    addTasker(EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID, new mCellular_SIM7000());
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    INCLUDE_FIX"4_Drivers/10_RCSwitch_Extended/mRCSwitch_Extended.h"
+    #define pCONT_rcswitch                            static_cast<mRCSwitch*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_HBRIDGE
+    INCLUDE_FIX"4_Drivers/Motors/HBridgeL9110/mHBridge.h"
+    #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+    INCLUDE_FIX"4_Drivers/SD/mSDCard.h"
+    #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+    INCLUDE_FIX"4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
+    #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+    INCLUDE_FIX"4_Drivers/20_Buzzer_Basic/mBuzzer.h"
+    #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
+    INCLUDE_FIX"4_Drivers/21_Buzzer_Tones/mBuzzer.h"
+    #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
+    INCLUDE_FIX"4_Drivers/50_CAM_OV2640/mCamera.h"
+    #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
+    INCLUDE_FIX"4_Drivers/Camera_OV2640/mCameraOV2640.h"
+    #define pCONT_camera                              static_cast<mCameraOV2640*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
+    INCLUDE_FIX"4_Drivers/51_WebCam/mWebCam.h"
+    #define pCONT_camera                              static_cast<mWebCam*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
+    INCLUDE_FIX"4_Drivers/52_WebCamera/mWebCamera.h"
+    #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
-    addTasker(EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID, new mWebCamera());
+    INCLUDE_FIX"4_Drivers/60_WebCam_Arduino/mWebCam.h"
+    #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
-    addTasker(EM_MODULE_DRIVERS__CAMERA_TASMOTA__ID, new mWebCamera());
+    INCLUDE_FIX"4_Drivers/61_WebCam_Tas/mWebCam.h"
+    #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_TASMOTA__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
-    addTasker(EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID, new mWebCamera());
+    INCLUDE_FIX"4_Drivers/52_WebCamera/mWebCamera.h"
+    #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    INCLUDE_FIX"4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
+    #define pCONT_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+    INCLUDE_FIX"4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
+    #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+    INCLUDE_FIX"4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
+    #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-    addTasker(EM_MODULE_DRIVERS__MODEM_7000G__ID, new mSIM7000G());
+  INCLUDE_FIX"4_Drivers/80_Modem_SIM7000G/mSIM7000G.h"
+    #define pCONT_sim7000g                           static_cast<mSIM7000G*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_7000G__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS_MODEM_800L
-    addTasker(EM_MODULE_DRIVERS__MODEM_800L__ID, new mSIM800L());
+  INCLUDE_FIX"4_Drivers/81_Modem_SIM800L/mSIM800L.h"
+    #define pCONT_sim800l                           static_cast<mSIM800L*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-
-  // Energy
-  #ifdef USE_MODULE_ENERGY_INTERFACE
-    addTasker(EM_MODULE_ENERGY_INTERFACE_ID, new mEnergyInterface());
-  #endif
-  #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-    addTasker(EM_MODULE_ENERGY_PZEM004T_V3_ID, new mEnergyPZEM004T());
-  #endif
-  #ifdef USE_MODULE_ENERGY_ADE7953
-    addTasker(EM_MODULE_ENERGY_ADE7953_ID, new mEnergyADE7953());
-  #endif
-  #ifdef USE_MODULE_ENERGY_INA219
-    addTasker(EM_MODULE_ENERGY_INA219_ID, new mEnergyINA219());
-  #endif
-
-  // Lights
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-    addTasker(EM_MODULE_LIGHTS_INTERFACE_ID, new mInterfaceLight());
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    addTasker(EM_MODULE_LIGHTS_ANIMATOR_ID, new mAnimatorLight());
-  #endif
-
-  // Sensors
+  /**
+   * @brief Sensors
+   **/
   #ifdef USE_MODULE_SENSORS_INTERFACE
-    addTasker(EM_MODULE_SENSORS_INTERFACE_ID, new mSensorsInterface());
-  #endif
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-    addTasker(EM_MODULE_SENSORS_BUTTONS_ID, new mButtons());
+  addTasker(EM_MODULE_SENSORS_INTERFACE_ID, new mSensorsInterface());
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
-    addTasker(EM_MODULE_SENSORS_SWITCHES_ID, new mSwitches());
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSwitches());
   #endif
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC
-    addTasker(EM_MODULE_SENSORS_LDR_BASIC_ID, new mLDRBasic());
-  #endif
-  #ifdef USE_MODULE_SENSORS_ANALOG
-    addTasker(EM_MODULE_SENSORS_ANALOG_ID, new mSensorsAnalog());
-  #endif
-  #ifdef USE_MODULE_SENSORS_DHT
-    addTasker(EM_MODULE_SENSORS_DHT_ID, new mSensorsDHT());
+  #ifdef USE_MODULE_SENSORS_BUTTONS
+  addTasker(EM_MODULE_SENSORS_BUTTONS_ID, new mButtons());
   #endif
   #ifdef USE_MODULE_SENSORS_BME
-    addTasker(EM_MODULE_SENSORS_BME_ID, new mBME());
+  addTasker(EM_MODULE_SENSORS_BME_ID, new mBME());
   #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    addTasker(EM_MODULE_SENSORS_ULTRASONIC_ID, new mUltraSonicSensor());
-  #endif
-  #ifdef USE_MODULE_SENSORS_DOOR
-    addTasker(EM_MODULE_SENSORS_DOOR_ID, new mDoorSensor());
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-    addTasker(EM_MODULE_SENSORS_MOTION_ID, new mMotion());
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOISTURE
-    addTasker(EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID, new X());
-  #endif
-  #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-    addTasker(EM_MODULE_SENSORS_PULSECOUNTER_ID, new X());
+  #ifdef USE_MODULE_SENSORS_DHT
+  addTasker(EM_MODULE_SENSORS_DHT_ID, new mSensorsDHT());
   #endif
   #ifdef USE_MODULE_SENSORS_BH1750
-    addTasker(EM_MODULE_SENSORS_BH1750_ID, new mBH1750());
+  addTasker(EM_MODULE_SENSORS_BH1750_ID, new mBH1750());
   #endif
-  #ifdef USE_MODULE_SENSORS_SR04
-    addTasker(EM_MODULE_SENSORS_SR04_ID, new mSR04());
+  #ifdef USE_MODULE_SENSORS_MOTION
+  addTasker(EM_MODULE_SENSORS_MOTION_ID, new mMotion());
   #endif
-  #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
-    addTasker(EM_MODULE_SENSORS_REMOTE_DEVICE_ID, new mRemoteDevice());
-  #endif
-  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
-    addTasker(EM_MODULE_SENSORS_ADC_INTERNAL_ID, new mADCInternal());
-  #endif
-  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-    addTasker(EM_MODULE_SENSORS_ADC_INTERNAL_ID, new mADCInternal());
-  #endif
-  #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
-    addTasker(EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID, new mADC_I2S_Sampler());
-  #endif
-  #ifdef USE_MODULE_SENSORS_LSM303D
-    addTasker(EM_MODULE_SENSORS_LSM303D_ID, new mSensorsLSM303D());
+  #ifdef USE_MODULE_SENSORS_DOOR
+    INCLUDE_FIX"5_Sensors/11_Door/mDoorSensor.h"
+    #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS_L3G
-    addTasker(EM_MODULE_SENSORS_L3G_ID, new mSensorsL3G());
+    INCLUDE_FIX"5_Sensors/L3GD20_3Axis_Gryo/mSensorsL3G.h"
+    #define pCONT_L3G                      static_cast<mSensorsL3G*>(pCONT->pModule[EM_MODULE_SENSORS_L3G_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_SENSORS_LDR_BASIC
+  addTasker(EM_MODULE_SENSORS_LDR_BASIC_ID, new mLDRBasic());
+  #endif
+  #ifdef USE_MODULE_SENSORS_LSM303D
+    INCLUDE_FIX"5_Sensors/LSM303D_3Axis_AccMag/mSensorsLSM303D.h"
+    #define pCONT_LSM303D                      static_cast<mSensorsLSM303D*>(pCONT->pModule[EM_MODULE_SENSORS_LSM303D_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOISTURE
+    INCLUDE_FIX"5_Sensors/Moisture/mMoistureSensor.h"
+    #define pCONT_srmoisture                      static_cast<mMoistureSensor*>(pCONT->pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_SENSORS_SR04
+    INCLUDE_FIX"5_Sensors/17_SR04/mSR04.h"
+    #define pCONT_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS_MPU9250
-    addTasker(EM_MODULE_SENSORS_MPU9250_ID, new mSensorsMPU9250());
+    INCLUDE_FIX"5_Sensors/MPU9250/mSensorsMPU9250.h"
+    #define pCONT_MPU9250                      static_cast<mSensorsMPU9250*>(pCONT->pModule[EM_MODULE_SENSORS_MPU9250_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
+    INCLUDE_FIX"5_Sensors/PulseCounter/mPulseCounter.h"
+    #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
+    INCLUDE_FIX"5_Sensors/20_RemoteDevice/mRemoteDevice.h"
+    #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
-    addTasker(EM_MODULE_SENSORS_ROTARY_ENCODER_ID, new mRotaryEncoder());
-  #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-    addTasker(EM_MODULE_SENSORS_ROTARY_ENCODER_ID, new mDB18x20_ESP32());
-  #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-    addTasker(EM_MODULE_SENSORS__DS18X20__ID, new mDB18x20_ESP8266());
-  #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    addTasker(EM_MODULE_SENSORS__DS18X20__ID, new mDB18x20_ESP32());
-  #endif
-  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-    addTasker(EM_MODULE__SENSORS_GPS_SERIAL__ID, new mGPS_Serial());
-  #endif
-  #ifdef USE_MODULE_SENSORS_GPS_MODEM
-    addTasker(EM_MODULE__SENSORS_GPS_MODEM__ID, new mGPS_Modem());
-  #endif
-  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-    addTasker(EM_MODULE__SENSORS_BATTERY_MODEM__ID, new mDB18x20_ESP32());
+    INCLUDE_FIX"5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
+    #define pCONT_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
   addTasker(EM_MODULE_SENSORS_SOLAR_LUNAR_ID, new mSolarLunar());
   #endif
-
-  // Controllers
-  #ifdef USE_MODULE_CONTROLLER_BLINDS
-    addTasker(EM_MODULE_CONTROLLER_BLINDS_ID, new X());
+  #ifdef USE_MODULE_SENSORS_ULTRASONICS
+    INCLUDE_FIX"5_Sensors/UltraSonic/mUltraSonicSensor.h"
+    #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_HVAC
-    addTasker(EM_MODULE_CONTROLLER__HVAC__ID, new mHVAC());
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
+    INCLUDE_FIX"5_Sensors/30_ADCInternal_ESP82/mADCInternal.h"
+    #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
-    addTasker(EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, new mSensorColourBar());
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+    INCLUDE_FIX"5_Sensors/31_ADCInternal_ESP32/mADCInternal.h"
+    #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
-    addTasker(EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, new mRelayStateLEDStrip());
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
+    INCLUDE_FIX"5_Sensors/40_ds18x20/mDB18x20.h"
+    #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
-    addTasker(EM_MODULE_CONTROLLER_IRTRANSMITTER_ID, new X());
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  addTasker(EM_MODULE_SENSORS__DS18X20__ID, new mDB18x20_ESP32());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
-    addTasker(EM_MODULE_CONTROLLER_TANKVOLUME_ID, new mTankVolume());
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
+    INCLUDE_FIX"5_Sensors/50_GPS_Serial/mGPS_Serial.h"
+    #define pCONT_gps                                 static_cast<mGPS_Serial*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
-    addTasker(EM_MODULE_CONTROLLER_EXERCISEBIKE_ID, new X());
+  #ifdef USE_MODULE_SENSORS_GPS_MODEM
+    INCLUDE_FIX"5_Sensors/51_GPS_Modem/mGPS_Modem.h"
+    #define pCONT_gps                                 static_cast<mGPS_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
+  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+    INCLUDE_FIX"5_Sensors/52_Battery_Modem/mBattery_Modem.h"
+    #define pCONT_batt_modem                                 static_cast<mBattery_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  /**
+   * @brief Lights
+   **/
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  addTasker(EM_MODULE_LIGHTS_INTERFACE_ID, new mInterfaceLight());
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
+  addTasker(EM_MODULE_LIGHTS_ANIMATOR_ID, new mAnimatorLight());
+  #endif
+  /**
+   * @brief Energy
+   **/
+  #ifdef USE_MODULE_ENERGY_INTERFACE
+  addTasker(EM_MODULE_ENERGY_INTERFACE_ID, new mEnergyInterface());
+  #endif
+  #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+  addTasker(EM_MODULE_ENERGY_PZEM004T_V3_ID, new mEnergyPZEM004T());
+  #endif
+  #ifdef USE_MODULE_ENERGY_ADE7953
+    INCLUDE_FIX"7_Energy/02_ADE7953/mADE7953.h"
+    #define pCONT_ade7953                         static_cast<mEnergyADE7953*>(pCONT->pModule[EM_MODULE_ENERGY_ADE7953_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_ENERGY_INA219
+  addTasker(EM_MODULE_ENERGY_INA219_ID, new mEnergyINA219());
+  #endif
+  /**
+   * @brief Displays
+   **/
+  #ifdef USE_MODULE_DISPLAYS_INTERFACE
+  addTasker(EM_MODULE_DISPLAYS_INTERFACE_ID, new mDisplaysInterface());
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
+  addTasker(EM_MODULE_DISPLAYS_NEXTION_ID, new mNextionPanel());
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+    INCLUDE_FIX"8_Displays/02_OLED_SSD1606/mOLED_SSD1306.h"
+    #define pCONT_oled1306                            static_cast<mOLED_SSD1306*>(pCONT->pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+  addTasker(EM_MODULE_DISPLAYS_OLED_SH1106_ID, new mOLED_SH1106());
+  #endif
+  /**
+   * @brief Controller Generic (Generic)
+   **/
   #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
-    addTasker(EM_MODULE_CONTROLLER_SONOFF_IFAN_ID, new mSonoffIFan());
+    INCLUDE_FIX"9_Controller/03_Sonoff_iFan/mSonoffIFan.h"
+    #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_FAN
-    addTasker(EM_MODULE_CONTROLLER_FAN_ID, new mFan());
+    INCLUDE_FIX"9_Controller/Fan/mFan.h"
+    #define pCONT_mfan                            static_cast<mFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_FAN_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_TREADMILL
-    addTasker(EM_MODULE_CONTROLLER_TREADMILL_ID, new X());
+  // 3d printer encoder here
+  #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
+    INCLUDE_FIX"9_Controller/08_TankVolume/mTankVolume.h"
+    #define pCONT_tankvolume                      static_cast<mTankVolume*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-    addTasker(EM_MODULE_CONTROLLER_DOORBELL_ID, new mDoorBell());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
-    addTasker(EM_MODULE_CONTROLLER_SDCARDLOGGER_ID, new mSDCardLogger());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
-    addTasker(EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID, new mSerialPositionalLogger());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
-    addTasker(EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID, new mSerialCalibrationMeasurmentLogger());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
-    addTasker(EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID, new mGPS_SD_Logger());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
-    addTasker(EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID, new mSDLoggerIMURadiationPattern());
+  #ifdef USE_MODULE_CONTROLLER_BLINDS
+    INCLUDE_FIX"9_Controller/Blinds/mBlinds.h"
+    #define pCONT_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
-    addTasker(EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID, new mBucketWaterLevel());
+    INCLUDE_FIX"9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
+    #define pCONT_bucket_water_level                static_cast<mBucketWaterLevel*>(pCONT->pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
-    addTasker(EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID, new mFurnaceSensor());
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+    INCLUDE_FIX"9_Controller/DoorBell/mDoorBell.h"
+    #define pCONT_doorbell                        static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
-    addTasker(EM_MODULE_CONTROLLER_USERMOD_01_ID, new mUserMod_01());
+  #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
+    INCLUDE_FIX"9_Controller/GPS_SD_Logger/mGPS_SD_Logger.h"
+    #define pCONT_gps_sd_log                  static_cast<mGPS_SD_Logger*>(pCONT->pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+    #define pCONT_serial_pos_log  pCONT_gps_sd_log
   #endif
-  
-  // Custom Controllers
+  #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
+    INCLUDE_FIX"9_Controller/SDCardLogger/mSDCardLogger.h"
+    #define pCONT_sdcardlogger                    static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  // USE_MODULE_CONTROLLER_UARTLOGGER
+  // USE_MODULE_CONTROLLER_INTERNAL_CLOCK
+  #ifdef USE_MODULE_CONTROLLER_HVAC
+  addTasker(EM_MODULE_CONTROLLER__HVAC__ID, new mHVAC());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
+    INCLUDE_FIX"9_Controller/41_HVAC_Remote/mHVAC.h"
+    #define pCONT_hvac_remote                        static_cast<mHVAC_Remote*>(pCONT->pModule[EM_MODULE_CONTROLLER__HVAC_REMOTE__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+  addTasker(EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, new mSensorColourBar());
+  #endif
+  #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+  addTasker(EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, new mRelayStateLEDStrip());
+  #endif
+  // 50_Animator_Input_Controller
+  // 51_Animator_Playlists
+  #ifdef USE_MODULE_CONTROLLER__ENERGY_OLED
+    INCLUDE_FIX"9_Controller/60_EnergyOnOLED/mEnergyOnOLED.h"
+    #define pCONT_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER__ENERGY_OLED__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  /**
+   * @brief 10 Controller Custom
+   **/  
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-    addTasker(EM_MODULE_CONTROLLER_RADIATORFAN_ID, new mRadiatorFan());
+    INCLUDE_FIX"10_ConSpec/00_RadiatorFan/mRadiatorFan.h"
+    #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-    addTasker(EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID, new mImmersionTankColour());
+    INCLUDE_FIX"10_ConSpec/01_ImmersionTankColour/mImmersionTankColour.h"
+    #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-    addTasker(EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID, new mHeatingStripColour_Understairs());
+  #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
+    INCLUDE_FIX"10_ConSpec/03_FurnaceSensor/mFurnaceSensor.h"
+    #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
-    addTasker(EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID, new mLouvoliteHub());
+  #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+    INCLUDE_FIX"10_ConSpec/04_LouvoliteHub/mLouvoliteHub.h"
+    #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2
+    INCLUDE_FIX"10_ConSpec/04v2_LouvoliteHub/mLouvoliteHub.h"
+    #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID, new mSideDoorLight());
+    INCLUDE_FIX"10_ConSpec/05_SideDoorLight/mSideDoorLight.h"
+    #define pCONT_sdlight                static_cast<mSideDoorLight*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID, new mImmersionPanel());
+    INCLUDE_FIX"10_ConSpec/06_ImmersionPanel/mImmersionPanel.h"
+    #define pCONT_immersion_cont         static_cast<mImmersionPanel*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID, new mTempSensorOLEDBath());
+    INCLUDE_FIX"10_ConSpec/07_TempSensorOnOLED/mTempSensorOLEDBath.h"
+    #define pCONT_immersion_cont         static_cast<mTempSensorOLEDBath*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_TESTER__ID, new mWLEDWebUI());
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+    INCLUDE_FIX"10_ConSpec/08_CellularBlackBox/mCellularBlackBox.h"
+    #define pCONT_immersion_cont         static_cast<mCellularBlackBox*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__ID, new mWLEDWebUI());
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+    INCLUDE_FIX"10_ConSpec/09_mMAVLink_Decoder_OLED/mMAVLink_Decoder_OLED.h"
+    #define pCONT_cont_mavlinoled         static_cast<mMAVLink_Decoder_OLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
+  addTasker(EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID, new mEnergyOLED());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE
-    addTasker(EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID, new mPrinter3D());
+    INCLUDE_FIX"10_ConSpec/11_3DPrinterEnclosure/Printer3D.h"
+    #define pCONT_3dprinter        static_cast<mPrinter3D*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
+    INCLUDE_FIX"10_ConSpec/12_TreadmillLogger/mTreadmillLogger.h"
+    #define pCONT_treadmill        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER__ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
+    INCLUDE_FIX"9_Controller/SDLoggerIMURadiationPattern/mSDLogger.h"
+    #define pCONT_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+    INCLUDE_FIX"9_Controller/SerialPositionalLogger/mSerialPositionalLogger.h"
+    #define pCONT_serial_pos_log                  static_cast<mSerialPositionalLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
+    INCLUDE_FIX"9_Controller/SerialCalibrationMeasurmentLogger/mSerialCalibrationMeasurmentLogger.h"
+    #define pCONT_serial_calibration_log                  static_cast<mSerialCalibrationMeasurmentLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
+    INCLUDE_FIX"9_Controller/UserMod_01/mUserMod_01.h"
+    #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
+  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+
 
   Serial.printf(D_LOG_CLASSLIST "Loaded %d|%d modules\n\r",  pModule.size(), GetClassCount());
   if(pModule.size() != GetClassCount())

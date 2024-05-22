@@ -91,7 +91,7 @@ void mMotion::Init(void)
   settings.sensors_active = MAXIMUM_SENSORS;
 
   // #ifdef USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH
-  AddLog(LOG_LEVEL_WARN, PSTR("USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH"));
+  AddLog(LOG_LEVEL_WARNING, PSTR("USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH"));
   // default is toggle, follow must be used here for motion 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) { pCONT_set->Settings.switchmode[i] = SWITCHMODE_FOLLOW_ID; }
   // #endif // USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH
@@ -223,7 +223,7 @@ char buffer[100];
       if(pir_detect[sensor_id].state)
       {
         pir_detect[sensor_id].tDetectTime = millis(); 
-        pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNowU32();
+        pir_detect[sensor_id].detected_time = pCONT_time->LocalTime();
         pir_detect[sensor_id].isactive = true;
 
         // #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -240,7 +240,7 @@ char buffer[100];
       else
       {
         pir_detect[sensor_id].tEndedTime = millis();
-        pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNowU32();
+        pir_detect[sensor_id].detected_time = pCONT_time->LocalTime();
         pir_detect[sensor_id].isactive = false;
 
         // #ifdef USE_MODULE_CORE_RULES
@@ -328,8 +328,14 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       // JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(e m_module_id, device_name_device_id, buffer, sizeof(buffer)));
 
       JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( device_name_module_id, device_name_device_id, buffer, sizeof(buffer))); 
-      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-      JsonBuilderI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
+      // JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      // JsonBuilderI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
+
+
+      JBI->Add("Time", pCONT_time->GetTimeStr(pCONT_time->Rtc.local_time).c_str());
+      JBI->Add("UTCTime", pCONT_time->Rtc.local_time);
+
+
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
       #ifdef ENABLE_DEVFEATURE_REPORT_MOTION_TIMES_WITH_EPOCH_AND_ISO8601_STANDARD_TIME
@@ -426,10 +432,10 @@ void mMotion::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mMotion::MQTTHandler_Sender(uint8_t id)
+void mMotion::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_MOTION_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_MOTION_ID, handle);
   }
 }
 

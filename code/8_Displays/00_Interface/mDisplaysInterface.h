@@ -1,10 +1,7 @@
 #ifndef _MODULE_DISPLAYS_INTERFACE_H
 #define _MODULE_DISPLAYS_INTERFACE_H
 
-#define D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID ((8*1000)+00)
-
-
-
+#define D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID 8000  // [(Folder_Number*1000)+ID_File]
 
 #define D_GROUP_MODULE_DISPLAYS_INTERFACE_ID    1    // Numerical accesending order of module within a group
 
@@ -55,28 +52,33 @@ class mDisplaysInterface :
   public mTaskerInterface
 {
   public:
-	  mDisplaysInterface(){};
-    void Pre_Init(void);
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+    mDisplaysInterface(){};
     void Init(void);
-    
+    void Pre_Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void   parse_JSONCommand(JsonParserObject obj);
+
     static const char* PM_MODULE_DISPLAYS_INTERFACE_CTR;
     static const char* PM_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_INTERFACE_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID; }
-
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mDisplaysInterface);
-    };
-    #endif
-    void parse_JSONCommand(JsonParserObject obj);
+    uint16_t GetClassSize(){      return sizeof(mDisplaysInterface);    };
+    #endif    
 
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-    }settings;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
     void EveryLoop();
 
     Renderer *renderer = nullptr;
@@ -84,6 +86,8 @@ class mDisplaysInterface :
     uint32_t tSaved_RefreshDisplay = millis();
 
     enum ColorType { COLOR_BW, COLOR_COLOR };
+
+    void Init(uint8_t mode);
 
     #ifndef MAX_TOUCH_BUTTONS
     #define MAX_TOUCH_BUTTONS 16
@@ -234,9 +238,6 @@ class mDisplaysInterface :
 
     bool disp_subscribed = false;
 
-
-    void InitDriver(void);
-
     void ScreenBuffer_Clear(void);
     void ScreenBuffer_Free(void);
     void ScreenBuffer_Alloc(void);
@@ -256,7 +257,6 @@ class mDisplaysInterface :
 
     void SetPower(void);
 
-    void Init(uint8_t mode);
     void Clear(void);
     void DrawStringAt(uint16_t x, uint16_t y, char *str, uint16_t color, uint8_t flag);
 
@@ -299,22 +299,13 @@ class mDisplaysInterface :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mDisplaysInterface> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mDisplaysInterface> mqtthandler_sensor_ifchanged;
     struct handler<mDisplaysInterface> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    //No extra handlers example
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    //with extra handlers example
-    
-    uint8_t list_ids[3] = {
-      MQTT_HANDLER_SETTINGS_ID, 
-      MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-      MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-    };
     
     struct handler<mDisplaysInterface>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,

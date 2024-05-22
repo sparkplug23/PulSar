@@ -1166,7 +1166,7 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
   // {
   //   delay_Start--;
   //   if(delay_Start==1){
-  //     if(!settings.caminit && (pCONT_time->uptime.seconds_nonreset>30)){
+  //     if(!settings.caminit && (pCONT_time->uptime_seconds_nonreset>30)){
   //       setup_cam();
   //     }
   //   }else{

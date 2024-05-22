@@ -3,6 +3,18 @@
 const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_CTR = D_MODULE_CORE_HARDWAREPINS_CTR;
 const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR = D_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR;
 
+/**
+ * @brief 
+ * 
+ * 
+ * Create new method here, look into how WLED "locks"/assigns pins.
+ * I want a way here to define nicely what the pin is doing (Which module is attached, what function is it, ie digital, I2C, serial)
+ * Then show which pins are available for use
+ * make sure to clasify the limitations on a pin too with a "special note" mqtt message against the pin. 
+ * 
+ * 
+ * 
+ */
 
 
 void mHardwarePins::Template_Load(){

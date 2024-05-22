@@ -49,83 +49,48 @@ class mPalette
      ************************************************************************************************************************************
      ***************************************************************************************************************************************/
    
-    // Single colour user options, up to all 5 rgbcct elements
-    // Single RGBCCT above where they are then used internally to make new palettes
     /**
-     * @brief Notes
-     * 
-     * Internally should be stored here as user changable palettes should be at the end of the list
-     * On the WebUI, it should be sorted to the top.
-     * 
+     * @brief 
+     * Single colour user options, up to all 5 rgbcct elements
      */
-    enum PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS{
-      PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID = 0, // New scene colour, static
-      PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_02__ID,
-      PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_03__ID,
-      PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_04__ID,
-      PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_05__ID,
-      PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
+    enum PALETTELIST_SEGMENT__RGBCCT_COLOUR__IDS
+    {
+      PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID = 0, // New scene colour, static
+      PALETTELIST_SEGMENT__RGBCCT_COLOUR_02__ID,
+      PALETTELIST_SEGMENT__RGBCCT_COLOUR_03__ID,
+      PALETTELIST_SEGMENT__RGBCCT_COLOUR_04__ID,
+      PALETTELIST_SEGMENT__RGBCCT_COLOUR_05__ID,
+      PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID
     };
-
-
-    /**
-     * @brief These below to become fully added into my methods as another encoding type
-     * to be merged and named in my static list
-     * 
-     * These should really be part of the dynamic ones ? or dynamic should automatically be pushed/grouped here, though MINE are not CRGB16
-     * 
-     * 
-     * These need to be added into my palette method at least by name only, data can be ignored
-     * Or, the data for CRGB16 is saved in the data field and then cast back to use?? This would reduce the need to keep 
-     * a static version of it. OR, simply do the math in C16 but convert back? or, do equivalent of these with mine.
-     * 
-     * 
-     * regardless of type, these should be moved into the dynamic list, as they are not static
-     * 
-     **/
-    enum PALETTELIST_DYNAMIC_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_TWO_12__ID = PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_THREE_123__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_FOUR_1234__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_FIVE_12345__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_REPEATED_ACTIVE__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID,      
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
-      PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID    
-    };
-
-    /**
-     * @brief These below to become fully added into my methods as another encoding type
-     * to be merged and named in my static list
-     * 
-     * These palettes probably also do not need any internal storage. They should be generated from external parameters(solar position, time, etc)
-     * 
-     * Or, dynamic simply need a name from progmem, but also std::vector of data as optional way to record information about itself when used. Though, this cant be done for multiple segments as they are shared. This can be fine, just a limitation is the dynamic palette does not change across segments
-     * 
-     * */
-    enum PALETTELIST_DYNAMIC__COLOUR__IDS{
-      PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID = PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID, // New scene colour, static
-      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID,
-      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID,
-
-      PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID, //palette will change from rgbcct01 to rgbcct02 over 60 seconds
-      PALETTELIST_DYNAMIC__LENGTH__ID
-    };
-
-
 
 
     /**
      * @brief 
-     * @note Sourced from WLED, part of FastLED
-     * @note includes colourmaps from MATLAB
+     * Generated using PALETTELIST_SEGMENT__RGBCCT_COLOUR__IDS
      **/
-    enum PALETTELIST_STATIC_CRGBPALETTE16__IDS{
-      
-      PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID = PALETTELIST_DYNAMIC__LENGTH__ID,
+    enum PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__IDS
+    {
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID = PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID,      
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
+      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID    
+    };
+
+
+    /**
+     * @brief 
+     * Sourced from WLED, part of FastLED. Common palettes found in MATLAB are also included for heatmaps
+     **/
+    enum PALETTELIST_STATIC_CRGBPALETTE16__IDS
+    {      
+      PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID = PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID,
@@ -143,9 +108,10 @@ class mPalette
       PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID
     };
 
+
     /**
      * @brief 
-     * @note Sourced from WLED, part of FastLED
+     * Sourced from WLED, part of FastLED
      **/
     enum PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
     { //39 of them 
@@ -211,17 +177,14 @@ class mPalette
       //
       PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
     };
-
-
-
-
-
+    
 
     /**
-     * @brief Instead of HTML Colours, define some popular colours for easy switching without using Custom Colour ##. Eg, Black for effects.
-     * 
+     * @brief 
+     * Instead of HTML Colours, define some popular colours for easy switching without using Custom Colour ##. Eg, Black for effects.
      */
-    enum PALETTELIST_STATIC_SINGLE_COLOURS__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
+    enum PALETTELIST_STATIC_SINGLE_COLOURS__IDS
+    {
       PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID,
       PALETTELIST_STATIC_SINGLE_COLOUR__ORANGE__ID,
       PALETTELIST_STATIC_SINGLE_COLOUR__LIGHTORANGE__ID,
@@ -267,24 +230,20 @@ class mPalette
       PALETTELIST_STATIC_AUTUMN_GREEN__ID,
       PALETTELIST_STATIC_AUTUMN_RED__ID,
       PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID,
-
-      PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGPBO__ID,
-      PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGPBY__ID,
-      PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_ROGPBY__ID,
-      PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGBO__ID,
-      PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGBY__ID,
-      PALETTELIST_STATIC__CHRISTMAS_COLD_WHITE__ID,
-      PALETTELIST_STATIC__CHRISTMAS_WARM_WHITE__ID,
-      PALETTELIST_STATIC__CHRISTMAS_VINTAGE_MINIBELLS__ID,
-      PALETTELIST_STATIC__CHRISTMAS_VINTAGE_MERRYLITES__ID,
-      PALETTELIST_STATIC__CHRISTMAS_VINTAGE_AGED_BULBS__ID,
-      PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_01__ID,
-      PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID,
-      PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_03__ID,
-      PALETTELIST_STATIC__CHRISTMAS_BERRY_YELLOW__ID,
-      PALETTELIST_STATIC__CHRISTMAS_BERRY_ORANGE__ID,
-      PALETTELIST_STATIC__CHRISTMAS_BERRY_GREEN__ID,
-
+      PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBO__ID,
+      PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBY__ID,
+      PALETTELIST_STATIC__FESTIVE_TRADITIONAL_ROGPBY__ID,
+      PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGBO__ID,
+      PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGBY__ID,
+      PALETTELIST_STATIC__FESTIVE_VINTAGE_MINIBELLS__ID,
+      PALETTELIST_STATIC__FESTIVE_VINTAGE_MERRYLITES__ID,
+      PALETTELIST_STATIC__FESTIVE_VINTAGE_AGED_BULBS__ID,
+      PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_01__ID,
+      PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID,
+      PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_03__ID,
+      PALETTELIST_STATIC__FESTIVE_BERRY_YELLOW__ID,
+      PALETTELIST_STATIC__FESTIVE_BERRY_ORANGE__ID,
+      PALETTELIST_STATIC__FESTIVE_BERRY_GREEN__ID,
       PALETTELIST_STATIC__COLOURFUL_PAIRS_01__ID,
       PALETTELIST_STATIC__COLOURFUL_COLOUR_WHITE_STRIPE__ID,
       PALETTELIST_STATIC__COLOURFUL_COLOUR_WARMWHITE_STRIPE__ID,
@@ -294,7 +253,6 @@ class mPalette
       PALETTELIST_STATIC__COLOURFUL_PEACHY_ORANGE__ID,
       PALETTELIST_STATIC__COLOURFUL_PEACHY_YELLOW__ID,
       PALETTELIST_STATIC__COLOURFUL_GREENLESS__ID,
-
       PALETTELIST_STATIC__GOLDEN__ID,
       PALETTELIST_STATIC_SUNRISE_01__ID,
       PALETTELIST_STATIC_SUNRISE_02__ID,
@@ -304,27 +262,31 @@ class mPalette
       PALETTELIST_STATIC_SUNSET_02__ID,
       PALETTELIST_STATIC_SUNSET_RED__ID,
       PALETTELIST_STATIC_SUNSET_BEACH__ID,
-      PALETTELIST_STATIC_SKY_GLOW_01__ID,
-
-      
+      PALETTELIST_STATIC_SKY_GLOW_01__ID,      
       PALETTELIST_STATIC_CANDLE_FLAME_01__ID,
       PALETTELIST_STATIC_GRADIENT_FIRE_01__ID,
-
       PALETTELIST_STATIC_OCEAN_01__ID,
-
-      /**
-       * Patterns for Gazebo
-       * */
       PALETTELIST_STATIC_FLOWER_SWEATPEA__ID,
       PALETTELIST_STATIC_PINK_PURPLE__ID,
       PALETTELIST_STATIC_PURPLE_PINK__ID,
-      
-      // Count of total handlers and starting point for other modules
       PALETTELIST_STATIC_LENGTH__ID 
     };
 
+    /**
+     * @brief These below to become fully added into my methods as another encoding type
+     * to be merged and named in my static list
+     * These palettes probably also do not need any internal storage. They should be generated from external parameters(solar position, time, etc)
+     * Or, dynamic simply need a name from progmem, but also std::vector of data as optional way to record information about itself when used. Though, this cant be done for multiple segments as they are shared. This can be fine, just a limitation is the dynamic palette does not change across segments
+     * These need moved outside of this ENUM as its own list
+     * */
+    enum PALETTELIST_DYNAMIC__COLOUR__IDS{ // to be moved, so static list should be renamed "PredefinedList", then "DynamicList" (which should also include "Randomise") and "CustomList" 
 
-
+      PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID = PALETTELIST_STATIC_LENGTH__ID, // New scene colour, static
+      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID,
+      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID,
+      PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID, //palette will change from rgbcct01 to rgbcct02 over 60 seconds
+      PALETTELIST_DYNAMIC__LENGTH__ID
+    };
 
 ///// END of stored in vector
 
@@ -335,10 +297,13 @@ class mPalette
      ****************************************************************************************************************************************
      *****************************************************************************************************************************************/
     #define PALETTELIST_LENGTH_OF_STATIC_IDS  PALETTELIST_STATIC_LENGTH__ID
+
+    #define PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED  PALETTELIST_DYNAMIC__LENGTH__ID
+
     #define MAX_USER_DEFINED_ENCODED_PALETTES 10
     uint8_t user_defined_palette_count = 10;
 
-    uint16_t GetPaletteListLength(){ return PALETTELIST_LENGTH_OF_STATIC_IDS + user_defined_palette_count; }
+    uint16_t GetPaletteListLength(){ return PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + user_defined_palette_count; }
 
     /**
      * @brief IMPORTANT
@@ -379,59 +344,54 @@ class mPalette
       };
     } PALETTE_ENCODING_DATA;
 
-    struct STATIC_PALETTE{ //6 bytes per palette
-      // enum: Used to call for ctr of friendly name
-      uint8_t id; // phase out, not needed, just get as relative index
+    /**
+     * @brief 
+     * StaticPalette will not change, and are stored in memory under various encoding types
+     * 
+     */
+    struct PALETTE_DATA{ // 6 bytes per palette
+      uint16_t palettelist_id;
       // Pointer to name
-      const char* friendly_name_ctr;
+      // const char* friendly_name_ctr;                   // Should I just move towards the faster way? there is no added benefit here
       // colour bytes 
       std::vector<uint8_t> data;
+      // Moving away from colour_width to reduce calculation per pixel
+      uint8_t number_of_colours;
       // Contains information on formatting of data buffer
       PALETTE_ENCODING_DATA encoding;
     };
-    std::vector<STATIC_PALETTE> static_palettes;
+    std::vector<PALETTE_DATA> static_palettes;
+    std::vector<PALETTE_DATA> dynamic_palettes;
+    std::vector<PALETTE_DATA> custom_palettes;
 
-
-    struct DYNAMIC_PALETTE{
-      // Name stored in progmem a dList
-      std::vector<uint8_t> data; // for dynamic this is used as buffer to remember how this dynamic palete works. This may include how it actually uses another defined palette, then uses information like sun position to apply gradient for the dynamic output
-      PALETTE_ENCODING_DATA encoding;  //probably not needed
-    };
-    std::vector<DYNAMIC_PALETTE> dynamic_palettes;
-
-
-    struct CUSTOM_PALETTE{
-      std::vector<uint8_t> data;
-      PALETTE_ENCODING_DATA encoding;
-    };
-    std::vector<CUSTOM_PALETTE> custom_palettes;
-
- 
-    void addStaticPalette(STATIC_PALETTE palette);
-    void addStaticPalette(uint16_t id, const char* name, const uint8_t* data, const uint8_t length, uint16_t encoding);
-    void addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
+    void addStaticPalette (uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
+    void addCustomPalette (uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
     void addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
 
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
-    uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0); 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
-    uint16_t GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding, uint8_t data_in_palette);
+
+
+    // uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0); 
+    // uint16_t GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding, uint8_t data_in_palette);
 
     uint8_t GetColoursInCRGB16Palette(uint16_t palette_id);
 
 
-
-
-
-
-    RgbcctColor Get_Encoded_Colour_ReadBuffer_Fast(
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromPreloadedPaletteBuffer_2023(
+      uint16_t palette_id = 0,
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,
-      PALETTE_ENCODING_DATA encoding = {0},
-      uint8_t encoded_colour_width = 0
+      uint8_t     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      uint8_t     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      uint8_t     flag_crgb_exact_colour = false
     );
-
+  
 
     RgbcctColor Get_Encoded_StaticPalette_Colour(
       uint16_t palette_id = 0,
@@ -445,12 +405,11 @@ class mPalette
     );
 
 
-    RgbcctColor Get_Encoded_Palette_Colour(
+    // Dynamic palettes should do any calculations, then rely on the other methods to get colours
+    RgbcctColor Get_Encoded_DynamicPalette_Colour(
+      uint16_t palette_id = 0,
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
-      uint8_t encoded_colour_width = 0,
-      uint8_t colours_in_palette = 0,
-      PALETTE_ENCODING_DATA encoding = {0},
       uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
@@ -470,11 +429,20 @@ class mPalette
       bool     flag_forced_gradient = false
     );
 
-    // Dynamic palettes should do any calculations, then rely on the other methods to get colours
-    RgbcctColor Get_Encoded_DynamicPalette_Colour(
-      uint16_t palette_id = 0,
+
+
+
+
+
+
+
+
+    RgbcctColor Get_Encoded_Palette_Colour(
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
+      uint8_t encoded_colour_width = 0,
+      uint8_t colours_in_palette = 0,
+      PALETTE_ENCODING_DATA encoding = {0},
       uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
@@ -483,62 +451,26 @@ class mPalette
     );
 
 
-    uint8_t GetPaletteDiscreteWidth(
-      uint16_t palette_id,
-      uint8_t* palette_buffer
-    );
 
-    
-    RgbcctColor 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-    IRAM_ATTR 
-    #endif 
-    GetColourFromPreloadedPaletteBuffer_2023(
-      uint16_t palette_id = 0,
+    RgbcctColor Get_Encoded_Colour_ReadBuffer_Fast(
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,
-      uint8_t     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      uint8_t     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t     flag_crgb_exact_colour = false
-    );
-  
-
-    RgbcctColor SubGet_Encoded_UserPalette_Colour(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_crgb_exact_colour = false
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t encoded_colour_width = 0
     );
 
 
-    // RgbcctColor Get_StaticPalette_Encoded_Colour_ReadBuffer(
-    //   uint16_t palette_id = 0,
-    //   uint8_t* palette_elements = nullptr,
-    //   uint16_t desired_index_from_palette = 0,
-    //   uint8_t* encoded_index = nullptr
-    // );
 
-    // RgbcctColor Get_StaticPalette_Encoded_Colour_IterativeIndex(
-    //   uint16_t palette_id = 0,
-    //   uint8_t* palette_elements = nullptr,
-    //   uint16_t colour_index = 0,
-    //   uint8_t* encoded_index = nullptr
-    // );
 
-    // RgbcctColor SubGet_Encoded_PaletteList_Colour_Gradient(
-    //   uint16_t palette_id = 0,
-    //   uint8_t* palette_elements = nullptr,
-    //   uint16_t desired_index_from_palette = 0,
-    //   uint8_t* encoded_index = nullptr,
-    //   bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    //   bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    //   bool     flag_crgb_exact_colour = false
-    // );
+
+
+    uint8_t GetColoursInPalette(uint16_t palette_id);
+
     
+
+
+
 };
 
 #define mPaletteI mPalette::GetInstance() // lets investigate making mPalette NOT a singleton, though, to be included inside palette controller, it might need to be so it only has once instance

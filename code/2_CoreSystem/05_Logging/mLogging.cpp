@@ -6,59 +6,6 @@ const char* mLogging::PM_MODULE_CORE_LOGGING_FRIENDLY_CTR = D_MODULE_CORE_LOGGIN
 
 
 
-int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
-{ // KEEP TASKER ON TOP
-
-
-  switch(function){
-    case FUNC_INIT:
-      // init();
-      // StartTelnetServer();
-    break;
-    case FUNC_LOOP: 
-    // Serial.println("mLogging::Tasker");
-      // if(!Telnet) StartTelnetServer();
-      if(telnet_started){      handleTelnet();    }
-      // pCONT_log->Telnet.println("FUNC_LOOP: ");
-    break;
-    case FUNC_EVERY_SECOND:
-      // Serial.println("mLogging::Tasker");
-    break;
-    case FUNC_EVERY_MINUTE:
-
-
-  /**** For increasing log level temporarily then reseting
-   * 
-   * */
-  // if (pCONT_set->seriallog_timer) {
-  //   seriallog_timer--;
-  //   if (!seriallog_timer) {
-  //     if (seriallog_level) {
-  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
-  //     }
-  //     seriallog_level = 0;
-  //   }
-  // }
-
-  // if (syslog_timer) {  // Restore syslog level
-  //   syslog_timer--;
-  //   if (!syslog_timer) {
-  //     syslog_level = Settings.syslog_level;
-  //     if (Settings.syslog_level) {
-  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
-  //     }
-  //   }
-  // }
-
-    break;
-    case FUNC_WIFI_CONNECTED:
-      StartTelnetServer();
-    break;
-  }
-
-}//end
-
-
 void mLogging::init(void){
   // StartTelnetServer();
 }
@@ -126,7 +73,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       
     //     pCONT_log->client = pCONT_log->server->available();
     //   }
-//     if(pCONT_time->uptime.seconds_nonreset>30){
+//     if(pCONT_time->uptime_seconds_nonreset>30){
   // pCONT_log->Telnet.println("AddLog: ");
 //     //   if(pCONT_log->client.connected()) {
 //     //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
@@ -143,6 +90,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
      * 
      */
 
+  DEBUG_LINE_HERE
 
   #ifdef DEBUG_FOR_FAULT
     pCONT_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
@@ -176,14 +124,14 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
 
-  // DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE 
 
   va_list arg;
   va_start(arg, formatP);
   vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
   va_end(arg);
 
-  // DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE
 
   //AddLogAddLog(loglevel);
 
@@ -195,32 +143,33 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   memset(mxtime,0,sizeof(mxtime));
   // if time is short, ie debugging, them only show uptime (not RTCTime)
-  if(pCONT_set->Settings.logging.time_isshort){
-    #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
-      // Only show hour
-      if(pCONT_time->uptime.hour<1){
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.minute,pCONT_time->uptime.second);
-      }else{
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-      }
-    #else
-      if(pCONT_time->uptime.hour<1){
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
-          pCONT_time->uptime.minute,pCONT_time->uptime.second
-        );
-      }else{
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
-          pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-      }
-    #endif
+  // if(pCONT_set->Settings.logging.time_isshort){
+  //   #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
+  //     // Only show hour
+  //     if(pCONT_time->uptime.hour<1){
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.minute,pCONT_time->uptime.second);
+  //     }else{
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second, pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+  //     }
+  //   #else
+  //     if(pCONT_time->uptime.hour<1){
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
+  //         pCONT_time->uptime.minute,pCONT_time->uptime.second
+  //       );
+  //     }else{
+  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
+  //         pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+  //     }
+  //   #endif
     
-  }else{
-    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
+  // }else{
+    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %s "),
     // sprintf(mxtime, PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
       pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
-      pCONT_time->uptime.Mday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-  }
+      pCONT_time->GetUptime().c_str());
+  // }
 
+  DEBUG_LINE_HERE
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
   char level_buffer[10];
 
@@ -235,10 +184,10 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
       // register uint32_t *sp asm("a1"); 
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
-      SERIAL_DEBUG.printf(PSTR("R%05d%c %02d%02d %s %s\r\n"), 
+      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %s %s\r\n"), 
         ESP.getFreeHeap(), // 4 * (sp - g_pcont->stack), 
         isconnected ? 'Y' : 'N',
-        pCONT_time->uptime.minute, pCONT_time->uptime.second,
+        pCONT_time->GetUptime(),
         pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),
         pCONT_log->log_data
       );
@@ -627,7 +576,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
 void mLogging::SetSeriallog(uint8_t loglevel)
 {
-  // Settings.seriallog_level = loglevel;
+  pCONT_set->Settings.logging.serial_level = loglevel;
   // seriallog_level = loglevel;
   // seriallog_timer = 0;
 }
@@ -768,7 +717,7 @@ void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 int Response_mP(const char* format, ...)     // Content send snprintf_P char data
 {
   
-  // if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
+  // if(pCONT_time->uptime_seconds_nonreset<60){ return 0 ;}
 
   memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
 
@@ -829,7 +778,7 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer, uint8_t
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
-    case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
+    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
     case LOG_LEVEL_HIGHLIGHT:           memcpy_P(buffer, PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR, sizeof(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
@@ -848,7 +797,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer, uint8_t bufl
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_LONG_CTR, sizeof(PM_LOG_LEVEL_NONE_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_LONG_CTR, sizeof(PM_LOG_LEVEL_ERROR_LONG_CTR)); break;
-    case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
+    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_LONG_CTR, sizeof(PM_LOG_LEVEL_TEST_LONG_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_LONG_CTR)); break;
     case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_LONG_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_LONG_CTR)); break;
@@ -885,6 +834,70 @@ int8_t mLogging::SetLogLevelIDbyName(const char* c){
     return LOG_LEVEL_DEBUG;
   }
 }
+
+
+int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
+{ // KEEP TASKER ON TOP
+
+
+  switch(function){
+    case FUNC_INIT:
+      // init();
+      // StartTelnetServer();
+    break;
+    case FUNC_LOOP: 
+    // Serial.println("mLogging::Tasker");
+      // if(!Telnet) StartTelnetServer();
+      if(telnet_started){      handleTelnet();    }
+      // pCONT_log->Telnet.println("FUNC_LOOP: ");
+    break;
+    case FUNC_EVERY_SECOND:
+      // Serial.println("mLogging::Tasker");
+      
+      #ifdef ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING
+      if(pCONT_time->uptime_seconds_nonreset == 60*1)
+      {
+        SetSeriallog(LOG_LEVEL_INFO);
+        Serial.printf("Reducing log level to %d to improve performance when not debugging", pCONT_set->Settings.logging.serial_level);
+        // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "Reducing log level to %d to improve performance when not debugging"), pCONT_set->Settings.logging.serial_level);
+      }
+      #endif
+
+    break;
+    case FUNC_EVERY_MINUTE:
+
+
+
+  /**** For increasing log level temporarily then reseting
+   * 
+   * */
+  // if (pCONT_set->seriallog_timer) {
+  //   seriallog_timer--;
+  //   if (!seriallog_timer) {
+  //     if (seriallog_level) {
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
+  //     }
+  //     seriallog_level = 0;
+  //   }
+  // }
+
+  // if (syslog_timer) {  // Restore syslog level
+  //   syslog_timer--;
+  //   if (!syslog_timer) {
+  //     syslog_level = Settings.syslog_level;
+  //     if (Settings.syslog_level) {
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
+  //     }
+  //   }
+  // }
+
+    break;
+    case FUNC_WIFI_CONNECTED:
+      StartTelnetServer();
+    break;
+  }
+
+}//end
 
 
 

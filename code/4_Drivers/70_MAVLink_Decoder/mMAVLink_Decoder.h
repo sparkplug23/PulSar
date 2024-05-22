@@ -633,7 +633,7 @@ class mMAVLink_Decoder :
     void MQTTHandler_Set_DefaultPeriodRate();
     std::vector<struct handler<mMAVLink_Decoder>*> mqtthandler_list;
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mMAVLink_Decoder> mqtthandler_settings_teleperiod;
 
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs;

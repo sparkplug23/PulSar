@@ -326,7 +326,7 @@ class mBME :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mBME> mqtthandler_settings_teleperiod;
     struct handler<mBME> mqtthandler_sensor_ifchanged;

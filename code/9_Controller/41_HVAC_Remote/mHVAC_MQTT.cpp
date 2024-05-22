@@ -206,10 +206,10 @@ void mHVAC::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mHVAC::MQTTHandler_Sender(uint8_t id)
+void mHVAC::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){  
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
   }
 }
   

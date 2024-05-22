@@ -37,6 +37,39 @@
 
 enum SwitchStates { SWITCH_PRESSED_ID, SWITCH_NOT_PRESSED_ID };
 
+
+enum SwitchModeOptions_IDS {
+  SWITCHMODE_TOGGLE_ID, 
+  SWITCHMODE_FOLLOW_ID, 
+  SWITCHMODE_FOLLOW_INV_ID, 
+  SWITCHMODE_PUSHBUTTON_ID, 
+  SWITCHMODE_PUSHBUTTON_INV_ID, 
+  SWITCHMODE_PUSHBUTTONHOLD_ID, 
+  SWITCHMODE_PUSHBUTTONHOLD_INV_ID, 
+  SWITCHMODE_PUSHBUTTON_TOGGLE_ID, 
+  SWITCHMODE_MAX_SWITCH_OPTION_ID
+};
+
+#define D_SWITCHMODE_TOGGLE_CTR               "Toggle"
+#define D_SWITCHMODE_FOLLOW_CTR               "Follow"
+#define D_SWITCHMODE_FOLLOW_INV_CTR           "Follow Inv"
+#define D_SWITCHMODE_PUSHBUTTON_CTR           "PushButton"
+#define D_SWITCHMODE_PUSHBUTTON_INV_CTR       "PushButton Inv"
+#define D_SWITCHMODE_PUSHBUTTONHOLD_CTR       "PushButton Hold"
+#define D_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR   "PushButton Hold Inv"
+#define D_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR    "PushButton Toggle"
+
+DEFINE_PGM_CTR(PM_SWITCHMODE_TOGGLE_CTR) D_SWITCHMODE_TOGGLE_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_FOLLOW_CTR) D_SWITCHMODE_FOLLOW_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_FOLLOW_INV_CTR) D_SWITCHMODE_FOLLOW_INV_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_CTR) D_SWITCHMODE_PUSHBUTTON_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_INV_CTR) D_SWITCHMODE_PUSHBUTTON_INV_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_CTR) D_SWITCHMODE_PUSHBUTTONHOLD_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR) D_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR;
+DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR) D_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR;
+
+
+
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mSwitches :
@@ -140,14 +173,14 @@ class mSwitches :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mSwitches> mqtthandler_settings_teleperiod;
     struct handler<mSwitches> mqtthandler_sensor_ifchanged;
     struct handler<mSwitches> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
 
     struct handler<mSwitches>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,

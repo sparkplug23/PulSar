@@ -303,7 +303,7 @@ void mInternalClock::SpeedRefresh(void)
     }
   // }
 
-  // if (ifan_restart_flag && (4 == pCONT_time->uptime.seconds_nonreset) && (INTERNAL_CLOCK02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
+  // if (ifan_restart_flag && (4 == pCONT_time->uptime_seconds_nonreset) && (INTERNAL_CLOCK02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
   //   ifan_restart_flag = false;
   //   SetDevicePower(1, SRC_RETRY);      // Sync with default power on state microcontroller being Light ON and Fan OFF
   //   SetDevicePower(pCONT_set->power, SRC_RETRY);  // Set required power on state
@@ -396,10 +396,10 @@ void mInternalClock::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mInternalClock::MQTTHandler_Sender(uint8_t id)
+void mInternalClock::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_INTERNAL_CLOCK_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_INTERNAL_CLOCK_ID, handle);
   }
 }
 

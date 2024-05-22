@@ -64,9 +64,9 @@ void mFileSystem::JsonFile_Save__Stored_Module()
   }
  
   JBI->Start();
-    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str());
     JBI->Add(PSTR("millis"), millis());
-    pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID);
+    // pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID);
   JBI->End();
 
   file.print(JBI->GetBufferPtr());
@@ -173,7 +173,7 @@ void mFileSystem::JsonFile_Save__Stored_Secure()
   }
  
   JBI->Start();
-    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
     JBI->Add(PSTR("millis"), millis());
     pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__Stored_Secure__ID);
   JBI->End();
@@ -260,12 +260,39 @@ void mFileSystem::ByteFile_Save(char* filename_With_extension, uint8_t* buffer, 
 
 }
 
-void mFileSystem::ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen) // where to write the data into
+uint32_t mFileSystem::ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen) // where to write the data into
 {
   
   ALOG_INF( PSTR("ByteFile_Load") );
 
+  File file;  
+  // Open file for writing, if it does not exist, create it
+  // Seek is placed at the start of the file, contents will be overwriten
+  file = FILE_SYSTEM.open(filename_With_extension, "r");
 
+  if(!file) 
+  {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), filename_With_extension);
+    return 0;
+  }
+
+
+  uint32_t filesize = file.size();
+
+  ALOG_INF(PSTR("Reading file \"%s\" %d bytes (expected %d bytes)"), filename_With_extension, filesize, buflen);
+
+  if(filesize != buflen){
+    ALOG_ERR(PSTR("File size mismatch, expected %d bytes, got %d bytes"), buflen, filesize);
+    file.close();
+    return 0;
+  }else{
+    ALOG_ERR(PSTR("File file.read(buffer, filesize)"));
+    file.read(buffer, filesize);
+  }
+
+  file.close();
+//must return the file size, note that if the read does not match the expected (ie file mismatch in internal memory), then the file is corrupted and must be reset to default
+  return 0;
   
 }
 

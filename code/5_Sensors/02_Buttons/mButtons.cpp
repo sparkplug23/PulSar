@@ -255,7 +255,7 @@ void mButtons::Pre_Init(void)
 // void mButtons::ButtonHandler(void)
 // {
   
-//   if (pCONT_time->uptime.seconds_nonreset < 4) // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+//   if (pCONT_time->uptime_seconds_nonreset < 4) // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
 //   {
 //     return; 
 //   } 
@@ -465,7 +465,7 @@ void mButtons::Pre_Init(void)
 void mButtons::ButtonHandler(void) {
 
 
-  if (pCONT_time->uptime.seconds_nonreset < 4) { return; }                     // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+  if (pCONT_time->uptime_seconds_nonreset < 4) { return; }                     // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
 
   uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;             // Extent hold time factor in case of iminnent Reset command
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.button_debounce;  // ButtonDebounce (50) - How often is the button polled? = 20 per second
@@ -832,10 +832,10 @@ void mButtons::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mButtons::MQTTHandler_Sender(uint8_t id)
+void mButtons::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BUTTONS_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BUTTONS_ID, handle);
   }
 }
   

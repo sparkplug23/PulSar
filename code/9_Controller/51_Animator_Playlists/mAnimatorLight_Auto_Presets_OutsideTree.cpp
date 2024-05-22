@@ -39,7 +39,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
   
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(1000);   
     // SEGMENT_I(0).set_intensity(30);
@@ -60,7 +60,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
     
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23);    
     // SEGMENT_I(0).set_intensity(255);
@@ -81,7 +81,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){   
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__SLOW_GLOW__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(500);
     // CommandSet_Animation_Transition_Rate_Ms(1000); 
     // SEGMENT_I(0).set_intensity(30);
@@ -105,7 +105,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__SLOW_GLOW__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(50); 
     // SEGMENT_I(0).set_intensity(20);
@@ -127,7 +127,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(100); 
     // SEGMENT_I(0).set_intensity(3);
@@ -149,7 +149,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 // make my own for this
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_STARBURST_GLOWS__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(100); 
     // SEGMENT_I(0).set_intensity(255);
@@ -190,7 +190,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STEPPING_PALETTE__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(1500);
     // CommandSet_Animation_Transition_Rate_Ms(3000); 
     // SEGMENT_I(0).set_intensity(20);
@@ -209,7 +209,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);   // no purple
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);   // no purple
     // CommandSet_Animation_Transition_Time_Ms(10000);
     // CommandSet_Animation_Transition_Rate_Ms(20000); 
     // SEGMENT_I(0).set_intensity(20);
@@ -231,7 +231,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID); //no purple
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID); //no purple
     // CommandSet_Animation_Transition_Time_Ms(50);
     // CommandSet_Animation_Transition_Rate_Ms(100); 
     // SEGMENT_I(0).set_intensity(20);
@@ -254,7 +254,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23); 
     // SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
@@ -273,7 +273,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23); 
     // SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
@@ -292,7 +292,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23); 
     // SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
@@ -314,7 +314,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);   // no purple
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);   // no purple
     // CommandSet_Animation_Transition_Time_Ms(10000);
     // CommandSet_Animation_Transition_Rate_Ms(20000); 
     // SEGMENT_I(0).set_intensity(20);
@@ -333,7 +333,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);   // Custom for this tree 2022
+    // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);   // Custom for this tree 2022
     // CommandSet_Animation_Transition_Time_Ms(10000);
     // CommandSet_Animation_Transition_Rate_Ms(20000); 
     // SEGMENT_I(0).set_intensity(20);
@@ -360,7 +360,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     
 
     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);  
+    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID);  
     
     CommandSet_Animation_Transition_Time_Ms(10000);
     CommandSet_Animation_Transition_Rate_Ms(20000); 
@@ -382,7 +382,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   ){
 
     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID);
-    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID); //no purple
+    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID); //no purple
     CommandSet_Animation_Transition_Time_Ms(900);
     CommandSet_Animation_Transition_Rate_Ms(1000); 
     SEGMENT_I(0).set_intensity(20);

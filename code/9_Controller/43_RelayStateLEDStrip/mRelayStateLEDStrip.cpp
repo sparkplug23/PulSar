@@ -135,12 +135,14 @@ void mRelayStateLEDStrip::EverySecond()
           colour_on = rt.relay_status[relay_id].timer_decounter.active % 2 ?  RgbcctColor(0,50,0) :  RgbcctColor(0,0,50);
         }
         pSEGMENT_I(segment_index).SetPixelColor(relay_id, colour_on);
+        pSEGMENT_I(segment_index).setBrightnessRGB(255);
 
 
       }
       else
       {
         pSEGMENT_I(segment_index).SetPixelColor(relay_id, RgbcctColor(5,0,0));
+        pSEGMENT_I(segment_index).setBrightnessRGB(255);
       }
     }
   }
@@ -324,10 +326,10 @@ void mRelayStateLEDStrip::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mRelayStateLEDStrip::MQTTHandler_Sender(uint8_t id)
+void mRelayStateLEDStrip::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, handle);
   }
 }
 

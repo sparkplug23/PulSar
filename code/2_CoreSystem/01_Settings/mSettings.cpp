@@ -41,6 +41,12 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
     // Function_Template_Load();
 
+  // SettingsUpdateText(SET_NTPSERVER1, PSTR(NTP_SERVER1));
+  // SettingsUpdateText(SET_NTPSERVER2, PSTR(NTP_SERVER2));
+  // SettingsUpdateText(SET_NTPSERVER3, PSTR(NTP_SERVER3));
+  // for (uint32_t i = 0; i < MAX_NTP_SERVERS; i++) {
+  //   SettingsUpdateText(SET_NTPSERVER1 +i, pCONT_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 +i)));
+  // }
 
     // 
     // TestSettingsLoad();
@@ -168,7 +174,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
       // Save stable start
       // Dont use a bootloop time, instead have other "stable qualifiers", probably from a function I can call that can be diffferent by device ie (if mqtt, then require it..... if network, then require it...... )
-        // if (BOOT_LOOP_TIME == pCONT_time-> uptime.seconds_nonreset) {
+        // if (BOOT_LOOP_TIME == pCONT_time-> uptime_seconds_nonreset) {
 
           #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
           RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
@@ -237,9 +243,6 @@ void mSettings::Function_Template_Load(){
   //DEBUG_PRINTF("mSettings::Function_Template_Load"); Serial.flush();
   #endif
 
-  runtime.boot_status.function_template_parse_success = 0;
-  runtime.boot_status.rules_template_parse_success = 0;
-
   #ifdef USE_FUNCTION_TEMPLATE  
   // Read into local
   D_DATA_BUFFER_CLEAR();
@@ -247,15 +250,13 @@ void mSettings::Function_Template_Load(){
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+  //ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
-  // delay(1000);
+  runtime.template_loading.status.function = TemplateSource::HEADER_TEMPLATE;
 
-  runtime.boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
   
 }
@@ -308,45 +309,6 @@ void mSettings::JsonAppend_Settings()
  */
 
 
-
-/**
- * @brief 
- * Actually not right for rules, I should probably make "SwitchMode_GetID_by_Name" and "GetStateNumber" together
- * 
- * @param c 
- * @return int16_t 
- */
-int16_t mSettings::SwitchMode_GetID_by_Name(const char* c)
-// D_DATE_TIME_SEPARATOR
-// RuleCommand? I need to be able to react to trigger, or simply directly set, so needs both switchmode and getstate range, create new LIST
-{
-  if(*c=='\0'){    return -1; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_TOGGLE_CTR)==0){ return SWITCHMODE_TOGGLE_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_FOLLOW_CTR)==0){ return SWITCHMODE_FOLLOW_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_FOLLOW_INV_CTR)==0){ return SWITCHMODE_FOLLOW_INV_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTON_CTR)==0){ return SWITCHMODE_PUSHBUTTON_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTON_INV_CTR)==0){ return SWITCHMODE_PUSHBUTTON_INV_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTONHOLD_CTR)==0){ return SWITCHMODE_PUSHBUTTONHOLD_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR)==0){ return SWITCHMODE_PUSHBUTTONHOLD_INV_ID; }
-  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR)==0){ return SWITCHMODE_PUSHBUTTON_TOGGLE_ID; }
-  return -1;
-}
-
-
-const char* mSettings::SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_t buflen){
-  switch(id){
-    default:
-    case SWITCHMODE_TOGGLE_ID:                memcpy_P(buffer, PM_SWITCHMODE_TOGGLE_CTR, sizeof(PM_SWITCHMODE_TOGGLE_CTR)); break;
-    case SWITCHMODE_FOLLOW_ID:                memcpy_P(buffer, PM_SWITCHMODE_FOLLOW_CTR, sizeof(PM_SWITCHMODE_FOLLOW_CTR)); break; 
-    case SWITCHMODE_FOLLOW_INV_ID:            memcpy_P(buffer, PM_SWITCHMODE_FOLLOW_INV_CTR, sizeof(PM_SWITCHMODE_FOLLOW_INV_CTR)); break; 
-    case SWITCHMODE_PUSHBUTTON_ID:            memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTON_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTON_CTR)); break; 
-    case SWITCHMODE_PUSHBUTTON_INV_ID:        memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTON_INV_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTON_INV_CTR)); break; 
-    case SWITCHMODE_PUSHBUTTONHOLD_ID:        memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTONHOLD_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTONHOLD_CTR)); break; 
-    case SWITCHMODE_PUSHBUTTONHOLD_INV_ID:    memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR)); break; 
-    case SWITCHMODE_PUSHBUTTON_TOGGLE_ID:     memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR)); break; 
-  }
-  return buffer;
-}
 
 
 
@@ -406,54 +368,128 @@ void mSettings::SetFlashModeDout(void)
 
 
 
-/**
- * If true, then load important info from settings struct into runtime values, else, remain on old settings
- * */
-void mSettings::SettingsLoad_CheckSuccessful()
-{
-  
-  // if (Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {
-  //   // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
-  //   if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
-  //     Settings.flag_network.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
-  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
-  //       // for (uint8_t i = 0; i < MAX_RULE_SETS; i++) {
-  //       //   // if (bitRead(Settings.rule_stop, i)) {
-  //       //   //   bitWrite(Settings.rule_enabled, i, 0);  // Disable rules causing boot loop
-  //       //   // }
-  //       // }
-  //     }
-  //     // if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
-  //     //   Settings.rule_enabled = 0;                  // Disable all rules
-  //     // }
-  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
-  //       for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) {
-  //         Settings.module_pins.io[i] = GPIO_NONE_ID;         // Reset user defined GPIO disabling sensors
-  //       }
-  //     }
-  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
-  //       Settings.module = MODULE_WEMOS_ID;             // Reset module to Sonoff Basic
-  //       Settings.last_module = MODULE_WEMOS_ID;
-  //     }
-  //     //reset 7 times, then fail into safe boot awaiting OTA
-  //     // HandleFailedBootFailBack();
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcReboot.fast_reboot_count);
-  //     #endif///   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   }
-  // }
 
-  memset(Settings.mqtt.topic,0,sizeof(Settings.mqtt.topic));
-  memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
-  
-  // Configure hostname 
-  memset(runtime.my_hostname,0,sizeof(runtime.my_hostname));
-  sprintf(runtime.my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
 
-  //Only load wifi here or else set fallback
 
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_PROJECT " %s %s " D_VERSION " %s%s-" ARDUINO_ESP8266_RELEASE), pCONT_set->Settings.system_name.device, Settings.system_name.friendly, my_version, my_image);
-  
+#ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
+
+/*********************************************************************************************\
+ * Config Settings->text char array support
+\*********************************************************************************************/
+
+uint32_t mSettings::GetSettingsTextLen(void) {
+  char* position = Settings.text_pool;
+  for (uint32_t size = 0; size < SET_MAX; size++) {
+    while (*position++ != '\0') { }
+  }
+  return position - Settings.text_pool;
 }
 
+bool settings_text_mutex = false;
+uint32_t settings_text_busy_count = 0;
+
+bool mSettings::SettingsUpdateFinished(void) {
+  uint32_t wait_loop = 10;
+  while (settings_text_mutex && wait_loop) {  // Wait for any update to finish
+    yield();
+    delayMicroseconds(1);
+    wait_loop--;
+  }
+  return (wait_loop > 0);  // true if finished
+}
+
+bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me) 
+{
+
+  ALOG_INF(PSTR("SettingsUpdateText %d %s"),index,replace_me);
+
+  if (index >= SET_MAX) {
+    return false;  // Setting not supported - internal error
+  }
+
+  // Make a copy first in case we use source from Settings->text
+  uint32_t replace_len = strlen_P(replace_me);
+  char replace[replace_len +1];
+  memcpy_P(replace, replace_me, sizeof(replace));
+  uint32_t index_save = index;
+
+  uint32_t start_pos = 0;
+  uint32_t end_pos = 0;
+  char* position = Settings.text_pool;
+  for (uint32_t size = 0; size < SET_MAX; size++) {
+    while (*position++ != '\0') { }
+    if (1 == index) {
+      start_pos = position - Settings.text_pool;
+    }
+    else if (0 == index) {
+      end_pos = position - Settings.text_pool -1;
+    }
+    index--;
+  }
+  uint32_t char_len = position - Settings.text_pool;
+
+  uint32_t current_len = end_pos - start_pos;
+  int diff = replace_len - current_len;
+
+ AddLog(LOG_LEVEL_INFO, PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
+   start_pos, end_pos, char_len, current_len, replace_len, diff);
+
+  int too_long = (char_len + diff) - settings_text_size;
+  if (too_long > 0) {
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
+    return false;  // Replace text too long
+  }
+
+  if (settings_text_mutex && !SettingsUpdateFinished()) {
+    settings_text_busy_count++;
+  } else {
+    settings_text_mutex = true;
+
+    if (diff != 0) {
+      // Shift Settings->text up or down
+      memmove_P(Settings.text_pool + start_pos + replace_len, Settings.text_pool + end_pos, char_len - end_pos);
+    }
+    // Replace text
+    memmove_P(Settings.text_pool + start_pos, replace, replace_len);
+    // Fill for future use
+    memset(Settings.text_pool + char_len + diff, 0x00, settings_text_size - char_len - diff);
+
+    settings_text_mutex = false;
+  }
+
+#ifdef DEBUG_FUNC_SETTINGSUPDATETEXT
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d, Id %02d = \"%s\""), GetSettingsTextLen(), settings_text_size, settings_text_busy_count, index_save, replace);
+Serial.println("test_pool");
+for(int i=0;i<100;i++)
+{
+  Serial.print(Settings.text_pool[i]);
+}
+Serial.println();
+#else
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d"), GetSettingsTextLen(), settings_text_size, settings_text_busy_count);
+#endif
+
+
+  return true;
+}
+
+char* mSettings::SettingsText(uint32_t index) {
+  char* position = Settings.text_pool;
+
+  if (index >= SET_MAX) { // Index above SET_MAX are not stored in Settings
+#ifdef USE_WEBSERVER
+    if (SET_BUTTON17 <= index && index <= SET_BUTTON32)
+      return (char*)GetWebButton(index-SET_BUTTON17+16);
+#endif
+    position += settings_text_size -1;  // Setting not supported - internal error - return empty string
+  } else {
+    SettingsUpdateFinished();
+    for (;index > 0; index--) {
+      while (*position++ != '\0') { }
+    }
+  }
+  return position;
+}
+
+#endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER

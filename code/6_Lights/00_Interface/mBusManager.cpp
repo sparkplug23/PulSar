@@ -7,6 +7,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
+
 void ColorOrderMap::add(uint16_t start, uint16_t len, COLOUR_ORDER_T colorOrder) 
 {
 
@@ -38,8 +39,6 @@ COLOUR_ORDER_T IRAM_ATTR ColorOrderMap::getPixelColorOrder(uint16_t pix, COLOUR_
   // Serial.println("getPixelColorOrder");
   // return colourtmp;
 
-
-
   if (_count == 0) return defaultColorOrder;
   for (uint8_t i = 0; i < _count; i++) 
   {
@@ -54,81 +53,39 @@ COLOUR_ORDER_T IRAM_ATTR ColorOrderMap::getPixelColorOrder(uint16_t pix, COLOUR_
 }
 
 
-uint32_t Bus::autoWhiteCalc(uint32_t c) 
+const char* Bus::getTypeName()
 {
-  uint8_t aWM = _autoWhiteMode;
-  if (_gAWM < 255) aWM = _gAWM;
-  if (aWM == RGBW_MODE_MANUAL_ONLY) return c;
-  uint8_t w = W(c);
-  //ignore auto-white calculation if w>0 and mode DUAL (DUAL behaves as BRIGHTER if w==0)
-  if (w > 0 && aWM == RGBW_MODE_DUAL) return c;
-  uint8_t r = R(c);
-  uint8_t g = G(c);
-  uint8_t b = B(c);
-  if (aWM == RGBW_MODE_MAX) return RGBW32(r, g, b, r > g ? (r > b ? r : b) : (g > b ? g : b)); // brightest RGB channel
-  w = r < g ? (r < b ? r : b) : (g < b ? g : b);
-  if (aWM == RGBW_MODE_AUTO_ACCURATE) { r -= w; g -= w; b -= w; } //subtract w in ACCURATE mode
-  return RGBW32(r, g, b, w);
+  return getTypeName(getType());
 }
 
-
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH__CTR) "WS2812_1CH";
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH_X3__CTR) "WS2812_1CH_X3";
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_2CH_X3__CTR) "WS2812_2CH_X3";
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_WWA__CTR) "WS2812_WWA";
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_RGB__CTR) "WS2812_RGB";
-DEFINE_PGM_CTR(PM_BUSTYPE__GS8608__CTR) "GS8608";
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2811_400KHZ__CTR) "WS2811_400KHZ";
-DEFINE_PGM_CTR(PM_BUSTYPE__TM1829__CTR) "TM1829";
-DEFINE_PGM_CTR(PM_BUSTYPE__SK6812_RGBW__CTR) "SK6812_RGBW";
-DEFINE_PGM_CTR(PM_BUSTYPE__TM1814__CTR) "TM1814";
-DEFINE_PGM_CTR(PM_BUSTYPE__ONOFF__CTR) "ONOFF";
-DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_1CH__CTR) "ANALOG_1CH";
-DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_2CH__CTR) "ANALOG_2CH";
-DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_3CH__CTR) "ANALOG_3CH";
-DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_4CH__CTR) "ANALOG_4CH";
-DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_5CH__CTR) "ANALOG_5CH";
-DEFINE_PGM_CTR(PM_BUSTYPE__WS2801__CTR) "WS2801";
-DEFINE_PGM_CTR(PM_BUSTYPE__APA102__CTR) "APA102";
-DEFINE_PGM_CTR(PM_BUSTYPE__LPD8806__CTR) "LPD8806";
-DEFINE_PGM_CTR(PM_BUSTYPE__P9813__CTR) "P9813";
-DEFINE_PGM_CTR(PM_BUSTYPE__LPD6803__CTR) "LPD6803";
-DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGB__CTR) "NET_DDP_RGB";
-DEFINE_PGM_CTR(PM_BUSTYPE__NET_E131_RGB__CTR) "NET_E131_RGB";
-DEFINE_PGM_CTR(PM_BUSTYPE__NET_ARTNET_RGB__CTR) "NET_ARTNET_RGB";
-DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGBW__CTR) "NET_DDP_RGBW";
-DEFINE_PGM_CTR(PM_BUSTYPE__RESERVED__CTR) "RESERVED";
-
-
-
-const char* Bus::getTypeName()
+const char* Bus::getTypeName(uint8_t id)
 {
   switch(getType()){
     default:
     //Digital types (data pin only) (16-31)
-    case BUSTYPE_WS2812_1CH:          return PM_BUSTYPE__WS2812_1CH__CTR;
-    case BUSTYPE_WS2812_1CH_X3:          return PM_BUSTYPE__WS2812_1CH_X3__CTR;
-    case BUSTYPE_WS2812_2CH_X3:          return PM_BUSTYPE__WS2812_2CH_X3__CTR;
-    case BUSTYPE_WS2812_WWA:          return PM_BUSTYPE__WS2812_WWA__CTR;
-    case BUSTYPE_WS2812_RGB:          return PM_BUSTYPE__WS2812_RGB__CTR;
-    case BUSTYPE_GS8608:          return PM_BUSTYPE__GS8608__CTR;
-    case BUSTYPE_WS2811_400KHZ:          return PM_BUSTYPE__WS2811_400KHZ__CTR;
-    case BUSTYPE_TM1829:          return PM_BUSTYPE__TM1829__CTR;
-    case BUSTYPE_SK6812_RGBW:          return PM_BUSTYPE__SK6812_RGBW__CTR;
-    case BUSTYPE_TM1814:          return PM_BUSTYPE__TM1814__CTR;
+    case BUSTYPE_WS2812_1CH:        return PM_BUSTYPE__WS2812_1CH__CTR;
+    case BUSTYPE_WS2812_1CH_X3:     return PM_BUSTYPE__WS2812_1CH_X3__CTR;
+    case BUSTYPE_WS2812_2CH_X3:     return PM_BUSTYPE__WS2812_2CH_X3__CTR;
+    case BUSTYPE_WS2812_WWA:        return PM_BUSTYPE__WS2812_WWA__CTR;
+    case BUSTYPE_WS2812_RGB:        return PM_BUSTYPE__WS2812_RGB__CTR;
+    case BUSTYPE_GS8608:            return PM_BUSTYPE__GS8608__CTR;
+    case BUSTYPE_WS2811_400KHZ:     return PM_BUSTYPE__WS2811_400KHZ__CTR;
+    case BUSTYPE_TM1829:            return PM_BUSTYPE__TM1829__CTR;
+    case BUSTYPE_SK6812_RGBW:       return PM_BUSTYPE__SK6812_RGBW__CTR;
+    case BUSTYPE_TM1814:            return PM_BUSTYPE__TM1814__CTR;
     //"Analog" types (PWM) (32-47)
-    case BUSTYPE_ONOFF:          return PM_BUSTYPE__ONOFF__CTR;
-    case BUSTYPE_ANALOG_1CH:          return PM_BUSTYPE__ANALOG_1CH__CTR;
-    case BUSTYPE_ANALOG_2CH:          return PM_BUSTYPE__ANALOG_2CH__CTR;
-    case BUSTYPE_ANALOG_3CH:          return PM_BUSTYPE__ANALOG_3CH__CTR;
-    case BUSTYPE_ANALOG_4CH:          return PM_BUSTYPE__ANALOG_4CH__CTR;
-    case BUSTYPE_ANALOG_5CH:          return PM_BUSTYPE__ANALOG_5CH__CTR;
+    case BUSTYPE_ONOFF:             return PM_BUSTYPE__ONOFF__CTR;
+    case BUSTYPE_ANALOG_1CH:        return PM_BUSTYPE__ANALOG_1CH__CTR;
+    case BUSTYPE_ANALOG_2CH:        return PM_BUSTYPE__ANALOG_2CH__CTR;
+    case BUSTYPE_ANALOG_3CH:        return PM_BUSTYPE__ANALOG_3CH__CTR;
+    case BUSTYPE_ANALOG_4CH:        return PM_BUSTYPE__ANALOG_4CH__CTR;
+    case BUSTYPE_ANALOG_5CH:        return PM_BUSTYPE__ANALOG_5CH__CTR;
     //Digital types (data + clock / SPI) (48-63)
-    case BUSTYPE_WS2801:          return PM_BUSTYPE__WS2801__CTR;
-    case BUSTYPE_APA102:          return PM_BUSTYPE__APA102__CTR;
-    case BUSTYPE_LPD8806:          return PM_BUSTYPE__LPD8806__CTR;
-    case BUSTYPE_P9813:          return PM_BUSTYPE__P9813__CTR;
-    case BUSTYPE_LPD6803:          return PM_BUSTYPE__LPD6803__CTR;
+    case BUSTYPE_WS2801:            return PM_BUSTYPE__WS2801__CTR;
+    case BUSTYPE_APA102:            return PM_BUSTYPE__APA102__CTR;
+    case BUSTYPE_LPD8806:           return PM_BUSTYPE__LPD8806__CTR;
+    case BUSTYPE_P9813:             return PM_BUSTYPE__P9813__CTR;
+    case BUSTYPE_LPD6803:           return PM_BUSTYPE__LPD6803__CTR;
     //Network types (master broadcast) (80-95)
     case BUSTYPE_NET_DDP_RGB:       return PM_BUSTYPE__NET_DDP_RGB__CTR;
     case BUSTYPE_NET_E131_RGB:      return PM_BUSTYPE__NET_E131_RGB__CTR;
@@ -138,8 +95,43 @@ const char* Bus::getTypeName()
   }
 }
 
+uint8_t Bus::getTypeIDbyName(const char* c)
+{
 
-
+  // Digital types (data pin only) (16-31)
+  if     (strcmp_P(c,PM_BUSTYPE__WS2812_1CH__CTR)==0){ return BUSTYPE_WS2812_1CH; }
+  else if(strcmp_P(c,PM_BUSTYPE__WS2812_1CH_X3__CTR)==0){ return BUSTYPE_WS2812_1CH_X3; }
+  else if(strcmp_P(c,PM_BUSTYPE__WS2812_2CH_X3__CTR)==0){ return BUSTYPE_WS2812_2CH_X3; }
+  else if(strcmp_P(c,PM_BUSTYPE__WS2812_WWA__CTR)==0){ return BUSTYPE_WS2812_WWA; }
+  else if(strcmp_P(c,PM_BUSTYPE__WS2812_RGB__CTR)==0){ return BUSTYPE_WS2812_RGB; }
+  else if(strcmp_P(c,PM_BUSTYPE__GS8608__CTR)==0){ return BUSTYPE_GS8608; }
+  else if(strcmp_P(c,PM_BUSTYPE__WS2811_400KHZ__CTR)==0){ return BUSTYPE_WS2811_400KHZ; }
+  else if(strcmp_P(c,PM_BUSTYPE__TM1829__CTR)==0){ return BUSTYPE_TM1829; }
+  else if(strcmp_P(c,PM_BUSTYPE__SK6812_RGBW__CTR)==0){ return BUSTYPE_SK6812_RGBW; }
+  else if(strcmp_P(c,PM_BUSTYPE__TM1814__CTR)==0){ return BUSTYPE_TM1814; }
+  // "Analog" types (PWM) (32-47)
+  else if(strcmp_P(c,PM_BUSTYPE__ONOFF__CTR)==0){ return BUSTYPE_ONOFF; }
+  else if(strcmp_P(c,PM_BUSTYPE__ANALOG_1CH__CTR)==0){ return BUSTYPE_ANALOG_1CH; }
+  else if(strcmp_P(c,PM_BUSTYPE__ANALOG_2CH__CTR)==0){ return BUSTYPE_ANALOG_2CH; }
+  else if(strcmp_P(c,PM_BUSTYPE__ANALOG_3CH__CTR)==0){ return BUSTYPE_ANALOG_3CH; }
+  else if(strcmp_P(c,PM_BUSTYPE__ANALOG_4CH__CTR)==0){ return BUSTYPE_ANALOG_4CH; }
+  else if(strcmp_P(c,PM_BUSTYPE__ANALOG_5CH__CTR)==0){ return BUSTYPE_ANALOG_5CH; }
+  // Digital types (data + clock / SPI) (48-63)
+  else if(strcmp_P(c,PM_BUSTYPE__WS2801__CTR)==0){ return BUSTYPE_WS2801; }
+  else if(strcmp_P(c,PM_BUSTYPE__APA102__CTR)==0){ return BUSTYPE_APA102; }
+  else if(strcmp_P(c,PM_BUSTYPE__LPD8806__CTR)==0){ return BUSTYPE_LPD8806; }
+  else if(strcmp_P(c,PM_BUSTYPE__P9813__CTR)==0){ return BUSTYPE_P9813; }
+  else if(strcmp_P(c,PM_BUSTYPE__LPD6803__CTR)==0){ return BUSTYPE_LPD6803; }
+  // Network types (master broadcast) (80-95)
+  else if(strcmp_P(c,PM_BUSTYPE__NET_DDP_RGB__CTR)==0){ return BUSTYPE_NET_DDP_RGB; }
+  else if(strcmp_P(c,PM_BUSTYPE__NET_E131_RGB__CTR)==0){ return BUSTYPE_NET_E131_RGB; }
+  else if(strcmp_P(c,PM_BUSTYPE__NET_ARTNET_RGB__CTR)==0){ return BUSTYPE_NET_ARTNET_RGB; }
+  else if(strcmp_P(c,PM_BUSTYPE__NET_DDP_RGBW__CTR)==0){ return BUSTYPE_NET_DDP_RGBW; }
+  else if(strcmp_P(c,PM_BUSTYPE__RESERVED__CTR)==0){ return BUSTYPE_RESERVED; }
+  
+  return BUSTYPE_NONE;
+  
+}
 
 
 
@@ -198,13 +190,6 @@ void BusDigital::show()
 bool BusDigital::canShow() 
 {
   return PolyBus::canShow(_busPtr, _iType);
-}
-
-
-void BusDigital::setBrightness(uint8_t b) 
-{
-  Bus::setBrightness(b);
-  // PolyBus::setBrightness(_busPtr, _iType, b);
 }
 
 
@@ -335,6 +320,8 @@ BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
   if (!IS_BUSTYPE_PWM(bc.type)) return;
   uint8_t numPins = NUM_BUSTYPE_PWM_PINS(bc.type);
 
+  ALOG_INF(PSTR("BusPwm::BusPwm numPins %d"), numPins);
+
   #ifdef ESP8266
   analogWriteRange(255);  //same range as one RGB channel
   analogWriteFreq(WLED_PWM_FREQ);
@@ -349,11 +336,11 @@ BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
   {
     uint8_t currentPin = bc.pins[i];
     _pins[i] = currentPin;
-    ALOG_HGL(PSTR("_pins[%d]=>%d"),i,_pins[i]);
+    ALOG_INF(PSTR("_pins[%d]=>%d"),i,_pins[i]);
     #ifdef ESP8266
     pinMode(_pins[i], OUTPUT);
     #else
-    ledcSetup(_ledcStart + i, WLED_PWM_FREQ, 10);
+    ledcSetup(_ledcStart + i, WLED_PWM_FREQ, 10); // Hi, the maximum frequency is 80000000 / 2resolution. At 1-bit resolution => 40MHz At 8-bits resolution => 312,5 kHz // 80MHz / 1024 = 78125 Hz
     ledcAttachPin(_pins[i], _ledcStart + i);
     #endif
   }
@@ -364,13 +351,11 @@ BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
 
 void BusPwm::setPixelColor(uint16_t pix, RgbcctColor c) 
 {
-  if (pix != 0 || !_valid){
-    return;
-  }
+  if (pix != 0 || !_valid) return; // only react to first pixel
   // ALOG_INF(PSTR("BusPwm::setPixelColor seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
   output_colour = c;
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  output_colour.debug_print("BusPwm::setPixelColor::output_colour");
+  output_colour.debug_print("BusPwm::setPixelColor::output_colour++++++++++++++++++++++++++");
   #endif
 }
 
@@ -380,10 +365,7 @@ RgbcctColor BusPwm::getPixelColor(uint16_t pix)
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "BusPwm::getPixelColor ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
   #endif
-  if (!_valid){
-    DEBUG_LINE_HERE;
-    return 0;
-  }
+  if (pix != 0 || !_valid) return RgbcctColor(0); // only react to first pixel
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   output_colour.debug_print("BusPwm::getPixelColor::output_colour");
   #endif //  ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
@@ -398,22 +380,9 @@ void BusPwm::show()
   ALOG_INF(PSTR("*********************************************************BusPwm::show"));
   #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
-  if (!_valid) 
-  {
+  if (!_valid){
     return;
   }
-
-  uint16_t pwm_value;
-
-  uint16_t colour10bit[5] = {0};
-
-  // Convert into full range value
-  // // This depends on the type!
-  // colour10bit[0] = mapvalue(output_colour.R, 0, 255, 0, 1023);
-  // colour10bit[1] = mapvalue(output_colour.G, 0, 255, 0, 1023);
-  // colour10bit[2] = mapvalue(output_colour.B, 0, 255, 0, 1023);
-  // colour10bit[3] = mapvalue(output_colour.WC, 0, 255, 0, 1023);
-  // colour10bit[4] = mapvalue(output_colour.WW, 0, 255, 0, 1023);
 
   uint16_t r = mapvalue(output_colour.R, 0, 255, 0, 1023);
   uint16_t g = mapvalue(output_colour.G, 0, 255, 0, 1023);
@@ -423,9 +392,9 @@ void BusPwm::show()
   
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   output_colour.debug_print_states("output_colour");
-  ALOG_INF(PSTR("w1[%d]=%d"), pCONT_lAni->getCurrSegmentId(), w1);
   #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
+  uint16_t colour10bit[5] = {0};
   switch (_type) {
     default:
     case BUSTYPE_ANALOG_5CH: //RGB + warm white + cold white
@@ -458,18 +427,24 @@ void BusPwm::show()
    * ** Shrink into desired PWM range limits
    * Here colour is just a PWM value, the actual colour information is above and should be inserted correctly
    */
+  uint16_t pwm_value;
   uint8_t numPins = NUM_BUSTYPE_PWM_PINS(_type);
   for(uint8_t ii=0;ii<numPins;ii++)
   {
     colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
     pwm_value = bitRead(pCONT_set->runtime.pwm_inverted, ii) ? pCONT_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
+
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
     ALOG_DBM(PSTR("BusPwm[%d]::pwm_value[%d] %d"), pCONT_lAni->getCurrSegmentId(), ii, pwm_value);
+    #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
     #ifdef ESP8266
     analogWrite(_pins[ii], pwm_value);
     #else
     ledcWrite(_ledcStart + ii, pwm_value);
     #endif
   }
+  
 }
 
 
@@ -526,7 +501,7 @@ void BusOnOff::setPixelColor(uint16_t pix, RgbcctColor c)
 {
   if (pix != 0 || !_valid) return; // only react to first pixel
   uint32_t colour = RgbcctColor::GetU32Colour(c);
-  _data = bool(colour && _bri) ? 0xFF : 0;
+  _data = bool(colour) ? 0xFF : 0;
 }
 
 RgbcctColor BusOnOff::getPixelColor(uint16_t pix) 
@@ -630,6 +605,27 @@ void BusNetwork::cleanup()
 }
 
 
+/*****************************************************************************************************************************************************************
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ** BusManager *************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************** 
+ *****************************************************************************************************************************************************************/
+
+
+
 //utility to get the approx. memory usage of a given BusConfig
 uint32_t BusManager::memUsage(BusConfig &bc) 
 {
@@ -693,7 +689,6 @@ int BusManager::add(BusConfig &bc)
   numBusses++;
 
   ALOG_INF(PSTR("BusManager::add::numBusses %d"), numBusses);
-
   
   return numBusses;
 
@@ -704,25 +699,16 @@ void BusManager::removeAll()
 {
   DEBUG_PRINTLN(F("Removing all."));
   //prevents crashes due to deleting busses while in use.
-        DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
   // while (!canAllShow()) yield(); //potentially freezing code YES, FREEZES ON BOOT
-        DEBUG_LINE_HERE;
-    ALOG_INF(PSTR("i < numBusses %d"), numBusses);
-
-  // Sanity check
-    ALOG_ERR(PSTR("numBusses busses array size %d %d"), numBusses, ARRAY_SIZE(busses));
-  if(numBusses >= ARRAY_SIZE(busses))
-  {
-    ALOG_ERR(PSTR("numBusses exceed busses array size %d %d"), numBusses, ARRAY_SIZE(busses));
-    numBusses = ARRAY_SIZE(busses);
-  }
+  DEBUG_LINE_HERE;
 
   for (uint8_t i = 0; i < numBusses; i++) 
   {
     ALOG_INF(PSTR("i=>%d"), i);
     if(busses[i]!=nullptr)
     {
-      delete busses[i];
+      delete busses[i]; // change to vectors?
     }
   }
   
@@ -746,6 +732,7 @@ void BusManager::show()
 
 void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, RgbcctColor c, int16_t cct) 
 {
+  // DEBUG_LINE_HERE;
   // ALOG_INF(PSTR("numBusses = %d"),numBusses);
   // c.debug_print("BusManager::setPixelColor");
   for (uint8_t i = 0; i < numBusses; i++) 
@@ -771,19 +758,14 @@ RgbcctColor BusManager::getPixelColor(uint16_t pix)
 }
 
 
-void BusManager::setBrightness(uint8_t b) {
-  for (uint8_t i = 0; i < numBusses; i++) {
-    busses[i]->setBrightness(b);
-  }
-}
-
 void BusManager::setSegmentCCT(int16_t cct, bool allowWBCorrection) {
-  if (cct > 255) cct = 255;
-  if (cct >= 0) {
-    //if white balance correction allowed, save as kelvin value instead of 0-255
-    if (allowWBCorrection) cct = 1900 + (cct << 5);
-  } else cct = -1;
-  Bus::setCCT(cct);
+  ALOG_ERR(PSTR("BusManager::setSegmentCCT needs WLED converted to PulSar CCT typing.")); // these functions are likely still needed to pass into the proper functions. 
+  // if (cct > 255) cct = 255;
+  // if (cct >= 0) {
+  //   //if white balance correction allowed, save as kelvin value instead of 0-255
+  //   if (allowWBCorrection) cct = 1900 + (cct << 5);
+  // } else cct = -1;
+  // Bus::setCCT(cct);
 }
 
 
@@ -801,6 +783,7 @@ bool BusManager::canAllShow() {
   return true;
 }
 
+
 Bus* BusManager::getBus(uint8_t busNr) {
   if (busNr >= numBusses) return nullptr;
   return busses[busNr];
@@ -812,7 +795,6 @@ uint16_t BusManager::getTotalLength() {
   for (uint8_t i=0; i<numBusses; i++) len += busses[i]->getLength();
   return len;
 }
-
 
 
 const char* BusManager::getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len)
@@ -831,12 +813,28 @@ const char* BusManager::getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buf
 }
 
 
-
+#ifdef ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
+uint32_t Bus::autoWhiteCalc(uint32_t c) 
+{
+  uint8_t aWM = _autoWhiteMode;
+  if (_gAWM < 255) aWM = _gAWM;
+  if (aWM == RGBW_MODE_MANUAL_ONLY) return c;
+  uint8_t w = W(c);
+  //ignore auto-white calculation if w>0 and mode DUAL (DUAL behaves as BRIGHTER if w==0)
+  if (w > 0 && aWM == RGBW_MODE_DUAL) return c;
+  uint8_t r = R(c);
+  uint8_t g = G(c);
+  uint8_t b = B(c);
+  if (aWM == RGBW_MODE_MAX) return RGBW32(r, g, b, r > g ? (r > b ? r : b) : (g > b ? g : b)); // brightest RGB channel
+  w = r < g ? (r < b ? r : b) : (g < b ? g : b);
+  if (aWM == RGBW_MODE_AUTO_ACCURATE) { r -= w; g -= w; b -= w; } //subtract w in ACCURATE mode
+  return RGBW32(r, g, b, w);
+}
+#endif // ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
 
 // Bus static member definition
-int16_t Bus::_cct = -1; // Phase out
-uint8_t Bus::_cctBlend = 0; // Phase out
+#ifdef ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
 uint8_t Bus::_gAWM = 255; // auto white mode
-
+#endif // ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES
 
 #endif // USE_MODULE_LIGHTS_INTERFACE

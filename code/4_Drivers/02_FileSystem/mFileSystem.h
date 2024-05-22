@@ -29,6 +29,15 @@
   #include "FS.h"
 #endif  // ESP32
 
+
+
+
+#define FILE_EXTENSION_JSON ".json"
+
+#define FILE_EXTENSION_BIN ".bin" //release version
+// #define FILE_EXTENSION_BIN ".txt"   //debug version so the editor can open the file
+
+
 /*
  * Connect the SD card to the following pins:
  *
@@ -80,7 +89,7 @@ class mFileSystem :
 
 
 void ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
-void ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
+uint32_t ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
 void JSONFile_Save(char* filename_With_extension, char* buffer, uint16_t buflen);
 void JSONFile_Load(char* filename_With_extension, char* buffer, uint16_t buflen);
 
@@ -305,7 +314,7 @@ void WebAppend_Root_Status_Table();
     void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mFileSystem>* ptr;
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mFileSystem> mqtthandler_settings_teleperiod;
@@ -315,9 +324,6 @@ void WebAppend_Root_Status_Table();
     struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
     
     std::vector<struct handler<mFileSystem>*> mqtthandler_list;
-
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
 
 };
 

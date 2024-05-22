@@ -91,13 +91,13 @@ class mMAVLink_Decoder_OLED :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     struct handler<mMAVLink_Decoder_OLED> mqtthandler_settings_teleperiod;
     struct handler<mMAVLink_Decoder_OLED> mqtthandler_state_ifchanged;
 
     //No extra handlers: ie settings and "state" only
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
       
     struct handler<mMAVLink_Decoder_OLED>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,

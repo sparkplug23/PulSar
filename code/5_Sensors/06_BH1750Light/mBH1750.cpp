@@ -373,10 +373,10 @@ void mBH1750::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mBH1750::MQTTHandler_Sender(uint8_t id)
+void mBH1750::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BH1750_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BH1750_ID, handle);
   }
 }
   

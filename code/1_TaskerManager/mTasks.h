@@ -71,6 +71,15 @@ enum TASKER_FUNCTION_TYPES {
 // END OF BOOT SECTION 
   FUNC_ON_BOOT_SUCCESSFUL, //should be triggered once after device is considered stable
 
+  /**
+   * @brief Mostly for developing code, these will be called after a successful boot when the device is stable, and will only then enable that module to run
+   * 
+   */
+  FUNC_PRE_INIT_DELAYED,     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
+  FUNC_INIT_DELAYED,         // Actually complete init, read sensors, enable modules fully etc
+  FUNC_MQTT_HANDLERS_INIT_DELAYED,
+
+
   // Configure sensors and drivers for device
   // Looping trigger times
   FUNC_LOOP, FUNC_EVERY_50_MSECOND, FUNC_EVERY_100_MSECOND, FUNC_EVERY_250_MSECOND, 
@@ -151,7 +160,7 @@ enum TASKER_FUNCTION_TYPES {
 
 
   
-  FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID,
+  // FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID,
   FUNC_FILESYSTEM_APPEND_JSON__Stored_Secure__ID,
   FUNC_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID, // Temporary, will be replaced with flash settings
 
@@ -160,6 +169,7 @@ enum TASKER_FUNCTION_TYPES {
   FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID,   // Each module is asked to load its data on restore at boot
 
 
+  FUNC_TIME_SYNCED,
 
   /**
    * @brief Rules

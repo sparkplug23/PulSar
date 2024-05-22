@@ -17,10 +17,11 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
-/**@@@@@ Minor Changes
+/**@@@@@ Minor Changes - aim to make these quarterly
+ * #122 : April 2024, lighting refactor and 2D
  * #121 : Jan 2024, starting with LTE tracing
  * #120 : XMAS 2023
- * #119 : Updated to latest neopixelbus library, and added support for 8 pin parallel output.
+ * #119 : Updated to latest neopixelbus library, and added support for 8/16 pin parallel output.
  * #118 : Nextion support added. TFT Upload via WebUI Async Webserver.
  * #117 : Introduction of first lighting testgroup (ie 6 candidate template default options to provide new users)
  * #116 : Multipin support on I2S (dual neopixel) and PWM. Introduction of TestGroups.
@@ -31,7 +32,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    121 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    122 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #06 : New BME680 added, bme/p 180/280 manual without library
@@ -58,8 +59,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  */
 #define FIRMWARE_VERSION_MODULE   0
 
-
-#define FIRMWARE_BRANCH_NAME_STRING "development" // Additions from colorado and for december 2022, to be merged into main dev branch and then deleted
+#define FIRMWARE_BRANCH_NAME_STRING "development"
 
 
 #ifndef SETTINGS_HOLDER
@@ -95,7 +95,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
   #define ENABLE_LOG_LEVEL_NONE 
   #define ENABLE_LOG_LEVEL_ERROR 
-  #define ENABLE_LOG_LEVEL_WARN 
+  #define ENABLE_LOG_LEVEL_WARNING 
   #define ENABLE_LOG_LEVEL_TEST
   #define ENABLE_LOG_LEVEL_INFO 
   #define ENABLE_LOG_LEVEL_COMMANDS
@@ -120,7 +120,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 // To reduce ram usage
 #define ENABLE_LOG_LEVEL_NONE 
 #define ENABLE_LOG_LEVEL_ERROR 
-#define ENABLE_LOG_LEVEL_WARN 
+#define ENABLE_LOG_LEVEL_WARNING
 #define ENABLE_LOG_LEVEL_TEST
 #define ENABLE_LOG_LEVEL_INFO 
 #define ENABLE_LOG_LEVEL_COMMANDS
@@ -135,12 +135,12 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 // #define DEBUG_WEBSERVER_MEMORY
 
 
-// Muted blue/green
-#define COLOR_BUTTON_HIGHLIGHT      "#1be7f1"
-#define COLOR_BUTTON                "#4d8d90"    // [WebColor11] Button color - Blueish
-#define COLOR_BUTTON_HOVER          "#31595b"
-#define D_COLOUR_PAGE_TITLE         "#4bb7e6"
-#define D_COL_TEXT_MODULE_TITLE_CTR "#4bb7e6"
+// // Muted blue/green
+// #define COLOR_BUTTON_HIGHLIGHT      "#1be7f1"
+// #define COLOR_BUTTON                "#4d8d90"    // [WebColor11] Button color - Blueish
+// #define COLOR_BUTTON_HOVER          "#31595b"
+// #define D_COLOUR_PAGE_TITLE         "#4bb7e6"
+// #define D_COL_TEXT_MODULE_TITLE_CTR "#4bb7e6"
 
 #define ENABLE_USER_CONFIG_OVERRIDE
 

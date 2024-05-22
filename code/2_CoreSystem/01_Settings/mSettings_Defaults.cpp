@@ -17,13 +17,16 @@ void mSettings::SettingsInit(void)
 void mSettings::SettingsDefault(void)
 {
   
+  DEBUG_LINE_HERE;
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
+  DEBUG_LINE_HERE;
   Settings.flag_system.stop_flash_rotate = true;
   runtime.stop_flash_rotate = true;
 
+  DEBUG_LINE_HERE;
   // Erase ALL settings to 0
   memset(&Settings, 0x00, sizeof(SETTINGS));
 
@@ -31,15 +34,18 @@ void mSettings::SettingsDefault(void)
   
   SystemSettings_DefaultBody();
 
+  DEBUG_LINE_HERE;
   // Clear module defaults
   pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
   DEBUG_LINE_HERE;
   pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
       
+  DEBUG_LINE_HERE;
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
   #endif// ENABLE_LOG_LEVEL_INFO
 
+  DEBUG_LINE_HERE;
   // After defaults are loaded everything should immediately be saved
   SettingsSaveAll();
   
@@ -195,9 +201,13 @@ void mSettings::SystemSettings_DefaultBody(void)
   if (((APP_TIMEZONE > -14) && (APP_TIMEZONE < 15)) || (99 == APP_TIMEZONE)) {
     Settings.timezone = APP_TIMEZONE;
     Settings.timezone_minutes = 0;
+    Settings.timezone2 = APP_TIMEZONE;
+    Settings.timezone_minutes2 = 0;
   } else {
     Settings.timezone = APP_TIMEZONE / 60;
     Settings.timezone_minutes = abs(APP_TIMEZONE % 60);
+    Settings.timezone2 = APP_TIMEZONE / 60;
+    Settings.timezone_minutes2 = abs(APP_TIMEZONE % 60);
   }
 
   SettingsResetStd();
@@ -213,6 +223,14 @@ void mSettings::SystemSettings_DefaultBody(void)
   //     }
   //   }
   // }
+  #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
+  SettingsUpdateText(SET_NTPSERVER1, PSTR(NTP_SERVER1));
+  SettingsUpdateText(SET_NTPSERVER2, PSTR(NTP_SERVER2));
+  SettingsUpdateText(SET_NTPSERVER3, PSTR(NTP_SERVER3));
+  for (uint32_t i = 0; i < MAX_NTP_SERVERS; i++) {
+    SettingsUpdateText(SET_NTPSERVER1 +i, pCONT_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 +i)));
+  }
+  #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
   /*********************************************************************************************
    ******* Lighting ****************************************************************************
@@ -355,12 +373,14 @@ void mSettings::SystemSettings_DefaultBody(void)
 
 void mSettings::SettingsResetStd(void)
 {
-  pCONT_time->tflag[0].hemis = TIME_STD_HEMISPHERE;
-  pCONT_time->tflag[0].week  = TIME_STD_WEEK;
-  pCONT_time->tflag[0].dow   = TIME_STD_DAY;
-  pCONT_time->tflag[0].month = TIME_STD_MONTH;
-  pCONT_time->tflag[0].hour  = TIME_STD_HOUR;
-  pCONT_time->toffset[0]     = TIME_STD_OFFSET;
+  
+  Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
+  Settings.tflag[0].week  = TIME_STD_WEEK;
+  Settings.tflag[0].dow   = TIME_STD_DAY;
+  Settings.tflag[0].month = TIME_STD_MONTH;
+  Settings.tflag[0].hour  = TIME_STD_HOUR;
+  Settings.toffset[0]     = TIME_STD_OFFSET;
+
 }
 
 
@@ -368,10 +388,10 @@ void mSettings::SettingsResetStd(void)
 
 void mSettings::SettingsResetDst(void)
 {
-  pCONT_time->tflag[1].hemis = TIME_DST_HEMISPHERE;
-  pCONT_time->tflag[1].week = TIME_DST_WEEK;
-  pCONT_time->tflag[1].dow = TIME_DST_DAY;
-  pCONT_time->tflag[1].month = TIME_DST_MONTH;
-  pCONT_time->tflag[1].hour = TIME_DST_HOUR;
-  pCONT_time->toffset[1] = TIME_DST_OFFSET;
+  Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
+  Settings.tflag[1].week = TIME_DST_WEEK;
+  Settings.tflag[1].dow = TIME_DST_DAY;
+  Settings.tflag[1].month = TIME_DST_MONTH;
+  Settings.tflag[1].hour = TIME_DST_HOUR;
+  Settings.toffset[1] = TIME_DST_OFFSET;
 }

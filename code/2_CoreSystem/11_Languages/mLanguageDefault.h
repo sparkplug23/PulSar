@@ -372,10 +372,6 @@
   #define D_MODULE_CONTROLLER_TANKVOLUME_CTR              "mTankVolume"
   #define D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR              "tankvolume"
 //#endif
-//#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
-  #define D_MODULE_CONTROLLER_EXERCISEBIKE_CTR              "mExerciseBike"
-  #define D_MODULE_CONTROLLER_EXERCISEBIKE_FRIENDLY_CTR              "exercisebike"
-//#endif
 
 
 
@@ -449,6 +445,16 @@
 
 #define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_FRIENDLY_CTR  "printer_enclosure"
 #define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_CTR "printer_enclosure"
+
+#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR  "oled_show_power"
+#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR           "oled_show_power"
+
+#define D_MODULE_CONTROLLER__ENERGY_OLED_FRIENDLY_CTR "energy_oled"
+#define D_MODULE_CONTROLLER__ENERGY_OLED_CTR          "energy_oled"
+
+
+#define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_FRIENDLY_CTRL "treadmill_logger"
+#define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR "treadmill_logger"
 
 
 #define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR "sensor_colourbar"
@@ -1498,6 +1504,7 @@
   #define D_LOG_LIGHT "LGT: "         // Light interface
   #define D_LOG_DOORBELL "DRB: "         // Neopixels
   #define D_LOG_RELAYS "RLY: "         // relays
+  #define D_LOG_TIME2 "TIM2: "         // Time testing v2
   #define D_LOG_TIME "TIM: "         // Time
   #define D_LOG_UPTIME "UPT: "         // Uptime
   #define D_LOG_DHT "DHT: "         // Uptime
@@ -1561,6 +1568,7 @@
   #define D_LOG_LIGHT "LGT: "         // Light interface
   #define D_LOG_DOORBELL "DRB: "         // Neopixels
   #define D_LOG_RELAYS "RLY: "         // relays
+  #define D_LOG_TIME2 "TIM2: "         // Time testing v2
   #define D_LOG_TIME "TIM: "         // Time
   #define D_LOG_UPTIME "UPT: "         // Uptime
   #define D_LOG_DHT "DHT: "         // Uptime

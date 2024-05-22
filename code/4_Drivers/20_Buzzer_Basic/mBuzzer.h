@@ -69,14 +69,14 @@ class mBuzzer :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mBuzzer> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mBuzzer> mqtthandler_sensor_ifchanged;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers example
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     //with extra handlers example
 
     

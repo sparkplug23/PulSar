@@ -41,7 +41,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  // if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
+  // if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -54,9 +54,18 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
 
     break;
     case FUNC_EVERY_SECOND:
-      // EverySecond_SendScreenInfo();
-      // EverySecond_FlashScreen();
-      EverySecond_ActivityCheck();
+      if(!update_in_progress)
+      {
+        EverySecond_ActivityCheck();
+        if(splash_page_seconds)
+        {
+          splash_page_seconds--;
+          if(splash_page_seconds==0) // The final time the if above is true, is when it is 1, then -- makes this 0 and thus true
+          {
+            Command_SetPage(splash_page_saved_page); // return to saved page
+          }
+        }
+      }
     break;
     case FUNC_EVERY_MINUTE:
       // EverySecond_SendScreenInfo();
@@ -65,18 +74,18 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
       // Command_SetPage(settings.page);   //temp fix
     break;
     case FUNC_RESTART_STABLE:      
-      nextionSendCmd("page large_message");
-      nextionSetAttr("large_message.main.txt", "\"System Rebooting...\"");
-      nextionSetAttr("large_message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
+      nextionSendCmd("page message");
+      nextionSetAttr("message.main.txt", "\"System Rebooting...\"");
+      nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_GREEN_STR);
       display->flush();
     break;
     /************
      * Network SECTION * 
     *******************/
     case FUNC_WIFI_STARTING_CONNECTION:      
-      nextionSendCmd("page large_message");
-      nextionSetAttr("large_message.main.txt", "\"WiFi Connecting...\"");
-      nextionSetAttr("large_message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
+      nextionSendCmd("page message");
+      nextionSetAttr("message.main.txt", "\"WiFi Connecting...\"");
+      nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
     break;
     case FUNC_WEB_ADD_HANDLER:
       WebPage_AddHandlers();
@@ -86,7 +95,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_JSON_COMMAND_ID:
     
-      if(!update_in_progress)
+      if(!update_in_progress && !pCONT_sup->arduino_ota_triggered)
         parse_JSONCommand(obj);
 
     break;
@@ -109,26 +118,44 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
       mqttDisconnected();
       Show_ConnectionNotWorking();
     break;
+    case FUNC_MQTT_SUBSCRIBE:
+      MQTTSubscribe();
+    break;
     #endif
   }
 
 }
 
 
+
+void mNextionPanel::Command_SplashPage(char* pagename, uint8_t time_on_page)
+{
+  // saved current page to return to later
+  splash_page_saved_page = settings.page;
+  // Change page by name
+  Command_SetPage(pagename);
+  // start timer to return to saved page
+  splash_page_seconds = time_on_page;
+
+}
+
+
 void mNextionPanel::Show_ConnectionWorking()
 {
-  nextionSendCmd("page large_message");
-  nextionSetAttr("large_message.main.txt", "\"Computer connected!\"");
+  Command_SplashPage("message", 2);
+  
+  nextionSetAttr("message.main.txt", "\"Computer connected!\"");
   uint16_t colour565 = RGB888_to_RGB565(0,255,255);
-  nextionSetAttr("large_message.main.bco", colour565);
+  nextionSetAttr("message.main.bco", colour565);
+
 }
 
 
 void mNextionPanel::Show_ConnectionNotWorking()
 {
-  nextionSendCmd("page large_message");
-  nextionSetAttr("large_message.main.txt", "\"Connection Lost!\"");
-  nextionSetAttr("large_message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
+  nextionSendCmd("page message");
+  nextionSetAttr("message.main.txt", "\"Connection Lost!\"");
+  nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
 }
 
 
@@ -136,29 +163,51 @@ void mNextionPanel::Show_ConnectionNotWorking()
 void mNextionPanel::Pre_Init(void)
 {
 
+  module_state.mode = ModuleStatus::Initialising;
+
   // Plan to make Serial the primary code, then everything here will interface into it. 
   // For now, just using locally
 
-  display = new HardwareSerial(2);
+  uint8_t serial_port = 1; // default
+  uint8_t rx_pin = 0;
+  uint8_t tx_pin = 0;
+  if(pCONT_pins->PinUsed(GPIO_NEXTION_RX_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX_ID))
+  {
+    serial_port = 1;
+    rx_pin = pCONT_pins->GetPin(GPIO_NEXTION_RX_ID);
+    tx_pin = pCONT_pins->GetPin(GPIO_NEXTION_TX_ID);
+  }
+  else if(pCONT_pins->PinUsed(GPIO_NEXTION_RX2_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX2_ID))
+  {
+    serial_port = 2;
+    rx_pin = pCONT_pins->GetPin(GPIO_NEXTION_RX2_ID);
+    tx_pin = pCONT_pins->GetPin(GPIO_NEXTION_TX2_ID);
+  }else{
+    module_state.mode = ModuleStatus::NoGPIOConfigured;
+    return;
+  }
 
-  display->flush(); // Clear TX Buffers
-  while (display->available()) { display->read(); } // Clear RX Buffers
-  delay(1000);
-  display->end(); // End Serial
+  display = new HardwareSerial(serial_port);
+  
+  ALOG_COM(PSTR(D_LOG_NEXTION "Using GPIO%d for Nextion RX"), rx_pin);
 
-  pinMode(16, OUTPUT); // RX - try forcing these to GPIO to stop serial comms
-  pinMode(17, OUTPUT); // TX - try forcing these to GPIO to stop serial comms
+  pinMode( rx_pin, OUTPUT); // RX - try forcing these to GPIO to stop serial comms
+  pinMode( tx_pin, OUTPUT); // TX - try forcing these to GPIO to stop serial comms
 
-  delay(1000);
-
+  /**
+   * @brief ESP32 is hanging when starting Serial 1 or 2.
+   * A work around is to start at a low baud, then switch to the desired baud to avoid hanging
+   **/
   display->begin(
-    115200,
+    9600,
     SERIAL_8N1,
-    16, // RX
-    17  // TX
+    rx_pin, // RX
+    tx_pin  // TX
   );
+  display->updateBaudRate(ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT);
 
-  // display->println("BOOT SUCCESFUL");
+
+  module_state.mode = ModuleStatus::Initialising; 
   
 }
 
@@ -173,36 +222,49 @@ void mNextionPanel::Init()
     if (lcdConnected)
     {
       ALOG_INF(PSTR("HMI: LCD responding but initialization wasn't completed. Continuing program load anyway."));
+      module_state.devices++;
     }
     else
     {
       ALOG_INF(PSTR("HMI: LCD not responding, continuing program load"));
+      module_state.devices++;
     }
+  }else{
+    module_state.devices++;
   }
+
+  delay(1000);
   
   // init variables
   memset(nextionSuffix,0xFF,sizeof(nextionSuffix));
   // memcpy(lcdVersionQuery,"p[0].b[2].val",sizeof("p[0].b[2].val"));
 
   memset(flash_message.message,0,sizeof(flash_message.message));
-  sprintf(flash_message.message,"%s","Awaitng a message to show");
+  sprintf(flash_message.message,"%s","Awaiting a message to show");
 
   char page_default_command[10];
   sprintf(page_default_command,"page %d",NEXTION_DEFAULT_PAGE_NUMBER);
 
 
+
+  #ifdef USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT  
+  CommandSet_Baud(USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT);
+  #endif 
+
+
   #ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
-    Template_Load_Init_Display_Command();
+  Template_Load_Init_Display_Command();
   #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
 
   settings.page = NEXTION_DEFAULT_PAGE_NUMBER;
-
-  settings.flags.EnableModule = true;
-
-  //nextionSendCmd(page_default_command); //set page 1 as default 
-  //   //nextionSendCmd("page 1"); //set page 1 as default 
-
   Command_SetPage(settings.page);
+
+  
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
+  }
+
 
 
 }
@@ -219,6 +281,8 @@ void mNextionPanel::EverySecond_ActivityCheck()
   //       fOpenHABDataStreamActive = false;
   //     }
   //   }
+
+  ALOG_DBG(PSTR("fOpenHABDataStreamActive_last_secs = %d"), settings.timeout_check.timeout_period );
 
   if(settings.timeout_check.timeout_period==1)
   {
@@ -266,164 +330,74 @@ void mNextionPanel::EveryLoop()
 }
 
 
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::debugPrintln(const String &debugText)
-{ // Debug output line of text to our debug targets
-
-//phase out!!
-
-  const String debugTimeText = "[+" + String(float(millis()) / 1000, 3) + "s] ";
-  if (debugSerialEnabled)
-  {
-    Serial.print(debugTimeText);
-    Serial.println(debugText);
-    // SoftwareSerial debugSerial(-1, 1); // -1==nc for RX, 1==TX pin
-    // debugSerial.begin(debugSerialBaud);
-    // debugSerial.print(debugTimeText);
-    // debugSerial.println(debugText);
-    // debugSerial.flush();
-  }
-  // if (debugTelnetEnabled)
-  // {
-  //   if (telnetClient.connected())
-  //   {
-  //     telnetClient.print(debugTimeText);
-  //     telnetClient.println(debugText);
-  //   }
-  // }
-}
-
-
   
 /******************************************************************************************************************
  * SECTION: Commands
 *******************************************************************************************************************/
 
 
-void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
+void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
+{
 
-//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEXTION D_TOPIC "Checking all commands"));
-//   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-
-//   char buffer[50];
-
-//   // Need to parse on a copy
-//   char parsing_buffer[data_buffer.payload.len+1];
-//   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-
-
-// // sprintf(parsing_buffer, "{[\"three=\\\"THREE\\\"\", \"two=\\\"TWO\\\"\"]}");
-
-// // Serial.println(parsing_buffer);
-
-//   JsonParser parser(parsing_buffer);
-//   JsonParserObject obj = parser.getRootObject();   
-//   if (!obj) { 
-//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-//     #endif //ENABLE_LOG_LEVEL_COMMANDS
-//     return;
-//   }  
-  JsonParserToken jtok = 0; 
+  JsonParserToken  jtok = 0; 
+  JsonParserObject jobj = 0;
   int8_t tmp_id = 0;
+
+  if(jtok = obj["Debug"].getObject()["Nextion"])
+  {
+    settings.dynamic_log_level = jtok.getInt();
+    ALOG_COM(PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE_K("Debug")), settings.dynamic_log_level);
+  }
+
   
-  /***
-   * As order of importance, others that rely on previous commands must come after
-   * */
-  
-
-//   if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
-//     if(jtok.isStr()){
-//       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-//         CommandSet_PaletteID(tmp_id);
-//         data_buffer.isserviced++;
-//       }
-//     }else
-//     if(jtok.isNum()){
-//       CommandSet_PaletteID(jtok.getInt());
-//       data_buffer.isserviced++;
-//     }
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }
-
-
-// int8_t mNextionPanel::parsesub_SetMulti(JsonObjectConst obj){
-
-//   AddLog(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
-
-    // if(jtok = obj["commands"]){
-
-    //     JsonParserArray array = jtok;
-
-    //     Serial.println(array.size());
-
-    //     for(auto val : array) {
-    //         // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-
-    //         // if(val.isStr()){
-    //             Serial.println(val.getStr());
-    //         // }else{
-    //         //     Serial.println("NOT NOT val.isStr()");
-    //         // }
-
-    //         // nextionSendCmd(val.getStr());
-    //     }
-
+  if(jtok = obj["Display"].getObject()["SetPageIfChanged"])
+  {
+    // if(jtok.isStr())
+    // {
+    //   Command_SetPageIfChanged(jtok.getInt());
     // }
-  
-    if(jtok = obj["Display"].getObject()["SetPageIfChanged"])
-    {
-      // if(jtok.isStr())
-      // {
-      //   Command_SetPageIfChanged(jtok.getInt());
-      // }
-      // else
-      // if(jtok.isInt())
-      // {
-        Command_SetPageIfChanged(jtok.getInt());
-      // }
-    }
-
-  
-    if(jtok = obj["commands"]){
-        JsonParserArray array = jtok;
-        for(auto val : array) {
-            AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-            nextionSendCmd(val.getStr());
-        }
-    }
-  
-/**
- * @brief Construct a new if object
- * I need to add check, if failed (ie due to wrong screen) then stop attempting to update the rest of the messages to stop overflow of UART
- * 
- */
-    if(jtok = obj["commands_formatted"]){
-        JsonParserArray array = jtok;
-        for(auto val : array) {
-            ALOG_DBM( PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-            // need to add bool for bad response
-            nextionSendCmd_ContainingFormattedText(val.getStr());
-            data_buffer.isserviced++;
-        }
-        settings.timeout_check.timeout_period = 120; //make fucntion to reset it
-    }
+    // else
+    // if(jtok.isInt())
+    // {
+      Command_SetPageIfChanged(jtok.getInt());
+    // }
+  }
 
 
-    if(jtok = obj["Nextion"]){
-      SubParse_DisplaySet_JSON(jtok.getObject());  // JsonParserArray array = jtok;
-        // for(auto val : array) {
-        //     // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
-        //     nextionSendCmd(val.getStr());
-        // }
-        // display->println(jtok.getStr());
-        settings.timeout_check.timeout_period = 120; //make fucntion to reset it
+  if(jtok = obj["commands"]){
+      JsonParserArray array = jtok;
+      for(auto val : array) {
+          AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+          nextionSendCmd(val.getStr());
+      }
+  }
+
+
+
+
+  /**
+   * @brief Construct a new if object
+   * I need to add check, if failed (ie due to wrong screen) then stop attempting to update the rest of the messages to stop overflow of UART
+   * 
+   */
+  #ifdef ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
+  if(jtok = obj["commands_formatted"]){
+      JsonParserArray array = jtok;
+      for(auto val : array) {
+          ALOG_DBM( PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+          // need to add bool for bad response
+          nextionSendCmd_ContainingFormattedText(val.getStr());
+          data_buffer.isserviced++;
+      }
+      settings.timeout_check.timeout_period = 120; //make fucntion to reset it
+  }
+  #endif // ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
+
+
+    if(jtok = obj["Nextion"])
+    {      
+      SubParse_DisplaySet_JSON(jtok.getObject());
+      settings.timeout_check.timeout_period = 10; //make fucntion to reset it
     }
 
 
@@ -452,13 +426,36 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
     ALOG_COM(PSTR("display->baudRate=%d"), display->baudRate());
   }
 
+  /***
+   * 
+   * Create new functions below that assume they are under "Nextion" json, but just parse that one bit out here for each the once
+   * 
+   * 
+  */
+  JsonParserObject obj1 = 0;
+  JsonParserToken jtok_nextion = 0;
+  JsonParserToken jtok_parse = 0;
+
+  if(jtok_nextion = obj["Nextion"])
+  {
+    JsonParserObject json_obj = jtok_nextion.getObject();
+
+    if(jtok_parse = json_obj["SetBrightness"])
+    {
+      Command_SetBrightness255(jtok_parse.getInt());
+    }
+
+  }
+
+
+
 
 }
 
 void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
 {
 
-  ALOG_DBM(PSTR("mNextionPanel::SubParse_DisplaySet_JSON"));
+  ALOG_DBG(PSTR("mNextionPanel::SubParse_DisplaySet_JSON"));
 
   JsonParserToken jtok_items = 0;
   JsonParserToken jtok_items2 = 0;
@@ -473,15 +470,29 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
   char item_value[100] = {0};
   char command_ctr[100] = {0};
 
+  /**
+   * @brief Construct a new if object
+   * If no page name is sent, then send commands without page name
+   * 
+   */
+
   if(jtok_items = obj["Page"])
   {
     sprintf(page_name,"%s",jtok_items.getStr());
     Command_SetPageIfChanged(6); //tmp fix
+    ALOG_WRN(PSTR("Page is forced as 6 by default, need to fix this"));
   }
 
 
   if(obj1 = obj["Items"])
   {
+
+    if(!strlen(page_name))
+    {
+      ALOG_DBG(PSTR("No page name sent, sending commands without page name"));
+    }else{
+      sniprintf(page_name, sizeof(page_name), "%s.", page_name); // add "." to page name to make code below easier
+    }
     
     for(auto key : obj1) 
     {
@@ -496,14 +507,30 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
         if(jtok_item_attribute = jtok.getObject()["txt"])
         {
           ALOG_DBG(PSTR("txt = \"%s\""), jtok_item_attribute.getStr());
-          sprintf(command_ctr,"%s.%s.txt=\"%s\"", page_name, item_name, jtok_item_attribute.getStr());
+          sprintf(command_ctr,"%s%s.txt=\"%s\"", page_name, item_name, jtok_item_attribute.getStr());
+          nextionSendCmd(command_ctr); 
+        }
+
+        if(jtok_item_attribute = jtok.getObject()["val"])
+        {
+          ALOG_DBG(PSTR("val = %d"), jtok_item_attribute.getInt());
+          sprintf(command_ctr,"%s%s.val=%d", page_name, item_name, jtok_item_attribute.getInt());
+          nextionSendCmd(command_ctr);  
+        }
+        
+        if(jtok_item_attribute = jtok.getObject()["valf"])
+        {
+          char convf[TBUFFER_SIZE_FLOAT];
+          mSupport::float2CString(jtok_item_attribute.getFloat(), 1, convf);
+          ALOG_DBG(PSTR("val = \"%s\""), convf);          
+          sprintf(command_ctr,"%s%s.val=%s", page_name, item_name, convf); //another conversion will be needed for float here later
           nextionSendCmd(command_ctr); 
         }
 
         if(jtok_item_attribute = jtok.getObject()["pco"])
         {
           ALOG_DBG(PSTR("pco = %d"), jtok_item_attribute.getInt());          
-          sprintf(command_ctr,"%s.%s.pco=%d", page_name, item_name, jtok_item_attribute.getInt());
+          sprintf(command_ctr,"%s%s.pco=%d", page_name, item_name, jtok_item_attribute.getInt());
           nextionSendCmd(command_ctr); 
         }
 
@@ -518,7 +545,7 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
             {
               uint32_t colour32bit = 0;
               colour32bit = (long) strtol( &colour_string[1], NULL, 16);
-              sprintf(command_ctr,"%s.%s.pco=%d", page_name, item_name, RGB888_to_RGB565(colour32bit));
+              sprintf(command_ctr,"%s%s.pco=%d", page_name, item_name, RGB888_to_RGB565(colour32bit));
               nextionSendCmd(command_ctr); 
             }
           }
@@ -527,7 +554,7 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
         if(jtok_item_attribute = jtok.getObject()["bco"])
         {
           ALOG_DBG(PSTR("bco = %d"), jtok_item_attribute.getInt());          
-          sprintf(command_ctr,"%s.%s.bco=%d", page_name, item_name, jtok_item_attribute.getInt());
+          sprintf(command_ctr,"%s%s.bco=%d", page_name, item_name, jtok_item_attribute.getInt());
           nextionSendCmd(command_ctr); 
         }
         
@@ -542,7 +569,7 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
             {
               uint32_t colour32bit = 0;
               colour32bit = (long) strtol( &colour_string[1], NULL, 16);
-              sprintf(command_ctr,"%s.%s.bco=%d", page_name, item_name, RGB888_to_RGB565(colour32bit));
+              sprintf(command_ctr,"%s%s.bco=%d", page_name, item_name, RGB888_to_RGB565(colour32bit));
               nextionSendCmd(command_ctr); 
             }
           }
@@ -551,7 +578,7 @@ void mNextionPanel::SubParse_DisplaySet_JSON(JsonParserObject obj)
         if(jtok_item_attribute = jtok.getObject()["pic"])
         {
           ALOG_DBG(PSTR("pic = %d"), jtok_item_attribute.getInt());          
-          sprintf(command_ctr,"%s.%s.pic=%d", page_name, item_name, jtok_item_attribute.getInt());
+          sprintf(command_ctr,"%s%s.pic=%d", page_name, item_name, jtok_item_attribute.getInt());
           nextionSendCmd(command_ctr); 
         }
         
@@ -617,6 +644,21 @@ void mNextionPanel::CommandSet_Baud(uint32_t baud)
  
 
 
+void mNextionPanel::MQTTSubscribe()
+{
+
+  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
+  pCONT_mqtt->Subscribe("openhab_broadcast/nextion/#", 0);
+  #endif // ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
+  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1
+  pCONT_mqtt->Subscribe(ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1, 0);
+  #endif
+  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2
+  pCONT_mqtt->Subscribe(ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2, 0);
+  #endif
+
+
+}
 
 
 
@@ -684,7 +726,7 @@ void mNextionPanel::nextionSendCmd(const char* c_str)
 { // Send a raw command to the Nextion panel
   serial_print(utf8ascii(c_str));
   serial_print_suffix();
-  // AddLog(settings.dynamic_log_level,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
+  AddLog(settings.dynamic_log_level,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
 }
 
 
@@ -719,73 +761,8 @@ void mNextionPanel::nextionSendCmd_String(const String &nextionCmd)
 }
 
 
-void mNextionPanel::HueToRgb(uint16_t hue, float* r, float* g, float* b)
-{
-    float h = hue/360.0f;
-    float s = 1.0f;
-    float v = 1.0f;
 
-    if (s == 0.0f)
-    {
-        *r = *g = *b = v; // achromatic or black
-    }
-    else
-    {
-        if (h < 0.0f)
-        {
-            h += 1.0f;
-        }
-        else if (h >= 1.0f)
-        {
-            h -= 1.0f;
-        }
-        h *= 6.0f;
-        int i = (int)h;
-        float f = h - i;
-        float q = v * (1.0f - s * f);
-        float p = v * (1.0f - s);
-        float t = v * (1.0f - s * (1.0f - f));
-        switch (i)
-        {
-        case 0:
-            *r = v;
-            *g = t;
-            *b = p;
-            break;
-        case 1:
-            *r = q;
-            *g = v;
-            *b = p;
-            break;
-        case 2:
-            *r = p;
-            *g = v;
-            *b = t;
-            break;
-        case 3:
-            *r = p;
-            *g = q;
-            *b = v;
-            break;
-        case 4:
-            *r = t;
-            *g = p;
-            *b = v;
-            break;
-        default:
-            *r = v;
-            *g = p;
-            *b = q;
-            break;
-        }
-    }
-
-    *r *= 255;
-    *g *= 255;
-    *b *= 255;
-
-}
-
+  #ifdef ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
 void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
 { // Send a raw command to the Nextion panel
 
@@ -874,6 +851,75 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
 
   nextionSendCmd(conversion_buffer);
 }
+
+void mNextionPanel::HueToRgb(uint16_t hue, float* r, float* g, float* b)
+{
+    float h = hue/360.0f;
+    float s = 1.0f;
+    float v = 1.0f;
+
+    if (s == 0.0f){ 
+        *r = *g = *b = v; // achromatic or black
+    }
+    else
+    {
+        if (h < 0.0f)
+        {
+            h += 1.0f;
+        }
+        else if (h >= 1.0f)
+        {
+            h -= 1.0f;
+        }
+        h *= 6.0f;
+        int i = (int)h;
+        float f = h - i;
+        float q = v * (1.0f - s * f);
+        float p = v * (1.0f - s);
+        float t = v * (1.0f - s * (1.0f - f));
+        switch (i)
+        {
+        case 0:
+            *r = v;
+            *g = t;
+            *b = p;
+            break;
+        case 1:
+            *r = q;
+            *g = v;
+            *b = p;
+            break;
+        case 2:
+            *r = p;
+            *g = v;
+            *b = t;
+            break;
+        case 3:
+            *r = p;
+            *g = q;
+            *b = v;
+            break;
+        case 4:
+            *r = t;
+            *g = p;
+            *b = v;
+            break;
+        default:
+            *r = v;
+            *g = p;
+            *b = q;
+            break;
+        }
+    }
+
+    *r *= 255;
+    *g *= 255;
+    *b *= 255;
+
+}
+
+
+  #endif // ENABLE_DEVFEATURE_NEXTION__PHASE_OUT_COMMAND_FORMATTED
 
 
 /******************************************************************************************************************
@@ -1109,6 +1155,7 @@ void mNextionPanel::nextionHandleInput()
       nextionTermByteCnt++;
       if (nextionTermByteCnt >= 3)
       { // We have received a complete command
+        // Serial.println("END");
         lcdConnected = true;
         nextionCommandComplete = true;
         nextionTermByteCnt = 0; // reset counter
@@ -1147,7 +1194,7 @@ void mNextionPanel::nextionProcessInput()
 
   // Serial.printf("nextionProcessInput Instruction= %d\n\r", nextionReturnBuffer[0]);
 
-  // ALOG_INF(PSTR("nextionProcessInput = %d, %d, %d, %d, %d"), nextionReturnBuffer[0], nextionReturnBuffer[1], nextionReturnBuffer[2], nextionReturnBuffer[3], nextionReturnBuffer[4] );
+  // ALOG_INF(PSTR("nextionProcessInput = %02x, %d, %d, %d, %d"), nextionReturnBuffer[0], nextionReturnBuffer[1], nextionReturnBuffer[2], nextionReturnBuffer[3], nextionReturnBuffer[4] );
 
 
   // DEBUG_LINE_HERE;
@@ -1250,14 +1297,15 @@ void mNextionPanel::nextionProcessInput()
     
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
 
-    if ((settings.page != nextionPage.toInt()) && ((nextionPage != "0") || nextionReportPage0))
-    { // If we have a new page AND ( (it's not "0") OR (we've set the flag to report 0 anyway) )
-      settings.page = nextionPage.toInt();
-      String mqttPageTopic = mqttStateTopic + "/page";      
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
-      //mqttClient.publish(mqttPageTopic, nextionPage);
-      pCONT_mqtt->Publish("status/nextion/event4",nextionPage.c_str(),0);
-    }
+    // if ((settings.page != nextionPage.toInt()) && ((nextionPage != "0") || nextionReportPage0))
+    // { // If we have a new page AND ( (it's not "0") OR (we've set the flag to report 0 anyway) )
+    //   settings.page = nextionPage.toInt();
+    //   String mqttPageTopic = mqttStateTopic + "/page";      
+    //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
+    //   //mqttClient.publish(mqttPageTopic, nextionPage);
+    //   pCONT_mqtt->Publish("status/nextion/event4",nextionPage.c_str(),0);
+    // }
+
   }
   else if (nextionReturnBuffer[0] == 0x67)
   { 
@@ -1287,6 +1335,10 @@ void mNextionPanel::nextionProcessInput()
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
       pCONT_mqtt->Publish("status/nextion/event6",xyCoord.c_str(),0);
     }
+  }
+  else if (nextionReturnBuffer[0] == 0x68)
+  { 
+    ALOG_ERR(PSTR("Touch coordinate data not enabled"));
   }
   else if (nextionReturnBuffer[0] == 0x70)
   { 
@@ -1864,6 +1916,10 @@ void mNextionPanel::Command_SetPage(uint8_t page){
   sprintf(ctr,"page %d",page);
   nextionSendCmd(ctr);
 }
+void mNextionPanel::Command_SetPage(char* pagename)
+{
+  nextionSendCmd(pagename);
+}
 
 void mNextionPanel::Command_SetPageIfChanged(uint8_t page){
   if(settings.page == page) {return;}
@@ -2128,10 +2184,11 @@ void mNextionPanel::MQTTSend_LongPressEvent(){
 
 const char*  mNextionPanel::GetObjectName_FromID(uint8_t id, char* objname, uint8_t objname_size)
 {
+  
 
-  uint16_t progmem_size = sizeof(NEXTION_HMI_CONTROL_MAP);
+  uint16_t progmem_size = sizeof(DISPLAY_TEMPLATE);
   char buffer[progmem_size];
-  memcpy_P(buffer,NEXTION_HMI_CONTROL_MAP,sizeof(NEXTION_HMI_CONTROL_MAP));
+  memcpy_P(buffer,DISPLAY_TEMPLATE,sizeof(DISPLAY_TEMPLATE));
 
   JsonParser parser(buffer);
   JsonParserObject rootObj = parser.getRootObject();   
@@ -2149,26 +2206,26 @@ const char*  mNextionPanel::GetObjectName_FromID(uint8_t id, char* objname, uint
   JsonParserObject obj1 = 0;
   char item_name[100] = {0};
 
-  // ALOG_INF(PSTR("ObjectNameIDList size %d"), rootObj["ObjectNameIDList"].size());
+  // ALOG_INF(PSTR("ObjectNameID size %d"), rootObj["ObjectNameID"].size());
 
-  if(jtok = rootObj["ObjectNameIDList"])
+  if(jtok = rootObj["ObjectNameID"])
   {
 
     uint8_t jsonpair_count = jtok.size();
 
     for(int pair_index = 0; pair_index < jsonpair_count; pair_index++){
 
-      jtok.nextOne(); // Skip over "ObjectNameIDList" to first key
+      jtok.nextOne(); // Skip over "ObjectNameID" to first key
       const char* key = jtok.getStr();
-      // ALOG_INF(PSTR("ObjectNameIDList key %s"), key);
+      // ALOG_INF(PSTR("ObjectNameID key %s"), key);
       jtok.nextOne(); // Skip to value
       const char* value = jtok.getStr();
-      // ALOG_INF(PSTR("ObjectNameIDList value %s"), value);
+      // ALOG_INF(PSTR("ObjectNameID value %s"), value);
 
       if(jtok.getInt() == id)
       {
         snprintf(objname, objname_size, "%s", key);
-        ALOG_INF(PSTR("ObjectNameIDList objname %s"), objname);
+        ALOG_INF(PSTR("ObjectNameID objname %s"), objname);
         return objname;
       }
 
@@ -2184,6 +2241,8 @@ const char*  mNextionPanel::GetObjectName_FromID(uint8_t id, char* objname, uint
 
 void mNextionPanel::MQTTHandler_Init(){
 
+  struct handler<mNextionPanel>* ptr;
+
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
@@ -2193,6 +2252,7 @@ void mNextionPanel::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -2203,6 +2263,7 @@ void mNextionPanel::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -2213,6 +2274,7 @@ void mNextionPanel::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 }
 
@@ -2242,10 +2304,10 @@ void mNextionPanel::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mNextionPanel::MQTTHandler_Sender(uint8_t id)
+void mNextionPanel::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_NEXTION_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_NEXTION_ID, handle);
   }
 }
 #endif// USE_MODULE_NETWORK_MQTT
@@ -2281,9 +2343,11 @@ void mNextionPanel::WebPage_AddHandlers()
                         }
                       );
 
+  #ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
   pCONT_web->server->on("/lcddownload", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->webHandleLcdDownload(request);
   });
+  #endif // ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
 
   pCONT_web->server->on("/lcdOtaSuccess", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->webHandleLcdUpdateSuccess(request);
@@ -2320,11 +2384,13 @@ void mNextionPanel::webHandleFirmware(AsyncWebServerRequest *request)
   /**
    * @brief Update LCD via URL
    **/
+  #ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
   data += F("<form method='get' action='lcddownload'>");  
   data += F("<br/><b>Update Nextion LCD from URL</b><small><i> http only</i></small>");
   data += F("<br/><input id='lcdFirmware' name='lcdFirmware' value='");
   data += "lcdFirmwareUrl";
   data += F("'><br/><br/><button type='submit'>Update LCD from URL</button></form>");
+  #endif // ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
 
   /**
    * @brief Update LCD via tft file upload
@@ -2357,20 +2423,16 @@ void mNextionPanel::webHandleFirmware(AsyncWebServerRequest *request)
  * 
  */
 void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
-{ // http://plate01/lcdupload
-
+{ 
 
   if(update_in_progress == false) // Not previously set, and hence upload
   {
     update_in_progress = true;
     ALOG_INF(PSTR("LCDOTA: LCD update started, update_in_progress SET, short delay for async"));
-    delay(500);
+    delay(100);
   }
 
-  // ALOG_INF(PSTR("================================================================\r\nUpload i=%d|len=%d|rem=%d|final=%d|tx=%d"), index, len, tftFileSize-len, final, transmitted_bytes);
-
-  //   String logmessage = "Client:" + request->client()->remoteIP().toString() + " " + request->url();
-  // Serial.println(logmessage);
+  ALOG_INF(PSTR(D_LOG_NEXTION "Upload i=%d|len=%d|rem=%d|f=%d|tx=%d"), index, len, tftFileSize-len, final, transmitted_bytes);
 
   static uint32_t lcdOtaTransferred = 0;
   static uint32_t lcdOtaRemaining;
@@ -2380,11 +2442,6 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
 
   bool success = false;
 
-  // HTTPUpload &upload = webServer->upload();
-
-  // ALOG_INF(PSTR(D_LOG_NEXTION "here Received tftFileSize: %d"), tftFileSize);
-  // ALOG_INF(PSTR(D_LOG_NEXTION "here Received index: %d"), index);
-
   if (tftFileSize == 0)
   {
 
@@ -2392,7 +2449,6 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
     ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: FAILED, no filesize sent."));
     String httpHeader = FPSTR(HTTP_HEAD_START);
     httpHeader.replace("{v}", String(pCONT_set->Settings.system_name.friendly) + " LCD update error");
-    // webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
 
     data2 += httpHeader;
     data2 += FPSTR(HTTP_SCRIPT3);
@@ -2433,6 +2489,8 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
     // ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Attempting firmware upload"));
     // ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: TFTfileSize: %d"), tftFileSize);
 
+    // WiFiUDP::stopAll(); // Stop UDP to prevent any issues with OTA
+
     lcdOtaRemaining = tftFileSize;
     lcdOtaParts = (lcdOtaRemaining / 4096) + 1;
     ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: File upload beginning. Size %d bytes in %d 4k chunks"), lcdOtaRemaining, lcdOtaParts);
@@ -2446,7 +2504,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
     display->flush();
     nextionHandleInput();
 
-    String lcdOtaNextionCmd = "whmi-wri " + String(tftFileSize) + "," + String(nextionBaud) + ",0";
+    String lcdOtaNextionCmd = "whmi-wri " + String(tftFileSize) + "," + String(ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT) + ",0";
     ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Sending LCD upload command: %s"), lcdOtaNextionCmd.c_str());
     display->print(lcdOtaNextionCmd);
     display->write(nextionSuffix, sizeof(nextionSuffix));
@@ -2469,14 +2527,12 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
     lcdOtaTimer = millis();
   }
   
-
-  // else if (upload.status == UPLOAD_FILE_WRITE)
-  if ( index>=0) // Now sending data
+  /**
+   * @brief UPLOAD_FILE_WRITE
+   **/
+  if ( index >= 0)
   { 
     
-    // Handle upload data
-    // Serial.println("upload.status == UPLOAD_FILE_WRITE");
-
     static int lcdOtaChunkCounter = 0;
     static uint16_t lcdOtaPartNum = 0;
     static int lcdOtaPercentComplete = 0;
@@ -2545,7 +2601,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
         lcdOtaChunkCounter = 0;
         if (nextionOtaResponse())
         {
-          ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Part %d OK, %d bytes send, %d%% complete"), lcdOtaPartNum, lcdOtaTransferred, lcdOtaPercentComplete);
+          ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Part %d OK (%d%%|%d)"), lcdOtaPartNum, lcdOtaPercentComplete, lcdOtaTransferred);
         }
         else
         {
@@ -2598,66 +2654,34 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
     lcdOtaTimer = millis();
   }
 
-  // else if (upload.status == UPLOAD_FILE_END)  
-   
+  /******************************************************************
+  ***  UPLOAD_FILE_END)  
+  ******************************************************************/
   if (final && !success)
-  { // Upload completed -- repeated from above, we should
+  {
 
-  Serial.println("upload.status == UPLOAD_FILE_END");
+    Serial.println("upload.status == UPLOAD_FILE_END");
     if (lcdOtaTransferred >= tftFileSize)
     {
       if (nextionOtaResponse())
       { 
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
         request->redirect("/lcdOtaSuccess"); 
-        // delay(10);
-        ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Delay to allow LCD to update"));//, lcdOtaTransferred, tftFileSize);
-        // pCONT_wif->EspRestart();
+        ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Delay to allow LCD to update"));
       }
       else
       {
         ALOG_INF(PSTR("LCDOTA: Failure"));
         request->redirect("/lcdOtaFailure");
-        // delay(10);
-        // pCONT_wif->EspRestart();
       }
+      pCONT_wif->EspRestart(); // Change later to schedule a restart
     }
   }
-
-  // else if (upload.status == UPLOAD_FILE_ABORTED)
-  // { // Something went kablooey
-  //   ALOG_INF(PSTR("LCDOTA: ERROR: upload.status returned: UPLOAD_FILE_ABORTED"));
-  //   ALOG_INF(PSTR("LCDOTA: Failure"));
-  //   webServer->sendHeader("Location", "/lcdOtaFailure");
-  //   webServer->send(303);
-  //   uint32_t lcdOtaDelay = millis();
-  //   while ((millis() - lcdOtaDelay) < 1000)
-  //   { // extra 1sec delay for client to grab failure page
-  //     webServer->handleClient();
-  //     yield();
-  //   }
-  //   pCONT_wif->EspRestart();
-  // }
-  else
-  { // Something went weird, we should never get here...
-  //   ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: upload.status returned: %s"), String(upload.status));
-  //   ALOG_INF(PSTR("LCDOTA: Failure"));
-  //   webServer->sendHeader("Location", "/lcdOtaFailure");
-  //   webServer->send(303);
-  //   uint32_t lcdOtaDelay = millis();
-  //   while ((millis() - lcdOtaDelay) < 1000)
-  //   { // extra 1sec delay for client to grab failure page
-  //     webServer->handleClient();
-  //     yield();
-  //   }
-  //   pCONT_wif->EspRestart();
-  }
-              
-  // DEBUG_LINE_HERE;
 
 }
 
 
+#ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
 void mNextionPanel::webHandleLcdDownload(AsyncWebServerRequest *request)
 { // http://plate01/lcddownload
   
@@ -2689,6 +2713,7 @@ void mNextionPanel::webHandleLcdDownload(AsyncWebServerRequest *request)
   request->send(200, "text/html", data);
 
 }
+#endif // ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
 
 
 void mNextionPanel::webHandleLcdUpdateSuccess(AsyncWebServerRequest *request)
@@ -2771,7 +2796,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
   WiFiClient lcdOtaWifi;
   if (lcdOtaUrl.startsWith(F("https")))
   {
-    debugPrintln("LCDOTA: Attempting firmware update from HTTPS host: " + lcdOtaUrl);
+    ALOG_INF(PSTR("LCDOTA: Attempting firmware update from HTTPS host: %s"), lcdOtaUrl.c_str());
 
     lcdOtaHttp.begin(lcdOtaWifiSecure, lcdOtaUrl);
     lcdOtaWifiSecure.setInsecure();
@@ -2779,7 +2804,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
   }
   else
   {
-    debugPrintln("LCDOTA: Attempting firmware update from HTTP host: " + lcdOtaUrl);
+    ALOG_INF(PSTR("LCDOTA: Attempting firmware update from HTTP host: %s"), lcdOtaUrl.c_str());
     lcdOtaHttp.begin(lcdOtaWifi, lcdOtaUrl);
   }
 
@@ -2811,7 +2836,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
       display->flush();
       nextionHandleInput();
 
-      String lcdOtaNextionCmd = "whmi-wri " + String(lcdOtaFileSize) + "," + String(nextionBaud) + ",0";
+      String lcdOtaNextionCmd = "whmi-wri " + String(lcdOtaFileSize) + "," + String(ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT) + ",0";
       ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Sending LCD upload command: %s"), lcdOtaNextionCmd);
 
       display->print(lcdOtaNextionCmd);
@@ -2873,7 +2898,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
           }
           else
           {
-            delay(20);
+            delay(20); //check these delays 
           }
           if (lcdOtaRemaining > 0)
           {
@@ -2942,12 +2967,14 @@ void mNextionPanel::WebPage_LCD_Update_TFT(AsyncWebServerRequest *request)
   /**
    * @brief Update with URL only
    **/
+  #ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
   data += F("<br/><hr><form method='get' action='lcddownload'>");
   if(updateLcdAvailable){ data += F("<font color='green'><b>LCD update available!</b></font>"); }
   data += F("<br/><b>Update Nextion LCD from URL</b><small><i> http only</i></small>");
   data += F("<br/><input id='lcdFirmware' name='lcdFirmware' value='");
   data += "No Url Set";
   data += F("'><br/><br/><button type='submit'>Update LCD from URL</button></form>");
+  #endif // ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
 
   /**
    * @brief Update with File

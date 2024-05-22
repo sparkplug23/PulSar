@@ -1648,7 +1648,7 @@ void mSerialUART::parse_JSONCommand(JsonParserObject obj){
 //     //   data_buffer.isserviced++;
 //     // }
 //   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
 //   //   #endif // ENABLE_LOG_LEVEL_DEBUG
 //   }
   
@@ -1756,7 +1756,7 @@ uint8_t mSerialUART::ConstructJSON_Settings(uint8_t json_level, bool json_append
   JsonBuilderI->Start();  
 
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -1790,7 +1790,7 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_level, bool json_append
 
     JBI->Object_End();
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -1857,10 +1857,10 @@ void mSerialUART::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mSerialUART::MQTTHandler_Sender(uint8_t id)
+void mSerialUART::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_SERIAL_UART_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_SERIAL_UART_ID, handle);
   }
 }
 #endif // USE_MODULE_NETWORK_MQTT

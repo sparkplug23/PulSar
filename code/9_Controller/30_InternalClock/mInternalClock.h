@@ -72,7 +72,7 @@ class mInternalClock :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     struct handler<mInternalClock> mqtthandler_settings_teleperiod;
     struct handler<mInternalClock> mqtthandler_power_ifchanged;

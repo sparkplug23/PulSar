@@ -7,6 +7,7 @@
 
 #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
 
+#include "2_CoreSystem/02_Time/mTime.h"
 
 class mRelayStateLEDStrip :
   public mTaskerInterface
@@ -162,7 +163,7 @@ class mRelayStateLEDStrip :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();    
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
 
     std::vector<struct handler<mRelayStateLEDStrip>*> mqtthandler_list;
     struct handler<mRelayStateLEDStrip> mqtthandler_settings_teleperiod;

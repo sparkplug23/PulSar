@@ -199,7 +199,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
 
 
     
-    transition.fader->SetTargetAndStartBlend(new_brightness, transition.time_ms);
+    transition.fader->SetTargetAndStartBlend(new_brightness, time_ms);
 
     // /**
     //  * @brief Also update the fader value
@@ -951,9 +951,9 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
   
   if(jtok = obj["ShellyDimmer"].getObject()["TransitionTimeSec"]){      //lets add way to set via sec/millis and automatically create new blender for it
 
-    transition.time_ms = jtok.getInt()*1000;
+    time_ms = jtok.getInt()*1000;
     
-    transition.fader->SetTargetAndStartBlend(new_brightness, transition.time_ms);
+    transition.fader->SetTargetAndStartBlend(new_brightness, time_ms);
 
   }
   // if(jtok = obj["ShellyDimmer"].getObject()["TransitionTimeSec"]){
@@ -1198,10 +1198,10 @@ void mShellyDimmer::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mShellyDimmer::MQTTHandler_Sender(uint8_t id)
+void mShellyDimmer::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_SHELLY_DIMMER_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_SHELLY_DIMMER_ID, handle);
   }
 }
 

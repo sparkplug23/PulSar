@@ -26,7 +26,7 @@
 enum LoggingLevels {LOG_LEVEL_NONE, 
                     LOG_LEVEL_DEBUG_TRACE, // Highest level of trace debug that will always be shown when called, but should always be disabled via ifdef calls ie "ENABLE_DEBUG_TRACE__##"
                     LOG_LEVEL_ERROR, 
-                    LOG_LEVEL_WARN, 
+                    LOG_LEVEL_WARNING, 
                     /**
                      * Used when developing a new thing
                      * */
@@ -237,6 +237,39 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                         SERIAL_DEBUG.flush();
 #else
   #define DEBUG_LINE_HERE   //nothing, no code
+#endif
+
+#if defined(ENABLE_DEBUG_LINE_HERE2)
+  #define DEBUG_LINE_HERE2    SERIAL_DEBUG.printf("DEBUG HERE2: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE_HERE2   //nothing, no code
+#endif
+
+
+#if defined(ENABLE_DEBUG_LINE_HERE_MILLIS)
+  #define DEBUG_LINE_HERE_MILLIS    SERIAL_DEBUG.printf("DEBUG: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.print(__LINE__);\
+                        SERIAL_DEBUG.print('-');\
+                        SERIAL_DEBUG.println(millis());\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE_HERE_MILLIS   //nothing, no code
+#endif
+
+
+
+
+#if defined(ENABLE_DEBUG_LINE_HERE)
+  #define DEBUG_LINE_HERE_MARKER    SERIAL_DEBUG.printf("DEBUG HERE: -------------------------------------------\n\r");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE_HERE_MARKER   //nothing, no code
 #endif
 
 #if !defined(USE_SOFTWARE_SERIAL_DEBUG)
@@ -456,6 +489,10 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
   //   ){
   //   return;
   // }  
+
+  // if(loglevel>pCONT_set->Settings.logging.serial_level){
+  //   return;
+  // }
   
   #ifndef DISABLE_SERIAL_LOGGING
   SERIAL_DEBUG.printf("%s = ",name_ctr);

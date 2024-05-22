@@ -47,7 +47,7 @@ class mExampleClass :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mExampleClass> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mExampleClass> mqtthandler_sensor_ifchanged;
@@ -67,7 +67,7 @@ class mExampleClass :
     };
 
     //No extra handlers example
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     //with extra handlers example
     #endif // USE_MODULE_NETWORK_MQTT
 

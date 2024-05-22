@@ -1276,10 +1276,10 @@ Bathroom
   "}";
 
   
-  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
   R"=====(
   {
-    "ObjectNameIDList": {
+    "ObjectNameID": {
       "hIconUS": 2,
       "hTimeUS": 6,
       "hBoostUS": 11,
@@ -1338,7 +1338,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -2537,8 +2537,6 @@ R"=====(
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
-
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
   // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
@@ -2947,7 +2945,7 @@ R"=====(
   //   #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
   //   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
   //   #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-  //   #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+  //   
   //   // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
   //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
   //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -4443,7 +4441,7 @@ R"=====(
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
@@ -4745,7 +4743,7 @@ R"=====(
  * 
  * *********************************************************************************************************************************************************************************
 */
-#ifdef DEVICE_IMMERSION_CONTROL_PANEL // New 2023 system unified
+#ifdef DEVICE_IMMERSION_CONTROL_PANEL
   #define DEVICENAME_CTR          "immersion_controller"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Heater Panel"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
@@ -4813,10 +4811,10 @@ R"=====(
     #define USE_MODULE_NETWORK_WEBSERVER
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 
-  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
   R"=====(
   {
-    "ObjectNameIDList": {
+    "ObjectNameID": {
       "hIconUS": 2,
       "hTimeUS": 6,
       "hBoostUS": 11,

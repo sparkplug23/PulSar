@@ -79,13 +79,18 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case FUNC_EVERY_FIVE_SECOND:
     // FileWrite_Test();    
+    
+      #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+      SystemTask__Execute_Module_Data_Save();
+      #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+
     break;
     case FUNC_EVERY_MINUTE:
-      // JsonFile_Save__Stored_Module();
-      // JsonFile_Save__Stored_Secure();
-      #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
-      // SystemTask__Execute_Module_Data_Save();
-      #endif     
+      // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
+      #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+      SystemTask__Execute_Module_Data_Save();
+      #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+      // #endif     
     break;  
     case FUNC_EVERY_FIVE_MINUTE:
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
@@ -532,10 +537,10 @@ void mFileSystem::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mFileSystem::MQTTHandler_Sender(uint8_t id)
+void mFileSystem::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_FILESYSTEM_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_FILESYSTEM_ID, handle);
   }
 }
 

@@ -242,7 +242,7 @@ uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_level, bool json_appending
     // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
     // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -293,10 +293,10 @@ void mUpdates::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mUpdates::MQTTHandler_Sender(uint8_t id)
+void mUpdates::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_UPDATES_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_UPDATES_ID, handle);
   }
 }
 

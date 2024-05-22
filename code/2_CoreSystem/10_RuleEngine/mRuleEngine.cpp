@@ -135,7 +135,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
   
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
-  pCONT_set->runtime.boot_status.rules_template_parse_success = 1;
+  // pCONT_set->runtime.boot_status.rules_template_parse_success = 1;
   #endif //USE_RULES_TEMPLATE
 
   
@@ -532,7 +532,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       }
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -551,7 +551,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -571,7 +571,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -597,7 +597,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -621,7 +621,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -812,7 +812,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     //     data_buffer.isserviced++;
     //   }
     //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     // }//end trigger
@@ -830,24 +830,6 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 
 }
 
-
-// int8_t mAnimatorLight::GetAnimationModeIDbyName(const char* c){
-
-//   if(*c=='\0'){
-//     return -1;
-//   }
-//   #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-//   if(strcmp_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)==0){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
-//   #endif
-//   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-//   if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_REALTIME_ADALIGHT; }
-//   #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-//   if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE__EFFECTS; }
-//   // #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
-//   // if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }
-//   // #endif
-//   return -1;
-// }
 
 
 void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
@@ -1177,11 +1159,11 @@ void mRuleEngine::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mRuleEngine::MQTTHandler_Sender(uint8_t id)
+void mRuleEngine::MQTTHandler_Sender()
 {
   // DEBUG_LINE_HERE;
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_RULES_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_RULES_ID, handle);
   }
 }
 

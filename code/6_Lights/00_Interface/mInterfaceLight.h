@@ -7,54 +7,6 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
-#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
-#include <Arduino.h>
-
-typedef std::function<void(void)> CommitHandler;
-
-struct CommitParams
-{
-  CommitHandler handler;
-  xSemaphoreHandle semaphore = NULL;
-};
-
-class NeoPixelShowTask
-{
-private:
-  CommitParams _commit_params;
-  // TaskHandle_t _commit_task;
-
-public:
-  TaskHandle_t _commit_task;
-
-  bool flag_block_show = false;
-
-  NeoPixelShowTask() : _commit_task(NULL){}
-  void begin(CommitHandler handler, uint8_t core_id);
-  void execute();
-  bool IsBusy();
-
-/**
- * @brief 
- * 
- * Two issues to test
- * 
- * 1) does execute start, and then the process runs forever? if so, then it could be calling show WAY too much. Either needs a delay or to make sure execute is one and done
- * 
- * Try adding delay after "show()" inside begin function, also try make sure its once only, remove the while(true) 
- * 
- */
-
-};
-
-#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-
-
 #define HUE_N2F(h) h/360.0f
 #define SAT_N2F(s) s/100.0f
 #define BRT_N2F(v) v/100.0f
@@ -72,29 +24,16 @@ public:
 #define D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR  "Palette %02d"
 
 
-
-// #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_GENERIC__NAME_CTR "Generic %02d"
-
-#define ENABLE_ANIMATION_MODE__EFFECTS
-
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
 #include "6_Lights/03_Animator/EffectNames/defines.h"
-
 #include "JsonParser.h"
-
 #include "6_Lights/02_Palette/mPaletteLoaded.h"
 #include "6_Lights/02_Palette/mPalette.h"
-
 #include "1_TaskerManager/mTaskerManager.h"
-
 #include "2_CoreSystem/02_Time/mTime.h"
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
-
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";  
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR) "debug/busconfig";
 
 enum LIHGT_POWER_STATE_IDS{
   LIGHT_POWER_STATE_OFF_ID=0,
@@ -104,10 +43,6 @@ enum LIHGT_POWER_STATE_IDS{
   LIGHT_POWER_STATE_ANIMATING_ID,
   LIGHT_POWER_STATE_LENGTH_ID
 };
-
-#define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
-
-typedef unsigned long power_t;              // Power (Relay) type
 
 #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 // New version of Gamma correction compute
@@ -197,6 +132,10 @@ DEFINE_PGM_CTR(PM_ANIMATION_MODE_EFFECTS_NAME_CTR  )         D_JSON_EFFECTS;
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
 #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";  
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR) "debug/busconfig";
+
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -205,11 +144,14 @@ class mInterfaceLight :
   public mTaskerInterface
 {
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mInterfaceLight(){};
+    void   Init(void);
+    void   Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void Init(void);
-    void Pre_Init(void);
-    void EveryLoop();
+    void   parse_JSONCommand(JsonParserObject obj);
     
     static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
     static const char* PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
@@ -220,14 +162,36 @@ class mInterfaceLight :
     uint16_t GetClassSize(){      return sizeof(mInterfaceLight);    };
     #endif
 
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    void Load_Module(bool erase);
+    void Save_Module(void);
+    bool Restore_Module(void);
+
+    // Add all data here that needs to be saved to filesystem
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+
     struct SETTINGS
     {
       
     }settings;
 
-    int8_t Get_BusTypeID_FromName(const char* c);
     COLOUR_ORDER_T GetColourOrder_FromName(const char* c);
     
+    void EveryLoop();
     void ShowInterface();
 
     void LightCalcPWMRange();
@@ -236,7 +200,6 @@ class mInterfaceLight :
     void Template_Load();
     void Template_Load_DefaultConfig();
 
-    void parse_JSONCommand(JsonParserObject obj);
 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
     NeoPixelShowTask* neopixel_runner = nullptr;
@@ -246,14 +209,14 @@ class mInterfaceLight :
     uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
     uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
 
-    void Module_DataSave();
 
     BusManager* bus_manager = nullptr;
     BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    
+
     void BusManager_Create_DefaultSingleNeoPixel();
     void BusManager_Create_DefaultSinglePWM_5CH();
 
-    void FileSystem_JsonAppend_Save_Module();
 
     #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
     uint16_t change8to10(uint8_t v);
@@ -322,7 +285,7 @@ class mInterfaceLight :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;
     struct handler<mInterfaceLight> mqtthandler__state__ifchanged;
     struct handler<mInterfaceLight> mqtthandler__debug_module_config__teleperiod;

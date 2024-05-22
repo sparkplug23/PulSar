@@ -46,6 +46,7 @@ void BufferWriter::Start()
 {
     if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }  
     // memset(writer.buffer,0,writer.buffer_size);
+    Clear();
     writer.length = 0;
 }
 bool BufferWriter::End()

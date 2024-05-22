@@ -135,7 +135,7 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     ALOG_DBM( PSTR("Remote Read %d" ), (int)value->data_f[0]);
     //  
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
 
     D_MQTT_COMMAND_HANDLED_COUNT_INC;
@@ -242,7 +242,7 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   //     JBI->Add(D_JSON_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
   //     JBI->Add(D_JSON_ISCHANGED, pCONT_dht->sensor[dht_id].instant.ischanged);
   //     // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;
-  //     // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
+  //     // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime_seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
   //     // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE
   //     // json1["dewpoint"] = pCONT->mhs->climate.ptr->raw.dewPoint;
   //   JBI->Object_End();
@@ -316,10 +316,10 @@ void mRemoteDevice::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief Check all handlers if they require action
  * */
-void mRemoteDevice::MQTTHandler_Sender(uint8_t id)
+void mRemoteDevice::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_REMOTE_DEVICE_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_REMOTE_DEVICE_ID, handle);
   }
 }
 

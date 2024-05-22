@@ -130,7 +130,7 @@ uint8_t Change_Detected(uint8_t sensor_id);
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mPulseCounter>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
@@ -140,7 +140,7 @@ uint8_t Change_Detected(uint8_t sensor_id);
     struct handler<mPulseCounter> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     
   //#endif
 

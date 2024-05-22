@@ -129,7 +129,7 @@ void mImmersionPanel::EverySecond()
   /*****
    * Red
   */
-  if(pCONT_hvac->zone[0].program_timer_method->IsRunning())
+  if(pCONT_hvac->zone[0].program_timer_method.IsRunning())
   {
     pCONT_led->CommandSet_LED_Power(1,0);
   }else{
@@ -214,16 +214,16 @@ void mImmersionPanel::SubTask_UpdateOLED()
    * */
   #ifdef USE_MODULE_CONTROLLER_HVAC
   
-  if(pCONT_hvac->zone[0].program_timer_method->GetTimer_Minutes() < 99)
+  if(pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes() < 99)
   {
     snprintf(line_ctr, sizeof(line_ctr), "IM:  %02d m",
-      pCONT_hvac->zone[0].program_timer_method->GetTimer_Minutes()
+      pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes()
     );
   }
   else
   {
     snprintf(line_ctr, sizeof(line_ctr), "IM: %03d m",
-      pCONT_hvac->zone[0].program_timer_method->GetTimer_Minutes()
+      pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes()
     );
   }
   pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
@@ -404,10 +404,10 @@ void mImmersionPanel::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mImmersionPanel::MQTTHandler_Sender(uint8_t id)
+void mImmersionPanel::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID, handle);
   }
 }
 

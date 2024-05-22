@@ -109,7 +109,7 @@ class mDB18x20_ESP32 :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender();
     
     struct handler<mDB18x20_ESP32>* ptr;
     struct handler<mDB18x20_ESP32> mqtthandler_settings_teleperiod;
@@ -122,7 +122,7 @@ class mDB18x20_ESP32 :
     #endif
 
     // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
     
     struct handler<mDB18x20_ESP32>* mqtthandler_list[
       3
