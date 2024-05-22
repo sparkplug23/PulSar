@@ -303,7 +303,7 @@ void mInternalClock::SpeedRefresh(void)
     }
   // }
 
-  // if (ifan_restart_flag && (4 == pCONT_time->uptime.seconds_nonreset) && (INTERNAL_CLOCK02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
+  // if (ifan_restart_flag && (4 == pCONT_time->uptime_seconds_nonreset) && (INTERNAL_CLOCK02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
   //   ifan_restart_flag = false;
   //   SetDevicePower(1, SRC_RETRY);      // Sync with default power on state microcontroller being Light ON and Fan OFF
   //   SetDevicePower(pCONT_set->power, SRC_RETRY);  // Set required power on state

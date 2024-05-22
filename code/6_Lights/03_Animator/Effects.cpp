@@ -387,7 +387,7 @@ static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = "S
 void mAnimatorLight::EffectAnim__Shimmering_Two_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
 {
   
-  EffectAnim__Flicker_Base(true, SEGMENT.params_user.val0);
+  EffectAnim__Flicker_Base(true, SEGMENT.params_user[0]);
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM = "Shimmering Palettes@Speed,Intensity,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
@@ -1995,7 +1995,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 
     random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
 
-    overdraw_colour = GetColourFromUnloadedPalette2(SEGMENT.params_user.val0, random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
+    overdraw_colour = GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
 
     // overdraw_colour.debug_print("overdraw_colour");
 
@@ -2101,7 +2101,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
 
     random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
 
-    overdraw_colour = RgbcctColor(0);  //GetColourFromUnloadedPalette2(SEGMENT.params_user.val0, random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
+    overdraw_colour = RgbcctColor(0);  //GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
 
     // overdraw_colour.debug_print("overdraw_colour");
 
@@ -11442,10 +11442,10 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(bool fl
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate)*2) ){ return; }
 
-  uint16_t   period_ms            = SEGMENT.params_user.val0;
-  uint16_t*  repeats_desired      = &SEGMENT.params_user.val1;
-  uint16_t*  duty_cycle_desired   = &SEGMENT.params_user.val2;
-  uint16_t*  auto_seconds_timeout = &SEGMENT.params_user.val3;
+  uint16_t   period_ms            = SEGMENT.params_user[0];
+  uint16_t*  repeats_desired      = &SEGMENT.params_user[1];
+  uint16_t*  duty_cycle_desired   = &SEGMENT.params_user[2];
+  uint16_t*  auto_seconds_timeout = &SEGMENT.params_user[3];
 
   // ALOG_INF(PSTR("duty_cycle_desired=%d"),*duty_cycle_desired);
   ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "SubTask_Segment_Animate_Function__Notification_Base %d of %d"),getCurrSegmentId(), segments.size());

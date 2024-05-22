@@ -73,7 +73,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       
     //     pCONT_log->client = pCONT_log->server->available();
     //   }
-//     if(pCONT_time->uptime.seconds_nonreset>30){
+//     if(pCONT_time->uptime_seconds_nonreset>30){
   // pCONT_log->Telnet.println("AddLog: ");
 //     //   if(pCONT_log->client.connected()) {
 //     //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
@@ -717,7 +717,7 @@ void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 int Response_mP(const char* format, ...)     // Content send snprintf_P char data
 {
   
-  // if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
+  // if(pCONT_time->uptime_seconds_nonreset<60){ return 0 ;}
 
   memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
 

@@ -456,7 +456,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_ap
   
   JBI->Start();
     JBI->Add(PM_JSON_UPTIME,         pCONT_time->GetUptime().c_str());// PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-    JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->UpTime());//uptime.seconds_nonreset);
+    JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->UpTime());//uptime_seconds_nonreset);
     JBI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay_temp);
     JBI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
     JBI->Add(PM_JSON_LOOPRATIO,      pCONT_sup->this_cycle_ratio);

@@ -89,7 +89,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root[F("of")]  = seg.offset;
   root["on"]     = seg.on;
   root["frz"]    = seg.freeze;
-  byte segbri    = seg.opacity;
+  byte segbri    = seg._brightness_rgb;
   root["bri"]    = (segbri) ? segbri : 255;
 
   if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
@@ -136,10 +136,10 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root["c1"]  = seg.custom1;
   root["c2"]  = seg.custom2;
   root["c3"]  = seg.custom3;
-  root["v0"]  = seg.params_user.val0;
-  root["v1"]  = seg.params_user.val1;
-  root["v2"]  = seg.params_user.val2;
-  root["v3"]  = seg.params_user.val3;
+  root["v0"]  = seg.params_user[0];
+  root["v1"]  = seg.params_user[1];
+  root["v2"]  = seg.params_user[2];
+  root["v3"]  = seg.params_user[3];
   root["sel"] = seg.isSelected();
   root["rev"] = seg.reverse;
   root["mi"]  = seg.mirror;
@@ -1226,11 +1226,11 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   if (seg.reset && seg.stop == 0) return true; // segment was deleted & is marked for reset, no need to change anything else
 
-  byte segbri = seg.opacity;
+  byte segbri = 255;//seg.opacity;
   if (getVal(elem["bri"], &segbri)) {
-    ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
-    if (segbri > 0) seg.setOpacity(segbri);
-    seg.setOption(SEG_OPTION_ON, segbri); // use transition
+    // ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
+    // if (segbri > 0) seg.setOpacity(segbri);
+    // seg.setOption(SEG_OPTION_ON, segbri); // use transition
   }
 
   if (getVal(elem["cBri"], &seg._brightness_rgb)) {
@@ -1426,10 +1426,10 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.custom3 = constrain(cust3, 0, 31);
 
 
-  seg.params_user.val0 = elem["v0"] | 0;
-  seg.params_user.val1 = elem["v1"] | 0;
-  seg.params_user.val2 = elem["v2"] | 0;
-  seg.params_user.val3 = elem["v3"] | 0;
+  seg.params_user[0] = elem["v0"] | 0;
+  seg.params_user[1] = elem["v1"] | 0;
+  seg.params_user[2] = elem["v2"] | 0;
+  seg.params_user[3] = elem["v3"] | 0;
 
 
 

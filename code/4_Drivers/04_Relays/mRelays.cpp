@@ -36,8 +36,6 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case FUNC_EVERY_MINUTE:
       SubTask_Every_Minute();
-
-      // Load_Module();
     break;
     /************
      * STORAGE SECTION * 
@@ -62,7 +60,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
     break;    
     case FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID:
-      AppendJSONResponse_Drivers_Unified(); // should this be an override? prob too complex to be useful
+      AppendJSONResponse_Drivers_Unified();
     break;
     /************
      * RULES SECTION * 
@@ -77,13 +75,13 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+      MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
+      MQTTHandler_Sender();
     break;
     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_DefaultPeriodRate();
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
@@ -110,8 +108,6 @@ void mRelays::Load_Module(bool erase)
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
 #endif // USE_MODULE_DRIVERS_FILESYSTEM
-
-
 
 
 void mRelays::Pre_Init(void){
@@ -147,12 +143,8 @@ void mRelays::Pre_Init(void){
 }
 
 
-void mRelays::Init(void){
-
-  // module_state.devices = pCONT_set->runtime.devices_present; //phase out
-
-  // module_state.devices = MAX_RELAYS;
-
+void mRelays::Init(void)
+{
 
   // clear all settings to 0
   memset(&rt.relay_status, 0, sizeof(rt.relay_status));
@@ -165,20 +157,9 @@ void mRelays::Init(void){
 
   #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
   flags.enabled_relays_allowed_time_window_checks = true;
-  // relay_status[0].enabled_ranges[0].enabled = true;
-  // relay_status[0].enabled_ranges[0].ontime = {8, 14, 25, 0}; //8 meaning all days   3pm to 8am
-  // relay_status[0].enabled_ranges[0].offtime = {8, 7, 0, 0}; //8 meaning all days
   #else
   rt.flags.enabled_relays_allowed_time_window_checks = false;
   #endif // ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
-
-
-//{"PowerName":0,"Relay":{"TimeOn":5},"EnabledTime":{"Enabled":1,"OnTime":"01D12:34:56","OffTime":"12D34:56:78"}}
-
-
-      // &relay_status[relay_id].enabled_ranges[0].ontime,
-      // &relay_status[relay_id].enabled_ranges[0].offtime
-
   
   SetPowerOnState();
 }
@@ -190,17 +171,10 @@ void mRelays::EverySecond()
   // e.g. Resetting a device 
   SubTask_Relay_PulseOff();   // RELAY_MODE_PULSE_OFF ;;;;;;; PulseOff is part of CycleTimer
   // TimeOn, PowerCycleInterval, PowerCycleLength 
-  SubTask_Relay_CycleTimer();
+  SubTask_Relay_CycleTimer(); // to enable relay toggling every X minutes (eg floor mat)
+  // Function is used to actually configure the output based on above functions
+  SubTask_Relay_TimeOn(); // this function will simply check timeroff, timeron and time restriction. Other functions will set these values
 
-  /**
-   * @brief Function is used to actually configure the output based on above functions
-   **/
-  SubTask_UpdateState(); // this function will simply check timeroff, timeron and time restriction. Other functions will set these values
-
-  // ALOG_INF(PSTR("%d timer_decounter %d"), 0, rt.relay_status[0].timer_decounter.seconds);
-  // ALOG_INF(PSTR("%d timer_decounter %d"), 1, rt.relay_status[1].timer_decounter.seconds);
-  // ALOG_INF(PSTR("%d timer_decounter %d"), 2, rt.relay_status[2].timer_decounter.seconds);
-  // ALOG_INF(PSTR("%d timer_decounter %d"), 3, rt.relay_status[3].timer_decounter.seconds);
 }
 
 void mRelays::SubTask_Relay_CycleTimer()
@@ -287,7 +261,7 @@ void mRelays::RulesEvent_Set_Power(){
 /**
  * @note: Time a relay will remain ON
  * */
-void mRelays::SubTask_UpdateState(){
+void mRelays::SubTask_Relay_TimeOn(){
   
   // Stop if no relays connected
   if(!module_state.devices){
@@ -303,7 +277,7 @@ void mRelays::SubTask_UpdateState(){
      * */
     if(rt.relay_status[relay_id].timer_off_then_on_decounter.seconds>0) //if active, then stop this function
     {
-      AddLog(LOG_LEVEL_WARNING, PSTR("SubTask_UpdateState BLOCKED by timeoffthenon"));
+      AddLog(LOG_LEVEL_WARNING, PSTR("SubTask_Relay_TimeOn BLOCKED by timeoffthenon"));
       return;     
     }
 
@@ -708,16 +682,13 @@ void mRelays::SetPowerOnState(void)
 }
 
 
-void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)
+void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)  // needs renamed better, to split from get/set power
 {
 
 /**
  * Adding locking time based method in here, so if set, relays will only turn on during set windows. 
  * Note: Allow the off command without time limits
  * */
-
-
-
 
 // device  = Relay number 1 and up
 // state 0 = POWER_OFF = Relay Off
@@ -851,82 +822,9 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
 
 
-/*********************************************************************************************\
- * Driver Settings load and save using filesystem
-\*********************************************************************************************/
-
-// const uint16_t XDRV_86_VERSION = 0x0104;              // Latest driver version (See settings deltas below)
-
-// void Xdrv86SettingsLoad(bool erase) {
-//   // *** Start init default values in case file is not found ***
-//   memset(&Sspm->Settings, 0x00, sizeof(tSspmSettings));
-//   Sspm->module_state.version = XDRV_86_VERSION;
-//   // Init any other parameter in struct
-//   Sspm->module_state.flag.display = SPM_DISPLAY_TABS;
-
-//   // *** End Init default values ***
-
-// #ifndef USE_UFILESYS
-//   AddLog(LOG_LEVEL_DEBUG, PSTR("CFG: XDRV86 Use defaults as file system not enabled"));
-// #else
-//   // Try to load file /.drvset086
-//   char filename[20];
-//   // Use for drivers:
-//   snprintf_P(filename, sizeof(filename), PSTR(TASM_FILE_DRIVER), XDRV_86);
-//   if (erase) {
-//     TfsDeleteFile(filename);  // Use defaults
-//   }
-//   else if (TfsLoadFile(filename, (uint8_t*)&Sspm->Settings, sizeof(tSspmSettings))) {
-//     if (Sspm->module_state.version != XDRV_86_VERSION) {      // Fix version dependent changes
-
-//       // *** Start fix possible setting deltas ***
-//       if (Sspm->module_state.version < 0x0104) {
-//         Sspm->module_state.flag.display = Settings->sbflag1.sspm_display;
-//       }
-
-//       // *** End setting deltas ***
-
-//       // Set current version and save settings
-//       Sspm->module_state.version = XDRV_86_VERSION;
-//       Xdrv86SettingsSave();
-//     }
-//     AddLog(LOG_LEVEL_INFO, PSTR("CFG: XDRV86 loaded from file"));
-//   }
-//   else {
-//     // File system not ready: No flash space reserved for file system
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CFG: XDRV86 Use defaults as file system not ready or file not found"));
-//   }
-// #endif  // USE_UFILESYS
-// }
-
-// void Xdrv86SettingsSave(void) {
-// #ifdef USE_UFILESYS
-//   // Called from FUNC_SAVE_SETTINGS every SaveData second and at restart
-//   uint32_t crc32 = GetCfgCrc32((uint8_t*)&Sspm->Settings +4, sizeof(tSspmSettings) -4);  // Skip crc32
-//   if (crc32 != Sspm->module_state.crc32) {
-//     // Try to save file /.drvset086
-//     Sspm->module_state.crc32 = crc32;
-
-//     char filename[20];
-//     // Use for drivers:
-//     snprintf_P(filename, sizeof(filename), PSTR(TASM_FILE_DRIVER), XDRV_86);
-//     if (TfsSaveFile(filename, (const uint8_t*)&Sspm->Settings, sizeof(tSspmSettings))) {
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CFG: XDRV86 saved to file"));
-//     } else {
-//       // File system not ready: No flash space reserved for file system
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CFG: XDRV86 ERROR File system not ready or unable to save file"));
-//     }
-//   }
-// #endif  // USE_UFILESYS
-// }
-
-// bool Xdrv86SettingsRestore(void) {
-//   XdrvMailbox.data = (char*)&Sspm->Settings;
-//   XdrvMailbox.index = sizeof(tSspmSettings);
-//   return true;
-// }
 
 
+//{"PowerName":0,"Relay":{"TimeOn":5},"EnabledTime":{"Enabled":1,"OnTime":"01D12:34:56","OffTime":"12D34:56:78"}}
 
 
 void mRelays::parse_JSONCommand(JsonParserObject obj)
@@ -948,7 +846,6 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
     if(jtok.isNum()){
       relay_id  = jtok.getInt();
     }
-
     ALOG_INF( PSTR("relay_id = %d"), relay_id );
   }
 
@@ -963,39 +860,13 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 
     /**
      * @brief If off, clear any timer decounters for relays
-     * 
-     */
+     **/
     if(state == 0)
     {
       CommandSet_Timer_Decounter(0, relay_id);
     }
 
-		//state needs checked for flipped
-		// if(state == 2){
-
-		// }
-
-  }
-
-
-
-
-
-  #ifndef ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
-  // PHASE OUT by version 0.87
-  if(jtok = obj[PM_JSON_ONOFF]){
-    AddLog(LOG_LEVEL_ERROR, PSTR("PHASE OUT -- Invalid Command"));
-    if(jtok.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok.getStr());
-    }else 
-    if(jtok.isNum()){
-      state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
-    }
-  }
-  #endif // ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
-
-
-  
+  } 
 
 
   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
@@ -1008,6 +879,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
     CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   }
 
+
   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_OFF_THEN_ON_SECS]){
     CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(jtok.getInt(), relay_id);
   }
@@ -1016,9 +888,6 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,module_state.devices)){
     CommandSet_Relay_Power(state,relay_id);
   }
-
-
-	//move this so its passed as object, hence "EnabledTime" can be search for by (no number and hence use powername) or "EnabledTime#" #=1,2,3 ... how does tas pull the numbers out? must match key partially
 
 	// Search for match which uses relayindex
 	if(jtok = obj["RelayEnabled"]){
@@ -1035,40 +904,6 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 		}
 
   }  
-
-  
-
-
-  // if(jtok = obj["EnabledTime"]){
-  //   time_short_t ontime;
-  //   time_short_t offtime;
-  //   uint8_t index = 0;
-    
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_INDEX]){
-  //     index = jtok.getInt();    
-  //   }
-    
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ONTIME]){
-  //     ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
-  //     relay_status[relay_id].enabled_ranges[index].ontime = ontime;
-  //   }
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_OFFTIME]){
-  //     offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
-  //     relay_status[relay_id].enabled_ranges[index].offtime = offtime;
-  //   }
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ENABLED]){
-  //     relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
-  //   }
-
-
-  //   pCONT_time->PrintDateTime(ontime);
-  //   pCONT_time->PrintDateTime(offtime);
-
-
-  // }
-
-
-  // mqtthandler_scheduled_teleperiod.flags.SendNow = true;
 
 }
 
@@ -1122,8 +957,7 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
   // Only apply changes when state is changed
 void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
-    ,"CommandSet_Relay_Power","num",num,"state",state);  
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE), "CommandSet_Relay_Power","num",num,"state",state);  
 
 	// Check state if it needs to toggle result
 
@@ -1209,14 +1043,8 @@ uint8_t mRelays::CommandGet_Relay_Power(uint8_t num){
 //   #endif
 // }
 
-uint32_t mRelays::CommandGet_SecondsRelayHasBeenOn(uint8_t relay_id)
+uint32_t mRelays::CommandGet_SecondsRelayHasBeenOn(uint8_t relay_id) // why function, just use direct access (or place function into header)
 {
-  // relay_status[relay_id].timer_decounter.seconds = time_secs;
-  // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
-  // #endif
-
   return rt.relay_status[relay_id].time_seconds_on;
 }
 

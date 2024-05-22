@@ -47,7 +47,6 @@ typedef struct Segment {
      * Decimate is a multiplier, so 0 means none, with each value being a divisor. Decimate 10 would be only generate 10% of the leds
      */
     uint8_t decimate = 0;
-    uint8_t opacity = 255; // PHASE OUT ie opacity is the segment "brightness"
     uint8_t grouping = 1;
     uint8_t  spacing = 0;
 
@@ -246,14 +245,7 @@ typedef struct Segment {
      * @brief 
      * External user controllable multi-use variables
      */
-    struct USER_PARAMETER_OPTIONS
-    {
-      uint16_t val0 = 0;
-      uint16_t val1 = 0;
-      uint16_t val2 = 0;
-      uint16_t val3 = 0;
-    }params_user;
-
+    uint16_t params_user[4] = {0};
 
     byte* data;     // effect data pointer
     CRGB* leds;     // local leds[] array (may be a pointer to global)
@@ -312,7 +304,6 @@ typedef struct Segment {
       options(SELECTED | SEGMENT_ON),
       grouping(1),
       spacing(0),
-      opacity(255),
       cct_slider(127),
       custom1(DEFAULT_C1),
       custom2(DEFAULT_C2),
@@ -434,7 +425,6 @@ typedef struct Segment {
     bool    setColor(uint8_t slot, uint32_t c); //returns true if changed
     bool    setColor(uint8_t slot, RgbcctColor c); //returns true if changed
     void    setCCT(uint16_t k);
-    void    setOpacity(uint8_t o);
     void    setOption(uint8_t n, bool val);
     void    setMode(uint8_t fx, bool loadDefaults = false);
     void    setPalette(uint8_t pal);

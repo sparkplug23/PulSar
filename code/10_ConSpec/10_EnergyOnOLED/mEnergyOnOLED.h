@@ -36,52 +36,56 @@ class mEnergyOLED :
 
   private:
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mEnergyOLED(){};
-    void init(void);
-    
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void   parse_JSONCommand(JsonParserObject obj);
 
     static const char* PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR;
     static const char* PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mEnergyOLED); };
-    #endif
-    
+    uint16_t GetClassSize(){      return sizeof(mEnergyOLED);    };
+    #endif    
 
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-    }settings;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    void Pre_Init();
-    void Init();
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
 
     void EverySecond();
     void SubTask_UpdateOLED();
     
-    void parse_JSONCommand(JsonParserObject obj);
-
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    
+    void MQTTHandler_Set_DefaultPeriodRate();    
     void MQTTHandler_Sender();
 
+    std::vector<struct handler<mEnergyOLED>*> mqtthandler_list;
     struct handler<mEnergyOLED> mqtthandler_settings_teleperiod;
     struct handler<mEnergyOLED> mqtthandler_state_ifchanged;
-
-    //No extra handlers: ie settings and "state" only
-    
-      
-    struct handler<mEnergyOLED>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_state_ifchanged
-    };
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 

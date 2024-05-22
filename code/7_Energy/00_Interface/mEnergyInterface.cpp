@@ -210,7 +210,6 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_app
 
               if(val.isFloatWaiting_WithSensorType(type_id_adjusted))
               {
-
                 
                 // val.sensor_id is used to since the order of devicename list may not match in accending order
                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));

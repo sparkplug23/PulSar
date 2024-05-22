@@ -17,6 +17,7 @@
 
 //  ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__02__ESP32_PARALLEL_4CH__1000LEDS_REDBOARD
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__07__ESP32_TREADMILL_STOPWATCH
 
 //    ;;;;;;;;;;;; ESP8266 ;;;;;;;;;;;;;;;;
 
@@ -386,6 +387,168 @@
   )=====";
 
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L2__ESP32_I2S_PARALLEL_4CH
+
+
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__07__ESP32_TREADMILL_STOPWATCH
+
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+
+  #define LOG_BUFFER_SIZE 2000
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+ 
+  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  #define ENABLE_DEVFEATURE_LIGHT__FORCE_EFFECT_COLOUR_TYPE_AS_RGBCCT
+
+  #define ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
+  #define DEBUG_FUNC_SETTINGSUPDATETEXT
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  /***********************************
+   * SECTION: Core Configs
+  ************************************/    
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+ 
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+  #define ENABLE_FEATURE_LIGHTS__ADD_WHITE_TO_LIVEVIEW
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":93
+      }
+    ],
+    "Segment0": {
+      "PixelRange":[0,93],
+      "ColourPalette":0,
+      "Effects": {
+        "Function":"Seven-Segment Number 01"
+      },
+      "SegColour0": {
+        "Hue": 0,
+        "Sat": 100,
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100,
+        "CCT_TempPercentage":100,
+        "ColourType":4
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 100
+  }
+  )=====";
+  
+
+
+
+
+
+
+#endif// DEVICE_TESTGROUP__LIGHTING_EFFECTS__07__ESP32_TREADMILL_STOPWATCH
+
 
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_ACTIVE_TESTGROUPS_BETA_H

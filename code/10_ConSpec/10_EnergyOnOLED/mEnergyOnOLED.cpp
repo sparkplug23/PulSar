@@ -40,7 +40,7 @@ int8_t mEnergyOLED::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function)
   {    
@@ -87,8 +87,8 @@ void mEnergyOLED::Pre_Init(void)
 
 void mEnergyOLED::Init(void)
 {
-  
-    settings.fEnableSensor = true;
+
+  module_state.mode = ModuleStatus::Running;
 
 }
 
@@ -115,16 +115,14 @@ void mEnergyOLED::EverySecond()
  * */
 void mEnergyOLED::SubTask_UpdateOLED()
 {
-  
+    DEBUG_LINE_HERE_MILLIS
+
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
   char buffer[100] = {0};
   char buffer_f[100] = {0};
   char buffer_n[100] = {0};
   
   snprintf(buffer, sizeof(buffer), "%s", pCONT_time->GetTime().c_str() );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
-
-  // #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
 
   float sensor_data = -1;
 
@@ -188,39 +186,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
     #endif
 
   }
-
-
-  
-  // for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-  // {
-  //   sensors_reading_t val;
-  //   pCONT_mina219->GetSensorReading(&val, sensor_id);
-  //   if(val.Valid())
-  //   {
-
-  //     sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-  //     DLI->GetDeviceName_WithModuleUniqueID( pCONT_mina219->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
-
-  //     /**
-  //      * @brief Check for name and replace with OLED friendly short name
-  //      * 
-  //      */
-  //     if(strcmp(buffer_n, D_DEVICE_SENSOR_CURRENT)==0)
-  //     {
-  //       memset(buffer_n, 0, sizeof(buffer_n));
-  //       sprintf(buffer_n, "%s", "LED");
-  //       line = 3;
-  //     }
-      
-
-  //     snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-  //     pCONT_iDisp->LogBuffer_AddRow(buffer, line);
-    
-  //   }
-
-  // }
-
-  // #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
+  DEBUG_LINE_HERE_MILLIS
 
 }
 
@@ -249,7 +215,6 @@ void mEnergyOLED::parse_JSONCommand(JsonParserObject obj)
 uint8_t mEnergyOLED::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);    
   return JBI->End();
 
 }
@@ -286,6 +251,7 @@ void mEnergyOLED::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mEnergyOLED::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -296,6 +262,7 @@ void mEnergyOLED::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mEnergyOLED::ConstructJSON_State;
+  mqtthandler_list.push_back(ptr);
 
 } //end "MQTTHandler_Init"
 

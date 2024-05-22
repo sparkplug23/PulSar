@@ -1061,7 +1061,7 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
   ){  
     int8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; //also skip the rgbcct colour names, though, they should be static?
     DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
-    ALOG_INF(PSTR("device name %s %d"),buffer, adjusted_id );
+    ALOG_DBM(PSTR("device name %s %d"),buffer, adjusted_id );
   }
 
   return buffer;
@@ -1313,12 +1313,6 @@ void mAnimatorLight::SubTask_Segments_Effects()
 {
 
   
-
-  #ifdef ENABLE_DEVFEATURE_LIGHT__REQUIRE_MINIMUM_BACKOFF_ON_ANIMATION_TO_MAYBE_FIX_BUS_FLICKER
-  // Need to also have a general backoff timer so the outputs are never hit faster than neopixelbus can update
-  if(!mTime::TimeReached(&tSaved_MinimumAnimateRunTime, MINIMUM_SHOW_BACKOFF_PERIOD_MS)){ return; } // Note: Override must still abide by this backoff
-  #endif // ENABLE_DEVFEATURE_LIGHT__REQUIRE_MINIMUM_BACKOFF_ON_ANIMATION_TO_MAYBE_FIX_BUS_FLICKER
-
   #ifdef ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
   // pCONT_iLight->neopixel_runner->IsBusy();
   // vTaskSuspend(pCONT_iLight->neopixel_runner->_commit_task);
@@ -2366,49 +2360,22 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
       
   if(f==0) return -2;
 
-   char lineBuffer[256];
-    for (size_t i = 0; i < getModeCount(); i++) {
-      strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer)/sizeof(char)-1);
-      lineBuffer[sizeof(lineBuffer)/sizeof(char)-1] = '\0'; // terminate string
+  char lineBuffer[256];
+  for (size_t i = 0; i < getModeCount(); i++) {
+    strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer)/sizeof(char)-1);
+    lineBuffer[sizeof(lineBuffer)/sizeof(char)-1] = '\0'; // terminate string
 
-      ALOG_INF(PSTR("lineBuffer %d %s"), i, lineBuffer);
+    ALOG_INF(PSTR("lineBuffer %d %s"), i, lineBuffer);
+    
+    char* dataPtr = strchr(lineBuffer,'@');
+    if (dataPtr) *dataPtr = 0; // replace name dividor with null termination. Escape "name@data"
 
-        
-      // snprintf_P(lineBuffer, buflen, effects.config[id]);  
-      
-      char* dataPtr = strchr(lineBuffer,'@');
-      if (dataPtr) *dataPtr = 0; // replace name dividor with null termination. Escape "name@data"
-
-      if(strcmp(f,lineBuffer)==0)//  mSupport::CheckCommand_P(f, lineBuffer))
-      {   
-        ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"),f,i);
-        return i; 
-      }
-
-
-      // if (lineBuffer[0] != 0) {
-      //   char* dataPtr = strchr(lineBuffer,'@');
-      //   if (dataPtr) fxdata.add(dataPtr+1);
-      //   else         fxdata.add("");
-      // }
+    if(strcmp(f,lineBuffer)==0)//  mSupport::CheckCommand_P(f, lineBuffer))
+    {   
+      ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"),f,i);
+      return i; 
     }
-
-
-
-  // for(uint16_t id=0;id<effects.function.size();id++)
-  // {
-
-  //   aaa
-
-
-
-
-  //   if(mSupport::CheckCommand_P(f, effects.data[id]))
-  //   {   
-  //     ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"),f,id);
-  //     return id; 
-  //   }
-  // }
+  }
 
   return -1;
 
@@ -2751,14 +2718,6 @@ void mAnimatorLight::Segment::setCCT(uint16_t k) {
   // stateChanged = true; // send UDP/WS broadcast
 }
 
-void mAnimatorLight::Segment::setOpacity(uint8_t o) {
-  if (opacity == o) return;
-  // if (fadeTransition) startTransition(strip.getTransition()); // start transition prior to change
-  opacity = o;
-  // stateChanged = true; // send UDP/WS broadcast
-  _brightness_rgb = o;
-  _brightness_cct = o;
-}
 
 void mAnimatorLight::Segment::setOption(uint8_t n, bool val) {
   bool prevOn = on;
@@ -6159,7 +6118,7 @@ void mAnimatorLight::notify(byte callMode, bool followUp)
     udpOut[7 +ofs] = selseg.offset >> 8;
     udpOut[8 +ofs] = selseg.offset & 0xFF;
     udpOut[9 +ofs] = selseg.options & 0x8F; //only take into account selected, mirrored, on, reversed, reverse_y (for 2D); ignore freeze, reset, transitional
-    udpOut[10+ofs] = selseg.opacity;
+    udpOut[10+ofs] = 255;//selseg.opacity;
     udpOut[11+ofs] = selseg.effect_id;
     udpOut[12+ofs] = selseg.speed;
     udpOut[13+ofs] = selseg.intensity;
@@ -6424,7 +6383,7 @@ void handleNotifications()
           }
           //for (size_t j = 1; j<4; j++) selseg.setOption(j, (udpIn[9 +ofs] >> j) & 0x01); //only take into account mirrored, on, reversed; ignore selected
           selseg.options = (selseg.options & 0x0071U) | (udpIn[9 +ofs] & 0x0E); // ignore selected, freeze, reset & transitional
-          selseg.setOpacity(udpIn[10+ofs]);
+          // selseg.setOpacity(udpIn[10+ofs]);
           if (applyEffects) {
             pCONT_lAni->setMode(id,  udpIn[11+ofs]);
             selseg.speed     = udpIn[12+ofs];

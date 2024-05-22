@@ -147,7 +147,7 @@ class mRelays :
     void SetAllPower(uint32_t state, uint32_t source);
     void ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source);
     void SetPowerOnState(void);
-    void SubTask_UpdateState();     
+    void SubTask_Relay_TimeOn();     
     bool IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id=255);
     void SubTask_Every_Minute();
     void SubTask_Relay_PulseOff();

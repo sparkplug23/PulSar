@@ -1,7 +1,7 @@
 #ifndef _MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_H
 #define _MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID   141  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID   10016  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 #define D_GROUP_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID    1    // Numerical accesending order of module within a group
 
 #include "1_TaskerManager/mTaskerManager.h"

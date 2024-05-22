@@ -364,7 +364,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
 
   // AddLog_Array(LOG_LEVEL_TEST, "encoded_gradient_temp_array", encoded_gradient_temp_array, index);
   
-  // if(pCONT_time->uptime.seconds_nonreset > 60){
+  // if(pCONT_time->uptime_seconds_nonreset > 60){
 
   
   // //print result over mqtt so I can test

@@ -235,7 +235,8 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
     {
       memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+      // AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+      AddLog(LOG_LEVEL_TEST, PSTR("F::GetDeviceName >> %s"), PM_SEARCH_NOMATCH);
       #endif // ENABLE_LOG_LEVEL_INFO
     
 
@@ -256,7 +257,8 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
       snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), random(1000));//device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
-      ALOG_INF( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+      // ALOG_INF( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+      ALOG_WRN(PSTR("F::GetDeviceName >> %s"), buffer);
       #endif // ENABLE_LOG_LEVEL_INFO
     }
     return buffer;

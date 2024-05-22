@@ -166,8 +166,12 @@ class mEnergyPZEM004T :
       #define MAX_PZEM004T_DEVICES 12
     #endif
 
+    #ifndef DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH
+      #define DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH 10
+    #endif
+
     
-    void DeviceSearch(uint8_t address_limit = 20); // address 248 is reserved for broadcast
+    void DeviceSearch(uint8_t address_limit = DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH); // address 248 is reserved for broadcast
     void AddDeviceIfNotExists(uint8_t address_to_save);
 
 

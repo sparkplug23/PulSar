@@ -248,6 +248,21 @@ enum LoggingLevels {LOG_LEVEL_NONE,
   #define DEBUG_LINE_HERE2   //nothing, no code
 #endif
 
+
+#if defined(ENABLE_DEBUG_LINE_HERE_MILLIS)
+  #define DEBUG_LINE_HERE_MILLIS    SERIAL_DEBUG.printf("DEBUG: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.print(__LINE__);\
+                        SERIAL_DEBUG.print('-');\
+                        SERIAL_DEBUG.println(millis());\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE_HERE_MILLIS   //nothing, no code
+#endif
+
+
+
+
 #if defined(ENABLE_DEBUG_LINE_HERE)
   #define DEBUG_LINE_HERE_MARKER    SERIAL_DEBUG.printf("DEBUG HERE: -------------------------------------------\n\r");\
                         SERIAL_DEBUG.print(__FILE__);\

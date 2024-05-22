@@ -645,9 +645,9 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
 // #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 // //move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
-//   // if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
+//   // if (BOOT_LOOP_TIME == pCONT_time->uptime_seconds_nonreset) { //might need cast to be the same
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
+//     AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime_seconds_nonreset"));
 //     #endif // ENABLE_LOG_LEVEL_INFO
 //     pCONT_set->RtcReboot.fast_reboot_count = 0;
 //     pCONT_set->RtcRebootSave();

@@ -1794,7 +1794,7 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
       // setup_cam();
     break;
     case FUNC_EVERY_MINUTE:
-      if(!settings.caminit && (pCONT_time->uptime.seconds_nonreset>60)){
+      if(!settings.caminit && (pCONT_time->uptime_seconds_nonreset>60)){
         setup_cam();
       }
     break;

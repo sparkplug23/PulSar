@@ -11,19 +11,6 @@
 
 #include "2_CoreSystem/02_Time/Toki.h"
 
-/***
- * Notes:
- * 
- * 030424: Transition in WLED effects will be removed as a feature for the foreseeable future. Reduce memory and code complexity. Perhaps add much later.
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
-*/
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
@@ -36,62 +23,181 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
+
 #define PIXEL_RANGE_LIMIT 3000
 
-#define ENABLE_DEVFEATURE_LIGHTING__DEVELOPING_CODE
-
-
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-#ifndef PIXEL_COUNTS
-  #define PIXEL_COUNTS DEFAULT_LED_COUNT
-#endif
-
-#ifndef DATA_PINS
-  #define DATA_PINS LEDPIN
-#endif
-#define DATA_PINS_BUSSES 23, 22
-
-#ifndef DEFAULT_LED_TYPE
-  #define DEFAULT_LED_TYPE BUSTYPE_WS2812_RGB
-#endif
-
-#ifndef DEFAULT_LED_COLOR_ORDER
-  #define DEFAULT_LED_COLOR_ORDER COL_ORDER_GRB  //default to GRB
-#endif
+  #ifndef PIXEL_COUNTS
+    #define PIXEL_COUNTS DEFAULT_LED_COUNT
+  #endif
+  #ifndef DATA_PINS
+    #define DATA_PINS LEDPIN
+  #endif
+  #define DATA_PINS_BUSSES 23, 22
+  #ifndef DEFAULT_LED_TYPE
+    #define DEFAULT_LED_TYPE BUSTYPE_WS2812_RGB
+  #endif
+  #ifndef DEFAULT_LED_COLOR_ORDER
+    #define DEFAULT_LED_COLOR_ORDER COL_ORDER_GRB  //default to GRB
+  #endif
 #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 #define MAX_PIXELBUS_DIGITAL_PINS 16
 
-// DEfines to make it visually easy to read
-#define PALETTE_WRAP_ON   true
-#define PALETTE_WRAP_OFF  false
-
-#define PALETTE_DISCRETE_OFF  false
-#define PALETTE_DISCRETE_ON   true
-#define PALETTE_DISCRETE_DEFAULT   2 // Use the prefered method depending on the palette. Gradients will be shown across the segment, discrete will be shown as a single colours sequenced
-
-#define PALETTE_INDEX_SPANS_SEGLEN_ON true
-#define PALETTE_SPAN_OFF false
-#define WLED_PALETTE_MAPPING_ARG_FALSE false
-#define NO_ENCODED_VALUE nullptr
+/**
+ * @brief GetColourPalette defines to make it visually easy to read
+ **/
+#define PALETTE_WRAP_ON                 true
+#define PALETTE_WRAP_OFF                false
+#define PALETTE_DISCRETE_OFF            false
+#define PALETTE_DISCRETE_ON             true
+#define PALETTE_DISCRETE_DEFAULT        2 // Use the prefered method depending on the palette. Gradients will be shown across the segment, discrete will be shown as a single colours sequenced
+#define PALETTE_INDEX_SPANS_SEGLEN_ON   true
+#define PALETTE_SPAN_OFF                false
+#define WLED_PALETTE_MAPPING_ARG_FALSE  false
+#define NO_ENCODED_VALUE                nullptr
+#define PALETTE_SOLID_WRAP              (paletteBlend == 1 || paletteBlend == 3)
+#define SET_BRIGHTNESS                  true
+#define BRIGHTNESS_ALREADY_SET          true
 
 /**
  * WLED conversions
  * These are basic defines that remap temporarily from WLED in PulSar. 
  * For optimisation, these will be removed and replaced with the correct values.
- * 
- */
+ **/
 #define color_from_palette(a,b,c,d)    GetPaletteColour(a,b,c,d).getU32()
 // #define ColorFromPalette_WithLoad3(a,b,c)   (if( SEGMENT.palette_id != SEGMENT.palette_container->loaded_palette_id){ LoadPalette(SEGMENT.palette_id, getCurrSegmentId()); ColorFromPalette(a,b,c); })
 // #define ColorFromPalette_WithLoad4(a,b,c,d) (if( SEGMENT.palette_id != SEGMENT.palette_container->loaded_palette_id){ LoadPalette(SEGMENT.palette_id, getCurrSegmentId()); ColorFromPalette(a,b,c,d); })
 
 
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
+/* Not used in all effects yet */
+#define WLED_FPS         42
+#define FRAMETIME_FIXED  (1000/WLED_FPS)
+#define FRAMETIME_MS     24
+#define FRAMETIME        25//getFrameTime()
+
+/* Each segment uses 52 bytes of SRAM memory, so if you're application fails because of insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
+#ifdef ESP8266
+  #define MAX_NUM_SEGMENTS    3
+  /* How much data bytes all segments combined may allocate */
+  #define MAX_SEGMENT_DATA  1000
+#else
+  #ifndef MAX_NUM_SEGMENTS
+    #define MAX_NUM_SEGMENTS  6
+  #endif
+  #define MAX_SEGMENT_DATA  32767
+#endif
+
+#define IBN 5100
+
+/* How much data bytes each segment should max allocate to leave enough space for other segments,
+  assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
+// #define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
+
+#define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
+
+
+// options
+// bit    7: segment is in transition mode
+// bits 4-6: TBD
+// bit    3: mirror effect within segment
+// bit    2: segment is on
+// bit    1: reverse segment
+// bit    0: segment is selected
+#define NO_OPTIONS   (uint8_t)0x00
+#define TRANSITIONAL (uint8_t)0x80
+#define MIRROR       (uint8_t)0x08
+#define SEGMENT_ON   (uint8_t)0x04
+#define REVERSE      (uint8_t)0x02
+#define SELECTED     (uint8_t)0x01
+#define IS_TRANSITIONAL ((SEGMENT_I(_segment_index_primary).options & TRANSITIONAL) == TRANSITIONAL)
+#define IS_MIRROR       ((SEGMENT_I(_segment_index_primary).options & MIRROR      ) == MIRROR      )
+#define IS_SEGMENT_ON   ((SEGMENT_I(_segment_index_primary).options & SEGMENT_ON  ) == SEGMENT_ON  )
+#define IS_REVERSE      ((SEGMENT_I(_segment_index_primary).options & REVERSE     ) == REVERSE     )
+#define IS_SELECTED     ((SEGMENT_I(_segment_index_primary).options & SELECTED    ) == SELECTED    )
+
+// #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
+#define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
+
+/* How much data bytes all segments combined may allocate */
+#ifdef ESP8266
+#define MAX_SEGMENT_DATA 2048
+#else
+// #define MAX_SEGMENT_DATA 8192
+// Really this value should be split across all segments, since I may want one very large (2000+) pixel or many smaller segments but multiples of them.
+#define MAX_SEGMENT_DATA 19000 //6*MAX_PIXELS = 
+#endif
+
+// #define ANIMATOR_UNSET() (seg.anim_function_callback == nullptr)
+
+#define FLASH_COUNT 4 
+#define LED_SKIP_AMOUNT  0
+#define MIN_SHOW_DELAY  15
+#define DEFAULT_LED_COUNT 30
+
+#define DEFAULT_BRIGHTNESS (uint8_t)127
+#define DEFAULT_MODE       (uint8_t)0
+#define DEFAULT_SPEED      (uint8_t)128
+#define DEFAULT_INTENSITY  (uint8_t)128
+#define DEFAULT_COLOR      (uint32_t)0xFFAA00
+#define DEFAULT_C1         (uint8_t)128
+#define DEFAULT_C2         (uint8_t)128
+#define DEFAULT_C3         (uint8_t)16
+
+
+//Segment option byte bits
+#define SEG_OPTION_SELECTED       0
+#define SEG_OPTION_REVERSED       1
+#define SEG_OPTION_ON             2
+#define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
+#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
+#define SEG_OPTION_TRANSITIONAL   7
+
+// some common colors
+// white, red, green, blue
+#define RED        (uint32_t)0xFF0000
+#define GREEN      (uint32_t)0x00FF00
+#define BLUE       (uint32_t)0x0000FF
+#define WHITE      (uint32_t)0xFFFFFF
+#define BLACK      (uint32_t)0x000000
+#define YELLOW     (uint32_t)0xFFFF00
+#define CYAN       (uint32_t)0x00FFFF
+#define MAGENTA    (uint32_t)0xFF00FF
+#define PURPLE     (uint32_t)0x400080
+#define ORANGE     (uint32_t)0xFF3000
+#define PINK       (uint32_t)0xFF1493
+#define ULTRAWHITE (uint32_t)0xFFFFFFFF
+#define DARKSLATEGRAY (uint32_t)0x2F4F4F
+#define DARKSLATEGREY (uint32_t)0x2F4F4F
+
+#define NUM_COLORS 3 
+
+#define SEGIDX           getCurrSegmentId()
+
+/**
+ * @brief 
+ * Note: WLED used full colour RGB SEGCOLOR_U32, here SEGCOLOR_U32 going forward will also have brightness applied otherwise it is assumed as 100% brightness and therefore the same as WLED
+ * 
+ */
+#define SEGCOLOR_U32(x)      RgbcctColor::GetU32ColourBrightnessApplied(segments[getCurrSegmentId()].rgbcctcolors[x])
+#define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
+
+#define SEGMENT          segments[getCurrSegmentId()]
+#define SEGMENT_I(X)     segments[X]
+#define pSEGMENT_I(X)    pCONT_lAni->segments[X]
+#define SEGLEN           _virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
+#define SEGPALETTE       SEGMENT.palette_container->CRGB16Palette16_Palette.data
+
+#define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT._speed))/SEGLEN
+
+
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 #include "6_Lights/02_Palette/mPalette.h"
 #include "6_Lights/02_Palette/mPaletteLoaded.h"
-
 #include "6_Lights/00_Interface/mInterfaceLight.h"
-
 
 #ifdef ESP32
   #include <WiFi.h>
@@ -162,10 +268,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
   #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 #endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
+
 #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-
   #include "3_Network/21_WebServer/AsyncJson-v6.h"
-
   #include "webpages_generated/html_ui.h"
   #ifdef WLED_ENABLE_SIMPLE_UI
     #include "webpages_generated/html_simple.h"
@@ -179,12 +284,10 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
     #include "webpages_generated/html_pxmagic.h"
   #endif
   #include "webpages_generated/html_cpal.h"
-
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 
 #include <functional>
-// #define ANIM_FUNCTION_SIGNATURE_TWO_COLOURS              std::function<void(const AnimationParam& param, RgbcctColor c1, RgbcctColor c2)>  anim_function_callback
 #define ANIM_FUNCTION_SIGNATURE                             std::function<void(const AnimationParam& param)>                              anim_function_callback
 #define ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE           std::function<void()>                                                         anim_progress_mqtt_function_callback
 #define ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED             std::function<void(const uint8_t segment_index, const AnimationParam& param)> anim_function_callback_indexed
@@ -254,100 +357,14 @@ class mAnimatorLight :
     uint8_t fPixelsUpdated = false;
     uint16_t desired_pixel;
 
-
-
-
-
-
-
-
-
-
     void Load_Module(bool erase);
     void Save_Module(void);
     bool Restore_Module(void);
     void FileSystem_JsonAppend_Save_Module();
 
-    // Add all data here that needs to be saved to filesystem
-
-
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/
-
-
-    /************************************************************************************************
-     * SECTION: Modes
-     ************************************************************************************************/
-
-    enum ANIMATION_MODE
-    {
-      ANIMATION_MODE__DISABLED,      
-      ANIMATION_MODE__EFFECTS,       // PulSar and WLED
-      ANIMATION_MODE__MQTT_SETPIXEL, // Using json encoded message to set the pixels directly
-      ANIMATION_MODE__REALTIME_UDP,
-      ANIMATION_MODE__REALTIME_HYPERION,
-      ANIMATION_MODE__REALTIME_E131,
-      #ifdef ENABLE_FEATURE_PIXEL_MODE__REALTIME_ADALIGHT
-      ANIMATION_MODE__REALTIME_ADALIGHT,
-      #endif
-      ANIMATION_MODE__REALTIME_ARTNET,
-      ANIMATION_MODE__REALTIME_TPM2NET,
-      ANIMATION_MODE__REALTIME_DDP,  
-      ANIMATION_MODE__LENGTH_ID
-    };             
-    int8_t GetAnimationModeIDbyName(const char* c);
-    const char* GetAnimationModeName(char* buffer, uint16_t buflen);
-    const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
-    void CommandSet_AnimationModeID(uint8_t value);
-
-
-    /************************************************************************************************
-     * SECTION: Commands
-     ************************************************************************************************/
-
-    uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 255);    
-    void parsesub_json_object_notification_shortcut(JsonParserObject obj);
-      
-    void CommandSet_CustomPalette(uint8_t index, uint16_t encoding, uint8_t* data, uint8_t data_length);
-
-
-
-
-
-
-
-
-
-
-    void TestCode_AddBus1();
-    void TestCode_Add16ParallelBus1();
-
-
-
-
-    /******************************************************************************************************************************
-    ****************** CommandSet_x *************************************************************************************************************
-    ******************************************************************************************************************************/
-
-    void CommandSet_LightPowerState(uint8_t value);
-    bool CommandGet_LightPowerState();
-    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    void CommandSet_EnabledAnimation_Flag(uint8_t value);
-    void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
-    
-    /******************************************************************************************************************************
-    ****************** CommandGet_x *************************************************************************************************************
-    ******************************************************************************************************************************/
-
-   
-    #ifdef USE_MODULE_CORE_RULES
-    void RulesEvent_Set_Power();
-    #endif // rules
-     
-    void EverySecond_AutoOff();
-    void BootMessage();
-
 
     void StartAnimation_AsAnimUpdateMemberFunction();
     
@@ -362,6 +379,12 @@ class mAnimatorLight :
     #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
     void EveryLoop();    
+    #ifdef USE_MODULE_CORE_RULES
+    void RulesEvent_Set_Power();
+    #endif // rules
+     
+    void EverySecond_AutoOff();
+    void BootMessage();
                 
 
     RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
@@ -392,127 +415,126 @@ class mAnimatorLight :
     #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
 
-      
+    /************************************************************************************************
+     * SECTION: Modes
+     ************************************************************************************************/
 
-    /*****************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    *** Subtask:   Mixer (for changing animations)   *****************************************************************************************************************************
-    **  @note:     to be renamed, "profiles?"  ***********************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-
-    #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER // Legacy mixer/playlist to enable hardcoded playlists while the file system playlists are underdevelopment
-
-    void Init_Sequencer();
-    void handleSequencer();
-    void Load_Sequencer(uint8_t id);
-    void SubLoad_Sequencer_Device(uint8_t id);
-    void SetSequenceTimes(uint16_t secs);
-
-    enum FLASH_LEVEL{
-      Static=0,
-      Gentle=1,
-      Flashing=2,
-      FastFlashing=3
-    }FlashLevel;
-
-    struct SEQUENCER_ITEM
+    enum ANIMATION_MODE
     {
-      uint16_t seconds_on = 10;
-      struct TIMES {
-        struct time_short start = {0};
-        struct time_short end = {0};
-        bool isArmed = false;
-      }time_enabled;
-      struct DISABLE{
-        uint8_t flash_level = 0; // let use 3, 0 is static, 1 is gentle, 2 is flashing, 3 is fast flashing
-
-      }limit;
-      String json_command;
-      String description;
-    }sequencer_item;
-    std::vector<struct SEQUENCER_ITEM> sequencer_item_list;
-
-    struct SEQUENCER{
-      uint16_t seconds_remaining_on_item = 0;
-      uint8_t active_sequence_index = 0;
-      uint32_t tSaved_Tick = 0;
-      uint8_t loaded_sequence_set = 1; // 0 means disabled 
-      bool Enable_TimeRestraints = false;
-      uint8_t remote_openhab_limit_flashing = 1; // default is no block. Openhab will send enable at 9am, and disable at 8pm
-    }sequencer_runtime;
+      ANIMATION_MODE__DISABLED,      
+      ANIMATION_MODE__EFFECTS,       // PulSar and WLED
+      ANIMATION_MODE__MQTT_SETPIXEL, // Using json encoded message to set the pixels directly
+      ANIMATION_MODE__REALTIME_UDP,
+      ANIMATION_MODE__REALTIME_HYPERION,
+      ANIMATION_MODE__REALTIME_E131,
+      #ifdef ENABLE_FEATURE_PIXEL_MODE__REALTIME_ADALIGHT
+      ANIMATION_MODE__REALTIME_ADALIGHT,
+      #endif
+      ANIMATION_MODE__REALTIME_ARTNET,
+      ANIMATION_MODE__REALTIME_TPM2NET,
+      ANIMATION_MODE__REALTIME_DDP,  
+      ANIMATION_MODE__LENGTH_ID
+    };             
+    
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_CHANGE_ANIMATION_MODE
+    int8_t GetAnimationModeIDbyName(const char* c);
+    const char* GetAnimationModeName(char* buffer, uint16_t buflen);
+    const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
+    void CommandSet_AnimationModeID(uint8_t value);
+    #endif // ENABLE_DEVFEATURE_LIGHTING__COMMANDS_CHANGE_ANIMATION_MODE
 
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
 
-
-    #endif // ENABLE_FEATURE_LIGHTING__SEQUENCER
-
-
-    /*****************************************************************************************************************************************************************************
-    ********************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    *** Animation Effect:   Ambilight   ***************************************************************************************************************************************************************************
-    **  @note:     **************************************************************************************************************************************************************************
-    ************************************************************************************************************************************************************************************
-    **********************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-
-    #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-    // Move completely into its own class, with its own tasker
-    /**************
-     * Ambilight is light patterns around screens or pictures
-     * PRESETS - patterns
-     * INPUT_STREAM - set leds directly through mqtt (wallpaper) or serial lighting
-    **************/ 
-    enum AMBILIGHT_MODES_IDS{
-      AMBILIGHT_PRESETS_ID=0,
-      AMBILIGHT_SIDES_ID,
-      AMBILIGHT_INPUT_STREAM_ID,
-      AMBILIGHT_LENGTH_ID
-    };
-    int8_t GetAmbilightModeIDbyName(const char* c);
-    const char* GetAmbilightModeName(char* buffer);
-
-    /*******AMBILIGHT*********************************************************************************************/
-
-    void SubTask_Ambilight_Main();
-    void Ambilight_Sides();
-    void Ambilight_Presets();
-    void Ambilight_InputStream();
-    void init_Ambilight();
-    #define AMBILIGHT_SCREENS_CONNECTED 1
-
-    /**
-     * 
-     * Long term, multiple screens will be used as their own subclass, containing all the info about that screen instead of struct arrays
-     * */
-    enum AMBILIGHT_SCREEN_INDEX{SCREEN_CENTRE=0,SCREEN_LEFT=1,SCREEN_RIGHT=2};
-
-    struct AMBILIGHT_SCREEN_SETTINGS{
-      uint8_t ambilight_mode = AMBILIGHT_SIDES_ID;
-      uint32_t tSavedUpdate = millis();
-      uint32_t ratemsSavedUpdate = 1000;
-      uint8_t fUpdate = false;
-      struct SCREENS{
-        struct EDGE{
-          RgbcctColor colour;
-          int8_t blend_between_sides_gradient_percentage = -1; // -1 is unset/none/solid, 0% is bottom/left, 100% is top/right
-          uint8_t size = 5;
-        };
-        struct EDGE top;
-        struct EDGE bottom;
-        struct EDGE left;
-        struct EDGE right;
-        struct FIRST_PIXEL{
-          //uint8_t bottom_right_clockwise = store as packed bit? 
-        }start_pixel;
-      }screens[AMBILIGHT_SCREENS_CONNECTED]; //0,1,2 where 0 is centre and only screen
-
-    }ambilightsettings;
-
+    uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 255);    
+    
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION_SHORTCUT
+    void parsesub_json_object_notification_shortcut(JsonParserObject obj);
     #endif
+
+    void CommandSet_CustomPalette(uint8_t index, uint16_t encoding, uint8_t* data, uint8_t data_length);
+    void CommandSet_LightPowerState(uint8_t value);
+    bool CommandGet_LightPowerState();
+    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
+   
+    void CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
+    const char* GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__COLOURHEATMAP_PALETTE
+    void CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t array_length, uint8_t style_index = 0, uint8_t palette_id = 255);
+    #endif
+
+    void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
+
+    void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
+
+    void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
+    int8_t GetFlasherFunctionIDbyName(const char* f);
+    const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
+    const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found = false);
+
+    void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
+
+    void CommandSet_HardwareColourOrderTypeByStr(const char* value, uint8_t segment_index = 0);
+    void CommandSet_ColourTypeByStr(const char* value, uint8_t segment_index = 0);
+    // const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
+    // const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
+
+    void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
+    void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
+  
+    void CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index = 0);
+    void CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index = 0);
+    
+    
+    void CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index = 0, uint8_t segment_index = 0);
+    void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
+    void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
+    void CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subtype, uint8_t colour_index = 0, uint8_t segment_index = 0);
+    void CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
+    void CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
+    void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
+
+
+    uint8_t GetNumberOfColoursInPalette(uint16_t palette_id);
+
+    /************************************************************************************************
+     * SECTION: Files
+     ************************************************************************************************/
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+      // General filesystem
+      size_t fsBytesUsed =0;
+      size_t fsBytesTotal =0;
+      unsigned long presetsModifiedTime =0L;
+      JsonDocument* fileDoc;
+      bool doCloseFile =false;
+      void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
+      void readFile(fs::FS &fs, const char * path);
+      void CommandSet_ReadFile(const char* filename);
+
+
+      void closeFile();
+      bool bufferedFind(const char *target, bool fromStart = true);
+      bool bufferedFindSpace(size_t targetLen, bool fromStart = true);
+      bool bufferedFindObjectEnd() ;
+      void writeSpace(size_t l);
+      bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
+      bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
+      bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
+      bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
+      bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
+      void updateFSInfo();
+
+      #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+      String getContentType(AsyncWebServerRequest* request, String filename);
+      bool handleFileRead(AsyncWebServerRequest* request, String path);
+      #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+    #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+
+
 
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
@@ -523,133 +545,6 @@ class mAnimatorLight :
     *****************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    #define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
-
-    #define MIN(a,b) ((a)<(b)?(a):(b))
-    #define MAX(a,b) ((a)>(b)?(a):(b))
-
-    /* Not used in all effects yet */
-    #define WLED_FPS         42
-    #define FRAMETIME_FIXED  (1000/WLED_FPS)
-    #define FRAMETIME_MS     24
-    #define FRAMETIME        25//getFrameTime()
-
-    /* Each segment uses 52 bytes of SRAM memory, so if you're application fails because of insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
-    #ifdef ESP8266
-      #define MAX_NUM_SEGMENTS    3
-      /* How much data bytes all segments combined may allocate */
-      #define MAX_SEGMENT_DATA  1000
-    #else
-      #ifndef MAX_NUM_SEGMENTS
-        #define MAX_NUM_SEGMENTS  6
-      #endif
-      #define MAX_SEGMENT_DATA  32767
-    #endif
-
-    #define IBN 5100
-
-    /* How much data bytes each segment should max allocate to leave enough space for other segments,
-      assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
-    // #define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
-
-    #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
-
-    // Nicer code names than true/false for what the function of that flag means
-    #define SET_BRIGHTNESS true
-    #define BRIGHTNESS_ALREADY_SET true
-
-    // options
-    // bit    7: segment is in transition mode
-    // bits 4-6: TBD
-    // bit    3: mirror effect within segment
-    // bit    2: segment is on
-    // bit    1: reverse segment
-    // bit    0: segment is selected
-    #define NO_OPTIONS   (uint8_t)0x00
-    #define TRANSITIONAL (uint8_t)0x80
-    #define MIRROR       (uint8_t)0x08
-    #define SEGMENT_ON   (uint8_t)0x04
-    #define REVERSE      (uint8_t)0x02
-    #define SELECTED     (uint8_t)0x01
-    #define IS_TRANSITIONAL ((SEGMENT_I(_segment_index_primary).options & TRANSITIONAL) == TRANSITIONAL)
-    #define IS_MIRROR       ((SEGMENT_I(_segment_index_primary).options & MIRROR      ) == MIRROR      )
-    #define IS_SEGMENT_ON   ((SEGMENT_I(_segment_index_primary).options & SEGMENT_ON  ) == SEGMENT_ON  )
-    #define IS_REVERSE      ((SEGMENT_I(_segment_index_primary).options & REVERSE     ) == REVERSE     )
-    #define IS_SELECTED     ((SEGMENT_I(_segment_index_primary).options & SELECTED    ) == SELECTED    )
-
-    // #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
-    #define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
-
-    /* How much data bytes all segments combined may allocate */
-    #ifdef ESP8266
-    #define MAX_SEGMENT_DATA 2048
-    #else
-    // #define MAX_SEGMENT_DATA 8192
-    // Really this value should be split across all segments, since I may want one very large (2000+) pixel or many smaller segments but multiples of them.
-    #define MAX_SEGMENT_DATA 19000 //6*MAX_PIXELS = 
-    #endif
-
-    // #define ANIMATOR_UNSET() (seg.anim_function_callback == nullptr)
-
-    #define FLASH_COUNT 4 
-    #define LED_SKIP_AMOUNT  0
-    #define MIN_SHOW_DELAY  15
-    #define DEFAULT_LED_COUNT 30
-
-    #define DEFAULT_BRIGHTNESS (uint8_t)127
-    #define DEFAULT_MODE       (uint8_t)0
-    #define DEFAULT_SPEED      (uint8_t)128
-    #define DEFAULT_INTENSITY  (uint8_t)128
-    #define DEFAULT_COLOR      (uint32_t)0xFFAA00
-    #define DEFAULT_C1         (uint8_t)128
-    #define DEFAULT_C2         (uint8_t)128
-    #define DEFAULT_C3         (uint8_t)16
-
-
-    //Segment option byte bits
-    #define SEG_OPTION_SELECTED       0
-    #define SEG_OPTION_REVERSED       1
-    #define SEG_OPTION_ON             2
-    #define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
-    #define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
-    #define SEG_OPTION_TRANSITIONAL   7
-
-    // some common colors
-    // white, red, green, blue
-    #define RED        (uint32_t)0xFF0000
-    #define GREEN      (uint32_t)0x00FF00
-    #define BLUE       (uint32_t)0x0000FF
-    #define WHITE      (uint32_t)0xFFFFFF
-    #define BLACK      (uint32_t)0x000000
-    #define YELLOW     (uint32_t)0xFFFF00
-    #define CYAN       (uint32_t)0x00FFFF
-    #define MAGENTA    (uint32_t)0xFF00FF
-    #define PURPLE     (uint32_t)0x400080
-    #define ORANGE     (uint32_t)0xFF3000
-    #define PINK       (uint32_t)0xFF1493
-    #define ULTRAWHITE (uint32_t)0xFFFFFFFF
-    #define DARKSLATEGRAY (uint32_t)0x2F4F4F
-    #define DARKSLATEGREY (uint32_t)0x2F4F4F
-
-    #define NUM_COLORS 3 
-
-    #define SEGIDX           getCurrSegmentId()
-
-    /**
-     * @brief 
-     * Note: WLED used full colour RGB SEGCOLOR_U32, here SEGCOLOR_U32 going forward will also have brightness applied otherwise it is assumed as 100% brightness and therefore the same as WLED
-     * 
-     */
-    #define SEGCOLOR_U32(x)      RgbcctColor::GetU32ColourBrightnessApplied(segments[getCurrSegmentId()].rgbcctcolors[x])
-    #define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
-
-    #define SEGMENT          segments[getCurrSegmentId()]
-    #define SEGMENT_I(X)     segments[X]
-    #define pSEGMENT_I(X)    pCONT_lAni->segments[X]
-    #define SEGLEN           _virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
-    #define SEGPALETTE       SEGMENT.palette_container->CRGB16Palette16_Palette.data
-
-    #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT._speed))/SEGLEN
 
     void fill(uint32_t c, bool apply_brightness = false);
     void fill(RgbcctColor c, bool apply_brightness = false);
@@ -662,45 +557,6 @@ class mAnimatorLight :
     void Init_Segments();
 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-    // General filesystem
-    size_t fsBytesUsed =0;
-    size_t fsBytesTotal =0;
-    unsigned long presetsModifiedTime =0L;
-    JsonDocument* fileDoc;
-    bool doCloseFile =false;
-
-    
-
-
-    void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
-    void readFile(fs::FS &fs, const char * path);
-    void CommandSet_ReadFile(const char* filename);
-
-
-    void closeFile();
-    bool bufferedFind(const char *target, bool fromStart = true);
-    bool bufferedFindSpace(size_t targetLen, bool fromStart = true);
-    bool bufferedFindObjectEnd() ;
-    void writeSpace(size_t l);
-    bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
-    bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
-    bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
-    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
-    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
-    void updateFSInfo();
-
-    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-    String getContentType(AsyncWebServerRequest* request, String filename);
-    bool handleFileRead(AsyncWebServerRequest* request, String path);
-    #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
-
-    #else
-
-    // static String getContentType(AsyncWebServerRequest* request, String filename);
-    // bool handleFileRead(AsyncWebServerRequest* request, String path);
-
-    #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
     #ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
     StaticJsonDocument<JSON_BUFFER_SIZE> doc;
@@ -750,11 +606,10 @@ class mAnimatorLight :
     void deletePreset(byte index);
     #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
+    /******************************************************************************************************************************************************************************
+    **** Playlists ***************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-
-    /*
-    * Handles playlists, timed sequences of presets
-    */
 
     typedef struct PlaylistEntry 
     {
@@ -779,11 +634,7 @@ class mAnimatorLight :
     int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
     void handlePlaylist();
     void serializePlaylist(JsonObject sObj);
-    #endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-
-
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    
     int16_t currentPlaylist = -1;
     
 
@@ -797,9 +648,15 @@ class mAnimatorLight :
     #endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
 
-    /**
-     * My animations (and their animators where applicable)
-     * */
+
+    /******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    ****** Effect Functions *************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     void EffectAnim__Solid_Colour(); 
     #endif
@@ -1064,11 +921,8 @@ class mAnimatorLight :
     void EffectAnim__1D__FlowStripe();
     #endif
     /****************************************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
     *** Specialised: 2D (No Audio) **********************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D_TODO
     void EffectAnim__2D__Blackhole();
@@ -1167,11 +1021,8 @@ class mAnimatorLight :
     void EffectAnim__2D__DNA();
     #endif
     /****************************************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
     *** Specialised: 1D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D_TODO
     void EffectAnim__AudioReactive__1D__Ripple_Peak();
@@ -1246,11 +1097,8 @@ class mAnimatorLight :
     void EffectAnim__AudioReactive__1D__FFT_Waterfall();
     #endif
     /****************************************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
-    *** Specialised: 2D (Audio Reactive) ************************************************************************************************************************************************
+    *** Specialised: 2D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
-    *****************************************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
     void EffectAnim__AudioReactive__2D__Swirl();
@@ -1267,7 +1115,114 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
     void EffectAnim__AudioReactive__2D__FFT_Akemi();
     #endif
+    /****************************************************************************************************************************************************************************
+    *** Specialised: Notifcations ****************************************************************************************************************************************
+    **  Requires:     ***********************************************************************************************************************************************************
+    *****************************************************************************************************************************************************************************/
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    void SubTask_Segment_Animate_Function__Notification_Static();
+    void SubTask_Segment_Animate_Function__Notification_Fade();
+    void SubTask_Segment_Animate_Function__Notification_Blinking();
+    void SubTask_Segment_Animate_Function__Notification_Pulsing();
+    void SubTask_Segment_Animate_Function__Notification_Base(bool flag_static = false, bool flag_blink = false, bool flag_pulse = false);
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    /****************************************************************************************************************************************************************************
+    *** Specialised: Notifcations ****************************************************************************************************************************************
+    **  Requires:     ***********************************************************************************************************************************************************
+    *****************************************************************************************************************************************************************************/
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
     
+    #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
+    // #define LED_PER_DIGITS_STRIP 47                  // ...two digits are made out of one piece of led strip with 47 leds...
+    #define LED_PER_DIGITS_STRIP 44                  // OR...two digits are made out of TWO pieces of led strip with 44 leds...
+    #define LED_BETWEEN_DIGITS_STRIPS 5              // 5 leds between above strips - and all this gives us LED_COUNT... :D
+    #define LED_COUNT ( LED_DIGITS / 2 ) * LED_PER_DIGITS_STRIP + ( LED_DIGITS / 3 ) * LED_BETWEEN_DIGITS_STRIPS
+
+    /* Segment order, seen from the front:
+
+        <  A  >
+      /\       /\
+      F        B
+      \/       \/
+        <  G  >
+      /\       /\
+      E        C
+      \/       \/
+        <  D  >
+
+    */
+
+    byte segGroups[14][2] = {         // 14 segments per strip, each segment has 1-x led(s). So lets assign them in a way we get something similar for both digits
+      // right (seen from front) digit. This is which led(s) can be seen in which of the 7 segments (two numbers: First and last led inside the segment, same on TE):
+      { 13, 15 },                     // top, a
+      { 10, 12 },                     // top right, b
+      {  6, 8  },                     // bottom right, c
+      {  3, 5  },                     // bottom, d
+      {  0, 2  },                     // bottom left, e
+      { 16, 18 },                     // top left, f
+      { 19, 21 },                     // center, g
+      // left (seen from front) digit
+      { 35, 37 },                     // top, a
+      { 38, 40 },                     // top right, b
+      { 22, 24 },                     // bottom right, c
+      { 25, 27 },                     // bottom, d
+      { 28, 30 },                     // bottom left, e
+      { 32, 34 },                     // top left, f
+      { 41, 43 }                      // center, g
+    };
+
+    // Using above arrays it's very easy to "talk" to the segments. Simply use 0-6 for the first 7 segments, add 7 (7-13) for the following ones per strip/two digits
+    byte digits[14][7] = {                    // Lets define 10 numbers (0-9) with 7 segments each, 1 = segment is on, 0 = segment is off
+      {   1,   1,   1,   1,   1,   1,   0 },  // 0 -> Show segments a - f, don't show g (center one)
+      {   0,   1,   1,   0,   0,   0,   0 },  // 1 -> Show segments b + c (top and bottom right), nothing else
+      {   1,   1,   0,   1,   1,   0,   1 },  // 2 -> and so on...
+      {   1,   1,   1,   1,   0,   0,   1 },  // 3
+      {   0,   1,   1,   0,   0,   1,   1 },  // 4
+      {   1,   0,   1,   1,   0,   1,   1 },  // 5
+      {   1,   0,   1,   1,   1,   1,   1 },  // 6
+      {   1,   1,   1,   0,   0,   0,   0 },  // 7
+      {   1,   1,   1,   1,   1,   1,   1 },  // 8
+      {   1,   1,   1,   1,   0,   1,   1 },  // 9
+      {   0,   0,   0,   1,   1,   1,   1 },  // t -> some letters from here on (index 10-13, so this won't interfere with using digits 0-9 by using index 0-9
+      {   0,   0,   0,   0,   1,   0,   1 },  // r
+      {   0,   1,   1,   1,   0,   1,   1 },  // y
+      {   0,   1,   1,   1,   1,   0,   1 }   // d
+    };
+
+
+    uint16_t lcd_display_show_number = 0;
+    char lcd_display_show_string[5] = {0}; //temporary solution, will be removed once newer commend to save effect runtime struct works
+    byte displayMode = 1;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
+    byte lastSecond = 0;
+    byte startColor = 0;                             // "index" for the palette color used for drawing
+    byte colorOffset = 32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
+
+
+    void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
+    void LCDDisplay_showDigit(byte digit, byte color, byte pos);
+    void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
+    void LCDDisplay_showDots(byte dots, byte color);
+
+    void EffectAnim__7SegmentDisplay__ClockTime_01();
+    void EffectAnim__7SegmentDisplay__ClockTime_02();
+    void EffectAnim__7SegmentDisplay__ManualNumber_01();
+    void EffectAnim__7SegmentDisplay__ManualString_01();
+    void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
+    void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
+
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+      
+
+    /******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    ****** Effect Enums *************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+
 
     enum EFFECTS_FUNCTION__IDS
     {
@@ -1579,7 +1534,7 @@ class mAnimatorLight :
     ******************************************************************************************************************************************************************************/
 
 
-// These should actually be made into palettes, so they can be used with any effect
+    // These should actually be made into palettes, so they can be used with any effect
 
 
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
@@ -1925,22 +1880,11 @@ class mAnimatorLight :
   void SubTask_Segments_Effects();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
   
-  // // realtime
   byte realtimeMode = REALTIME_MODE_INACTIVE;
-  // byte realtimeOverride = REALTIME_OVERRIDE_NONE;
-  // IPAddress realtimeIP = IPAddress(0,0,0,0);// = (({0, 0, 0, 0}));
-  // unsigned long realtimeTimeout = 0;
-  // uint8_t tpmPacketCount = 0;
-  // uint16_t tpmPayloadFrameSize = 0;
-  // bool useMainSegmentOnly = false;
-
-  #define NUM_COLORS2       3 /* number of colors per segment */
 
   typedef union {
     uint16_t data; // allows full manipulating
     struct { 
-      // enable animations (pause)
-      uint16_t fEnable_Animation : 1;
       uint16_t fForceUpdate : 1; 
       uint16_t fRunning : 1;
       uint16_t animator_first_run : 1;
@@ -1950,8 +1894,6 @@ class mAnimatorLight :
   } ANIMATION_FLAGS;
 
   uint8_t GetSizeOfPixel(RgbcctColor::ColourType colour_type);
-
-
 
 
   struct TransitionColourPairs
@@ -2133,160 +2075,192 @@ class mAnimatorLight :
 
 
 
+    /*****************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Subtask:   SEQUENCER   *****************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
 
-  // Temporary helper functions to be cleaned up and converted
-  uint32_t crgb_to_col(CRGB fastled);
-  CRGB col_to_crgb(uint32_t);
-  uint8_t get_random_wheel_index(uint8_t pos);
-  uint16_t triwave16(uint16_t in);
-  uint16_t mode_palette();
+    #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER // Legacy mixer/playlist to enable hardcoded playlists while the file system playlists are underdevelopment
 
-  #ifdef ENABLE_DEVFEATURE_LIGHT__REQUIRE_MINIMUM_BACKOFF_ON_ANIMATION_TO_MAYBE_FIX_BUS_FLICKER
-  uint32_t tSaved_MinimumAnimateRunTime = millis();
-  #endif
+    void Init_Sequencer();
+    void handleSequencer();
+    void Load_Sequencer(uint8_t id);
+    void SubLoad_Sequencer_Device(uint8_t id);
+    void SetSequenceTimes(uint16_t secs);
 
-  void CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
-  const char* GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
-  int8_t GetColourTypeIDbyName(const char* c);
+    enum FLASH_LEVEL{
+      Static=0,
+      Gentle=1,
+      Flashing=2,
+      FastFlashing=3
+    }FlashLevel;
 
-  void CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t array_length, uint8_t style_index = 0, uint8_t palette_id = 255);
+    struct SEQUENCER_ITEM
+    {
+      uint16_t seconds_on = 10;
+      struct TIMES {
+        struct time_short start = {0};
+        struct time_short end = {0};
+        bool isArmed = false;
+      }time_enabled;
+      struct DISABLE{
+        uint8_t flash_level = 0; // let use 3, 0 is static, 1 is gentle, 2 is flashing, 3 is fast flashing
 
-  void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
+      }limit;
+      String json_command;
+      String description;
+    }sequencer_item;
+    std::vector<struct SEQUENCER_ITEM> sequencer_item_list;
 
+    struct SEQUENCER{
+      uint16_t seconds_remaining_on_item = 0;
+      uint8_t active_sequence_index = 0;
+      uint32_t tSaved_Tick = 0;
+      uint8_t loaded_sequence_set = 1; // 0 means disabled 
+      bool Enable_TimeRestraints = false;
+      uint8_t remote_openhab_limit_flashing = 1; // default is no block. Openhab will send enable at 9am, and disable at 8pm
+    }sequencer_runtime;
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  void SubTask_Segment_Animate_Function__Notification_Static();
-  void SubTask_Segment_Animate_Function__Notification_Fade();
-  void SubTask_Segment_Animate_Function__Notification_Blinking();
-  void SubTask_Segment_Animate_Function__Notification_Pulsing();
-  void SubTask_Segment_Animate_Function__Notification_Base(bool flag_static = false, bool flag_blink = false, bool flag_pulse = false);
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-
-
-
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  
-  #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
-  // #define LED_PER_DIGITS_STRIP 47                  // ...two digits are made out of one piece of led strip with 47 leds...
-  #define LED_PER_DIGITS_STRIP 44                  // OR...two digits are made out of TWO pieces of led strip with 44 leds...
-  #define LED_BETWEEN_DIGITS_STRIPS 5              // 5 leds between above strips - and all this gives us LED_COUNT... :D
-  #define LED_COUNT ( LED_DIGITS / 2 ) * LED_PER_DIGITS_STRIP + ( LED_DIGITS / 3 ) * LED_BETWEEN_DIGITS_STRIPS
-
-  /* Segment order, seen from the front:
-
-      <  A  >
-    /\       /\
-    F        B
-    \/       \/
-      <  G  >
-    /\       /\
-    E        C
-    \/       \/
-      <  D  >
-
-  */
-
-  byte segGroups[14][2] = {         // 14 segments per strip, each segment has 1-x led(s). So lets assign them in a way we get something similar for both digits
-    // right (seen from front) digit. This is which led(s) can be seen in which of the 7 segments (two numbers: First and last led inside the segment, same on TE):
-    { 13, 15 },                     // top, a
-    { 10, 12 },                     // top right, b
-    {  6, 8  },                     // bottom right, c
-    {  3, 5  },                     // bottom, d
-    {  0, 2  },                     // bottom left, e
-    { 16, 18 },                     // top left, f
-    { 19, 21 },                     // center, g
-    // left (seen from front) digit
-    { 35, 37 },                     // top, a
-    { 38, 40 },                     // top right, b
-    { 22, 24 },                     // bottom right, c
-    { 25, 27 },                     // bottom, d
-    { 28, 30 },                     // bottom left, e
-    { 32, 34 },                     // top left, f
-    { 41, 43 }                      // center, g
-  };
-
-  // Using above arrays it's very easy to "talk" to the segments. Simply use 0-6 for the first 7 segments, add 7 (7-13) for the following ones per strip/two digits
-  byte digits[14][7] = {                    // Lets define 10 numbers (0-9) with 7 segments each, 1 = segment is on, 0 = segment is off
-    {   1,   1,   1,   1,   1,   1,   0 },  // 0 -> Show segments a - f, don't show g (center one)
-    {   0,   1,   1,   0,   0,   0,   0 },  // 1 -> Show segments b + c (top and bottom right), nothing else
-    {   1,   1,   0,   1,   1,   0,   1 },  // 2 -> and so on...
-    {   1,   1,   1,   1,   0,   0,   1 },  // 3
-    {   0,   1,   1,   0,   0,   1,   1 },  // 4
-    {   1,   0,   1,   1,   0,   1,   1 },  // 5
-    {   1,   0,   1,   1,   1,   1,   1 },  // 6
-    {   1,   1,   1,   0,   0,   0,   0 },  // 7
-    {   1,   1,   1,   1,   1,   1,   1 },  // 8
-    {   1,   1,   1,   1,   0,   1,   1 },  // 9
-    {   0,   0,   0,   1,   1,   1,   1 },  // t -> some letters from here on (index 10-13, so this won't interfere with using digits 0-9 by using index 0-9
-    {   0,   0,   0,   0,   1,   0,   1 },  // r
-    {   0,   1,   1,   1,   0,   1,   1 },  // y
-    {   0,   1,   1,   1,   1,   0,   1 }   // d
-  };
+    #endif // ENABLE_FEATURE_LIGHTING__SEQUENCER
 
 
-  uint16_t lcd_display_show_number = 0;
-  char lcd_display_show_string[5] = {0}; //temporary solution, will be removed once newer commend to save effect runtime struct works
-  byte displayMode = 1;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
-  byte lastSecond = 0;
-  byte startColor = 0;                             // "index" for the palette color used for drawing
-  byte colorOffset = 32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
+    /*****************************************************************************************************************************************************************************
+    ********************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Animation Effect:   Ambilight   ***************************************************************************************************************************************************************************
+    **  @note:     **************************************************************************************************************************************************************************
+    ************************************************************************************************************************************************************************************
+    **********************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    // Move completely into its own class, with its own tasker
+    /**************
+     * Ambilight is light patterns around screens or pictures
+     * PRESETS - patterns
+     * INPUT_STREAM - set leds directly through mqtt (wallpaper) or serial lighting
+    **************/ 
+    enum AMBILIGHT_MODES_IDS{
+      AMBILIGHT_PRESETS_ID=0,
+      AMBILIGHT_SIDES_ID,
+      AMBILIGHT_INPUT_STREAM_ID,
+      AMBILIGHT_LENGTH_ID
+    };
+    int8_t GetAmbilightModeIDbyName(const char* c);
+    const char* GetAmbilightModeName(char* buffer);
+
+    /*******AMBILIGHT*********************************************************************************************/
+
+    void SubTask_Ambilight_Main();
+    void Ambilight_Sides();
+    void Ambilight_Presets();
+    void Ambilight_InputStream();
+    void init_Ambilight();
+    #define AMBILIGHT_SCREENS_CONNECTED 1
+
+    /**
+     * 
+     * Long term, multiple screens will be used as their own subclass, containing all the info about that screen instead of struct arrays
+     * */
+    enum AMBILIGHT_SCREEN_INDEX{SCREEN_CENTRE=0,SCREEN_LEFT=1,SCREEN_RIGHT=2};
+
+    struct AMBILIGHT_SCREEN_SETTINGS{
+      uint8_t ambilight_mode = AMBILIGHT_SIDES_ID;
+      uint32_t tSavedUpdate = millis();
+      uint32_t ratemsSavedUpdate = 1000;
+      uint8_t fUpdate = false;
+      struct SCREENS{
+        struct EDGE{
+          RgbcctColor colour;
+          int8_t blend_between_sides_gradient_percentage = -1; // -1 is unset/none/solid, 0% is bottom/left, 100% is top/right
+          uint8_t size = 5;
+        };
+        struct EDGE top;
+        struct EDGE bottom;
+        struct EDGE left;
+        struct EDGE right;
+        struct FIRST_PIXEL{
+          //uint8_t bottom_right_clockwise = store as packed bit? 
+        }start_pixel;
+      }screens[AMBILIGHT_SCREENS_CONNECTED]; //0,1,2 where 0 is centre and only screen
+
+    }ambilightsettings;
+
+    #endif
+
+    /*****************************************************************************************************************************************************************************
+    ********************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Palette related   ***************************************************************************************************************************************************************************
+    **  @note:     **************************************************************************************************************************************************************************
+    ************************************************************************************************************************************************************************************
+    **********************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromUnloadedPalette2(
+      uint16_t palette_id,
+      uint16_t desired_index_from_palette = 0,
+      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      uint8_t* encoded_index = nullptr
+    );
+
+    CRGB ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
+    
+
+    const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
+    int16_t GetPaletteIDbyName(char* buffer);
+    
+    /*****************************************************************************************************************************************************************************
+    ********************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Helper functions   ***************************************************************************************************************************************************************************
+    **  @note:     **************************************************************************************************************************************************************************
+    ************************************************************************************************************************************************************************************
+    **********************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
 
 
-  void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
-  void LCDDisplay_showDigit(byte digit, byte color, byte pos);
-  void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
-  void LCDDisplay_showDots(byte dots, byte color);
+    // Temporary helper functions to be cleaned up and converted
+    uint32_t crgb_to_col(CRGB fastled);
+    CRGB col_to_crgb(uint32_t);
+    uint8_t get_random_wheel_index(uint8_t pos);
+    uint16_t triwave16(uint16_t in);
+    uint16_t mode_palette();
+    void colorFromUint32(uint32_t in, bool secondary = false);
+    void colorFromUint24(uint32_t in, bool secondary = false);
+    void relativeChangeWhite(int8_t amount, byte lowerBoundary = 0);
+    void colorHStoRGB(uint16_t hue, byte sat, byte* rgb); //hue, sat to rgb
+    void colorCTtoRGB(uint16_t mired, byte* rgb); //white spectrum to rgb
+    void colorFromDecOrHexString(byte* rgb, char* in);
+    void colorRGBtoRGBW(byte* rgb); //rgb to rgbw (http://codewelt.com/rgbw). (RGBW_MODE_LEGACY)
 
-  void EffectAnim__7SegmentDisplay__ClockTime_01();
-  void EffectAnim__7SegmentDisplay__ClockTime_02();
-  void EffectAnim__7SegmentDisplay__ManualNumber_01();
-  void EffectAnim__7SegmentDisplay__ManualString_01();
-  void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
-  void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
 
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+
+    /*****************************************************************************************************************************************************************************
+    ********************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** To sort   ***************************************************************************************************************************************************************************
+    **  @note:     **************************************************************************************************************************************************************************
+    ************************************************************************************************************************************************************************************
+    **********************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+
+
 
   void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
   void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
   
-  void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
 
-  void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
-  int8_t GetFlasherFunctionIDbyName(const char* f);
-  const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
-  const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found = false);
-
-  void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
-
-  void CommandSet_HardwareColourOrderTypeByStr(const char* value, uint8_t segment_index = 0);
-  void CommandSet_ColourTypeByStr(const char* value, uint8_t segment_index = 0);
-  // const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
-  // const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
-
-  void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
-  void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
- 
-  void CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index = 0);
-  void CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index = 0);
-  
-  
-  void CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index = 0, uint8_t segment_index = 0);
-  void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
-  void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
-  void CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subtype, uint8_t colour_index = 0, uint8_t segment_index = 0);
-  void CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
-  void CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
-  void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
-
-
-  uint8_t GetNumberOfColoursInPalette(uint16_t palette_id);
-
-  /***************
-   * END
-   * 
-   * Command List 
-   * 
-   * *********************/
 
   void setValuesFromMainSeg();
   void resetTimebase();
@@ -2296,15 +2270,7 @@ class mAnimatorLight :
   void colorUpdated(int callMode);
   void handleTransitions();
 
-  void colorFromUint32(uint32_t in, bool secondary = false);
-  void colorFromUint24(uint32_t in, bool secondary = false);
-  void relativeChangeWhite(int8_t amount, byte lowerBoundary = 0);
-  void colorHStoRGB(uint16_t hue, byte sat, byte* rgb); //hue, sat to rgb
-  void colorCTtoRGB(uint16_t mired, byte* rgb); //white spectrum to rgb
-
-  void colorFromDecOrHexString(byte* rgb, char* in);
-  void colorRGBtoRGBW(byte* rgb); //rgb to rgbw (http://codewelt.com/rgbw). (RGBW_MODE_LEGACY)
-
+  
   float minf2(float v, float w);
   float maxf2(float v, float w);
 
@@ -2326,24 +2292,6 @@ class mAnimatorLight :
   #include "6_Lights/03_Animator/SubHeader_Segments.h" // Include the segment header file section, doing this to keep it easier to see
 
 
-  RgbcctColor 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-  IRAM_ATTR 
-  #endif 
-  GetColourFromUnloadedPalette2(
-    uint16_t palette_id,
-    uint16_t desired_index_from_palette = 0,
-    bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    bool     flag_crgb_exact_colour = false,
-    uint8_t* encoded_index = nullptr
-  );
-
-  CRGB ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
-  
-
-  const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
-  int16_t GetPaletteIDbyName(char* buffer);
 
 
   RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
@@ -2655,158 +2603,11 @@ class mAnimatorLight :
 
     void estimateCurrentAndLimitBri(void);
 
-    #ifdef ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // uint16_t udpRgbPort = 19446; // Hyperion port
-
-    #define WLED_GLOBAL
-    #define _INIT(x) = x
-    # define _INIT_N(x)
-
-
-    // //if true, a segment per bus will be created on boot and LED settings save
-    // //if false, only one segment spanning the total LEDs is created,
-    // //but not on LED settings save if there is more than one segment currently
-    // bool autoSegments    _INIT(false);
-    // bool correctWB       _INIT(false); // CCT color correction of RGB color
-    // bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
-    // bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
-    // bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
-    // float gammaCorrectVal _INIT(2.8f); // gamma correction value
-
-    // byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
-    // byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
-    // byte briS     _INIT(128);                     // default brightness
-
-    // byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
-    // byte nightlightDelayMins _INIT(60);
-    // byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
-    // bool fadeTransition      _INIT(true);   // enable crossfading color transition
-    // uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
-
-    Toki toki _INIT(Toki());
-
-
-    // // nightlight
-    // bool nightlightActive _INIT(false);
-    // bool nightlightActiveOld _INIT(false);
-    // uint32_t nightlightDelayMs _INIT(10);
-    // byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
-    // unsigned long nightlightStartTime;
-    // byte briNlT _INIT(0);                     // current nightlight brightness
-    // byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
-
-    // // udp interface objects
+    Toki toki = Toki();
     WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
-    // WiFiUDP ntpUdp;
-    // // ESPAsyncE131 e131 _INIT_N(((handleE131Packet)));
-    // // ESPAsyncE131 ddp  _INIT_N(((handleE131Packet)));
-    bool e131NewData _INIT(false);
-
-    // uint16_t udpPort    _INIT(21324); // WLED notifier default port
-    // uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
-
-    // bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
-    // bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
-    // bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
-    // bool notifyMacro  _INIT(false);                       // send notification for macro
-    // bool notifyHue    _INIT(true);                        // send notification if Hue light changes
-
-    // //Notifier callMode
-    // #define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
-    // #define CALL_MODE_DIRECT_CHANGE  1
-    // #define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
-    // #define CALL_MODE_NOTIFICATION   3
-    // #define CALL_MODE_NIGHTLIGHT     4
-    // #define CALL_MODE_NO_NOTIFY      5
-    // #define CALL_MODE_FX_CHANGED     6     //no longer used
-    // #define CALL_MODE_HUE            7
-    // #define CALL_MODE_PRESET_CYCLE   8
-    // #define CALL_MODE_BLYNK          9     //no longer used
-    // #define CALL_MODE_ALEXA         10
-    // #define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
-    // #define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
-
-    // // notifications
-    // bool notifyDirectDefault _INIT(notifyDirect);
-    // bool receiveNotifications _INIT(true);
-    // unsigned long notificationSentTime _INIT(0);
-    // byte notificationSentCallMode _INIT(CALL_MODE_INIT);
-    // uint8_t notificationCount _INIT(0);
-
-
-    // uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
-    // int arlsOffset _INIT(0);                              // realtime LED offset
-    // bool receiveDirect _INIT(true);                       // receive UDP realtime
-    // bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
-    // bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
-
-
-    // // LED CONFIG
-    // bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
-    // byte bootPreset   _INIT(0);                   // save preset to load after power-up
-
-    // byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
-
-
-    // uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
-    // uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
-    // bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
-    // bool receiveNotificationColor      _INIT(true);       // apply color
-    // bool receiveNotificationEffects    _INIT(true);       // apply effects setup
-    // bool receiveSegmentOptions         _INIT(false);      // apply segment options
-    // bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
-    // // bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
-    // // bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
-    // // bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
-    // // bool notifyMacro  _INIT(false);                       // send notification for macro
-    // // bool notifyHue    _INIT(true);                        // send notification if Hue light changes
-    // uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
-
-    // // network
-    // bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
-
-
-    // // brightness
-    // unsigned long lastOnTime _INIT(0);
-    // bool offMode             _INIT(!turnOnAtBoot);
-    // byte bri                 _INIT(briS);          // global brightness (set)
-    // byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
-    // byte briT                _INIT(0);             // global brightness during transition
-    // byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
-    // byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
-
-
-
-
-    // // transitions
-    // bool          transitionActive        _INIT(false);
-    // uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
-    // uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
-    // unsigned long transitionStartTime;
-    // float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
-    // bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
-    // uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
-
-        
-    // // User Interface CONFIG
-    // #ifndef SERVERNAME
-    // char serverDescription[33] _INIT("WLED");  // Name of module - use default
-    // #else
-    // char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
-    // #endif
-    // bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
-    // bool simplifiedUI          _INIT(false);   // enable simplified UI
-    // byte cacheInvalidate       _INIT(0);   
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-
-    // presets
-    byte currentPreset _INIT(0);
-
-    byte errorFlag _INIT(0);
-
-
-    // bool stateChanged _INIT(false);
+    bool e131NewData = false;
+    byte currentPreset = 0;
+    byte errorFlag = 0;
 
     class NeoGammaWLEDMethod {
       public:
@@ -2820,79 +2621,26 @@ class mAnimatorLight :
     #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
     #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
 
-
-      // //colors.cpp
-      // // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
-      // class NeoGammaWLEDMethod {
-      //   public:
-      //     static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
-      //     static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
-      //     static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
-      //     static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
-      //   private:
-      //     const uint8_t gammaT[256] = {
-      //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-      //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-      //         1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-      //         2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-      //         5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-      //       10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-      //       17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-      //       25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-      //       37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-      //       51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-      //       69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-      //       90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-      //       115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-      //       144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-      //       177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-      //       215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-
-
-      // };
-      // #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
-      // #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
-
-    // //gamma 2.8 lookup table used for color correction
-    // uint8_t NeoGammaWLEDMethod::gammaT[256] = {
-    //     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    //     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-    //     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-    //     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-    //     5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-    //    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-    //    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-    //    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-    //    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-    //    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-    //    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-    //    90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-    //   115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-    //   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-    //   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-    //   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-        
-//wled_math.cpp
-#ifndef WLED_USE_REAL_MATH
-  // template <typename T> T atan_t(T x);
-  static float cos_t(float phi);
-  static float sin_t(float x);
-  static float tan_t(float x);
-  static float acos_t(float x);
-  static float asin_t(float x);
-  static float floor_t(float x);
-  static float fmod_t(float num, float denom);
-#else
-  #include <math.h>
-  #define sin_t sin
-  #define cos_t cos
-  #define tan_t tan
-  #define asin_t asin
-  #define acos_t acos
-  #define atan_t atan
-  #define fmod_t fmod
-  #define floor_t floor
-#endif
+    #ifndef WLED_USE_REAL_MATH
+      // template <typename T> T atan_t(T x);
+      static float cos_t(float phi);
+      static float sin_t(float x);
+      static float tan_t(float x);
+      static float acos_t(float x);
+      static float asin_t(float x);
+      static float floor_t(float x);
+      static float fmod_t(float num, float denom);
+    #else
+      #include <math.h>
+      #define sin_t sin
+      #define cos_t cos
+      #define tan_t tan
+      #define asin_t asin
+      #define acos_t acos
+      #define atan_t atan
+      #define fmod_t fmod
+      #define floor_t floor
+    #endif
 
     #include <map>
     #include <IPAddress.h>
@@ -2923,28 +2671,9 @@ class mAnimatorLight :
     typedef std::map<uint8_t, NodeStruct> NodesMap;
 
 
-
-
-
-    #endif // ENABLE_DEVFEATURE_LIGHT__HYPERION
-
-
     #define ARDUINOJSON_DECODE_UNICODE 0
     #include "3_Network/21_WebServer/AsyncJson-v6.h"
     #include "3_Network/21_WebServer/ArduinoJson-v6.h"
-
-
-    /**
-     * @brief Include style01 for webui based on WLED 
-     * 
-     */
-    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-    // #include "6_Lights/03_Animator/WebUI_01/WebUI.h"
-
-
-
-#endif
-
 
 void serializeNetworks(JsonObject root);
     
@@ -2966,11 +2695,6 @@ bool deserializeConfig(JsonObject doc, bool fromFS = false);
 
 
 void getStringFromJson(char* dest, const char* src, size_t len);
-
-
-// #define MDNS_NAME DEVICENAME_CTR ".local"
-// char cmDNS[] _INIT(MDNS_NAME);         pCONT_set->Settings.system_name.device
-
 // Temp buffer
 char* obuf;
 uint16_t olen = 0;
@@ -3228,7 +2952,7 @@ bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
 float gammaCorrectVal _INIT(2.8f); // gamma correction value
 
 byte col[4]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
-byte colSec[4] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
+byte colSec[4] = UNPACK ({ 0, 0, 0, 0 });      // current RGB(W) secondary color
 // byte briS     _INIT(128);                     // default brightness
 
 byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
@@ -3634,6 +3358,17 @@ bool useMainSegmentOnly _INIT(false);
       struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
       #endif
     #endif // USE_MODULE_NETWORK_MQTT
+
+    
+
+    /************************************************************************************************
+     * SECTION: Development Code
+     ************************************************************************************************/
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__DEVELOPING_CODE
+    void TestCode_AddBus1();
+    void TestCode_Add16ParallelBus1();
+    #endif // ENABLE_DEVFEATURE_LIGHTING__DEVELOPING_CODE
 
 };
 

@@ -394,7 +394,7 @@ void mAnimatorLight::BusConfig_ManualLoad_16Pin()
 
 
 
-
+#ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION_SHORTCUT
 void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject obj)
 {
 
@@ -493,10 +493,10 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
 
     CommandSet_Flasher_FunctionID(data[0], segment_index);
 
-    SEGMENT_I(segment_index).params_user.val0 = data[1];
-    SEGMENT_I(segment_index).params_user.val1 = data[2];
-    SEGMENT_I(segment_index).params_user.val2 = data[3];
-    SEGMENT_I(segment_index).params_user.val3 = data[4];
+    SEGMENT_I(segment_index).params_user[0] = data[1];
+    SEGMENT_I(segment_index).params_user[1] = data[2];
+    SEGMENT_I(segment_index).params_user[2] = data[3];
+    SEGMENT_I(segment_index).params_user[3] = data[4];
   }
   
   if(jtok1 = obj["Colour"])
@@ -557,6 +557,7 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
     }
 
 }
+#endif // ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION_SHORTCUT
 
 
 

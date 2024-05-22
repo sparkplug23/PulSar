@@ -135,7 +135,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
   
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
-  pCONT_set->runtime.boot_status.rules_template_parse_success = 1;
+  // pCONT_set->runtime.boot_status.rules_template_parse_success = 1;
   #endif //USE_RULES_TEMPLATE
 
   
@@ -830,24 +830,6 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 
 }
 
-
-// int8_t mAnimatorLight::GetAnimationModeIDbyName(const char* c){
-
-//   if(*c=='\0'){
-//     return -1;
-//   }
-//   #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-//   if(strcmp_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)==0){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
-//   #endif
-//   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-//   if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_REALTIME_ADALIGHT; }
-//   #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-//   if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE__EFFECTS; }
-//   // #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
-//   // if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }
-//   // #endif
-//   return -1;
-// }
 
 
 void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)

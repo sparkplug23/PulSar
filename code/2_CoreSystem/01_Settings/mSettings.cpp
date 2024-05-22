@@ -174,7 +174,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
       // Save stable start
       // Dont use a bootloop time, instead have other "stable qualifiers", probably from a function I can call that can be diffferent by device ie (if mqtt, then require it..... if network, then require it...... )
-        // if (BOOT_LOOP_TIME == pCONT_time-> uptime.seconds_nonreset) {
+        // if (BOOT_LOOP_TIME == pCONT_time-> uptime_seconds_nonreset) {
 
           #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
           RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)

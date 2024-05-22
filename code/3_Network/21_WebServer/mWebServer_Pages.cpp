@@ -62,7 +62,7 @@
 //       switch(row){
 //         case 0:
 //           JBI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
-//           JBI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+//           JBI->Add("fc", pCONT_time->uptime_seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
 //         break;
 //         case 1:{        
 //           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
@@ -123,7 +123,7 @@
 //       switch(row){
 //         case 0:
 //           JBI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
-//           JBI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+//           JBI->Add("fc", pCONT_time->uptime_seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
 //         break;
 //         case 1:{        
 //           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();

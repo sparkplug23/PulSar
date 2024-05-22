@@ -220,6 +220,25 @@ String mTime::GetTime(uint8_t time_type)
   
 }
 
+
+/**
+ * @brief Testing: New way of getting the TimeOfDay (TOD) in a string format
+ * 
+ * @param time_type 
+ * @return String 
+ */
+String mTime::GetTimeStr(uint32_t time, bool include_day_of_week)
+{
+  // HH:MM:SS or WWTHH:MM:SS
+        
+  char dt[20];
+  datetime_t tmpTime;
+  BreakTime(time, tmpTime);
+  snprintf_P(dt, sizeof(dt), PSTR("%02d:%02d:%02d"), tmpTime.hour, tmpTime.minute, tmpTime.second);
+  return String(dt);  // 11:08:02
+
+}
+
 /*
  * timestamps in https://en.wikipedia.org/wiki/ISO_8601 format
  *
@@ -1142,7 +1161,8 @@ time_short_t mTime::GetTimeShortNow(){
 
 }
 
-uint32_t mTime::GetTimeShortNowU32(){
+uint32_t mTime::GetTimeShortNowU32()
+{
 
   // time_short_t now;
 

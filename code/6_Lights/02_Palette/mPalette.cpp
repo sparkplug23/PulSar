@@ -700,11 +700,11 @@ void mPalette::addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t 
 
   if (id_adj < custom_palettes.size()) {
     custom_palettes[id_adj] = palette_tmp;
-    ALOG_INF(PSTR("addCustomPalette %d"), id_adj);
+    ALOG_DBM(PSTR("addCustomPalette %d"), id_adj);
     
     // #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-    ALOG_INF(PSTR("addCustomPalette bytes added[3] %d"), custom_palettes[id_adj].data.size());
-    for(int i=0;i<length;i++){ Serial.print( custom_palettes[id_adj].data[i]); Serial.print( "," ); } Serial.println();
+    ALOG_DBM(PSTR("addCustomPalette bytes added[3] %d"), custom_palettes[id_adj].data.size());
+    // for(int i=0;i<length;i++){ Serial.print( custom_palettes[id_adj].data[i]); Serial.print( "," ); } Serial.println();
     // #endif
 
   } else {

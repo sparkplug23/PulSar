@@ -200,7 +200,7 @@ void mEnergyPZEM004T::EveryLoop()
       rt.device_current = 0;
       request_reading.millis = millis();
       request_reading.run = false; // make sure to clear this too
-      ALOG_INF(PSTR(D_LOG_PZEM "All sensors read %d(%d)"), rt.rate_measure_ms, millis());
+      ALOG_DBG(PSTR(D_LOG_PZEM "All sensors read %d(%d)"), rt.rate_measure_ms, millis());
       mqtthandler_state_ifchanged.flags.SendNow = true; // Send all data when all sensors have been read
     }
   }
@@ -216,7 +216,7 @@ void mEnergyPZEM004T::EveryLoop()
   {
     uint8_t address = data_v[rt.device_current].address;
     modbus->Send(address, 0x04, 0, 10);   
-    ALOG_INF(PSTR(D_LOG_PZEM "RQST [%d]%d %d"), rt.device_current, address, millis());  
+    ALOG_DBM(PSTR(D_LOG_PZEM "RQST [%d]%d %d"), rt.device_current, address, millis());  
   }
 
 } // END EveryLoop

@@ -17,13 +17,16 @@ void mSettings::SettingsInit(void)
 void mSettings::SettingsDefault(void)
 {
   
+  DEBUG_LINE_HERE;
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
+  DEBUG_LINE_HERE;
   Settings.flag_system.stop_flash_rotate = true;
   runtime.stop_flash_rotate = true;
 
+  DEBUG_LINE_HERE;
   // Erase ALL settings to 0
   memset(&Settings, 0x00, sizeof(SETTINGS));
 
@@ -31,15 +34,18 @@ void mSettings::SettingsDefault(void)
   
   SystemSettings_DefaultBody();
 
+  DEBUG_LINE_HERE;
   // Clear module defaults
   pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
   DEBUG_LINE_HERE;
   pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
       
+  DEBUG_LINE_HERE;
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
   #endif// ENABLE_LOG_LEVEL_INFO
 
+  DEBUG_LINE_HERE;
   // After defaults are loaded everything should immediately be saved
   SettingsSaveAll();
   

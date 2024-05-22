@@ -6,7 +6,8 @@
 const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHES_CTR;
 const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR = D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR;
 
-int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   switch(function){
     case FUNC_INIT:
@@ -17,14 +18,10 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND:
 
-      // AddLog(LOG_LEVEL_INFO,PSTR("swt=%s"),IsSwitchActive(0)?"On":"Off");
+      AddLog(LOG_LEVEL_INFO,PSTR("swt=%s"),IsSwitchActive(0)?"On":"Off");
       // AddLog(LOG_LEVEL_INFO,PSTR("swt=%d"), digitalRead(5) );
-      
-      
-      
 
-
-   
+       
         // Serial.printf("PinUsed[29]\t\tpin=%d\n\r",pCONT_pins->GetPin(29));
         // Serial.printf("PinUsed[30]\t\tpin=%d\n\r",pCONT_pins->GetPin(30));
         // Serial.printf("PinUsed[291]\t\tpin=%d\n\r",pCONT_pins->PinUsed(GPIO_SWT1_NP_ID));
@@ -80,6 +77,8 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
 void mSwitches::SwitchInit(void)
 {
 
+  ALOG_HGL( PSTR("D_LOG_STARTUP" "Switches Init") );
+
   // Init states
   for(uint8_t pin_id=0;pin_id<MAX_SWITCHES;pin_id++){
     switches[pin_id].lastwallswitch = 1;  // Init global to virtual switch state;
@@ -91,9 +90,9 @@ void mSwitches::SwitchInit(void)
   settings.switches_found = 0;    
   for(uint8_t pin_id=GPIO_SWT1_ID;pin_id<GPIO_SWT1_ID+(MAX_SWITCHES*4);pin_id++){
 
-        // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_SWT1_ID+(MAX_SWITCHES*4));
+        Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_SWT1_ID+(MAX_SWITCHES*4));
     if(pCONT_pins->PinUsed(pin_id)){
-        // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
+        Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
       
       switches[settings.switches_found].pin = pCONT_pins->GetPin(pin_id);
 
@@ -118,7 +117,7 @@ void mSwitches::SwitchInit(void)
         (pin_id >= GPIO_SWT1_NP_ID)&&
         (pin_id < GPIO_SWT1_NP_ID+MAX_SWITCHES)
       ){
-        // Serial.printf("GPIO_SWT1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+        Serial.printf("GPIO_SWT1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
         pinMode(switches[settings.switches_found].pin, INPUT);
         switches[settings.switches_found].active_state_value = HIGH;
       }else
@@ -130,7 +129,7 @@ void mSwitches::SwitchInit(void)
         pinMode(switches[settings.switches_found].pin, INPUT);
         switches[settings.switches_found].active_state_value = LOW;
       }else{
-        // Serial.printf("NO MATCH GPIO_SWT1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+        Serial.printf("NO MATCH GPIO_SWT1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
 
       }
 
@@ -186,7 +185,8 @@ void mSwitches::SwitchInit(void)
 
 void mSwitches::SwitchProbe(void)
 {
-  if (pCONT_time->uptime.seconds_nonreset < 4) { return; }                           // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+  
+  if (pCONT_time->uptime_seconds_nonreset < 4) { return; }                           // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
 
   uint8_t state_filter = pCONT_set->Settings.switch_debounce / SWITCH_PROBE_INTERVAL;   // 5, 10, 15
   uint8_t force_high = (pCONT_set->Settings.switch_debounce % 50) &1;                   // 51, 101, 151 etc
@@ -336,7 +336,7 @@ const char* mSettings::SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_
 
 void mSwitches::SwitchHandler(uint8_t mode)
 {
-  if (pCONT_time->uptime.seconds_nonreset < 4) { return; }  
+  if (pCONT_time->uptime_seconds_nonreset < 4) { return; }  
 
   uint8_t state = SWITCH_NOT_PRESSED_ID;
   uint8_t switchflag;

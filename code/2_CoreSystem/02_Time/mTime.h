@@ -237,7 +237,7 @@ class mTime :
     static bool TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime);
     static uint32_t MillisElapsed(uint32_t* tSaved);
     static uint32_t MillisElapsed(uint32_t tSaved);
-
+    String GetTimeStr(uint32_t time, bool include_day_of_week = false);
     
     uint8_t hour(uint32_t time);
     uint8_t minute(uint32_t time);
