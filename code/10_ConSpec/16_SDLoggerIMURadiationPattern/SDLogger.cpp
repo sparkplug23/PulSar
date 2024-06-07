@@ -315,18 +315,18 @@ void mSDLoggerIMURadiationPattern::SubTask_UpdateOLED()
 
 uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+  return JBI->End();
 
 }
 
 
 uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_VOLTAGE, 0);
+  return JBI->End();
     
 }
 
@@ -340,7 +340,7 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_Sensor(uint8_t json_level, b
  * */
 uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
     
     /**
      * on first sequence number, send additional useful info
@@ -443,7 +443,7 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
       JBI->Add("5", adc_values.adc5);
     JBI->Object_End();
 
-  return JsonBuilderI->End();
+  return JBI->End();
     
 }
 

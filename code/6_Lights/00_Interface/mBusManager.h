@@ -54,6 +54,7 @@ DEFINE_PGM_CTR(PM_BUSTYPE__GS8608__CTR) "GS8608";
 DEFINE_PGM_CTR(PM_BUSTYPE__WS2811_400KHZ__CTR) "WS2811_400KHZ";
 DEFINE_PGM_CTR(PM_BUSTYPE__TM1829__CTR) "TM1829";
 DEFINE_PGM_CTR(PM_BUSTYPE__SK6812_RGBW__CTR) "SK6812_RGBW";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2805_RGBWW__CTR) "WS2805_RGBWW";
 DEFINE_PGM_CTR(PM_BUSTYPE__TM1814__CTR) "TM1814";
 DEFINE_PGM_CTR(PM_BUSTYPE__ONOFF__CTR) "ONOFF";
 DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_1CH__CTR) "ANALOG_1CH";
@@ -219,7 +220,7 @@ class Bus {
     }
     virtual bool hasWhite() { return Bus::hasWhite(_type); }
     static  bool hasWhite(uint8_t type) {
-      if ((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_SK6812_RGBW || type == BUSTYPE_TM1814) return true; // digital types with white channel
+      if ((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_SK6812_RGBW || type == BUSTYPE_WS2805_RGBWW || type == BUSTYPE_TM1814) return true; // digital types with white channel
       if (type > BUSTYPE_ONOFF && type <= BUSTYPE_ANALOG_5CH && type != BUSTYPE_ANALOG_3CH) return true; // analog types with white channel
       if (type == BUSTYPE_NET_DDP_RGBW) return true; // network types with white channel
       return false;

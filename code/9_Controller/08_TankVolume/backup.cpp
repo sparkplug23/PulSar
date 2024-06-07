@@ -418,7 +418,7 @@
 //   //   // break;
 
 //   //   case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
-//   //     // JsonBuilderI->Add("/draw/palette_selector.json",-500);
+//   //     // JBI->Add("/draw/palette_selector.json",-500);
 //   //   break;
 //   //   case FUNC_WEB_ADD_HANDLER:
 //   //     WebPage_Root_AddHandlers();
@@ -457,43 +457,43 @@
 
 // //   char buffer[50];
   
-// //   JsonBuilderI->Array_Start("oil_table");// Class name
+// //   JBI->Array_Start("oil_table");// Class name
 // //   for(int row=0;row<8;row++){
-// //     JsonBuilderI->Object_Start();
-// //       JsonBuilderI->Add("id",row);
+// //     JBI->Object_Start();
+// //       JBI->Add("id",row);
 // //       switch(row){
 // //         default:
-// //         case 0: JsonBuilderI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
+// //         case 0: JBI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
 // //         // case 1:
-// //         //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
+// //         //   JBI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
 // //         //     animation.cycle_time__rate_ms/1000, 
 // //         //     animation.time_ms.val/1000
 // //         //   );
 // //         // break;
 // //         // case 2: 
-// //         //   JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
+// //         //   JBI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
 // //         //     animation.transition.pixels_to_update_as_percentage.val, 
 // //         //     GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val)
 // //         //   );
 // //         // break;
-// //         // case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
-// //         // case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
-// //         // case 5: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
-// //         // case 6: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
+// //         // case 3: JBI->Add("ih",GetTransitionOrderName(buffer)); break;
+// //         // case 4: JBI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
+// //         // case 5: JBI->Add("ih",GetFlasherFunctionName(buffer)); break;
+// //         // case 6: JBI->Add_FV("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
 // //         // case 7:
 // //         //   if(!animation.auto_time_off_secs){ //off
-// //         //     JsonBuilderI->Add("ih","Unset");
+// //         //     JBI->Add("ih","Unset");
 // //         //   }else{
-// //         //     JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""),
+// //         //     JBI->Add_FV("ih",PSTR("\"%d (%s)\""),
 // //         //       animation.auto_time_off_secs,"secs"
 // //         //     );
 // //         //   }
 // //         // break;
 // //       } //switch
     
-// //     JsonBuilderI->Object_End();
+// //     JBI->Object_End();
 // //   }
-// //   JsonBuilderI->Array_End();
+// //   JBI->Array_End();
   
 
 // //   // char colour_button[8];
@@ -503,19 +503,19 @@
 // //   // #endif
 // //   // ANIMATION_MODE_NONE_ID};
   
-// //   // JsonBuilderI->Array_Start("animod");// Class name
+// //   // JBI->Array_Start("animod");// Class name
 // //   // for(int row=0;row<sizeof(button_ids);row++){
 // //   //   if(button_ids[row] == animation.mode_id){
 // //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON_HIGHLIGHT); //selected
 // //   //   }else{
 // //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
 // //   //   }        
-// //   //   JsonBuilderI->Object_Start();
-// //   //     JsonBuilderI->Add("id",row);
-// //   //     JsonBuilderI->Add("bc",colour_button);
-// //   //   JsonBuilderI->Object_End();
+// //   //   JBI->Object_Start();
+// //   //     JBI->Add("id",row);
+// //   //     JBI->Add("bc",colour_button);
+// //   //   JBI->Object_End();
 // //   // }  
-// //   // JsonBuilderI->Array_End();
+// //   // JBI->Array_End();
 
 // // }
 
@@ -708,20 +708,20 @@
 // // Send all litres calculations from all methods
 // uint8_t mTankVolumeUltrasonic::ConstructJSON_Litres(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
 //   if(json_method >= JSON_LEVEL_SHORT){
 
-//     JsonBuilderI->Add("isvalid", oiltank.smooth_1hr.isvalid);
-//     JsonBuilderI->Add("litres_in_tank", oiltank.smooth_1hr.final.litres_in_tank);
-//     JsonBuilderI->Add("litres_of_usable_oil", oiltank.smooth_1hr.final.litres_of_usable_oil);
-//     JsonBuilderI->Add("litres_of_usable_oil_rounded", mSupport::roundfloat(oiltank.smooth_1hr.final.litres_of_usable_oil,1));
-//     JsonBuilderI->Add("height_cm", (int)oiltank.smooth_1hr.final.distance_from_bottom_cm);
+//     JBI->Add("isvalid", oiltank.smooth_1hr.isvalid);
+//     JBI->Add("litres_in_tank", oiltank.smooth_1hr.final.litres_in_tank);
+//     JBI->Add("litres_of_usable_oil", oiltank.smooth_1hr.final.litres_of_usable_oil);
+//     JBI->Add("litres_of_usable_oil_rounded", mSupport::roundfloat(oiltank.smooth_1hr.final.litres_of_usable_oil,1));
+//     JBI->Add("height_cm", (int)oiltank.smooth_1hr.final.distance_from_bottom_cm);
 
-//     JsonBuilderI->Add("litres_per_day", history.litres_per_day);
-//     // JsonBuilderI->Add("days_remaining", floor(history.days_remaining));
-//     // JsonBuilderI->Add("weekly_usage",   floor(history.overview.litres_change));
-//     // JsonBuilderI->Add("daily_usage",    floor(history.overview.litres_change));
+//     JBI->Add("litres_per_day", history.litres_per_day);
+//     // JBI->Add("days_remaining", floor(history.days_remaining));
+//     // JBI->Add("weekly_usage",   floor(history.overview.litres_change));
+//     // JBI->Add("daily_usage",    floor(history.overview.litres_change));
 
 //   }
 
@@ -729,13 +729,13 @@
 //   // if(json_method > JSON_LEVEL_SHORT){
 
 //   JBI->Object_Start("instant");
-//     JsonBuilderI->Add("isvalid", mSupport::roundfloat(oiltank.instant.isvalid,1));
-//     JsonBuilderI->Add("height_cm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_cm,1));
-//     JsonBuilderI->Add("litres_usable", mSupport::roundfloat(oiltank.instant.final.litres_of_usable_oil,1));
+//     JBI->Add("isvalid", mSupport::roundfloat(oiltank.instant.isvalid,1));
+//     JBI->Add("height_cm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_cm,1));
+//     JBI->Add("litres_usable", mSupport::roundfloat(oiltank.instant.final.litres_of_usable_oil,1));
 //     if(json_method <= JSON_LEVEL_DETAILED){
-//       JsonBuilderI->Add("height_mm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_mm,1));
-//       JsonBuilderI->Add("litres_total", mSupport::roundfloat(oiltank.instant.final.litres_in_tank,1));
-//       JsonBuilderI->Add("last_changed", abs(millis()-oiltank.instant.final.tLastChanged));
+//       JBI->Add("height_mm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_mm,1));
+//       JBI->Add("litres_total", mSupport::roundfloat(oiltank.instant.final.litres_in_tank,1));
+//       JBI->Add("last_changed", abs(millis()-oiltank.instant.final.tLastChanged));
 //     }
 //   JBI->Object_End();
 
@@ -764,7 +764,7 @@
 //   // serializeJson(doc,data_buffer.payload.ctr);
 
   
-//   return JsonBuilderI->End();
+//   return JBI->End();
 // }
 
 
@@ -780,11 +780,11 @@
 //     // data_buffer.payload.len = measureJson(root)+1;
 //     // serializeJson(doc,data_buffer.payload.ctr);
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
-//     JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+//     JBI->Add(D_JSON_CHANNELCOUNT"232",         0);
   
-//   return JsonBuilderI->End();
+//   return JBI->End();
 
 // }
 
@@ -820,11 +820,11 @@
 // //     data_buffer.payload.len = measureJson(root)+1;
 // //     serializeJson(doc,data_buffer.payload.ctr);
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
-//     JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+//     JBI->Add(D_JSON_CHANNELCOUNT"232",         0);
   
-//   return JsonBuilderI->End();
+//   return JBI->End();
     
 // }
 

@@ -346,7 +346,7 @@ void mSolarLunar::parse_JSONCommand(JsonParserObject obj)
 
 uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_method, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
 	if(solar_position.isvalid)
 	{
@@ -371,7 +371,7 @@ uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_method, bool json_appendi
 		 */
 	}
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -379,9 +379,9 @@ uint8_t mSolarLunar::ConstructJSON_Settings(uint8_t json_method, bool json_appen
 
   char buffer[20];
 
-  JsonBuilderI->Start();
+  JBI->Start();
 	JBI->Add("mSolarLunar",0);
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

@@ -395,7 +395,7 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_appe
   JBI->Start();
   for( int ii=0; ii < data_v.size(); ii++)
   {
-    JsonBuilderI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
+    JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
       JBI->Add(D_JSON_ADDRESS,      data_v[ii].address );
       JBI->Add(D_JSON_VOLTAGE,      data_v[ii].voltage);
       JBI->Add(D_JSON_CURRENT,      data_v[ii].current);

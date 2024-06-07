@@ -110,18 +110,18 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appendin
         JBI->Add("Minimum", state.threshold_minimum_temperature);
       JBI->Object_End();
       JBI->Add("TriggerTemperature", state.temperature_current);
-      JsonBuilderI->Object_Start("InternalSensors");
+      JBI->Object_Start("InternalSensors");
         for(int sensor_id=0;sensor_id<3;sensor_id++)
         { 
           if(pCONT_db18->sensor_vector.size())
           {
-            // JsonBuilderI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
-            JsonBuilderI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
-              JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
-            JsonBuilderI->Object_End();  
+            // JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
+            JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
+              JBI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
+            JBI->Object_End();  
           }
         }
-      JsonBuilderI->Object_End();  
+      JBI->Object_End();  
     JBI->Object_End();
     
     JBI->Object_Start("Fan"); // Based on relay controls

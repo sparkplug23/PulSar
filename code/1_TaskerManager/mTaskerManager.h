@@ -302,9 +302,9 @@ enum TaskerID
   #ifdef USE_MODULE_CORE_UPDATES
     EM_MODULE_CORE_UPDATES_ID,
   #endif 
-  #ifdef USE_MODULE_CORE_SERIAL_UART
-    EM_MODULE_CORE_SERIAL_UART_ID,
-  #endif
+  // #ifdef USE_MODULE_CORE_SERIAL_UART
+  //   EM_MODULE_CORE_SERIAL_UART_ID,
+  // #endif
   #ifdef USE_MODULE_CORE__SERIAL //merge into above
     CORE__SERIAL,
   #endif 
@@ -399,6 +399,9 @@ enum TaskerID
     EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID,
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
     EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
@@ -628,6 +631,9 @@ enum TaskerID
   #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
     EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
+    CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -669,10 +675,10 @@ enum TaskerID
   #include "2_CoreSystem/14_Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
 #endif
-#ifdef USE_MODULE_CORE_SERIAL_UART
-  #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
-  #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
-#endif
+// #ifdef USE_MODULE_CORE_SERIAL_UART
+//   #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
+//   #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
+// #endif
 #ifdef USE_MODULE_CORE__SERIAL
   #include "2_CoreSystem/15_SerialUART/mSerial.h"
   #define   tkr_Serial                              static_cast<mSerial*>(pCONT->pModule[TaskerID::CORE__SERIAL])
@@ -796,7 +802,11 @@ enum TaskerID
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
-  #define pCONT_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
+#endif
+#ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
+  #include "4_Drivers/82_MAVLink_Decoder2/mMAVLink_Decoder.h"
+  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
   #include "4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
@@ -1097,6 +1107,10 @@ enum TaskerID
 #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
   #include "9_Controller/SerialCalibrationMeasurmentLogger/mSerialCalibrationMeasurmentLogger.h"
   #define pCONT_serial_calibration_log                  static_cast<mSerialCalibrationMeasurmentLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
+  #include "10_ConSpec/19_MAVLinkFlyingLEDS/mMAVLinkFlyingLEDS.h"
+  #define tkr_mavlink_leds                            static_cast<mMavlinkFlyingLEDS*>(pCONT->pModule[TaskerID::CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"

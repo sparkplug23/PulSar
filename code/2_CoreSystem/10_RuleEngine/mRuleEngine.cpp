@@ -979,8 +979,8 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
 uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 
 
-  JsonBuilderI->Start();
-    // JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
+  JBI->Start();
+    // JBI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
 
     char buffer[200];
 
@@ -998,15 +998,15 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
       
       // JBI->Object_End();
 
-      JsonBuilderI->Level_Start_P(name);//DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+      JBI->Level_Start_P(name);//DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
 
         JBI->Add("Conf", rules[id].flag_configured);
         JBI->Add("Enab", rules[id].flag_enabled);
-        JsonBuilderI->Level_Start_P("Source");
-            JsonBuilderI->Add("module_id", rules[id].trigger.module_id);
-            JsonBuilderI->Add("function_id", rules[id].trigger.function_id);
-            JsonBuilderI->Add("device_id", rules[id].trigger.device_id);
-            JsonBuilderI->Add("json", rules[id].trigger.json_commands_dlist_id);
+        JBI->Level_Start_P("Source");
+            JBI->Add("module_id", rules[id].trigger.module_id);
+            JBI->Add("function_id", rules[id].trigger.function_id);
+            JBI->Add("device_id", rules[id].trigger.device_id);
+            JBI->Add("json", rules[id].trigger.json_commands_dlist_id);
             JBI->Array_AddArray("params", rules[id].trigger.value.data, 5);
             JBI->Add("len", rules[id].trigger.value.length);
 
@@ -1014,13 +1014,13 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
             // if(rules[id].trigger.p_json_commands!=nullptr){
             //     JBI->Add("json", rules[id].trigger.p_json_commands);
             // }
-        JsonBuilderI->Object_End(); 
+        JBI->Object_End(); 
 
-        JsonBuilderI->Level_Start_P("Destination");
-            JsonBuilderI->Add("module_id", rules[id].command.module_id);
-            JsonBuilderI->Add("function_id", rules[id].command.function_id);
-            JsonBuilderI->Add("device_id", rules[id].command.device_id);
-            JsonBuilderI->Add("json", rules[id].command.json_commands_dlist_id);
+        JBI->Level_Start_P("Destination");
+            JBI->Add("module_id", rules[id].command.module_id);
+            JBI->Add("function_id", rules[id].command.function_id);
+            JBI->Add("device_id", rules[id].command.device_id);
+            JBI->Add("json", rules[id].command.json_commands_dlist_id);
             JBI->Array_AddArray("params", rules[id].command.value.data, 5);
             JBI->Add("len", rules[id].command.value.length);
             // if(rules[id].command.p_json_commands!=nullptr){
@@ -1054,10 +1054,10 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
                 JBI->Add("json_es", buffer_escaped); 
 
             }
-        JsonBuilderI->Object_End(); 
+        JBI->Object_End(); 
 
 
-      JsonBuilderI->Object_End(); 
+      JBI->Object_End(); 
     }
 
     // JBI->Add("data", jsonbuffer.data); 
@@ -1070,7 +1070,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
       // JBI->Add("jsonbuffer_data", jsonbuffer.data);    
       JBI->Add("jsonbuffer_bytes_used", jsonbuffer.bytes_used);    
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

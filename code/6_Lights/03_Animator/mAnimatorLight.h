@@ -492,7 +492,6 @@ class mAnimatorLight :
     void CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
-    void CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subtype, uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
@@ -503,37 +502,6 @@ class mAnimatorLight :
     /************************************************************************************************
      * SECTION: Files
      ************************************************************************************************/
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-      // General filesystem
-      size_t fsBytesUsed =0;
-      size_t fsBytesTotal =0;
-      unsigned long presetsModifiedTime =0L;
-      JsonDocument* fileDoc;
-      bool doCloseFile =false;
-      void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
-      void readFile(fs::FS &fs, const char * path);
-      void CommandSet_ReadFile(const char* filename);
-
-
-      void closeFile();
-      bool bufferedFind(const char *target, bool fromStart = true);
-      bool bufferedFindSpace(size_t targetLen, bool fromStart = true);
-      bool bufferedFindObjectEnd() ;
-      void writeSpace(size_t l);
-      bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
-      bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
-      bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
-      bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
-      bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
-      void updateFSInfo();
-
-      #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-      String getContentType(AsyncWebServerRequest* request, String filename);
-      bool handleFileRead(AsyncWebServerRequest* request, String path);
-      #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
-    #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-
 
 
     /******************************************************************************************************************************************************************************
@@ -1893,7 +1861,6 @@ class mAnimatorLight :
     };
   } ANIMATION_FLAGS;
 
-  uint8_t GetSizeOfPixel(RgbcctColor::ColourType colour_type);
 
 
   struct TransitionColourPairs
@@ -1901,11 +1868,24 @@ class mAnimatorLight :
     RgbcctColor StartingColour;
     RgbcctColor DesiredColour;
   };
-  
-  // TransitionColourPairs* 
-  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
-  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
+  enum ColourType{ 
+      // COLOUR_TYPE__NONE__ID=0, 
+      COLOUR_TYPE__SINGLE__ID, // likely never used for me, remove
+      COLOUR_TYPE__COLDWARM__ID,  //CCT Only
+      COLOUR_TYPE__RGB__ID,   
+      COLOUR_TYPE__RGBW__ID, 
+      COLOUR_TYPE__RGBCCT__ID, // CW/WW 
+      
+      // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
+      COLOUR_TYPE__RGBWC__ID, 
+      COLOUR_TYPE__RGBCW__ID
+  };
 
+  // TransitionColourPairs* 
+  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
+  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
+
+  uint8_t GetSizeOfPixel(ColourType colour_type);
 
   /**
    * @brief New method that allows getting WLED basic 3 colours, but also applying the colour when getting, the same as my palette method
@@ -1923,8 +1903,8 @@ class mAnimatorLight :
   void AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
   void AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSegColours(const AnimationParam& param);
 
-  void SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
-  void SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
+  void SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, RgbcctColor starting_colour);
+  void SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  ColourType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_WithFade(uint8_t fade = 0);
@@ -2607,7 +2587,6 @@ class mAnimatorLight :
     WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
     bool e131NewData = false;
     byte currentPreset = 0;
-    byte errorFlag = 0;
 
     class NeoGammaWLEDMethod {
       public:

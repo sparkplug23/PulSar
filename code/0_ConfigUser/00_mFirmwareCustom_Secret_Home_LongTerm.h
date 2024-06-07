@@ -159,8 +159,7 @@ Outside + Garage
 **/
 // #define DEVICE_SIDEDOORLIGHT
 // #define DEVICE_GAZEBO_SONOFF_4CHPRO
-// #define DEVICE_GAZEBO_SENSOR
-// #define DEVICE_H801_RGBGAZEBO
+// #define DEVICE_GAZEBO__LIGHT_CONTROLLER_AND_SENSOR
 // #define DEVICE_OILTANK
 // #define DEVICE_OILFURNACE
 // #define DEVICE_GARAGELIGHT
@@ -2906,68 +2905,368 @@ R"=====(
 
 
 /**
- * @brief Presence detector
- * - PIR 
- * - BME280
- * - BH1750
+ * @brief New custom built 8channel output with RJ45 to external sensor box 
+ *  - 8x 12V outputs
+ *  - roof with sk6812 microleds
+ *  - trees and rose bush
+ *  - a lantern? 
+ *  - possible strip of new ws2805 along the top to replace h801, added failure point and wont use, so dont bother.
  * 
- **/
-#ifdef DEVICE_GAZEBO_SENSOR
-  #define DEVICENAME_CTR          "gazebosensor"
-  #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
-  #define DEVICENAME_ROOMHINT_CTR "Gazebo"
+ */
+#ifdef DEVICE_GAZEBO__LIGHT_CONTROLLER_AND_SENSOR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
   
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to disable fastboot recovery
+
+  #define LOG_BUFFER_SIZE 2000
+
+  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
 
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define STRIP_SIZE_MAX 100
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   /********* Group: Needed to build ************************/
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  //   /********* Group: Ready for full integration ************************/
-  //   // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   /********* Group: Testing ************************/
-  //   #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-  //   #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-  //   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-  //   #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-  //   
-  //   // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-  //   // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-  //   /********* Group: Debug options only ************************/
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-  //   #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-  //   #define ENABLE_DEBUG_SERIAL
-  //   // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-  //   // #define ENABLE_LOG_LEVEL_DEBUG
-  //   // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  //   // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-    
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+
+  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
+  #define USE_LIGHTING_TEMPLATE
+
+  /**
+   * @brief 
+   * Tree Left:  200
+   * Tree Right: 200
+   * Ceiling Near: 250
+   * Ceiling Further: 250
+   */
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":5,
+  //       "ColourOrder":"GRBCW",
+  //       "BusType":"WS2805_RGBWW",
+  //       "Start":0,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":250,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":21,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":500,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":750,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       500
+  //     ],
+  //     "ColourPalette":"Purple Pink",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":127,
+  //       "Intensity":1,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 100
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "Segment1": {
+  //     "PixelRange": [
+  //       500,
+  //       1000
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":5,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":500,
+        "Length":250
+      },
+      {
+        "Pin":21,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":750,
+        "Length":250
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        500
+      ],
+      "ColourPalette":"Sweetpea",
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment1": {
+      "PixelRange": [
+        500,
+        750
+      ],
+      "ColourPalette":"IceCream Floats",
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment2": {
+      "PixelRange": [
+        750,
+        1000
+      ],
+      "ColourPalette":172,
+      "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 0,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":5,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":250,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":500,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":21,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":750,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       1000
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 5,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  
+  /***********************************
+   * SECTION: GPIO Configs
+  ************************************/  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2975,19 +3274,21 @@ R"=====(
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
-      #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      "\"2\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"15\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"4\":\""  D_GPIO_FUNCTION_SWT1_CTR "\""
       #endif
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  /***********************************
+   * SECTION: DeviceName Configs
+  ************************************/  
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Gazebo"
   #define D_DEVICE_SENSOR_CLIMATE "Outside"
@@ -2999,46 +3300,29 @@ R"=====(
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"  
-    "}"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"
   "}";
 
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"WS28XX",
-    "AnimationMode":"Effects",
-    "ColourOrder":"grb",
-    "ColourPalette":"Christmas 01",
-    "Effects": {
-      "Function":1,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "SegColour": {
-      "Hue": 120,
-      "Sat": 100,
-      "SubType":3
-    },
-    "BrightnessRGB_255": 255,
-    "BrightnessCCT_255": 1
-  }
-  )=====";
+  /***********************************
+   * SECTION: Rules Configs
+  ************************************/  
   
   #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
   "{"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
@@ -3055,92 +3339,12 @@ R"=====(
     "}"
   "}";
 
-#endif
+#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L1__ESP32_I2S_PARALLEL_4CH
 
 
-/**
- * 24W/meter
- * Approx 5.5m used, 24*5.5 = 132W so 132/12 = 11Amps at 12V
- * 20A 12V should be enough
- * */
-#ifdef DEVICE_H801_RGBGAZEBO
-  #define DEVICENAME_CTR          "h801_rgbgazebo"
-  #define DEVICENAME_FRIENDLY_CTR "H801 RGB Gazebo RGBCCT Strip"
-  #define DEVICENAME_ROOMHINT_CTR "Gazebo"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-  
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  // #define ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
 
-  #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define DISABLE_WEBSERVER
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
-    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    // #define ENABLE_DEVFEATURE_TRANSITION_MODE_LEVEL_OPTIONS
-    // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-  // #define STRIP_SIZE_MAX 1
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBCW\","
-  //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20\"},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":10,"
-  //   "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-  //   "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid\"},"
-  //   "\"" D_JSON_BRIGHTNESS     "\":100"
-  // "}";
-
-  #define STRIP_SIZE_MAX 2 // tmp fix
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
-    "\"Hue\":345,\"Sat\":100,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
-    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
-  "}";
-
-#endif
 
 
 /**************************************************************************************************************************************************

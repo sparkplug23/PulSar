@@ -268,9 +268,9 @@ void mShellyDimmer::RulesEvent_Set_Power(){
 
 uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
+    JBI->Add_P(PM_JSON_TIME, 1000);
 
     // JBI->Add("serial_active",hardware_serial_active);
 
@@ -280,19 +280,19 @@ uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_level, bool json_appe
     JBI->Add("power",dimmer.power);
     JBI->Add("fade_rate",dimmer.fade_rate);
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
 uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_level, bool json_appending){
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
     JBI->Add_P(PM_JSON_BRIGHTNESS, map(dimmer.brightness,0,1000,0,100));
     JBI->Add("CommandGet_SecondsToRemainOn", CommandGet_SecondsToRemainOn());
     JBI->Add("CommandGet_SecondsToRemainOn_Active", timer_decounter.active);
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

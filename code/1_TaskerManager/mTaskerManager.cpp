@@ -305,13 +305,11 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_UPDATES
   addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());
   #endif
-  #ifdef USE_MODULE_CORE_SERIAL_UART
-  addTasker(EM_MODULE_CORE_SERIAL_UART_ID, new mSerialUART());
-  #endif
+  // #ifdef USE_MODULE_CORE_SERIAL_UART
+  // addTasker(EM_MODULE_CORE_SERIAL_UART_ID, new mSerialUART());
+  // #endif
   #ifdef USE_MODULE_CORE__SERIAL
-    INCLUDE_FIX"2_CoreSystem/15_SerialUART/mSerial.h"
-    #define   tkr_Serial                              static_cast<mSerial*>(pCONT->pModule[TaskerID::CORE__SERIAL])
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(TaskerID::CORE__SERIAL, new mSerial());
   #endif
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID, new mDevelopmentDebugging());
@@ -441,9 +439,10 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-    INCLUDE_FIX"4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
-    #define pCONT_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(EM_MODULE__DRIVERS_MAVLINK_DECODER__ID, new mMAVLink_Decoder());
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
+  addTasker(EM_MODULE__DRIVERS_MAVLINK_DECODER__ID, new mMAVLink_Decoder());
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
     INCLUDE_FIX"4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
@@ -564,9 +563,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_SENSORS__DS18X20__ID, new mDB18x20_ESP32());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-    INCLUDE_FIX"5_Sensors/50_GPS_Serial/mGPS_Serial.h"
-    #define pCONT_gps                                 static_cast<mGPS_Serial*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID])
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(EM_MODULE__SENSORS_GPS_SERIAL__ID, new mGPS_Serial());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_MODEM
     INCLUDE_FIX"5_Sensors/51_GPS_Modem/mGPS_Modem.h"
@@ -774,6 +771,9 @@ uint8_t mTaskerManager::Instance_Init()
     INCLUDE_FIX"9_Controller/UserMod_01/mUserMod_01.h"
     #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
+  addTasker(TaskerID::CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID, new mMavlinkFlyingLEDS());
   #endif
 
 

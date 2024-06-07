@@ -236,24 +236,24 @@ void mEnergyINA219::EveryLoop(){
   
 //   uint8_t count = 0;
 
-//   JsonBuilderI->Array_Start("ina219_tab");// Class name
+//   JBI->Array_Start("ina219_tab");// Class name
 //   for(int row=0;row<6;row++){
 //     for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++){
-//       JsonBuilderI->Object_Start();
-//         JsonBuilderI->Add("id",count++);
-//         if(sensor[sensor_id].power_mw>30){ JsonBuilderI->Add("fc","#ff0000");
-//         }else{ JsonBuilderI->Add("fc","#ffffff"); }
+//       JBI->Object_Start();
+//         JBI->Add("id",count++);
+//         if(sensor[sensor_id].power_mw>30){ JBI->Add("fc","#ff0000");
+//         }else{ JBI->Add("fc","#ffffff"); }
 //         switch(row){
-//           case 0: JsonBuilderI->Add("ih",sensor[sensor_id].bus_voltage_mv); break;
-//           case 1: JsonBuilderI->Add("ih",sensor[sensor_id].shunt_voltage_mv); break;
-//           case 2: JsonBuilderI->Add("ih",sensor[sensor_id].load_voltage_mv); break;
-//           case 3: JsonBuilderI->Add("ih",sensor[sensor_id].current_ma); break;
-//           case 4: JsonBuilderI->Add("ih",sensor[sensor_id].power_mw); break;
+//           case 0: JBI->Add("ih",sensor[sensor_id].bus_voltage_mv); break;
+//           case 1: JBI->Add("ih",sensor[sensor_id].shunt_voltage_mv); break;
+//           case 2: JBI->Add("ih",sensor[sensor_id].load_voltage_mv); break;
+//           case 3: JBI->Add("ih",sensor[sensor_id].current_ma); break;
+//           case 4: JBI->Add("ih",sensor[sensor_id].power_mw); break;
 //         } //switch      
-//       JsonBuilderI->Object_End();
+//       JBI->Object_End();
 //     }
 //   }//end for
-//   JsonBuilderI->Array_End();
+//   JBI->Array_End();
 
 // }
 
@@ -367,57 +367,57 @@ void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comp
 
 uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+  return JBI->End();
 
 }
 
 uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   char buffer[50];
 
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     // if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer))); 
+      JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer))); 
 
 
-      JsonBuilderI->Add("ina219_current_multiplier",ina219_current_multiplier);
+      JBI->Add("ina219_current_multiplier",ina219_current_multiplier);
 
 
-        JsonBuilderI->Add("Bus" D_JSON_VOLTAGE,   sensor[sensor_id].bus_voltage_mv);
-        JsonBuilderI->Add("Shunt" D_JSON_VOLTAGE, sensor[sensor_id].shunt_voltage_mv);
-        JsonBuilderI->Add("Load" D_JSON_VOLTAGE,  sensor[sensor_id].load_voltage_mv);
-        JsonBuilderI->Add(D_JSON_CURRENT,         sensor[sensor_id].current_ma);
-        JsonBuilderI->Add("Direct" D_JSON_CURRENT,sensor[sensor_id].direct_current_ma);
-        JsonBuilderI->Add(D_JSON_POWER,           sensor[sensor_id].power_mw);
-        JsonBuilderI->Add("Direct" D_JSON_POWER,  sensor[sensor_id].direct_power_mw);
+        JBI->Add("Bus" D_JSON_VOLTAGE,   sensor[sensor_id].bus_voltage_mv);
+        JBI->Add("Shunt" D_JSON_VOLTAGE, sensor[sensor_id].shunt_voltage_mv);
+        JBI->Add("Load" D_JSON_VOLTAGE,  sensor[sensor_id].load_voltage_mv);
+        JBI->Add(D_JSON_CURRENT,         sensor[sensor_id].current_ma);
+        JBI->Add("Direct" D_JSON_CURRENT,sensor[sensor_id].direct_current_ma);
+        JBI->Add(D_JSON_POWER,           sensor[sensor_id].power_mw);
+        JBI->Add("Direct" D_JSON_POWER,  sensor[sensor_id].direct_power_mw);
 
 
-        // JsonBuilderI->Add("Bus" D_JSON_VOLTAGE "_v",   sensor[sensor_id].bus_voltage_mv/1000);
-        // JsonBuilderI->Add("Shunt" D_JSON_VOLTAGE"_v", sensor[sensor_id].shunt_voltage_mv/1000);
-        // JsonBuilderI->Add("Load" D_JSON_VOLTAGE"_v",  sensor[sensor_id].load_voltage_mv/1000);
-        // JsonBuilderI->Add(D_JSON_CURRENT "_a",         sensor[sensor_id].current_ma/1000);
-        // JsonBuilderI->Add(D_JSON_POWER "_w",           sensor[sensor_id].power_mw/1000);
+        // JBI->Add("Bus" D_JSON_VOLTAGE "_v",   sensor[sensor_id].bus_voltage_mv/1000);
+        // JBI->Add("Shunt" D_JSON_VOLTAGE"_v", sensor[sensor_id].shunt_voltage_mv/1000);
+        // JBI->Add("Load" D_JSON_VOLTAGE"_v",  sensor[sensor_id].load_voltage_mv/1000);
+        // JBI->Add(D_JSON_CURRENT "_a",         sensor[sensor_id].current_ma/1000);
+        // JBI->Add(D_JSON_POWER "_w",           sensor[sensor_id].power_mw/1000);
 
 
-        // JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
-        // JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
-        // JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
-        // JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-        //   JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-        //   JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
-        // JsonBuilderI->Object_End(); 
+        // JBI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
+        // JBI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
+        // JBI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
+        // JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
+        //   JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+        //   JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
+        // JBI->Object_End(); 
 
 
 
-      JsonBuilderI->Object_End();
+      JBI->Object_End();
     // }
   }
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

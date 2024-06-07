@@ -23,6 +23,11 @@
 #include "jsmn.h"
 
 
+#ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+#include <gpio_viewer.h> // Must me the first include in your project
+#endif
+
+
 #ifdef DEBUG_PIN1_GPIO
   #define DEBUG_PIN1_INIT()     pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
   #define DEBUG_PIN1_SET(X)     digitalWrite(DEBUG_PIN1_GPIO, X);
@@ -115,6 +120,7 @@ class mHardwarePins :
     };
     #endif
     
+
     
     void parse_JSONCommand(JsonParserObject obj);
 

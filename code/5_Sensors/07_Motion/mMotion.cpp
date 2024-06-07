@@ -288,9 +288,9 @@ void mMotion::parse_JSONCommand(JsonParserObject obj)
 
 uint8_t mMotion::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+  return JBI->End();
 
 }
 
@@ -301,8 +301,8 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   char buffer[80];
 
-  JsonBuilderI->Start();
-    // JsonBuilderI->Add("motion", 0);
+  JBI->Start();
+    // JBI->Add("motion", 0);
 
     for(
       uint8_t sensor_id = 0;//pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
@@ -325,18 +325,18 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
        */
       // uint16_t e m_module_id = pCONT->GetEnumNumber_UsingModuleUniqueID(device_name_module_id);
       
-      // JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(e m_module_id, device_name_device_id, buffer, sizeof(buffer)));
+      // JBI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(e m_module_id, device_name_device_id, buffer, sizeof(buffer)));
 
-      JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( device_name_module_id, device_name_device_id, buffer, sizeof(buffer))); 
-      // JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-      // JsonBuilderI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
+      JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( device_name_module_id, device_name_device_id, buffer, sizeof(buffer))); 
+      // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      // JBI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
 
 
       JBI->Add("Time", pCONT_time->GetTimeStr(pCONT_time->Rtc.local_time).c_str());
       JBI->Add("UTCTime", pCONT_time->Rtc.local_time);
 
 
-      JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+      JBI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
       #ifdef ENABLE_DEVFEATURE_REPORT_MOTION_TIMES_WITH_EPOCH_AND_ISO8601_STANDARD_TIME
       JBI->Object_Start("TriggerTime");
@@ -359,7 +359,7 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
 
 
-      JsonBuilderI->Add("Index", sensor_id);
+      JBI->Add("Index", sensor_id);
 
   //     //if another is yet to send, then reset the mqtt_handler to fire immeditely again!
   //     //if any mtion flag remains, then set mqtt again
@@ -367,10 +367,10 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
     }
   }
 
-  // ALOG_INF(PSTR("JBI MOTION %s"), JsonBuilderI->GetBufferPtr());
+  // ALOG_INF(PSTR("JBI MOTION %s"), JBI->GetBufferPtr());
 
 
-  return JsonBuilderI->End();
+  return JBI->End();
     
 }
   
@@ -465,10 +465,10 @@ void mMotion::MQTTHandler_Sender()
 
 //   char buffer[20];
 
-//   JsonBuilderI->Array_Start("tab_pir");// Class name
+//   JBI->Array_Start("tab_pir");// Class name
 //   for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-//     JsonBuilderI->Object_Start();
-//       JsonBuilderI->Add("id",sensor_id);
+//     JBI->Object_Start();
+//       JBI->Add("id",sensor_id);
 
 //         char colour_ctr[8];
 //         uint32_t millis_elapsed = mTime::MillisElapsed(&pir_detect[sensor_id].tEndedTime);
@@ -494,15 +494,15 @@ void mMotion::MQTTHandler_Sender()
 //         }
 
 
-//       JsonBuilderI->Add("ih",
+//       JBI->Add("ih",
 //         pCONT_time->ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       
 //       //detected_rtc_ctr);
-//       JsonBuilderI->Add("fc",colour_ctr);    
-//     JsonBuilderI->Object_End();
+//       JBI->Add("fc",colour_ctr);    
+//     JBI->Object_End();
 //   }
 
-//   JsonBuilderI->Array_End();
+//   JBI->Array_End();
 
 // }
 // #endif // DISABLE_WEBSERVER

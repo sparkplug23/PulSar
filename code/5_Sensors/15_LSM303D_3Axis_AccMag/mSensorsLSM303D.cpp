@@ -608,9 +608,9 @@ void mSensorsLSM303D::CalculateOrientation(
 
 uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+  return JBI->End();
 
 }
 
@@ -618,16 +618,16 @@ uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_ap
 
 uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level){
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   char buffer[40];
 
   for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++)
   { //db18_sensors_active
    
-  //  JsonBuilderI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+  //  JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
    
-   JsonBuilderI->Object_Start( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));         
+   JBI->Object_Start( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));         
    
 
 
@@ -671,7 +671,7 @@ uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level){
     JBI->Object_End();
   }
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

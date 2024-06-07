@@ -197,7 +197,7 @@ void mSensorsInterface::MQTT_Report_Event_Button()
 
     char event_ctr[20]; memset(event_ctr,0,sizeof(event_ctr));
 
-  JsonBuilderI->Start();
+  JBI->Start();
   
   // if(pCONT_rules->event_triggered.device_id == 0)
   // {
@@ -205,23 +205,23 @@ void mSensorsInterface::MQTT_Report_Event_Button()
 
   // }
 
-    JsonBuilderI->Add("Event", event_ctr);
+    JBI->Add("Event", event_ctr);
 
-    JsonBuilderI->Add("Device", pCONT_rules->event_triggered.device_id);
-    JsonBuilderI->Add("Function", "ButtonPress");
+    JBI->Add("Device", pCONT_rules->event_triggered.device_id);
+    JBI->Add("Function", "ButtonPress");
 
-    JsonBuilderI->Add("Task", "Button");
-    // JsonBuilderI->Add("Task", "Button");
+    JBI->Add("Task", "Button");
+    // JBI->Add("Task", "Button");
 
-    JsonBuilderI->Add("State", "SHORT_PRESS");// : "LONG_PRESS");
+    JBI->Add("State", "SHORT_PRESS");// : "LONG_PRESS");
     
-    // JsonBuilderI->Add("value", (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS");
-    JsonBuilderI->Add("Duration", 0);//tSavedTimeSincePressOn);
-  JsonBuilderI->End();
+    // JBI->Add("value", (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS");
+    JBI->Add("Duration", 0);//tSavedTimeSincePressOn);
+  JBI->End();
 
 
 
-  pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JsonBuilderI->GetBufferPtr(),false);
+  pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JBI->GetBufferPtr(),false);
 
 
   /**

@@ -207,18 +207,18 @@ void mGPS_SD_Logger::SubTask_UpdateOLED_Detailed_GPS()
 
 uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+  return JBI->End();
 
 }
 
 
 uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_VOLTAGE, 0);
+  return JBI->End();
     
 }
 
@@ -232,7 +232,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
  * */
 uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
     
   /**
    * on first sequence number, send additional useful info
@@ -276,7 +276,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool 
   JBI->Object_End();
   #endif // USE_MODULE_SENSORS_GPS_SERIAL
   
-  return JsonBuilderI->End();
+  return JBI->End();
     
 }
 

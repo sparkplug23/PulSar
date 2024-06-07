@@ -284,13 +284,13 @@ void mSensorsDHT::ShowSensor_AddLog()
 
 uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
     JBI->Add("SensorCount", settings.sensor_active_count);
     JBI->Array_Start("Pin");
       JBI->Add(pin[0]);
       JBI->Add(pin[1]);
     JBI->Array_End();
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -301,7 +301,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
 
   char buffer[50];
 
-  JsonBuilderI->Start();
+  JBI->Start();
   for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
     if(
       sensor[sensor_id].instant.ischanged || 
@@ -309,22 +309,22 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
       (json_level == JSON_LEVEL_SHORT)
     ){
 
-      JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));   
-        JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
-        JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
+      JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));   
+        JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
+        JBI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
         if(json_level >=  JSON_LEVEL_DETAILED)
         {     
-          JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-            JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-            JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
-          JsonBuilderI->Object_End();   
+          JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
+            JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+            JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+          JBI->Object_End();   
         }
-      JsonBuilderI->Object_End(); 
+      JBI->Object_End(); 
     }
 
   }
     
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -438,17 +438,17 @@ void mSensorsDHT::MQTTHandler_Sender()
 //       uint8_t multiline_enabled = false;
 
 
-//     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       JsonBuilderI->Append_P(PSTR("<td>DHT%s %s %s</td>"), "22",multiline_enabled?"Temperature":"Climate",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-//       JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
+//     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//       JBI->Append_P(PSTR("<td>DHT%s %s %s</td>"), "22",multiline_enabled?"Temperature":"Climate",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+//       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
       
 //     if(multiline_enabled){
-//       JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-//       JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//         JsonBuilderI->Append_P(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+//       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+//       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//         JBI->Append_P(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
 //     }
-//     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
-//     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+//     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
+//     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   }
 
 
@@ -461,9 +461,9 @@ void mSensorsDHT::MQTTHandler_Sender()
   
 //   uint8_t sensor_counter = 0;
 
-//   // JsonBuilderI->Append_P(PSTR("\"%s\":["),PSTR("tab_dht")); 
+//   // JBI->Append_P(PSTR("\"%s\":["),PSTR("tab_dht")); 
   
-//   JsonBuilderI->Array_Start("tab_dht");// Class name
+//   JBI->Array_Start("tab_dht");// Class name
 
 //   for(int row=0;row<(2*settings.sensor_active_count);row++){
 //     switch(row%2){
@@ -488,15 +488,15 @@ void mSensorsDHT::MQTTHandler_Sender()
 //           sprintf(colour_ctr,"%s","#ffffff");
 //         }
     
-//         // JsonBuilderI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
+//         // JBI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
 //         //   table_row, colour_ctr
 //         // );
         
-//         JsonBuilderI->Object_Start();
-//           JsonBuilderI->Add("id",row);
-//           JsonBuilderI->Add("ih",table_row);
-//           JsonBuilderI->Add("fc",colour_ctr);
-//         JsonBuilderI->Object_End();
+//         JBI->Object_Start();
+//           JBI->Add("id",row);
+//           JBI->Add("ih",table_row);
+//           JBI->Add("fc",colour_ctr);
+//         JBI->Object_End();
 
 //       }break;
 //       case 1:{      
@@ -517,24 +517,24 @@ void mSensorsDHT::MQTTHandler_Sender()
 //           sprintf(colour_ctr,"%s","#ffffff");
 //         }
     
-//         // JsonBuilderI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
+//         // JBI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
 //         //   table_row, colour_ctr
 //         // );
         
-//         JsonBuilderI->Object_Start();
-//           JsonBuilderI->Add("id",row);
-//           JsonBuilderI->Add("ih",table_row);
-//           JsonBuilderI->Add("fc",colour_ctr);
-//         JsonBuilderI->Object_End();
+//         JBI->Object_Start();
+//           JBI->Add("id",row);
+//           JBI->Add("ih",table_row);
+//           JBI->Add("fc",colour_ctr);
+//         JBI->Object_End();
 
 //         sensor_counter++;
 //       }break;
 //     }
 //   }
 //   // *pCONT_web->buffer_writer_internal = (*pCONT_web->buffer_writer_internal) - 1;// remove extra comma
-//   // JsonBuilderI->Append_P(PSTR("],")); 
+//   // JBI->Append_P(PSTR("],")); 
 
-//   JsonBuilderI->Array_End();
+//   JBI->Array_End();
 // }
 
 

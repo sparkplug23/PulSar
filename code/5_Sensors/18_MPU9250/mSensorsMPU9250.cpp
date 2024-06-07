@@ -340,15 +340,15 @@ uint32_t tSaved = millis();
 
 uint8_t mSensorsMPU9250::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+  return JBI->End();
 
 }
 
 uint8_t mSensorsMPU9250::ConstructJSON_Sensor(uint8_t json_level){
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   char buffer[50];
 
@@ -378,22 +378,22 @@ JBI->Add("reset", mag.average.x->tResetPeriod);
 
 //   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
 //     if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-//       JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
-//         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
-//         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
-//         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
-//         JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
-//         JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-//           JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-//           JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
-//         JsonBuilderI->Object_End();  
-//       JsonBuilderI->Object_End();
+//       JBI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
+//         JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
+//         JBI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
+//         JBI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
+//         JBI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
+//         JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
+//           JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+//           JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
+//         JBI->Object_End();  
+//       JBI->Object_End();
 //     }
 //   }
 
     // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "mSensorsMPU9250::MQTTHandler_Sender %s"), JBI->GetBufferPtr());
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

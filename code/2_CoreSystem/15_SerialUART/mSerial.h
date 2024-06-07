@@ -92,31 +92,81 @@ static uart_isr_handle_t *uart2_handle_console;
 class mSerial :
   public mTaskerInterface
 {
-
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mSerial(){};
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    int8_t Tasker_Web(uint8_t function);
+    void   parse_JSONCommand(JsonParserObject obj);
 
     static const char* PM_MODULE_CORE__SERIAL__CTR;
     static const char* PM_MODULE_CORE__SERIAL__FRIENDLY_CTR;
-    PGM_P GetModuleName(){         return PM_MODULE_CORE__SERIAL__CTR; }
-    PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE__SERIAL__FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__SERIAL__ID; }
-
-    
+    PGM_P GetModuleName(){          return PM_MODULE_CORE__SERIAL__CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE__SERIAL__FRIENDLY_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__SERIAL__ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSerial);
-    };
-    #endif
+    uint16_t GetClassSize(){      return sizeof(mSerial);    };
+    #endif    
 
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    #if defined(ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS) && defined(USE_MODULE_DRIVERS_FILESYSTEM)
+    void Load_Module(bool erase = false);
+    void Save_Module(void);
+    bool Restore_Module(void);
+    #endif // USE_MODULE_DRIVERS_FILESYSTEM
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    
+    
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_UARTInfo(uint8_t json_level = 0, bool json_appending = true);
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_RefreshAll();
+    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_Sender();
+
+    std::vector<struct handler<mSerial>*> mqtthandler_list;
+    struct handler<mSerial> mqtthandler_settings_teleperiod;
+    struct handler<mSerial> mqtthandler_uartinfo_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
+
+    /************************************************************************************************
+     * SECITON: TOSORT
+     ************************************************************************************************/
 
     char special_json_part_of_gps_buffer[300] = {0};
     uint16_t special_json_part_of_gps_buflen = 0;
 
     void Pre_Init_Pins();
-    void Init();
     void StartISR_RingBuffers();
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
@@ -200,8 +250,6 @@ class mSerial :
 
 
     struct SETTINGS{
-      uint8_t fEnableModule = false;
-
       #ifdef ENABLE_HARDWARE_UART_0
       UART_SETTINGS uart0;
       #endif
@@ -224,33 +272,11 @@ class mSerial :
      * lazy for now, hard coded 0xFF 0xFF
      * */
     // uint16_t GetRingBufferDataAndClearUntilSpecialDelimeter(uint8_t uart_num, char* buffer, uint16_t buflen);
-    uint16_t GetSingleItemFromNoSplitRingBuffer(uint8_t uart_num, char* buffer, uint16_t buflen);
-
-
-
-    void init(void);
-    void Pre_Init();
-
-    void parse_JSONCommand(JsonParserObject obj);
-
-    void WebPage_Root_AddHandlers();
-    
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_UARTInfo(uint8_t json_level = 0, bool json_appending = true);
-    
+    uint16_t GetSingleItemFromNoSplitRingBuffer(uint8_t uart_num, char* buffer, uint16_t buflen);   
   
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender();
-    struct handler<mSerial> mqtthandler_settings_teleperiod;
-    struct handler<mSerial> mqtthandler_uartinfo_teleperiod;
 
     
-    std::vector<struct handler<mSerial>*> mqtthandler_list;
     
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
 
 };
 

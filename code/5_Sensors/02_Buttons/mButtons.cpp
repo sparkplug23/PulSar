@@ -77,17 +77,6 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEB SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER_2022
-    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-      WebAppend_Root_Draw_Table();
-    break; 
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break;     
-    #endif // USE_MODULE_NETWORK_WEBSERVER_2022
   }
 
   return FUNCTION_RESULT_SUCCESS_ID;
@@ -706,16 +695,16 @@ char* mButtons::IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen){
 
 uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
+  return JBI->End();
 
 }
 
 uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
+  JBI->Start();
+    // JBI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
 
     JBI->Object_Start("ButtonPressed");
       JBI->Add("IsButtonActiveCtr", buttons[0].isactive);
@@ -760,7 +749,7 @@ uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       for(int i=0;i<MAX_KEYS;i++){ JBI->Add(buttons[i].state); }
     JBI->Array_End();
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
   
@@ -840,44 +829,6 @@ void mButtons::MQTTHandler_Sender()
 }
   
 #endif// USE_MODULE_NETWORK_MQTT
-
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-#ifdef USE_MODULE_NETWORK_WEBSERVER_2022
-
-void mButtons::WebAppend_Root_Draw_Table(){
-
-  pCONT_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(settings.buttons_found,"button_table", "Button");
-
-
-}
-
-//append to internal buffer if any root messages table
-void mButtons::WebAppend_Root_Status_Table(){
-
-  char buffer[20];
-
-  JsonBuilderI->Array_Start_P(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR);// Class name
-  for(int row=0;row<settings.buttons_found;row++){
-    JsonBuilderI->Object_Start();
-      JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,row);
-      JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,IsButtonActiveCtr(row, buffer, sizeof(buffer)));//"\"%s\"", IsButtonActiveCtr(row, buffer, sizeof(buffer)));
-      if(IsButtonActive(row)){
-        JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#00ff00"); //make webcolours dlist in progmem!
-      }else{
-        JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#ff0000");
-      }
-    
-    JsonBuilderI->Object_End();
-  }
-  JsonBuilderI->Array_End();
-  
-}
-
-    #endif // USE_MODULE_NETWORK_WEBSERVER_2022
-
 
 
 

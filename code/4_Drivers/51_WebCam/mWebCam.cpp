@@ -1831,8 +1831,8 @@ void mWebCam::Pre_Init(void){
 
 // uint8_t mWebCam::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
+//   JBI->Start();
+//     JBI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
 
 //     JBI->Array_Start_P(PSTR("rel_inverted"));
 //       // for(int8_t bits=0; bits<sizeof(rel_inverted)*8; bits++)
@@ -1843,7 +1843,7 @@ void mWebCam::Pre_Init(void){
 
 
 
-//   JsonBuilderI->End();
+//   JBI->End();
 
 // }
 
@@ -1853,56 +1853,56 @@ void mWebCam::Pre_Init(void){
 //   char buffer[100];
 
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 //     // for(int device_id=0;device_id<settings.relays_connected;device_id++){
 //     //   if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
         
-//     //     JsonBuilderI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+//     //     JBI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
 //     //     //phase onoff out
-//     //       JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
-//     //       JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+//     //       JBI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
+//     //       JBI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
 
-//     //       JsonBuilderI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
-//     //       JsonBuilderI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-//     //       JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+//     //       JBI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
+//     //       JBI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+//     //       JBI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
 //     //       JBI->Add("TimerDeCounter", CommandGet_SecondsToRemainOn(device_id)); //Phase out
 //     //       JBI->Add("SecondsToRemainOn", CommandGet_SecondsToRemainOn(device_id));          
 //     //       JBI->Add("SecondsToRemainOff", CommandGet_SecondsRelayHasBeenOn(device_id));
 
 
-//     //       JsonBuilderI->Level_Start_P(PM_JSON_LAST);
+//     //       JBI->Level_Start_P(PM_JSON_LAST);
 //     //         snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
-//     //         JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
+//     //         JBI->Add_P(PM_JSON_ONTIME, buffer);
 //     //         snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
-//     //         JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
-//     //       JsonBuilderI->Object_End();
+//     //         JBI->Add_P(PM_JSON_OFFTIME, buffer);
+//     //       JBI->Object_End();
         
 //     //     // Schedules time periods the relays are allowed to run (or should this be locking off?)
-//     //     JsonBuilderI->Level_Start_P("RelayEnabled");
+//     //     JBI->Level_Start_P("RelayEnabled");
 //     //     for(int ii=0;ii<D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT;ii++){
-//     //       JsonBuilderI->Level_Start_P("Range%d",ii);
+//     //       JBI->Level_Start_P("Range%d",ii);
 
 //     //         time_short_t t = relay_status[device_id].enabled_ranges[ii].ontime;
 //     //         snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-//     //         JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
+//     //         JBI->Add_P(PM_JSON_ONTIME, buffer);
 
 //     //         t = relay_status[device_id].enabled_ranges[ii].offtime;
 //     //         snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-//     //         JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
+//     //         JBI->Add_P(PM_JSON_OFFTIME, buffer);
 
 //     //         // Add if relay is within window etc here
 //     //         JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
 
-//     //       JsonBuilderI->Object_End();
+//     //       JBI->Object_End();
 //     //     }
-//     //     JsonBuilderI->Object_End();
+//     //     JBI->Object_End();
 
-//     //     JsonBuilderI->Object_End();
+//     //     JBI->Object_End();
         
 //     //   }
 //     // }
 //   // AddLog(LOG_LEVEL_INFO, PSTR("mWebCam::ConstructJSON_State %d"),JBI->GetLength());
-//   JsonBuilderI->End();
+//   JBI->End();
 
 // }
 
@@ -1912,21 +1912,21 @@ void mWebCam::Pre_Init(void){
 
 //   char buffer[50];
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
   
 //     // for(int device_id=0;device_id<settings.relays_connected;device_id++){
 //     //   if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
         
-//     //     JsonBuilderI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-//     //       JsonBuilderI->Object_Start("enabled_ranges");
+//     //     JBI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+//     //       JBI->Object_Start("enabled_ranges");
 
-//     //         JsonBuilderI->Array_Start("ontime");
-//     //           JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
-//     //         JsonBuilderI->Array_End();
-//     //         JsonBuilderI->Array_Start("offtime");
-//     //           JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
-//     //         JsonBuilderI->Array_End();
+//     //         JBI->Array_Start("ontime");
+//     //           JBI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
+//     //         JBI->Array_End();
+//     //         JBI->Array_Start("offtime");
+//     //           JBI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
+//     //         JBI->Array_End();
 
 
 //     //         JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
@@ -1937,22 +1937,22 @@ void mWebCam::Pre_Init(void){
 
 
 
-//     //       JsonBuilderI->Object_End();
+//     //       JBI->Object_End();
 
-//     //       // JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
-//     //       // JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-//     //       // JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-//     //       // JsonBuilderI->Level_Start_P(PM_JSON_LAST);
+//     //       // JBI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
+//     //       // JBI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+//     //       // JBI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+//     //       // JBI->Level_Start_P(PM_JSON_LAST);
 //     //       //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
-//     //       //   JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
+//     //       //   JBI->Add_P(PM_JSON_ONTIME, buffer);
 //     //       //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
-//     //       //   JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
-//     //       // JsonBuilderI->Object_End();
-//     //     JsonBuilderI->Object_End();
+//     //       //   JBI->Add_P(PM_JSON_OFFTIME, buffer);
+//     //       // JBI->Object_End();
+//     //     JBI->Object_End();
         
 //     //   }
 //     // }
-//   JsonBuilderI->End();
+//   JBI->End();
 
 // }
 

@@ -189,7 +189,7 @@ uint8_t mAnimatorLight::ConstructJSON_Sequencer(uint8_t json_level, bool json_ap
 
   char buffer[100] = {0};
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   JBI->Add("LimitLevel", sequencer_runtime.remote_openhab_limit_flashing);
 
@@ -223,7 +223,7 @@ uint8_t mAnimatorLight::ConstructJSON_Sequencer(uint8_t json_level, bool json_ap
     JBI->Array_End();
  
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 } // ConstructJSON_Sequencer
 

@@ -701,7 +701,7 @@ void mSupport::Debug_I2CScan_To_Serial()
     // Serial.println(mqtt_data);
 
     //need to escape option to function above
-    // JsonBuilderI->Add("I2C_Scan",          mqtt_data);
+    // JBI->Add("I2C_Scan",          mqtt_data);
 
     BufferWriterI->Start();
     BufferWriterI->Append("\"I2C_Scan\":");

@@ -1,0 +1,18 @@
+[Keywords]
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+byte
+boolean
+uint16_t
+int16_t
+int
+enum
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+begin KEYWORD2
+setPort KEYWORD2
+setSamplingInterval KEYWORD2
+connectToWifi KEYWORD2

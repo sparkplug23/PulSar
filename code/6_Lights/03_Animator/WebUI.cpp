@@ -53,7 +53,7 @@ bool mAnimatorLight::requestJSONBufferLock(uint8_t module)
   // DEBUG_PRINT(jsonBufferLock);
   // DEBUG_PRINTLN(")");
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  fileDoc = &doc;  // used for applying presets (presets.cpp)
+  pCONT_mfile->fileDoc = &doc;  // used for applying presets (presets.cpp)
   doc.clear();
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
   return true;
@@ -65,7 +65,7 @@ void mAnimatorLight::releaseJSONBufferLock()
   // DEBUG_PRINT(jsonBufferLock);
   // DEBUG_PRINTLN(")");
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  fileDoc = nullptr;
+  pCONT_mfile->fileDoc = nullptr;
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
   jsonBufferLock = 0;
 }
@@ -94,7 +94,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
 
   if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
 
-  root["cct"] = seg.palette_id < 5 ? seg.rgbcctcolors[seg.palette_id].getCCT255() : 255;
+  root["cct"] = seg.palette_id < 5 ? seg.rgbcctcolors[seg.palette_id].getCCT() : 255;
   
   root[F("set")] = 0;//seg.set;    // unknown, phase into newer WLED UI
 
@@ -165,7 +165,7 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
   }
 
   if (!forPreset) {
-    if (errorFlag) {root[F("error")] = errorFlag; errorFlag = ERR_NONE;} //prevent error message to persist on screen
+    if (pCONT_mfile->errorFlag) {root[F("error")] = pCONT_mfile->errorFlag; pCONT_mfile->errorFlag = ERR_NONE;} //prevent error message to persist on screen
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;    
     root[F("pl")] = currentPlaylist;
@@ -1565,7 +1565,7 @@ bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path)
 
 void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
 {
-  if (handleFileRead(request, "/index.htm"))
+  if (pCONT_mfile->handleFileRead(request, "/index.htm"))
   {
     return;
   }
@@ -2257,7 +2257,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         count++;
       } while ( u.index != 255);
 
-      // ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
+      ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
 
       u = *ent;
       int indexstart = 0;
@@ -2709,7 +2709,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
 
     return;
   }
-  else if (url.indexOf("cfg") > 0 && handleFileRead(request, "/cfg.json")) {
+  else if (url.indexOf("cfg") > 0 && pCONT_mfile->handleFileRead(request, "/cfg.json")) {
     return;
   }
   else if (url.length() > 6) { //not just /json
@@ -2757,6 +2757,8 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
         SEGMENT_I(0).flags.fForceUpdate = true; // New data in, so we should update
       }
 
+      // ALOG_INF(PSTR("default==================================="));
+
       if (subJson != JSON_PATH_STATE_INFO)
       {
         JsonArray effects = lDoc.createNestedArray(F("effects"));
@@ -2772,6 +2774,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
           {    
             char* dataPtr = strchr(lineBuffer,'|');
             if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+            // Serial.println(lineBuffer);
           }
           pal.add(lineBuffer);
         }
@@ -2991,7 +2994,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   });
 
   pCONT_web->server->on("/favicon.ico", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if(!handleFileRead(request, "/favicon.ico"))
+    if(!pCONT_mfile->handleFileRead(request, "/favicon.ico"))
     {
       request->send_P(200, "image/x-icon", favicon, 156);
     }
@@ -3157,7 +3160,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
   #ifndef WLED_DISABLE_PXMAGIC
   pCONT_web->server->on("/pxmagic.htm", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (this->handleFileRead(request, "/pxmagic.htm")) return;
+    if (pCONT_mfile->handleFileRead(request, "/pxmagic.htm")) return;
     if (this->handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_pxmagic, PAGE_pxmagic_L);
     response->addHeader(FPSTR(s_content_enc),"gzip");
@@ -3167,7 +3170,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #endif
 
   pCONT_web->server->on("/cpal.htm", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (this->handleFileRead(request, "/cpal.htm")) return;
+    if (pCONT_mfile->handleFileRead(request, "/cpal.htm")) return;
     if (this->handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_cpal, PAGE_cpal_L);
     response->addHeader(FPSTR(s_content_enc),"gzip");
@@ -3201,7 +3204,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
       return;
     }
 
-    if(handleFileRead(request, request->url())) return;
+    if(pCONT_mfile->handleFileRead(request, request->url())) return;
     AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     this->setStaticContentCacheHeaders(response);

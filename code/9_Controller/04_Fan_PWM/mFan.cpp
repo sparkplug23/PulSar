@@ -153,18 +153,18 @@ int8_t mFan::Tasker(uint8_t function, JsonParserObject obj){
 
 uint8_t mFan::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P("test",0);  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P("test",0);  
+  JBI->End();
 
 }
 
 uint8_t mFan::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
-    JsonBuilderI->Add_P(D_JSON_FANPWM, set_fan_pwm);  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
+    JBI->Add_P(D_JSON_FANPWM, set_fan_pwm);  
+  JBI->End();
 
 }
 

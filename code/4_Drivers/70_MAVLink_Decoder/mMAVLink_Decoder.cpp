@@ -71,7 +71,7 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
 void mMAVLink_Decoder::Pre_Init(void)
 {
 
-  // ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void) %d"), pCONT_uart->settings.uart2.initialised);
+  // ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void) %d"), tkr_Serial->settings.uart2.initialised);
 
   
   connection.system_id = 1; // ESP32 sysid
@@ -109,20 +109,20 @@ void mMAVLink_Decoder::Send_Heartbeat()
 void mMAVLink_Decoder::Init(void)
 {
   
-  #ifdef USE_MODULE_CORE_SERIAL_UART
-  if(pCONT_uart->settings.uart2.initialised)
+  #ifdef USE_MODULE_CORE__SERIAL
+  if(tkr_Serial->settings.uart2.initialised)
   {
-    _MAVSerial = pCONT_uart->HWSerial2;//pCONT_uart->GetSerial(2);
+    _MAVSerial = tkr_Serial->HWSerial2;//tkr_Serial->GetSerial(2);
     // _MAVSerial->begin(
-    //   pCONT_uart->settings.uart2.baud, 
+    //   tkr_Serial->settings.uart2.baud, 
     //   SERIAL_8N1, 
-    //   pCONT_uart->settings.uart2.gpio.rx, 
-    //   pCONT_uart->settings.uart2.gpio.tx
+    //   tkr_Serial->settings.uart2.gpio.rx, 
+    //   tkr_Serial->settings.uart2.gpio.tx
     // );
     // ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void) %d %d %d"),
-    //   pCONT_uart->settings.uart2.baud, 
-    //   pCONT_uart->settings.uart2.gpio.rx, 
-    //   pCONT_uart->settings.uart2.gpio.tx
+    //   tkr_Serial->settings.uart2.baud, 
+    //   tkr_Serial->settings.uart2.gpio.rx, 
+    //   tkr_Serial->settings.uart2.gpio.tx
     // );
   }
   #else
@@ -178,6 +178,8 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
     
   while(_MAVSerial->available() > 0)
   {
+
+    // Serial.println("PollMAVLink_Stream");
   
     mavlink_message_t msg;
     mavlink_status_t status1;
@@ -186,7 +188,7 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
     if(mavlink_parse_char(MAVLINK_COMM_0, ch, &msg, &status1))
     {
       pkt.tSaved_Last_Response = millis();
-      // ALOG_INF(PSTR("Packet = %d \"%S\""), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)));     
+      ALOG_INF(PSTR("Packet = %d \"%S\""), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)));     
 
       #ifdef USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
       if(std::find(unique_msg_id_list.begin(), unique_msg_id_list.end(), msg.msgid) != unique_msg_id_list.end()) {
@@ -910,6 +912,18 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool jso
     
 }
 
+uint8_t mMAVLink_Decoder::ConstructJSON_Debug_ReceiveStats(uint8_t json_level, bool json_appending)
+{
+  char buffer[50];
+  JBI->Start();
+    JBI->Object_Start("ElapsedMessageTime");
+      for(uint8_t id=0;id<ARRAY_SIZE(pkt_debug_receive_stats);id++)
+      {
+        JBI->Add(MavLink_Msg_FriendlyName_By_ID(id, buffer, sizeof(buffer)), pkt_debug_receive_stats[id].tUpdate);
+      }
+    JBI->Object_End();
+  return JBI->End();    
+}
 
 uint8_t mMAVLink_Decoder::ConstructJSON_ahrs(uint8_t json_level, bool json_appending)
 {
@@ -2063,12 +2077,12 @@ void mMAVLink_Decoder::MQTTHandler_Set_RefreshAll()
  * */
 void mMAVLink_Decoder::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**

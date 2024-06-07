@@ -17,23 +17,6 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     SEGMENT_I(0).flags.fForceUpdate = true;
   }
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-
-  if(jtok = obj["ListDir"]){
-
-    // CommandSet_SerialPrint_FileNames(jtok.getStr());
-    listDir(FILE_SYSTEM, "/", 0);
-    
-  }
-
-  if(jtok = obj["ReadFile"]){
-
-    CommandSet_ReadFile(jtok.getStr());
-    
-  }
-
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
-
   uint8_t segments_found = 0;
 
 
@@ -79,83 +62,6 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   ALOG_DBM(PSTR(D_LOG_LIGHT D_TOPIC "mAnimatorLight::parse_JSONCommand::End"));
 
 }
-
-/**
- * @brief move into sdcard class
- * 
- */
-#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-void mAnimatorLight::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-    Serial.printf("Listing directory: %s\n", dirname);
-
-#ifdef ESP32
-    File root = fs.open(dirname);
-    if(!root){
-        Serial.println("Failed to open directory");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println("Not a directory");
-        return;
-    }
-
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
-            }
-        } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
-        }
-        file = root.openNextFile();
-    }
-
-    #endif 
-}
-
-
-void mAnimatorLight::readFile(fs::FS &fs, const char * path){
-    Serial.printf("Reading file: %s\n\r", path);
-
-#ifdef ESP32
-    File file = fs.open(path);
-    if(!file){
-        Serial.println("Failed to open file for reading");
-        return;
-    }
-
-    Serial.print("Read from file: \n\r");
-    while(file.available()){
-        Serial.write(file.read());
-    }
-    #endif
-
-    Serial.println();
-}
-
-
-void mAnimatorLight::CommandSet_ReadFile(const char* filename){
-
-  readFile(FILE_SYSTEM, filename);
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-} 
-
-#endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-
-
-
-
-
 
 
 
@@ -735,7 +641,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
             if(arrlen > 5){ break; }
             array[arrlen++] = v.getInt();
           }
-          SEGMENT_I(segment_index).rgbcctcolors[colour_index].setChannelsRaw(array[0],array[1],array[2],array[3],array[4]);
+          SEGMENT_I(segment_index).rgbcctcolors[colour_index] = RgbcctColor(array[0],array[1],array[2],array[3],array[4]);
         }
 
         data_buffer.isserviced++;
@@ -804,10 +710,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
     
       if(jtok = seg_obj[D_JSON_SUBTYPE]){
-        ALOG_WRN(PSTR("D_JSON_SUBTYPE is in conflict with ColourType, likely this needs to be the main command and ColourType set internally only with no external command"));
-        CommandSet_SegColour_RgbcctColour_LightSubType(jtok.getInt(), colour_index, segment_index);
-        ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SUBTYPE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getSubType());
-        data_buffer.isserviced++;
+        ALOG_ERR(PSTR("D_JSON_SUBTYPE removed"));
       }
       
     
@@ -1132,7 +1035,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 void mAnimatorLight::CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index)
 {
   
-  SEGMENT_I(segment_index).colour_type__used_in_effect_generate = (RgbcctColor::ColourType)id;
+  SEGMENT_I(segment_index).colour_type__used_in_effect_generate = (ColourType)id;
 
   ALOG_INF(PSTR("ColourType = %d"),SEGMENT_I(segment_index).colour_type__used_in_effect_generate);
 
@@ -1382,29 +1285,29 @@ void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new, 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index, uint8_t segment_index)
 {
   if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
-  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setCCT(ct);    
+  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setCCT_Kelvin(ct);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index, uint8_t segment_index)
 {
   if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
-  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setBrightnessRGB255(brightness);    
+  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setBrightnessRGB(brightness);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index, uint8_t segment_index)
 {
   if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
-  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setBrightnessCCT255(brightness);    
+  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setBrightnessCCT(brightness);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index, uint8_t segment_index)
 {
     
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
-  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setChannelsRaw(values);    // must be 5 for now, will consider less later
+  // if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
+  // SEGMENT_I(segment_index).rgbcctcolors[colour_index].setChannelsRaw(values);    // must be 5 for now, will consider less later
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[30];
@@ -1413,12 +1316,6 @@ void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, u
   #endif // ENABLE_LOG_LEVEL_DEBUG
 }
 
-
-void mAnimatorLight::CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subtype, uint8_t colour_index, uint8_t segment_index)
-{
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
-  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setSubType(subtype); 
-}
 
 
 

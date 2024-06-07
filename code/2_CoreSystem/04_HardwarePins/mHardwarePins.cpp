@@ -16,6 +16,10 @@ const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR = D_MODULE_C
  * 
  */
 
+#ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+GPIOViewer gpio_viewer;
+#endif
+
 
 void mHardwarePins::Template_Load(){
 
@@ -143,6 +147,11 @@ void mHardwarePins::Pre_Init(){
   
   #endif // USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
 
+#ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+  // Must be at the end of your setup
+  // gpio_viewer.setSamplingInterval(25); // You can set the sampling interval in ms, if not set default is 100ms
+  gpio_viewer.begin();
+#endif
 
 
 

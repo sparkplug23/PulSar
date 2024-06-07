@@ -103,8 +103,6 @@ class mImmersionTankColour :
     &mqtthandler_sensor_teleperiod
   };
     
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
 
 };
 

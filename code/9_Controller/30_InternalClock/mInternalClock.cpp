@@ -316,18 +316,18 @@ void mInternalClock::SpeedRefresh(void)
 
 uint8_t mInternalClock::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P("test",0);  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P("test",0);  
+  JBI->End();
 
 }
 
 uint8_t mInternalClock::ConstructJSON_Power(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
-    JsonBuilderI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
+    JBI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
+  JBI->End();
 
 }
 

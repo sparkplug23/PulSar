@@ -69,7 +69,7 @@ void mSerial::Init(void)
 
     settings.uart2.initialised = true;
     // init_UART2_pins();
-    AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+    AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"), settings.uart2.gpio.tx, settings.uart2.gpio.rx);
 
     
 
@@ -81,6 +81,8 @@ void mSerial::Init(void)
 }
 void mSerial::Pre_Init()
 {
+
+  module_state.mode = ModuleStatus::Initialising;
 
   #ifdef ENABLE_HARDWARE_UART_0
   if(pCONT_pins->PinUsed(GPIO_HWSERIAL0_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL0_RING_BUFFER_RX_ID)) {
@@ -150,14 +152,23 @@ void mSerial::Pre_Init()
 
     HWSerial2 = new HardwareSerial(2);
 
+    // HWSerial2->begin(
+    //   settings.uart2.baud, 
+    //   SERIAL_8N1, 
+    //   settings.uart2.gpio.rx, 
+    //   settings.uart2.gpio.tx
+    // );
     HWSerial2->begin(
-      settings.uart2.baud, 
-      SERIAL_8N1, 
-      settings.uart2.gpio.rx, 
-      settings.uart2.gpio.tx
+      9600,
+      SERIAL_8N1,
+      settings.uart2.gpio.rx, // RX
+      settings.uart2.gpio.tx  // TX
     );
+    HWSerial2->updateBaudRate(settings.uart2.baud);
 
     // settings.uart1.receive_interrupts_enable = true;
+
+    settings.uart2.initialised = true;
     // init_UART1_pins();
     AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
   }else{
@@ -220,6 +231,7 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 //     break;
 
 
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
 
   switch(function){
@@ -345,9 +357,9 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
    * WEBPAGE SECTION * 
   *******************/
   
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  // #ifdef USE_MODULE_NETWORK_WEBSERVER
+  // return Tasker_Web(function);
+  // #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
   // // Only continue in to tasker if module was configured properly
@@ -412,7 +424,7 @@ void mSerial::StartISR_RingBuffers()
     init_UART1_RingBuffer();
     init_UART1_ISR();
     settings.uart1.initialised = true;
-    settings.fEnableModule = true;
+    module_state.mode = ModuleStatus::Running;
   }
   #endif // ENABLE_HARDWARE_UART_1
 
@@ -425,7 +437,7 @@ DEBUG_LINE_HERE;
     init_UART2_RingBuffer();
     init_UART2_ISR();
     settings.uart2.initialised = true;
-    settings.fEnableModule = true;
+    module_state.mode = ModuleStatus::Running;
   }
   #endif // ENABLE_HARDWARE_UART_2
 
@@ -1616,29 +1628,29 @@ uint8_t mSerial::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
+    JBI->Add_P(PM_JSON_TIME, 1000);
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
 uint8_t mSerial::ConstructJSON_UARTInfo(uint8_t json_level, bool json_appending){
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
+    JBI->Add_P(PM_JSON_TIME, 1000);
 
     // JBI->Object_Start("UART1");
     //   JBI->Add("receive_interrupts_enable", settings.uart1.receive_interrupts_enable);
@@ -1664,8 +1676,8 @@ uint8_t mSerial::ConstructJSON_UARTInfo(uint8_t json_level, bool json_appending)
     JBI->Object_End();
     #endif
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
 

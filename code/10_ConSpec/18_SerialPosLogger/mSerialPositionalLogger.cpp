@@ -213,13 +213,13 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //       switch(stream_tmp_buf_writer_index)
 //       {
 //         case 0:
-//           stream_tmp_buflen_0 = JsonBuilderI->GetLength();
-//           memcpy(stream_tmp_buffer_0, JsonBuilderI->GetBufferPtr(), stream_tmp_buflen_0);
+//           stream_tmp_buflen_0 = JBI->GetLength();
+//           memcpy(stream_tmp_buffer_0, JBI->GetBufferPtr(), stream_tmp_buflen_0);
 //           stream_tmp_buf_writer_index = 1;
 //         break;
 //         case 1:
-//           stream_tmp_buflen_1 = JsonBuilderI->GetLength();
-//           memcpy(stream_tmp_buffer_1, JsonBuilderI->GetBufferPtr(), stream_tmp_buflen_1);
+//           stream_tmp_buflen_1 = JBI->GetLength();
+//           memcpy(stream_tmp_buffer_1, JBI->GetBufferPtr(), stream_tmp_buflen_1);
 //           stream_tmp_buf_writer_index = 0;
 //         break;
 //       }
@@ -374,7 +374,7 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //       // BufferWriterI->Append("]");
 //   //     // BufferWriterI->Append("\"");
 
-//       // JsonBuilderI->End();
+//       // JBI->End();
 
 //   // //     //   /**
 //   // //     //    * Write all data with ISR safe method into sd output ringbuffer
@@ -393,13 +393,13 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //       switch(stream_tmp_buf_writer_index)
 //       {
 //         case 0:
-//           stream_tmp_buflen_0 = JsonBuilderI->GetLength();
-//           memcpy(stream_tmp_buffer_0, JsonBuilderI->GetBufferPtr(), stream_tmp_buflen_0);
+//           stream_tmp_buflen_0 = JBI->GetLength();
+//           memcpy(stream_tmp_buffer_0, JBI->GetBufferPtr(), stream_tmp_buflen_0);
 //           stream_tmp_buf_writer_index = 1;
 //         break;
 //         case 1:
-//           stream_tmp_buflen_1 = JsonBuilderI->GetLength();
-//           memcpy(stream_tmp_buffer_1, JsonBuilderI->GetBufferPtr(), stream_tmp_buflen_1);
+//           stream_tmp_buflen_1 = JBI->GetLength();
+//           memcpy(stream_tmp_buffer_1, JBI->GetBufferPtr(), stream_tmp_buflen_1);
 //           stream_tmp_buf_writer_index = 0;
 //         break;
 //       }
@@ -812,7 +812,7 @@ void ISR_Direct_SubTask_Generate_SyncFrame_To_SDCard_Stream()
   // /**
   //  *  ConstructJSON_SDCardSuperFrame
   //  **/
-  // JsonBuilderI->Start();
+  // JBI->Start();
     
   // if(pCONT_serial_pos_log->sequence_test == 0){
   //   JBI->Add("DeviceName", DEVICENAME_FRIENDLY_CTR);
@@ -845,7 +845,7 @@ void ISR_Direct_SubTask_Generate_SyncFrame_To_SDCard_Stream()
   // }
   // BufferWriterI->Append("]");
 
-  // JsonBuilderI->End();
+  // JBI->End();
 
   char* test = "test write";
 
@@ -1145,18 +1145,18 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
 
 uint8_t mSerialPositionalLogger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+  return JBI->End();
 
 }
 
 
 uint8_t mSerialPositionalLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_VOLTAGE, 0);
+  return JBI->End();
     
 }
 
@@ -1170,7 +1170,7 @@ uint8_t mSerialPositionalLogger::ConstructJSON_Sensor(uint8_t json_level, bool j
  * */
 uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
     
   /**
    * on first sequence number, send additional useful info
@@ -1266,7 +1266,7 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_lev
   #endif // USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
 
 
-  return JsonBuilderI->End();
+  return JBI->End();
     
 }
 

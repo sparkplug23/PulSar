@@ -1731,32 +1731,32 @@ void mEnergyInterface::MQTTHandler_Sender()
 // // Instead of this way, it should take in via GetSensor like sensor_interface to accumulate all present and future energy devices
 
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
-//   JsonBuilderI->Add(D_JSON_CHANNELCOUNT,         Energy.phase_count);
-//   JsonBuilderI->Array_AddArray_F(D_JSON_VOLTAGE,              Energy.voltage,       Energy.phase_count);
-//   JsonBuilderI->Array_AddArray_F(D_JSON_CURRENT,              Energy.current,       Energy.phase_count);
-//   JsonBuilderI->Array_AddArray_F(D_JSON_ACTIVE_POWERUSAGE,    Energy.active_power,  Energy.phase_count);
+//   JBI->Add(D_JSON_CHANNELCOUNT,         Energy.phase_count);
+//   JBI->Array_AddArray_F(D_JSON_VOLTAGE,              Energy.voltage,       Energy.phase_count);
+//   JBI->Array_AddArray_F(D_JSON_CURRENT,              Energy.current,       Energy.phase_count);
+//   JBI->Array_AddArray_F(D_JSON_ACTIVE_POWERUSAGE,    Energy.active_power,  Energy.phase_count);
 
 //   JBI->Add("tRateSecs", mqtthandler_sensor_ifchanged.tRateSecs);
 
 
-//   // JsonBuilderI->Array_AddArray_F(D_JSON_APPARENT_POWERUSAGE,  Energy.apparent_power,Energy.phase_count);
-//   // JsonBuilderI->Array_AddArray_F(D_JSON_REACTIVE_POWERUSAGE,  Energy.reactive_power,Energy.phase_count);
-//   // JsonBuilderI->Array_AddArray_F(D_JSON_POWERFACTOR,          Energy.power_factor,  Energy.phase_count);
-//   // JsonBuilderI->Array_AddArray_F(D_JSON_FREQUENCY,            Energy.frequency,     Energy.phase_count);
-//   // JsonBuilderI->Add(D_JSON_ENERGY,               Energy.energy);
-//   // JsonBuilderI->Add(D_JSON_ENERGYLAST,           Energy.last_energy);
+//   // JBI->Array_AddArray_F(D_JSON_APPARENT_POWERUSAGE,  Energy.apparent_power,Energy.phase_count);
+//   // JBI->Array_AddArray_F(D_JSON_REACTIVE_POWERUSAGE,  Energy.reactive_power,Energy.phase_count);
+//   // JBI->Array_AddArray_F(D_JSON_POWERFACTOR,          Energy.power_factor,  Energy.phase_count);
+//   // JBI->Array_AddArray_F(D_JSON_FREQUENCY,            Energy.frequency,     Energy.phase_count);
+//   // JBI->Add(D_JSON_ENERGY,               Energy.energy);
+//   // JBI->Add(D_JSON_ENERGYLAST,           Energy.last_energy);
   
 //   // if(json_method >= JSON_LEVEL_DETAILED){
-//   //   JsonBuilderI->Object_Start(D_JSON_KWH_STATS);
-//   //     JsonBuilderI->Add(D_JSON_INDEX, Energy.stats.kwh_per_minute_index);
-//   //     JsonBuilderI->Add(D_JSON_ENERGY "LastMinute", Energy.stats.last_minutes_energy);
-//   //     JsonBuilderI->Add(D_JSON_ENERGY "Currently",  Energy.stats.current_energy);
-//   //     JsonBuilderI->Add(D_JSON_ENERGY "ThisMinute", Energy.stats.this_minutes_energy);
-//   //     JsonBuilderI->Array_AddArray_F("kwh_per_minute",           Energy.stats.kwh_per_minute,     sizeof(Energy.stats.kwh_per_minute)/4);
-//   //     JsonBuilderI->Array_AddArray_F("kwh_each_minute",          Energy.stats.kwh_each_minute,    sizeof(Energy.stats.kwh_each_minute)/4);
-//   //   JsonBuilderI->Object_End();
+//   //   JBI->Object_Start(D_JSON_KWH_STATS);
+//   //     JBI->Add(D_JSON_INDEX, Energy.stats.kwh_per_minute_index);
+//   //     JBI->Add(D_JSON_ENERGY "LastMinute", Energy.stats.last_minutes_energy);
+//   //     JBI->Add(D_JSON_ENERGY "Currently",  Energy.stats.current_energy);
+//   //     JBI->Add(D_JSON_ENERGY "ThisMinute", Energy.stats.this_minutes_energy);
+//   //     JBI->Array_AddArray_F("kwh_per_minute",           Energy.stats.kwh_per_minute,     sizeof(Energy.stats.kwh_per_minute)/4);
+//   //     JBI->Array_AddArray_F("kwh_each_minute",          Energy.stats.kwh_each_minute,    sizeof(Energy.stats.kwh_each_minute)/4);
+//   //   JBI->Object_End();
 //   // }
 
 //   // Serial.println(JBI->GetBufferPtr()); Serial.flush();
@@ -1764,56 +1764,56 @@ void mEnergyInterface::MQTTHandler_Sender()
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("mEnergyInterface::ConstructJSON_Sensor"));
 
-//   return JsonBuilderI->End();
+//   return JBI->End();
 
 // }
 
 
 // uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
 //   // Create a new "Array" method that just lets me pass infinite amount of parameters using vsprintf
 
-//     JsonBuilderI->Object_Start("Current");
+//     JBI->Object_Start("Current");
     
-//       JsonBuilderI->Array_Start("IsExceeded"); //show value right now
+//       JBI->Array_Start("IsExceeded"); //show value right now
 //       for(int ii=0;ii<Energy.phase_count;ii++){
-//         JsonBuilderI->Add(parameter_thresholds[ii].current.over_limit_seconds_trigger_value_exceeded);
+//         JBI->Add(parameter_thresholds[ii].current.over_limit_seconds_trigger_value_exceeded);
 //       }
-//       JsonBuilderI->Array_End();
+//       JBI->Array_End();
 
-//       // JsonBuilderI->Array_Start("OverLimitCounter");
+//       // JBI->Array_Start("OverLimitCounter");
 //       // for(int ii=0;ii<Energy.phase_count;ii++){
-//       //   JsonBuilderI->Add_FV(PSTR("%d"),parameter_thresholds[ii].current.over_limit_seconds_counter);
+//       //   JBI->Add_FV(PSTR("%d"),parameter_thresholds[ii].current.over_limit_seconds_counter);
 //       // }
-//       // JsonBuilderI->Array_End();
+//       // JBI->Array_End();
 
-//       // JsonBuilderI->Array_Start("Value"); //show value right now
+//       // JBI->Array_Start("Value"); //show value right now
 //       // for(int ii=0;ii<Energy.phase_count;ii++){
-//       //   JsonBuilderI->Add(Energy.current[ii]);
+//       //   JBI->Add(Energy.current[ii]);
 //       // }
-//       // JsonBuilderI->Array_End();
+//       // JBI->Array_End();
 
-//       // JsonBuilderI->Array_Start("UpperLimit");
+//       // JBI->Array_Start("UpperLimit");
 //       // for(int ii=0;ii<Energy.phase_count;ii++){
-//       //   JsonBuilderI->Add(parameter_thresholds[ii].current.upper_limit);
+//       //   JBI->Add(parameter_thresholds[ii].current.upper_limit);
 //       // }
-//       // JsonBuilderI->Array_End();
+//       // JBI->Array_End();
 
-//       // JsonBuilderI->Array_Start("LowerLimit");
+//       // JBI->Array_Start("LowerLimit");
 //       // for(int ii=0;ii<Energy.phase_count;ii++){
-//       //   JsonBuilderI->Add(parameter_thresholds[ii].current.lower_limit);
+//       //   JBI->Add(parameter_thresholds[ii].current.lower_limit);
 //       // }
-//       // JsonBuilderI->Array_End();
+//       // JBI->Array_End();
 
-//       // JsonBuilderI->Array_Start("OverLimitTrigger");
+//       // JBI->Array_Start("OverLimitTrigger");
 //       // for(int ii=0;ii<Energy.phase_count;ii++){
-//       //   JsonBuilderI->Add_FV(PSTR("%d"),parameter_thresholds[ii].current.over_limit_seconds_trigger_value);
+//       //   JBI->Add_FV(PSTR("%d"),parameter_thresholds[ii].current.over_limit_seconds_trigger_value);
 //       // }
-//       // JsonBuilderI->Array_End();
+//       // JBI->Array_End();
 
-//     JsonBuilderI->Object_End();
+//     JBI->Object_End();
 
 
 //     // Voltage
@@ -1852,17 +1852,17 @@ void mEnergyInterface::MQTTHandler_Sender()
 //     // parameter_thresholds[ii].energy.over_limit_seconds_counter = 0;
 //     // parameter_thresholds[ii].energy.over_limit_seconds_trigger_value = 120;
 //   // if(json_method >= JSON_LEVEL_DETAILED){
-//   //   JsonBuilderI->Object_Start(D_JSON_KWH_STATS);
-//   //     JsonBuilderI->Add(D_JSON_INDEX, Energy.stats.kwh_per_minute_index);
-//   //     JsonBuilderI->Add(D_JSON_ENERGY "LastMinute", Energy.stats.last_minutes_energy);
-//   //     JsonBuilderI->Add(D_JSON_ENERGY "Currently",  Energy.stats.current_energy);
-//   //     JsonBuilderI->Add(D_JSON_ENERGY "ThisMinute", Energy.stats.this_minutes_energy);
-//   //     JsonBuilderI->Array_AddArray_F("kwh_per_minute",           Energy.stats.kwh_per_minute,     sizeof(Energy.stats.kwh_per_minute)/4);
-//   //     JsonBuilderI->Array_AddArray_F("kwh_each_minute",          Energy.stats.kwh_each_minute,    sizeof(Energy.stats.kwh_each_minute)/4);
-//   //   JsonBuilderI->Object_End();
+//   //   JBI->Object_Start(D_JSON_KWH_STATS);
+//   //     JBI->Add(D_JSON_INDEX, Energy.stats.kwh_per_minute_index);
+//   //     JBI->Add(D_JSON_ENERGY "LastMinute", Energy.stats.last_minutes_energy);
+//   //     JBI->Add(D_JSON_ENERGY "Currently",  Energy.stats.current_energy);
+//   //     JBI->Add(D_JSON_ENERGY "ThisMinute", Energy.stats.this_minutes_energy);
+//   //     JBI->Array_AddArray_F("kwh_per_minute",           Energy.stats.kwh_per_minute,     sizeof(Energy.stats.kwh_per_minute)/4);
+//   //     JBI->Array_AddArray_F("kwh_each_minute",          Energy.stats.kwh_each_minute,    sizeof(Energy.stats.kwh_each_minute)/4);
+//   //   JBI->Object_End();
 //   // }
 
-//   return JsonBuilderI->End();
+//   return JBI->End();
 
 // }
 // /*********************************************************************************************************************************************
@@ -1872,9 +1872,9 @@ void mEnergyInterface::MQTTHandler_Sender()
 
 // uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
-//     // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+//     // JBI->Add(D_JSON_CHANNELCOUNT"232",         0);
     
 //     JBI->Object_Start("Address");
 //     // for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
@@ -1891,18 +1891,18 @@ void mEnergyInterface::MQTTHandler_Sender()
 
 
   
-//   return JsonBuilderI->End();
+//   return JBI->End();
 
 // }
 
 
 // uint8_t mEnergyInterface::ConstructJSON_EnergyStats(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
 
-//     // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+//     // JBI->Add(D_JSON_CHANNELCOUNT"232",         0);
   
-//   return JsonBuilderI->End();
+//   return JBI->End();
 //   // D_DATA_BUFFER_CLEAR();
 
 //   // // StaticJsonDocument<1000> doc;
@@ -2240,30 +2240,30 @@ void mEnergyInterface::MQTTHandler_Sender()
 // //   char buffer[50];
 // //   uint8_t count = 0;
   
-// //   JsonBuilderI->Array_Start("ener_tab");// Class name
+// //   JBI->Array_Start("ener_tab");// Class name
 // //   for(int row=0;row<6;row++){
 // //     for(int device=0;device<Energy.phase_count;device++){//Energy.phase_count;device++){
-// //       JsonBuilderI->Object_Start();
-// //         JsonBuilderI->Add("id",count++);
+// //       JBI->Object_Start();
+// //         JBI->Add("id",count++);
 // //         //add for flag, to highlight row where power is "in use"/high
 // //         if(pCONT_pzem->data_modbus[device].active_power>30){
-// //           JsonBuilderI->Add("fc","#ff0000");
+// //           JBI->Add("fc","#ff0000");
 // //         }else{
-// //           JsonBuilderI->Add("fc","#ffffff");
+// //           JBI->Add("fc","#ffffff");
 // //         }
-// //         // JsonBuilderI->Add_FV("ih","\"c%d d%d\"", count-1, device);
+// //         // JBI->Add_FV("ih","\"c%d d%d\"", count-1, device);
 // //         switch(row){
-// //           case 0: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].voltage); break;
-// //           case 1: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].current); break;
-// //           case 2: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].active_power); break;
-// //           case 3: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].frequency); break;
-// //           case 4: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].power_factor); break;
-// //           case 5: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].energy); break;
+// //           case 0: JBI->Add("ih",pCONT_pzem->data_modbus[device].voltage); break;
+// //           case 1: JBI->Add("ih",pCONT_pzem->data_modbus[device].current); break;
+// //           case 2: JBI->Add("ih",pCONT_pzem->data_modbus[device].active_power); break;
+// //           case 3: JBI->Add("ih",pCONT_pzem->data_modbus[device].frequency); break;
+// //           case 4: JBI->Add("ih",pCONT_pzem->data_modbus[device].power_factor); break;
+// //           case 5: JBI->Add("ih",pCONT_pzem->data_modbus[device].energy); break;
 // //         } //switch      
-// //       JsonBuilderI->Object_End();
+// //       JBI->Object_End();
 // //     }
 // //   }//end for
-// //   JsonBuilderI->Array_End();
+// //   JBI->Array_End();
   
 
 // //   // char colour_button[8];
@@ -2273,19 +2273,19 @@ void mEnergyInterface::MQTTHandler_Sender()
 // //   // #endif
 // //   // ANIMATION_MODE_NONE_ID};
   
-// //   // JsonBuilderI->Array_Start("animod");// Class name
+// //   // JBI->Array_Start("animod");// Class name
 // //   // for(int row=0;row<sizeof(button_ids);row++){
 // //   //   if(button_ids[row] == animation.mode_id){
 // //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON_HIGHLIGHT); //selected
 // //   //   }else{
 // //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
 // //   //   }        
-// //   //   JsonBuilderI->Object_Start();
-// //   //     JsonBuilderI->Add("id",row);
-// //   //     JsonBuilderI->Add("bc",colour_button);
-// //   //   JsonBuilderI->Object_End();
+// //   //   JBI->Object_Start();
+// //   //     JBI->Add("id",row);
+// //   //     JBI->Add("bc",colour_button);
+// //   //   JBI->Object_End();
 // //   // }  
-// //   // JsonBuilderI->Array_End();
+// //   // JBI->Array_End();
 
 // // }
 

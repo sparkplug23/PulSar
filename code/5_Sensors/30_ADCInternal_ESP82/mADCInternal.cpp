@@ -337,9 +337,9 @@ void mADCInternal::Update_Channel1_ADC_Readings()
 
 uint8_t mADCInternal::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+  return JBI->End();
 
 }
 
@@ -746,9 +746,9 @@ void mADCInternal::MQTTHandler_Sender()
 
 // uint8_t mSensorsAnalog::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add("analog", analogRead(A0));
-//   return JsonBuilderI->End();
+//   JBI->Start();
+//     JBI->Add("analog", analogRead(A0));
+//   return JBI->End();
   
 // }
 
@@ -758,18 +758,18 @@ void mADCInternal::MQTTHandler_Sender()
 
 // uint8_t mSensorsAnalog::ConstructJSON_Sensor(uint8_t json_level){
   
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add("analog", analogRead(A0));
+//   JBI->Start();
+//     JBI->Add("analog", analogRead(A0));
 
 //     uint8_t percentage = mapvalue(analogRead(A0), 1024,320, 0,100);
 
-//     JsonBuilderI->Add("percentage", percentage);
-//     JsonBuilderI->Object_Start("limits");
-//       JsonBuilderI->Add("min", 1024);    
-//       JsonBuilderI->Add("max", 320);
-//     JsonBuilderI->Object_End();
+//     JBI->Add("percentage", percentage);
+//     JBI->Object_Start("limits");
+//       JBI->Add("min", 1024);    
+//       JBI->Add("max", 320);
+//     JBI->Object_End();
 
-//   return JsonBuilderI->End();
+//   return JBI->End();
 
 // }
 

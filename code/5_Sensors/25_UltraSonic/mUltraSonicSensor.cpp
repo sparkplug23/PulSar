@@ -498,15 +498,15 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void)
 
     char buffer[50];
       
-    JsonBuilderI->Start();
-      JsonBuilderI->Add("location", DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
-      JsonBuilderI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
-    JsonBuilderI->End();
+    JBI->Start();
+      JBI->Add("location", DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
+      JBI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
+    JBI->End();
 
     if(motion_detect.isactive){
-      pCONT_mqtt->ppublish("status/motion/detected",JsonBuilderI->GetBufferPtr(),false);
+      pCONT_mqtt->ppublish("status/motion/detected",JBI->GetBufferPtr(),false);
     }else{
-      pCONT_mqtt->ppublish("status/motion/over",JsonBuilderI->GetBufferPtr(),false);
+      pCONT_mqtt->ppublish("status/motion/over",JBI->GetBufferPtr(),false);
     }
 
   }
@@ -612,21 +612,21 @@ void mUltraSonicSensor::WebAppend_Root_Status_Table_Data(){
   
   char float_ctr[10];
 
-  JsonBuilderI->Array_Start("tab_ult");// Class name
+  JBI->Array_Start("tab_ult");// Class name
   for(int row=0;row<2;row++){
-    JsonBuilderI->Object_Start();
-      JsonBuilderI->Add("id",row);
+    JBI->Object_Start();
+      JBI->Add("id",row);
       switch(row){
         default:
         case 0:
           dtostrf(GetDistanceCMReading()/100,3,2,float_ctr);
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s m\""),float_ctr);
+          JBI->Add_FV("ih",PSTR("\"%s m\""),float_ctr);
         break;
-        case 1: JsonBuilderI->Add_P("ih",motion_detect.detected_rtc_ctr); break;
+        case 1: JBI->Add_P("ih",motion_detect.detected_rtc_ctr); break;
       }  
-    JsonBuilderI->Object_End();
+    JBI->Object_End();
   }
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
 
 }
     #endif// USE_MODULE_NETWORK_WEBSERVER
@@ -720,77 +720,77 @@ void mUltraSonicSensor::parse_JSONCommand(){
 
 uint8_t mUltraSonicSensor::ConstructJSON_Settings(uint8_t json_level){
 
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
     // // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
 uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
 
-  JsonBuilderI->Start(); 
-    JsonBuilderI->Object_Start(D_JSON_SENSOR);
-      JsonBuilderI->Add(D_JSON_ISVALID, ultrasonic.isvalid);
-      JsonBuilderI->Add(D_JSON_DURATION, ultrasonic.duration);
-      JsonBuilderI->Add(D_JSON_DURATION_RAW, ultrasonic.duration_raw);
-      JsonBuilderI->Add(D_JSON_TEMPERATURE, ultrasonic.temperature);
-      JsonBuilderI->Add(D_JSON_TEMPERATURE "_Age", abs(millis()-ultrasonic.tPermitTempUpdate));
-      JsonBuilderI->Add(D_JSON_SPEEDOFSOUND, ultrasonic.speedofsound);
-      JsonBuilderI->Add(D_JSON_LASTREAD, abs(millis()-ultrasonic.tUltraSonicSensorReadLast));
+  JBI->Start(); 
+    JBI->Object_Start(D_JSON_SENSOR);
+      JBI->Add(D_JSON_ISVALID, ultrasonic.isvalid);
+      JBI->Add(D_JSON_DURATION, ultrasonic.duration);
+      JBI->Add(D_JSON_DURATION_RAW, ultrasonic.duration_raw);
+      JBI->Add(D_JSON_TEMPERATURE, ultrasonic.temperature);
+      JBI->Add(D_JSON_TEMPERATURE "_Age", abs(millis()-ultrasonic.tPermitTempUpdate));
+      JBI->Add(D_JSON_SPEEDOFSOUND, ultrasonic.speedofsound);
+      JBI->Add(D_JSON_LASTREAD, abs(millis()-ultrasonic.tUltraSonicSensorReadLast));
       if(json_level >= JSON_LEVEL_DETAILED){
-        JsonBuilderI->Object_Start(D_JSON_ACCURACY);
-          JsonBuilderI->Add(D_JSON_INSIDE, ultrasonic.accuracy.insidecount);
-          JsonBuilderI->Add(D_JSON_OUTSIDE, ultrasonic.accuracy.outsidecount);
-          JsonBuilderI->Add(D_JSON_PERCENTAGE, ultrasonic.accuracy.percent);
-        JsonBuilderI->Object_End(); // D_JSON_ACCURACY
-        JsonBuilderI->Level_Start_P(  PSTR(D_JSON_THRESHOLD));
-          JsonBuilderI->Add_P(          PSTR(D_JSON_SET     D_JSON_PERCENT), ultrasonic.threshold.setpercent);
-          JsonBuilderI->Add_P(          PSTR(D_JSON_NARROW  D_JSON_PERCENT), ultrasonic.threshold.narrowpercent);
-          JsonBuilderI->Add_P(          PSTR(D_JSON_WIDE    D_JSON_PERCENT), ultrasonic.threshold.widepercent);
-          JsonBuilderI->Add_P(          PSTR(D_JSON_LOWER   D_JSON_VALUE),   ultrasonic.threshold.lowervalue);
-          JsonBuilderI->Add_P(          PSTR(D_JSON_UPPER   D_JSON_VALUE),   ultrasonic.threshold.uppervalue);
-          JsonBuilderI->Add_P(          PSTR(D_JSON_INSIDE  D_JSON_COUNT),   ultrasonic.threshold.insidecount);
-          JsonBuilderI->Add_P(          PSTR(D_JSON_OUTSIDE D_JSON_COUNT),   ultrasonic.threshold.outsidecount);
-          JsonBuilderI->Level_Start_P(  PSTR(D_JSON_RATIO));
-            JsonBuilderI->Add_P(          PSTR(D_JSON_POSITIVE),   ultrasonic.threshold.ratio_pos);
-            JsonBuilderI->Add_P(          PSTR(D_JSON_NEGATIVE),   ultrasonic.threshold.ratio_pos);
-            JsonBuilderI->Add_P(          PSTR(D_JSON_RELATIVE),   ultrasonic.threshold.ratio_pos);
-          JsonBuilderI->Object_End(); // D_JSON_RATIO
-        JsonBuilderI->Object_End(); // D_JSON_THRESHOLD
+        JBI->Object_Start(D_JSON_ACCURACY);
+          JBI->Add(D_JSON_INSIDE, ultrasonic.accuracy.insidecount);
+          JBI->Add(D_JSON_OUTSIDE, ultrasonic.accuracy.outsidecount);
+          JBI->Add(D_JSON_PERCENTAGE, ultrasonic.accuracy.percent);
+        JBI->Object_End(); // D_JSON_ACCURACY
+        JBI->Level_Start_P(  PSTR(D_JSON_THRESHOLD));
+          JBI->Add_P(          PSTR(D_JSON_SET     D_JSON_PERCENT), ultrasonic.threshold.setpercent);
+          JBI->Add_P(          PSTR(D_JSON_NARROW  D_JSON_PERCENT), ultrasonic.threshold.narrowpercent);
+          JBI->Add_P(          PSTR(D_JSON_WIDE    D_JSON_PERCENT), ultrasonic.threshold.widepercent);
+          JBI->Add_P(          PSTR(D_JSON_LOWER   D_JSON_VALUE),   ultrasonic.threshold.lowervalue);
+          JBI->Add_P(          PSTR(D_JSON_UPPER   D_JSON_VALUE),   ultrasonic.threshold.uppervalue);
+          JBI->Add_P(          PSTR(D_JSON_INSIDE  D_JSON_COUNT),   ultrasonic.threshold.insidecount);
+          JBI->Add_P(          PSTR(D_JSON_OUTSIDE D_JSON_COUNT),   ultrasonic.threshold.outsidecount);
+          JBI->Level_Start_P(  PSTR(D_JSON_RATIO));
+            JBI->Add_P(          PSTR(D_JSON_POSITIVE),   ultrasonic.threshold.ratio_pos);
+            JBI->Add_P(          PSTR(D_JSON_NEGATIVE),   ultrasonic.threshold.ratio_pos);
+            JBI->Add_P(          PSTR(D_JSON_RELATIVE),   ultrasonic.threshold.ratio_pos);
+          JBI->Object_End(); // D_JSON_RATIO
+        JBI->Object_End(); // D_JSON_THRESHOLD
       }
-    JsonBuilderI->Object_End(); // D_JSON_SENSOR
-    JsonBuilderI->Object_Start(D_JSON_INSTANT);
-      JsonBuilderI->Add(D_JSON_ISVALID, averaged.instant.isvalid);
-      JsonBuilderI->Add(D_JSON_DISTANCE "_mm", averaged.instant.final.distance_mm);
-    JsonBuilderI->Object_End();   // D_JSON_INSTANT 
-    JsonBuilderI->Object_Start(D_JSON_SMOOTH "_1m");
-      JsonBuilderI->Add(D_JSON_ISVALID, averaged.smooth_1m.isvalid);
-      JsonBuilderI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1m.final.distance_mm);
+    JBI->Object_End(); // D_JSON_SENSOR
+    JBI->Object_Start(D_JSON_INSTANT);
+      JBI->Add(D_JSON_ISVALID, averaged.instant.isvalid);
+      JBI->Add(D_JSON_DISTANCE "_mm", averaged.instant.final.distance_mm);
+    JBI->Object_End();   // D_JSON_INSTANT 
+    JBI->Object_Start(D_JSON_SMOOTH "_1m");
+      JBI->Add(D_JSON_ISVALID, averaged.smooth_1m.isvalid);
+      JBI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1m.final.distance_mm);
       if(json_level >= JSON_LEVEL_DETAILED){
-      JsonBuilderI->Add(D_JSON_DEVIATION, averaged.smooth_1m.averaging.deviationaverage);
-      JsonBuilderI->Add(D_JSON_OUTLIERS, averaged.smooth_1m.averaging.outliercount);
-      JsonBuilderI->Add(D_JSON_RATIO, averaged.smooth_1m.averaging.usableratio);
+      JBI->Add(D_JSON_DEVIATION, averaged.smooth_1m.averaging.deviationaverage);
+      JBI->Add(D_JSON_OUTLIERS, averaged.smooth_1m.averaging.outliercount);
+      JBI->Add(D_JSON_RATIO, averaged.smooth_1m.averaging.usableratio);
       }
-    JsonBuilderI->Object_End();  // D_JSON_SMOOTH "_1m"
-    JsonBuilderI->Object_Start(D_JSON_SMOOTH "_1hr");
-      JsonBuilderI->Add(D_JSON_ISVALID, averaged.smooth_1hr.isvalid);
-      JsonBuilderI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1hr.final.distance_mm);
+    JBI->Object_End();  // D_JSON_SMOOTH "_1m"
+    JBI->Object_Start(D_JSON_SMOOTH "_1hr");
+      JBI->Add(D_JSON_ISVALID, averaged.smooth_1hr.isvalid);
+      JBI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1hr.final.distance_mm);
       if(json_level >= JSON_LEVEL_DETAILED){
-      JsonBuilderI->Add(D_JSON_DEVIATION, averaged.smooth_1hr.averaging.deviationaverage);
-      JsonBuilderI->Add(D_JSON_OUTLIERS, averaged.smooth_1hr.averaging.outliercount);
-      JsonBuilderI->Add(D_JSON_RATIO, averaged.smooth_1hr.averaging.usableratio);
+      JBI->Add(D_JSON_DEVIATION, averaged.smooth_1hr.averaging.deviationaverage);
+      JBI->Add(D_JSON_OUTLIERS, averaged.smooth_1hr.averaging.outliercount);
+      JBI->Add(D_JSON_RATIO, averaged.smooth_1hr.averaging.usableratio);
       }
-    JsonBuilderI->Object_End(); // D_JSON_SMOOTH "_1hr"
+    JBI->Object_End(); // D_JSON_SMOOTH "_1hr"
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
 uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
 
-  JsonBuilderI->Start();  
+  JBI->Start();  
   // Serial.println("ConstructJSON_SensorsAveraged");
 
   // D_DATA_BUFFER_CLEAR();
@@ -802,7 +802,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
   // data_buffer.payload.len = measureJson(root)+1;
   // serializeJson(doc,data_buffer.payload.ctr);
 
-  return JsonBuilderI->End();
+  return JBI->End();
 }
 
 /*********************************************************************************************************************************************

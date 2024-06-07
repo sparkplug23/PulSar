@@ -118,7 +118,7 @@ void mAnimatorLight::doSaveState()
     DEBUG_LINE_HERE;
     #endif
 
-    size_t len = measureJson(*fileDoc) + 1;
+    size_t len = measureJson(*pCONT_mfile->fileDoc) + 1;
 
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
@@ -154,7 +154,7 @@ void mAnimatorLight::doSaveState()
       DEBUG_LINE_HERE;
       #endif
       
-      serializeJson(*fileDoc, tmpRAMbuffer, len);
+      serializeJson(*pCONT_mfile->fileDoc, tmpRAMbuffer, len);
   
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
@@ -168,7 +168,7 @@ void mAnimatorLight::doSaveState()
       DEBUG_LINE_HERE;
       #endif
 
-      writeObjectToFileUsingId(filename, presetToSave, fileDoc);
+      pCONT_mfile->writeObjectToFileUsingId(filename, presetToSave, pCONT_mfile->fileDoc);
   
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
@@ -182,7 +182,7 @@ void mAnimatorLight::doSaveState()
     DEBUG_LINE_HERE;
     #endif
 
-    writeObjectToFileUsingId(filename, presetToSave, fileDoc);
+    pCONT_mfile->writeObjectToFileUsingId(filename, presetToSave, pCONT_mfile->fileDoc);
   
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
@@ -191,7 +191,7 @@ void mAnimatorLight::doSaveState()
   }
   #endif
 
-  if (persist) presetsModifiedTime = toki.second(); //unix time
+  if (persist) pCONT_mfile->presetsModifiedTime = toki.second(); //unix time
   
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
@@ -203,7 +203,7 @@ void mAnimatorLight::doSaveState()
   DEBUG_LINE_HERE;
   #endif
 
-  updateFSInfo();
+  pCONT_mfile->updateFSInfo();
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
@@ -229,7 +229,7 @@ bool mAnimatorLight::getPresetName(byte index, String& name)
 
   if (!requestJSONBufferLock(9)) return false;
   bool presetExists = false;
-  if (readObjectFromFileUsingId(getFileName(), index, &doc))
+  if (pCONT_mfile->readObjectFromFileUsingId(getFileName(), index, &doc))
   {
     JsonObject fdo = doc.as<JsonObject>();
     if (fdo["n"]) {
@@ -260,7 +260,7 @@ void mAnimatorLight::initPresetsFile()
   ALOG_INF(PSTR("initPresetsFile() -- creating init file"));
 
   if (!f) {
-    errorFlag = ERR_FS_GENERAL;
+    pCONT_mfile->errorFlag = ERR_FS_GENERAL;
     return;
   }
   serializeJson(doc, f);
@@ -297,7 +297,7 @@ void mAnimatorLight::handlePresets()
     return;
   }
 
-  if (presetToApply == 0 || fileDoc)
+  if (presetToApply == 0 || pCONT_mfile->fileDoc)
   {
     // ALOG_INF(PSTR("(presetToApply == 0 || fileDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
@@ -335,8 +335,8 @@ void mAnimatorLight::handlePresets()
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
     #endif
-    deserializeJson(*fileDoc,tmpRAMbuffer);
-    errorFlag = ERR_NONE;
+    deserializeJson(*pCONT_mfile->fileDoc,tmpRAMbuffer);
+    pCONT_mfile->errorFlag = ERR_NONE;
   } 
   else
   #endif
@@ -346,7 +346,7 @@ void mAnimatorLight::handlePresets()
     DEBUG_LINE_HERE;
     #endif
 
-    errorFlag = readObjectFromFileUsingId(filename, tmpPreset, fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
+    pCONT_mfile->errorFlag = pCONT_mfile->readObjectFromFileUsingId(filename, tmpPreset, pCONT_mfile->fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
 
   } 
 
@@ -354,7 +354,7 @@ void mAnimatorLight::handlePresets()
   DEBUG_LINE_HERE;
   #endif
 
-  fdo = fileDoc->as<JsonObject>();
+  fdo = pCONT_mfile->fileDoc->as<JsonObject>();
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
@@ -392,7 +392,7 @@ void mAnimatorLight::handlePresets()
 
   }
 
-  if (!errorFlag && tmpPreset < 255 && changePreset)
+  if (!pCONT_mfile->errorFlag && tmpPreset < 255 && changePreset)
   {
     presetCycCurr = currentPreset = tmpPreset;
   }
@@ -474,7 +474,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     {
       // we will save API call immediately (often causes presets.json corruption)
       presetToSave = 0;
-      if (index > 250 || !fileDoc) return; // cannot save API calls to temporary preset (255)
+      if (index > 250 || !pCONT_mfile->fileDoc) return; // cannot save API calls to temporary preset (255)
       sObj.remove("o");
       sObj.remove("v");
       sObj.remove("time");
@@ -492,19 +492,19 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
       DEBUG_LINE_HERE;
       #endif
 
-      writeObjectToFileUsingId(getFileName(index<255), index, fileDoc);
+      pCONT_mfile->writeObjectToFileUsingId(getFileName(index<255), index, pCONT_mfile->fileDoc);
     
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
       #endif
       
-      presetsModifiedTime = toki.second(); //unix time
+      pCONT_mfile->presetsModifiedTime = toki.second(); //unix time
   
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
       #endif
 
-      updateFSInfo();
+      pCONT_mfile->updateFSInfo();
 
     } 
     else 
@@ -532,9 +532,9 @@ void mAnimatorLight::deletePreset(byte index)
 {
 
   StaticJsonDocument<24> empty;
-  writeObjectToFileUsingId(getFileName(), index, &empty);
-  presetsModifiedTime = toki.second(); //unix time
-  updateFSInfo();
+  pCONT_mfile->writeObjectToFileUsingId(getFileName(), index, &empty);
+  pCONT_mfile->presetsModifiedTime = toki.second(); //unix time
+  pCONT_mfile->updateFSInfo();
 
 }
 
@@ -648,7 +648,7 @@ void mAnimatorLight::deletePreset(byte index)
 //   sObj.createNestedObject("0");
 //   File f = FILE_SYSTEM.open(getFileName(), "w");
 //   if (!f) {
-//     errorFlag = ERR_FS_GENERAL;
+//     pCONT_mfile->errorFlag = ERR_FS_GENERAL;
 //     return;
 //   }
 //   serializeJson(doc, f);
@@ -701,11 +701,11 @@ void mAnimatorLight::deletePreset(byte index)
 //   #ifdef ARDUINO_ARCH_ESP32
 //   if (tmpPreset==255 && tmpRAMbuffer!=nullptr) {
 //     deserializeJson(*fileDoc,tmpRAMbuffer);
-//     errorFlag = ERR_NONE;
+//     pCONT_mfile->errorFlag = ERR_NONE;
 //   } else
 //   #endif
 //   {
-//   errorFlag = readObjectFromFileUsingId(filename, tmpPreset, fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
+//   pCONT_mfile->errorFlag = readObjectFromFileUsingId(filename, tmpPreset, fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
 //   }
 //   fdo = fileDoc->as<JsonObject>();
 
@@ -724,7 +724,7 @@ void mAnimatorLight::deletePreset(byte index)
 //       fdo.remove("ps"); // remove load request for presets to prevent recursive crash (if not called by button and contains preset cycling string "1~5~")
 //     deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset); // may change presetToApply by calling applyPreset()
 //   }
-//   if (!errorFlag && tmpPreset < 255 && changePreset) presetCycCurr = currentPreset = tmpPreset;
+//   if (!pCONT_mfile->errorFlag && tmpPreset < 255 && changePreset) presetCycCurr = currentPreset = tmpPreset;
 
 //   #if defined(ARDUINO_ARCH_ESP32)
 //   //Aircoookie recommended not to delete buffer

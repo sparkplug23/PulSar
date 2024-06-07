@@ -2457,74 +2457,93 @@ const byte candy2_gp[] PROGMEM = {
   211,  39, 33, 34,
   255,   1,  1,  1};
 
+  
+const byte pink_purple_blend[] PROGMEM = {
+    0, 255,0,43,    // Hot Pink
+    50, 255,0,43,   // Hot Pink
+    205, 255,0,255, // Pink
+    255, 255,0,255  // Pink
+  };
+
+
+const byte pink_white_purple_blend[] PROGMEM = {
+    0, 255,0,43,    // Hot Pink
+    10, 255,0,43,   // Hot Pink
+    127, 200,200,200,   // White
+    245, 255,0,255, // Pink
+    255, 255,0,255  // Pink
+  };
+
+
 
 // Single array of defined cpt-city color palettes.
 // This will let us programmatically choose one based on
 // a number, rather than having to activate each explicitly
 // by name every time.
 const byte* const gGradientPalettes[] PROGMEM = {
-  Sunset_Real_gp,               //13-00 Sunset
-  es_rivendell_15_gp,           //14-01 Rivendell
-  es_ocean_breeze_036_gp,       //15-02 Breeze
-  rgi_15_gp,                    //16-03 Red & Blue
-  retro2_16_gp,                 //17-04 Yellowout
-  Analogous_1_gp,               //18-05 Analogous
-  es_pinksplash_08_gp,          //19-06 Splash
-  Sunset_Yellow_gp,             //20-07 Pastel
-  Another_Sunset_gp,            //21-08 Sunset2
-  Beech_gp,                     //22-09 Beech
-  es_vintage_01_gp,             //23-10 Vintage
-  departure_gp,                 //24-11 Departure
-  es_landscape_64_gp,           //25-12 Landscape
-  es_landscape_33_gp,           //26-13 Beach
-  rainbowsherbet_gp,            //27-14 Sherbet
-  gr65_hult_gp,                 //28-15 Hult
-  gr64_hult_gp,                 //29-16 Hult64
-  GMT_drywet_gp,                //30-17 Drywet
-  ib_jul01_gp,                  //31-18 Jul
-  es_vintage_57_gp,             //32-19 Grintage
-
+  // 0-9
+  Sunset_Real_gp,               // Sunset
+  es_rivendell_15_gp,           // Rivendell
+  es_ocean_breeze_036_gp,       // Breeze
+  rgi_15_gp,                    // Red & Blue
+  retro2_16_gp,                 // Yellowout
+  Analogous_1_gp,               // Analogous
+  es_pinksplash_08_gp,          // Splash
+  Sunset_Yellow_gp,             // Pastel
+  Another_Sunset_gp,            // Sunset2
+  Beech_gp,                     // Beech
+  // 10-19
+  es_vintage_01_gp,             // Vintage
+  departure_gp,                 // Departure
+  es_landscape_64_gp,           // Landscape
+  es_landscape_33_gp,           // Beach
+  rainbowsherbet_gp,            // Sherbet
+  gr65_hult_gp,                 // Hult
+  gr64_hult_gp,                 // Hult64
+  GMT_drywet_gp,                // Drywet
+  ib_jul01_gp,                  // Jul
+  es_vintage_57_gp,             // Grintage
   // 20-29
-  ib15_gp,                      //33-20 Rewhi
-  Tertiary_01_gp,               //34-21 Tertiary
-  lava_gp,                      //35-22 Fire
-  fierce_ice_gp,                //36-23 Icefire
-  Colorfull_gp,                 //37-24 Cyane
-
-  Pink_Purple_gp,               //38-25 Light Pink
-  es_autumn_19_gp,              //39-26 Autumn
-  BlacK_Blue_Magenta_White_gp,  //40-27 Magenta
-  BlacK_Magenta_Red_gp,         //41-28 Magred
-  BlacK_Red_Magenta_Yellow_gp,  //42-29 Yelmag
-  
-
+  ib15_gp,                      // Rewhi
+  Tertiary_01_gp,               // Tertiary
+  lava_gp,                      // Fire
+  fierce_ice_gp,                // Icefire
+  Colorfull_gp,                 // Cyane
+  Pink_Purple_gp,               // Light Pink
+  es_autumn_19_gp,              // Autumn
+  BlacK_Blue_Magenta_White_gp,  // Magenta
+  BlacK_Magenta_Red_gp,         // Magred
+  BlacK_Red_Magenta_Yellow_gp,  // Yelmag
   // 30-39
-  Blue_Cyan_Yellow_gp,          //43-30 Yelblu
-  Orange_Teal_gp,               //44-31 Orange & Teal
-  Tiamat_gp,                    //45-32 Tiamat
-  April_Night_gp,               //46-33 April Night
-  Orangery_gp,                  //47-34 Orangery
-  Sakura_gp,                    //49-36 Sakura
-  Aurora_gp,                    //50-37 Aurora
-  Atlantica_gp,                 //51-38 Atlantica
-  
-  temperature_gp,               //54-41 Temperature
-  Aurora2_gp,                   //55-42 Aurora 2
-  retro_clown_gp,               //56-43 Retro Clown
-  candy_gp,                     //57-44 Candy
-  toxy_reaf_gp,                 //58-45 Toxy Reaf
-  fairy_reaf_gp,                //59-46 Fairy Reaf
-  semi_blue_gp,                 //60-47 Semi Blue
-  pink_candy_gp,                //61-48 Pink Candy
-  red_reaf_gp,                  //62-49 Red Reaf
-  
-  aqua_flash_gp,                //63-50 Aqua Flash
-  yelblu_hot_gp,                //64-51 Yelblu Hot
-  lite_light_gp,                //65-52 Lite Light
-  red_flash_gp,                 //66-53 Red Flash
-  blink_red_gp,                 //67-54 Blink Red
-  red_shift_gp,                 //68-55 Red Shift
-  candy2_gp                     //70-57 Candy2
+  Blue_Cyan_Yellow_gp,          // Yelblu
+  Orange_Teal_gp,               // Orange & Teal
+  Tiamat_gp,                    // Tiamat
+  April_Night_gp,               // April Night
+  Orangery_gp,                  // Orangery
+  Sakura_gp,                    // Sakura
+  Aurora_gp,                    // Aurora
+  Atlantica_gp,                 // Atlantica  
+  temperature_gp,               // Temperature
+  Aurora2_gp,                   // Aurora 2
+  // 40-49
+  retro_clown_gp,               // Retro Clown
+  candy_gp,                     // Candy
+  toxy_reaf_gp,                 // Toxy Reaf
+  fairy_reaf_gp,                // Fairy Reaf
+  semi_blue_gp,                 // Semi Blue
+  pink_candy_gp,                // Pink Candy
+  red_reaf_gp,                  // Red Reaf  
+  aqua_flash_gp,                // Aqua Flash
+  yelblu_hot_gp,                // Yelblu Hot
+  lite_light_gp,                // Lite Light
+  // 50-59
+  red_flash_gp,                 // Red Flash
+  blink_red_gp,                 // Blink Red
+  red_shift_gp,                 // Red Shift
+  candy2_gp,                    // Candy2
+  pink_purple_blend,            // Pink Purple Blend
+  pink_white_purple_blend       // Pink White Purple Blend
+
 };
 
 // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
@@ -2622,11 +2641,11 @@ DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_NAMES_CTR)
 DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR)
 {
   "Sunset|Rivendell|Ocean Breeze|Red & Blue|Yellowout|Analogous|Pink Splash|Sunset Yellow|Sunset 2|Beech|"
-  "Vintage|Departure|Landscape|Beach|Sherbet|Hult|Hult 64|Drywet|Jul|"
-  "Grintage|Rewhi|Tertiary|Lava Fire|Icefire|Cyane|Light Pink|Autumn 16|Magenta|Magred|Yelmag|"
-  "Yelblu|Orange & Teal|Tiamat|April Night|Orangery|Sakura|Aurora|Atlantica|"
-  "Temperature|Aurora 2|Retro Clown|Candy|Toxy Reaf|Fairy Reaf|Semi Blue|Pink Candy|Red Reaf|"
-  "Aqua Flash|Yelblu Hot|Lite Light|Red Flash|Blink Red|Red Shift|Candy2"
+  "Vintage|Departure|Landscape|Beach|Sherbet|Hult|Hult 64|Drywet|Jul|Grintage|"
+  "Rewhi|Tertiary|Lava Fire|Icefire|Cyane|Light Pink|Autumn 16|Magenta|Magred|Yelmag|"
+  "Yelblu|Orange & Teal|Tiamat|April Night|Orangery|Sakura|Aurora|Atlantica|Temperature|Aurora 2|"
+  "Retro Clown|Candy|Toxy Reaf|Fairy Reaf|Semi Blue|Pink Candy|Red Reaf|Aqua Flash|Yelblu Hot|Lite Light|"
+  "Red Flash|Blink Red|Red Shift|Candy2|Pink Purple Grad|Pink White Purple Grad"
 };
 
 

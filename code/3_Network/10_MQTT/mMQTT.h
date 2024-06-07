@@ -475,7 +475,7 @@ Serial.flush();
     template<typename T>
     void MQTTHandler_Command(T& class_ptr, uint16_t class_id, handler<T>* handler_ptr)
     {
-      
+
       // Sanity check
       if(handler_ptr == nullptr){
         Serial.println("handler_ptr == nullptr"); Serial.flush(); 
@@ -501,7 +501,7 @@ Serial.flush();
       }
             
       #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-      Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
+      // Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
       #endif // ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
 
       if(handler_ptr->flags.PeriodicEnabled){
@@ -587,7 +587,7 @@ Serial.flush();
                 #endif
               }
             }else{
-                // Serial.printf("------------------- packet_successfully_sent %s LIMIT\n\r",handler_ptr->postfix_topic);
+                Serial.printf("------------------- packet_successfully_sent %s LIMIT\n\r",handler_ptr->postfix_topic);
             }
             #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
             Serial.printf("last sent %d\n\r", millis()-con->tSaved_LastOutGoingTopic);

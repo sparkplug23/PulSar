@@ -330,16 +330,16 @@ void mUserMod_01::Pre_Init(){
 
 uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P("test",0);  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P("test",0);  
+  JBI->End();
 
 }
 
 uint8_t mUserMod_01::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-  JsonBuilderI->End();
+  JBI->Start();
+  JBI->End();
 
 }
 

@@ -128,7 +128,7 @@ void mAnimatorLight::handlePlaylist()
   static unsigned long presetCycledTime = 0;
 
   // if fileDoc is not null JSON buffer is in use so just quit
-  if (currentPlaylist < 0 || playlistEntries == nullptr || fileDoc != nullptr) 
+  if (currentPlaylist < 0 || playlistEntries == nullptr || pCONT_mfile->fileDoc != nullptr) 
   {
     // ALOG_INF(PSTR("handlePlaylist return early"));    
     return;

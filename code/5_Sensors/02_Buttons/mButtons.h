@@ -152,13 +152,6 @@ void ButtonLoop(void);
 
 char* IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen);
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER_2022
-
-void WebAppend_Root_Draw_Table();
-void WebAppend_Root_Status_Table();
-
-    #endif // USE_MODULE_NETWORK_WEBSERVER_2022
-
 bool IsButtonActive(uint8_t id);
 
 

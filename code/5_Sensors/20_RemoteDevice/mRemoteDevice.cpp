@@ -193,13 +193,13 @@ void mRemoteDevice::EveryLoop(){
 
 uint8_t mRemoteDevice::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
     JBI->Add("SensorCount", settings.sensor_active_count);
     // JBI->Array_Start("Pin");
     //   JBI->Add(pin[0]);
     //   JBI->Add(pin[1]);
     // JBI->Array_End();
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -211,7 +211,7 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
 
   char buffer[50];
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   sensors_reading_t* data = &sensor_data;
   
@@ -224,14 +224,14 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   //     //  &&(sensor[sensor_id].instant.isvalid)  
   //     ){
 
-  //     JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
-  //       JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
-  //       JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
-  //       JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-  //         JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-  //         JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
-  //       JsonBuilderI->Object_End();   
-  //     JsonBuilderI->Object_End(); 
+  //     JBI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+  //       JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
+  //       JBI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
+  //       JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
+  //         JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+  //         JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+  //       JBI->Object_End();   
+  //     JBI->Object_End(); 
   //   }
 
   // }
@@ -248,7 +248,7 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   //   JBI->Object_End();
   // }
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

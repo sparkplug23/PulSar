@@ -70,6 +70,7 @@
 #define BUSTYPE_GS8608              23            //same driver as WS2812, but will require signal 2x per second (else displays test pattern)
 #define BUSTYPE_WS2811_400KHZ       24            //half-speed WS2812 protocol, used by very old WS2811 units
 #define BUSTYPE_TM1829              25
+#define BUSTYPE_WS2805_RGBWW        29
 #define BUSTYPE_SK6812_RGBW         30
 #define BUSTYPE_TM1814              31
 

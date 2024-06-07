@@ -298,18 +298,18 @@
 
 // uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-//   return JsonBuilderI->End();
+//   JBI->Start();
+//     JBI->Add(D_JSON_CHANNELCOUNT, 0);
+//   return JBI->End();
 
 // }
 
 
 // uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-//   return JsonBuilderI->End();
+//   JBI->Start();
+//     JBI->Add(D_JSON_VOLTAGE, 0);
+//   return JBI->End();
     
 // }
 
@@ -323,7 +323,7 @@
 //  * */
 // uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_SDCard_Calibration_Frame(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
+//   JBI->Start();
     
 //   // Debug data only
 //   JBI->Add("M",millis());
@@ -347,7 +347,7 @@
 //   JBI->Add("e5", adc_values.esp32.adc5);
 //   #endif
 
-//   return JsonBuilderI->End();
+//   return JBI->End();
     
 // }
 

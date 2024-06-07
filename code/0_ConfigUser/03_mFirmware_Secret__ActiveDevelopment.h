@@ -33,7 +33,8 @@
 // #define DEVICE_TESTBED__LED_MATRIX
 // #define DEVICE_CAMERA_XIAO_TESTBED
 // #define DEVICE_DESKSENSOR // tester with ring led/
-#define DEVICE_TESTBED__GPS_SERIAL
+// #define DEVICE_TESTBED__GPS_SERIAL
+#define DEVICE_TESTBED__FLIGHT__LED_CONTROL_MAVLINK
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -203,6 +204,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
     #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_UI_VIEWER
 
   /***********************************
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -395,26 +399,24 @@ May need to add two power connections too, so its not just the cat5e wire to let
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
-    #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
-    #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-    #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-    #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-    #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+    // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
+    // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+    // #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+    // #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
+    // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
 
-    #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+    // #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
 
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
 
     #define USE_MODULE_NETWORK_WEBSERVER
     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
-    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
-    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+
+    #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
     
     #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
@@ -423,6 +425,18 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
     #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+
+  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
+  #define USE_LIGHTING_TEMPLATE
+
+  
     // 13, 18, 19, 22, 23, 25, 26, 27       USED
     // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
     // 21 = on PCB (4 pixels)
@@ -477,7 +491,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "TimeMs": 200,
           "RateMs": 1000
         },
-        "BrightnessRGB": 0,
+        "BrightnessRGB": 100,
         "BrightnessCCT": 0
       },
       "Segment1": {
@@ -503,7 +517,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "TimeMs": 200,
           "RateMs": 1000
         },
-        "BrightnessRGB": 0,
+        "BrightnessRGB": 100,
         "BrightnessCCT": 0
       },
       "Segment2": {
@@ -529,7 +543,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "TimeMs": 200,
           "RateMs": 1000
         },
-        "BrightnessRGB": 0,
+        "BrightnessRGB": 100,
         "BrightnessCCT": 0
       },
       "BrightnessRGB": 100,
@@ -568,11 +582,11 @@ May need to add two power connections too, so its not just the cat5e wire to let
      #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
      #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
 
-   #ifdef USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
-     #define USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
-     #define USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
-       #define ENABLE_CONTROLLERS__RELAY_STATE_LEDSTRIP__SEGMENT_INDEX   1
-   #endif // USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
+    #ifdef USE_LIGHTING_TEMPLATE
+      #define USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+      #define USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+        #define ENABLE_CONTROLLERS__RELAY_STATE_LEDSTRIP__SEGMENT_INDEX   1
+    #endif // USE_LIGHTING_TEMPLATE
    #define USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
 
    //   // Make all the water tank sensors be "remote sensors", then internally they will let me do the colour bar in the same way with IDs
@@ -788,6 +802,615 @@ May need to add two power connections too, so its not just the cat5e wire to let
   
 #endif
 
+
+/**
+ * @brief 
+ * Testbed for LED control via Mavlink
+ * 
+ * Test 1:
+ *  - Control LED strip and set to simply be colours, use my segments to make different patterns!
+ * 
+ * Test 2:
+ *  - Decode mavlink, change wing colours based an altitude. Or at least, when below 30, then 20m, switch to "landing" colours
+ * 
+ * Test 3:
+ *  - Based on TX16S left slider, have maybe 4 modes of lighting and switch between them. Have "altitude" mode be a mode
+ *    -- Mode 1: 
+ *        -- Altitude changes speed of flashing, and or colour?
+ * 
+ * 
+ */
+#ifdef DEVICE_TESTBED__FLIGHT__LED_CONTROL_MAVLINK
+  #define DEVICENAME_CTR          "flight_mavlink_led"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
+    #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE 
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE_MILLIS
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+    #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_UI_VIEWER
+
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+
+  #define ENABLE_TEMPLATE_SECTION__LIGHTING__TESTRING  
+  #define ENABLE_TEMPLATE_SECTION__DRIVERS_MAVLINK
+  #define ENABLE_TEMPLATE_SECTION__CUSTOM__MAVLINK_FLYING_LEDS
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+
+  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/    
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+
+  // #define ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+
+  // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
+  // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+ #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 20
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  //   #define USE_MODULE_SENSORS_INTERFACE
+  //     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+  // #endif
+  // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+  //   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  //     #define DS18X20_MAX_SENSORS 20
+  //       #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
+  // #endif 
+  // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  //   #define USE_MODULE_SENSORS_BME
+  //     #define ENABLE_DEVFEATURE_BME680
+  // #endif
+  // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
+  //   #define USE_MODULE_SENSORS_SOLAR_LUNAR     
+  // #endif
+  // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  //   #define USE_MODULE_SENSORS_BH1750
+  // #endif
+    
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  //   #ifdef USE_MODULE_DISPLAYS_NEXTION
+  //     #define NEXTION_DEFAULT_PAGE_NUMBER 6  
+  //       #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+  //       // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+  //       #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+  //       #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+  //       // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS                    
+  //       #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+  //       #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+  //       #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+  //       #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  //       #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+  //       #define USE_MODULE_NETWORK_WEBSERVER
+  //       #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+  //         #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
+  //         // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
+  //         // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1  "openhab_broadcast/nextion/group/hvac_home"
+  //         // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2  "openhab_broadcast/nextion/group/hvac_desk_power"
+      
+  //       DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
+  //       R"=====(
+  //       {
+  //         "PageNames": [
+  //           "boot_flash",
+  //           "boot",
+  //           "message",
+  //           "multiline",
+  //           "logger",
+  //           "heating",
+  //           "hvacdesk",
+  //           "main"
+  //         ],
+  //         "DefaultPageName":"hvacdesk",
+  //         "DefaultBaud":115200,
+  //         "TargetBaud":115200,
+  //         "ObjectNameID": {
+  //           "hdIconHAI": 2,
+  //           "hdTimeHAI": 6,
+  //           "hdBoostHAI": 11,
+  //           "hdAutoHAI": 16,
+  //           "powHAI": 21,
+  //           "hdIconFLR": 3,
+  //           "hdTimeFLR": 7,
+  //           "hdBoostFLR": 12,
+  //           "hdAutoFLR": 17,
+  //           "powFLR": 22,
+  //           "hdIconFAN": 4,
+  //           "hdTimeFAN": 8,
+  //           "hdBoostFAN": 13,
+  //           "hdAutoFAN": 18,
+  //           "powFAN": 23,
+  //           "hdIconOIL": 5,
+  //           "hdTimeOIL": 9,
+  //           "hdBoostOIL": 14,
+  //           "hdAutoOIL": 19,
+  //           "powOIL": 24
+  //         }
+  //       }
+  //       )=====";
+
+  //   #endif // USE_MODULE_DISPLAYS_NEXTION
+
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+        
+  //  #define USE_MODULE_DRIVERS_INTERFACE
+  //  #define USE_MODULE_DRIVERS_RELAY
+
+  #ifdef ENABLE_TEMPLATE_SECTION__DRIVERS_MAVLINK
+    #define USE_MODULE__DRIVERS_MAVLINK_DECODER2
+      #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+      #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+      // #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+    #define USE_MODULE_CORE__SERIAL
+      #define ENABLE_HARDWARE_UART_2
+      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+
+      #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+      // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3500
+
+
+  #endif
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #ifdef ENABLE_TEMPLATE_SECTION__LIGHTING__TESTRING
+
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
+    // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
+    // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+    // #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+    // #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
+    // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
+
+    // #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+
+    #define USE_MODULE_NETWORK_WEBSERVER
+    #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
+    #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+
+    
+    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+
+  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+
+  #define USE_LIGHTING_TEMPLATE
+
+  
+    // 13, 18, 19, 22, 23, 25, 26, 27       USED
+    // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
+    // 21 = on PCB (4 pixels)
+    // 32 = external
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":13,
+          "ColourOrder":"GRB",
+          "BusType":"WS2812_RGB",
+          "Start":0,
+          "Length":16
+        }
+      ],
+      "Segment0": {
+        "PixelRange": [
+          0,
+          16
+        ],
+        "ColourPalette":"IceCream Floats",
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":100,
+          "BrightnessRGB":5
+        },
+        "Effects": {
+          "Function":"Spanned Palette",
+          "Speed":127,
+          "Intensity":255,
+          "Decimate":0,
+          "Grouping":1
+        },
+        "Transition": {
+          "TimeMs": 200,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 0
+      },
+      "BrightnessRGB": 5,
+      "BrightnessCCT": 0
+    }
+    )=====";
+
+  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY
+  //   #define USE_MODULE_ENERGY_INTERFACE
+  // #endif
+  
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+  //   #define USE_MODULE_ENERGY_PZEM004T_V3
+  //     #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+  //   #define MAX_ENERGY_SENSORS 4
+  //   #define MAX_PZEM004T_DEVICES 4
+  //   #define ENABLE_DEVFEATURE_PZEM004T__AUTOSEARCH
+  // #endif
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY__INA219
+  //   #define USE_MODULE_ENERGY_INA219
+  //   // #define ENABLE_DEVFEATURE_ENERGY__DISABLE_ENERGY_INTERFACE_FOR_DEBUGGING
+  // #endif
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+  // #define USE_MODULE_CONTROLLER_HVAC
+  //    #define HEATING_DEVICE_MAX 4
+  //    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+  //    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
+
+  //   #ifdef USE_LIGHTING_TEMPLATE
+  //     #define USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
+  //     #define USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
+  //       #define ENABLE_CONTROLLERS__RELAY_STATE_LEDSTRIP__SEGMENT_INDEX   1
+  //   #endif // USE_LIGHTING_TEMPLATE
+  //  #define USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
+
+  
+  #ifdef ENABLE_TEMPLATE_SECTION__CUSTOM__MAVLINK_FLYING_LEDS
+
+      #define USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
+
+
+  #endif
+   //   // Make all the water tank sensors be "remote sensors", then internally they will let me do the colour bar in the same way with IDs
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
+      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
+      "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
+      #endif
+      // "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      // "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      #endif    
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER2
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      // 32 - LED Strip External
+      // 21 - LED Strip Onboard
+      // 25?
+      // 
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  /**
+   * @brief Drivers and Sensors for HVAC zones
+   **/
+  #define D_DEVICE_HEATER_0_NAME "Dryer"
+  #define D_DEVICE_HEATER_1_NAME "FloorMat"
+  #define D_DEVICE_HEATER_2_NAME "FanHeater"
+  #define D_DEVICE_HEATER_3_NAME "OilRadiator"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
+
+// {"NumDevices":4,"DeviceNameIndex":[-1,-1,-1,-1],"AddressList":[[40,140,131,47,0,0,0,230],[40,18,77,49,0,0,0,233],[40,233,112,49,0,0,0,11],[40,165,161,47,0,0,0,189]]}
+
+  /** 
+   * MainBoard
+   * */
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "MainBoard-1"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,165,161,47,0,0,0,189]"
+
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "MainBoard-2"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,233,112,49,0,0,0,11]"
+
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "MainBoard-3"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,140,131,47,0,0,0,230]"
+
+  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "MainBoard-4"
+  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,18,77,49,0,0,0,233]" //233 4
+
+  #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
+  #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
+
+  #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
+
+  #define D_DEVICE_SENSOR_CURRENT "LEDStrip"
+
+  
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "1"
+  #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "2"
+  #define D_DEVICE_SENSOR_PZEM004T_2_ADDRESS "3"
+  #define D_DEVICE_SENSOR_PZEM004T_3_ADDRESS "4"
+  
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR D_DEVICE_HEATER_0_NAME
+  #define D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR D_DEVICE_HEATER_1_NAME
+  #define D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR D_DEVICE_HEATER_2_NAME
+  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR D_DEVICE_HEATER_3_NAME 
+  
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_0_NAME
+  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_1_NAME
+  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_2_NAME
+  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_3_NAME
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_ENERGY "\":{"
+        "\"DeviceCount\":4"    
+    "},"
+    "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":{"
+        "\"DeviceCount\":4"    
+    "},"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR "\":["
+        "\"" "Desk" "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BME_280_NAME "\","
+        "\"" D_DEVICE_SENSOR_BME_680_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_INA219_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CURRENT "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+      "],"
+      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
+      "},"  
+      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_1_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_2_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_3_ADDRESS
+      "]"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_0_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_3_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "\"MQTTSubscribe\":["
+      "\"openhab_broadcast/nextion/group/hvac_home\","
+      "\"openhab_broadcast/nextion/group/hvac_desk_power\""
+    "],"
+  "}";
+
+
+
+  
+#endif
 
 
 
@@ -2008,7 +2631,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
  * 800L as smaller and lighter than 7000G
  */
 #ifdef DEVICE_TESTBED__GPS_SERIAL
-  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_CTR          "testbed_gps_serial"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
@@ -2021,266 +2644,266 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "1" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
   // #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "60" // When deployed, this will text me every 60 seconds with the GPS position
   #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0" // Turned off for testing
-  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
+  // #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_2024
 
 
-  // #define ENABLE_GROUPFEATURE__CELLULAR
-  #define ENABLE_GROUPFEATURE__GPS_SERIAL
-  // #define ENABLE_GROUPFEATURE__GYRO
+//   // #define ENABLE_GROUPFEATURE__CELLULAR
+//   #define ENABLE_GROUPFEATURE__GPS_SERIAL
+//   // #define ENABLE_GROUPFEATURE__GYRO
 
 
-  #ifdef ENABLE_GROUPFEATURE__CELLULAR
-    // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
-    #define USE_MODULE_DRIVERS_MODEM_800L
-  #endif
+//   #ifdef ENABLE_GROUPFEATURE__CELLULAR
+//     // https://github.com/Xinyuan-LilyGO/LilyGo-T-Call-SIM800
+//     #define USE_MODULE_DRIVERS_MODEM_800L
+//   #endif
 
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+//   /***********************************
+//    * SECTION: System Debug Options
+//   ************************************/    
+//   // #define DISABLE_SERIAL
+//   // #define DISABLE_SERIAL0_CORE
+//   // #define DISABLE_SERIAL_LOGGING
   
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
+//   // #define ENABLE_ADVANCED_DEBUGGING
+//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+//   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
-  #define ENABLE_FREERAM_APPENDING_SERIAL
+//   #define ENABLE_FREERAM_APPENDING_SERIAL
 
 
 
-  /***********************************
-   * SECTION: System Configs
-  ************************************/    
+//   /***********************************
+//    * SECTION: System Configs
+//   ************************************/    
   
 
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
+//   /***********************************
+//    * SECTION: Network Configs
+//   ************************************/    
 
- #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-
-
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/    
+//  #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
 
 
-  // #define ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
-  #define ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+
+//   /***********************************
+//    * SECTION: Lighting Configs
+//   ************************************/    
 
 
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-    #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
-  //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
-
-  #ifdef ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
-    // #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
-    #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 10    
-    // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES    
-    // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-    #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-    #define ENABLE_DEBUG_FUNCTION_NAMES
-    #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
-    // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-    #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
-    #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
-    // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
-    #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
-    #define ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
-    #define ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
-    // #define ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
-    // #define ENABLE_DEVFEATURE__NTP_OVER_CELLULAR_TEST_WITHOUT_INTERFACE_INTEGRATION
-    #define ENABLE_DEVFEATURE__TIME_UPDATE_WITH_GPS_TIME
-    // #define ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
-    #define ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS 600
-  #endif // ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+//   // #define ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+//   #define ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
 
 
-  #ifdef ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
-    #define ENABLE_ADVANCED_DEBUGGING
-    #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-  #endif // ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+//   #define ENABLE_FEATURE_WATCHDOG_TIMER
+//     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
+//   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+//   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
+//   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+//   #ifdef ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+//     // #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
+//     #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 10    
+//     // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES    
+//     // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+//     #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//     #define ENABLE_DEBUG_FUNCTION_NAMES
+//     #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+//     // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+//     #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
+//     #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
+//     // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
+//     #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+//     #define ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
+//     #define ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
+//     // #define ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
+//     // #define ENABLE_DEVFEATURE__NTP_OVER_CELLULAR_TEST_WITHOUT_INTERFACE_INTEGRATION
+//     #define ENABLE_DEVFEATURE__TIME_UPDATE_WITH_GPS_TIME
+//     // #define ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+//     #define ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS 600
+//   #endif // ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
 
 
-  #define ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+//   #ifdef ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+//     #define ENABLE_ADVANCED_DEBUGGING
+//     #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+//   #endif // ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
 
 
-  // *************************************************************************************
+//   #define ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
 
-  // #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
-  //   #define SERIAL_DEBUG_BAUD_DEFAULT 921600
-  // #endif 
-  // #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
-  //   #define USE_MODULE__DRIVERS_MAVLINK_DECODER
-  //     #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
-  //     #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
-  //     #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
-  //   #define USE_MODULE_CORE_SERIAL_UART
-  //     #define ENABLE_HARDWARE_UART_2
-  //     #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
-  // #endif
-  // #ifdef USE_GROUPFEATURE__MODEM_GPS
-  //   #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-  //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  //   #define USE_MODULE_SENSORS_GPS_MODEM
-  // #endif 
-  // #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR 
-  //   #define DISABLE_NETWORK_WIFI
-  //   #define USE_MODULE_NETWORK_CELLULAR
-  //   #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-  //   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-  //   #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-  //   #define USE_MODULE_NETWORK_MQTT
-  //   // #define MQTT_SOCKET_TIMEOUT 1
-  //   // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
-  //    #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
-  //   // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-  //   // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
-  //   #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-  //   // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
-  // #endif
-  // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
-  //   #define USE_MODULE_NETWORK_WIFI
-  //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-  //   #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-  //   #define MQTT_PORT     1883
-  // #endif
-  // #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
-  //   #define DISABLE_NETWORK_WIFI
-  //   #define USE_MODULE_NETWORK_CELLULAR
-  //   #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-  //   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-  //   // #define USE_MODULE_SENSORS_INTERFACE
-  //   // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-  //   // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
-  //   // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
-  // #endif
 
-  /**
-   *  GPS
-   * */
-  #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
-    #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
-    #define USE_MODULE_SENSORS_GPS_SERIAL
-    #define ENABLE_GPS_PARSER_NMEA
-    #define ENABLE_GPS_PARSER_UBX
-    #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
-    #define NMEAGPS_DERIVED_TYPES
-    // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
-    #define NMEAGPS_PARSE_SAVE_MILLIS
-    // #define gpsPort Serial1
-    // #define D_GPS_BAUD_RATE_FAST    921600
-    // #define D_GPS_BAUD_RATE_DEFAULT 9600
+//   // *************************************************************************************
 
-    // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+//   // #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+//   //   #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+//   // #endif 
+//   // #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
+//   //   #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+//   //     #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+//   //     #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+//   //     #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+//   //   #define USE_MODULE_CORE_SERIAL_UART
+//   //     #define ENABLE_HARDWARE_UART_2
+//   //     #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+//   // #endif
+//   // #ifdef USE_GROUPFEATURE__MODEM_GPS
+//   //   #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+//   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+//   //   #define USE_MODULE_SENSORS_GPS_MODEM
+//   // #endif 
+//   // #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR 
+//   //   #define DISABLE_NETWORK_WIFI
+//   //   #define USE_MODULE_NETWORK_CELLULAR
+//   //   #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+//   //   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+//   //   #define USE_MODULE_SENSORS_INTERFACE
+//   //   #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+//   //   #define USE_MODULE_NETWORK_MQTT
+//   //   // #define MQTT_SOCKET_TIMEOUT 1
+//   //   // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+//   //    #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
+//   //   // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+//   //   // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+//   //   #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+//   //   // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+//   // #endif
+//   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
+//   //   #define USE_MODULE_NETWORK_WIFI
+//   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+//   //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   //   #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+//   //   #define MQTT_PORT     1883
+//   // #endif
+//   // #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+//   //   #define DISABLE_NETWORK_WIFI
+//   //   #define USE_MODULE_NETWORK_CELLULAR
+//   //   #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+//   //   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+//   //   // #define USE_MODULE_SENSORS_INTERFACE
+//   //   // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+//   //   // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+//   //   // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+//   // #endif
 
-    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+//   /**
+//    *  GPS
+//    * */
+//   #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
+//     #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+//     #define USE_MODULE_SENSORS_GPS_SERIAL
+//     #define ENABLE_GPS_PARSER_NMEA
+//     #define ENABLE_GPS_PARSER_UBX
+//     #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+//     #define NMEAGPS_DERIVED_TYPES
+//     // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+//     #define NMEAGPS_PARSE_SAVE_MILLIS
+//     // #define gpsPort Serial1
+//     // #define D_GPS_BAUD_RATE_FAST    921600
+//     // #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+//     // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+//     // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
 
     
-#define ENABLE_DEVFEATURE__START_STATIC_WHILE
-#define ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
-#define ENABLE_DEVFEATURE__START_STATIC_LOOP
+// #define ENABLE_DEVFEATURE__START_STATIC_WHILE
+// #define ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
+// #define ENABLE_DEVFEATURE__START_STATIC_LOOP
 
-#define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+// #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
-    #define NMEAGPS_PARSE_SAVE_MILLIS
-    #define gpsPort Serial2
-    // #define D_GPS_BAUD_RATE_FAST    921600
-    // #define D_GPS_BAUD_RATE_DEFAULT 9600
-    // #define D_GPS_BAUD_RATE_DEFAULT 115200
-    #define D_GPS_BAUD_RATE_DEFAULT 230400
-    // #define D_GPS_BAUD_RATE_DEFAULT 460800
+//     #define NMEAGPS_PARSE_SAVE_MILLIS
+//     #define gpsPort Serial2
+//     // #define D_GPS_BAUD_RATE_FAST    921600
+//     // #define D_GPS_BAUD_RATE_DEFAULT 9600
+//     // #define D_GPS_BAUD_RATE_DEFAULT 115200
+//     #define D_GPS_BAUD_RATE_DEFAULT 230400
+//     // #define D_GPS_BAUD_RATE_DEFAULT 460800
 
-    // #define D_GPS_BAUD_RATE_DEFAULT 115200
-    // #define D_GPS_TX_PIN_DEFAULT 19
-    // #define D_GPS_RX_PIN_DEFAULT 18
+//     // #define D_GPS_BAUD_RATE_DEFAULT 115200
+//     // #define D_GPS_TX_PIN_DEFAULT 19
+//     // #define D_GPS_RX_PIN_DEFAULT 18
 
-    #define USE_DEVFEATURE_GPS_POLLING_INPUT
+//     #define USE_DEVFEATURE_GPS_POLLING_INPUT
 
-    // #define USE_MODULE_CORE__SERIAL
+//     // #define USE_MODULE_CORE__SERIAL
 
-    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+//     // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
 
-    #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+//     #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
 
-    #define USE_DEVFEATURE_UBLOX_GLOBAL
+//     #define USE_DEVFEATURE_UBLOX_GLOBAL
     
-    // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+//     // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
 
-    #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+//     #define USE_DEVFEATURE__UBLOX_TEST_CLASS
 
-    #define ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
-
-
+//     #define ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
 
 
 
-    // #define USE_MODULE_DRIVERS_INTERFACE
-    // #define USE_MODULE_DRIVERS_SERIAL_UART
-    #define ENABLE_HARDWARE_UART_1
-    #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
-  #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
-
-  /***********************************
-   * SECTION: Template Configs
-  ************************************/    
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_NUMBER "\":{"
-      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
-      #endif // USE_MODULE_NETWORK_CELLULAR   
 
 
-      /** 5P small - UART1 GPS Stream
-       * Orange      19, UART1_TX
-       * Yellow      18, UART1_RX
-       * White        
-       * Red         VCC, 3V3
-       * Black       GND
-       * */
-      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+//     // #define USE_MODULE_DRIVERS_INTERFACE
+//     // #define USE_MODULE_DRIVERS_SERIAL_UART
+//     #define ENABLE_HARDWARE_UART_1
+//     #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+//   #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+
+//   /***********************************
+//    * SECTION: Template Configs
+//   ************************************/    
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIO_NUMBER "\":{"
+//       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+//       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+//       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+//       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+//       #ifdef USE_MODULE_NETWORK_CELLULAR
+//       "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+//       "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
+//       "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
+//       "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+//       #endif // USE_MODULE_NETWORK_CELLULAR   
+
+
+//       /** 5P small - UART1 GPS Stream
+//        * Orange      19, UART1_TX
+//        * Yellow      18, UART1_RX
+//        * White        
+//        * Red         VCC, 3V3
+//        * Black       GND
+//        * */
+//       // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+//       // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
-      #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
-      #endif // USE_MODULE_DRIVERS_SDCARD   
-      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
-      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
-    "},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
+//       #ifdef USE_MODULE_DRIVERS_SDCARD
+//       "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
+//       "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
+//       "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
+//       "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+//       #endif // USE_MODULE_DRIVERS_SDCARD   
+//       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+//       "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+//       "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+//       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+//       "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+//       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+//     "},"
+//     "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//   "}";
 
 
   /***********************************
@@ -2303,7 +2926,162 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
 
-#endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+
+  /***********************************
+   * SECTION: Core Configs
+  ************************************/     
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  #define ENABLE_DEVFEATURE__START_STATIC_WHILE
+  #define ENABLE_DEVFEATURE__START_STATIC_INIT_PORT
+  #define ENABLE_DEVFEATURE__START_STATIC_LOOP
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  /**
+   *  GPS
+   * */
+  // #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
+    #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+    #define USE_MODULE_SENSORS_GPS_SERIAL
+    #define ENABLE_GPS_PARSER_NMEA
+    #define ENABLE_GPS_PARSER_UBX
+    #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+    #define NMEAGPS_DERIVED_TYPES
+    // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+    #define NMEAGPS_PARSE_SAVE_MILLIS
+    // #define gpsPort Serial1
+    // #define D_GPS_BAUD_RATE_FAST    921600
+    // #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+    // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    
+    #define NMEAGPS_PARSE_SAVE_MILLIS
+    #define gpsPort Serial2
+    #define D_GPS_BAUD_RATE_DEFAULT 9600
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    // #define D_GPS_BAUD_RATE_DEFAULT 230400
+    // #define D_GPS_BAUD_RATE_DEFAULT 460800
+
+    // #define D_GPS_BAUD_RATE_DEFAULT 115200
+    // #define D_GPS_TX_PIN_DEFAULT 19
+    // #define D_GPS_RX_PIN_DEFAULT 18
+
+    #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+    #define USE_MODULE_CORE__SERIAL
+
+    // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+    #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+    // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+    #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+    #define ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
+
+
+
+
+
+    // #define USE_MODULE_DRIVERS_INTERFACE
+    // #define USE_MODULE_DRIVERS_SERIAL_UART
+    #define ENABLE_HARDWARE_UART_1
+    #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  // #endif // ENABLE_GROUPFEATURE__GPS_SERIAL
+
+  // /**
+  //  *  GPS
+  //  * */
+  // #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  // #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  //   #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+  //   #define USE_MODULE_SENSORS_GPS_SERIAL
+  //   #define ENABLE_GPS_PARSER_NMEA
+  //   #define ENABLE_GPS_PARSER_UBX
+  //   #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  //   #define NMEAGPS_DERIVED_TYPES
+  //   // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  //   #define NMEAGPS_PARSE_SAVE_MILLIS
+  //   #define gpsPort Serial2
+  //   #define D_GPS_BAUD_RATE_FAST    921600
+  //   #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+  //   #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+  //   // #define USE_MODULE_CORE__SERIAL
+
+  //   // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+  //   #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+  //   #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+  //   // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+  //   #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+  //   // #define ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
+
+
+  //   // #define USE_MODULE_DRIVERS_INTERFACE
+  //   // #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_2
+  //   #define HARDWARE_UART_2_BAUD_RATE_SPEED  9600  //D_GPS_BAUD_RATE_FAST
+  // #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_CORE__SERIAL
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+
+
+#endif // DEVICE_TESTBED__GPS_SERIAL
 
               
 

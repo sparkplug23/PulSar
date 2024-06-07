@@ -510,20 +510,20 @@ void mPWM::WebAppend_Root_Status_Table(){
 
   char buffer[50];
   
-  JsonBuilderI->Array_Start("switch_table");// Class name
+  JBI->Array_Start("switch_table");// Class name
   for(int row=0;row<settings.switches_found;row++){
-    JsonBuilderI->Object_Start();
-      JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
+    JBI->Object_Start();
+      JBI->Add("id",row);
+      JBI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
       if(IsSwitchActive(row)){
-        JsonBuilderI->Add("fc","#00ff00");
+        JBI->Add("fc","#00ff00");
       }else{
-        JsonBuilderI->Add("fc","#ff0000");
+        JBI->Add("fc","#ff0000");
       }
     
-    JsonBuilderI->Object_End();
+    JBI->Object_End();
   }
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
   
 }
 

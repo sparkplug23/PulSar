@@ -1085,16 +1085,16 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_level, bool json_ap
 
   char buffer[30];
   
-  JsonBuilderI->Start();
+  JBI->Start();
 
-  JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
+  JBI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
 
-  // // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
+  // // JBI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->SEGMENT_I(0).transition.pixels_to_update_as_number);
+  // JBI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->SEGMENT_I(0).transition.pixels_to_update_as_number);
   // #endif // USE_MODULE_LIGHTS_ANIMATOR
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -1111,7 +1111,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
     #ifdef ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
     mqtthandler__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
@@ -1126,7 +1126,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
     #endif  // ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
 
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -1136,31 +1136,31 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
 
   char buffer[30];
   
-  JsonBuilderI->Start();
+  JBI->Start();
 
-  JsonBuilderI->Object_Start("RgbcctController");
+  JBI->Object_Start("RgbcctController");
   
-    // JsonBuilderI->Object_Start("raw");
-    //   JsonBuilderI->Add("R", rgbcct_controller.R); 
-    //   JsonBuilderI->Add("G", rgbcct_controller.G); 
-    //   JsonBuilderI->Add("B", rgbcct_controller.B); 
-    //   JsonBuilderI->Add("WW", rgbcct_controller.WW); 
-    //   JsonBuilderI->Add("WC", rgbcct_controller.WC); 
-    // JsonBuilderI->Object_End();
-    JsonBuilderI->Object_Start("type");
+    // JBI->Object_Start("raw");
+    //   JBI->Add("R", rgbcct_controller.R); 
+    //   JBI->Add("G", rgbcct_controller.G); 
+    //   JBI->Add("B", rgbcct_controller.B); 
+    //   JBI->Add("WW", rgbcct_controller.WW); 
+    //   JBI->Add("WC", rgbcct_controller.WC); 
+    // JBI->Object_End();
+    JBI->Object_Start("type");
     
-    JsonBuilderI->Add("R", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.r); 
-    JsonBuilderI->Add("G", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.g); 
-    JsonBuilderI->Add("B", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.b); 
-    JsonBuilderI->Add("WW", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.w); 
-    JsonBuilderI->Add("WC", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.c); 
+    JBI->Add("R", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.r); 
+    JBI->Add("G", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.g); 
+    JBI->Add("B", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.b); 
+    JBI->Add("WW", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.w); 
+    JBI->Add("WC", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.c); 
 
 
-    JsonBuilderI->Object_End();
+    JBI->Object_End();
 
-    // JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
+    // JBI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
 
-  JsonBuilderI->Object_End();
+  JBI->Object_End();
 
 
   if(pCONT_lAni->SEGMENT_I(0).palette_id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
@@ -1171,30 +1171,30 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
   }
 
 
-  // JsonBuilderI->Object_Start("singlecolour");
-  //   JsonBuilderI->Add_P(PM_R", mode_singlecolour.colour.R);
-  //   JsonBuilderI->Add_P(PM_G", mode_singlecolour.colour.G);
-  //   JsonBuilderI->Add_P(PM_B", mode_singlecolour.colour.B);
-  //   JsonBuilderI->Add_P(PM_WW", mode_singlecolour.colour.WW);
-  //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
-  //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
-  // JsonBuilderI->Object_End();
-  // JsonBuilderI->Object_Start("active_rgbcct_colour_p");
-  //   JsonBuilderI->Add_P(PM_R", active_rgbcct_colour_p->R);
-  //   JsonBuilderI->Add_P(PM_G", active_rgbcct_colour_p->G);
-  //   JsonBuilderI->Add_P(PM_B", active_rgbcct_colour_p->B);
-  //   JsonBuilderI->Add_P(PM_WW", active_rgbcct_colour_p->WW);
-  //   JsonBuilderI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
-  //   JsonBuilderI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
-  // JsonBuilderI->Object_End();
+  // JBI->Object_Start("singlecolour");
+  //   JBI->Add_P(PM_R", mode_singlecolour.colour.R);
+  //   JBI->Add_P(PM_G", mode_singlecolour.colour.G);
+  //   JBI->Add_P(PM_B", mode_singlecolour.colour.B);
+  //   JBI->Add_P(PM_WW", mode_singlecolour.colour.WW);
+  //   JBI->Add_P(PM_WC", mode_singlecolour.colour.WC);
+  //   JBI->Add_P(PM_WC", mode_singlecolour.colour.WC);
+  // JBI->Object_End();
+  // JBI->Object_Start("active_rgbcct_colour_p");
+  //   JBI->Add_P(PM_R", active_rgbcct_colour_p->R);
+  //   JBI->Add_P(PM_G", active_rgbcct_colour_p->G);
+  //   JBI->Add_P(PM_B", active_rgbcct_colour_p->B);
+  //   JBI->Add_P(PM_WW", active_rgbcct_colour_p->WW);
+  //   JBI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
+  //   JBI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
+  // JBI->Object_End();
 
-  // JsonBuilderI->Array_AddArray("singlecolour", current_color, 5);   
+  // JBI->Array_AddArray("singlecolour", current_color, 5);   
 
-  // JsonBuilderI->Object_Start("fade");
-  //   JsonBuilderI->Add("running", fade.running);
-  // JsonBuilderI->Object_End();
+  // JBI->Object_Start("fade");
+  //   JBI->Add("running", fade.running);
+  // JBI->Object_End();
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG

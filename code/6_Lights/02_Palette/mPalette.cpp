@@ -868,7 +868,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     {
       colour = pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
     }
-    colour.debug_print("rgbcctcolors");
+    // colour.debug_print("rgbcctcolors");
   }
 
   /**************************************************************
@@ -1135,11 +1135,11 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
       {
 
         if(elevation >= 0){ // daytime
-          colour_out.setCCT(CCT_MIN_DEFAULT); // Cold White
+          colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT); // Cold White
           colour_out.setRGB(255,255,255);
           // ALOG_INF(PSTR("++++++ elevation %d"), (int)(elevation*100) );
         }else{ //nighttime
-          colour_out.setCCT(CCT_MAX_DEFAULT); // Warm White
+          colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT); // Warm White
           colour_out.setRGB(0xFF,0x52,0x18);
           // ALOG_INF(PSTR("------ elevation %d"), (int)(elevation*100) );
         }
@@ -1151,12 +1151,12 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
                                             );
 
         RgbcctColor colour1 = RgbcctColor(0);
-        colour1.setCCT(CCT_MIN_DEFAULT); // Cold White
+        colour1.setCCT_Kelvin(CCT_MIN_DEFAULT); // Cold White
         colour1.setRGB(255,255,255); // Cold White with RGB (Full)
         // colour1.setRGB(255,0,0); // Debugging
 
         RgbcctColor colour2 = RgbcctColor(0);
-        colour2.setCCT(CCT_MAX_DEFAULT); // Warm White
+        colour2.setCCT_Kelvin(CCT_MAX_DEFAULT); // Warm White
         colour2.setRGB(0xFF,0x52,0x18);  // Warm White with RGB (White with reduced G,B)
         // colour2.setRGB(0,0,255); // Debugging
 
@@ -1754,7 +1754,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   ){  
     uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
-    ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
   }
 
   /**************************************************************
@@ -1767,6 +1767,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   ){  
     uint16_t adjusted_id = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR);   
+    // Serial.printf("BName id%d|a%d \"%s\"\n", palette_id,adjusted_id, buffer );
   }
 
   /**************************************************************
@@ -1792,7 +1793,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   ){  
     uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_SINGLE_COLOUR_NAMES_CTR);   
-    ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
   }
 
   /**************************************************************

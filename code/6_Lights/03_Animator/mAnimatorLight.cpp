@@ -1047,6 +1047,7 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
   if(
     ((palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED))
   ){       
+    // ALOG_INF(PSTR("GetPaletteNameByID  A%d"), palette_id);
     mPaletteI->GetPaletteNameByID(palette_id, buffer, buflen);
   }
   
@@ -1059,6 +1060,7 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
   if(
     ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) && (palette_id < mPaletteI->GetPaletteListLength()))
   ){  
+  // ALOG_INF(PSTR("GetPaletteNameByID B %d"), palette_id);
     int8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; //also skip the rgbcct colour names, though, they should be static?
     DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
     ALOG_DBM(PSTR("device name %s %d"),buffer, adjusted_id );
@@ -1620,15 +1622,15 @@ void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light
 }
 
 
-uint8_t mAnimatorLight::GetSizeOfPixel(RgbcctColor::ColourType colour_type)
+uint8_t mAnimatorLight::GetSizeOfPixel(ColourType colour_type)
 {
   switch(colour_type)
   {
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:     return 3;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:    
+    case ColourType::COLOUR_TYPE__RGB__ID:     return 3;
+    case ColourType::COLOUR_TYPE__RGBW__ID:    
     // case RgbcctColor::ColourType::LIGHT_TYPE_RGBC__ID:      
     return 4;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
+    case ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
   }
 
 }
@@ -1637,7 +1639,7 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
-  RgbcctColor::ColourType pixel_type, 
+  ColourType pixel_type, 
   RgbcctColor starting_colour
 ){
 
@@ -1652,7 +1654,7 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
   switch(pixel_type)
   {
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:
+    case ColourType::COLOUR_TYPE__RGB__ID:
     
       pixel_start_i = pixel_index*6;
 
@@ -1665,7 +1667,7 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
       }
 
     break;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:
+    case ColourType::COLOUR_TYPE__RGBW__ID:
     
       pixel_start_i = pixel_index*8;
 
@@ -1679,7 +1681,7 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
       }
 
     break;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:
+    case ColourType::COLOUR_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
@@ -1690,7 +1692,7 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
         start_of_pixel_pair[1] = starting_colour.G;
         start_of_pixel_pair[2] = starting_colour.B;
         start_of_pixel_pair[3] = starting_colour.WW;
-        start_of_pixel_pair[4] = starting_colour.WC;
+        start_of_pixel_pair[4] = starting_colour.CW;
       }
 
     break;
@@ -1972,7 +1974,7 @@ CRGB mAnimatorLight::col_to_crgb(uint32_t color)
 }
 
 
-void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor desired_colour)
+void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, RgbcctColor desired_colour)
 {   
   
   // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
@@ -1992,9 +1994,17 @@ void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint1
   AddLog(LOG_LEVEL_TEST, PSTR("[%d] \t pixel_start_i/buflen=%d\t%d"),pixel_index, pixel_start_i,buflen);
   #endif 
 
+  /**
+   * @brief Construct a new switch object
+   * 
+   * Since rgbcct is the base colour anyway, then the code below can be simplified by indexing (not using "R", "G", "B" etc)
+   * Instead just use width of colour up to 5 bytes wide. "GetSizeOfPixel" and perhaps memcpy?
+   * 
+   */
+
   switch(pixel_type)
   {
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:
+    case ColourType::COLOUR_TYPE__RGB__ID:
     
       pixel_start_i = pixel_index*6;
 
@@ -2007,7 +2017,7 @@ void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint1
       }
 
     break;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:
+    case ColourType::COLOUR_TYPE__RGBW__ID:
     
       pixel_start_i = pixel_index*8; // rgbw * 2
 
@@ -2021,7 +2031,7 @@ void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint1
       }
 
     break;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:
+    case ColourType::COLOUR_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
@@ -2032,7 +2042,7 @@ void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint1
         start_of_pixel_pair[6] = desired_colour.G;
         start_of_pixel_pair[7] = desired_colour.B;
         start_of_pixel_pair[8] = desired_colour.WW;
-        start_of_pixel_pair[9] = desired_colour.WC;
+        start_of_pixel_pair[9] = desired_colour.CW;
       }
 
     break;
@@ -2076,7 +2086,7 @@ copies_of_that_pixel
     ie starting and desired, so 2
 length_of_pixels
     number of pixel in that segment up to (100?) then replicate and wrap output*/
-bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, 
+bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, 
 RgbcctColor starting_colour, RgbcctColor desired_colour)
 {
 
@@ -2102,12 +2112,12 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
     start_of_pixel_pair[1] = starting_colour.G;
     start_of_pixel_pair[2] = starting_colour.B;
     start_of_pixel_pair[3] = starting_colour.WW;
-    start_of_pixel_pair[4] = starting_colour.WC;
+    start_of_pixel_pair[4] = starting_colour.CW;
     start_of_pixel_pair[5] = desired_colour.R;
     start_of_pixel_pair[6] = desired_colour.G;
     start_of_pixel_pair[7] = desired_colour.B;
     start_of_pixel_pair[8] = desired_colour.WW;
-    start_of_pixel_pair[9] = desired_colour.WC;
+    start_of_pixel_pair[9] = desired_colour.CW;
   }else{
     
     #ifdef ENABLE_LOG_LEVEL_WARNING
@@ -2145,7 +2155,7 @@ void IRAM_ATTR mAnimatorLight::GetTransitionColourBuffer(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
-  RgbcctColor::ColourType pixel_type, 
+  ColourType pixel_type, 
   mAnimatorLight::TransitionColourPairs* colour  // Get and Set colours will still only store in rgb or rgbw format, for now, limited to rgb
 ){
 
@@ -2170,19 +2180,19 @@ uint16_t pixel_start_i = 0;
   switch(pixel_type)
   {
     default: return;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:
+    case ColourType::COLOUR_TYPE__RGB__ID:
       pixel_start_i = pixel_index*6;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbColor(c[0], c[1], c[2]);
       colour->DesiredColour  = RgbColor(c[3], c[4], c[5]);
       break;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:
+    case ColourType::COLOUR_TYPE__RGBW__ID:
       pixel_start_i = pixel_index*8;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbwColor(c[0], c[1], c[2], c[3]);
       colour->DesiredColour  = RgbwColor(c[4], c[5], c[6], c[7]);
       break;
-    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:
+    case ColourType::COLOUR_TYPE__RGBCCT__ID:
       pixel_start_i = pixel_index*10;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbcctColor(c[0], c[1], c[2], c[3], c[4]);
@@ -2568,10 +2578,6 @@ bool mAnimatorLight::Segment::allocateData(size_t len)
   addUsedSegmentData(len);
   _dataLen = len;
   memset(data, 0, len);
-      
-  
-      
-  // 
 
   return true;
 }
@@ -2711,7 +2717,7 @@ void mAnimatorLight::Segment::setCCT(uint16_t k) {
   {
     ALOG_INF(PSTR("setCCT: palette_id < 5, updating colour %d"), k);
 
-    rgbcctcolors[palette_id].setCCT_255Range(k);
+    rgbcctcolors[palette_id].setCCT_Kelvin(k);
     
   }
   
@@ -4302,7 +4308,7 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
 
   if (!requestJSONBufferLock(7)) return false;
 
-  if (!readObjectFromFile(fileName, nullptr, &doc)) {
+  if (!pCONT_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
     releaseJSONBufferLock();
     return false; //if file does not exist just exit
   }
@@ -5485,18 +5491,18 @@ JBI->Start();
     // }
     // JBI->Array_End();
     
-//   JsonBuilderI->Start();  
-//     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
+//   JBI->Start();  
+//     JBI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
 //     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
 //     JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette_id );
 //     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette_id, buffer, sizeof(buffer)));
-//     // JsonBuilderI->Array_Start("rgb");
+//     // JBI->Array_Start("rgb");
 //     // for(int i=0;i<numpixels;i++){
 //     //   RgbTypeColor c = GetPixelColor(i);
-//     //   JsonBuilderI->Add_FV(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
+//     //   JBI->Add_FV(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
 //     // }
-//     // JsonBuilderI->Array_End();
-//   return JsonBuilderI->End();
+//     // JBI->Array_End();
+//   return JBI->End();
 
 
     /**
@@ -5675,9 +5681,9 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 
   if(anim_progress_mqtt_function_callback)
   {
-    JsonBuilderI->Start();
+    JBI->Start();
     anim_progress_mqtt_function_callback(); // Call the function
-    return JsonBuilderI->End();
+    return JBI->End();
   }
   return false;
 

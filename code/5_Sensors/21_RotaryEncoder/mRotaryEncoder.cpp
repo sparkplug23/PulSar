@@ -116,9 +116,9 @@ void mRotaryEncoder::EveryLoop_ReadSensor()
 
 uint8_t mRotaryEncoder::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+  return JBI->End();
 
 }
 
@@ -127,11 +127,11 @@ uint8_t mRotaryEncoder::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
 
   char buffer[80];
 
-  JsonBuilderI->Start();
+  JBI->Start();
   
-    JsonBuilderI->Add("value", data.value);
+    JBI->Add("value", data.value);
 
-  return JsonBuilderI->End();
+  return JBI->End();
     
 }
 

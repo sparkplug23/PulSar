@@ -204,9 +204,9 @@ void mDoorSensor::ShowSensor_AddLog()
 
 uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    //JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.);
-  return JsonBuilderI->End();
+  JBI->Start();
+    //JBI->Add_P(PM_JSON_SENSORCOUNT, settings.);
+  return JBI->End();
 
 }
 
@@ -215,13 +215,13 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   
   char buffer[50];
 
-  JsonBuilderI->Start();
-  JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
-  JsonBuilderI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
+  JBI->Start();
+  JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
+  JBI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){
-    JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
-    JsonBuilderI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
+    JBI->Add(D_JSON_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
+    JBI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
   }
 
   JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
@@ -236,7 +236,7 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
     JBI->Add("IsLock_Locked", IsLock_Locked());
   }
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

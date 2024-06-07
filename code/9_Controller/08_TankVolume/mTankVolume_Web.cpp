@@ -24,43 +24,43 @@
 
 //   char buffer[50];
   
-//   JsonBuilderI->Array_Start("oil_table");// Class name
+//   JBI->Array_Start("oil_table");// Class name
 //   for(int row=0;row<8;row++){
-//     JsonBuilderI->Object_Start();
-//       JsonBuilderI->Add("id",row);
+//     JBI->Object_Start();
+//       JBI->Add("id",row);
 //       switch(row){
 //         default:
-//         case 0: JsonBuilderI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
+//         case 0: JBI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
 //         // case 1:
-//         //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
+//         //   JBI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
 //         //     animation.cycle_time__rate_ms/1000, 
 //         //     animation.time_ms.val/1000
 //         //   );
 //         // break;
 //         // case 2: 
-//         //   JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
+//         //   JBI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
 //         //     animation.transition.pixels_to_update_as_percentage.val, 
 //         //     GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val)
 //         //   );
 //         // break;
-//         // case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
-//         // case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
-//         // case 5: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
-//         // case 6: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
+//         // case 3: JBI->Add("ih",GetTransitionOrderName(buffer)); break;
+//         // case 4: JBI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
+//         // case 5: JBI->Add("ih",GetFlasherFunctionName(buffer)); break;
+//         // case 6: JBI->Add_FV("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
 //         // case 7:
 //         //   if(!animation.auto_time_off_secs){ //off
-//         //     JsonBuilderI->Add("ih","Unset");
+//         //     JBI->Add("ih","Unset");
 //         //   }else{
-//         //     JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""),
+//         //     JBI->Add_FV("ih",PSTR("\"%d (%s)\""),
 //         //       animation.auto_time_off_secs,"secs"
 //         //     );
 //         //   }
 //         // break;
 //       } //switch
     
-//     JsonBuilderI->Object_End();
+//     JBI->Object_End();
 //   }
-//   JsonBuilderI->Array_End();
+//   JBI->Array_End();
   
 
 //   // char colour_button[8];
@@ -70,19 +70,19 @@
 //   // #endif
 //   // ANIMATION_MODE_NONE_ID};
   
-//   // JsonBuilderI->Array_Start("animod");// Class name
+//   // JBI->Array_Start("animod");// Class name
 //   // for(int row=0;row<sizeof(button_ids);row++){
 //   //   if(button_ids[row] == animation.mode_id){
 //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON_HIGHLIGHT); //selected
 //   //   }else{
 //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
 //   //   }        
-//   //   JsonBuilderI->Object_Start();
-//   //     JsonBuilderI->Add("id",row);
-//   //     JsonBuilderI->Add("bc",colour_button);
-//   //   JsonBuilderI->Object_End();
+//   //   JBI->Object_Start();
+//   //     JBI->Add("id",row);
+//   //     JBI->Add("bc",colour_button);
+//   //   JBI->Object_End();
 //   // }  
-//   // JsonBuilderI->Array_End();
+//   // JBI->Array_End();
 
 // }
 

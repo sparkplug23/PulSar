@@ -230,20 +230,20 @@ uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_level, bool json_appending
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
+    JBI->Add_P(PM_JSON_TIME, 1000);
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
 

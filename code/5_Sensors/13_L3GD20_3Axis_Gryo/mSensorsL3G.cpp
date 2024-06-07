@@ -167,15 +167,15 @@ void mSensorsL3G::EveryLoop(){
 
 uint8_t mSensorsL3G::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+  return JBI->End();
 
 }
 
 uint8_t mSensorsL3G::ConstructJSON_Sensor(uint8_t json_level){
 
-  JsonBuilderI->Start();
+  JBI->Start();
   
   
     JBI->Object_Start("Gyro");
@@ -187,7 +187,7 @@ uint8_t mSensorsL3G::ConstructJSON_Sensor(uint8_t json_level){
     JBI->Object_End();
 
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

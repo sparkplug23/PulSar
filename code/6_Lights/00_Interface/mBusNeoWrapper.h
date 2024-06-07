@@ -59,9 +59,14 @@ enum EM_BUS_TYPE
   BUSTYPE__32_RN_NEO_4__ID,
   BUSTYPE__32_I0_NEO_4__ID,
   BUSTYPE__32_I1_NEO_4__ID,
-  BUSTYPE__32_BB_NEO_4__ID,  // bitbangging on ESP32 not recommended
   BUSTYPE__32_8PARALELL_4__ID,
   BUSTYPE__32_16PARALLEL_4__ID,
+  //
+  BUSTYPE__32_RN_NEO_5__ID,
+  BUSTYPE__32_I0_NEO_5__ID,
+  BUSTYPE__32_I1_NEO_5__ID,
+  BUSTYPE__32_8PARALELL_5__ID,
+  BUSTYPE__32_16PARALLEL_5__ID,
   // 400Kbps
   BUSTYPE__32_RN_400_3__ID,
   BUSTYPE__32_I0_400_3__ID,
@@ -163,6 +168,25 @@ enum EM_BUS_TYPE
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS   // New parallel output
 #define NEOPIXELBUS_32_16PARALLEL_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method>
 #endif
+
+
+
+#ifdef ENABLE_DEVFEATURE__WS2801
+  //RGBWW (WS2805)
+  #define NEOPIXELBUS_32_RN_NEO_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32RmtNWs2805Method>
+  #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+  #define NEOPIXELBUS_32_I0_NEO_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
+  #endif
+  #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+  #define NEOPIXELBUS_32_I1_NEO_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1Ws2805Method>
+  #endif
+  #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS   // New parallel output
+  #define NEOPIXELBUS_32_8PARALLEL_NEO_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1X8Ws2805Method>
+  #endif
+  #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS   // New parallel output
+  #define NEOPIXELBUS_32_16PARALLEL_NEO_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0X8Ws2805Method>
+  #endif
+#endif // ENABLE_DEVFEATURE__WS2801
 
 //400Kbps
 #define NEOPIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtN400KbpsMethod>
@@ -278,6 +302,22 @@ class PolyBus
       case BUSTYPE__32_16PARALLEL_4__ID: (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_4*>(busPtr))->Begin(); break;
       #endif
 
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_5*>(busPtr))->Begin(); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_5*>(busPtr))->Begin(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_5*>(busPtr))->Begin(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: (static_cast<NEOPIXELBUS_32_8PARALLEL_NEO_5*>(busPtr))->Begin(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_5*>(busPtr))->Begin(); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
+
       case BUSTYPE__32_RN_400_3__ID: (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->Begin(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->Begin(); break;
@@ -363,6 +403,22 @@ class PolyBus
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_16PARALLEL_4__ID: busPtr = new NEOPIXELBUS_32_16PARALLEL_NEO_4(len, pins[0]); break;
       #endif
+
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: busPtr = new NEOPIXELBUS_32_RN_NEO_5(len, pins[0], (NeoBusChannel)channel); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: busPtr = new NEOPIXELBUS_32_I0_NEO_5(len, pins[0]); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: busPtr = new NEOPIXELBUS_32_I1_NEO_5(len, pins[0]); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: busPtr = new NEOPIXELBUS_32_8PARALLEL_NEO_5(len, pins[0]); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: busPtr = new NEOPIXELBUS_32_16PARALLEL_NEO_5(len, pins[0]); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
 
       case BUSTYPE__32_RN_400_3__ID: busPtr = new NEOPIXELBUS_32_RN_400_3(len, pins[0], (NeoBusChannel)channel); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
@@ -463,6 +519,22 @@ class PolyBus
       case BUSTYPE__32_16PARALLEL_4__ID: (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_4*>(busPtr))->Show(); break;
       #endif
 
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_5*>(busPtr))->Show(); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_5*>(busPtr))->Show(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_5*>(busPtr))->Show(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: (static_cast<NEOPIXELBUS_32_8PARALLEL_NEO_5*>(busPtr))->Show(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_5*>(busPtr))->Show(); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
+
       case BUSTYPE__32_RN_400_3__ID: (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->Show(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->Show(); break;
@@ -556,6 +628,22 @@ class PolyBus
       case BUSTYPE__32_16PARALLEL_4__ID: return (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_4*>(busPtr))->CanShow(); break;
       #endif
 
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: return (static_cast<NEOPIXELBUS_32_RN_NEO_5*>(busPtr))->CanShow(); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: return (static_cast<NEOPIXELBUS_32_I0_NEO_5*>(busPtr))->CanShow(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: return (static_cast<NEOPIXELBUS_32_I1_NEO_5*>(busPtr))->CanShow(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: return (static_cast<NEOPIXELBUS_32_8PARALLEL_NEO_5*>(busPtr))->CanShow(); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: return (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_5*>(busPtr))->CanShow(); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
+
       case BUSTYPE__32_RN_400_3__ID: return (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->CanShow(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: return (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->CanShow(); break;
@@ -595,7 +683,7 @@ class PolyBus
     if(colour_order.red        != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.red]         = colour_internal.R;  }
     if(colour_order.green      != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.green]       = colour_internal.G;  }
     if(colour_order.blue       != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.blue]        = colour_internal.B;  }
-    if(colour_order.white_cold != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.white_cold]  = colour_internal.WC; }
+    if(colour_order.white_cold != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.white_cold]  = colour_internal.CW; }
     if(colour_order.white_warm != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.white_warm]  = colour_internal.WW; }
     #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
     if(pix==0){ // Just first pixel
@@ -608,7 +696,7 @@ class PolyBus
         colour_internal.R,
         colour_internal.G,
         colour_internal.B,
-        colour_internal.WC,
+        colour_internal.CW,
         colour_internal.WW
       );
     }
@@ -693,6 +781,22 @@ class PolyBus
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_16PARALLEL_4__ID: (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       #endif
+
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_5*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_5*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_5*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: (static_cast<NEOPIXELBUS_32_8PARALLEL_NEO_5*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_5*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
 
       case BUSTYPE__32_RN_400_3__ID: (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
@@ -789,6 +893,22 @@ class PolyBus
       case BUSTYPE__32_16PARALLEL_4__ID: col = (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_4*>(busPtr))->GetPixelColor(pix); break;
       #endif
 
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: col = (static_cast<NEOPIXELBUS_32_RN_NEO_5*>(busPtr))->GetPixelColor(pix); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: col = (static_cast<NEOPIXELBUS_32_I0_NEO_5*>(busPtr))->GetPixelColor(pix); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: col = (static_cast<NEOPIXELBUS_32_I1_NEO_5*>(busPtr))->GetPixelColor(pix); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: col = (static_cast<NEOPIXELBUS_32_8PARALLEL_NEO_5*>(busPtr))->GetPixelColor(pix); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: col = (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_5*>(busPtr))->GetPixelColor(pix); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
+
       case BUSTYPE__32_RN_400_3__ID: col = (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->GetPixelColor(pix); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: col = (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->GetPixelColor(pix); break;
@@ -822,7 +942,7 @@ class PolyBus
     if(colour_order.green      != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.green] = col.G; }
     if(colour_order.blue       != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.blue] = col.B; }
     if(colour_order.white_cold != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.white_cold] = col.WW; }
-    if(colour_order.white_warm != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.white_warm] = col.WC; }
+    if(colour_order.white_warm != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.white_warm] = col.CW; }
     #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
     if(pix==0){ // Just first pixel
       Serial.printf("get colour_order R=%d, G=%d, B=%d, CW=%d, WW=%d\n\r",
@@ -903,6 +1023,22 @@ class PolyBus
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_16PARALLEL_4__ID: delete (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_4*>(busPtr)); break;
       #endif
+
+#ifdef ENABLE_DEVFEATURE__WS2801
+      case BUSTYPE__32_RN_NEO_5__ID: delete (static_cast<NEOPIXELBUS_32_RN_NEO_5*>(busPtr)); break;
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_NEO_5__ID: delete (static_cast<NEOPIXELBUS_32_I0_NEO_5*>(busPtr)); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_NEO_5__ID: delete (static_cast<NEOPIXELBUS_32_I1_NEO_5*>(busPtr)); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_8PARALELL_5__ID: delete (static_cast<NEOPIXELBUS_32_8PARALLEL_NEO_5*>(busPtr)); break;
+      #endif
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_16PARALLEL_5__ID: delete (static_cast<NEOPIXELBUS_32_16PARALLEL_NEO_5*>(busPtr)); break;
+      #endif
+#endif // ENABLE_DEVFEATURE__WS2801
 
       case BUSTYPE__32_RN_400_3__ID: delete (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr)); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
@@ -1052,6 +1188,8 @@ class PolyBus
           return BUSTYPE__32_RN_NEO_3__ID + offset_method_inside_group;
         case BUSTYPE_SK6812_RGBW:
           return BUSTYPE__32_RN_NEO_4__ID + offset_method_inside_group;
+        case BUSTYPE_WS2805_RGBWW:
+          return BUSTYPE__32_RN_NEO_5__ID + offset_method_inside_group;
         case BUSTYPE_WS2811_400KHZ:
           return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
         case BUSTYPE_TM1814:

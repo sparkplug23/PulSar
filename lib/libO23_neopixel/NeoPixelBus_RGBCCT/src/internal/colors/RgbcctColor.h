@@ -57,6 +57,7 @@ struct RgbcctColor : RgbColorBase
         union {
           uint8_t WC;
           uint8_t W1;
+          uint8_t CW;
           uint8_t white_cold;  // Assume cold is the normal white, its only "warm" when an alternate exists
         };
         union {

@@ -56,18 +56,6 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER_2022
-    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-      WebAppend_Root_Draw_Table();
-    break; 
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break; 
-    #endif //USE_MODULE_NETWORK_WEBSERVER_2022
-
   }
 
 }
@@ -305,31 +293,6 @@ const char* mSettings::SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_
 }
 
 
-
-
-// Bonus: After thinking about it for a second, you could use a lambda instead of creating the function (note you need to have a + sign before the lambda in order for it to work as a function pointer). This would look like:
-
-// #include <Arduino.h>
-// #include <Test.h>
-// #include <functional>
-
-// // for ESP8266: https://github.com/esp8266/Arduino/blob/master/libraries/Ticker/src/Ticker.h
-// // for ESP32:   https://github.com/espressif/arduino-esp32/blob/master/libraries/Ticker/src/Ticker.h
-// #include <Ticker.h>
-
-// Ticker ticker;
-
-// void Test::start(){
-//   ticker.once(5, +[](Test* testInstance) { testInstance->onTickerCallback(); }, this);
-// }
-
-// void Test::onTickerCallback() {
-//   doSomething();
-// }
-
-// void Test::doSomething() {
-//   Serial.println("Hello");
-// }
 /*********************************************************************************************\
  * Switch handler
 \*********************************************************************************************/
@@ -533,17 +496,17 @@ uint8_t mSwitches::GetVirtual(uint8_t index)
 
 uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.switches_found);
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.switches_found);
 
-    // JsonBuilderI->Add("pin0", switches[0].pin);
-    // JsonBuilderI->Add("pin1", switches[1].pin);
-    // JsonBuilderI->Add("pin2", switches[2].pin);
-    // JsonBuilderI->Add("read0", digitalRead(switches[0].pin));
-    // JsonBuilderI->Add("read1", digitalRead(switches[1].pin));
-    // JsonBuilderI->Add("read2", digitalRead(switches[2].pin));
+    // JBI->Add("pin0", switches[0].pin);
+    // JBI->Add("pin1", switches[1].pin);
+    // JBI->Add("pin2", switches[2].pin);
+    // JBI->Add("read0", digitalRead(switches[0].pin));
+    // JBI->Add("read1", digitalRead(switches[1].pin));
+    // JBI->Add("read2", digitalRead(switches[2].pin));
     
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -551,35 +514,35 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 
   char buffer[50]; 
   
-  JsonBuilderI->Start();
+  JBI->Start();
 
   for(uint8_t sensor_id=0;sensor_id<settings.switches_found;sensor_id++){
     if(switches[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
       
-      JsonBuilderI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
-        JsonBuilderI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
-        JsonBuilderI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
+      JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
+        JBI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
+        JBI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
 
 
-        JsonBuilderI->Add("digitalRead", digitalRead(switches[sensor_id].pin));
+        JBI->Add("digitalRead", digitalRead(switches[sensor_id].pin));
 
         
 
 
-        JsonBuilderI->Add("ischanged", switches[sensor_id].ischanged);
-        JsonBuilderI->Add("lastwallswitch", switches[sensor_id].lastwallswitch);
-        JsonBuilderI->Add("holdwallswitch", switches[sensor_id].holdwallswitch);
-        JsonBuilderI->Add("switch_state_buf", switches[sensor_id].switch_state_buf);
-        JsonBuilderI->Add("switch_virtual", switches[sensor_id].switch_virtual);
-        // JsonBuilderI->Add("is_linked_to_internal_relay", switches[sensor_id].is_linked_to_internal_relay);
-        JsonBuilderI->Add("linked_internal_relay_id", switches[sensor_id].linked_internal_relay_id);
-      JsonBuilderI->Object_End();
+        JBI->Add("ischanged", switches[sensor_id].ischanged);
+        JBI->Add("lastwallswitch", switches[sensor_id].lastwallswitch);
+        JBI->Add("holdwallswitch", switches[sensor_id].holdwallswitch);
+        JBI->Add("switch_state_buf", switches[sensor_id].switch_state_buf);
+        JBI->Add("switch_virtual", switches[sensor_id].switch_virtual);
+        // JBI->Add("is_linked_to_internal_relay", switches[sensor_id].is_linked_to_internal_relay);
+        JBI->Add("linked_internal_relay_id", switches[sensor_id].linked_internal_relay_id);
+      JBI->Object_End();
       
     }
 
   }
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -670,57 +633,6 @@ void mSwitches::MQTTHandler_Sender()
 }
 
 #endif // USE_MODULE_NETWORK_MQTT
-
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-
-#ifdef USE_MODULE_NETWORK_WEBSERVER_2022
-
-void mSwitches::WebAppend_Root_Draw_Table(){
-
-  const char kTitle_TableTitles_Root[] = 
-    "Switch 0" "|" 
-    "Switch 1" "|" 
-    "Switch 2" "|" 
-    "Switch 3" "|" 
-    "Switch 4" "|" 
-    "Switch 5" "|" 
-    "Switch 6" "|" 
-    "Switch 7" "|" 
-    "Switch 8" "|" ;
-
- pCONT_web->WebAppend_Root_Draw_Table_dList(settings.switches_found,"switch_table", kTitle_TableTitles_Root); //add flag (or another function) that draws names with numbers after it
-
-}
-
-//append to internal buffer if any root messages table
-void mSwitches::WebAppend_Root_Status_Table(){
-
-  char buffer[50];
-  
-  JsonBuilderI->Array_Start("switch_table");// Class name
-  for(int row=0;row<settings.switches_found;row++){
-    JsonBuilderI->Object_Start();
-      JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
-      if(IsSwitchActive(row)){
-        JsonBuilderI->Add("fc","#00ff00");
-      }else{
-        JsonBuilderI->Add("fc","#ff0000");
-      }
-    
-    JsonBuilderI->Object_End();
-  }
-  JsonBuilderI->Array_End();
-  
-}
-
-
-#endif// USE_MODULE_NETWORK_WEBSERVER_2022
-
-
 
 
 

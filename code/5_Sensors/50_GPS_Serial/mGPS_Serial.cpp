@@ -17,6 +17,22 @@ static ubloxGPS gps_ublox(&Serial2);
 #endif
 
 
+/**
+ * @brief 
+ * 2024
+ * 
+ * 
+ * New GPS
+ * ** Polling method (direct read from serial)
+ * ** Ringbuffer method (read from ringbuffer) so assumes CoreSerial is active and has ringbuffers, and is reserved for GPS.
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+
 //-----------------------------------------------------------------
 //  Derive a class to add the state machine for starting up:
 //    1) The status must change to something other than NONE.
@@ -215,6 +231,11 @@ public:
         case GETTING_UTC         : get_utc         (); break;
       }
 
+      if(state == RUNNING)
+      {
+        pCONT_gps->rt.valid_timeout_seconds = 3;
+      }
+
       return (state == RUNNING);
 
     } // running
@@ -305,10 +326,15 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
 
       // ubx_parser.PrintDevice("func loop");
 
-      started_successfully = true;
 
-      if(started_successfully)
+      if(rt.valid_timeout_seconds)
       {
+      //   started_successfully = true;
+      // }
+
+
+      // if(started_successfully)
+      // {
 
         #ifdef ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
 
@@ -367,21 +393,30 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
   //       #endif
 
 
-   #ifdef      ENABLE_DEVFEATURE__START_STATIC_LOOP
-  if (static_gps.available( gpsPort ))
-    trace_all( DEBUG_PORT, static_gps, static_gps.read() );
+      #ifdef      ENABLE_DEVFEATURE__START_STATIC_LOOP
+        if (static_gps.available( gpsPort ))
+          trace_all( DEBUG_PORT, static_gps, static_gps.read() );
 
-  // If the user types something, reset the message configuration
-  //   back to a normal set of NMEA messages.  This makes it
-  //   convenient to switch to another example program that
-  //   expects a typical set of messages.  This also saves
-  //   putting those config messages in every other example.
+        // If the user types something, reset the message configuration
+        //   back to a normal set of NMEA messages.  This makes it
+        //   convenient to switch to another example program that
+        //   expects a typical set of messages.  This also saves
+        //   putting those config messages in every other example.
 
-  #endif // ENABLE_DEVFEATURE__START_STATIC_LOOP
+        #endif // ENABLE_DEVFEATURE__START_STATIC_LOOP
+        
+      } // end valid_timeout_seconds
 
-      
-      } // end started_successfully
-
+    break;
+    case FUNC_EVERY_SECOND:
+      if(rt.valid_timeout_seconds==0)
+      {
+        ALOG_INF(PSTR("GPS Fix Timeout"));
+        RecheckConnection();
+      }else{
+        rt.valid_timeout_seconds--;
+        ALOG_INF(PSTR("GPS Fix Valid: %d"), rt.valid_timeout_seconds);
+      }
     break;
     case FUNC_EVERY_MINUTE:
       #ifndef DISABLE_SERIAL_LOGGING
@@ -425,6 +460,31 @@ void mGPS_Serial::Handle_Connection_And_Configuration()
 
 }
 
+
+void mGPS_Serial::RecheckConnection(void)
+{
+  uint32_t timeout_millis = millis();
+  
+  #ifdef ENABLE_DEVFEATURE__START_STATIC_WHILE
+  while (!static_gps.running())
+  {
+    if (static_gps.available( gpsPort ))
+    {
+      static_gps.read();
+    }
+    
+    
+    if(abs(millis()-timeout_millis)>500)
+    {
+      ALOG_ERR(PSTR("GPS RecheckConnection Timeout"));
+      break;
+    }
+  }
+
+
+  #endif // ENABLE_DEVFEATURE__START_STATIC_WHILE
+
+}
 
 
 void mGPS_Serial::ReadGPSStream()
@@ -904,7 +964,7 @@ void mGPS_Serial::Init(void)
   // DEBUG_LINE_HERE;
 
   // delay(3000);
-  gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, 18,19);
+  gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, 16,17);
 
   // while(1)
   // {
@@ -935,11 +995,11 @@ void mGPS_Serial::Init(void)
 
   // tkr_Serial->HWSerial2->print("TEST");
 
-  #ifdef ENABLE_DEVFEATURE__START_STATIC_WHILE
-  while (!static_gps.running())
-    if (static_gps.available( gpsPort ))
-      static_gps.read();
-  #endif // ENABLE_DEVFEATURE__START_STATIC_WHILE
+  // #ifdef ENABLE_DEVFEATURE__START_STATIC_WHILE
+  // while (!static_gps.running())
+  //   if (static_gps.available( gpsPort ))
+  //     static_gps.read();
+  // #endif // ENABLE_DEVFEATURE__START_STATIC_WHILE
   
   DEBUG_LINE_HERE;
   // // // Turn off the preconfigured NMEA standard messages
@@ -1541,22 +1601,6 @@ void mGPS_Serial::EveryLoop_InputMethod_PollingSerial_BytesFromBuffer()
  * Commands
 *******************************************************************************************************************/
 
-void mGPS_Serial::main_body_function()
-{ 
-  test_value = 0;
-  Serial.printf("main_body_functionA %d\n",test_value);
-  header_function();
-  Serial.printf("main_body_functionB %d\n",test_value);
-}
-
-
-
-
-
-
-
-
-
 void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
   char buffer[50];
@@ -1916,63 +1960,63 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Minimal(uint8_t json_level, bool js
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   
-      JsonBuilderI->Add("packets", stats.packets_received); 
-      JsonBuilderI->Add("last", millis()-stats.last_message_received_time); 
+      JBI->Add("packets", stats.packets_received); 
+      JBI->Add("last", millis()-stats.last_message_received_time); 
 
   // #ifdef ENABLE_GPS_PARSER_NMEA
-    JsonBuilderI->Object_Start("Location");
-      JsonBuilderI->Add("latitudeL", fix_valid.latitudeL()); 
-      JsonBuilderI->Add("latitude", fix_valid.latitude());
-      JsonBuilderI->Add("longitudeL", fix_valid.longitudeL());
-      JsonBuilderI->Add("longitude", fix_valid.longitude());
-    JsonBuilderI->Object_End();
+    JBI->Object_Start("Location");
+      JBI->Add("latitudeL", fix_valid.latitudeL()); 
+      JBI->Add("latitude", fix_valid.latitude());
+      JBI->Add("longitudeL", fix_valid.longitudeL());
+      JBI->Add("longitude", fix_valid.longitude());
+    JBI->Object_End();
 
-    JsonBuilderI->Object_Start("Altitude");
-      JsonBuilderI->Add("altitude_cm", fix_valid.altitude_cm()); 
-      JsonBuilderI->Add("altitude", fix_valid.altitude());
-      JsonBuilderI->Add("altitude_ft", fix_valid.altitude_ft());
-    JsonBuilderI->Object_End();
+    JBI->Object_Start("Altitude");
+      JBI->Add("altitude_cm", fix_valid.altitude_cm()); 
+      JBI->Add("altitude", fix_valid.altitude());
+      JBI->Add("altitude_ft", fix_valid.altitude_ft());
+    JBI->Object_End();
 
 
-    JsonBuilderI->Object_Start("Speed");
-      JsonBuilderI->Add("speed_mkn", fix_valid.speed_mkn()); 
-      JsonBuilderI->Add("speed", fix_valid.speed());
-      JsonBuilderI->Add("speed_kph", fix_valid.speed_kph());
-      JsonBuilderI->Add("speed_metersph", fix_valid.speed_metersph());
-      JsonBuilderI->Add("speed_mph", fix_valid.speed_mph());
-    JsonBuilderI->Object_End();
+    JBI->Object_Start("Speed");
+      JBI->Add("speed_mkn", fix_valid.speed_mkn()); 
+      JBI->Add("speed", fix_valid.speed());
+      JBI->Add("speed_kph", fix_valid.speed_kph());
+      JBI->Add("speed_metersph", fix_valid.speed_metersph());
+      JBI->Add("speed_mph", fix_valid.speed_mph());
+    JBI->Object_End();
 
-    // JsonBuilderI->Object_Start("Heading");
-    //   JsonBuilderI->Add("heading_cd", fix_valid.heading_cd()); 
-    //   JsonBuilderI->Add("heading", fix_valid.heading());
-    // JsonBuilderI->Object_End();
+    // JBI->Object_Start("Heading");
+    //   JBI->Add("heading_cd", fix_valid.heading_cd()); 
+    //   JBI->Add("heading", fix_valid.heading());
+    // JBI->Object_End();
 
-    // JsonBuilderI->Object_Start("geoidHt");
-    //   JsonBuilderI->Add("geoidHeight_cm", fix_valid.geoidHeight_cm()); 
-    //   JsonBuilderI->Add("geoidHeight", fix_valid.geoidHeight());
-    // JsonBuilderI->Object_End();
+    // JBI->Object_Start("geoidHt");
+    //   JBI->Add("geoidHeight_cm", fix_valid.geoidHeight_cm()); 
+    //   JBI->Add("geoidHeight", fix_valid.geoidHeight());
+    // JBI->Object_End();
 
-    // JsonBuilderI->Add("satellites", fix_valid.satellites); 
+    // JBI->Add("satellites", fix_valid.satellites); 
 
-    // JsonBuilderI->Object_Start("Dilution");
-    //   JsonBuilderI->Add("hdop", fix_valid.hdop); 
-    //   JsonBuilderI->Add("vdop", fix_valid.vdop);
-    //   JsonBuilderI->Add("pdop", fix_valid.pdop);
-    //   JsonBuilderI->Add("lat_err", fix_valid.lat_err());
-    //   JsonBuilderI->Add("lon_err", fix_valid.lon_err());
-    //   JsonBuilderI->Add("alt_err", fix_valid.alt_err());
-    //   JsonBuilderI->Add("spd_err", fix_valid.spd_err());
-    //   JsonBuilderI->Add("hdg_err", fix_valid.hdg_err());
-    //   JsonBuilderI->Add("spd_err", fix_valid.spd_err());
-    //   JsonBuilderI->Add("time_err", fix_valid.time_err());
-    // JsonBuilderI->Object_End();
+    // JBI->Object_Start("Dilution");
+    //   JBI->Add("hdop", fix_valid.hdop); 
+    //   JBI->Add("vdop", fix_valid.vdop);
+    //   JBI->Add("pdop", fix_valid.pdop);
+    //   JBI->Add("lat_err", fix_valid.lat_err());
+    //   JBI->Add("lon_err", fix_valid.lon_err());
+    //   JBI->Add("alt_err", fix_valid.alt_err());
+    //   JBI->Add("spd_err", fix_valid.spd_err());
+    //   JBI->Add("hdg_err", fix_valid.hdg_err());
+    //   JBI->Add("spd_err", fix_valid.spd_err());
+    //   JBI->Add("time_err", fix_valid.time_err());
+    // JBI->Object_End();
 
   // #endif // ENABLE_GPS_PARSER_NMEA
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -1986,54 +2030,54 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_a
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
 //   #ifdef ENABLE_GPS_PARSER_NMEA
-//     JsonBuilderI->Object_Start("Location");
-//       JsonBuilderI->Add("latitudeL", fix_valid.latitudeL()); 
-//       JsonBuilderI->Add("latitude", fix_valid.latitude());
-//       JsonBuilderI->Add("longitudeL", fix_valid.longitudeL());
-//       JsonBuilderI->Add("longitude", fix_valid.longitude());
-//     JsonBuilderI->Object_End();
+//     JBI->Object_Start("Location");
+//       JBI->Add("latitudeL", fix_valid.latitudeL()); 
+//       JBI->Add("latitude", fix_valid.latitude());
+//       JBI->Add("longitudeL", fix_valid.longitudeL());
+//       JBI->Add("longitude", fix_valid.longitude());
+//     JBI->Object_End();
 
-//     JsonBuilderI->Object_Start("Altitude");
-//       JsonBuilderI->Add("altitude_cm", fix_valid.altitude_cm()); 
-//       JsonBuilderI->Add("altitude", fix_valid.altitude());
-//       JsonBuilderI->Add("altitude_ft", fix_valid.altitude_ft());
-//     JsonBuilderI->Object_End();
+//     JBI->Object_Start("Altitude");
+//       JBI->Add("altitude_cm", fix_valid.altitude_cm()); 
+//       JBI->Add("altitude", fix_valid.altitude());
+//       JBI->Add("altitude_ft", fix_valid.altitude_ft());
+//     JBI->Object_End();
 
-//     JsonBuilderI->Object_Start("Speed");
-//       JsonBuilderI->Add("speed_mkn", fix_valid.speed_mkn()); 
-//       JsonBuilderI->Add("speed", fix_valid.speed());
-//       JsonBuilderI->Add("speed_kph", fix_valid.speed_kph());
-//       JsonBuilderI->Add("speed_metersph", fix_valid.speed_metersph());
-//       JsonBuilderI->Add("speed_mph", fix_valid.speed_mph());
-//     JsonBuilderI->Object_End();
+//     JBI->Object_Start("Speed");
+//       JBI->Add("speed_mkn", fix_valid.speed_mkn()); 
+//       JBI->Add("speed", fix_valid.speed());
+//       JBI->Add("speed_kph", fix_valid.speed_kph());
+//       JBI->Add("speed_metersph", fix_valid.speed_metersph());
+//       JBI->Add("speed_mph", fix_valid.speed_mph());
+//     JBI->Object_End();
 
-//     JsonBuilderI->Object_Start("Heading");
-//       JsonBuilderI->Add("heading_cd", fix_valid.heading_cd()); 
-//       JsonBuilderI->Add("heading", fix_valid.heading());
-//     JsonBuilderI->Object_End();
+//     JBI->Object_Start("Heading");
+//       JBI->Add("heading_cd", fix_valid.heading_cd()); 
+//       JBI->Add("heading", fix_valid.heading());
+//     JBI->Object_End();
 
-//     JsonBuilderI->Object_Start("geoidHt");
-//       JsonBuilderI->Add("geoidHeight_cm", fix_valid.geoidHeight_cm()); 
-//       JsonBuilderI->Add("geoidHeight", fix_valid.geoidHeight());
-//     JsonBuilderI->Object_End();
+//     JBI->Object_Start("geoidHt");
+//       JBI->Add("geoidHeight_cm", fix_valid.geoidHeight_cm()); 
+//       JBI->Add("geoidHeight", fix_valid.geoidHeight());
+//     JBI->Object_End();
 
-//     JsonBuilderI->Add("satellites", fix_valid.satellites); 
+//     JBI->Add("satellites", fix_valid.satellites); 
 
-//     JsonBuilderI->Object_Start("Dilution");
-//       JsonBuilderI->Add("hdop", fix_valid.hdop); 
-//       JsonBuilderI->Add("vdop", fix_valid.vdop);
-//       JsonBuilderI->Add("pdop", fix_valid.pdop);
-//       JsonBuilderI->Add("lat_err", fix_valid.lat_err());
-//       JsonBuilderI->Add("lon_err", fix_valid.lon_err());
-//       JsonBuilderI->Add("alt_err", fix_valid.alt_err());
-//       JsonBuilderI->Add("spd_err", fix_valid.spd_err());
-//       JsonBuilderI->Add("hdg_err", fix_valid.hdg_err());
-//       JsonBuilderI->Add("spd_err", fix_valid.spd_err());
-//       JsonBuilderI->Add("time_err", fix_valid.time_err());
-//     JsonBuilderI->Object_End();
+//     JBI->Object_Start("Dilution");
+//       JBI->Add("hdop", fix_valid.hdop); 
+//       JBI->Add("vdop", fix_valid.vdop);
+//       JBI->Add("pdop", fix_valid.pdop);
+//       JBI->Add("lat_err", fix_valid.lat_err());
+//       JBI->Add("lon_err", fix_valid.lon_err());
+//       JBI->Add("alt_err", fix_valid.alt_err());
+//       JBI->Add("spd_err", fix_valid.spd_err());
+//       JBI->Add("hdg_err", fix_valid.hdg_err());
+//       JBI->Add("spd_err", fix_valid.spd_err());
+//       JBI->Add("time_err", fix_valid.time_err());
+//     JBI->Object_End();
 
 
 
@@ -2050,8 +2094,8 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_a
 // */
 
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
 
@@ -2066,7 +2110,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   // #ifdef ENABLE_GPS_PARSER_NMEA
   // JBI->Object_Start("SequenceNumber");
@@ -2076,7 +2120,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json
 
   // JBI->Object_Start("Quality");
   //   JBI->Add("Fix", fix_valid.status);
-  //   JsonBuilderI->Add("satellites", fix_valid.satellites); 
+  //   JBI->Add("satellites", fix_valid.satellites); 
   //   JBI->Add("SatelleteCount", fix_valid.satellites);
   //   JBI->Add("SatelleteThreshold", 0); //minimal fix to be considered enough
   //   JBI->Add("UptimeSeconds", 0); 
@@ -2101,58 +2145,58 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json
   // JBI->Object_End();
 
   // JBI->Object_Start("Location");
-  //   // JsonBuilderI->Add("latitudeL", fix_valid.latitudeL()); 
-  //   JsonBuilderI->Add("latitude", fix_valid.latitude());
-  //   // JsonBuilderI->Add("longitudeL", fix_valid.longitudeL());
-  //   JsonBuilderI->Add("longitude", fix_valid.longitude());
+  //   // JBI->Add("latitudeL", fix_valid.latitudeL()); 
+  //   JBI->Add("latitude", fix_valid.latitude());
+  //   // JBI->Add("longitudeL", fix_valid.longitudeL());
+  //   JBI->Add("longitude", fix_valid.longitude());
   // JBI->Object_End();
 
   // JBI->Object_Start("Altitude");
   //   JBI->Add("hMSL_mm", 0);
   //   JBI->Add("height_mm", 0);
-  //     JsonBuilderI->Add("altitude_cm", fix_valid.altitude_cm()); 
-  //     JsonBuilderI->Add("altitude", fix_valid.altitude());
-  //     JsonBuilderI->Add("altitude_ft", fix_valid.altitude_ft());
+  //     JBI->Add("altitude_cm", fix_valid.altitude_cm()); 
+  //     JBI->Add("altitude", fix_valid.altitude());
+  //     JBI->Add("altitude_ft", fix_valid.altitude_ft());
   // JBI->Object_End();
 
   // JBI->Object_Start("Velocity");
   //   JBI->Add("speed3D", 0);
   //   JBI->Add("speed2D", 0);
-  //     JsonBuilderI->Add("speed_mkn", fix_valid.speed_mkn()); 
-  //     JsonBuilderI->Add("speed", fix_valid.speed());
-  //     JsonBuilderI->Add("speed_kph", fix_valid.speed_kph());
-  //     JsonBuilderI->Add("speed_metersph", fix_valid.speed_metersph());
-  //     JsonBuilderI->Add("speed_mph", fix_valid.speed_mph());
+  //     JBI->Add("speed_mkn", fix_valid.speed_mkn()); 
+  //     JBI->Add("speed", fix_valid.speed());
+  //     JBI->Add("speed_kph", fix_valid.speed_kph());
+  //     JBI->Add("speed_metersph", fix_valid.speed_metersph());
+  //     JBI->Add("speed_mph", fix_valid.speed_mph());
   // JBI->Object_End();
 
   // JBI->Object_Start("Velocity");
 
-  //     JsonBuilderI->Add("heading_cd", fix_valid.heading_cd()); 
-  //     JsonBuilderI->Add("heading", fix_valid.heading());
+  //     JBI->Add("heading_cd", fix_valid.heading_cd()); 
+  //     JBI->Add("heading", fix_valid.heading());
 
   // JBI->Object_End();
 
-  //   JsonBuilderI->Object_Start("geoidHt");
-  //     JsonBuilderI->Add("geoidHeight_cm", fix_valid.geoidHeight_cm()); 
-  //     JsonBuilderI->Add("geoidHeight", fix_valid.geoidHeight());
-  //   JsonBuilderI->Object_End();
+  //   JBI->Object_Start("geoidHt");
+  //     JBI->Add("geoidHeight_cm", fix_valid.geoidHeight_cm()); 
+  //     JBI->Add("geoidHeight", fix_valid.geoidHeight());
+  //   JBI->Object_End();
 
-  //   JsonBuilderI->Object_Start("Dilution");
-  //     JsonBuilderI->Add("hdop", fix_valid.hdop); 
-  //     JsonBuilderI->Add("vdop", fix_valid.vdop);
-  //     JsonBuilderI->Add("pdop", fix_valid.pdop);
-  //     JsonBuilderI->Add("lat_err", fix_valid.lat_err());
-  //     JsonBuilderI->Add("lon_err", fix_valid.lon_err());
-  //     JsonBuilderI->Add("alt_err", fix_valid.alt_err());
-  //     JsonBuilderI->Add("spd_err", fix_valid.spd_err());
-  //     JsonBuilderI->Add("hdg_err", fix_valid.hdg_err());
-  //     JsonBuilderI->Add("spd_err", fix_valid.spd_err());
-  //     JsonBuilderI->Add("time_err", fix_valid.time_err());
-  //   JsonBuilderI->Object_End();
+  //   JBI->Object_Start("Dilution");
+  //     JBI->Add("hdop", fix_valid.hdop); 
+  //     JBI->Add("vdop", fix_valid.vdop);
+  //     JBI->Add("pdop", fix_valid.pdop);
+  //     JBI->Add("lat_err", fix_valid.lat_err());
+  //     JBI->Add("lon_err", fix_valid.lon_err());
+  //     JBI->Add("alt_err", fix_valid.alt_err());
+  //     JBI->Add("spd_err", fix_valid.spd_err());
+  //     JBI->Add("hdg_err", fix_valid.hdg_err());
+  //     JBI->Add("spd_err", fix_valid.spd_err());
+  //     JBI->Add("time_err", fix_valid.time_err());
+  //   JBI->Object_End();
 
   // #endif // ENABLE_GPS_PARSER_NMEA
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -2160,50 +2204,50 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   // #ifdef ENABLE_GPS_PARSER_NMEA
-  //   JsonBuilderI->Object_Start("Millis");
-  //     JsonBuilderI->Add("GGA",nmea_parser->active_millis.GGA);
-  //     JsonBuilderI->Add("GLL",nmea_parser->active_millis.GLL);
-  //     JsonBuilderI->Add("GSA",nmea_parser->active_millis.GSA);
-  //     JsonBuilderI->Add("GST",nmea_parser->active_millis.GST);
-  //     JsonBuilderI->Add("GSV",nmea_parser->active_millis.GSV);
-  //     JsonBuilderI->Add("RMC",nmea_parser->active_millis.RMC);
-  //     JsonBuilderI->Add("VTG",nmea_parser->active_millis.VTG);
-  //     JsonBuilderI->Add("ZDA",nmea_parser->active_millis.ZDA);
-  //   JsonBuilderI->Object_End();
+  //   JBI->Object_Start("Millis");
+  //     JBI->Add("GGA",nmea_parser->active_millis.GGA);
+  //     JBI->Add("GLL",nmea_parser->active_millis.GLL);
+  //     JBI->Add("GSA",nmea_parser->active_millis.GSA);
+  //     JBI->Add("GST",nmea_parser->active_millis.GST);
+  //     JBI->Add("GSV",nmea_parser->active_millis.GSV);
+  //     JBI->Add("RMC",nmea_parser->active_millis.RMC);
+  //     JBI->Add("VTG",nmea_parser->active_millis.VTG);
+  //     JBI->Add("ZDA",nmea_parser->active_millis.ZDA);
+  //   JBI->Object_End();
 
-  //   JsonBuilderI->Object_Start("Millis2");
-  //     JsonBuilderI->Add("GGA",millis()-nmea_parser->active_millis.GGA);
-  //     JsonBuilderI->Add("GLL",millis()-nmea_parser->active_millis.GLL);
-  //     JsonBuilderI->Add("GSA",millis()-nmea_parser->active_millis.GSA);
-  //     JsonBuilderI->Add("GST",millis()-nmea_parser->active_millis.GST);
-  //     JsonBuilderI->Add("GSV",millis()-nmea_parser->active_millis.GSV);
-  //     JsonBuilderI->Add("RMC",mTime::MillisElapsed(nmea_parser->active_millis.RMC));
-  //     JsonBuilderI->Add("VTG",millis()-nmea_parser->active_millis.VTG);
-  //     JsonBuilderI->Add("ZDA",millis()-nmea_parser->active_millis.ZDA);
-  //   JsonBuilderI->Object_End();
+  //   JBI->Object_Start("Millis2");
+  //     JBI->Add("GGA",millis()-nmea_parser->active_millis.GGA);
+  //     JBI->Add("GLL",millis()-nmea_parser->active_millis.GLL);
+  //     JBI->Add("GSA",millis()-nmea_parser->active_millis.GSA);
+  //     JBI->Add("GST",millis()-nmea_parser->active_millis.GST);
+  //     JBI->Add("GSV",millis()-nmea_parser->active_millis.GSV);
+  //     JBI->Add("RMC",mTime::MillisElapsed(nmea_parser->active_millis.RMC));
+  //     JBI->Add("VTG",millis()-nmea_parser->active_millis.VTG);
+  //     JBI->Add("ZDA",millis()-nmea_parser->active_millis.ZDA);
+  //   JBI->Object_End();
 
   // #endif // ENABLE_GPS_PARSER_NMEA
 
 
-  //   JsonBuilderI->Object_Start("UBX_Parsed_Millis");
-  //     JsonBuilderI->Add("status",millis()-gps.debug_millis_last_parsed.status);
-  //     JsonBuilderI->Add("posllh",millis()-gps.debug_millis_last_parsed.posllh);
-  //     JsonBuilderI->Add("pvt",millis()-gps.debug_millis_last_parsed.pvt);
-  //     JsonBuilderI->Add("dop",millis()-gps.debug_millis_last_parsed.dop);
-  //     JsonBuilderI->Add("velned",millis()-gps.debug_millis_last_parsed.velned);
-  //     JsonBuilderI->Add("timegps",mTime::MillisElapsed(gps.debug_millis_last_parsed.timegps));
-  //     JsonBuilderI->Add("timeutc",millis()-gps.debug_millis_last_parsed.timeutc);
-  //     JsonBuilderI->Add("svinfo",millis()-gps.debug_millis_last_parsed.svinfo);
-  //   JsonBuilderI->Object_End();
+  //   JBI->Object_Start("UBX_Parsed_Millis");
+  //     JBI->Add("status",millis()-gps.debug_millis_last_parsed.status);
+  //     JBI->Add("posllh",millis()-gps.debug_millis_last_parsed.posllh);
+  //     JBI->Add("pvt",millis()-gps.debug_millis_last_parsed.pvt);
+  //     JBI->Add("dop",millis()-gps.debug_millis_last_parsed.dop);
+  //     JBI->Add("velned",millis()-gps.debug_millis_last_parsed.velned);
+  //     JBI->Add("timegps",mTime::MillisElapsed(gps.debug_millis_last_parsed.timegps));
+  //     JBI->Add("timeutc",millis()-gps.debug_millis_last_parsed.timeutc);
+  //     JBI->Add("svinfo",millis()-gps.debug_millis_last_parsed.svinfo);
+  //   JBI->Object_End();
 
 
 
 
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
 
@@ -2216,20 +2260,20 @@ uint8_t mGPS_Serial::ConstructJSON_Settings(uint8_t json_level, bool json_append
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+    JBI->Add_P(PM_JSON_TIME, 1000);
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
 
@@ -2243,20 +2287,20 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Required(uint8_t json_level, bool j
 
   char buffer[30];
   
-  JsonBuilderI->Start();  
+  JBI->Start();  
 
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
-  return JsonBuilderI->End();
+    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+    JBI->Add_P(PM_JSON_TIME, 1000);
+    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+  return JBI->End();
 
 }
   

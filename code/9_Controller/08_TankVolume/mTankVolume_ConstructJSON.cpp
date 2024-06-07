@@ -48,7 +48,7 @@ uint8_t mTankVolume::ConstructJSON_State(uint8_t json_level, bool json_appending
 // Send all litres calculations from all methods
 uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
     JBI->Object_Start("Litres");
 
@@ -61,16 +61,16 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appendin
 
   if(json_level >= JSON_LEVEL_SHORT){
 
-    // JsonBuilderI->Add("isvalid", oiltank.smooth_1hr.isvalid);
-    // JsonBuilderI->Add("litres_in_tank", oiltank.smooth_1hr.final.litres_in_tank);
-    // JsonBuilderI->Add("litres_of_usable_oil", oiltank.smooth_1hr.final.litres_of_usable_oil);
-    // JsonBuilderI->Add("litres_of_usable_oil_rounded", mSupport::roundfloat(oiltank.smooth_1hr.final.litres_of_usable_oil,1));
-    // JsonBuilderI->Add("height_cm", (int)oiltank.smooth_1hr.final.distance_from_bottom_cm);
+    // JBI->Add("isvalid", oiltank.smooth_1hr.isvalid);
+    // JBI->Add("litres_in_tank", oiltank.smooth_1hr.final.litres_in_tank);
+    // JBI->Add("litres_of_usable_oil", oiltank.smooth_1hr.final.litres_of_usable_oil);
+    // JBI->Add("litres_of_usable_oil_rounded", mSupport::roundfloat(oiltank.smooth_1hr.final.litres_of_usable_oil,1));
+    // JBI->Add("height_cm", (int)oiltank.smooth_1hr.final.distance_from_bottom_cm);
 
-    // JsonBuilderI->Add("litres_per_day", history.litres_per_day);
-    // JsonBuilderI->Add("days_remaining", floor(history.days_remaining));
-    // JsonBuilderI->Add("weekly_usage",   floor(history.overview.litres_change));
-    // JsonBuilderI->Add("daily_usage",    floor(history.overview.litres_change));
+    // JBI->Add("litres_per_day", history.litres_per_day);
+    // JBI->Add("days_remaining", floor(history.days_remaining));
+    // JBI->Add("weekly_usage",   floor(history.overview.litres_change));
+    // JBI->Add("daily_usage",    floor(history.overview.litres_change));
 
   }
 
@@ -78,13 +78,13 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appendin
   // if(json_method > JSON_LEVEL_SHORT){
 
   // JBI->Object_Start("instant");
-  //   JsonBuilderI->Add("isvalid", mSupport::roundfloat(oiltank.instant.isvalid,1));
-  //   JsonBuilderI->Add("height_cm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_cm,1));
-  //   JsonBuilderI->Add("litres_usable", mSupport::roundfloat(oiltank.instant.final.litres_of_usable_oil,1));
+  //   JBI->Add("isvalid", mSupport::roundfloat(oiltank.instant.isvalid,1));
+  //   JBI->Add("height_cm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_cm,1));
+  //   JBI->Add("litres_usable", mSupport::roundfloat(oiltank.instant.final.litres_of_usable_oil,1));
   //   if(json_method <= JSON_LEVEL_DETAILED){
-  //     JsonBuilderI->Add("height_mm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_mm,1));
-  //     JsonBuilderI->Add("litres_total", mSupport::roundfloat(oiltank.instant.final.litres_in_tank,1));
-  //     JsonBuilderI->Add("last_changed", abs(millis()-oiltank.instant.final.tLastChanged));
+  //     JBI->Add("height_mm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_mm,1));
+  //     JBI->Add("litres_total", mSupport::roundfloat(oiltank.instant.final.litres_in_tank,1));
+  //     JBI->Add("last_changed", abs(millis()-oiltank.instant.final.tLastChanged));
   //   }
   // JBI->Object_End();
 
@@ -113,7 +113,7 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appendin
   // serializeJson(doc,data_buffer.payload.ctr);
 
   
-  return JsonBuilderI->End();
+  return JBI->End();
 }
 
 
@@ -148,11 +148,11 @@ uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_appendi
 //     data_buffer.payload.len = measureJson(root)+1;
 //     serializeJson(doc,data_buffer.payload.ctr);
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT,         0);
+    JBI->Add(D_JSON_CHANNELCOUNT,         0);
   
-  return JsonBuilderI->End();
+  return JBI->End();
     
 }
 

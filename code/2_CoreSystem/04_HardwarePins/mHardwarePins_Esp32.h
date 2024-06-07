@@ -26,8 +26,8 @@
  * [13]    |    17  |            |       OK        |       OK       | HS1_DATA5, U2TXD, EMAC_CLK_OUT_180                                            |
  * [14]    |    18  |            |       OK        |       OK       | VSPICLK, HS1_DATA7                                                            |
  * [15]    |    19  |            |       OK        |       OK       | VSPIQ, U0CTS, EMAC_TXD0                                                       |
- * [16]    |    21  |            |       OK        |       OK       | VSPIHD, EMAC_TX_EN                                                            |
- * [17]    |    22  |            |       OK        |       OK       | VSPIWP, U0RTS, EMAC_TXD1                                                      |
+ * [16]    |    21  |            |       OK        |       OK       | VSPIHD, EMAC_TX_EN, default_I2C_DATA                                                            |
+ * [17]    |    22  |            |       OK        |       OK       | VSPIWP, U0RTS, EMAC_TXD1, default_I2C_CLOCK                                                      |
  * [18]    |    23  |            |       OK        |       OK       | VSPID, HS1_STROBE                                                             |
  * [--]    |    24  |            |       --        |       --       |                                                                               |
  * [19]    |    25  |            |       OK        |       OK       | DAC_1, ADC2_CH8, RTC_GPIO6, EMAC_RXD0                                         |  ADC2 not functional with WiFi, 

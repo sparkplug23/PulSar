@@ -388,8 +388,8 @@ void mSR04::SubTask_UpdateAmbientTemperature()
 
 uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_TYPE, sr04_type);
+  JBI->Start();
+    JBI->Add(D_JSON_TYPE, sr04_type);
     
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     JBI->Object_Start("Filtered_EMA");
@@ -402,27 +402,27 @@ uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
       JBI->Add("alpha2", readings.average_DEMA.alpha1);
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
 
-  return JsonBuilderI->End();
+  return JBI->End();
 }
 
 
 uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
-  JsonBuilderI->Start();
-    JsonBuilderI->Add("Ping", readings.raw.ping_value);
-    JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.raw.distance_cm);
+  JBI->Start();
+    JBI->Add("Ping", readings.raw.ping_value);
+    JBI->Add(D_JSON_DISTANCE "_cm", readings.raw.distance_cm);
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     JBI->Object_Start("Filtered_EMA");
-      JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.average_EMA.distance_cm);
-      JsonBuilderI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
-      JsonBuilderI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
+      JBI->Add(D_JSON_DISTANCE "_cm", readings.average_EMA.distance_cm);
+      JBI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
+      JBI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
     JBI->Object_Start("Filtered_DEMA");
-      JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.average_DEMA.distance_cm);
-      JsonBuilderI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
-      JsonBuilderI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
+      JBI->Add(D_JSON_DISTANCE "_cm", readings.average_DEMA.distance_cm);
+      JBI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
+      JBI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
     JBI->Object_End();
     #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
@@ -435,7 +435,7 @@ uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
       JBI->Add("flag_distance_conversion_method", readings.conversion_settings.flag_distance_conversion_method);
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
-  return JsonBuilderI->End();    
+  return JBI->End();    
 }
 
 

@@ -419,20 +419,20 @@
 
 // uint8_t mSonoffIFan::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add_P("test",0);  
-//   JsonBuilderI->End();
+//   JBI->Start();
+//     JBI->Add_P("test",0);  
+//   JBI->End();
 
 // }
 
 // uint8_t mSonoffIFan::ConstructJSON_Power(uint8_t json_level, bool json_appending){
 
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
-//     JsonBuilderI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
-//     JsonBuilderI->Add_P(D_JSON_FANTIMER "Seconds", time_on->ValueWithDisabledAsZero());  
-//     JsonBuilderI->Add_P(D_JSON_FANTIMER "Minutes", (int)(time_on->ValueWithDisabledAsZero()/60));  
-//   JsonBuilderI->End();
+//   JBI->Start();
+//     JBI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
+//     JBI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
+//     JBI->Add_P(D_JSON_FANTIMER "Seconds", time_on->ValueWithDisabledAsZero());  
+//     JBI->Add_P(D_JSON_FANTIMER "Minutes", (int)(time_on->ValueWithDisabledAsZero()/60));  
+//   JBI->End();
 
 // }
 

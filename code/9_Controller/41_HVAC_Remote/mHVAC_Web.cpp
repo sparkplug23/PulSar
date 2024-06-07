@@ -106,14 +106,14 @@ void mHVAC::WebAppend_Root_Status_Table(){
   
   // if(settings.fShowTable){
 
-  JsonBuilderI->Array_Start("prog_status_tab");// Class name 
+  JBI->Array_Start("prog_status_tab");// Class name 
     for(int device_id=0;device_id<4;device_id++){      
-      JsonBuilderI->Object_Start();
-        JsonBuilderI->Add("id",device_id);
-        JsonBuilderI->Add("ih",heating_status[device_id].message_ctr);  
-      JsonBuilderI->Object_End();
+      JBI->Object_Start();
+        JBI->Add("id",device_id);
+        JBI->Add("ih",heating_status[device_id].message_ctr);  
+      JBI->Object_End();
     }
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
 
   //need nested for loops to cover all values
 
@@ -140,7 +140,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
 
   uint8_t button_Counter = 0;
     char buffer[20];
-    JsonBuilderI->Array_Start(WEB_HANDLE_BUTTON_NAME_TIMER_SET);// Class name
+    JBI->Array_Start(WEB_HANDLE_BUTTON_NAME_TIMER_SET);// Class name
     
   for(uint8_t device_id=0;device_id<4;device_id++){
 
@@ -154,8 +154,8 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
     }
 
     for(int row=0;row<4;row++){  
-      JsonBuilderI->Object_Start();
-        JsonBuilderI->Add("id",button_Counter++);        
+      JBI->Object_Start();
+        JBI->Add("id",button_Counter++);        
         if(program_timers[device_id].time_minutes_on_start == _kButtonTitle[row]){
           sprintf(buffer, "#00ff00");
           // sprintf(buffer, "MATCH%d==%d %d",program_timers[row].time_minutes_on_start,_kButtonTitle[row], row, button_Counter);
@@ -164,13 +164,13 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
           // sprintf(buffer, "%d==%d %d",program_timers[row].time_minutes_on_start,_kButtonTitle[row], row, button_Counter);
         }
         // AddLog(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_timers[row].time_minutes_on_start,row,_kButtonTitle[row]);
-        JsonBuilderI->Add("bc",buffer);//program_timers[row].time_minutes_on_start ? "#00ff00" : "#ee2200" );
-      JsonBuilderI->Object_End();
+        JBI->Add("bc",buffer);//program_timers[row].time_minutes_on_start ? "#00ff00" : "#ee2200" );
+      JBI->Object_End();
     }
 
   }
 
-    JsonBuilderI->Array_End();
+    JBI->Array_End();
   /*
 
   
@@ -218,20 +218,20 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
 
     */
 
-  // JsonBuilderI->Array_Start(WEB_HANDLE_BUTTON_NAME_TEMP_SET);// Class name
+  // JBI->Array_Start(WEB_HANDLE_BUTTON_NAME_TEMP_SET);// Class name
   // for(int row=0;row<4;row++){  
-  //   JsonBuilderI->Object_Start();
-  //     JsonBuilderI->Add("id",row);
-  //     JsonBuilderI->Add("bc",program_timers[row].time_minutes_on ? "#00ff00" : "#ee2200" );
-  //   JsonBuilderI->Object_End();
+  //   JBI->Object_Start();
+  //     JBI->Add("id",row);
+  //     JBI->Add("bc",program_timers[row].time_minutes_on ? "#00ff00" : "#ee2200" );
+  //   JBI->Object_End();
   // }
-  // JsonBuilderI->Array_End();
+  // JBI->Array_End();
 
   
   // uint8_t 
   button_Counter = 0;
     // char buffer[20];
-    JsonBuilderI->Array_Start(WEB_HANDLE_BUTTON_NAME_TEMP_SET);// Class name
+    JBI->Array_Start(WEB_HANDLE_BUTTON_NAME_TEMP_SET);// Class name
     
   for(uint8_t device_id=0;device_id<4;device_id++){
 
@@ -245,8 +245,8 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
     }
 
     for(int row=0;row<4;row++){  
-      JsonBuilderI->Object_Start();
-        JsonBuilderI->Add("id",button_Counter++);  
+      JBI->Object_Start();
+        JBI->Add("id",button_Counter++);  
         
         //if not running, its off
         if(program_temps[device_id].time_running.on||program_temps[device_id].time_maintaining.on){
@@ -265,13 +265,13 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
         }
 
        
-        JsonBuilderI->Add("bc",buffer);//program_temps[row].time_minutes_on_start ? "#00ff00" : "#ee2200" );
-      JsonBuilderI->Object_End();
+        JBI->Add("bc",buffer);//program_temps[row].time_minutes_on_start ? "#00ff00" : "#ee2200" );
+      JBI->Object_End();
     }
 
   }
 
-    JsonBuilderI->Array_End();
+    JBI->Array_End();
   
 }
 

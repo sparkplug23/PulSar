@@ -62,11 +62,6 @@ class mLDRBasic :
 
     }ldr[MAX_LDR_BASIC];
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER_2022
-    void WebAppend_Root_Draw_Table();
-    void WebAppend_Root_Status_Table();
-    #endif// USE_MODULE_NETWORK_WEBSERVER_2022
-
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   

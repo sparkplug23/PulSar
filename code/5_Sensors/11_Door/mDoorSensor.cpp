@@ -214,9 +214,9 @@ void mDoorSensor::ShowSensor_AddLog()
 
 uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    //JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.);
-  return JsonBuilderI->End();
+  JBI->Start();
+    //JBI->Add_P(PM_JSON_SENSORCOUNT, settings.);
+  return JBI->End();
 
 }
 
@@ -225,13 +225,13 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
   
   char buffer[50];
 
-  JsonBuilderI->Start();
-  JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
-  JsonBuilderI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
+  JBI->Start();
+  JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
+  JBI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){
-    JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
-    JsonBuilderI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
+    JBI->Add(D_JSON_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
+    JBI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
   }
 
   JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
@@ -246,7 +246,7 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
     JBI->Add("IsLock_Locked", IsLock_Locked());
   }
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -356,12 +356,12 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
   char door_pos_ctr[20];
   char time_ctr[20];
 
-  JsonBuilderI->Array_Start("tab_door");// Class name
+  JBI->Array_Start("tab_door");// Class name
   
   for(int sensor_id=0;sensor_id<1;sensor_id++){
     
-    JsonBuilderI->Object_Start();
-      JsonBuilderI->Add("id",sensor_id);
+    JBI->Object_Start();
+      JBI->Add("id",sensor_id);
 
       char colour_ctr[8];
       uint32_t millis_elapsed = mTime::MillisElapsed(&door_detect.tEndedTime);
@@ -386,13 +386,13 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
       // sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
       //   mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
     
-      JsonBuilderI->Add("ih",inner_html);
-      JsonBuilderI->Add("fc",colour_ctr);
+      JBI->Add("ih",inner_html);
+      JBI->Add("fc",colour_ctr);
     
-    JsonBuilderI->Object_End();
+    JBI->Object_End();
   }
 
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
 
 }
 

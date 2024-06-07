@@ -20,6 +20,7 @@
 #define UBLOX_PARSE_SVINFO
 #define UBLOX_PARSE_TIMEUTC
 #define GPS_FIX_TIME
+#define GPS_FIX_DATE
 
 #define NMEAGPS_PARSE_SATELLITES
 
@@ -162,48 +163,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL_CTR)    "debug/all";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR)    "micro";
 
 
-
-// #ifndef NMEAGPS_DERIVED_TYPES
-//   #error You must "#define NMEAGPS_DERIVED_TYPES" in NMEAGPS_cfg.h!
-// #endif
-
-// #if !defined(UBLOX_PARSE_STATUS)  & !defined(UBLOX_PARSE_TIMEGPS) & \
-//     !defined(UBLOX_PARSE_TIMEUTC) & !defined(UBLOX_PARSE_POSLLH)  & \
-//     !defined(UBLOX_PARSE_DOP)     & !defined(UBLOX_PARSE_PVT)     & \
-//     !defined(UBLOX_PARSE_VELNED)  & !defined(UBLOX_PARSE_SVINFO)  & \
-//     !defined(UBLOX_PARSE_HNR_PVT)
-
-//   // #error No UBX binary messages enabled: no fix data available.
-
-// #endif
-
-// #ifndef NMEAGPS_RECOGNIZE_ALL
-//   //  Resetting the messages with ublox::configNMEA requires that
-//   //    all message types are recognized (i.e., the enum has all
-//   //    values).
-//   // #error You must "#define NMEAGPS_RECOGNIZE_ALL" in NMEAGPS_cfg.h!
-// #endif
-
-// // Need class that can force virtual method to the right parsing/decode method
-// class MyGPS : public ubloxGPS
-// {
-// public:
-
-//     MyGPS( Stream *device ) : ubloxGPS( device )
-//     {
-//       // state = GETTING_STATUS;
-//     }
-// };
-
-// // Construct the GPS object and hook it to the appropriate serial device
-// // static MyGPS gps( &gpsPort );
-
-
-
-
 class mGPS_Serial :
   public mTaskerInterface
-  // , ubloxGPS
 {
 
   private:
@@ -242,7 +203,8 @@ class mGPS_Serial :
     bool Restore_Module(void);
 
     struct MODULE_RUNTIME{ // these will be saved and recovered on boot
-
+      uint32_t last_message = 0;
+      uint8_t valid_timeout_seconds = 0;
     }rt;
 
 
@@ -250,6 +212,7 @@ class mGPS_Serial :
      * SECTION: Internal Functions
      ************************************************************************************************/
 
+    void RecheckConnection(void);
 
     /************************************************************************************************
      * SECTION: Commands
@@ -286,14 +249,6 @@ class mGPS_Serial :
 
 
 
-
-
-
-
-
-
-
-
     void EveryLoop_InputMethod_PollingSerial_Internal();
     void EveryLoop_InputMethod_PollingSerial_Bytes();
     void EveryLoop_InputMethod_PollingSerial_BytesToBuffer();
@@ -301,68 +256,12 @@ class mGPS_Serial :
     void EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
 
 
-
-
-// //------------------------------------------------------------
-// // This object parses received characters
-// //   into the gps.fix() data structure
-
-// static NMEAGPS  gps;
-
-// //------------------------------------------------------------
-// //  Define a set of GPS fix information.  It will
-// //  hold on to the various pieces as they are received from
-// //  an RMC sentence.  It can be used anywhere in your sketch.
-
-// static gps_fix  fix;
-
-//----------------------------------------------------------------
-//  This function gets called about once per second, during the GPS
-//  quiet time.  It's the best place to do anything that might take
-//  a while: print a bunch of things, write to SD, send an SMS, etc.
-//
-//  By doing the "hard" work during the quiet time, the CPU can get back to
-//  reading the GPS chars as they come in, so that no chars are lost.
-
-
-bool flag_show_incoming_gps_byte_stream = false;
-
-
-
-uint32_t sequence_test_global = 0;
-
-    // struct INTERNAL_BUFFER{
-    //   uint16_t buflen = 0;
-    //   uint16_t bufused = 0;
-    //   uint8_t* buffer = nullptr;
-    // }gps_receive_buffer;
-    
-    // enum
-    //   {
-    //     GETTING_STATUS, 
-    //     GETTING_LEAP_SECONDS, 
-    //     GETTING_UTC, 
-    //     RUNNING
-    //   }
-    //     state NEOGPS_BF(8);
-
-
-        uint8_t flag_incoming_data_at_correct_runtime_baud = false;
-
-        
-const uint32_t COMMAND_DELAY = 500;
-
-void changeBaud( const char *textCommand, unsigned long baud );
-
-
-// static
-//  MyGPS* gps2 = nullptr;//( &gpsPort );
-
-    // void get_status();
-    // void get_leap_seconds();
-    // void get_utc();
+    bool flag_show_incoming_gps_byte_stream = false;
+    uint32_t sequence_test_global = 0;
+    uint8_t flag_incoming_data_at_correct_runtime_baud = false;        
+    const uint32_t COMMAND_DELAY = 500;
+    void changeBaud( const char *textCommand, unsigned long baud );
     void send_UBX_enable_messages();
-    // bool running();
     void configNMEA( uint8_t rate );
     void disableUBX();
     void enableUBX();
@@ -393,24 +292,6 @@ void changeBaud( const char *textCommand, unsigned long baud );
     }my_gps_vals;
 
     uint32_t tSaved_SplashFix = millis();
-
-
-
-
-
-
-
-    int16_t test_value = 0;
-    void main_body_function();
-    void header_function(){
-      test_value++;
-      Serial.printf("header_function %d\n",test_value);
-    }
-
-
-
-
-
 
     enum
     {
@@ -445,8 +326,6 @@ void changeBaud( const char *textCommand, unsigned long baud );
     // #endif // USE_DEVFEATURE_UBLOX_GLOBAL
     // #endif
     // ubloxGPS*  gps_ublox = nullptr; // This parses the GPS characters
-
-
     // #ifdef USE_DEVFEATURE__UBLOX_TEST_CLASS
     // ubloxGPS*  ubx_test = nullptr; // This parses the GPS characters
     // #endif
@@ -477,10 +356,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
 
     uint32_t tSaved_parse_gps = 0;
 
-
-    struct SETTINGS{
-      uint8_t read_gps_method = GPS_INPUT_STREAM_METHOD_RINGBUFFERS_ID; 
-    }settings;
+    uint8_t read_gps_method = GPS_INPUT_STREAM_METHOD_RINGBUFFERS_ID; 
 
     struct CONNECTION_STATUS{
       /**
@@ -533,34 +409,6 @@ void changeBaud( const char *textCommand, unsigned long baud );
     }gps_latest;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     void CommandSet_CreateFile_WithName(char* value);
     void CommandSet_SerialPrint_FileNames(const char* value);
     void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
@@ -572,194 +420,10 @@ void changeBaud( const char *textCommand, unsigned long baud );
 
     uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_appending);
 
-    void WebCommand_Parse(void);
-
-
-    void WebAppend_Root_Draw_PageTable();
-    void WebAppend_Root_Status_Table();
-
-
 
 };
 
 #endif
 
 #endif
-
-// #include "globals.h"
-// #include "main.h"
-// //#include "transceive.h"
-
-// #define GPS_SC_1 0xB5
-// #define GPS_SC_2 0x62
-
-// #define NAV_CLASS 0x01  
-// int ublox_NAV_LENGTH_idx;
-// #define NAV_AOPSTATUS_ID     0x06 
-// #define NAV_AOPSTATUS_LENGTH 52
-// #define NAV_PVT_ID           0x07 
-// #define NAV_PVT_LENGTH       84
-// #define NAV_CLOCK_ID         0x22 
-// #define NAV_CLOCK_LENGTH     20
-// #define NAV_POSLLH_ID        0x02 
-// #define NAV_POSLLH_LENGTH    28
-
-// #define NAV_STATUS_ID        0x03 
-// #define NAV_STATUS_LENGTH    16
-// #define NAV_SOL_ID           0x06 
-// #define NAV_SOL_LENGTH       52
-// #define NAV_TIMEUTC_ID       0x21 
-// #define NAV_TIMEUTC_LENGTH   20
-// #define NAV_TIMEGPS_ID       0x20 
-// #define NAV_TIMEGPS_LENGTH   16
-// #define NAV_TIMEVELNED_ID       0x12 
-// #define NAV_TIMEVELNED_LENGTH   36
-
-// unsigned char gps_parsed_status[3];
-// int flag_gps_data_ready_to_parse;
-// unsigned char encodebuffer[70];
-// int encodebuffer_index;
-// int flag_save_gps_data;
-// unsigned long encoded_sequence;
-// unsigned char gpspacketwaiting;
-        
-// //#define unsigned char U1
-
-// void init_gps(void);
-// void SendGPStoUART(void);
-
-// struct NAV_POSLLH{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 payload_length;
-//      unsigned long iTOW_ms;
-//      signed long lon_deg_scaled_e7;
-//      signed long lat_deg_scaled_e7;
-//      long height_mm;
-//      long hMSL_mm;
-//      unsigned long hAcc_mm;
-//      unsigned long vAcc_mm;
-// }nav_posllh;
-// extern struct NAV_POSLLH *ptr_NAV_POSLLH_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_POSLLH *ptr_NAV_POSLLH_r;//Declare a pointer that is used to read point to structures
-
-// struct NAV_TIMEUTC{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 payload_length;
-//      U4 iTOW_ms;
-//      U4 tAcc_ns;
-//      I4 nano_ns;
-//      U2 year;
-//      U1 month;
-//      U1 day;
-//      U1 hour;
-//      U1 min;
-//      U1 sec;
-// }nav_timeutc;
-// extern struct NAV_TIMEUTC *ptr_NAV_TIMEUTC_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_TIMEUTC *ptr_NAV_TIMEUTC_r;//Declare a pointer that is used to read point to structures
-
-// struct NAV_TIMEGPS{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 payload_length;
-//      U4 iTOW_ms;
-//      U4 fTOW_ns;
-//      I2 week;
-//      I1 leapS_s;
-//      X1 valid;
-//      U4 tAcc_ns;
-// }nav_timegps;
-// extern struct NAV_TIMEGPS *ptr_NAV_TIMEGPS_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_TIMEGPS *ptr_NAV_TIMEGPS_r;//Declare a pointer that is used to read point to structures
-
-// struct NAV_STATUS{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 payload_length;
-//      U4 iTOW_ms;
-//      U1 gpsFix;
-//      X1 flags;
-//      X1 fixStat;
-//      X1 flags2;
-//      U4 ttff;
-//      U4 msss;
-// }nav_status;
-// extern struct NAV_STATUS *ptr_NAV_STATUS_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_STATUS *ptr_NAV_STATUS_r;//Declare a pointer that is used to read point to structures
-
-// struct NAV_SOL{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 payload_length;
-//      U4 iTOW_ms;
-//      I4 fTOW_ns;  
-//      I2 week_weeks;
-//      U1 gpsFix;
-//      X1 flags;
-//      I4 ecefX;
-//      I4 ecefY;
-//      I4 ecefZ;
-//      U4 pAcc;
-//      I4 ecefVX;
-//      I4 ecefVY;
-//      I4 ecefVZ; 
-//      U4 sAcc;
-//      U2 pDOP;
-// }nav_sol;
-// extern struct NAV_SOL *ptr_NAV_SOL_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_SOL *ptr_NAV_SOL_r;//Declare a pointer that is used to read point to structures
-
-// struct NAV_VELNED{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 payload_length;
-//      U4 iTOW_ms;
-//      I4 velN;  
-//      I4 velE;
-//      I4 velD;
-//      U4 speed3D;
-//      U4 speed2D;
-//      I4 heading;
-// }nav_velned;
-// extern struct NAV_VELNED *ptr_NAV_VELNED_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_VELNED *ptr_NAV_VELNED_r;//Declare a pointer that is used to read point to structures
-
-
-// struct NAV_DESIRED{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
-//      U1 gps_length;
-//      U4 iTOW_ms;
-//      I4 fTOW_ns;
-//      I2 week_weeks;
-//      U1 gpsFix;
-//      I4 lon_deg_scaled_e7;
-//      I4 lat_deg_scaled_e7;
-//      I4 height_mm;
-//      I4 hMSL_mm;         
-//      U4 speed3D;
-//      U4 speed2D;
-//      I4 heading;
-// }nav_desired;
-// extern struct NAV_DESIRED *ptr_NAV_DESIRED_w;//Declare a pointer that is used to write point to structures
-// extern struct NAV_DESIRED *ptr_NAV_DESIRED_r;//Declare a pointer that is used to read point to structures
-
-
-
-
-// // OLD TO REMOVE
-// int flag_gps_data_ready_to_parse;
-// unsigned char encodegpsbuffer[70];
-// int encodegpsbuffer_index;
-// int flag_save_gps_data;
-// unsigned long enconded_gps_sequence;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

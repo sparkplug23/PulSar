@@ -29,6 +29,26 @@
   #include "FS.h"
 #endif  // ESP32
 
+#ifdef ESP32
+  #include <WiFi.h>
+  #ifndef DISABLE_NETWORK
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+    #include <SPIFFSEditor.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+#endif
+#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  #define ARDUINOJSON_DECODE_UNICODE 0
+  #include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
 
 
@@ -262,11 +282,31 @@ void UFSRename(void);
 
 
 
+    // General filesystem
+    size_t fsBytesUsed =0;
+    size_t fsBytesTotal =0;
+    unsigned long presetsModifiedTime =0L;
+    JsonDocument* fileDoc;
+    bool doCloseFile =false;
+    byte errorFlag = 0;
 
 
+    void closeFile();
+    bool bufferedFind(const char *target, bool fromStart = true);
+    bool bufferedFindSpace(size_t targetLen, bool fromStart = true);
+    bool bufferedFindObjectEnd() ;
+    void writeSpace(size_t l);
+    bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
+    bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
+    bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
+    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
+    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
+    void updateFSInfo();
 
-
-
+    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+    String getContentType(AsyncWebServerRequest* request, String filename);
+    bool handleFileRead(AsyncWebServerRequest* request, String path);
+    #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 
 

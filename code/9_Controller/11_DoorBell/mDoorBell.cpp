@@ -213,9 +213,9 @@ void mDoorBell::EveryLoop(){
 
 uint8_t mDoorBell::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P("test",0);  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P("test",0);  
+  JBI->End();
 
 }
 
@@ -223,12 +223,12 @@ uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 
   if(doorbell_switch.event.ischanged){doorbell_switch.event.ischanged=false;
 
-    JsonBuilderI->Start();
+    JBI->Start();
       char buffer[80];
-      JsonBuilderI->Add(D_JSON_LOCATION,  DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&doorbell_switch.event.detected_time, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_EVENT, doorbell_switch.event.isactive ? "detected": "over");
-    JsonBuilderI->End();
+      JBI->Add(D_JSON_LOCATION,  DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
+      JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&doorbell_switch.event.detected_time, buffer, sizeof(buffer)));
+      JBI->Add(D_JSON_EVENT, doorbell_switch.event.isactive ? "detected": "over");
+    JBI->End();
 
   }
 

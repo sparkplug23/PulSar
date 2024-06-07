@@ -388,16 +388,16 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
 
 uint8_t mImmersionTankColour::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
-  JsonBuilderI->Start();
-    JsonBuilderI->Add_P("test",0);  
-  JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add_P("test",0);  
+  JBI->End();
 
 }
 
 uint8_t mImmersionTankColour::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    // JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
+  JBI->Start();
+    // JBI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
 
     JBI->Add("TimeOn", data.time_on->Value());
     JBI->Add("Mode",   data.mode);
@@ -409,7 +409,7 @@ uint8_t mImmersionTankColour::ConstructJSON_Sensor(uint8_t json_level, bool json
       }
     JBI->Array_End();
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

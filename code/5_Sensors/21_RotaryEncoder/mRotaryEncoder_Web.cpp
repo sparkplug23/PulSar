@@ -23,10 +23,10 @@
 
 //   char buffer[20];
 
-//   JsonBuilderI->Array_Start("tab_pir");// Class name
+//   JBI->Array_Start("tab_pir");// Class name
 //   for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-//     JsonBuilderI->Object_Start();
-//       JsonBuilderI->Add("id",sensor_id);
+//     JBI->Object_Start();
+//       JBI->Add("id",sensor_id);
 
 //         char colour_ctr[8];
 //         uint32_t millis_elapsed = mTime::MillisElapsed(&pir_detect[sensor_id].tEndedTime);
@@ -52,15 +52,15 @@
 //         }
 
 
-//       JsonBuilderI->Add("ih",
+//       JBI->Add("ih",
 //         pCONT_time->ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       
 //       //detected_rtc_ctr);
-//       JsonBuilderI->Add("fc",colour_ctr);    
-//     JsonBuilderI->Object_End();
+//       JBI->Add("fc",colour_ctr);    
+//     JBI->Object_End();
 //   }
 
-//   JsonBuilderI->Array_End();
+//   JBI->Array_End();
 
 // }
 // #endif // DISABLE_WEBSERVER

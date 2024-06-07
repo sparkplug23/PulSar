@@ -12,7 +12,9 @@ typedef struct Segment {
     uint8_t  intensity           = 127;           // should not relate to blending, only what the effect is doing
     uint16_t cycle_time__rate_ms = 2000; // EffectTimePeriod ie EffectCycleTime
     
-    uint16_t animator_blend_time_ms(){ return (cycle_time__rate_ms * speed)/255; } // time_ms
+    // Speed = 0 means blending is slowest and full cycle time is spent blending
+    // Speed = 255 means blending is instant
+    uint16_t animator_blend_time_ms(){ return (cycle_time__rate_ms * (255-speed))/255; } // time_ms
     
 
     uint16_t palette_id = 0; 
@@ -57,9 +59,9 @@ typedef struct Segment {
      * @NOTE: minimal/default should be RGB, only when white channels are needed should that also be computed
      **/
     #ifdef ENABLE_DEVFEATURE_LIGHT__FORCE_EFFECT_COLOUR_TYPE_AS_RGBCCT
-    RgbcctColor::ColourType colour_type__used_in_effect_generate = RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID; 
+    ColourType colour_type__used_in_effect_generate = ColourType::COLOUR_TYPE__RGBCCT__ID; 
     #else
-    RgbcctColor::ColourType colour_type__used_in_effect_generate = RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID; 
+    ColourType colour_type__used_in_effect_generate = ColourType::COLOUR_TYPE__RGB__ID; 
     #endif
 
     /**

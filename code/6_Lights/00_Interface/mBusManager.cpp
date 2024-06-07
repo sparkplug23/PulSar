@@ -72,6 +72,7 @@ const char* Bus::getTypeName(uint8_t id)
     case BUSTYPE_WS2811_400KHZ:     return PM_BUSTYPE__WS2811_400KHZ__CTR;
     case BUSTYPE_TM1829:            return PM_BUSTYPE__TM1829__CTR;
     case BUSTYPE_SK6812_RGBW:       return PM_BUSTYPE__SK6812_RGBW__CTR;
+    case BUSTYPE_WS2805_RGBWW:      return PM_BUSTYPE__WS2805_RGBWW__CTR;
     case BUSTYPE_TM1814:            return PM_BUSTYPE__TM1814__CTR;
     //"Analog" types (PWM) (32-47)
     case BUSTYPE_ONOFF:             return PM_BUSTYPE__ONOFF__CTR;
@@ -108,6 +109,7 @@ uint8_t Bus::getTypeIDbyName(const char* c)
   else if(strcmp_P(c,PM_BUSTYPE__WS2811_400KHZ__CTR)==0){ return BUSTYPE_WS2811_400KHZ; }
   else if(strcmp_P(c,PM_BUSTYPE__TM1829__CTR)==0){ return BUSTYPE_TM1829; }
   else if(strcmp_P(c,PM_BUSTYPE__SK6812_RGBW__CTR)==0){ return BUSTYPE_SK6812_RGBW; }
+  else if(strcmp_P(c,PM_BUSTYPE__WS2805_RGBWW__CTR)==0){ return BUSTYPE_WS2805_RGBWW; }
   else if(strcmp_P(c,PM_BUSTYPE__TM1814__CTR)==0){ return BUSTYPE_TM1814; }
   // "Analog" types (PWM) (32-47)
   else if(strcmp_P(c,PM_BUSTYPE__ONOFF__CTR)==0){ return BUSTYPE_ONOFF; }
