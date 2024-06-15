@@ -186,12 +186,12 @@
 #define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
 
 #define SEGMENT          segments[getCurrSegmentId()]
-#define SEGMENT_I(X)     segments[X]
+#define SEGMENT_I(X)     segments[X] // can this be changed later to "getSegment(X)" and hence protect against out of bounds
 #define pSEGMENT_I(X)    pCONT_lAni->segments[X]
 #define SEGLEN           _virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
 #define SEGPALETTE       SEGMENT.palette_container->CRGB16Palette16_Palette.data
 
-#define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT._speed))/SEGLEN
+#define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed))/SEGLEN
 
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
@@ -698,7 +698,9 @@ class mAnimatorLight :
     void EffectAnim__Static_Pattern();
     void EffectAnim__Tri_Static_Pattern();
     void EffectAnim__Base_Spots(uint16_t threshold);
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     void EffectAnim__Spots();
+    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     void EffectAnim__Percent();
     #endif
@@ -1211,14 +1213,8 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
+    // EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,
-    #endif    
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    EFFECTS_FUNCTION__STATIC_PALETTE_VINTAGE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID,
@@ -1233,13 +1229,10 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,
+    EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
@@ -1250,26 +1243,36 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,
     #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    EFFECTS_FUNCTION__STATIC_PALETTE_VINTAGE__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,
+    #endif    
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
-    EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
-    EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
-    EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
-    EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,    
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-        
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,
     EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__ID,
     EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_WHITE__ID,
     EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_WHITE__ID,
     #endif
+
+
+
+    
+    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
+    // EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,    
+    // #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
         
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-    EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
-    #endif
+        
+    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+    // EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
+    // #endif
 
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -1314,7 +1317,7 @@ class mAnimatorLight :
      * 
      */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-    EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL_TWINKLE_LIGHTS_ID,
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL_TWINKLE_LIGHTS_ID,
     #endif
 
 
@@ -1872,13 +1875,13 @@ class mAnimatorLight :
       // COLOUR_TYPE__NONE__ID=0, 
       COLOUR_TYPE__SINGLE__ID, // likely never used for me, remove
       COLOUR_TYPE__COLDWARM__ID,  //CCT Only
-      COLOUR_TYPE__RGB__ID,   
-      COLOUR_TYPE__RGBW__ID, 
-      COLOUR_TYPE__RGBCCT__ID, // CW/WW 
+      COLOUR_TYPE__RGB__ID, //3   
+      COLOUR_TYPE__RGBW__ID, //4
+      COLOUR_TYPE__RGBCCT__ID, // 5 
       
       // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
-      COLOUR_TYPE__RGBWC__ID, 
-      COLOUR_TYPE__RGBCW__ID
+      COLOUR_TYPE__RGBWC__ID, //remove
+      COLOUR_TYPE__RGBCW__ID //remove
   };
 
   // TransitionColourPairs* 
@@ -2441,7 +2444,7 @@ class mAnimatorLight :
     inline uint16_t getMinShowDelay(void) { return MIN_SHOW_DELAY; }
     inline uint16_t getLengthTotal(void) { return _length; }
 
-    uint32_t _now;
+    uint32_t millis_at_start_of_effect_update;
     uint32_t timebase;
     uint32_t currentColor(uint32_t colorNew, uint8_t tNr);
     uint32_t getPixelColor(uint16_t);

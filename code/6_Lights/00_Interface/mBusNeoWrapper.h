@@ -59,6 +59,7 @@ enum EM_BUS_TYPE
   BUSTYPE__32_RN_NEO_4__ID,
   BUSTYPE__32_I0_NEO_4__ID,
   BUSTYPE__32_I1_NEO_4__ID,
+  BUSTYPE__32_BB_NEO_4__ID,  // not fully added, temp added to keep the ID working so X16 for RGBW should work
   BUSTYPE__32_8PARALELL_4__ID,
   BUSTYPE__32_16PARALLEL_4__ID,
   //

@@ -79,6 +79,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   int16_t tmp_id = 0;
   char buffer[50];
 
+  uint16_t isserviced_start_count = data_buffer.isserviced; // to know if anything was serviced in this function
+
 
   /**
    * @brief Critical this is always parsed first, as many other commands rely on this value
@@ -1010,8 +1012,18 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
 #endif // ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS options above to be moved into debug methods
 
+  /**
+   * @brief 
+   * # Issue : Caused effects to reset when non lighting commands happened
+   * Fix is to only reset effects if lighting commands are updated
+   */
+  if(isserviced_start_count != data_buffer.isserviced)
+  {
+    ALOG_INF(PSTR("isserviced_start_count %d data_buffer.isserviced %d"), isserviced_start_count, data_buffer.isserviced);
     // If segment commands updated, some effects may need reset
     SEGMENT_I(segment_index).call = 0; 
+  }
+
 
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI)

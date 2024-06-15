@@ -7,13 +7,15 @@
 
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
 
-#include "internal/ardupilotmega/mavlink.h"
-#include "internal/checksum.h"
-#include "internal/mavlink_types.h"
-#include "internal/protocol.h"
+#include "4_Drivers/70_MAVLink_Decoder/internal/ardupilotmega/mavlink.h"
+#include "4_Drivers/70_MAVLink_Decoder/internal/checksum.h"
+#include "4_Drivers/70_MAVLink_Decoder/internal/mavlink_types.h"
+#include "4_Drivers/70_MAVLink_Decoder/internal/protocol.h"
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <vector>
+#include <cstdint>
+#include <string>
 
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__ACTUATOR_CONTROL_TARGET__CTR) "ACTUATOR_CONTROL_TARGET";
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__ADAP_TUNING__CTR) "ADAP_TUNING"; // 11010 
@@ -245,48 +247,52 @@ DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__WIND_COV__CTR) "WIND_COV"; // 231
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_01_CTR) "overview/Overview_01"; // 231 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_02_CTR) "overview/Overview_02"; // 231 
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_RECEIVE_STATS__CTR) "debug/receive"; // 231 
+
 
 class mMAVLink_Decoder :
   public mTaskerInterface
 {
   public:
-	  mMAVLink_Decoder(){};
-    void Pre_Init(void);
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+    mMAVLink_Decoder(){};
     void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    
+    void   parse_JSONCommand(JsonParserObject obj);
+
     static const char* PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR;
     static const char* PM_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mMAVLink_Decoder);    };
-    #endif
+    #endif    
 
-    typedef union {
-      uint8_t data;
-      struct { // L2H
-        uint8_t enabled : 1;        // For inclusion in compiles but not set
-        uint8_t init_completed : 1; // 
-        uint8_t module_running : 1; // 
-        // uint8_t use_for_module_init_refresh 
-        uint8_t reserved : 5;       //
-      };
-    } SETTINGS_MODULE_OPTIONS;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    void handleMessage(const mavlink_message_t& msg);
 
     struct SETTINGS_MODULE{
-      SETTINGS_MODULE_OPTIONS flags = {0};
       uint8_t tSaved_ReInit_Counter = 10; // starts at 0, otherwise backoff time added to retry
       uint8_t ReInit_BackOff_Secs = 10;    //rename later
     }settings;
 
     void EveryLoop();        
-    void parse_JSONCommand(JsonParserObject obj);
-
-    std::vector<uint16_t> unique_msg_id_list;
-
-    struct MAINTAIN_CONNECTION{
+    
+    struct MAINTAIN_CONNECTION
+    {
       timereached_t timereached_heartbeat;
 
       struct RECEIVED_SETTINGS{
@@ -295,269 +301,20 @@ class mMAVLink_Decoder :
 
       mavlink_heartbeat_t heartbeat_module; // from esp32, sent to vehicle
       
-      uint8_t system_id;
-      uint8_t component_id;
+      uint8_t system_id = 100; // different from any connected devices
+      uint8_t component_id = 1;
       uint8_t type;
       uint8_t autopilot;
-      uint8_t received_sysid; // Pixhawk sysid
-      uint8_t received_compid; // Pixhawk compid
+      uint8_t received_sysid = 1; // Pixhawk sysid
+      uint8_t received_compid = 1; // Pixhawk compid
 
     }connection;
 
     void Send_Heartbeat();
     void Maintain_Connection();
 
-    char buffer[100] = {0};
-    const char* MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* buffer, uint8_t buflen);
-
-    struct DATA{
-      uint32_t tSaved_Last_Response = 0;
-      struct{
-        mavlink_ahrs_t                    data = {0};       
-        uint32_t                          tUpdate = 0;
-      }ahrs;
-      struct{
-        mavlink_ahrs2_t                   data = {0};       
-        uint32_t                          tUpdate = 0;
-      }ahrs2;
-      struct{
-        mavlink_attitude_t                data = {0};       
-        uint32_t                          tUpdate = 0;
-      }attitude;   
-      struct{
-        mavlink_autopilot_version_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }autopilot_version;
-      struct{
-        mavlink_battery_status_t          data = {0};       
-        uint32_t                          tUpdate = 0;
-      }battery_status;  
-      struct{
-        mavlink_ekf_status_report_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }ekf_status_report;  
-      struct{
-        mavlink_fence_status_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }fence_status;          
-      struct{
-        mavlink_gimbal_report_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }gimbal_report;     
-      struct{
-        mavlink_gimbal_torque_cmd_report_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }gimbal_torque_cmd_report;     
-      struct{
-        mavlink_global_position_int_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }global_position_int;     
-      struct{
-        mavlink_gopro_heartbeat_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }gopro_heartbeat;     
-      struct{
-        mavlink_gopro_set_response_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }gopro_set_response; 
-      struct{
-        mavlink_gps_global_origin_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }gps_global_origin; 
-      struct{
-        mavlink_gps_raw_int_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }gps_raw_int; 
-      struct{
-        mavlink_heartbeat_t       data = {0};  
-        uint32_t                          tUpdate = 0;
-        uint8_t                vehicle_sys_id = 0; // ID of message sender system/aircraft
-        uint8_t                vehicle_component_id = 0; //  ID of the message sender component
-      }heartbeat; 
-      struct{
-        mavlink_home_position_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }home_position; 
-      struct{
-        mavlink_hwstatus_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }hwstatus; 
-      struct{
-        mavlink_local_position_ned_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }local_position_ned; 
-      struct{
-        mavlink_meminfo_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }meminfo; 
-      struct{
-        mavlink_mission_current_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }mission_current; 
-      struct{
-        mavlink_mount_status_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }mount_status;    
-      struct{
-        mavlink_nav_controller_output_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }nav_controller_output;    
-      struct{
-        mavlink_param_request_read_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }param_request_read;    
-      struct{
-        mavlink_param_request_list_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }param_request_list;    
-      struct{
-        mavlink_param_value_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }param_value;    
-      struct{
-        mavlink_power_status_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }power_status;    
-      struct{
-        mavlink_raw_imu_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }raw_imu;    
-      struct{
-        mavlink_rc_channels_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }rc_channels; 
-      struct{
-        mavlink_rc_channels_raw_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }rc_channels_raw; 
-      struct{
-        mavlink_rc_channels_scaled_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }rc_channels_scaled; 
-      struct{
-        mavlink_remote_log_block_status_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }remote_log_block_status; 
-      struct{
-        mavlink_request_data_stream_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }request_data_stream; 
-      struct{
-        mavlink_scaled_imu2_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }scaled_imu2; 
-      struct{
-        mavlink_scaled_imu3_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }scaled_imu3;   
-      struct{
-        mavlink_scaled_pressure_t         data = {0};       
-        uint32_t                          tUpdate = 0;
-      }scaled_pressure;   
-      struct{
-        mavlink_scaled_pressure2_t        data = {0};       
-        uint32_t                          tUpdate = 0;
-      }scaled_pressure2;           
-      struct{
-        mavlink_sensor_offsets_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }sensor_offsets; 
-      struct{
-        mavlink_servo_output_raw_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }servo_output_raw; 
-      struct{
-        mavlink_set_mode_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }set_mode; 
-      struct{
-        mavlink_statustext_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }statustext;                                       
-      struct{
-        mavlink_sys_status_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }sys_status;                                       
-      struct{
-        mavlink_system_time_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }system_time;                                       
-      struct{
-        mavlink_timesync_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }timesync;                                       
-      struct{
-        mavlink_terrain_report_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }terrain_report;                                      
-      struct{
-        mavlink_vfr_hud_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }vfr_hud;                                      
-      struct{
-        mavlink_vibration_t       data = {0};       
-        uint32_t                          tUpdate = 0;
-      }vibration;                                                                   
-    }pkt;
-
-    /**
-     * @brief Debug
-     * 
-     */
-    uint8_t included_parsing_list_mavlink_ids[41] =
-    {      
-      MAVLINK_MSG_ID_AHRS,
-      MAVLINK_MSG_ID_AHRS2,
-      MAVLINK_MSG_ID_ATTITUDE,
-      MAVLINK_MSG_ID_AUTOPILOT_VERSION_REQUEST,
-      MAVLINK_MSG_ID_BATTERY_STATUS,
-      // MAVLINK_MSG_ID_CAMERA_FEEDBACK,
-      // MAVLINK_MSG_ID_COMMAND_LONG,
-      MAVLINK_MSG_ID_EKF_STATUS_REPORT,
-      MAVLINK_MSG_ID_FENCE_STATUS,
-      MAVLINK_MSG_ID_GIMBAL_REPORT,
-      MAVLINK_MSG_ID_GIMBAL_TORQUE_CMD_REPORT,
-      MAVLINK_MSG_ID_GPS_GLOBAL_ORIGIN,
-      MAVLINK_MSG_ID_GLOBAL_POSITION_INT,
-      MAVLINK_MSG_ID_GOPRO_HEARTBEAT,
-      // MAVLINK_MSG_ID_GOPRO_SET_RESPONSE,
-      MAVLINK_MSG_ID_GPS_RAW_INT,
-      MAVLINK_MSG_ID_HEARTBEAT,
-      MAVLINK_MSG_ID_HOME_POSITION,
-      MAVLINK_MSG_ID_HWSTATUS,
-      MAVLINK_MSG_ID_LOCAL_POSITION_NED,
-      MAVLINK_MSG_ID_MEMINFO,
-      MAVLINK_MSG_ID_MISSION_CURRENT,
-      MAVLINK_MSG_ID_MOUNT_STATUS,
-      MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT,
-      // MAVLINK_MSG_ID_PARAM_REQUEST_READ,
-      // MAVLINK_MSG_ID_PARAM_REQUEST_LIST,
-      MAVLINK_MSG_ID_PARAM_VALUE,
-      MAVLINK_MSG_ID_POWER_STATUS,
-      MAVLINK_MSG_ID_RAW_IMU,
-      MAVLINK_MSG_ID_RC_CHANNELS,
-      MAVLINK_MSG_ID_RC_CHANNELS_RAW,
-      MAVLINK_MSG_ID_RC_CHANNELS_SCALED,
-      // MAVLINK_MSG_ID_REMOTE_LOG_BLOCK_STATUS,
-      MAVLINK_MSG_ID_REQUEST_DATA_STREAM,
-      MAVLINK_MSG_ID_SCALED_IMU2,
-      MAVLINK_MSG_ID_SCALED_IMU3,
-      MAVLINK_MSG_ID_SCALED_PRESSURE,
-      MAVLINK_MSG_ID_SCALED_PRESSURE2,
-      MAVLINK_MSG_ID_SENSOR_OFFSETS,
-      MAVLINK_MSG_ID_SERVO_OUTPUT_RAW,
-      // MAVLINK_MSG_ID_SET_MODE,
-      MAVLINK_MSG_ID_STATUSTEXT,
-      MAVLINK_MSG_ID_SYS_STATUS,
-      MAVLINK_MSG_ID_SYSTEM_TIME,
-      MAVLINK_MSG_ID_TIMESYNC,
-      MAVLINK_MSG_ID_TERRAIN_REPORT,
-      MAVLINK_MSG_ID_VFR_HUD,
-      MAVLINK_MSG_ID_VIBRATION,
-    };
-
-
     HardwareSerial* _MAVSerial;
+    uint32_t tSaved_Last_Response = 0;
     
     void Send_MAVLink_Stream_Pack__Enable_All();
     
@@ -570,10 +327,11 @@ class mMAVLink_Decoder :
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
       
+    #ifdef ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
     uint8_t ConstructJSON_ahrs(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_ahrs2(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_attitude(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_autopilot_version_request(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_autopilot_version(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_battery_status(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_ekf_status_report(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_fence_status(uint8_t json_level = 0, bool json_appending = true);
@@ -611,6 +369,8 @@ class mMAVLink_Decoder :
     uint8_t ConstructJSON_terrain_report(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_vfr_hud(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_vibration(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Debug_ReceiveStats(uint8_t json_level = 0, bool json_appending = true);
+    #endif // ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
 
     /**
      * @brief Overview channels to select key information for realtime downlink
@@ -631,15 +391,16 @@ class mMAVLink_Decoder :
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    std::vector<struct handler<mMAVLink_Decoder>*> mqtthandler_list;
     
     void MQTTHandler_Sender();
+    std::vector<struct handler<mMAVLink_Decoder>*> mqtthandler_list;
+
     struct handler<mMAVLink_Decoder> mqtthandler_settings_teleperiod;
 
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs2;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__attitude;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__autopilot_version_request;
+    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__autopilot_version;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__battery_status;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ekf_status_report;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__fence_status;
@@ -677,11 +438,29 @@ class mMAVLink_Decoder :
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__vfr_hud;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__vibration;
 
+    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__debug_receive_stats;
+
     struct handler<mMAVLink_Decoder> mqtthandler_overview_01;
     struct handler<mMAVLink_Decoder> mqtthandler_overview_02;
 
     #endif // USE_MODULE_NETWORK_MQTT
 
+    struct PacketData {
+        uint32_t tUpdate;
+        uint16_t packetID;
+        const char* packet_name;
+        void* data;
+    };
+
+    PacketData* findPacketData(uint16_t packetID);
+    void addOrUpdatePacket(uint16_t packetID, void* data, uint32_t dataSize, const char* packetName) ;
+
+    void requestDataStream(uint8_t system_id, uint8_t component_id, uint8_t target_system, uint8_t target_component, uint8_t stream_id, uint16_t message_rate, uint8_t start_stop, HardwareSerial* serial);
+    void disableAllDataStreams(uint8_t system_id, uint8_t component_id, uint8_t target_system, uint8_t target_component, HardwareSerial* serial);
+    void setMessageRate(uint8_t system_id, uint8_t component_id, uint8_t target_system, uint8_t target_component, uint16_t message_id, uint32_t interval_us, HardwareSerial* serial);
+
+private:
+    std::vector<PacketData> packets;
 
 };
 
@@ -692,48 +471,46 @@ class mMAVLink_Decoder :
 
 
 /*
-{
-  "msg list": [
-    163,AHRS
-    178,AHRS2
-    30,ATTITUDE
-    183,AUTOPILOT_VERSION_REQUEST
-    147,BATTERY_STATUS
-    193,EKF_STATUS_REPORT
-    162,FENCE_STATUS
-    200,GIMBAL_REPORT
-    214,GIMBAL_TORQUE_CMD_REPORT
-    33,GLOBAL_POSITION_INT
-    215,GOPRO_HEARTBEAT
-    24,GPS_RAW_INT
-    0,HEARTBEAT
-    165,HWSTATUS
-    152,MEMINFO
-    42,MISSION_CURRENT
-    158,MOUNT_STATUS
-    62,NAV_CONTROLLER_OUTPUT
-    22,PARAM_VALUE
-    125,POWER_STATUS
-    27,RAW_IMU
-    65,RC_CHANNELS
-    35,RC_CHANNELS_RAW
-    66,REQUEST_DATA_STREAM
-    116,SCALED_IMU2
-    129,SCALED_IMU3
-    29,SCALED_PRESSURE
-    137,SCALED_PRESSURE2
-    150,SENSOR_OFFSETS
-    36,SERVO_OUTPUT_RAW
-    253,STATUSTEXT
-    1,SYS_STATUS
-    2,SYSTEM_TIME
-    111,TIMESYNC
-    74,VFR_HUD
-    241,VIBRATION
-  ]
-*/
+"msg list": [
+  163,AHRS
+  178,AHRS2
+  30,ATTITUDE
+  183,AUTOPILOT_VERSION_REQUEST
+  147,BATTERY_STATUS
+  193,EKF_STATUS_REPORT
+  162,FENCE_STATUS
+  200,GIMBAL_REPORT
+  214,GIMBAL_TORQUE_CMD_REPORT
+  33,GLOBAL_POSITION_INT
+  215,GOPRO_HEARTBEAT
+  24,GPS_RAW_INT
+  0,HEARTBEAT
+  165,HWSTATUS
+  152,MEMINFO
+  42,MISSION_CURRENT
+  158,MOUNT_STATUS
+  62,NAV_CONTROLLER_OUTPUT
+  22,PARAM_VALUE
+  125,POWER_STATUS
+  27,RAW_IMU
+  65,RC_CHANNELS
+  35,RC_CHANNELS_RAW
+  66,REQUEST_DATA_STREAM
+  116,SCALED_IMU2
+  129,SCALED_IMU3
+  29,SCALED_PRESSURE
+  137,SCALED_PRESSURE2
+  150,SENSOR_OFFSETS
+  36,SERVO_OUTPUT_RAW
+  253,STATUSTEXT
+  1,SYS_STATUS
+  2,SYSTEM_TIME
+  111,TIMESYNC
+  74,VFR_HUD
+  241,VIBRATION
+]
 
-/* In alphabetical order
+In alphabetical order
 { "ACTUATOR_CONTROL_TARGET", 140 }
 { "ADAP_TUNING", 11010 }
 { "ADSB_VEHICLE", 246 }

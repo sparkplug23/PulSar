@@ -63,8 +63,14 @@ class mMavlinkFlyingLEDS :
      ************************************************************************************************/
 
     void EverySecond();
-    void SubTask_UpdateOLED();
     void EveryLoop();
+
+    void Effect_LandingLights();
+    void Effect_TakeoffLights();
+
+    uint8_t effect_mode = 0;
+    bool effect_manual = false;
+    float test_float = 0.0f;
     
     /************************************************************************************************
      * SECTION: Construct Messages

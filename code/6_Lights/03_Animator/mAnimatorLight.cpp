@@ -447,7 +447,7 @@ void mAnimatorLight::Init(void)
   cctBlending = 0;
   ablMilliampsMax = 0;
   currentMilliamps = 0;
-  _now = millis();
+  millis_at_start_of_effect_update = millis();
   timebase = 0;
   isMatrix = false;
   _virtualSegmentLength = 0;
@@ -1380,7 +1380,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       _virtualSegmentLength = SEGMENT_I(seg_i).virtualLength();
 
-      _now = millis(); // internal millis used for animation to make calculations work correctly (instead of calling millis lots)
+      millis_at_start_of_effect_update = millis(); // internal millis used for animation to make calculations work correctly (instead of calling millis lots)
 
       // ALOG_INF( PSTR("_segments[%d].effect_id=%d/%d \t%d"),_segment_index_primary, SEGMENT_I(seg_i).effect_id,effects.function.size(), millis()); 
 
@@ -1419,6 +1419,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
       }
               
       SEGMENT_I(seg_i).call++; // Used as progress counter for animations eg rainbow across all hues
+      ALOG_INF(PSTR("seg=%d,call=%d"),seg_i, SEGMENT_I(seg_i).call);
 
       DEBUG_PIN1_SET(HIGH);
                 
@@ -1436,18 +1437,21 @@ void mAnimatorLight::SubTask_Segments_Effects()
         /**
          * @brief A Backoff time is needed per animation so the DMA is not overloaded
         **/
+        #ifdef ENABLE_DEVFEATURE_LIGHT__REMOVE_BACKOFF_TIME // UpdateAnimations should handle this internally
         if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, ANIMATION_UPDATOR_TIME_MINIMUM))
         {
+        #endif
           DEBUG_PIN4_TOGGLE();
   
           SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
   
           update_output = true; // Animator updated, so trigger SHOW
+        #ifdef ENABLE_DEVFEATURE_LIGHT__REMOVE_BACKOFF_TIME
         } // TimeReached
+        #endif
   
         SEGMENT.flags.animator_first_run = RESET_FLAG;     // CHANGE to function: reset here for all my methods
 
-  
         /**
          * @brief If it completes, reset
          *

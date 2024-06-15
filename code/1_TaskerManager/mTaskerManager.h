@@ -401,9 +401,6 @@ enum TaskerID
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
     EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
   #endif
-  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
-    EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
-  #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
     EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID,
   #endif
@@ -802,10 +799,6 @@ enum TaskerID
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
-#endif
-#ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
-  #include "4_Drivers/82_MAVLink_Decoder2/mMAVLink_Decoder.h"
   #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI

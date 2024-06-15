@@ -441,9 +441,6 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   addTasker(EM_MODULE__DRIVERS_MAVLINK_DECODER__ID, new mMAVLink_Decoder());
   #endif
-  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER2
-  addTasker(EM_MODULE__DRIVERS_MAVLINK_DECODER__ID, new mMAVLink_Decoder());
-  #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
     INCLUDE_FIX"4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
     #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])

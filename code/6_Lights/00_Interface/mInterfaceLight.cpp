@@ -155,49 +155,58 @@ void mInterfaceLight::Template_Load()
 
   if(!template_loaded)
   {
+    ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
+    D_DATA_BUFFER_CLEAR();
+    ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
+    // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
+    // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
+    memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
+    ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+    data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+    data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // to avoid need to memset everything
+    ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+    ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
+    #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+    Serial.println(data_buffer.payload.ctr);
+    #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+
+    ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+
+    // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+
+    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+    ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
+
+    #ifdef USE_LIGHTING_TEMPLATE_ANOTHER
+    ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
+    D_DATA_BUFFER_CLEAR();
+    ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
+    // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
+    // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
+    memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE_ANOTHER,sizeof(LIGHTING_TEMPLATE_ANOTHER));
+    ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+    data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+    data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // to avoid need to memset everything
+    ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+    ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE_ANOTHER), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE_ANOTHER)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
+    #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+    Serial.println(data_buffer.payload.ctr);
+    #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
+
+    ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
+
+    // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+
+    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+    ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
+    #endif // USE_LIGHTING_TEMPLATE_ANOTHER
 
 
-  ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-  D_DATA_BUFFER_CLEAR();
 
-  
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------B- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   memset(data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr)); 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------C- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   data_buffer.topic.length_used = 0; 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------D- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   memset(data_buffer.payload.ctr,0,sizeof(data_buffer.payload.ctr)); 
-  // ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------E- >>>>>>>>>> %d"),JBI->GetBufferSize());
-  //   data_buffer.payload.length_used = 0; 
-
-
-  ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
-
-
-  // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-  // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
-  memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-
-  ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
-
-  data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // to avoid need to memset everything
-
-  ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
-  ALOG_HGL(PSTR("Template Json Size %d/%d %d%%"), sizeof(LIGHTING_TEMPLATE), data_buffer.payload.length_used, (sizeof(LIGHTING_TEMPLATE)*100)/DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-
-  #ifdef ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
-  Serial.println(data_buffer.payload.ctr);
-  #endif // ENABLE_DEBUGCRITICAL__STOPPING_CODE_AFTER_TEMPLATE_LOAD
-
-
-  ALOG_INF(PSTR("Tasker_Interface before parser ------------ >>>>>>>>>> %d"), JBI->GetBufferSize());
-
-  // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
-  ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
 
   }
 
@@ -740,6 +749,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   uint16_t start = 0;
   uint16_t length = 10;
   int8_t bus_type = BUSTYPE_NONE;
+  uint8_t reversed = 0;
   COLOUR_ORDER_T ColourOrder = {COLOUR_ORDER_INIT_DISABLED};
   uint8_t pins[5] = {255}; // 255 is unset
   
@@ -822,6 +832,17 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   //   }
   // }
 
+  if(jtok = obj["Reversed"])
+  {
+    reversed = jtok.getInt();
+    ALOG_INF(PSTR("reversed %d"), reversed);
+  }
+  // if(jtok = obj["S"])
+  // {
+  //   start = jtok.getInt();
+  //   ALOG_INF(PSTR("start %d"), start);
+  // }
+
 
   uint8_t bus_index = bus_count; // next bus space 
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
@@ -843,7 +864,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     start, 
     length,
     ColourOrder,
-    false, 
+    reversed, 
     0, 
     RGBW_MODE_MANUAL_ONLY
   );    

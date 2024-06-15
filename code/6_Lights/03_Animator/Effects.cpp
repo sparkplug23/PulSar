@@ -114,7 +114,7 @@ void mAnimatorLight::EffectAnim__Solid_Colour()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = "Solid Colour@;!,!,!,!,!;pal=0,etp=1000";
+static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = "Solid Colour@;!,!,!,!,!;pal=0,etp=3000";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 /********************************************************************************************************************************************************************************************************************
@@ -6142,7 +6142,7 @@ void mAnimatorLight::EffectAnim__Tri_Static_Pattern()
   SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
 
 }
-static const char PM_EFFECT_CONFIG__TRI_STATIC_PATTERN[] PROGMEM = ",Size;1,2,3;;;pal=6";
+static const char PM_EFFECT_CONFIG__TRI_STATIC_PATTERN[] PROGMEM = "Static Pattern Tri@,Size;1,2,3;;;pal=6";
 
 
 
@@ -6179,7 +6179,7 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
 //speed of 128, cycletime = 19800
   uint32_t cycleTime = 750 + (255 - SEGMENT.speed)*150;
   // millis() % total_cycle_time ==> gives remainder, and therefore process of animation from 0->cycleTime is 0->100%
-  uint32_t perc = millis() % cycleTime;
+  uint32_t perc = millis_at_start_of_effect_update % cycleTime;
   // prog gets the process from 0->65535 again
   uint16_t prog = (perc * 65535) / cycleTime;
    
@@ -6201,6 +6201,7 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
     // First call ie create colours to later be animated
     if (SEGMENT.call == 0) {
       SEGMENT.params_internal.aux0 = random8();
+      ALOG_INF(PSTR("random8() %d %d %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1, SEGMENT.call);
       SEGMENT.step = 3;
     }
     if (SEGMENT.step == 1) { //if flag set, change to new random color
@@ -6211,7 +6212,7 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
       SEGMENT.params_internal.aux0 = get_random_wheel_index(SEGMENT.params_internal.aux1);
       SEGMENT.step = 0;
     }
-    // ALOG_INF(PSTR("useRandomColors %d %d %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1, SEGMENT.call);
+    ALOG_INF(PSTR("useRandomColors %d %d %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1, SEGMENT.call);
   }else
   if(useIterateOverPalette)
   {
@@ -6257,6 +6258,8 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
   {
     col_wipe = SEGCOLOR_U32(1);
   }
+
+  ALOG_INF(PSTR("aux0 %d aux1 %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1);
 
 
   for (uint16_t i = 0; i < SEGLEN; i++)
@@ -6307,7 +6310,7 @@ void mAnimatorLight::EffectAnim__Colour_Wipe()
 {
   BaseEffectAnim__Base_Colour_Wipe(false, false);
 }
-static const char PM_EFFECT_CONFIG__COLOR_WIPE[] PROGMEM = "!,!;!,!;!";
+static const char PM_EFFECT_CONFIG__COLOR_WIPE[] PROGMEM = "Wipe Over@!,!;!,!;!";
 
 /*
  * Turns all LEDs after each other to a random color.
@@ -6317,7 +6320,7 @@ void mAnimatorLight::EffectAnim__Colour_Wipe_Random()
 {
   BaseEffectAnim__Base_Colour_Wipe(false, true);
 }
-static const char PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM[] PROGMEM = "!;;!";
+static const char PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM[] PROGMEM = "Wipe Random@!;;!";
 
 /*
  * Turns all LEDs after each other to a random color.
@@ -6327,7 +6330,7 @@ void mAnimatorLight::EffectAnim__Colour_Wipe_Palette()
 {
   BaseEffectAnim__Base_Colour_Wipe(false, false, true);
 }
-static const char PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE[] PROGMEM = "!;;!";
+static const char PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE[] PROGMEM = "Wipe Palette@!;;!";
 
 
 /*
@@ -6337,7 +6340,7 @@ void mAnimatorLight::EffectAnim__Colour_Sweep()
 {
   BaseEffectAnim__Base_Colour_Wipe(true, false);
 }
-static const char PM_EFFECT_CONFIG__COLOR_SWEEP[] PROGMEM = "!,!;!,!;!";
+static const char PM_EFFECT_CONFIG__COLOR_SWEEP[] PROGMEM = "Sweep Over@!,!;!,!;!";
 
 
 /*
@@ -6347,7 +6350,7 @@ void mAnimatorLight::EffectAnim__Colour_Sweep_Random()
 {
   BaseEffectAnim__Base_Colour_Wipe(true, true);
 }
-static const char PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM[] PROGMEM = "!;;!";
+static const char PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM[] PROGMEM = "Sweep Random@!;;!";
 
 /*
  * Random color introduced alternating from start and end of strip->
@@ -6356,7 +6359,7 @@ void mAnimatorLight::EffectAnim__Colour_Sweep_Palette()
 {
   BaseEffectAnim__Base_Colour_Wipe(true, false, true);
 }
-static const char PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE[] PROGMEM = "!;;!";
+static const char PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE[] PROGMEM = "Sweep Palette@!;;!";
 
 
 
@@ -6538,7 +6541,7 @@ void mAnimatorLight::EffectAnim__Chase_Colour()
 {
   EffectAnim__Base_Chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), true);
 }
-static const char PM_EFFECT_CONFIG__CHASE_COLOR[] PROGMEM = "!,Width;!,!,!;!";
+static const char PM_EFFECT_CONFIG__CHASE_COLOR[] PROGMEM = "Chase@!,Width;!,!,!;!";
 
 
 
@@ -6570,7 +6573,7 @@ void mAnimatorLight::EffectAnim__Chase_Rainbow()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__CHASE_RAINBOW[] PROGMEM = "!,Width;!,!;!";
+static const char PM_EFFECT_CONFIG__CHASE_RAINBOW[] PROGMEM = "Chase Rainbow@!,Width;!,!;!";
 
 
 /*
@@ -6622,7 +6625,7 @@ void mAnimatorLight::EffectAnim__Chase_Flash()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__CHASE_FLASH[] PROGMEM = "!;Bg,Fx;!";
+static const char PM_EFFECT_CONFIG__CHASE_FLASH[] PROGMEM = "Chase Flash@!;Bg,Fx;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6674,7 +6677,7 @@ void mAnimatorLight::EffectAnim__Chase_Flash_Random()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
-static const char PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM[] PROGMEM = "!;!,!;!";
+static const char PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM[] PROGMEM = "Chase Flash Rnd@!;!,!;!";
 
 
 // /*
@@ -6700,7 +6703,7 @@ void mAnimatorLight::EffectAnim__Chase_Rainbow_White()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE[] PROGMEM = "!,Size;Bg;!";
+static const char PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE[] PROGMEM = "Rainbow Runner@!,Size;Bg;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6753,7 +6756,7 @@ void mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t co
 void mAnimatorLight::EffectAnim__Chase_Theater(void) {
   return EffectAnim__Base_Chase_Theater(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
 }
-static const char PM_EFFECT_CONFIG__THEATER_CHASE[] PROGMEM = "!,Gap size;!,!;!";
+static const char PM_EFFECT_CONFIG__THEATER_CHASE[] PROGMEM = "Theater@!,Gap size;!,!;!";
 
 
 /*
@@ -6763,7 +6766,7 @@ static const char PM_EFFECT_CONFIG__THEATER_CHASE[] PROGMEM = "!,Gap size;!,!;!"
 void mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow(void) {
   return EffectAnim__Base_Chase_Theater(color_wheel(SEGMENT.step), SEGCOLOR_U32(1), false);
 }
-static const char PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW[] PROGMEM = "!,Gap size;,!;!";
+static const char PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW[] PROGMEM = "Theater Rainbow@!,Gap size;,!;!";
 
 
 
@@ -6815,7 +6818,7 @@ void mAnimatorLight::EffectAnim__Chase_TriColour(void) {
 
   return EffectAnim__Base_Chase_TriColour(SEGCOLOR_U32(2), SEGCOLOR_U32(0));
 }
-static const char PM_EFFECT_CONFIG__TRICOLOR_CHASE[] PROGMEM = "!,Size;1,2,3;!";
+static const char PM_EFFECT_CONFIG__TRICOLOR_CHASE[] PROGMEM = "Tri Chase@!,Size;1,2,3;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6854,7 +6857,7 @@ void mAnimatorLight::EffectAnim__Chase_Random()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   return;
 }
-static const char PM_EFFECT_CONFIG__CHASE_RANDOM[] PROGMEM = "!,Width;!,,!;!";
+static const char PM_EFFECT_CONFIG__CHASE_RANDOM[] PROGMEM = "Stream 2@!,Width;!,,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -6886,7 +6889,7 @@ void mAnimatorLight::EffectAnim__Breath()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM = "!;!,!;!;01";
+static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM = "Breath@!;!,!;!;01";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -6914,7 +6917,7 @@ void mAnimatorLight::EffectAnim__Fade()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__FADE[] PROGMEM = "!;!,!;!;01";
+static const char PM_EFFECT_CONFIG__FADE[] PROGMEM = "Fade@!;!,!;!;01";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -6968,7 +6971,7 @@ void mAnimatorLight::EffectAnim__Fireworks()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__FIREWORKS[] PROGMEM = ",Frequency;!,!;!;12;ix=137," EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR ""; // ix(itensity)=192, pal=randomise01
+static const char PM_EFFECT_CONFIG__FIREWORKS[] PROGMEM = "Fireworks@,Frequency;!,!;!;12;ix=137," EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR ""; // ix(itensity)=192, pal=randomise01
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7108,7 +7111,7 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst()
 }
 
 
-static const char PM_EFFECT_CONFIG__STARBURST[] PROGMEM = "Chance,Fragments,,,,,,,Overlay;,!;!;;" EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR "";
+static const char PM_EFFECT_CONFIG__STARBURST[] PROGMEM = "Fireworks Starburst@Chance,Fragments,,,,,,,Overlay;,!;!;;" EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR "";
 
 
 /**
@@ -7226,7 +7229,7 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__STARBURST_GLOWS[] PROGMEM = "Chance,Fragments,,,,,,,Overlay;,!;!;" EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR ",m12=0";
+static const char PM_EFFECT_CONFIG__STARBURST_GLOWS[] PROGMEM = "Fireworks Starburst Glows@Chance,Fragments,,,,,,,Overlay;,!;!;" EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR ",m12=0";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7357,7 +7360,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
-static const char PM_EFFECT_CONFIG__EXPLODING_FIREWORKS[] PROGMEM = "Gravity,Firing side;!,!;!;12;pal=10,ix=128";
+static const char PM_EFFECT_CONFIG__EXPLODING_FIREWORKS[] PROGMEM = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=10,ix=128";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7514,7 +7517,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
-static const char PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH[] PROGMEM = "Gravity,Firing side;!,!;!;12;pal=10,ix=128";
+static const char PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH[] PROGMEM = "Fireworks 1D No Launch@Gravity,Firing side;!,!;!;12;pal=10,ix=128";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7556,7 +7559,7 @@ void mAnimatorLight::EffectAnim__Rain()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();  
 
 }
-static const char PM_EFFECT_CONFIG__RAIN[] PROGMEM = "!,Spawning rate;!,!;!;12;ix=128";
+static const char PM_EFFECT_CONFIG__RAIN[] PROGMEM = "Rain@!,Spawning rate;!,!;!;12;ix=128";
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
@@ -7602,7 +7605,7 @@ void mAnimatorLight::EffectAnim__Sparkle() // Firework_Rain
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__SPARKLE[] PROGMEM = "!,,,,,,,,Overlay;!,!;!;;m12=0";
+static const char PM_EFFECT_CONFIG__SPARKLE[] PROGMEM = "Sparkle@!,,,,,,,,Overlay;!,!;!;;m12=0";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7630,7 +7633,7 @@ void mAnimatorLight::EffectAnim__Sparkle_Flash() // Firework_Rain
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__FLASH_SPARKLE[] PROGMEM = "!,!,,,,,,,Overlay;Bg,Fx;!;;m12=0";
+static const char PM_EFFECT_CONFIG__FLASH_SPARKLE[] PROGMEM = "Sparkle Dark@!,!,,,,,,,Overlay;Bg,Fx;!;;m12=0";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7660,7 +7663,7 @@ void mAnimatorLight::EffectAnim__Sparkle_Hyper() // Firework_Rain
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__HYPER_SPARKLE[] PROGMEM = "!,!,,,,,,,Overlay;Bg,Fx;!;;m12=0";
+static const char PM_EFFECT_CONFIG__HYPER_SPARKLE[] PROGMEM = "Sparkle+@!,!,,,,,,,Overlay;Bg,Fx;!;;m12=0";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -7690,7 +7693,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Up() // Firework_Rain
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_UP[] PROGMEM = "!,Intensity;!,!;!;;m12=0";
+static const char PM_EFFECT_CONFIG__TWINKLE_UP[] PROGMEM = "Twinkle Up@!,Intensity;!,!;!;;m12=0";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -7733,7 +7736,7 @@ void mAnimatorLight::EffectAnim__Random_Colour()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM = "!,Fade time;;!";
+static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM = "Random Colors@!,Fade time;;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -7764,7 +7767,7 @@ void mAnimatorLight::EffectAnim__Rainbow_Cycle()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__RAINBOW_CYCLE[] PROGMEM = "!,Size;;!";
+static const char PM_EFFECT_CONFIG__RAINBOW_CYCLE[] PROGMEM = "Rainbow Cylcle@!,Size;;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -7816,7 +7819,7 @@ void mAnimatorLight::EffectAnim__Running_Lights()
 {
   EffectAnim__Base_Running(false);
 }
-static const char PM_EFFECT_CONFIG__RUNNING_LIGHTS[] PROGMEM = "!,Wave width;!,!;!";
+static const char PM_EFFECT_CONFIG__RUNNING_LIGHTS[] PROGMEM = "Running@!,Wave width;!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7830,7 +7833,7 @@ void mAnimatorLight::EffectAnim__Saw()
 {
   EffectAnim__Base_Running(true);
 }
-static const char PM_EFFECT_CONFIG__SAW[] PROGMEM = "!,Width;!,!;!";
+static const char PM_EFFECT_CONFIG__SAW[] PROGMEM = "Saw@!,Width;!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -7875,7 +7878,7 @@ void mAnimatorLight::EffectAnim__Twinkle()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__TWINKLE[] PROGMEM = "!,!;!,!;!;;m12=0"; //pixels
+static const char PM_EFFECT_CONFIG__TWINKLE[] PROGMEM = "Twinkle@!,!;!,!;!;;m12=0"; //pixels
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7939,7 +7942,7 @@ void mAnimatorLight::EffectAnim__Dissolve()
 {
   EffectAnim__Base_Dissolve(SEGCOLOR_U32(0));
 }
-static const char PM_EFFECT_CONFIG__DISSOLVE[] PROGMEM = "Repeat speed,Dissolve speed,,,,Random;!,!;!";
+static const char PM_EFFECT_CONFIG__DISSOLVE[] PROGMEM = "Dissolve@Repeat speed,Dissolve speed,,,,Random;!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -7953,7 +7956,7 @@ void mAnimatorLight::EffectAnim__Dissolve_Random()
 {
   EffectAnim__Base_Dissolve(color_wheel(random8()));
 }
-static const char PM_EFFECT_CONFIG__DISSOLVE_RANDOM[] PROGMEM = "Repeat speed,Dissolve speed;,!;!";
+static const char PM_EFFECT_CONFIG__DISSOLVE_RANDOM[] PROGMEM = "Dissolve Random@Repeat speed,Dissolve speed;,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8012,7 +8015,7 @@ void mAnimatorLight::EffectAnim__Android()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
-static const char PM_EFFECT_CONFIG__ANDROID[] PROGMEM = "!,Width;!,!;!;;m12=1"; //vertical
+static const char PM_EFFECT_CONFIG__ANDROID[] PROGMEM = "Android@!,Width;!,!;!;;m12=1"; //vertical
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8054,7 +8057,7 @@ void mAnimatorLight::EffectAnim__ColourFul()
   for (size_t i = numColors; i < numColors*2 -1U; i++) cols[i] = cols[i-numColors];
 
   uint32_t cycleTime = 50 + (8 * (uint32_t)(255 - SEGMENT.speed));
-  uint32_t it = _now / cycleTime;
+  uint32_t it = millis_at_start_of_effect_update / cycleTime;
   if (it != SEGMENT.step)
   {
     if (SEGMENT.speed > 0) SEGMENT.params_internal.aux0++;
@@ -8071,7 +8074,7 @@ void mAnimatorLight::EffectAnim__ColourFul()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__COLORFUL[] PROGMEM = "!,Saturation;1,2,3;!";
+static const char PM_EFFECT_CONFIG__COLORFUL[] PROGMEM = "Colourful@!,Saturation;1,2,3;!";
 
 
 
@@ -8116,7 +8119,7 @@ void mAnimatorLight::EffectAnim__Traffic_Light()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__TRAFFIC_LIGHT[] PROGMEM = "!,US style;,!;!";
+static const char PM_EFFECT_CONFIG__TRAFFIC_LIGHT[] PROGMEM = "Traffic Light@!,US style;,!;!";
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
@@ -8172,7 +8175,7 @@ void mAnimatorLight::EffectAnim__Base_Running(uint32_t color1, uint32_t color2)
 void mAnimatorLight::EffectAnim__Running_Colour(void) {
   return EffectAnim__Base_Running(SEGCOLOR_U32(0), SEGCOLOR_U32(1));
 }
-static const char PM_EFFECT_CONFIG__RUNNING_COLOR[] PROGMEM = "!,Width;!,!;!";
+static const char PM_EFFECT_CONFIG__RUNNING_COLOR[] PROGMEM = "Running 2@!,Width;!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8215,7 +8218,7 @@ void mAnimatorLight::EffectAnim__Running_Random()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__RUNNING_RANDOM[] PROGMEM = "!,Zone size;;!";
+static const char PM_EFFECT_CONFIG__RUNNING_RANDOM[] PROGMEM = "Stream@!,Zone size;;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -8274,7 +8277,7 @@ void mAnimatorLight::EffectAnim__Base_Gradient(bool loading)
 void mAnimatorLight::EffectAnim__Gradient(void) {
   return EffectAnim__Base_Gradient(false);
 }
-static const char PM_EFFECT_CONFIG__GRADIENT[] PROGMEM = "!,Spread;!,!;!;;ix=16";
+static const char PM_EFFECT_CONFIG__GRADIENT[] PROGMEM = "Gradient@!,Spread;!,!;!;;ix=16";
 
 
 
@@ -8284,7 +8287,7 @@ static const char PM_EFFECT_CONFIG__GRADIENT[] PROGMEM = "!,Spread;!,!;!;;ix=16"
 void mAnimatorLight::EffectAnim__Loading(void) {
   return EffectAnim__Base_Gradient(true);
 }
-static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM = "!,Fade;!,!;!;;ix=16";
+static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM = "Loading@!,Fade;!,!;!;;ix=16";
 
 
 
@@ -8347,7 +8350,7 @@ void mAnimatorLight::EffectAnim__Polce_All()
 {  
   return EffectAnim__Base_Police(RED, BLUE, true);
 }
-static const char PM_EFFECT_CONFIG__POLICE_ALL[] PROGMEM = "!,Width;,Bg;0";
+static const char PM_EFFECT_CONFIG__POLICE_ALL[] PROGMEM = "Police All@!,Width;,Bg;0";
 
 
 //Police Lights Red and Blue 
@@ -8356,7 +8359,7 @@ void mAnimatorLight::EffectAnim__Police()
   fill(SEGCOLOR_U32(1));
   return EffectAnim__Base_Police(RED, BLUE, false);
 }
-static const char PM_EFFECT_CONFIG__POLICE[] PROGMEM = "!,Width;,Bg;0";
+static const char PM_EFFECT_CONFIG__POLICE[] PROGMEM = "Police@!,Width;,Bg;0";
 
 
 //Police All with custom colors
@@ -8364,7 +8367,7 @@ void mAnimatorLight::EffectAnim__Two_Areas()
 {  
   return EffectAnim__Base_Police(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
 }
-static const char PM_EFFECT_CONFIG__TWO_AREAS[] PROGMEM = "!,Dot size,,,,,,,Overlay;1,2,Bg;!";
+static const char PM_EFFECT_CONFIG__TWO_AREAS[] PROGMEM = "Two Areas@!,Dot size,,,,,,,Overlay;1,2,Bg;!";
 
 
 //Police Lights with custom colors 
@@ -8377,7 +8380,7 @@ void mAnimatorLight::EffectAnim__Two_Dots()
   
   return EffectAnim__Base_Police(SEGCOLOR_U32(0), color2, false);
 }
-static const char PM_EFFECT_CONFIG__TWO_DOTS[] PROGMEM = "!,Dot size,,,,,,,Overlay;1,2,Bg;!";
+static const char PM_EFFECT_CONFIG__TWO_DOTS[] PROGMEM = "Two Dots@!,Dot size,,,,,,,Overlay;1,2,Bg;!";
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
@@ -8438,7 +8441,7 @@ void mAnimatorLight::EffectAnim__TriColour()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__TRICOLOR_WIPE[] PROGMEM = "!;1,2,3;!";
+static const char PM_EFFECT_CONFIG__TRICOLOR_WIPE[] PROGMEM = "TriColour@!;1,2,3;!";
 
 
 
@@ -8503,7 +8506,7 @@ void mAnimatorLight::EffectAnim__Fade_TriColour()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__TRICOLOR_FADE[] PROGMEM = "!;1,2,3;!";
+static const char PM_EFFECT_CONFIG__TRICOLOR_FADE[] PROGMEM = "TriColour Fade@!;1,2,3;!";
 
 
 
@@ -8559,7 +8562,7 @@ void mAnimatorLight::EffectAnim__Multi_Comet()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__MULTI_COMET[] PROGMEM = "";
+static const char PM_EFFECT_CONFIG__MULTI_COMET[] PROGMEM = "Multi Comet@!,Speed;1,2,3;!";
 
 
 
@@ -8656,7 +8659,7 @@ void mAnimatorLight::EffectAnim__Oscillate()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__OSCILLATE[] PROGMEM = "";
+static const char PM_EFFECT_CONFIG__OSCILLATE[] PROGMEM = "Oscillate@";
 
 
 
@@ -8716,7 +8719,7 @@ void mAnimatorLight::EffectAnim__Pride_2015()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__PRIDE_2015[] PROGMEM = "!;;";
+static const char PM_EFFECT_CONFIG__PRIDE_2015[] PROGMEM = "Pride@!;;";
 
 
 
@@ -8758,7 +8761,7 @@ void mAnimatorLight::EffectAnim__Juggle()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__JUGGLES[] PROGMEM = "!,Trail;;!;;sx=64,ix=128"; // Pixels, Beatsin
+static const char PM_EFFECT_CONFIG__JUGGLES[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128"; // Pixels, Beatsin
 
 // getVal(elem["sx"], &seg._speed);
 //   getVal(elem["ix"], &seg._intensity);
@@ -8797,7 +8800,7 @@ void mAnimatorLight::EffectAnim__Palette()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__PALETTE[] PROGMEM = "Cycle speed;;!;;c3=0,o2=0";
+static const char PM_EFFECT_CONFIG__PALETTE[] PROGMEM = "Palette@Cycle speed;;!;;c3=0,o2=0";
 
 
 // // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
@@ -8890,7 +8893,7 @@ void mAnimatorLight::EffectAnim__ColourWaves()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM = "!,Hue;!;!";
+static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM = "Colour Waves@!,Hue;!;!";
 
 
 
@@ -8915,7 +8918,7 @@ void mAnimatorLight::EffectAnim__BPM()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__BPM[] PROGMEM = "!;!;!;;sx=64";
+static const char PM_EFFECT_CONFIG__BPM[] PROGMEM = "BPM@!;!;!;;sx=64";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8985,7 +8988,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Colour()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__COLORTWINKLE[] PROGMEM = "Fade speed,Spawn speed;;!;;m12=0"; //pixels
+static const char PM_EFFECT_CONFIG__COLORTWINKLE[] PROGMEM = "Colortwinkles@Fade speed,Spawn speed;;!;;m12=0"; //pixels
 
 
 
@@ -9019,7 +9022,7 @@ void mAnimatorLight::EffectAnim__Lake()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM = "!;Fx;!";
+static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM = "Lake@!;Fx;!";
 
 
 
@@ -9070,7 +9073,7 @@ void mAnimatorLight::EffectAnim__Meteor()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM = "!,Trail length;!;!";
+static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM = "Meteor@!,Trail length;!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9118,7 +9121,7 @@ void mAnimatorLight::EffectAnim__Metoer_Smooth()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__METEOR_SMOOTH[] PROGMEM = "!,Trail length;!;!";
+static const char PM_EFFECT_CONFIG__METEOR_SMOOTH[] PROGMEM = "Meteor Smooth@!,Trail length;!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9278,13 +9281,13 @@ void mAnimatorLight::EffectAnim__Twinkle_Fox()
 {
   return EffectAnim__Base_Twinkle_Fox(false);
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_FOX[] PROGMEM = "!,Twinkle rate;;!";
+static const char PM_EFFECT_CONFIG__TWINKLE_FOX[] PROGMEM = "Twinkle SlowIn/SlowOut@!,Twinkle rate;;!";
 
 void mAnimatorLight::EffectAnim__Twinkle_Cat()
 {
   return EffectAnim__Base_Twinkle_Fox(true);
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_CAT[] PROGMEM = "!,Twinkle rate;;!";
+static const char PM_EFFECT_CONFIG__TWINKLE_CAT[] PROGMEM = "Twinkle FastIn/SlowOut@!,Twinkle rate;;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -9334,7 +9337,7 @@ void mAnimatorLight::EffectAnim__Spots()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__SPOTS[] PROGMEM = "Spread,Width,,,,,,,Overlay;!,!;!";
+static const char PM_EFFECT_CONFIG__SPOTS[] PROGMEM = "Spots@Spread,Width,,,,,,,Overlay;!,!;!";
 
 
 //intensity slider sets number of "lights", LEDs per light fade in and out
@@ -9348,7 +9351,7 @@ void mAnimatorLight::EffectAnim__Fade_Spots()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__SPOTS_FADE[] PROGMEM = "Spread,Width,,,,Repeat Rate (ms),,Overlay;!,!;!"; // 7 sliders + 4 options before first ;
+static const char PM_EFFECT_CONFIG__SPOTS_FADE[] PROGMEM = "Spots Fade@Spread,Width,,,,Repeat Rate (ms),,Overlay;!,!;!"; // 7 sliders + 4 options before first ;
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9403,7 +9406,7 @@ void mAnimatorLight::EffectAnim__Glitter()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__GLITTER[] PROGMEM = "!,!,,,,,,,Overlay;1,2,Glitter color;!;;pal=25,m12=0"; //pixels
+static const char PM_EFFECT_CONFIG__GLITTER[] PROGMEM = "Glitter@!,!,,,,,,,Overlay;1,2,Glitter color;!;;pal=25,m12=0"; //pixels
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9481,7 +9484,7 @@ void mAnimatorLight::EffectAnim__Popcorn()
   
 
 }
-static const char PM_EFFECT_CONFIG__POPCORN[] PROGMEM = "!,!,,,,,,,Overlay;!,!,!;!;;m12=1"; //bar
+static const char PM_EFFECT_CONFIG__POPCORN[] PROGMEM = "Popcorn@!,!,,,,,,,Overlay;!,!,!;!;;m12=1"; //bar
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
@@ -9514,7 +9517,7 @@ void mAnimatorLight::EffectAnim__Plasma()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 } 
-static const char PM_EFFECT_CONFIG__PLASMA[] PROGMEM = "Phase,!;!;!";
+static const char PM_EFFECT_CONFIG__PLASMA[] PROGMEM = "Plasma@Phase,!;!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 /********************************************************************************************************************************************************************************************************************
@@ -9574,7 +9577,7 @@ void mAnimatorLight::EffectAnim__Percent()
   
 
 }
-static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM = ",% of fill,,,,One color;!,!;!";
+static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM = "Percent@,% of fill,,,,One color;!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -9690,7 +9693,7 @@ void mAnimatorLight::EffectAnim__Pacifica()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__PACIFICA[] PROGMEM = "!,Angle;;!;;pal=51";
+static const char PM_EFFECT_CONFIG__PACIFICA[] PROGMEM = "Pacifica@!,Angle;;!;;pal=51";
 
 // Add one layer of waves into the led array
 CRGB mAnimatorLight::pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
@@ -9736,7 +9739,7 @@ void mAnimatorLight::EffectAnim__Solid_Glitter()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__SOLID_GLITTER[] PROGMEM = ",!;Bg,,Glitter color;;;m12=0";
+static const char PM_EFFECT_CONFIG__SOLID_GLITTER[] PROGMEM = "Solid Glitter@,!;Bg,,Glitter color;;;m12=0";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9803,7 +9806,7 @@ void mAnimatorLight::EffectAnim__Sunrise()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__SUNRISE[] PROGMEM = "Time [min],Width;;!;;sx=60";
+static const char PM_EFFECT_CONFIG__SUNRISE[] PROGMEM = "Sunrise@Time [min],Width;;!;;sx=60";
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -9840,7 +9843,7 @@ void mAnimatorLight::EffectAnim__Sinewave()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__SINEWAVE[] PROGMEM = "";
+static const char PM_EFFECT_CONFIG__SINEWAVE[] PROGMEM = "Sine@";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9885,7 +9888,7 @@ void mAnimatorLight::EffectAnim__Flow()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__FLOW[] PROGMEM = "!,Zones;;!;;m12=1"; //vertical
+static const char PM_EFFECT_CONFIG__FLOW[] PROGMEM = "Flow@!,Zones;;!;;m12=1"; //vertical
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 /****************************************************************************************************************************
@@ -9925,7 +9928,7 @@ void mAnimatorLight::EffectAnim__Static_Pattern()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__STATIC_PATTERN[] PROGMEM = "Fg size,Bg size;Fg,!;!;;pal=19";
+static const char PM_EFFECT_CONFIG__STATIC_PATTERN[] PROGMEM = "Static Pattern Lit@Fg size,Bg size;Fg,!;!;;pal=19";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
@@ -9946,8 +9949,8 @@ void mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bo
   uint32_t onTime = FRAMETIME;
   if (!strobe) onTime += ((cycleTime * SEGMENT.intensity) >> 8);
   cycleTime += FRAMETIME*2;
-  uint32_t it = _now / cycleTime;
-  uint32_t rem = _now % cycleTime;
+  uint32_t it = millis_at_start_of_effect_update / cycleTime;
+  uint32_t rem = millis_at_start_of_effect_update % cycleTime;
 
   bool on = false;
   if (it != SEGMENT.step //new iteration, force on state for one frame, even if set time is too brief
@@ -9986,7 +9989,7 @@ void mAnimatorLight::EffectAnim__Blink()
 {
   EffectAnim__Base_Blink(SEGCOLOR_U32(0), SEGCOLOR_U32(1), false, true);  
 }
-static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM = "!,Duty cycle;!,!;!;01";
+static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM = "Blink@!,Duty cycle;!,!;!;01";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10000,7 +10003,7 @@ void mAnimatorLight::EffectAnim__Blink_Rainbow()
 {
   EffectAnim__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), false, false);  
 }
-static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM = "Frequency,Blink duration;!,!;!;01";
+static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10014,7 +10017,7 @@ void mAnimatorLight::EffectAnim__Strobe()
 {
   EffectAnim__Base_Blink(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true, true);
 }
-static const char PM_EFFECT_CONFIG__STROBE[] PROGMEM = "!;!,!;!;01";
+static const char PM_EFFECT_CONFIG__STROBE[] PROGMEM = "Strobe@!;!,!;!;01";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 /********************************************************************************************************************************************************************************************************************
@@ -10048,7 +10051,7 @@ void mAnimatorLight::EffectAnim__Strobe_Multi()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__MULTI_STROBE[] PROGMEM = "!,!;!,!;!;01";
+static const char PM_EFFECT_CONFIG__MULTI_STROBE[] PROGMEM = "Strobe Multi@!,!;!,!;!;01";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10062,7 +10065,7 @@ void mAnimatorLight::EffectAnim__Strobe_Rainbow()
 {
   EffectAnim__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), true, false);
 }
-static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM = "!;,!;!;01";
+static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM = "Strobe Rainbow@!;,!;!;01";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10089,7 +10092,7 @@ void mAnimatorLight::EffectAnim__Rainbow()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__RAINBOW[] PROGMEM = "!,Saturation;;!";
+static const char PM_EFFECT_CONFIG__RAINBOW[] PROGMEM = "Rainbow@!,Saturation;;!";
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -10139,7 +10142,7 @@ void mAnimatorLight::EffectAnim__Lightning()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__LIGHTNING[] PROGMEM = "!,!,,,,,,,Overlay;!,!;!";
+static const char PM_EFFECT_CONFIG__LIGHTNING[] PROGMEM = "Lightning@!,!,,,,,,,Overlay;!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10211,7 +10214,7 @@ void mAnimatorLight::EffectAnim__Fire_2012()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__FIRE_2012[] PROGMEM = "Cooling,Spark rate,,,Boost;;!;1;sx=64,ix=160,m12=1";
+static const char PM_EFFECT_CONFIG__FIRE_2012[] PROGMEM = "Fire 2012@Cooling,Spark rate,,,Boost;;!;1;sx=64,ix=160,m12=1";
 
 
 
@@ -10252,7 +10255,7 @@ void mAnimatorLight::EffectAnim__Railway()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__RAILWAY[] PROGMEM = "!,Smoothness;1,2;!";
+static const char PM_EFFECT_CONFIG__RAILWAY[] PROGMEM = "Railway@!,Smoothness;1,2;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10296,7 +10299,7 @@ void mAnimatorLight::EffectAnim__Heartbeat()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__HEARTBEAT[] PROGMEM = "!,!;!,!;!;01;m12=1";
+static const char PM_EFFECT_CONFIG__HEARTBEAT[] PROGMEM = "Heartbeat@!,!;!,!;!;01;m12=1";
 
 
 /****************************************************************************************************************************
@@ -10327,7 +10330,7 @@ void mAnimatorLight::EffectAnim__FillNoise8()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__FILLNOISE8[] PROGMEM = "!;!;!";
+static const char PM_EFFECT_CONFIG__FILLNOISE8[] PROGMEM = "Fill Noise@!;!;!";
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -10364,7 +10367,7 @@ void mAnimatorLight::EffectAnim__Noise16_1()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__NOISE16_1[] PROGMEM = "!;!;!";
+static const char PM_EFFECT_CONFIG__NOISE16_1[] PROGMEM = "Noise 1@!;!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10398,7 +10401,7 @@ void mAnimatorLight::EffectAnim__Noise16_2()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__NOISE16_2[] PROGMEM = "!;!;!";
+static const char PM_EFFECT_CONFIG__NOISE16_2[] PROGMEM = "Noise 2@!;!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10434,7 +10437,7 @@ void mAnimatorLight::EffectAnim__Noise16_3()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__NOISE16_3[] PROGMEM = "!;!;!";
+static const char PM_EFFECT_CONFIG__NOISE16_3[] PROGMEM = "Noise 3@!;!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10456,7 +10459,7 @@ void mAnimatorLight::EffectAnim__Noise16_4()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__NOISE16_4[] PROGMEM = "!;!;!";
+static const char PM_EFFECT_CONFIG__NOISE16_4[] PROGMEM = "Noise 4@!;!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10504,7 +10507,7 @@ void mAnimatorLight::EffectAnim__Noise_Pal()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__NOISEPAL[] PROGMEM = "!,Scale;;!";
+static const char PM_EFFECT_CONFIG__NOISEPAL[] PROGMEM = "Noise Pal@!,Scale;;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10545,13 +10548,13 @@ void mAnimatorLight::EffectAnim__Base_Phased(uint8_t moder)
 void mAnimatorLight::EffectAnim__PhasedNoise(void) {
   return EffectAnim__Base_Phased(1);
 }
-static const char PM_EFFECT_CONFIG__PHASEDNOISE[] PROGMEM = "!,!;!,!;!";
+static const char PM_EFFECT_CONFIG__PHASEDNOISE[] PROGMEM = "Phased Noise@!,!;!,!;!";
 
 
 void mAnimatorLight::EffectAnim__Phased(void) {
   return EffectAnim__Base_Phased(0);
 }
-static const char PM_EFFECT_CONFIG__PHASED[] PROGMEM = "!,!;!,!;!";
+static const char PM_EFFECT_CONFIG__PHASED[] PROGMEM = "Phased@!,!;!,!;!";
 
 
 
@@ -10608,7 +10611,7 @@ void mAnimatorLight::EffectAnim__Scan()
 {
   EffectAnim__Base_Scan(false);
 }
-static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM = "!,# of dots,,,,,,,Overlay;!,!,!;!";
+static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM = "Scan@!,# of dots,,,,,,,Overlay;!,!,!;!";
 
 
 /*
@@ -10618,7 +10621,7 @@ void mAnimatorLight::EffectAnim__Scan_Dual()
 {
   EffectAnim__Base_Scan(true);
 }
-static const char PM_EFFECT_CONFIG__DUAL_SCAN[] PROGMEM = "!,# of dots,,,,,,,Overlay;!,!,!;!";
+static const char PM_EFFECT_CONFIG__DUAL_SCAN[] PROGMEM = "Scan Dual@!,# of dots,,,,,,,Overlay;!,!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10671,7 +10674,7 @@ void mAnimatorLight::EffectAnim__Larson_Scanner()
 {
   EffectAnim__Base_Larson_Scanner(false);
 }
-static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM = "!,Fade rate;!,!;!;;m12=0";
+static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM = "Larson Scanner@!,Fade rate;!,!;!;;m12=0";
 
 
 /*
@@ -10681,7 +10684,7 @@ static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM = "!,Fade rate;!,!;
 void mAnimatorLight::EffectAnim__Larson_Scanner_Dual(void){
   return EffectAnim__Base_Larson_Scanner(true);
 }
-static const char PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER[] PROGMEM = "!,Fade rate;!,!,!;!;;m12=0";
+static const char PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER[] PROGMEM = "Larson Scanner Dual@!,Fade rate;!,!,!;!;;m12=0";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10730,7 +10733,7 @@ void mAnimatorLight::EffectAnim__ICU()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__ICU[] PROGMEM = "!,!,,,,,,,Overlay;!,!;!";
+static const char PM_EFFECT_CONFIG__ICU[] PROGMEM = "ICU@!,!,,,,,,,Overlay;!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10828,12 +10831,12 @@ void mAnimatorLight::EffectAnim__Base_Ripple(bool rainbow)
 void mAnimatorLight::EffectAnim__Ripple(void) {
   return EffectAnim__Base_Ripple(false);
 }
-static const char PM_EFFECT_CONFIG__RIPPLE[] PROGMEM = "!,Wave #,,,,,,,Overlay;,!;!;12";
+static const char PM_EFFECT_CONFIG__RIPPLE[] PROGMEM = "Ripple@!,Wave #,,,,,,,Overlay;,!;!;12";
 
 void mAnimatorLight::EffectAnim__Ripple_Rainbow(void) {
   return EffectAnim__Base_Ripple(true);
 }
-static const char PM_EFFECT_CONFIG__RIPPLE_RAINBOW[] PROGMEM = "!,Wave #;;!;12";
+static const char PM_EFFECT_CONFIG__RIPPLE_RAINBOW[] PROGMEM = "Ripple Rainbow@!,Wave #;;!;12";
 
 
 
@@ -10870,7 +10873,7 @@ void mAnimatorLight::EffectAnim__Comet()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__COMET[] PROGMEM = "!,Fade rate;!,!;!";
+static const char PM_EFFECT_CONFIG__COMET[] PROGMEM = "Comet@!,Fade rate;!,!;!";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10899,7 +10902,7 @@ void mAnimatorLight::EffectAnim__Chunchun()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
-static const char PM_EFFECT_CONFIG__CHUNCHUN[] PROGMEM = "!,Gap size;!,!;!";
+static const char PM_EFFECT_CONFIG__CHUNCHUN[] PROGMEM = "Chunchun@!,Gap size;!,!;!";
 
 //each needs 12 bytes
 //Spark type is used for popcorn and 1D fireworks
@@ -10971,7 +10974,7 @@ void mAnimatorLight::EffectAnim__Bouncing_Balls()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__BOUNCINGBALLS[] PROGMEM = "Gravity,# of balls,,,,,,,Overlay;!,!,!;!;1;m12=1"; //bar
+static const char PM_EFFECT_CONFIG__BOUNCINGBALLS[] PROGMEM = "Bouncing Balls@Gravity,# of balls,,,,,,,Overlay;!,!,!;!;1;m12=1"; //bar
 
 
 
@@ -11021,17 +11024,17 @@ void mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
 void mAnimatorLight::EffectAnim__Sinelon(void) {
   return EffectAnim__Base_Sinelon(false);
 }
-static const char PM_EFFECT_CONFIG__SINELON[] PROGMEM = "!,Trail;!,!,!;!";
+static const char PM_EFFECT_CONFIG__SINELON[] PROGMEM = "Sinelon@!,Trail;!,!,!;!";
 
 void mAnimatorLight::EffectAnim__Sinelon_Dual(void) {
   return EffectAnim__Base_Sinelon(true);
 }
-static const char PM_EFFECT_CONFIG__SINELON_DUAL[] PROGMEM = "!,Trail;!,!,!;!";
+static const char PM_EFFECT_CONFIG__SINELON_DUAL[] PROGMEM = "Sinelon Dual@!,Trail;!,!,!;!";
 
 void mAnimatorLight::EffectAnim__Sinelon_Rainbow(void) {
   return EffectAnim__Base_Sinelon(true, true);
 }
-static const char PM_EFFECT_CONFIG__SINELON_RAINBOW[] PROGMEM = "!,Trail;,,!;!";
+static const char PM_EFFECT_CONFIG__SINELON_RAINBOW[] PROGMEM = "Sinelon Rainbow@!,Trail;,,!;!";
 
 
 
@@ -11153,7 +11156,7 @@ void mAnimatorLight::EffectAnim__Drip()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__DRIP[] PROGMEM = "Gravity,# of drips,,,,,,,Overlay;!,!;!;;m12=1"; //bar
+static const char PM_EFFECT_CONFIG__DRIP[] PROGMEM = "Drip@Gravity,# of drips,,,,,,,Overlay;!,!;!;;m12=1"; //bar
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
@@ -11963,7 +11966,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
 
 
 }
-static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT[] PROGMEM = ",,,,,Repeat Rate (ms);!,!,!,!,!;!";
+static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT[] PROGMEM = "Border Wallpaper TwoColour@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
@@ -11997,7 +12000,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT[] PROGMEM = ",,,,,Repeat Rate (ms);!,!,!,!,!;!";
+static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT[] PROGMEM = "Border Wallpaper FourColour@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
@@ -12030,7 +12033,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM = ",,,,,Repeat Rate (ms);!,!,!,!,!;!";
+static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM = "BW 4s@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
@@ -13820,7 +13823,7 @@ void mAnimatorLight::EffectAnim__Christmas_Musical__01()
 
 
 }
-static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = ",,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_MUSICAL_01@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 
 //********************************************************************************************************************************************************************************************************************/
@@ -18054,7 +18057,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_Akemi()
   const uint16_t cols = SEGMENT.virtualWidth();
   const uint16_t rows = SEGMENT.virtualHeight();
 
-  uint16_t counter = (_now * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
+  uint16_t counter = (millis_at_start_of_effect_update * ((SEGMENT.speed >> 2) +2)) & 0xFFFF;
   counter = counter >> 8;
 
   const float lightFactor  = 0.15f;
@@ -18721,10 +18724,10 @@ void mAnimatorLight::LoadEffects()
   addEffect(EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,      &mAnimatorLight::EffectAnim__Blend_Two_Palettes,                    PM_EFFECT_CONFIG__BLEND_TWO_PALETTES);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID, &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,          PM_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR,        PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID, &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,          PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,                        &mAnimatorLight::EffectAnim__Twinkle_Out_Palette,          PM_EFFECT_NAME__TWINKLE_OUT_PALETTE,        PM_EFFECT_CONFIG__TWINKLE_OUT_PALETTE);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,                        &mAnimatorLight::EffectAnim__Twinkle_Out_Palette,          PM_EFFECT_CONFIG__TWINKLE_OUT_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   addEffect(EFFECTS_FUNCTION__STATIC_PALETTE_VINTAGE__ID,                
@@ -18733,13 +18736,17 @@ void mAnimatorLight::LoadEffects()
             Effect_DevStage::Dev);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect(EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,  &mAnimatorLight::EffectAnim__TimeBased__HourProgress,             PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS); 
+  addEffect(EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,  
+            &mAnimatorLight::EffectAnim__TimeBased__HourProgress,             
+            PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS); 
   #endif  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,                   &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,              PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR,                          PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,                   
+            &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,              
+            PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,                      &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black,                                              PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK, Effect_DevStage::Unstable);
+  addEffect(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,                      &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black,PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK, Effect_DevStage::Unstable);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__ID,                       &mAnimatorLight::EffectAnim__Popping_Decay_Random_To_Black,                                                PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_BLACK);
@@ -18750,169 +18757,169 @@ void mAnimatorLight::LoadEffects()
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_WHITE__ID,                       &mAnimatorLight::EffectAnim__Popping_Decay_Random_To_White,                                                PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_WHITE);
   #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING   
-  addEffect(EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID,            &mAnimatorLight::SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment, PM_EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__NAME_CTR); 
-  #endif        
+  // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING   
+  // addEffect(EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID,            &mAnimatorLight::SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment, PM_EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__NAME_CTR); 
+  // #endif        
   /**
    * Static
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__STATIC_PATTERN__NAME_CTR,              PM_EFFECT_CONFIG__STATIC_PATTERN);
-  addEffect(EFFECTS_FUNCTION__TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__TRI_STATIC_PATTERN__NAME_CTR,          PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__SPOTS__ID,                &mAnimatorLight::EffectAnim__Spots,                                 PM_EFFECTS_FUNCTION__SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
+  addEffect(EFFECTS_FUNCTION__STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECT_CONFIG__STATIC_PATTERN);
+  addEffect(EFFECTS_FUNCTION__TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__PERCENT__NAME_CTR,                     PM_EFFECT_CONFIG__PERCENT);
+  addEffect(EFFECTS_FUNCTION__SPOTS__ID,                &mAnimatorLight::EffectAnim__Spots,                                 PM_EFFECT_CONFIG__SPOTS);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  addEffect(EFFECTS_FUNCTION__PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECT_CONFIG__PERCENT);
   #endif
   /**
    * One Colour
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         &mAnimatorLight::EffectAnim__Random_Colour,                         PM_EFFECTS_FUNCTION__RANDOM_COLOR__NAME_CTR,                PM_EFFECT_CONFIG__RANDOM_COLOR);
+  addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         &mAnimatorLight::EffectAnim__Random_Colour,                         PM_EFFECT_CONFIG__RANDOM_COLOR);
   #endif
   /**
    * Wipe/Sweep/Runners 
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,           &mAnimatorLight::EffectAnim__Colour_Wipe,                           PM_EFFECTS_FUNCTION__COLOR_WIPE__NAME_CTR,                  PM_EFFECT_CONFIG__COLOR_WIPE);
-  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,    &mAnimatorLight::EffectAnim__Colour_Wipe_Random,                    PM_EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__NAME_CTR,           PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM);
-  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,   &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,                   PM_EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE);
-  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP__ID,          &mAnimatorLight::EffectAnim__Colour_Sweep,                          PM_EFFECTS_FUNCTION__COLOR_SWEEP__NAME_CTR,                 PM_EFFECT_CONFIG__COLOR_SWEEP);
-  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,   &mAnimatorLight::EffectAnim__Colour_Sweep_Random,                   PM_EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM);
-  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,  &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,                  PM_EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__NAME_CTR,         PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE);
+  addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,           &mAnimatorLight::EffectAnim__Colour_Wipe,                           PM_EFFECT_CONFIG__COLOR_WIPE);
+  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,    &mAnimatorLight::EffectAnim__Colour_Wipe_Random,                    PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM);
+  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,   &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,                   PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE);
+  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP__ID,          &mAnimatorLight::EffectAnim__Colour_Sweep,                          PM_EFFECT_CONFIG__COLOR_SWEEP);
+  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,   &mAnimatorLight::EffectAnim__Colour_Sweep_Random,                   PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM);
+  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,  &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,                  PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Fireworks
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__FIREWORKS__ID,                     &mAnimatorLight::EffectAnim__Fireworks,                    PM_EFFECTS_FUNCTION__FIREWORKS__NAME_CTR,                      PM_EFFECT_CONFIG__FIREWORKS);
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID,           &mAnimatorLight::EffectAnim__Exploding_Fireworks,          PM_EFFECTS_FUNCTION__EXPLODING_FIREWORKS__NAME_CTR,            PM_EFFECT_CONFIG__EXPLODING_FIREWORKS);
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_STARBURST__ID,           &mAnimatorLight::EffectAnim__Fireworks_Starburst,          PM_EFFECTS_FUNCTION__STARBURST__NAME_CTR,                      PM_EFFECT_CONFIG__STARBURST);
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_STARBURST_GLOWS__ID,     &mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows,    PM_EFFECTS_FUNCTION__STARBURST_GLOWS__NAME_CTR,                PM_EFFECT_CONFIG__STARBURST_GLOWS);
-  addEffect(EFFECTS_FUNCTION__RAIN__ID,                          &mAnimatorLight::EffectAnim__Rain,                         PM_EFFECTS_FUNCTION__RAIN__NAME_CTR,                           PM_EFFECT_CONFIG__RAIN);
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID, &mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch, PM_EFFECTS_FUNCTION__EXPLODING_FIREWORKS_NO_LAUNCH__NAME_CTR,  PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH);
+  addEffect(EFFECTS_FUNCTION__FIREWORKS__ID,                     &mAnimatorLight::EffectAnim__Fireworks,                    PM_EFFECT_CONFIG__FIREWORKS);
+  addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID,           &mAnimatorLight::EffectAnim__Exploding_Fireworks,          PM_EFFECT_CONFIG__EXPLODING_FIREWORKS);
+  addEffect(EFFECTS_FUNCTION__FIREWORKS_STARBURST__ID,           &mAnimatorLight::EffectAnim__Fireworks_Starburst,          PM_EFFECT_CONFIG__STARBURST);
+  addEffect(EFFECTS_FUNCTION__FIREWORKS_STARBURST_GLOWS__ID,     &mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows,    PM_EFFECT_CONFIG__STARBURST_GLOWS);
+  addEffect(EFFECTS_FUNCTION__RAIN__ID,                          &mAnimatorLight::EffectAnim__Rain,                         PM_EFFECT_CONFIG__RAIN);
+  addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID, &mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch, PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,         &mAnimatorLight::EffectAnim__TriColour,          PM_EFFECTS_FUNCTION__TRICOLOR_WIPE__NAME_CTR,              PM_EFFECT_CONFIG__TRICOLOR_WIPE);
-  addEffect(EFFECTS_FUNCTION__ANDROID__ID,               &mAnimatorLight::EffectAnim__Android,            PM_EFFECTS_FUNCTION__ANDROID__NAME_CTR,                    PM_EFFECT_CONFIG__ANDROID);
-  addEffect(EFFECTS_FUNCTION__RUNNING_COLOR__ID,         &mAnimatorLight::EffectAnim__Running_Colour,     PM_EFFECTS_FUNCTION__RUNNING_COLOR__NAME_CTR,              PM_EFFECT_CONFIG__RUNNING_COLOR);
-  addEffect(EFFECTS_FUNCTION__RUNNING_RANDOM__ID,        &mAnimatorLight::EffectAnim__Running_Random,     PM_EFFECTS_FUNCTION__RUNNING_RANDOM__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_RANDOM);
-  addEffect(EFFECTS_FUNCTION__GRADIENT__ID,              &mAnimatorLight::EffectAnim__Gradient,           PM_EFFECTS_FUNCTION__GRADIENT__NAME_CTR,                   PM_EFFECT_CONFIG__GRADIENT);
-  addEffect(EFFECTS_FUNCTION__LOADING__ID,               &mAnimatorLight::EffectAnim__Loading,            PM_EFFECTS_FUNCTION__LOADING__NAME_CTR,                    PM_EFFECT_CONFIG__LOADING);
-  addEffect(EFFECTS_FUNCTION__POLICE__ID,                &mAnimatorLight::EffectAnim__Police,             PM_EFFECTS_FUNCTION__POLICE__NAME_CTR,                     PM_EFFECT_CONFIG__POLICE);
-  addEffect(EFFECTS_FUNCTION__POLICE_ALL__ID,            &mAnimatorLight::EffectAnim__Polce_All,          PM_EFFECTS_FUNCTION__POLICE_ALL__NAME_CTR,                 PM_EFFECT_CONFIG__POLICE_ALL);
-  addEffect(EFFECTS_FUNCTION__TWO_DOTS__ID,              &mAnimatorLight::EffectAnim__Two_Dots,           PM_EFFECTS_FUNCTION__TWO_DOTS__NAME_CTR,                   PM_EFFECT_CONFIG__TWO_DOTS);
-  addEffect(EFFECTS_FUNCTION__TWO_AREAS__ID,             &mAnimatorLight::EffectAnim__Two_Areas,          PM_EFFECTS_FUNCTION__TWO_AREAS__NAME_CTR,                  PM_EFFECT_CONFIG__TWO_AREAS);
-  addEffect(EFFECTS_FUNCTION__MULTI_COMET__ID,           &mAnimatorLight::EffectAnim__Multi_Comet,        PM_EFFECTS_FUNCTION__MULTI_COMET__NAME_CTR,                PM_EFFECT_CONFIG__MULTI_COMET);
-  addEffect(EFFECTS_FUNCTION__OSCILLATE__ID,             &mAnimatorLight::EffectAnim__Oscillate,          PM_EFFECTS_FUNCTION__OSCILLATE__NAME_CTR,                  PM_EFFECT_CONFIG__OSCILLATE);
-  addEffect(EFFECTS_FUNCTION__BPM__ID,                   &mAnimatorLight::EffectAnim__BPM,                PM_EFFECTS_FUNCTION__BPM__NAME_CTR,                        PM_EFFECT_CONFIG__BPM);
-  addEffect(EFFECTS_FUNCTION__JUGGLE__ID,                &mAnimatorLight::EffectAnim__Juggle,             PM_EFFECTS_FUNCTION__JUGGLE__NAME_CTR,                     PM_EFFECT_CONFIG__JUGGLES);
-  addEffect(EFFECTS_FUNCTION__PALETTE__ID,               &mAnimatorLight::EffectAnim__Palette,            PM_EFFECTS_FUNCTION__PALETTE__NAME_CTR,                    PM_EFFECT_CONFIG__PALETTE);
-  addEffect(EFFECTS_FUNCTION__COLORWAVES__ID,            &mAnimatorLight::EffectAnim__ColourWaves,        PM_EFFECTS_FUNCTION__COLORWAVES__NAME_CTR,                 PM_EFFECT_CONFIG__COLORWAVES);
-  addEffect(EFFECTS_FUNCTION__LAKE__ID,                  &mAnimatorLight::EffectAnim__Lake,               PM_EFFECTS_FUNCTION__LAKE__NAME_CTR,                       PM_EFFECT_CONFIG__LAKE);
-  addEffect(EFFECTS_FUNCTION__GLITTER__ID,               &mAnimatorLight::EffectAnim__Glitter,            PM_EFFECTS_FUNCTION__GLITTER__NAME_CTR,                    PM_EFFECT_CONFIG__GLITTER);
-  addEffect(EFFECTS_FUNCTION__METEOR__ID,                &mAnimatorLight::EffectAnim__Meteor,             PM_EFFECTS_FUNCTION__METEOR__NAME_CTR,                     PM_EFFECT_CONFIG__METEOR);
-  addEffect(EFFECTS_FUNCTION__METEOR_SMOOTH__ID,         &mAnimatorLight::EffectAnim__Metoer_Smooth,      PM_EFFECTS_FUNCTION__METEOR_SMOOTH__NAME_CTR,              PM_EFFECT_CONFIG__METEOR_SMOOTH);
-  addEffect(EFFECTS_FUNCTION__PRIDE_2015__ID,            &mAnimatorLight::EffectAnim__Pride_2015,         PM_EFFECTS_FUNCTION__PRIDE_2015__NAME_CTR,                 PM_EFFECT_CONFIG__PRIDE_2015);
-  addEffect(EFFECTS_FUNCTION__PACIFICA__ID,              &mAnimatorLight::EffectAnim__Pacifica,           PM_EFFECTS_FUNCTION__PACIFICA__NAME_CTR,                   PM_EFFECT_CONFIG__PACIFICA);
-  addEffect(EFFECTS_FUNCTION__SUNRISE__ID,               &mAnimatorLight::EffectAnim__Sunrise,            PM_EFFECTS_FUNCTION__SUNRISE__NAME_CTR,                    PM_EFFECT_CONFIG__SUNRISE);
-  addEffect(EFFECTS_FUNCTION__SINEWAVE__ID,              &mAnimatorLight::EffectAnim__Sinewave,           PM_EFFECTS_FUNCTION__SINEWAVE__NAME_CTR,                   PM_EFFECT_CONFIG__SINEWAVE);
-  addEffect(EFFECTS_FUNCTION__FLOW__ID,                  &mAnimatorLight::EffectAnim__Flow,               PM_EFFECTS_FUNCTION__FLOW__NAME_CTR,                       PM_EFFECT_CONFIG__FLOW);
-  addEffect(EFFECTS_FUNCTION__RUNNING_LIGHTS__ID,        &mAnimatorLight::EffectAnim__Running_Lights,     PM_EFFECTS_FUNCTION__RUNNING_LIGHTS__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_LIGHTS);
-  addEffect(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,         &mAnimatorLight::EffectAnim__Rainbow_Cycle,      PM_EFFECTS_FUNCTION__RAINBOW_CYCLE__NAME_CTR,              PM_EFFECT_CONFIG__RAINBOW_CYCLE);
+  addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,         &mAnimatorLight::EffectAnim__TriColour,          PM_EFFECT_CONFIG__TRICOLOR_WIPE);
+  addEffect(EFFECTS_FUNCTION__ANDROID__ID,               &mAnimatorLight::EffectAnim__Android,            PM_EFFECT_CONFIG__ANDROID);
+  addEffect(EFFECTS_FUNCTION__RUNNING_COLOR__ID,         &mAnimatorLight::EffectAnim__Running_Colour,     PM_EFFECT_CONFIG__RUNNING_COLOR);
+  addEffect(EFFECTS_FUNCTION__RUNNING_RANDOM__ID,        &mAnimatorLight::EffectAnim__Running_Random,     PM_EFFECT_CONFIG__RUNNING_RANDOM);
+  addEffect(EFFECTS_FUNCTION__GRADIENT__ID,              &mAnimatorLight::EffectAnim__Gradient,           PM_EFFECT_CONFIG__GRADIENT);
+  addEffect(EFFECTS_FUNCTION__LOADING__ID,               &mAnimatorLight::EffectAnim__Loading,            PM_EFFECT_CONFIG__LOADING);
+  addEffect(EFFECTS_FUNCTION__POLICE__ID,                &mAnimatorLight::EffectAnim__Police,             PM_EFFECT_CONFIG__POLICE);
+  addEffect(EFFECTS_FUNCTION__POLICE_ALL__ID,            &mAnimatorLight::EffectAnim__Polce_All,          PM_EFFECT_CONFIG__POLICE_ALL);
+  addEffect(EFFECTS_FUNCTION__TWO_DOTS__ID,              &mAnimatorLight::EffectAnim__Two_Dots,           PM_EFFECT_CONFIG__TWO_DOTS);
+  addEffect(EFFECTS_FUNCTION__TWO_AREAS__ID,             &mAnimatorLight::EffectAnim__Two_Areas,          PM_EFFECT_CONFIG__TWO_AREAS);
+  addEffect(EFFECTS_FUNCTION__MULTI_COMET__ID,           &mAnimatorLight::EffectAnim__Multi_Comet,        PM_EFFECT_CONFIG__MULTI_COMET); // PM_EFFECTS_FUNCTION__[A-Z_]+__NAME_CTR,\s*
+  addEffect(EFFECTS_FUNCTION__OSCILLATE__ID,             &mAnimatorLight::EffectAnim__Oscillate,          PM_EFFECT_CONFIG__OSCILLATE);
+  addEffect(EFFECTS_FUNCTION__BPM__ID,                   &mAnimatorLight::EffectAnim__BPM,                PM_EFFECT_CONFIG__BPM);
+  addEffect(EFFECTS_FUNCTION__JUGGLE__ID,                &mAnimatorLight::EffectAnim__Juggle,             PM_EFFECT_CONFIG__JUGGLES);
+  addEffect(EFFECTS_FUNCTION__PALETTE__ID,               &mAnimatorLight::EffectAnim__Palette,            PM_EFFECT_CONFIG__PALETTE);
+  addEffect(EFFECTS_FUNCTION__COLORWAVES__ID,            &mAnimatorLight::EffectAnim__ColourWaves,        PM_EFFECT_CONFIG__COLORWAVES);
+  addEffect(EFFECTS_FUNCTION__LAKE__ID,                  &mAnimatorLight::EffectAnim__Lake,               PM_EFFECT_CONFIG__LAKE);
+  addEffect(EFFECTS_FUNCTION__GLITTER__ID,               &mAnimatorLight::EffectAnim__Glitter,            PM_EFFECT_CONFIG__GLITTER);
+  addEffect(EFFECTS_FUNCTION__METEOR__ID,                &mAnimatorLight::EffectAnim__Meteor,             PM_EFFECT_CONFIG__METEOR);
+  addEffect(EFFECTS_FUNCTION__METEOR_SMOOTH__ID,         &mAnimatorLight::EffectAnim__Metoer_Smooth,      PM_EFFECT_CONFIG__METEOR_SMOOTH);
+  addEffect(EFFECTS_FUNCTION__PRIDE_2015__ID,            &mAnimatorLight::EffectAnim__Pride_2015,         PM_EFFECT_CONFIG__PRIDE_2015);
+  addEffect(EFFECTS_FUNCTION__PACIFICA__ID,              &mAnimatorLight::EffectAnim__Pacifica,           PM_EFFECT_CONFIG__PACIFICA);
+  addEffect(EFFECTS_FUNCTION__SUNRISE__ID,               &mAnimatorLight::EffectAnim__Sunrise,            PM_EFFECT_CONFIG__SUNRISE);
+  addEffect(EFFECTS_FUNCTION__SINEWAVE__ID,              &mAnimatorLight::EffectAnim__Sinewave,           PM_EFFECT_CONFIG__SINEWAVE);
+  addEffect(EFFECTS_FUNCTION__FLOW__ID,                  &mAnimatorLight::EffectAnim__Flow,               PM_EFFECT_CONFIG__FLOW);
+  addEffect(EFFECTS_FUNCTION__RUNNING_LIGHTS__ID,        &mAnimatorLight::EffectAnim__Running_Lights,     PM_EFFECT_CONFIG__RUNNING_LIGHTS);
+  addEffect(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,         &mAnimatorLight::EffectAnim__Rainbow_Cycle,      PM_EFFECT_CONFIG__RAINBOW_CYCLE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Chase
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,           &mAnimatorLight::EffectAnim__Chase_Colour,          PM_EFFECTS_FUNCTION__CHASE_COLOR__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_COLOR);
-  addEffect(EFFECTS_FUNCTION__CHASE_RANDOM__ID,          &mAnimatorLight::EffectAnim__Chase_Random,          PM_EFFECTS_FUNCTION__CHASE_RANDOM__NAME_CTR,            PM_EFFECT_CONFIG__CHASE_RANDOM);
-  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,         &mAnimatorLight::EffectAnim__Chase_Rainbow,         PM_EFFECTS_FUNCTION__CHASE_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__CHASE_RAINBOW);
-  addEffect(EFFECTS_FUNCTION__CHASE_FLASH__ID,           &mAnimatorLight::EffectAnim__Chase_Flash,           PM_EFFECTS_FUNCTION__CHASE_FLASH__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_FLASH);
-  addEffect(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,    &mAnimatorLight::EffectAnim__Chase_Flash_Random,    PM_EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__NAME_CTR,      PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM);
-  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,   &mAnimatorLight::EffectAnim__Chase_Rainbow_White,   PM_EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__NAME_CTR,     PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE);
-  addEffect(EFFECTS_FUNCTION__CHASE_THEATER__ID,         &mAnimatorLight::EffectAnim__Chase_Theater,         PM_EFFECTS_FUNCTION__THEATER_CHASE__NAME_CTR,           PM_EFFECT_CONFIG__THEATER_CHASE);
-  addEffect(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID, &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow, PM_EFFECTS_FUNCTION__THEATER_CHASE_RAINBOW__NAME_CTR,   PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW);
-  addEffect(EFFECTS_FUNCTION__CHASE_TRICOLOR__ID,        &mAnimatorLight::EffectAnim__Chase_TriColour,       PM_EFFECTS_FUNCTION__TRICOLOR_CHASE__NAME_CTR,          PM_EFFECT_CONFIG__TRICOLOR_CHASE);
+  addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,           &mAnimatorLight::EffectAnim__Chase_Colour,          PM_EFFECT_CONFIG__CHASE_COLOR);
+  addEffect(EFFECTS_FUNCTION__CHASE_RANDOM__ID,          &mAnimatorLight::EffectAnim__Chase_Random,          PM_EFFECT_CONFIG__CHASE_RANDOM);
+  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,         &mAnimatorLight::EffectAnim__Chase_Rainbow,         PM_EFFECT_CONFIG__CHASE_RAINBOW);
+  addEffect(EFFECTS_FUNCTION__CHASE_FLASH__ID,           &mAnimatorLight::EffectAnim__Chase_Flash,           PM_EFFECT_CONFIG__CHASE_FLASH);
+  addEffect(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,    &mAnimatorLight::EffectAnim__Chase_Flash_Random,    PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM);
+  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,   &mAnimatorLight::EffectAnim__Chase_Rainbow_White,   PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE);
+  addEffect(EFFECTS_FUNCTION__CHASE_THEATER__ID,         &mAnimatorLight::EffectAnim__Chase_Theater,         PM_EFFECT_CONFIG__THEATER_CHASE);
+  addEffect(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID, &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow, PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW);
+  addEffect(EFFECTS_FUNCTION__CHASE_TRICOLOR__ID,        &mAnimatorLight::EffectAnim__Chase_TriColour,       PM_EFFECT_CONFIG__TRICOLOR_CHASE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    *  Breathe/Fade/Pulse
    **/    
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__BREATH__ID,                &mAnimatorLight::EffectAnim__Breath,                PM_EFFECTS_FUNCTION__BREATH__NAME_CTR,                  PM_EFFECT_CONFIG__BREATH);
-  addEffect(EFFECTS_FUNCTION__FADE__ID,                  &mAnimatorLight::EffectAnim__Fade,                  PM_EFFECTS_FUNCTION__FADE__NAME_CTR,                    PM_EFFECT_CONFIG__FADE);
-  addEffect(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,         &mAnimatorLight::EffectAnim__Fade_TriColour,        PM_EFFECTS_FUNCTION__TRICOLOR_FADE__NAME_CTR,           PM_EFFECT_CONFIG__TRICOLOR_FADE);
-  addEffect(EFFECTS_FUNCTION__FADE_SPOTS__ID,            &mAnimatorLight::EffectAnim__Fade_Spots,            PM_EFFECTS_FUNCTION__SPOTS_FADE__NAME_CTR,              PM_EFFECT_CONFIG__SPOTS_FADE);
+  addEffect(EFFECTS_FUNCTION__BREATH__ID,                &mAnimatorLight::EffectAnim__Breath,                PM_EFFECT_CONFIG__BREATH);
+  addEffect(EFFECTS_FUNCTION__FADE__ID,                  &mAnimatorLight::EffectAnim__Fade,                  PM_EFFECT_CONFIG__FADE);
+  addEffect(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,         &mAnimatorLight::EffectAnim__Fade_TriColour,        PM_EFFECT_CONFIG__TRICOLOR_FADE);
+  addEffect(EFFECTS_FUNCTION__FADE_SPOTS__ID,            &mAnimatorLight::EffectAnim__Fade_Spots,            PM_EFFECT_CONFIG__SPOTS_FADE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Sparkle/Twinkle
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,   &mAnimatorLight::EffectAnim__Solid_Glitter,               PM_EFFECTS_FUNCTION__SOLID_GLITTER__NAME_CTR,           PM_EFFECT_CONFIG__SOLID_GLITTER);
-  addEffect(EFFECTS_FUNCTION__POPCORN__ID,         &mAnimatorLight::EffectAnim__Popcorn,                     PM_EFFECTS_FUNCTION__POPCORN__NAME_CTR,                 PM_EFFECT_CONFIG__POPCORN);
-  addEffect(EFFECTS_FUNCTION__PLASMA__ID,          &mAnimatorLight::EffectAnim__Plasma,                      PM_EFFECTS_FUNCTION__PLASMA__NAME_CTR,                  PM_EFFECT_CONFIG__PLASMA);
-  addEffect(EFFECTS_FUNCTION__SPARKLE__ID,         &mAnimatorLight::EffectAnim__Sparkle,                     PM_EFFECTS_FUNCTION__SPARKLE__NAME_CTR,                 PM_EFFECT_CONFIG__SPARKLE);
-  addEffect(EFFECTS_FUNCTION__FLASH_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Flash,               PM_EFFECTS_FUNCTION__FLASH_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__FLASH_SPARKLE);
-  addEffect(EFFECTS_FUNCTION__HYPER_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Hyper,               PM_EFFECTS_FUNCTION__HYPER_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__HYPER_SPARKLE);
-  addEffect(EFFECTS_FUNCTION__TWINKLE__ID,         &mAnimatorLight::EffectAnim__Twinkle,                     PM_EFFECTS_FUNCTION__TWINKLE__NAME_CTR,                 PM_EFFECT_CONFIG__TWINKLE);
-  addEffect(EFFECTS_FUNCTION__COLORTWINKLE__ID,    &mAnimatorLight::EffectAnim__Twinkle_Colour,              PM_EFFECTS_FUNCTION__COLORTWINKLE__NAME_CTR,            PM_EFFECT_CONFIG__COLORTWINKLE);
-  addEffect(EFFECTS_FUNCTION__TWINKLE_FOX__ID,     &mAnimatorLight::EffectAnim__Twinkle_Fox,                 PM_EFFECTS_FUNCTION__TWINKLE_FOX__NAME_CTR,             PM_EFFECT_CONFIG__TWINKLE_FOX);
-  addEffect(EFFECTS_FUNCTION__TWINKLE_CAT__ID,     &mAnimatorLight::EffectAnim__Twinkle_Cat,                 PM_EFFECTS_FUNCTION__TWINKLE_CAT__NAME_CTR,             PM_EFFECT_CONFIG__TWINKLE_CAT);
-  addEffect(EFFECTS_FUNCTION__TWINKLE_UP__ID,      &mAnimatorLight::EffectAnim__Twinkle_Up,                  PM_EFFECTS_FUNCTION__TWINKLE_UP__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLE_UP);
-  addEffect(EFFECTS_FUNCTION__SAW__ID,             &mAnimatorLight::EffectAnim__Saw,                         PM_EFFECTS_FUNCTION__SAW__NAME_CTR,                     PM_EFFECT_CONFIG__SAW);
-  addEffect(EFFECTS_FUNCTION__DISSOLVE__ID,        &mAnimatorLight::EffectAnim__Dissolve,                    PM_EFFECTS_FUNCTION__DISSOLVE__NAME_CTR,                PM_EFFECT_CONFIG__DISSOLVE);
-  addEffect(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID, &mAnimatorLight::EffectAnim__Dissolve_Random,             PM_EFFECTS_FUNCTION__DISSOLVE_RANDOM__NAME_CTR,         PM_EFFECT_CONFIG__DISSOLVE_RANDOM);
-  addEffect(EFFECTS_FUNCTION__COLORFUL__ID,        &mAnimatorLight::EffectAnim__ColourFul,                   PM_EFFECTS_FUNCTION__COLORFUL__NAME_CTR,                PM_EFFECT_CONFIG__COLORFUL);
-  addEffect(EFFECTS_FUNCTION__TRAFFIC_LIGHT__ID,   &mAnimatorLight::EffectAnim__Traffic_Light,               PM_EFFECTS_FUNCTION__TRAFFIC_LIGHT__NAME_CTR,           PM_EFFECT_CONFIG__TRAFFIC_LIGHT);
+  addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,   &mAnimatorLight::EffectAnim__Solid_Glitter,               PM_EFFECT_CONFIG__SOLID_GLITTER);
+  addEffect(EFFECTS_FUNCTION__POPCORN__ID,         &mAnimatorLight::EffectAnim__Popcorn,                     PM_EFFECT_CONFIG__POPCORN);
+  addEffect(EFFECTS_FUNCTION__PLASMA__ID,          &mAnimatorLight::EffectAnim__Plasma,                      PM_EFFECT_CONFIG__PLASMA);
+  addEffect(EFFECTS_FUNCTION__SPARKLE__ID,         &mAnimatorLight::EffectAnim__Sparkle,                     PM_EFFECT_CONFIG__SPARKLE);
+  addEffect(EFFECTS_FUNCTION__FLASH_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Flash,               PM_EFFECT_CONFIG__FLASH_SPARKLE);
+  addEffect(EFFECTS_FUNCTION__HYPER_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Hyper,               PM_EFFECT_CONFIG__HYPER_SPARKLE);
+  addEffect(EFFECTS_FUNCTION__TWINKLE__ID,         &mAnimatorLight::EffectAnim__Twinkle,                     PM_EFFECT_CONFIG__TWINKLE);
+  addEffect(EFFECTS_FUNCTION__COLORTWINKLE__ID,    &mAnimatorLight::EffectAnim__Twinkle_Colour,              PM_EFFECT_CONFIG__COLORTWINKLE);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_FOX__ID,     &mAnimatorLight::EffectAnim__Twinkle_Fox,                 PM_EFFECT_CONFIG__TWINKLE_FOX);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_CAT__ID,     &mAnimatorLight::EffectAnim__Twinkle_Cat,                 PM_EFFECT_CONFIG__TWINKLE_CAT);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_UP__ID,      &mAnimatorLight::EffectAnim__Twinkle_Up,                  PM_EFFECT_CONFIG__TWINKLE_UP);
+  addEffect(EFFECTS_FUNCTION__SAW__ID,             &mAnimatorLight::EffectAnim__Saw,                         PM_EFFECT_CONFIG__SAW);
+  addEffect(EFFECTS_FUNCTION__DISSOLVE__ID,        &mAnimatorLight::EffectAnim__Dissolve,                    PM_EFFECT_CONFIG__DISSOLVE);
+  addEffect(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID, &mAnimatorLight::EffectAnim__Dissolve_Random,             PM_EFFECT_CONFIG__DISSOLVE_RANDOM);
+  addEffect(EFFECTS_FUNCTION__COLORFUL__ID,        &mAnimatorLight::EffectAnim__ColourFul,                   PM_EFFECT_CONFIG__COLORFUL);
+  addEffect(EFFECTS_FUNCTION__TRAFFIC_LIGHT__ID,   &mAnimatorLight::EffectAnim__Traffic_Light,               PM_EFFECT_CONFIG__TRAFFIC_LIGHT);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Blink/Strobe
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__BLINK__ID,           &mAnimatorLight::EffectAnim__Blink,                       PM_EFFECTS_FUNCTION__BLINK__NAME_CTR,                   PM_EFFECT_CONFIG__BLINK);
-  addEffect(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,   &mAnimatorLight::EffectAnim__Blink_Rainbow,               PM_EFFECTS_FUNCTION__BLINK_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__BLINK_RAINBOW);
-  addEffect(EFFECTS_FUNCTION__STROBE__ID,          &mAnimatorLight::EffectAnim__Strobe,                      PM_EFFECTS_FUNCTION__STROBE__NAME_CTR,                  PM_EFFECT_CONFIG__STROBE);
-  addEffect(EFFECTS_FUNCTION__MULTI_STROBE__ID,    &mAnimatorLight::EffectAnim__Strobe_Multi,                PM_EFFECTS_FUNCTION__MULTI_STROBE__NAME_CTR,            PM_EFFECT_CONFIG__MULTI_STROBE);
-  addEffect(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,  &mAnimatorLight::EffectAnim__Strobe_Rainbow,              PM_EFFECTS_FUNCTION__STROBE_RAINBOW__NAME_CTR,          PM_EFFECT_CONFIG__STROBE_RAINBOW);
-  addEffect(EFFECTS_FUNCTION__RAINBOW__ID,         &mAnimatorLight::EffectAnim__Rainbow,                     PM_EFFECTS_FUNCTION__RAINBOW__NAME_CTR,                 PM_EFFECT_CONFIG__RAINBOW);
-  addEffect(EFFECTS_FUNCTION__LIGHTNING__ID,       &mAnimatorLight::EffectAnim__Lightning,                   PM_EFFECTS_FUNCTION__LIGHTNING__NAME_CTR,               PM_EFFECT_CONFIG__LIGHTNING);
-  addEffect(EFFECTS_FUNCTION__FIRE_2012__ID,       &mAnimatorLight::EffectAnim__Fire_2012,                   PM_EFFECTS_FUNCTION__FIRE_2012__NAME_CTR,               PM_EFFECT_CONFIG__FIRE_2012);
-  addEffect(EFFECTS_FUNCTION__RAILWAY__ID,         &mAnimatorLight::EffectAnim__Railway,                     PM_EFFECTS_FUNCTION__RAILWAY__NAME_CTR,                 PM_EFFECT_CONFIG__RAILWAY);
-  addEffect(EFFECTS_FUNCTION__HEARTBEAT__ID,       &mAnimatorLight::EffectAnim__Heartbeat,                   PM_EFFECTS_FUNCTION__HEARTBEAT__NAME_CTR,               PM_EFFECT_CONFIG__HEARTBEAT);
+  addEffect(EFFECTS_FUNCTION__BLINK__ID,           &mAnimatorLight::EffectAnim__Blink,                       PM_EFFECT_CONFIG__BLINK);
+  addEffect(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,   &mAnimatorLight::EffectAnim__Blink_Rainbow,               PM_EFFECT_CONFIG__BLINK_RAINBOW);
+  addEffect(EFFECTS_FUNCTION__STROBE__ID,          &mAnimatorLight::EffectAnim__Strobe,                      PM_EFFECT_CONFIG__STROBE);
+  addEffect(EFFECTS_FUNCTION__MULTI_STROBE__ID,    &mAnimatorLight::EffectAnim__Strobe_Multi,                PM_EFFECT_CONFIG__MULTI_STROBE);
+  addEffect(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,  &mAnimatorLight::EffectAnim__Strobe_Rainbow,              PM_EFFECT_CONFIG__STROBE_RAINBOW);
+  addEffect(EFFECTS_FUNCTION__RAINBOW__ID,         &mAnimatorLight::EffectAnim__Rainbow,                     PM_EFFECT_CONFIG__RAINBOW);
+  addEffect(EFFECTS_FUNCTION__LIGHTNING__ID,       &mAnimatorLight::EffectAnim__Lightning,                   PM_EFFECT_CONFIG__LIGHTNING);
+  addEffect(EFFECTS_FUNCTION__FIRE_2012__ID,       &mAnimatorLight::EffectAnim__Fire_2012,                   PM_EFFECT_CONFIG__FIRE_2012);
+  addEffect(EFFECTS_FUNCTION__RAILWAY__ID,         &mAnimatorLight::EffectAnim__Railway,                     PM_EFFECT_CONFIG__RAILWAY);
+  addEffect(EFFECTS_FUNCTION__HEARTBEAT__ID,       &mAnimatorLight::EffectAnim__Heartbeat,                   PM_EFFECT_CONFIG__HEARTBEAT);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Noise
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,      &mAnimatorLight::EffectAnim__FillNoise8,                  PM_EFFECTS_FUNCTION__FILLNOISE8__NAME_CTR,              PM_EFFECT_CONFIG__FILLNOISE8);
-  addEffect(EFFECTS_FUNCTION__NOISE16_1__ID,       &mAnimatorLight::EffectAnim__Noise16_1,                   PM_EFFECTS_FUNCTION__NOISE16_1__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_1);
-  addEffect(EFFECTS_FUNCTION__NOISE16_2__ID,       &mAnimatorLight::EffectAnim__Noise16_2,                   PM_EFFECTS_FUNCTION__NOISE16_2__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_2);
-  addEffect(EFFECTS_FUNCTION__NOISE16_3__ID,       &mAnimatorLight::EffectAnim__Noise16_3,                   PM_EFFECTS_FUNCTION__NOISE16_3__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_3);
-  addEffect(EFFECTS_FUNCTION__NOISE16_4__ID,       &mAnimatorLight::EffectAnim__Noise16_4,                   PM_EFFECTS_FUNCTION__NOISE16_4__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_4);
-  addEffect(EFFECTS_FUNCTION__NOISEPAL__ID,        &mAnimatorLight::EffectAnim__Noise_Pal,                   PM_EFFECTS_FUNCTION__NOISEPAL__NAME_CTR,                PM_EFFECT_CONFIG__NOISEPAL);
-  addEffect(EFFECTS_FUNCTION__PHASEDNOISE__ID,     &mAnimatorLight::EffectAnim__PhasedNoise,                 PM_EFFECTS_FUNCTION__PHASEDNOISE__NAME_CTR,             PM_EFFECT_CONFIG__PHASEDNOISE);
-  addEffect(EFFECTS_FUNCTION__PHASED__ID,          &mAnimatorLight::EffectAnim__Phased,                      PM_EFFECTS_FUNCTION__PHASED__NAME_CTR,                  PM_EFFECT_CONFIG__PHASED);
+  addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,      &mAnimatorLight::EffectAnim__FillNoise8,                  PM_EFFECT_CONFIG__FILLNOISE8);
+  addEffect(EFFECTS_FUNCTION__NOISE16_1__ID,       &mAnimatorLight::EffectAnim__Noise16_1,                   PM_EFFECT_CONFIG__NOISE16_1);
+  addEffect(EFFECTS_FUNCTION__NOISE16_2__ID,       &mAnimatorLight::EffectAnim__Noise16_2,                   PM_EFFECT_CONFIG__NOISE16_2);
+  addEffect(EFFECTS_FUNCTION__NOISE16_3__ID,       &mAnimatorLight::EffectAnim__Noise16_3,                   PM_EFFECT_CONFIG__NOISE16_3);
+  addEffect(EFFECTS_FUNCTION__NOISE16_4__ID,       &mAnimatorLight::EffectAnim__Noise16_4,                   PM_EFFECT_CONFIG__NOISE16_4);
+  addEffect(EFFECTS_FUNCTION__NOISEPAL__ID,        &mAnimatorLight::EffectAnim__Noise_Pal,                   PM_EFFECT_CONFIG__NOISEPAL);
+  addEffect(EFFECTS_FUNCTION__PHASEDNOISE__ID,     &mAnimatorLight::EffectAnim__PhasedNoise,                 PM_EFFECT_CONFIG__PHASEDNOISE);
+  addEffect(EFFECTS_FUNCTION__PHASED__ID,          &mAnimatorLight::EffectAnim__Phased,                      PM_EFFECT_CONFIG__PHASED);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Scan
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect(EFFECTS_FUNCTION__SCAN__ID,                &mAnimatorLight::EffectAnim__Scan,                    PM_EFFECTS_FUNCTION__SCAN__NAME_CTR,                    PM_EFFECT_CONFIG__SCAN);
-  addEffect(EFFECTS_FUNCTION__DUAL_SCAN__ID,           &mAnimatorLight::EffectAnim__Scan_Dual,               PM_EFFECTS_FUNCTION__DUAL_SCAN__NAME_CTR,               PM_EFFECT_CONFIG__DUAL_SCAN);
-  addEffect(EFFECTS_FUNCTION__LARSON_SCANNER__ID,      &mAnimatorLight::EffectAnim__Larson_Scanner,          PM_EFFECTS_FUNCTION__LARSON_SCANNER__NAME_CTR,          PM_EFFECT_CONFIG__LARSON_SCANNER);
-  addEffect(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID, &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,     PM_EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__NAME_CTR,     PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER);
-  addEffect(EFFECTS_FUNCTION__ICU__ID,                 &mAnimatorLight::EffectAnim__ICU,                     PM_EFFECTS_FUNCTION__ICU__NAME_CTR,                     PM_EFFECT_CONFIG__ICU);
-  addEffect(EFFECTS_FUNCTION__RIPPLE__ID,              &mAnimatorLight::EffectAnim__Ripple,                  PM_EFFECTS_FUNCTION__RIPPLE__NAME_CTR,                  PM_EFFECT_CONFIG__RIPPLE);
-  addEffect(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,      &mAnimatorLight::EffectAnim__Ripple_Rainbow,          PM_EFFECTS_FUNCTION__RIPPLE_RAINBOW__NAME_CTR,          PM_EFFECT_CONFIG__RIPPLE_RAINBOW);
-  addEffect(EFFECTS_FUNCTION__COMET__ID,               &mAnimatorLight::EffectAnim__Comet,                   PM_EFFECTS_FUNCTION__COMET__NAME_CTR,                   PM_EFFECT_CONFIG__COMET);
-  addEffect(EFFECTS_FUNCTION__CHUNCHUN__ID,            &mAnimatorLight::EffectAnim__Chunchun,                PM_EFFECTS_FUNCTION__CHUNCHUN__NAME_CTR,                PM_EFFECT_CONFIG__CHUNCHUN);
-  addEffect(EFFECTS_FUNCTION__BOUNCINGBALLS__ID,       &mAnimatorLight::EffectAnim__Bouncing_Balls,          PM_EFFECTS_FUNCTION__BOUNCINGBALLS__NAME_CTR,           PM_EFFECT_CONFIG__BOUNCINGBALLS);
-  addEffect(EFFECTS_FUNCTION__SINELON__ID,             &mAnimatorLight::EffectAnim__Sinelon,                 PM_EFFECTS_FUNCTION__SINELON__NAME_CTR,                 PM_EFFECT_CONFIG__SINELON);
-  addEffect(EFFECTS_FUNCTION__SINELON_DUAL__ID,        &mAnimatorLight::EffectAnim__Sinelon_Dual,            PM_EFFECTS_FUNCTION__SINELON_DUAL__NAME_CTR,            PM_EFFECT_CONFIG__SINELON_DUAL);
-  addEffect(EFFECTS_FUNCTION__SINELON_RAINBOW__ID,     &mAnimatorLight::EffectAnim__Sinelon_Rainbow,         PM_EFFECTS_FUNCTION__SINELON_RAINBOW__NAME_CTR,         PM_EFFECT_CONFIG__SINELON_RAINBOW);
-  addEffect(EFFECTS_FUNCTION__DRIP__ID,                &mAnimatorLight::EffectAnim__Drip,                    PM_EFFECTS_FUNCTION__DRIP__NAME_CTR,                    PM_EFFECT_CONFIG__DRIP);
+  addEffect(EFFECTS_FUNCTION__SCAN__ID,                &mAnimatorLight::EffectAnim__Scan,                    PM_EFFECT_CONFIG__SCAN);
+  addEffect(EFFECTS_FUNCTION__DUAL_SCAN__ID,           &mAnimatorLight::EffectAnim__Scan_Dual,               PM_EFFECT_CONFIG__DUAL_SCAN);
+  addEffect(EFFECTS_FUNCTION__LARSON_SCANNER__ID,      &mAnimatorLight::EffectAnim__Larson_Scanner,          PM_EFFECT_CONFIG__LARSON_SCANNER);
+  addEffect(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID, &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,     PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER);
+  addEffect(EFFECTS_FUNCTION__ICU__ID,                 &mAnimatorLight::EffectAnim__ICU,                     PM_EFFECT_CONFIG__ICU);
+  addEffect(EFFECTS_FUNCTION__RIPPLE__ID,              &mAnimatorLight::EffectAnim__Ripple,                  PM_EFFECT_CONFIG__RIPPLE);
+  addEffect(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,      &mAnimatorLight::EffectAnim__Ripple_Rainbow,          PM_EFFECT_CONFIG__RIPPLE_RAINBOW);
+  addEffect(EFFECTS_FUNCTION__COMET__ID,               &mAnimatorLight::EffectAnim__Comet,                   PM_EFFECT_CONFIG__COMET);
+  addEffect(EFFECTS_FUNCTION__CHUNCHUN__ID,            &mAnimatorLight::EffectAnim__Chunchun,                PM_EFFECT_CONFIG__CHUNCHUN);
+  addEffect(EFFECTS_FUNCTION__BOUNCINGBALLS__ID,       &mAnimatorLight::EffectAnim__Bouncing_Balls,          PM_EFFECT_CONFIG__BOUNCINGBALLS);
+  addEffect(EFFECTS_FUNCTION__SINELON__ID,             &mAnimatorLight::EffectAnim__Sinelon,                 PM_EFFECT_CONFIG__SINELON);
+  addEffect(EFFECTS_FUNCTION__SINELON_DUAL__ID,        &mAnimatorLight::EffectAnim__Sinelon_Dual,            PM_EFFECT_CONFIG__SINELON_DUAL);
+  addEffect(EFFECTS_FUNCTION__SINELON_RAINBOW__ID,     &mAnimatorLight::EffectAnim__Sinelon_Rainbow,         PM_EFFECT_CONFIG__SINELON_RAINBOW);
+  addEffect(EFFECTS_FUNCTION__DRIP__ID,                &mAnimatorLight::EffectAnim__Drip,                    PM_EFFECT_CONFIG__DRIP);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
   addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,                      &mAnimatorLight::EffectAnim__Hardware__Show_Bus,                    PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS);
@@ -18921,13 +18928,13 @@ void mAnimatorLight::LoadEffects()
   addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,   &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing, PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING);  
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,                                     &mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01,                                               PM_EFFECTS_FUNCTION__SUNPOSITIONS__SUNRISE_ALARM_01__NAME_CTR,                                          PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01); 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,               &mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01,                         PM_EFFECTS_FUNCTION__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__NAME_CTR,                    PM_EFFECT_CONFIG__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01); 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,                           &mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01,                                     PM_EFFECTS_FUNCTION__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01__NAME_CTR,                                PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01); 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_01__ID,                              &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01,                                        PM_EFFECTS_FUNCTION__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01__NAME_CTR,                                   PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01); 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,                                &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01,                                          PM_EFFECTS_FUNCTION__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01__NAME_CTR,                                     PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01); 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID,                  &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01,                            PM_EFFECTS_FUNCTION__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__NAME_CTR,                       PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01); 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__ID,   &mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01,             PM_EFFECTS_FUNCTION__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__NAME_CTR,        PM_EFFECT_CONFIG__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01);   
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,                                     &mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01,                                               PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01); 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,               &mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01,                         PM_EFFECT_CONFIG__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01); 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,                           &mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01,                                     PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01); 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_01__ID,                              &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01,                                        PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01); 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,                                &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01,                                          PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01); 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID,                  &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01,                            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01); 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__ID,   &mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01,             PM_EFFECT_CONFIG__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01);   
   #endif          
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK  
   addEffect(EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,            &mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01,                PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_01);
@@ -18953,9 +18960,9 @@ void mAnimatorLight::LoadEffects()
    * BorderWallpaper
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
-  addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,     &mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient,                     PM_EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__NAME_CTR,   PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT);
-  addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__ID,    &mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient,                    PM_EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__NAME_CTR,           PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT);
-  addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__ID,       &mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid,                       PM_EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__NAME_CTR,           PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID);
+  addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,     &mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient,                     PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT);
+  addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__ID,    &mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient,                    PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT);
+  addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__ID,       &mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid,                       PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
   /**
    * Manual Methods (ie basic or limited effect generation, mostly updates output)
@@ -19196,7 +19203,7 @@ void mAnimatorLight::LoadEffects()
    * Development effects without full code 
    **/   
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                       &mAnimatorLight::EffectAnim__Christmas_Musical__01,                 PM_EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01__NAME_CTR,                             PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01);
+  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                       &mAnimatorLight::EffectAnim__Christmas_Musical__01,                 PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   case EFFECTS_FUNCTION__TESTER_01__ID:
