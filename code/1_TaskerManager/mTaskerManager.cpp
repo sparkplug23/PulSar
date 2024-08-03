@@ -394,9 +394,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-    INCLUDE_FIX"4_Drivers/20_Buzzer_Basic/mBuzzer.h"
-    #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID])
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(EM_MODULE__DRIVERS_BUZZER_BASIC__ID, new mBuzzer());
   #endif
   #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
     INCLUDE_FIX"4_Drivers/21_Buzzer_Tones/mBuzzer.h"
@@ -509,9 +507,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS_SR04
-    INCLUDE_FIX"5_Sensors/17_SR04/mSR04.h"
-    #define pCONT_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(EM_MODULE_SENSORS_SR04_ID, new mSR04());
   #endif
   #ifdef USE_MODULE_SENSORS_MPU9250
     INCLUDE_FIX"5_Sensors/MPU9250/mSensorsMPU9250.h"
@@ -619,9 +615,7 @@ uint8_t mTaskerManager::Instance_Init()
    * @brief Controller Generic (Generic)
    **/
   #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
-    INCLUDE_FIX"9_Controller/03_Sonoff_iFan/mSonoffIFan.h"
-    #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(EM_MODULE_CONTROLLER_SONOFF_IFAN_ID, new mSonoffIFan());
   #endif
   #ifdef USE_MODULE_CONTROLLER_FAN
     INCLUDE_FIX"9_Controller/Fan/mFan.h"

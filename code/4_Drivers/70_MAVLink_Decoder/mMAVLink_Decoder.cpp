@@ -159,7 +159,7 @@ void mMAVLink_Decoder::Init(void)
 
 void mMAVLink_Decoder::handleMessage(const mavlink_message_t& msg) {
 
-  ALOG_INF(PSTR("handleMessage %d"), msg.msgid);
+  ALOG_DBM(PSTR("handleMessage %d"), msg.msgid);
 
   switch (msg.msgid) {
     case MAVLINK_MSG_ID_AHRS:

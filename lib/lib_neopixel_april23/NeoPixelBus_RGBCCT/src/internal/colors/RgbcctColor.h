@@ -896,15 +896,8 @@ void setSat255(uint8_t sat_new);
   }
 
 
-  RgbcctColor WithBrightness(uint8_t bri)
-  {
-    RgbcctColor c_out;
-    c_out.R = map(R, 0, 255, 0, bri);
-    c_out.G = map(G, 0, 255, 0, bri);
-    c_out.B = map(B, 0, 255, 0, bri);
-    c_out.W1 = map(W1, 0, 255, 0, bri);
-    c_out.W2 = map(W2, 0, 255, 0, bri);
-    return c_out;
+  RgbcctColor WithBrightness(){ //legacy
+    return GetColourWithBrightnessApplied();
   }
 
   // uint8_t getMaxWhiteness() {

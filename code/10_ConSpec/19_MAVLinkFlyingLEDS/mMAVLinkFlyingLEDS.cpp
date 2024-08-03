@@ -118,6 +118,11 @@ void mMavlinkFlyingLEDS::EverySecond()
 void mMavlinkFlyingLEDS::Effect_LandingLights()
 {
 
+  ALOG_INF(PSTR("Effect_LandingLights"));
+
+  uint8_t rgbbri = map(constrain(mav.slider_left, 1000, 2000),1000,2000,0,255);
+  uint8_t cctbri = map(constrain(mav.slider_left, 1000, 2000),1000,2000,0,255);
+
 
   /**
    * @brief Segment0 [Wings]
@@ -130,7 +135,7 @@ void mMavlinkFlyingLEDS::Effect_LandingLights()
   pCONT_lAni->SEGMENT_I(0).setBrightnessRGB(0);
   pCONT_lAni->SEGMENT_I(0).setBrightnessCCT(255);
   /**
-   * @brief Segment1 [Wings]
+   * @brief Segment1 [fuselage]
    **/
   pCONT_lAni->SEGMENT_I(1).rgbcctcolors[0] = RgbcctColor(255,255,255,255,255); //white
   pCONT_lAni->SEGMENT_I(1).palette_id = 0;
@@ -144,11 +149,11 @@ void mMavlinkFlyingLEDS::Effect_LandingLights()
    **/
   // For testing of full range, lets use "seconds" as the ticker
   HsbColor color_hatch_chase = HsbColor(0, 1, 1);
-  #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_TIME_FOR_RANGE_TESTING
-  hue = map(pCONT_time->RtcTime.second, 0,59, 0,359);
-  ALOG_INF(PSTR("Hue: %d"), hue);
-  color_hatch_chase = HsbColor(hue/360.0f, 1, 1);
-  #else
+  // #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_TIME_FOR_RANGE_TESTING
+  // hue = map(pCONT_time->RtcTime.second, 0,59, 0,359);
+  // ALOG_INF(PSTR("Hue: %d"), hue);
+  // color_hatch_chase = HsbColor(hue/360.0f, 1, 1);
+  // #else
     #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_MANUAL_FOR_RANGE_TESTING
 
     float altitude = test_float;
@@ -163,18 +168,41 @@ void mMavlinkFlyingLEDS::Effect_LandingLights()
     }
 
     #else
-      uint16_t pwm_led_mode = 0;
-      mMAVLink_Decoder::PacketData* message = tkr_mavlink->findPacketData(MAVLINK_MSG_ID_RC_CHANNELS);
+    
+    
+      uint32_t mode_pwm = 0;
+      mMAVLink_Decoder::PacketData* message = tkr_mavlink->findPacketData(MAVLINK_MSG_ID_GPS_RAW_INT);
       if (message != nullptr && message->data != nullptr) {
-          mavlink_rc_channels_t* rc_channels_data = static_cast<mavlink_rc_channels_t*>(message->data);
-          pwm_led_mode = rc_channels_data->chan15_raw;
+          mavlink_gps_raw_int_t* rc_channels_data = static_cast<mavlink_gps_raw_int_t*>(message->data);
+          mode_pwm = rc_channels_data->alt;
       }
+
+
+      
+      float altitude = (float)mode_pwm/1000.0f;
+
+      // Serial.printf("Altitude: %f\n\r", altitude);
+      // Serial.println(altitude);
+
+
+
+      if(altitude > 50)
+      { 
+        color_hatch_chase = HsbColor(240/360.0f, 1, 1); 
+      }else{
+        altitude = constrain(altitude, 0, 50);
+        float hue = mSupport::mapfloat(altitude, 0, 50, 0.0f, 1.0f);
+        color_hatch_chase = HsbColor(hue, 1, 1);
+      }
+
+
+
     #endif
-  #endif
+  // #endif
   pCONT_lAni->SEGMENT_I(2).rgbcctcolors[0] = color_hatch_chase;
   pCONT_lAni->SEGMENT_I(2).rgbcctcolors[1] = RgbcctColor(0,0,0,0,0); //black
   pCONT_lAni->SEGMENT_I(2).palette_id = mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;
-  pCONT_lAni->SEGMENT_I(2).effect_id = 71;//mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
+  pCONT_lAni->SEGMENT_I(2).effect_id = mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
   pCONT_lAni->SEGMENT_I(2).cycle_time__rate_ms = FRAMETIME_MS;
   pCONT_lAni->SEGMENT_I(2).speed = 255;
   pCONT_lAni->SEGMENT_I(2).cycle_time__rate_ms = 25;
@@ -208,7 +236,57 @@ void mMavlinkFlyingLEDS::Effect_LandingLights()
 
 }
 
+
 void mMavlinkFlyingLEDS::Effect_TakeoffLights()
+{
+
+
+  /**
+   * @brief Segment0 [Wings]
+   **/
+  pCONT_lAni->SEGMENT_I(0).rgbcctcolors[0] = RgbcctColor(0,255,0,0,0); //white
+  pCONT_lAni->SEGMENT_I(0).palette_id = 0;
+  pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__ANDROID__ID;
+  pCONT_lAni->SEGMENT_I(0).cycle_time__rate_ms = FRAMETIME_MS;
+  pCONT_lAni->SEGMENT_I(0).speed = 255;
+  pCONT_lAni->SEGMENT_I(0).setBrightnessRGB(255);
+  pCONT_lAni->SEGMENT_I(0).setBrightnessCCT(255);
+
+
+  /**
+   * @brief Segment1 [Rudder] - height is colour
+   **/
+  // HsbColor color_rudder = color_hatch_chase;
+  // pCONT_lAni->SEGMENT_I(3).rgbcctcolors[0] = color_rudder;
+  pCONT_lAni->SEGMENT_I(3).palette_id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__YELLOWOUT__ID;
+  pCONT_lAni->SEGMENT_I(3).effect_id = mAnimatorLight::EFFECTS_FUNCTION__RAINBOW_CYCLE__ID;
+  pCONT_lAni->SEGMENT_I(3).cycle_time__rate_ms = FRAMETIME_MS;
+  pCONT_lAni->SEGMENT_I(3).speed = 255;
+  pCONT_lAni->SEGMENT_I(3).cycle_time__rate_ms = 25;
+  pCONT_lAni->SEGMENT_I(3).setBrightnessRGB(50);
+  pCONT_lAni->SEGMENT_I(3).setBrightnessCCT(0);
+
+
+  /**
+   * @brief Segment4 [Nose]
+   **/
+  pCONT_lAni->SEGMENT_I(4).rgbcctcolors[0] = RgbcctColor(0,255,0,0,0); //white
+  pCONT_lAni->SEGMENT_I(4).palette_id = 0;
+  pCONT_lAni->SEGMENT_I(4).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+  pCONT_lAni->SEGMENT_I(4).cycle_time__rate_ms = FRAMETIME_MS;
+  pCONT_lAni->SEGMENT_I(4).speed = 255;
+  pCONT_lAni->SEGMENT_I(4).setBrightnessRGB(255);
+  pCONT_lAni->SEGMENT_I(4).setBrightnessCCT(255);
+
+
+
+}
+
+
+
+
+
+void mMavlinkFlyingLEDS::Effect_Flight01_RandomSweep()
 {
 
   
@@ -217,33 +295,95 @@ void mMavlinkFlyingLEDS::Effect_TakeoffLights()
    **/
   pCONT_lAni->SEGMENT_I(0).rgbcctcolors[0] = RgbcctColor(255,255,255,255,255); //white
   pCONT_lAni->SEGMENT_I(0).palette_id = 0;
-  pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID;// 71;//mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
+  // pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID;// 71;//mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
+  pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID;// 71;//mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
   pCONT_lAni->SEGMENT_I(0).cycle_time__rate_ms = FRAMETIME_MS;
-  // pCONT_lAni->SEGMENT_I(0).mirror = true; // so it comes from centre out
-  // pCONT_lAni->SEGMENT_I(0).reverse = true;
-  pCONT_lAni->SEGMENT_I(0).speed = 127;
+  pCONT_lAni->SEGMENT_I(0).mirror = true; // so it comes from centre out
+  pCONT_lAni->SEGMENT_I(0).reverse = true;
+  pCONT_lAni->SEGMENT_I(0).speed = 200;
   pCONT_lAni->SEGMENT_I(0).setBrightnessRGB(255);
   pCONT_lAni->SEGMENT_I(0).setBrightnessCCT(0);
   /**
-   * @brief Segment1 [Wings]
+   * @brief Segment1 [Fuselage]
    **/
-  pCONT_lAni->SEGMENT_I(1).rgbcctcolors[0] = RgbcctColor(255,255,255,255,255); //white
-  pCONT_lAni->SEGMENT_I(1).palette_id = 0;
-  pCONT_lAni->SEGMENT_I(1).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+  // pCONT_lAni->SEGMENT_I(1).rgbcctcolors[0] = RgbcctColor(0,0,0,255,255); //white
+  // pCONT_lAni->SEGMENT_I(1).rgbcctcolors[1] = RgbcctColor(0,0,255,255,255); //white
+  // pCONT_lAni->SEGMENT_I(1).rgbcctcolors[2] = RgbcctColor(0,0,0,100,100); //white
+  // pCONT_lAni->SEGMENT_I(1).palette_id = mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + 9;
+  // pCONT_lAni->SEGMENT_I(1).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SPANNED_PALETTE__ID;
+  // pCONT_lAni->SEGMENT_I(1).colour_type__used_in_effect_generate = mAnimatorLight::ColourType::COLOUR_TYPE__RGBCCT__ID;
+  // pCONT_lAni->SEGMENT_I(1).cycle_time__rate_ms = FRAMETIME_MS;
+  // pCONT_lAni->SEGMENT_I(1).speed = 255;
+  // pCONT_lAni->SEGMENT_I(1).setBrightnessRGB(255);
+  // pCONT_lAni->SEGMENT_I(1).setBrightnessCCT(255);
+  // mPalette::PALETTE_ENCODING_DATA encoding = {PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT}; 
+  // uint8_t palette_data[] = {
+  //   // White forward
+  //   0,    0,0,0,255,255,
+  //   100,    0,0,0,255,255,
+  //   110,    0,0,255,0,0,
+  //   127,  0,0,255,0,0,
+  //   195,  0,0,255,0,0,
+  //   205,  0,0,255,0,0,
+  //   255,  0,0,0,255,255
+  //   // Blue forward
+  //   // 0,    0,0,255,0,0,
+  //   // 10,   0,0,255,0,0,
+  //   // 40,   0,0,0,30,30,
+  //   // 127,  0,0,0,30,30,
+  //   // 215,  0,0,0,30,30,
+  //   // 245,  0,0,255,0,0,
+  //   // 255,  0,0,255,0,0,
+  // };
+  // uint8_t palette_custom_index = 9;
+  // pCONT_lAni->CommandSet_CustomPalette(palette_custom_index, encoding.data, palette_data, ARRAY_SIZE(palette_data));
+  // /**
+  //  * @brief Segment1 [Fuselage] - Copy start of wings
+  //  **/
+  // uint32_t col32 = pCONT_lAni->getPixelColor(41);
+  // pCONT_lAni->SEGMENT_I(1).rgbcctcolors[0] = RgbcctColor(R(col32), G(col32), B(col32), 0, 0); //white
+  // pCONT_lAni->SEGMENT_I(1).palette_id = 0;
+  // pCONT_lAni->SEGMENT_I(1).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+  // pCONT_lAni->SEGMENT_I(1).colour_type__used_in_effect_generate = mAnimatorLight::ColourType::COLOUR_TYPE__RGBCCT__ID;
+  // pCONT_lAni->SEGMENT_I(1).cycle_time__rate_ms = FRAMETIME_MS;
+  // pCONT_lAni->SEGMENT_I(1).speed = 255;
+  // pCONT_lAni->SEGMENT_I(1).setBrightnessRGB(255);
+  // pCONT_lAni->SEGMENT_I(1).setBrightnessCCT(255);
+  /**
+   * @brief Segment1 [Fuselage] - Copy start of wings, with gradient to nose
+   **/
+  pCONT_lAni->SEGMENT_I(1).palette_id = mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + 9;
+  pCONT_lAni->SEGMENT_I(1).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SPANNED_PALETTE__ID;
+  pCONT_lAni->SEGMENT_I(1).colour_type__used_in_effect_generate = mAnimatorLight::ColourType::COLOUR_TYPE__RGBCCT__ID;
   pCONT_lAni->SEGMENT_I(1).cycle_time__rate_ms = FRAMETIME_MS;
   pCONT_lAni->SEGMENT_I(1).speed = 255;
   pCONT_lAni->SEGMENT_I(1).setBrightnessRGB(255);
   pCONT_lAni->SEGMENT_I(1).setBrightnessCCT(255);
+  uint32_t col32 = pCONT_lAni->getPixelColor(41);
+  mPalette::PALETTE_ENCODING_DATA encoding = {PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT}; 
+  uint8_t palette_data[] = {
+    // White forward near nose, otherwise copy the wing
+    0,    0,0,0,255,255,
+    20,    0,0,0,255,255,
+    55,  R(col32), G(col32), B(col32),0,0,
+    127,  R(col32), G(col32), B(col32),0,0,
+    200,  R(col32), G(col32), B(col32),0,0,
+    235,  0,0,0,255,255,
+    255,  0,0,0,255,255
+  };
+  uint8_t palette_custom_index = 9;
+  pCONT_lAni->CommandSet_CustomPalette(palette_custom_index, encoding.data, palette_data, ARRAY_SIZE(palette_data));
+
   /**
    * @brief Segment1 [Hatches] - when landing, make the hatches be chasing (for power reserve) but match rudder solid for altitude
    **/
   // For testing of full range, lets use "seconds" as the ticker
   HsbColor color_hatch_chase = HsbColor(0, 1, 1);
-  #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_TIME_FOR_RANGE_TESTING
-  hue = map(pCONT_time->RtcTime.second, 0,59, 0,359);
-  ALOG_INF(PSTR("Hue: %d"), hue);
-  color_hatch_chase = HsbColor(hue/360.0f, 1, 1);
-  #else
+  // #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_TIME_FOR_RANGE_TESTING
+  // hue = map(pCONT_time->RtcTime.second, 0,59, 0,359);
+  // ALOG_INF(PSTR("Hue: %d"), hue);
+  // color_hatch_chase = HsbColor(hue/360.0f, 1, 1);
+  // #else
     #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_MANUAL_FOR_RANGE_TESTING
 
     float altitude = test_float;
@@ -258,18 +398,41 @@ void mMavlinkFlyingLEDS::Effect_TakeoffLights()
     }
 
     #else
-      uint16_t pwm_led_mode = 0;
-      mMAVLink_Decoder::PacketData* message = tkr_mavlink->findPacketData(MAVLINK_MSG_ID_RC_CHANNELS);
+
+
+      uint32_t mode_pwm = 0;
+      mMAVLink_Decoder::PacketData* message = tkr_mavlink->findPacketData(MAVLINK_MSG_ID_GPS_RAW_INT);
       if (message != nullptr && message->data != nullptr) {
-          mavlink_rc_channels_t* rc_channels_data = static_cast<mavlink_rc_channels_t*>(message->data);
-          pwm_led_mode = rc_channels_data->chan15_raw;
+          mavlink_gps_raw_int_t* rc_channels_data = static_cast<mavlink_gps_raw_int_t*>(message->data);
+          mode_pwm = rc_channels_data->alt;
       }
+
+
+      
+      float altitude = (float)mode_pwm/1000.0f;
+
+      // Serial.printf("Altitude: %f\n\r", altitude);
+      // Serial.println(altitude);
+
+
+
+      if(altitude > 120)
+      { 
+        color_hatch_chase = HsbColor(240/360.0f, 1, 1); 
+      }else{
+        altitude = constrain(altitude, 0, 120);
+        float hue = mSupport::mapfloat(altitude, 0, 120, 0.0f, 1.0f);
+        color_hatch_chase = HsbColor(hue, 1, 1);
+      }
+
+
+    
     #endif
-  #endif
+  // #endif
   pCONT_lAni->SEGMENT_I(2).rgbcctcolors[0] = color_hatch_chase;
   pCONT_lAni->SEGMENT_I(2).rgbcctcolors[1] = RgbcctColor(0,0,0,0,0); //black
   pCONT_lAni->SEGMENT_I(2).palette_id = mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;
-  pCONT_lAni->SEGMENT_I(2).effect_id = 71;//mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
+  pCONT_lAni->SEGMENT_I(2).effect_id = mAnimatorLight::EFFECTS_FUNCTION__CHASE_THEATER__ID;
   pCONT_lAni->SEGMENT_I(2).cycle_time__rate_ms = FRAMETIME_MS;
   pCONT_lAni->SEGMENT_I(2).speed = 255;
   pCONT_lAni->SEGMENT_I(2).cycle_time__rate_ms = 25;
@@ -291,7 +454,7 @@ void mMavlinkFlyingLEDS::Effect_TakeoffLights()
   /**
    * @brief Segment4 [Nose]
    **/
-  pCONT_lAni->SEGMENT_I(4).rgbcctcolors[0] = RgbcctColor(255,255,255,255,255); //white
+  pCONT_lAni->SEGMENT_I(4).rgbcctcolors[0] = RgbcctColor(0,0,0,255,255); //white
   pCONT_lAni->SEGMENT_I(4).palette_id = 0;
   pCONT_lAni->SEGMENT_I(4).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
   pCONT_lAni->SEGMENT_I(4).cycle_time__rate_ms = FRAMETIME_MS;
@@ -302,104 +465,194 @@ void mMavlinkFlyingLEDS::Effect_TakeoffLights()
 
 }
 
-
-void mMavlinkFlyingLEDS::EveryLoop()
+/**
+ * @brief Keeping this separate so I can easily have ifdef debug methods to test the lighting
+ * Also have a timeout, if mavlink data is old then revert to failsafe LEDs
+ * 
+ */
+void mMavlinkFlyingLEDS::Update_ControlDataFromMAVLink()
 {
-  uint16_t pwm_led_mode = 0;
+
+
   mMAVLink_Decoder::PacketData* packet_rc_channels = tkr_mavlink->findPacketData(MAVLINK_MSG_ID_RC_CHANNELS);
   if (packet_rc_channels != nullptr && packet_rc_channels->data != nullptr) {
-      mavlink_rc_channels_t* rc_channels_data = static_cast<mavlink_rc_channels_t*>(packet_rc_channels->data);
-      pwm_led_mode = rc_channels_data->chan15_raw;
+    mavlink_rc_channels_t* rc_channels_data = static_cast<mavlink_rc_channels_t*>(packet_rc_channels->data);
+    mav.buttons_6P = rc_channels_data->chan14_raw;
+    mav.slider_left = rc_channels_data->chan15_raw;
+    mav.slider_left = rc_channels_data->chan15_raw;
+    mav.slider_right = rc_channels_data->chan16_raw;
   }
 
+
+  /**
+   * @brief Override for debug, set values I want
+   * 
+   */
+  #ifdef ENABLE_DEVFEATURE_MAVLINK__USE_MANUAL_FOR_RANGE_TESTING
+    mav.slider_left = 2;
+    mav.slider_right = 900;
+  #endif
+
+
+  
+}
+
+/**
+ * @brief 
+ * LEFT_SLIDER:  Mode select, with 5 positions
+ * * BOTTOM:      Landing Lights
+ * * MID-BOTTOM:  Landing Basic   [so I can transition from Centre/Inflight, to basic, then full landing]
+ * * CENTRE:      Inflight Lighting (based on RS)
+ * * MID-TOP:     Takeoff Lights
+ * * TOP:         Inflight Lighting default (keeping this so its always a set basic colour as backup)
+ * RIGHT_SLIDER: Mode intensity (or alternate versions)
+ * 
+ */
+void mMavlinkFlyingLEDS::EveryLoop()
+{
+
+  Update_ControlDataFromMAVLink();
+
+
+  uint16_t mode_pwm = mav.buttons_6P;
+
+  // ALOG_INF(PSTR("buttons_6P = %d"), mav.buttons_6P);
+
+  // return;
+  
   enum SWITCH_POSITION__MODE{
-    Bottom__Landing = 0,
-    MidBottom = 1,
-    Centre__AltitudeLighting = 2,
+    Bottom__Landing_Full = 1,
+    MidBottom__Landing_Basic_And_Failsafe = 1,
+    Centre__Inflight_Multimode = 2,
+    MidTop__Takeoff = 3,
+    Top__Inflight_Default = 4
   };
   
+  // Slider Left
+  // uint8_t mode = 0; // should be failsafe as "landing" lighting mode
+  // if     (mode_pwm <= 1000){ mode = 0; }                            // Bottom
+  // else if((mode_pwm > 1000) && (mode_pwm <= 1400)){ mode = 1; } // Mid-Bottom
+  // else if((mode_pwm > 1400) && (mode_pwm <= 1600)){ mode = Centre__Inflight_Multimode; } // Centre
+  // else if((mode_pwm > 1600) && (mode_pwm <= 2000)){ mode = 3; } // Mid-Top
+  // else if(mode_pwm > 2000){ mode = 4; }     
+
+  // Slider right, 6 options
   uint8_t mode = 0; // should be failsafe as "landing" lighting mode
-  if     (pwm_led_mode <= 1000){ mode = 0; }                            // Bottom
-  else if((pwm_led_mode > 1000) && (pwm_led_mode <= 1400)){ mode = 1; } // Mid-Bottom
-  else if((pwm_led_mode > 1400) && (pwm_led_mode <= 1600)){ mode = Centre__AltitudeLighting; } // Centre
-  else if((pwm_led_mode > 1600) && (pwm_led_mode <= 2000)){ mode = 3; } // Mid-Top
-  else if(pwm_led_mode > 2000){ mode = 4; }                             // Top
+  if     (mode_pwm <= 1000){ mode = 1; }                            // Bottom
+  else if((mode_pwm > 1000) && (mode_pwm <= 1250)){ mode = 2; } // Mid-Bottom
+  else if((mode_pwm > 1250) && (mode_pwm <= 1500)){ mode = 3; } // Centre
+  else if((mode_pwm > 1500) && (mode_pwm <= 1700)){ mode = 4; } // Mid-Top
+  else if((mode_pwm > 1700) && (mode_pwm <= 1850)){ mode = 5; } // Mid-Top
+  else if(mode_pwm > 1850){ mode = 6; }                             // Top
 
   #ifdef ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE
   mode = ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE;
   #endif
 
-  if(effect_manual == true)
-  {
-    switch(effect_mode)
+  ALOG_INF(PSTR("buttons_6P %d, mode = %d"), mav.buttons_6P, mode);
+  // if(effect_manual)
+  // {
+    // mode = effect_mode;
+  // }
+
+  // if(effect_manual == true)
+  // {
+    switch(mode)
     {
-      default:
-      case 0:
-        effect_manual = false;
-      break;
-      case 1: // Landing Lights
+      case Bottom__Landing_Full: // Landing Lights
         Effect_LandingLights();
       break;
-      case 2: // Takeoff Lights
+      default:
+        ALOG_INF(PSTR("Error: effect_mode %d not found"), mode);
+      // case MidBottom__Landing_Basic_And_Failsafe:
+      //   effect_manual = false;
+      // break;
+      case Centre__Inflight_Multimode: // Inflight Lighting
+
+        /**
+         * @brief Slider Right in multimode just switches between the different effects
+         * 
+         */
+        // if(IS_WITHIN_RANGE_MAXINC(0, 1000, mav.slider_right))
+        // {
+          Effect_Flight01_RandomSweep();
+        // }
+
+      break;
+      case MidTop__Takeoff: // Takeoff Lights
         Effect_TakeoffLights();
       break;
+      case 4:
+        
+        pCONT_lAni->SEGMENT_I(4).rgbcctcolors[0] = RgbcctColor(255,0,0,0,0); //white
+        pCONT_lAni->SEGMENT_I(4).palette_id = 0;
+        pCONT_lAni->SEGMENT_I(4).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+        pCONT_lAni->SEGMENT_I(4).cycle_time__rate_ms = FRAMETIME_MS;
+        pCONT_lAni->SEGMENT_I(4).speed = 200;
+        pCONT_lAni->SEGMENT_I(4).setBrightnessRGB(255);
+        pCONT_lAni->SEGMENT_I(4).setBrightnessCCT(0);
+
+      break;
+      case 5:
+        
+        pCONT_lAni->SEGMENT_I(4).rgbcctcolors[0] = RgbcctColor(0,255,0,0,0); //white
+        pCONT_lAni->SEGMENT_I(4).palette_id = 0;
+        pCONT_lAni->SEGMENT_I(4).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+        pCONT_lAni->SEGMENT_I(4).cycle_time__rate_ms = FRAMETIME_MS;
+        pCONT_lAni->SEGMENT_I(4).speed = 200;
+        pCONT_lAni->SEGMENT_I(4).setBrightnessRGB(255);
+        pCONT_lAni->SEGMENT_I(4).setBrightnessCCT(0);
+
+      break;
+      case 6:
+        
+        pCONT_lAni->SEGMENT_I(4).rgbcctcolors[0] = RgbcctColor(0,0,255,0,0); //white
+        pCONT_lAni->SEGMENT_I(4).palette_id = 0;
+        pCONT_lAni->SEGMENT_I(4).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+        pCONT_lAni->SEGMENT_I(4).cycle_time__rate_ms = FRAMETIME_MS;
+        pCONT_lAni->SEGMENT_I(4).speed = 200;
+        pCONT_lAni->SEGMENT_I(4).setBrightnessRGB(255);
+        pCONT_lAni->SEGMENT_I(4).setBrightnessCCT(0);
+
+
+        /**
+         * @brief Segment1 [wing] - height is colour
+         **/
+        // HsbColor color_rudder = color_hatch_chase;
+        // pCONT_lAni->SEGMENT_I(3).rgbcctcolors[0] = color_rudder;
+        pCONT_lAni->SEGMENT_I(0).palette_id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__YELLOWOUT__ID;
+        pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__RAINBOW_CYCLE__ID;
+        pCONT_lAni->SEGMENT_I(0).cycle_time__rate_ms = FRAMETIME_MS;
+        pCONT_lAni->SEGMENT_I(0).speed = 255;
+        pCONT_lAni->SEGMENT_I(0).cycle_time__rate_ms = 25;
+        pCONT_lAni->SEGMENT_I(0).setBrightnessRGB(255);
+        pCONT_lAni->SEGMENT_I(0).setBrightnessCCT(0);
+
+      break;
+
+
+
+
+      // case Top__Inflight_Default: // Flight 01 - Random Sweep
+      //   Effect_Flight01_RandomSweep();
+      // break;
     }
-  }
+  // }
+
+/**
+ * @brief For now, make the right slider the master brightness
+ * 
+ */
+  uint8_t rgbbri = map(constrain(mav.slider_right, 1000, 2000),1000,2000,0,255);
+  uint8_t cctbri = map(constrain(mav.slider_right, 1000, 2000),1000,2000,0,255);
+
+  // ALOG_INF(PSTR("mav.slider_right %d rgbbri = %d %d"), mav.slider_right, rgbbri, cctbri );
+
+  pCONT_iLight->setBriRGB_Global(rgbbri);
+  pCONT_iLight->setBriCT_Global(cctbri);
 
 
-  switch(mode)
-  {
-    default:
-    case 0: // Bottom == Landing
-    {
-      uint16_t hue = map(pwm_led_mode, 1000, 2000, 0, 360);
-      HsbColor color = HsbColor(hue/360.0f, 1, 1);
-
-      pCONT_lAni->SEGMENT_I(0).rgbcctcolors[0] = color;
-      pCONT_lAni->SEGMENT_I(0).rgbcctcolors[0].W1 = 255;
-      pCONT_lAni->SEGMENT_I(0).palette_id = 0;
-      pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
-      pCONT_lAni->SEGMENT_I(0).cycle_time__rate_ms = FRAMETIME_MS;
-      pCONT_lAni->SEGMENT_I(0).speed = 255;
-
-    }break;
-    case Centre__AltitudeLighting:
-
-
-
-
-    break;
-    case 3:
-
-      //test, pitch is colour
-
-      // float pitch = 0;
-
-      // mMAVLink_Decoder::PacketData* packet_attitude = tkr_mavlink->findPacketData(MAVLINK_MSG_ID_ATTITUDE);
-      // if (packet_attitude != nullptr && packet_attitude->data != nullptr) {
-      //   mavlink_attitude_t* attitude_data = static_cast<mavlink_attitude_t*>(packet_attitude->data);
-      //   pitch = attitude_data->pitch;
-      // }
-
-
-      // uint16_t hue = mSupport::mapfloat(pitch, -1.5, 1.5, 0, 360);
-      // HsbColor color = HsbColor(hue/360.0f, 1, 1);
-
-      // pCONT_lAni->SEGMENT_I(0).rgbcctcolors[0] = color;
-      // pCONT_lAni->SEGMENT_I(0).palette_id = 0;
-      // pCONT_lAni->SEGMENT_I(0).effect_id = mAnimatorLight::EFFECTS_FUNCTION__SOLID_COLOUR__ID;
-      // pCONT_lAni->SEGMENT_I(0).cycle_time__rate_ms = FRAMETIME_MS;
-      // pCONT_lAni->SEGMENT_I(0).speed = 255;
-
-
-
-
-
-    break;
-
-  }
-
-  // ALOG_INF(PSTR("Throttle: %d, Hue: %d, Mode %d"), pwm_led_mode, hue, mode);
+  // ALOG_INF(PSTR("Throttle: %d, Hue: %d, Mode %d"), mode_pwm, hue, mode);
 
 }
 
@@ -432,6 +685,9 @@ void mMavlinkFlyingLEDS::parse_JSONCommand(JsonParserObject obj)
       break;
       case 2: // Takeoff Lights
         Effect_TakeoffLights();
+      break;
+      case 3: // Flight 01 - Random Sweep
+        Effect_Flight01_RandomSweep();
       break;
     }
 

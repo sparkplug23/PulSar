@@ -225,6 +225,8 @@ Bathroom
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_FLOORFAN2
 // #define DEVICE_FLOORFAN4
+// #define DEVICE_FLOORFAN5
+// #define DEVICE_FLOORFAN6 // unused, but doing now
 // #define DEVICE_DEFAULT_SONOFF_BASIC__06
 // #define DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT // Desk floor mat
 
@@ -3027,9 +3029,11 @@ R"=====(
 
   #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+
+  
   #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+  
 
   #define USE_LIGHTING_TEMPLATE
 
@@ -3114,33 +3118,127 @@ R"=====(
   // }
   // )=====";
   
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  //group A
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":5,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":250,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":500,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":21,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":750,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       500
+  //     ],
+  //     "ColourPalette":"Sweetpea",
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "Segment1": {
+  //     "PixelRange": [
+  //       500,
+  //       750
+  //     ],
+  //     "ColourPalette":"IceCream Floats",
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "Segment2": {
+  //     "PixelRange": [
+  //       750,
+  //       1000
+  //     ],
+  //     "ColourPalette":172,
+  //     "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  // side 2
   R"=====(
   {
     "BusConfig":[
       {
-        "Pin":5,
+        "Pin":33,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":250
       },
       {
-        "Pin":18,
+        "Pin":27,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":250,
         "Length":250
       },
       {
-        "Pin":19,
+        "Pin":26,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":500,
         "Length":250
       },
       {
-        "Pin":21,
+        "Pin":25,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":750,
@@ -3157,10 +3255,7 @@ R"=====(
         "Function":"Static Palette",
         "Speed":127,
         "Intensity":127,
-        "Grouping":1
-      },
-      "Transition": {
-        "TimeMs": 0,
+        "Grouping":1,
         "RateMs": 1000
       },
       "BrightnessRGB": 100
@@ -3170,15 +3265,12 @@ R"=====(
         500,
         750
       ],
-      "ColourPalette":"IceCream Floats",
+      "ColourPalette":"Snowy 02",
       "Effects": {
-        "Function":"Static Palette",
+        "Function":"Slow Glow",
         "Speed":127,
         "Intensity":127,
-        "Grouping":1
-      },
-      "Transition": {
-        "TimeMs": 0,
+        "Grouping":1,
         "RateMs": 1000
       },
       "BrightnessRGB": 100
@@ -3194,19 +3286,15 @@ R"=====(
         "Function":"Static Palette",
         "Speed":127,
         "Intensity":127,
-        "Grouping":1
-      },
-      "Transition": {
-        "TimeMs": 0,
+        "Grouping":1,
         "RateMs": 1000
       },
       "BrightnessRGB": 100
     },
-    "BrightnessRGB": 0,
+    "BrightnessRGB": 100,
     "BrightnessCCT": 0
   }
   )=====";
-
 
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // R"=====(
@@ -5852,5 +5940,104 @@ HVAC controllers here
 
 #endif
 
+#ifdef DEVICE_FLOORFAN5
+  #define DEVICENAME_CTR          "floorfan5"
+  #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 5"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT 1883
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  //   #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_SENSORS_BUTTONS
+
+  #define USE_MODULE_CONTROLLER_SONOFF_IFAN
+    #define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"Relay1\","
+        "\"Relay2\","
+        "\"Relay3\","
+        "\"Relay4\""
+      "]"
+    "}"
+  "}";
+   
+#endif
+
+#ifdef DEVICE_FLOORFAN6
+  #define DEVICENAME_CTR          "floorfan6"
+  #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 6"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT 1883
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  //   #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_SENSORS_BUTTONS
+
+  #define USE_MODULE_CONTROLLER_SONOFF_IFAN
+    #define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"Relay1\","
+        "\"Relay2\","
+        "\"Relay3\","
+        "\"Relay4\""
+      "]"
+    "}"
+  "}";
+   
+#endif
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_LONGTERM_TEMPLATES_H

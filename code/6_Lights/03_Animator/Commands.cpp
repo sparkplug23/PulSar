@@ -229,54 +229,38 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
   
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Reverse"])
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_REVERSE])
   { 
-   SEGMENT_I(segment_index).setOption(SEG_OPTION_REVERSED, jtok.getInt());  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    SEGMENT_I(segment_index).setOption(SEG_OPTION_REVERSED, jtok.getInt());  
+    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_REVERSE)), SEGMENT_I(segment_index).reverse);
   }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Mirror"])
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_MIRROR])
   { 
-   SEGMENT_I(segment_index).setOption(SEG_OPTION_MIRROR, jtok.getInt());  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    SEGMENT_I(segment_index).setOption(SEG_OPTION_MIRROR, jtok.getInt());  
+    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_MIRROR)), SEGMENT_I(segment_index).mirror);
   }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Grouping"])
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_GROUPING])
   { 
-    ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
     SEGMENT_I(segment_index).grouping = jtok.getInt();  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
   }
 
   
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Decimate"])
-  { 
-    
-    ALOG_INF( PSTR("Decimate %d %d"), jtok.getInt(), segment_index );
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_DECIMATE])
+  {
     SEGMENT_I(segment_index).decimate = jtok.getInt();  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
   }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Spacing"])
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_SPACING])
   { 
-
-
-    ALOG_INF( PSTR("Spacing %d %d"), jtok.getInt(), segment_index );
-   SEGMENT_I(segment_index).spacing = jtok.getInt();  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    SEGMENT_I(segment_index).spacing = jtok.getInt();  
+    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_SPACING)), SEGMENT_I(segment_index).spacing);
   }
 
 
@@ -530,6 +514,12 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   {
     SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms = jtok.getInt();
     ALOG_INF(PSTR("single_animation_override_turning_off=%d"),SEGMENT_I(segment_index).single_animation_override_turning_off.time_ms);
+  }
+
+
+  if(jtok = obj["Transition"].getObject()["RateMs"])
+  {
+    ALOG_ERR(PSTR("$.Transition.RateMs is now $.Effects.RateMs"));
   }
   
 

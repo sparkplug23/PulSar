@@ -140,7 +140,22 @@
 
   #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
   
+
+
+
+
+
+
+  
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+
+
+
+
+
+
+
+
   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
   #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
@@ -164,7 +179,7 @@
     #define ENABLE_DEBUG_SERIAL    
 
     
-  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_DUAL_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
@@ -300,11 +315,10 @@
 
  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
  
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
 
   #define USE_MODULE_TEMPLATE
@@ -1372,8 +1386,6 @@
 
   // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
 
-  #define LOG_BUFFER_SIZE 2000
-
   // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
 
   /***********************************
@@ -1385,6 +1397,17 @@
    * Options should just be ifdef to switch between methods. 
   */
   // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
+  #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
+  
 
   /***********************************
    * SECTION: System Configs
@@ -1435,14 +1458,18 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/  
-
  
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+
+    // #undef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+    // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
 
 
   #define USE_MODULE_TEMPLATE
@@ -1497,13 +1524,13 @@
       ],
       "ColourPalette":"Snowy 02",
       "Effects": {
-        "Function":"Spanned Palette",
+        "Function":"Slow Glow",
         "Speed":127,
         "Intensity":127,
         "Grouping":1
       },
       "Transition": {
-        "TimeMs": 0,
+        "TimeMs": 500,
         "RateMs": 1000
       },
       "BrightnessRGB": 100
@@ -1512,6 +1539,41 @@
     "BrightnessCCT": 0
   }
   )=====";
+  
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":10
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       10
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Spanned Palette",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
   
 
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L1__ESP32_I2S_PARALLEL_4CH

@@ -718,6 +718,9 @@ struct RgbcctColor : RgbColorBase
     return adjusted_colour;
 
   }
+  RgbcctColor WithBrightness(){ //legacy
+    return GetColourWithBrightnessApplied();
+  }
 
   /**
    * Get RgbcctColor withOUT brightness applied

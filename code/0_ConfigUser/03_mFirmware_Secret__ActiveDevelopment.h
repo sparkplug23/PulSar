@@ -35,7 +35,8 @@
 // #define DEVICE_DESKSENSOR // tester with ring led/
 // #define DEVICE_TESTBED__GPS_SERIAL
 // #define DEVICE_TESTBED__FLIGHT__LED_CONTROL_MAVLINK
-#define DEVICE_DOLPHIN__FLIGHT__LED_CONTROL_MAVLINK
+// #define DEVICE_DOLPHIN__FLIGHT__LED_CONTROL_MAVLINK
+// #define DEVICE_TESTBED__ULTRASONIC
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -43,6 +44,102 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
+
+/**
+ * 
+ * Change to ESP32
+ * Add ultrasonic sensor to the cold water tank (glue, cut in 2 inches on lid so wire can be brought over and ziptie so it cant fall into the water ever)
+ *  DONT FLASH UNTIL ITS ESP32
+ * 
+ * */
+#ifdef DEVICE_TESTBED__ULTRASONIC
+  #define DEVICENAME_CTR          "testbed_ultrasonic"
+  #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Attic"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  //   #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #define USE_MODULE_SENSORS_SR04
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    // #define SONAR_SERIAL_BAUD 115200
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_SR04
+      "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
+      "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      #endif 
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," 
+      #endif
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Attic"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Attic"  
+  #define D_DEVICE_SENSOR_SR04_FRIENDLY_NAME_LONG "ColdWaterHeaderTank"  
+
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "Cold Water Tank"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,50,199,3,0,0,0,102]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "Attic Top"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,255,100,30,7,142,92,154]"
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "Attic Bottom"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,255,100,30,7,143,73,252]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SR04_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_SR04_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ""
+      "}"   
+    "}"
+  "}";
+
+#endif
 
 
 /*
@@ -420,20 +517,20 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
     
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+    
 
 
 
 
   #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  
   #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+  
 
   #define USE_LIGHTING_TEMPLATE
 
@@ -1084,20 +1181,20 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
     
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+    
 
 
 
 
   #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  
   #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+  
 
   #define USE_LIGHTING_TEMPLATE
 
@@ -1541,6 +1638,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
 
  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 20
+// #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
+// #define DISABLE_NETWORK
+
+#define ENABLE_DEVFEATURE_NETWORK__BLOCK_CONNECT_PUSH_BACKOFF_LONG_AS_TEMP_SOLUTION_TO_NO_WIFI
 
   /***********************************
    * SECTION: Sensor Configs
@@ -1656,7 +1757,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
       #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
-      #define ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE 3
+      // #define ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE 2
 
       // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3500
 
@@ -1693,11 +1794,11 @@ May need to add two power connections too, so its not just the cat5e wire to let
     // #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
     
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+    
 
 
   /***********************************
@@ -1755,8 +1856,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Driver Configs
   ************************************/  
 
-//  #define ENABLE_DEVFEATURE_MAVLINK__USE_TIME_FOR_RANGE_TESTING
-#define ENABLE_DEVFEATURE_MAVLINK__USE_MANUAL_FOR_RANGE_TESTING
+  //  #define ENABLE_DEVFEATURE_MAVLINK__USE_TIME_FOR_RANGE_TESTING
+  // #define ENABLE_DEVFEATURE_MAVLINK__USE_MANUAL_FOR_RANGE_TESTING
+  // #define ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE
 
   /***********************************
    * SECTION: Lighting Configs
@@ -1798,7 +1900,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define ENABLE_DEBUG_SERIAL    
 
     
-  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_DUAL_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
@@ -1819,9 +1921,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+  
   #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-  #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
+  
 
   #define USE_LIGHTING_TEMPLATE
 
@@ -1861,7 +1963,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "ColourOrder":"GRBC",
           "BusType":"SK6812_RGBW",
           "Start":82,
-          "Length":18
+          "Length":18,
+          "Reversed":1
         },
         {
           "Pin":4,
@@ -2675,6 +2778,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
  * 
  * add solar value I can poll to get time of day (day/dusk/twilight/) and direction of sun movement (rising/falling)
  * 
+ * Temporary sensor tester with dual DHT
+ * 
  * 
  **/
 #ifdef DEVICE_DESKSENSOR
@@ -2936,17 +3041,16 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define USE_MODULE_NETWORK_WEBSERVER
     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
 
     
-    #define ENABLE_DEVFEATURE_LIGHTING__PALETTE_ENCODED_HEATMAPS
+    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-    #define ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
     // 13, 18, 19, 22, 23, 25, 26, 27       USED
     // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED

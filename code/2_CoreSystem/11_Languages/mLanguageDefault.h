@@ -1952,6 +1952,12 @@
 #define D_JSON_MINUTES_ON "minutes_on"
 #define D_JSON_NAME "Name"
 
+#define D_GROUPING "Grouping"
+#define D_DECIMATE "Decimate"
+#define D_SPACING "Spacing"
+#define D_REVERSE "Reverse"
+#define D_MIRROR "Mirror"
+
 #define D_JSON_MEMORY_INSUFFICIENT "Memory Insufficient"
 
 #define D_JSON_SCENENAME "SceneName"

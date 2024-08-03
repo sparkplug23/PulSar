@@ -683,7 +683,6 @@ public:
 #define WEB_LOG_SIZE 200       // Max number of characters in weblog
 #endif // WEB_LOG_SIZE
 #ifndef LOG_BUFFER_SIZE
-
 #ifdef ESP8266
 #define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
 #else //esp32

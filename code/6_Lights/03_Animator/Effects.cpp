@@ -134,7 +134,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
   
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -176,7 +176,7 @@ void mAnimatorLight::EffectAnim__Static_Palette_Vintage()
 
     ALOG_INF(PSTR("Static Palette Vintage: First Run"));
 
-    RgbcctColor colour = RgbcctColor(0);
+    RgbcctColor colour = RgbcctColor();
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
       colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -214,7 +214,7 @@ void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
@@ -776,7 +776,7 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder, b
   
 //   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.virtualLength() )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-//   RgbcctColor colour = RgbcctColor(0);
+//   RgbcctColor colour = RgbcctColor();
 
 
 
@@ -1037,9 +1037,9 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
   
   uint16_t start_pixel = 0;
   uint16_t end_pixel = 100;
-  RgbcctColor start_colour = RgbcctColor(0);
-  RgbcctColor end_colour = RgbcctColor(0);
-  RgbcctColor out_colour = RgbcctColor(0);
+  RgbcctColor start_colour = RgbcctColor();
+  RgbcctColor end_colour = RgbcctColor();
+  RgbcctColor out_colour = RgbcctColor();
   uint8_t start_pixel_position = 255, end_pixel_position = 255;
 
   uint16_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette_id);
@@ -1165,7 +1165,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette()
            
       ALOG_DBM( PSTR("Segment: %d\t(%d,%d),(%d)"), SEGIDX, SEGMENT.start, SEGMENT.stop, SEGMENT.palette_id);
 
-      RgbcctColor colour = RgbcctColor(0);
+      RgbcctColor colour = RgbcctColor();
       for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
       {
 
@@ -1253,7 +1253,7 @@ static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM = "Rotating Palet
            
 //       ALOG_DBM( PSTR("Segment: %d\t(%d,%d),(%d)"), SEGIDX, SEGMENT.start, SEGMENT.stop, SEGMENT.palette_id);
 
-//       RgbcctColor colour = RgbcctColor(0);
+//       RgbcctColor colour = RgbcctColor();
 //       for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
 //       {
 
@@ -1575,10 +1575,10 @@ void mAnimatorLight::EffectAnim__TimeBased__HourProgress()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = RgbcctColor(0);
+    colour = RgbcctColor();
     colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type__used_in_effect_generate, colour);
   }
@@ -1767,9 +1767,9 @@ static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
 
 //   uint8_t saturation_255 = 200;
 //   float   saturation     = saturation_255/255.0f;
-//   HsbColor colour_hsb = HsbColor(RgbcctColor(0));
+//   HsbColor colour_hsb = HsbColor(RgbcctColor());
   
-//   RgbcctColor colour = RgbcctColor(0);
+//   RgbcctColor colour = RgbcctColor();
 //   for(uint16_t pixel = 0; 
 //                pixel < SEGLEN; 
 //                pixel++
@@ -1846,7 +1846,7 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
   uint16_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette_id);
 
   uint16_t pixel_index = 0;
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
 
   /**
    * @brief On first run, all leds need set once
@@ -1939,7 +1939,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
    * @brief Step 1: Draw palette 1 as base
    * 
    */
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; 
                 pixel < SEGMENT.virtualLength(); 
                 pixel++
@@ -1964,7 +1964,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
    * For xmas2022, forced as white
    */
 
-  RgbcctColor overdraw_colour = RgbcctColor(0);
+  RgbcctColor overdraw_colour = RgbcctColor();
 
 
 
@@ -2045,7 +2045,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
    * @brief Step 1: Draw palette 1 as base
    * 
    */
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; 
                 pixel < SEGMENT.virtualLength(); 
                 pixel++
@@ -2070,7 +2070,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
    * For xmas2022, forced as white
    */
 
-  RgbcctColor overdraw_colour = RgbcctColor(0);
+  RgbcctColor overdraw_colour = RgbcctColor();
 
 
 
@@ -2101,7 +2101,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
 
     random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
 
-    overdraw_colour = RgbcctColor(0);  //GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
+    overdraw_colour = RgbcctColor();  //GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
 
     // overdraw_colour.debug_print("overdraw_colour");
 
@@ -2176,7 +2176,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
    * @brief Step 1: Draw palette 1
    * 
    */
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; 
                 pixel < SEGMENT.virtualLength(); 
                 pixel++
@@ -2271,7 +2271,7 @@ void mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -2305,7 +2305,7 @@ void mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palet
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -2339,7 +2339,7 @@ void mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -2373,7 +2373,7 @@ void mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -2407,7 +2407,7 @@ void mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -2441,7 +2441,7 @@ void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -2474,7 +2474,7 @@ void mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_Base
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
@@ -3145,7 +3145,7 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01()
 
   for(int i=0;i<SEGLEN;i++)
   {    
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_type__used_in_effect_generate, RgbcctColor(0));
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_type__used_in_effect_generate, RgbcctColor());
   }
 
   uint8_t colour_offset = 1;
@@ -3224,11 +3224,11 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
   // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   
-  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
+  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor();}
   uint8_t segment_index=0;
 
   for(int i=0;i<93;i++){
-    // animation_colours[i].DesiredColour = RgbcctColor(0);
+    // animation_colours[i].DesiredColour = RgbcctColor();
     // }
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_type__used_in_effect_generate, RgbwColor(0,0,0,0));
   
@@ -3660,7 +3660,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //   //   animation_colours[index].DesiredColour = SEGMENT.GetPixelColor(index);
 //   // }
 //     for(uint16_t index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
-//     animation_colours[index].DesiredColour = RgbcctColor(0);//,0,30,0,0);//,0,10,0,0);
+//     animation_colours[index].DesiredColour = RgbcctColor();//,0,30,0,0);//,0,10,0,0);
 //   }
 
 //   //scan back and forth
@@ -5711,7 +5711,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 //       // if(flashersettings.flags.enable_endingcolour_as_alternate){
 //       //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
-//       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
+//       //   UpdateDesiredColourWithSingleColour(RgbcctColor());
 //       // }
 
 //       pCONT_iLight->rgbcct_controller.setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
@@ -5720,7 +5720,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //       UpdateDesiredColourFromPaletteSelected();
 //       // if(flashersettings.flags.enable_startcolour_as_alternate){
 //       //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
-//       //   UpdateStartingColourWithSingleColour(RgbcctColor(0));
+//       //   UpdateStartingColourWithSingleColour(RgbcctColor());
 //       // }else{
 //         UpdateStartingColourWithGetPixel();
 //       // }
@@ -5997,12 +5997,12 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //       AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 //       // if(flashersettings.flags.enable_endingcolour_as_alternate){
 //       //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
-//       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
+//       //   UpdateDesiredColourWithSingleColour(RgbcctColor());
 //       // }
 //       UpdateDesiredColourFromPaletteSelected();
 //       // if(flashersettings.flags.enable_startcolour_as_alternate){
 //       //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
-//       //   UpdateStartingColourWithSingleColour(RgbcctColor(0));
+//       //   UpdateStartingColourWithSingleColour(RgbcctColor());
 //       // }else{
 //         UpdateStartingColourWithGetPixel();
 //       // }
@@ -6212,7 +6212,7 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
       SEGMENT.params_internal.aux0 = get_random_wheel_index(SEGMENT.params_internal.aux1);
       SEGMENT.step = 0;
     }
-    ALOG_INF(PSTR("useRandomColors %d %d %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1, SEGMENT.call);
+    // ALOG_INF(PSTR("useRandomColors %d %d %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1, SEGMENT.call);
   }else
   if(useIterateOverPalette)
   {
@@ -6259,7 +6259,7 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
     col_wipe = SEGCOLOR_U32(1);
   }
 
-  ALOG_INF(PSTR("aux0 %d aux1 %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1);
+  // ALOG_INF(PSTR("aux0 %d aux1 %d"), SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1);
 
 
   for (uint16_t i = 0; i < SEGLEN; i++)
@@ -11461,7 +11461,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(bool fl
   uint16_t* blink_counter_p         = &SEGMENT.params_internal.aux2;
   uint16_t* autotimeout_last_millis = &SEGMENT.params_internal.aux3; // cant use tSaved as its U16, so just compare against previous millis
 
-  RgbcctColor starting_colour     = RgbcctColor(0);
+  RgbcctColor starting_colour     = RgbcctColor();
   RgbcctColor desired_colour      = SEGCOLOR_RGBCCT(0);
   bool        flag_set_animator   = false;
 
@@ -11488,18 +11488,18 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(bool fl
   {
     if(*blink_state_p)
     {
-      starting_colour = RgbcctColor(0);
+      starting_colour = RgbcctColor();
       desired_colour  = SEGCOLOR_RGBCCT(0);
       *blink_state_p = 0;
     }
     else
     {
       starting_colour = SEGCOLOR_RGBCCT(0);
-      desired_colour  = RgbcctColor(0);
+      desired_colour  = RgbcctColor();
       *blink_state_p = 1;
     }
   }else{
-    starting_colour = RgbcctColor(0);
+    starting_colour = RgbcctColor();
     desired_colour  = SEGCOLOR_RGBCCT(0);
   }
 
@@ -11577,7 +11577,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(bool fl
     if(*auto_seconds_timeout==1)
     {
       ALOG_DBM( PSTR("auto_seconds_timeout = %d, %d   OFF"), *autotimeout_last_millis, *auto_seconds_timeout );
-      desired_colour = RgbcctColor(0); // off
+      desired_colour = RgbcctColor(); // off
       SEGMENT.time_ms = 500;
       SEGMENT.cycle_time__rate_ms = 1000;
     }
@@ -11736,7 +11736,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
 
 
 
-  // RgbcctColor colour = RgbcctColor(0);
+  // RgbcctColor colour = RgbcctColor();
   // for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   // {    
   //   colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
@@ -11987,7 +11987,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
@@ -12020,7 +12020,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
     colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);

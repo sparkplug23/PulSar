@@ -347,8 +347,7 @@ void WebAppend_Root_Status_Table();
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
   
-  //#ifdef USE_CORE_MQTT 
-
+    #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
@@ -364,6 +363,7 @@ void WebAppend_Root_Status_Table();
     struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
     
     std::vector<struct handler<mFileSystem>*> mqtthandler_list;
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 

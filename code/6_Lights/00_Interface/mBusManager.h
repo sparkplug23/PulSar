@@ -193,7 +193,7 @@ class Bus {
     virtual bool     canShow() { return true; }
     
     virtual void     setPixelColor(uint16_t pix, RgbcctColor c) = 0;
-    virtual RgbcctColor getPixelColor(uint16_t pix) { return 0; }
+    virtual RgbcctColor getPixelColor(uint16_t pix) { return RgbcctColor(); }
 
     virtual void     cleanup() = 0;
     virtual uint8_t  getPins(uint8_t* pinArray) { return 0; }

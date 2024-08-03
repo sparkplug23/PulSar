@@ -7,7 +7,7 @@
  * ** Will be turned off when I leave
 \*********************************************************************************************/
 
-#define USE_MODULE_NETWORKS_MQTT
+// #define USE_MODULE_NETWORKS_MQTT
 // #define DEVICE_FORCED_TO_BE_TESTER
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER

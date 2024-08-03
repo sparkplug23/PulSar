@@ -1419,7 +1419,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
       }
               
       SEGMENT_I(seg_i).call++; // Used as progress counter for animations eg rainbow across all hues
-      ALOG_INF(PSTR("seg=%d,call=%d"),seg_i, SEGMENT_I(seg_i).call);
+      // ALOG_INF(PSTR("seg=%d,call=%d"),seg_i, SEGMENT_I(seg_i).call);
 
       DEBUG_PIN1_SET(HIGH);
                 
@@ -1548,7 +1548,7 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
 void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
 {    
 
-  RgbcctColor updatedColor = RgbcctColor(0);
+  RgbcctColor updatedColor;
   TransitionColourPairs colour_pairs;
   GetTransitionColourBuffer(SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type__used_in_effect_generate, &colour_pairs);
   
@@ -1582,7 +1582,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
 void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSegColours(const AnimationParam& param)
 {    
   
-  RgbcctColor updatedColor = RgbcctColor::LinearBlend(SEGMENT.rgbcctcolors[4].GetColourWithBrightnessApplied(), SEGMENT.rgbcctcolors[5].GetColourWithBrightnessApplied(), param.progress);    
+  RgbcctColor updatedColor = RgbcctColor::LinearBlend(SEGMENT.rgbcctcolors[4].WithBrightness(), SEGMENT.rgbcctcolors[5].WithBrightness(), param.progress);    
   
   // ALOG_INF( PSTR("SEGMENT.colour_type__used_in_effect_generate=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type__used_in_effect_generate,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
 
@@ -1631,9 +1631,7 @@ uint8_t mAnimatorLight::GetSizeOfPixel(ColourType colour_type)
   switch(colour_type)
   {
     case ColourType::COLOUR_TYPE__RGB__ID:     return 3;
-    case ColourType::COLOUR_TYPE__RGBW__ID:    
-    // case RgbcctColor::ColourType::LIGHT_TYPE_RGBC__ID:      
-    return 4;
+    case ColourType::COLOUR_TYPE__RGBW__ID:    return 4;
     case ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
   }
 
@@ -2692,7 +2690,8 @@ void mAnimatorLight::Segment::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8
 bool mAnimatorLight::Segment::setColor(uint8_t slot, uint32_t c) { //returns true if changed
 
 
-  rgbcctcolors[slot] = RgbcctColor::GetRgbcctFromU32Colour(c); 
+  // rgbcctcolors[slot] = RgbcctColor::GetRgbcctFromU32Colour(c); 
+  rgbcctcolors[slot] = RgbcctColor(c); 
 
   // if (slot >= NUM_COLORS || c == colors[slot]) return false;
   // if (fadeTransition) startTransition(strip.getTransition()); // start transition prior to change
@@ -3253,7 +3252,10 @@ void mAnimatorLight::Segment::fade_out(uint8_t rate) {
   float mappedRate = float(rate) +1.1;
 
   // 
-  uint32_t color = RgbcctColor::GetU32ColourBrightnessApplied(rgbcctcolors[1]);   //pCONT_lAni->SEGCOLOR_RGBCCT(1).G; //  pCONT_lAni->segments[0].rgbcctcolors[1].getU32(); // getPixelColor(0);
+  uint32_t color = rgbcctcolors[1].WithBrightness().getU32();
+  
+  
+  // RgbcctColor::GetU32ColourBrightnessApplied(rgbcctcolors[1]);   //pCONT_lAni->SEGCOLOR_RGBCCT(1).G; //  pCONT_lAni->segments[0].rgbcctcolors[1].getU32(); // getPixelColor(0);
   
   // 
   int w2 = W(color);
@@ -3757,7 +3759,7 @@ uint32_t mAnimatorLight::getPixelColor(uint16_t i)
   RgbcctColor c = pCONT_iLight->bus_manager->getPixelColor(i);
   if(i==0 || i==1)
     c.debug_print("getPixelColor");
-  return RgbcctColor::GetU32Colour(c);
+  return c.getU32();
 }
 
 
@@ -4493,7 +4495,7 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, uint8
   
 void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, uint32_t color, bool segment_brightness_needs_applied)
 {
-  RgbcctColor col = RgbcctColor(0);
+  RgbcctColor col;
   col.red =   (color >> 16 & 0xFF);
   col.green = (color >> 8  & 0xFF);
   col.blue =  (color       & 0xFF);

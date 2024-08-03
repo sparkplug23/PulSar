@@ -64,13 +64,26 @@ class mMavlinkFlyingLEDS :
 
     void EverySecond();
     void EveryLoop();
+    void Update_ControlDataFromMAVLink();
 
     void Effect_LandingLights();
     void Effect_TakeoffLights();
+    void Effect_Flight01_RandomSweep();
 
     uint8_t effect_mode = 0;
     bool effect_manual = false;
     float test_float = 0.0f;
+
+    struct MAVLink_Data{
+      bool isvalid = false;
+
+      // RC Inputs
+      uint16_t buttons_6P = 0;
+      uint16_t slider_left = 0;
+      uint16_t slider_right = 0;
+
+
+    }mav;
     
     /************************************************************************************************
      * SECTION: Construct Messages

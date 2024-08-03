@@ -74,7 +74,7 @@ void mMQTT::MQTTSubscribe()
 {
 
   // Probably needs moved into main parsing, if this does not need redoing with each new connection, parsing it once may be enough. Or else, reparsing again.
-  
+  #ifdef USE_FUNCTION_TEMPLATE
   uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
   char buffer[progmem_size];
   memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
@@ -110,6 +110,8 @@ void mMQTT::MQTTSubscribe()
     }
       
   }
+
+  #endif // USE_FUNCTION_TEMPLATE
 
 
 

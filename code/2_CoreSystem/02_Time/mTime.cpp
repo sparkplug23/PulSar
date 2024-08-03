@@ -773,11 +773,16 @@ uint64_t mTime::WifiGetNtp(void)
     }
     ntp_server_id++;
   }
+  
+  #ifdef USE_MODULE_NETWORK_MQTT
   if (!pCONT_wif->WifiHostByName(ntp_server, time_server_ip)) {
     ntp_server_id++;
     ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
     return 0;
   }
+  #else
+  return 0; //tmp solution to no networking
+  #endif
   
   WiFiUDP udp;
 

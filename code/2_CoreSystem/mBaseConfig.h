@@ -193,10 +193,10 @@ With latest version, all longer term shared debug features should be added here 
   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-  #if !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE) && !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
-  // Enable the default method must devices need to use
-  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_DUAL_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS // To switch between I2S and RMT as primary channels
-  #endif
+  // #if !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE) && !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
+  // // Enable the default method must devices need to use
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS // To switch between I2S and RMT as primary channels
+  // #endif
 
   #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
 
@@ -272,7 +272,8 @@ With latest version, all longer term shared debug features should be added here 
 \*********************************************************************************************/
 
 #ifndef DISABLE_NETWORK
-#define USE_MODULE_NETWORK_MQTT
+#define USE_MODULE_NETWORK_MQTT 
+// here
 #define USE_MODULE_NETWORK_WIFI
 #endif // DISABLE_NETWORK
 

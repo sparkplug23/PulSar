@@ -367,7 +367,7 @@ RgbcctColor BusPwm::getPixelColor(uint16_t pix)
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "BusPwm::getPixelColor ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
   #endif
-  if (pix != 0 || !_valid) return RgbcctColor(0); // only react to first pixel
+  if (pix != 0 || !_valid) return RgbcctColor(); // only react to first pixel
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   output_colour.debug_print("BusPwm::getPixelColor::output_colour");
   #endif //  ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
@@ -502,13 +502,13 @@ BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
 void BusOnOff::setPixelColor(uint16_t pix, RgbcctColor c) 
 {
   if (pix != 0 || !_valid) return; // only react to first pixel
-  uint32_t colour = RgbcctColor::GetU32Colour(c);
+  uint32_t colour = c.getU32();
   _data = bool(colour) ? 0xFF : 0;
 }
 
 RgbcctColor BusOnOff::getPixelColor(uint16_t pix) 
 {
-  if (!_valid) return 0;
+  if (!_valid) return RgbcctColor();
   return RgbcctColor(_data);
 }
 
@@ -756,7 +756,7 @@ RgbcctColor BusManager::getPixelColor(uint16_t pix)
     if (pix < bstart || pix >= bstart + b->getLength()) continue;
     return b->getPixelColor(pix - bstart);
   }
-  return 0;
+  return RgbcctColor();
 }
 
 

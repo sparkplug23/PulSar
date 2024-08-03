@@ -754,7 +754,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   DEBUG_PIN4_SET(0);
 
   // ALOG_INF(PSTR("palette_id  = %d %d"), palette_id, palette_id);
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor();
 
   // 
 
@@ -1102,7 +1102,11 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
       ALOG_ERR(PSTR("Bad Palette ID"));
     case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:{
 
+      #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
       float azimuth = pCONT_solar->solar_position.azimuth;
+      #else
+      float azimuth = 0;
+      #endif
 
       float progress = mSupport::mapfloat(azimuth, 0,360, 0.0f, 1.0f);
       
@@ -1123,10 +1127,14 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
      */
     case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
     {
-    
+      
+      #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
       float elevation = pCONT_solar->GetElevation();
+      #else
+      float elevation = 0;
+      #endif
 
-      RgbcctColor colour_out = RgbcctColor(0);  
+      RgbcctColor colour_out = RgbcctColor();  
 
       float elevation_transition_degrees = 10; // degrees above/below horizon to transition between warm/cold white
 
@@ -1150,12 +1158,12 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
                                               0.0f,                            1.0f
                                             );
 
-        RgbcctColor colour1 = RgbcctColor(0);
+        RgbcctColor colour1 = RgbcctColor();
         colour1.setCCT_Kelvin(CCT_MIN_DEFAULT); // Cold White
         colour1.setRGB(255,255,255); // Cold White with RGB (Full)
         // colour1.setRGB(255,0,0); // Debugging
 
-        RgbcctColor colour2 = RgbcctColor(0);
+        RgbcctColor colour2 = RgbcctColor();
         colour2.setCCT_Kelvin(CCT_MAX_DEFAULT); // Warm White
         colour2.setRGB(0xFF,0x52,0x18);  // Warm White with RGB (White with reduced G,B)
         // colour2.setRGB(0,0,255); // Debugging
@@ -1206,9 +1214,13 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
 
 
       
-      float elevation = pCONT_solar->solar_position.elevation;
+      #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+      float elevation = pCONT_solar->GetElevation();
+      #else
+      float elevation = 0;
+      #endif
 
-      RgbcctColor colour_out = RgbcctColor(0);  
+      RgbcctColor colour_out = RgbcctColor();  
 
       float elevation_transition_degrees = 10; // degrees above/below horizon to transition between warm/cold white
 
@@ -1290,8 +1302,6 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
     //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
     //   ALOG_INF(PSTR("Get_Encoded_DynamicPalette_Colour::ENCODED %d"), palette_adjusted_id);
     //   #endif 
-
-    //   #ifdef ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
     //   uint16_t palette_id = PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID;
     //   uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
@@ -1469,7 +1479,6 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
   
 
     //   return colour;
-    //   #endif // ENABLE_DEVFEATUER_LIGHT__DECODE_DYNAMIC_ENCODED_WITH_FUNCTIONS
 
     // }break;
   }
@@ -2147,7 +2156,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
   
     // ALOG_INF(PSTR("index_relativeA=%d"),index_relative);
 
-    if(palette_buffer == nullptr){ ALOG_ERR(PSTR("palette_buffer is null")); return RgbcctColor(0); }
+    if(palette_buffer == nullptr){ ALOG_ERR(PSTR("palette_buffer is null")); return RgbcctColor(); }
 
       // DEBUG_LINE_HERE2;
     if(encoding.index_gradient)
@@ -2173,7 +2182,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
 
   }
 
-  return RgbcctColor(0);
+  return RgbcctColor();
 
 }
 

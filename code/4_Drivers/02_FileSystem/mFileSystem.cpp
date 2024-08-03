@@ -967,6 +967,7 @@ uint8_t mFileSystem::ConstructJSON_Settings(uint8_t json_level, bool json_append
 }
 
 
+  #ifdef USE_MODULE_NETWORK_MQTT
 void mFileSystem::MQTTHandler_Init(){
 
   struct handler<mFileSystem>* ptr;
@@ -1017,6 +1018,7 @@ void mFileSystem::MQTTHandler_Sender()
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_FILESYSTEM_ID, handle);
   }
 }
+  #endif // USE_MODULE_NETWORK_MQTT
 
 
 

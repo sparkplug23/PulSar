@@ -36,17 +36,16 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     JBI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JBI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
 
-    JBI->Object_Start(PM_JSON_NETWORK);
-      IPAddress localip = WiFi.localIP();
-      JBI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
-      JBI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
-      JBI->Add(PM_JSON_RSSI,         WiFi.RSSI());
-      #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-      // JBI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
-      JBI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
-      JBI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
-      #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    JBI->Object_End();
+    IPAddress localip = WiFi.localIP();
+    JBI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
+    JBI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
+    JBI->Add(PM_JSON_RSSI,         WiFi.RSSI());
+    #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
+    // JBI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
+    JBI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
+    JBI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
+    #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
+      
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     // JBI->Object_Start(PM_JSON_MQTT);
     //   JBI->Add(PM_JSON_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);

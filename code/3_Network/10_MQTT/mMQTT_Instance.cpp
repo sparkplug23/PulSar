@@ -4,7 +4,7 @@
 
 void MQTTConnection::MqttConnected(void)
 {
-  
+  // here
   connected = true;
   retry_counter = 0;
   cConnectionAttempts = 0; // reset

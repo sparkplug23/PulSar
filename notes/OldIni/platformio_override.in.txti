@@ -75,7 +75,6 @@ default_envs =
     ; wh_garagelight
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Gazebo
     ; wh_gazebo_4chpro
-    ; wh_gazebosensor
     ; wh_h801_rgbgazebo
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Outside
     ; wh_sidelight

@@ -32,7 +32,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    122 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    123 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #06 : New BME680 added, bme/p 180/280 manual without library

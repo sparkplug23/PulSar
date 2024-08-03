@@ -2286,7 +2286,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
         encoded_gradient = 0;
         
-        RgbcctColor color =    RgbcctColor(0);
+        RgbcctColor color;
 
 
         #ifdef ENABLE_FEATURE_WATCHDOG_TIMER

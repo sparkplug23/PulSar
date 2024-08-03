@@ -18,7 +18,9 @@
 #include "DoubleEMAFilterLib.h"
 #endif //  ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
 
-
+#ifndef SONAR_SERIAL_BAUD
+  #define SONAR_SERIAL_BAUD 9600
+#endif // SONAR_SERIAL_BAUD
 
 #include <NewPing.h>
 #include <TasmotaSerial.h>

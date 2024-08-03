@@ -176,6 +176,12 @@
   uint8_t X[] PROGMEM =
 
 
+#define IS_WITHIN_RANGE(X,Y,Z) ((X>Y)&&(X<Z))
+#define IS_WITHIN_RANGE_MAXINC(X,Y,Z) ((X>Y)&&(X<=Z))  // max inclusive
+
+
+
+
 // #define SET_BUFFER_AS_GLOBAL_OR_LOCAL(X,Y) \
 //           if(Y == nullptr){ \
 //             X = pCONT_sup->global_buffer; \

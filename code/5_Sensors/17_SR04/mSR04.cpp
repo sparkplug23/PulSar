@@ -139,17 +139,17 @@ uint8_t mSR04::ModeDetect(void)
   int sr04_trig_pin = (pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID)) ? pCONT_pins->GetPin(GPIO_SR04_TRIG_ID) : pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);   // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
   sonar_serial = new TasmotaSerial(sr04_echo_pin, sr04_trig_pin, 1);
 
-  if (sonar_serial->begin(9600,1))
+
+  if (sonar_serial->begin(SONAR_SERIAL_BAUD,1))
   {
-    AddLog(LOG_LEVEL_TEST,PSTR("SR04: Detect mode"));
+    AddLog(LOG_LEVEL_TEST,PSTR("SR04: Detect mode pins TX%d, RX%d"), sr04_trig_pin, sr04_echo_pin);
     if (sr04_trig_pin != -1) 
     {      
-      // sr04_type = (
-      //   MiddleValue(
-      //     Mode3Distance(), 
-      //     Mode3Distance(), 
-      //     Mode3Distance()
-      //   ) != NO_ECHO) ? 3 : 1;
+      if (PinUsed(GPIO_SR04_TRIG_ID, i)) {
+        SR04[i].type = (Sr04TMiddleValue(Sr04TMode3Distance(i), Sr04TMode3Distance(i), Sr04TMode3Distance(i)) != 0) ? SR04_MODE_SER_TRANSCEIVER : SR04_MODE_TRIGGER_ECHO;
+      } else {
+        SR04[i].type = (Sr04TMiddleValue(Sr04TMode2Distance(i), Sr04TMode2Distance(i), Sr04TMode2Distance(i)) != 0) ? SR04_MODE_SER_RECEIVER : SR04_MODE_TRIGGER_ECHO;
+      }
     } else {
       sr04_type = 2;
     }
@@ -268,6 +268,7 @@ void mSR04::MeasureSensor()
       break;
     case 1:
       readings.raw.ping_value = sonar->ping_median(1);
+      Serial.println(readings.raw.ping_value);
       readings.raw.distance_cm = GetDistanceFromPing(readings.raw.ping_value);
       break;
     default:
