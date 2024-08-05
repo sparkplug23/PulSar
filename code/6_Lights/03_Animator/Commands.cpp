@@ -102,8 +102,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    */
   if(!segments.size())
   {
-    ALOG_ERR(PSTR("Segment Index %d exceeds max %d"), segment_index, segments.size());
-    
+    ALOG_ERR(PSTR("Segment Index %d exceeds max %d"), segment_index, segments.size());    
     return 0;
   }
 
@@ -112,17 +111,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   { 
     if(jtok.isArray())
     {
-/*
-      custom_palette 
-      going back, I may want to use my basic custom palette direct encoding
-      struct{
-        encoding  (rgb,rgbcct,crgb16palette bytes)
-        data
-        length
-      }
-
-
-  */    uint8_t array[16];
+      uint8_t array[16];
       uint8_t arrlen = 0;
       
       SEGMENT_I(segment_index).palette_container->mapping_values.clear(); // reset old map
@@ -132,27 +121,18 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       {
         if(arrlen > 16){ break; }
         SEGMENT_I(segment_index).palette_container->mapping_values.push_back(v.getFloat());
-
-        Serial.println(SEGMENT_I(segment_index).palette_container->mapping_values[arrlen]);
-        
+        Serial.println(SEGMENT_I(segment_index).palette_container->mapping_values[arrlen]);        
         arrlen++;      
-      }
-
-      
+      }      
       data_buffer.isserviced++;
     }
   }
 
   
-  /**
-   * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
-   **/
   if(jtok = obj[PM_JSON_COLOUR_PALETTE])
   {
-    if(jtok.isStr()){
-      /**
-       * @brief First check if it is simple commands
-       **/
+    if(jtok.isStr())
+    {
       if(strcmp(jtok.getStr(),"+")==0){
         SEGMENT_I(segment_index).palette_id++;
       }else
@@ -194,74 +174,122 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       ErrorMessage_P(ERROR_MESSAGE_TYPE_INVALID_FORMAT, PM_JSON_PIXELRANGE);
     }
   }
-  
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_FUNCTION])
-  { 
-    if(jtok.isStr())
-    {
-      if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0)
+  /*************************************************************************
+   *** {"Effects":{X:Y}}
+   *************************************************************************/
+  if(jtok_sub = obj[PM_JSON_EFFECTS])
+  {    
+    JsonParserObject jobj = jtok_sub.getObject();
+
+    if(jtok = jobj[PM_JSON_FUNCTION])
+    { 
+      if(jtok.isStr())
       {
-        CommandSet_Flasher_FunctionID(tmp_id, segment_index);
+        if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0)
+        {
+          CommandSet_Flasher_FunctionID(tmp_id, segment_index);
+          data_buffer.isserviced++;
+        }
+      }else
+      if(jtok.isNum())
+      {
+        CommandSet_Flasher_FunctionID(jtok.getInt(), segment_index);
         data_buffer.isserviced++;
       }
-    }else
-    if(jtok.isNum())
-    {
-      CommandSet_Flasher_FunctionID(jtok.getInt(), segment_index);
-      data_buffer.isserviced++;
+      ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
     }
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
-  }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_INTENSITY])
-  { 
-    CommandSet_Effect_Intensity(jtok.getInt(), segment_index);
-    ALOG_COM( PSTR(D_LOG_PIXEL D_JSON_COMMAND_2KEY_NVALUE_K(D_JSON_EFFECTS, D_JSON_INTENSITY)), jtok.getInt() );
-  }
-  
+    if(jtok = jobj[PM_JSON_INTENSITY])
+    { 
+      CommandSet_Effect_Intensity(jtok.getInt(), segment_index);
+      ALOG_COM( PSTR(D_LOG_PIXEL D_JSON_COMMAND_2KEY_NVALUE_K(D_JSON_EFFECTS, D_JSON_INTENSITY)), jtok.getInt() );
+    }
+    
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_SPEED])
-  { 
-    CommandSet_Effect_Speed(jtok.getInt(), segment_index);
-    ALOG_COM( PSTR(D_LOG_PIXEL D_JSON_COMMAND_2KEY_NVALUE_K(D_JSON_EFFECTS, D_JSON_SPEED)), jtok.getInt() );
-  }
-  
+    if(jtok = jobj[PM_JSON_SPEED])
+    { 
+      CommandSet_Effect_Speed(jtok.getInt(), segment_index);
+      ALOG_COM( PSTR(D_LOG_PIXEL D_JSON_COMMAND_2KEY_NVALUE_K(D_JSON_EFFECTS, D_JSON_SPEED)), jtok.getInt() );
+    }
+    
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_REVERSE])
-  { 
-    SEGMENT_I(segment_index).setOption(SEG_OPTION_REVERSED, jtok.getInt());  
-    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_REVERSE)), SEGMENT_I(segment_index).reverse);
-  }
-
-
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_MIRROR])
-  { 
-    SEGMENT_I(segment_index).setOption(SEG_OPTION_MIRROR, jtok.getInt());  
-    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_MIRROR)), SEGMENT_I(segment_index).mirror);
-  }
+    if(jtok = jobj[D_REVERSE])
+    { 
+      SEGMENT_I(segment_index).setOption(SEG_OPTION_REVERSED, jtok.getInt());  
+      ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_REVERSE)), SEGMENT_I(segment_index).reverse);
+    }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_GROUPING])
-  { 
-    SEGMENT_I(segment_index).grouping = jtok.getInt();  
-    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
-  }
-
-  
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_DECIMATE])
-  {
-    SEGMENT_I(segment_index).decimate = jtok.getInt();  
-    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
-  }
+    if(jtok = jobj[D_MIRROR])
+    { 
+      SEGMENT_I(segment_index).setOption(SEG_OPTION_MIRROR, jtok.getInt());  
+      ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_MIRROR)), SEGMENT_I(segment_index).mirror);
+    }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[D_SPACING])
-  { 
-    SEGMENT_I(segment_index).spacing = jtok.getInt();  
-    ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_SPACING)), SEGMENT_I(segment_index).spacing);
-  }
+    if(jtok = jobj[D_GROUPING])
+    { 
+      SEGMENT_I(segment_index).grouping = jtok.getInt();  
+      ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
+    }
+
+    
+    if(jtok = jobj[D_DECIMATE])
+    {
+      SEGMENT_I(segment_index).decimate = jtok.getInt();  
+      ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
+    }
+
+
+    if(jtok = jobj[D_SPACING])
+    { 
+      SEGMENT_I(segment_index).spacing = jtok.getInt();  
+      ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_SPACING)), SEGMENT_I(segment_index).spacing);
+    }
+      
+
+    if(jtok = jobj[PM_JSON_RATE]){ // default to secs
+      CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000, segment_index);
+      data_buffer.isserviced++;
+      ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RATE)), SEGMENT_I(segment_index).cycle_time__rate_ms);
+    }else
+    if(jtok = jobj[PM_JSON_RATE_MS]){
+      CommandSet_Animation_Transition_Rate_Ms(jtok.getInt(), segment_index);
+      data_buffer.isserviced++;
+      ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
+    }
+
+      
+    if (jtok = jobj["Params"]) { 
+      if (jtok.isArray()) {
+        JsonParserArray arrobj = jtok;
+        uint8_t array[4] = {0};  // Initialize the array to store values
+        arrobj.getArray(array);  // Retrieve array elements
+
+        // Assign retrieved values to SEGMENT_I params_user
+        auto& params_user = SEGMENT_I(segment_index).params_user;
+        std::copy(array, array + 4, params_user);
+
+        ALOG_COM(PSTR(D_LOG_PIXEL "Effects.Params Segment[%d] = %d,%d,%d,%d"), segment_index, params_user[0], params_user[1], params_user[2], params_user[3]);
+        data_buffer.isserviced++;
+      }
+    }else{
+      char keyname[10];
+      for(int i=0;i<4;i++)
+      {
+        snprintf(keyname, sizeof(keyname), "Param%d", i);
+        if(jtok = jobj[keyname])
+        {
+          SEGMENT_I(segment_index).params_user[i] = jtok.getInt();
+          data_buffer.isserviced++;
+          ALOG_COM(PSTR(D_LOG_PIXEL "Effects.Params Segment[%d] = %d,%d,%d,%d"), segment_index, SEGMENT_I(segment_index).params_user[0], SEGMENT_I(segment_index).params_user[1], SEGMENT_I(segment_index).params_user[2], SEGMENT_I(segment_index).params_user[3]);
+        }
+      }
+    }    
+
+  } // PM_JSON_EFFECTS
 
 
   /**
@@ -346,39 +374,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
   
   
-  if(jtok = obj["Effects"].getObject()["Params"])
-  { 
-    if(jtok.isArray())
-    {
-      uint8_t array[4];
-      uint8_t arrlen = 0;
-      JsonParserArray arrobj = jtok;
-      for(auto v : arrobj) 
-      {
-        if(arrlen > 4){ break; }
-        SEGMENT_I(segment_index).params_user[arrlen] = v.getInt();
-        arrlen++;      
-      }
-
-      ALOG_COM(PSTR(D_LOG_PIXEL "Effects.Params Segment[%d] = %d,%d,%d,%d"), segment_index, SEGMENT_I(segment_index).params_user[0], SEGMENT_I(segment_index).params_user[1], SEGMENT_I(segment_index).params_user[2], SEGMENT_I(segment_index).params_user[3]);
-      
-      data_buffer.isserviced++;
-    }
-  }else{
-
-    char keyname[10];
-    for(int i=0;i<4;i++)
-    {
-      snprintf(keyname, sizeof(keyname), "Param%d", i);
-      if(jtok = obj["Effects"].getObject()[keyname])
-      {
-        SEGMENT_I(segment_index).params_user[i] = jtok.getInt();
-        data_buffer.isserviced++;
-        ALOG_COM(PSTR(D_LOG_PIXEL "Effects.Params Segment[%d] = %d,%d,%d,%d"), segment_index, SEGMENT_I(segment_index).params_user[0], SEGMENT_I(segment_index).params_user[1], SEGMENT_I(segment_index).params_user[2], SEGMENT_I(segment_index).params_user[3]);
-      }
-    }
-
-  }
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION_SHORTCUT
   if(jtok = obj["LightNotif"])
@@ -520,22 +515,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   if(jtok = obj["Transition"].getObject()["RateMs"])
   {
     ALOG_ERR(PSTR("$.Transition.RateMs is now $.Effects.RateMs"));
-  }
-  
-
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_RATE]){ // default to secs
-    CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000, segment_index);
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RATE)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
-    #endif
-  }else
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_RATE_MS]){
-    CommandSet_Animation_Transition_Rate_Ms(jtok.getInt(), segment_index);
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
-    #endif
   }
   
 

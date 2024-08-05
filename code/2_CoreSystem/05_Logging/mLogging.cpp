@@ -22,44 +22,20 @@ void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP
 }
 
 
-
-// template<typename T, typename U>
-// void mLogging::AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-
-
-//   char buffer[100] = {0}; // short buffer
-//   uint16_t buflen = 0;
-
-//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
-
-//   AddLog(loglevel, buffer);
-
-
-
-// }
-
-
-
-
 void ErrorMessage_P(uint8_t error_type, const char* message)
 {
 
-
   AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %S"), message);
 
-
 }
+
 
 void ErrorMessage(uint8_t error_type, const char* message)
 {
 
   AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %s"), message);
 
-
-
 }
-
 
 
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)

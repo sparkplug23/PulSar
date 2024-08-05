@@ -216,6 +216,23 @@ public:
 
   // get the element if index `i` from 0 to `size() - 1`
   JsonParserToken operator[](int32_t i) const;
+  
+  // Method to get the array elements directly into a standard array
+  template <size_t N>
+  void getArray(uint8_t (&arr)[N]) const {
+    size_t count = size() < N ? size() : N;
+    for (size_t i = 0; i < count; ++i) {
+      arr[i] = (*this)[i].getInt();
+    }
+  }
+
+  // Method to get the array elements directly into a vector
+  void getArray(std::vector<uint8_t>& vec) const {
+    vec.resize(size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+      vec[i] = (*this)[i].getInt();
+    }
+  }
 
   //
   // const iterator
