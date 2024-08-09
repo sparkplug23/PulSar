@@ -35,7 +35,9 @@ License along with NeoPixel.  If not, see
 #include "HsbColor.h"
 #include "HtmlColor.h"
 
+// ADDED BY MICHAEL
 #include "RgbcctColor.h"
+
 #include "RgbwwColor.h"
 
 RgbwwColor::RgbwwColor(const HtmlColor& color)
@@ -63,6 +65,7 @@ RgbwwColor::RgbwwColor(const HsbColor& color)
     *this = rgbColor;
 }
 
+// ADDED BY MICHAEL
 RgbwwColor::RgbwwColor(const RgbcctColor& color)
 {
     R = color.R;
@@ -71,6 +74,7 @@ RgbwwColor::RgbwwColor(const RgbcctColor& color)
     WW = color.WW;
     CW = color.CW;
 }
+
 
 RgbwwColor::ElementType RgbwwColor::CalculateBrightness() const
 {

@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
-RgbwColor provides a color object that can be directly consumed by NeoPixelBus
+RgbwwColor provides a color object that can be directly consumed by NeoPixelBus
 
 Written by Michael C. Miller.
 
@@ -28,109 +28,100 @@ License along with NeoPixel.  If not, see
 struct RgbColor;
 struct HslColor;
 struct HsbColor;
-struct RgbcctColor;
-
-struct RgbwwColor;
-struct RgbwwwColor;
-struct Rgbw64Color;
-struct Rgbww80Color;
 
 // ------------------------------------------------------------------------
-// RgbwColor represents a color object that is represented by Red, Green, Blue
-// component values and an extra White component.  It contains helpful color 
-// routines to manipulate the color.
+// RgbwwColor represents a color object that is represented by Red, Green, Blue
+// component values and two extra White components.  
+// While the white components are labeled as WW (warm) and CW (cool), they can be
+// considered as the "warmer" and "cooler" whites of your LEDs; so that if yours
+// have Nuetral and Cool, you could consider the WW as your nuetral. 
+// It contains helpful color routines to manipulate the color.
 // ------------------------------------------------------------------------
-struct RgbwColor : RgbColorBase
+struct RgbwwColor : RgbColorBase
 {
     typedef uint8_t ElementType;
-    typedef NeoRgbwCurrentSettings SettingsObject;
+    typedef NeoRgbwwCurrentSettings SettingsObject;
 
     // ------------------------------------------------------------------------
-    // Construct a RgbwColor using R, G, B, W values (0-255)
+    // Construct a RgbwwColor using R, G, B, WW, CW values (0-255)
     // ------------------------------------------------------------------------
-    RgbwColor(ElementType r, ElementType g, ElementType b, ElementType w = 0) :
-        R(r), G(g), B(b), W(w)
+    RgbwwColor(ElementType r, ElementType g, ElementType b, ElementType warmW = 0, ElementType coolW = 0) :
+        R(r), G(g), B(b), WW(warmW), CW(coolW)
     {
     };
 
     // ------------------------------------------------------------------------
-    // Construct a RgbColor using a single brightness value (0-255)
+    // Construct a RgbwwColor using a single brightness value (0-255)
     // This works well for creating gray tone colors
     // (0) = black, (255) = white, (128) = gray
     // ------------------------------------------------------------------------
-    RgbwColor(ElementType brightness) :
-        R(0), G(0), B(0), W(brightness)
+    RgbwwColor(ElementType brightness) :
+        R(0), G(0), B(0), WW(brightness), CW(brightness)
     {
     };
 
     // ------------------------------------------------------------------------
-    // Construct a RgbwColor using RgbColor
+    // Construct a RgbwwColor using RgbColor
     // ------------------------------------------------------------------------
-    RgbwColor(const RgbColor& color) :
+    RgbwwColor(const RgbColor& color) :
         R(color.R),
         G(color.G),
         B(color.B),
-        W(0)
+        WW(0),
+        CW(0)
     {
     };
 
     // ------------------------------------------------------------------------
-    // explicitly Construct a RgbColor using RgbwwColor
+    // Construct a RgbwwColor using RgbwColor
     // ------------------------------------------------------------------------
-    explicit RgbwColor(const RgbwwColor& color);
+    RgbwwColor(const RgbwColor& color) :
+        R(color.R),
+        G(color.G),
+        B(color.B),
+        WW(color.W),
+        CW(color.W)
+    {
+    };
 
     // ------------------------------------------------------------------------
-    // explicitly Construct a RgbColor using RgbwwwColor
+    // Construct a RgbwwColor using HtmlColor
     // ------------------------------------------------------------------------
-    explicit RgbwColor(const RgbwwwColor& color);
+    RgbwwColor(const HtmlColor& color);
 
     // ------------------------------------------------------------------------
-     // explicitly Construct a RgbColor using Rgbw64Color
-     // ------------------------------------------------------------------------
-    explicit RgbwColor(const Rgbw64Color& color);
+    // Construct a RgbwwColor using HslColor
+    // ------------------------------------------------------------------------
+    RgbwwColor(const HslColor& color);
 
     // ------------------------------------------------------------------------
-    // explicitly Construct a RgbColor using Rgbww80Color
+    // Construct a RgbwwColor using HsbColor
     // ------------------------------------------------------------------------
-    explicit RgbwColor(const Rgbww80Color& color);
-
-    // ------------------------------------------------------------------------
-    // Construct a RgbwColor using HtmlColor
-    // ------------------------------------------------------------------------
-    RgbwColor(const HtmlColor& color);
-
-    // ------------------------------------------------------------------------
-    // Construct a RgbwColor using HslColor
-    // ------------------------------------------------------------------------
-    RgbwColor(const HslColor& color);
-
-    // ------------------------------------------------------------------------
-    // Construct a RgbwColor using HsbColor
-    // ------------------------------------------------------------------------
-    RgbwColor(const HsbColor& color);
+    RgbwwColor(const HsbColor& color);
     
+    // ADDED BY MICHAEL
     // ------------------------------------------------------------------------
     // Construct a RgbwColor using RgbcctColor
     // ------------------------------------------------------------------------
-    RgbwColor(const RgbcctColor& color);
+    RgbwwColor(const RgbcctColor& color);
 
     // ------------------------------------------------------------------------
-    // Construct a RgbwColor that will have its values set in latter operations
-    // CAUTION:  The R,G,B, W members are not initialized and may not be consistent
+    // Construct a RgbwwColor that will have its values set in latter operations
+    // CAUTION:  The R,G,B, WW, CW members are not initialized and may not be consistent
     // ------------------------------------------------------------------------
-    RgbwColor()
+    RgbwwColor()
     {
     };
 
     // ------------------------------------------------------------------------
     // Comparison operators
     // ------------------------------------------------------------------------
-    bool operator==(const RgbwColor& other) const
+    bool operator==(const RgbwwColor& other) const
     {
-        return (R == other.R && G == other.G && B == other.B && W == other.W);
+        return (R == other.R && G == other.G && B == other.B && WW == other.WW && CW == other.CW);
     };
 
-    bool operator!=(const RgbwColor& other) const
+    bool operator!=(const RgbwwColor& other) const
     {
         return !(*this == other);
     };
@@ -143,9 +134,9 @@ struct RgbwColor : RgbColorBase
     //   negative - this is less than other
     //   positive - this is greater than other
     // ------------------------------------------------------------------------
-    int16_t CompareTo(const RgbwColor& other, ElementType epsilon = 1)
+    int16_t CompareTo(const RgbwwColor& other, ElementType epsilon = 1)
     {
-        return _Compare<RgbwColor, int16_t>(*this, other, epsilon);
+        return _Compare<RgbwwColor, int16_t>(*this, other, epsilon);
     }
 
     // ------------------------------------------------------------------------
@@ -156,14 +147,14 @@ struct RgbwColor : RgbColorBase
     //   negative - left is less than right
     //   positive - left is greater than right
     // ------------------------------------------------------------------------
-    static int16_t Compare(const RgbwColor& left, const RgbwColor& right, ElementType epsilon = 1)
+    static int16_t Compare(const RgbwwColor& left, const RgbwwColor& right, ElementType epsilon = 1)
     {
-        return _Compare<RgbwColor, int16_t>(left, right, epsilon);
+        return _Compare<RgbwwColor, int16_t>(left, right, epsilon);
     }
 
     // ------------------------------------------------------------------------
     // operator [] - readonly
-    // access elements in order by index rather than R,G,B
+    // access elements in order by index rather than R,G,B,WW,CW
     // see static Count for the number of elements
     // ------------------------------------------------------------------------
     ElementType operator[](size_t idx) const
@@ -176,14 +167,16 @@ struct RgbwColor : RgbColorBase
             return G;
         case 2:
             return B;
+        case 3:
+            return WW;
         default:
-            return W;
+            return CW;
         }
     }
 
     // ------------------------------------------------------------------------
     // operator [] - read write
-    // access elements in order by index rather than R,G,B
+    // access elements in order by index rather than R,G,B,WW,CW
     // see static Count for the number of elements
     // ------------------------------------------------------------------------
     ElementType& operator[](size_t idx)
@@ -196,13 +189,15 @@ struct RgbwColor : RgbColorBase
             return G;
         case 2:
             return B;
+        case 3:
+            return WW;
         default:
-            return W;
+            return CW;
         }
     }
 
     // ------------------------------------------------------------------------
-    // Returns if the color is grey, all values are equal other than white
+    // Returns if the color is grey, all values are equal other than whites
     // ------------------------------------------------------------------------
     bool IsMonotone() const
     {
@@ -210,7 +205,7 @@ struct RgbwColor : RgbColorBase
     };
 
     // ------------------------------------------------------------------------
-    // Returns if the color components are all zero, the white component maybe 
+    // Returns if the color components are all zero, the white components maybe 
     // anything
     // ------------------------------------------------------------------------
     bool IsColorLess() const
@@ -230,7 +225,7 @@ struct RgbwColor : RgbColorBase
     // 
     // NOTE: This is a simple linear blend
     // ------------------------------------------------------------------------
-    RgbwColor Dim(uint8_t ratio) const;
+    RgbwwColor Dim(uint8_t ratio) const;
 
     // ------------------------------------------------------------------------
     // Brighten will return a new color that is blended to white with the given ratio
@@ -238,7 +233,7 @@ struct RgbwColor : RgbColorBase
     // 
     // NOTE: This is a simple linear blend
     // ------------------------------------------------------------------------
-    RgbwColor Brighten(uint8_t ratio) const;
+    RgbwwColor Brighten(uint8_t ratio) const;
 
     // ------------------------------------------------------------------------
     // Darken will adjust the color by the given delta toward black
@@ -261,11 +256,11 @@ struct RgbwColor : RgbColorBase
     // progress - (0.0 - 1.0) value where 0 will return left and 1.0 will return right
     //     and a value between will blend the color weighted linearly between them
     // ------------------------------------------------------------------------
-    static RgbwColor LinearBlend(const RgbwColor& left, const RgbwColor& right, float progress);
+    static RgbwwColor LinearBlend(const RgbwwColor& left, const RgbwwColor& right, float progress);
     // progress - (0 - 255) value where 0 will return left and 255 will return right
     //     and a value between will blend the color weighted linearly between them
     // ------------------------------------------------------------------------
-    static RgbwColor LinearBlend(const RgbwColor& left, const RgbwColor& right, uint8_t progress);
+    static RgbwwColor LinearBlend(const RgbwwColor& left, const RgbwwColor& right, uint8_t progress);
 
     // ------------------------------------------------------------------------
     // BilinearBlend between four colors by the amount defined by 2d variable
@@ -276,18 +271,12 @@ struct RgbwColor : RgbColorBase
     // x - unit value (0.0 - 1.0) that defines the blend progress in horizontal space
     // y - unit value (0.0 - 1.0) that defines the blend progress in vertical space
     // ------------------------------------------------------------------------
-    static RgbwColor BilinearBlend(const RgbwColor& c00, 
-        const RgbwColor& c01, 
-        const RgbwColor& c10, 
-        const RgbwColor& c11, 
+    static RgbwwColor BilinearBlend(const RgbwwColor& c00, 
+        const RgbwwColor& c01, 
+        const RgbwwColor& c10, 
+        const RgbwwColor& c11, 
         float x, 
         float y);
-
-
-    static RgbwColor PgmRead(PGM_VOID_P pPixelSrc)
-    {
-        return _PgmReadByBytes<RgbwColor>(pPixelSrc);
-    }
 
     uint16_t CalcTotalTenthMilliAmpere(const SettingsObject& settings)
     {
@@ -296,23 +285,28 @@ struct RgbwColor : RgbColorBase
         total += R * settings.RedTenthMilliAmpere / Max;
         total += G * settings.GreenTenthMilliAmpere / Max;
         total += B * settings.BlueTenthMilliAmpere / Max;
-        total += W * settings.WhiteTenthMilliAmpere / Max;
+        total += WW * settings.WarmWhiteTenthMilliAmpere / Max;
+        total += CW * settings.CoolWhiteTenthMilliAmpere / Max;
 
         return total;
     }
 
     // ------------------------------------------------------------------------
-    // Red, Green, Blue, White color members (0-255) where 
-    // (0,0,0,0) is black and (255,255,255, 0) and (0,0,0,255) is white
-    // Note (255,255,255,255) is extreme bright white
+    // Red, Green, Blue, Warm White, Cool White color members (0-255) where 
+    // (0,0,0,0,0) is black and 
+    // (255,255,255, 0, 0) is a white 
+    // (0,0,0,255,0) is warm white and
+    // (0,0,0,0,255) is cool white and
+    // Note (255,255,255,255,255) is extreme bright white
     // ------------------------------------------------------------------------
     ElementType R;
     ElementType G;
     ElementType B;
-    ElementType W;
+    ElementType WW;
+    ElementType CW;
 
     const static ElementType Max = 255;
-    const static size_t Count = 4; // four elements in []
+    const static size_t Count = 5; // five elements in []
     const static size_t Size = Count * sizeof(ElementType);
 
 private:

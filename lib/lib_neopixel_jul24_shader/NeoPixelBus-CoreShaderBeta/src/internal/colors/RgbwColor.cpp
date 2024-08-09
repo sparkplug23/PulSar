@@ -33,7 +33,10 @@ License along with NeoPixel.  If not, see
 #include "HslColor.h"
 #include "HsbColor.h"
 #include "RgbwColor.h"
+
+// ADDED BY MICHAEL
 #include "RgbcctColor.h"
+
 #include "HtmlColor.h"
 
 #include "RgbwwColor.h"
@@ -97,6 +100,7 @@ RgbwColor::RgbwColor(const HsbColor& color)
     *this = rgbColor;
 }
 
+// ADDED BY MICHAEL
 RgbwColor::RgbwColor(const RgbcctColor& color)
 {
     R = color.R;

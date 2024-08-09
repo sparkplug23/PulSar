@@ -21,20 +21,17 @@ void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP
   }
 }
 
-
+// type first, so varargin can be added later
 void ErrorMessage_P(uint8_t error_type, const char* message)
 {
-
-  AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %S"), message);
-
+  // ERROR_MESSAGE_TYPE_INVALID_FORMAT
+  AddLog(LOG_LEVEL_ERROR, PSTR("%S"), message);
 }
 
 
 void ErrorMessage(uint8_t error_type, const char* message)
 {
-
-  AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %s"), message);
-
+  AddLog(LOG_LEVEL_ERROR, PSTR("%s"), message);
 }
 
 

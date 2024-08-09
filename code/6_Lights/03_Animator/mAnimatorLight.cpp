@@ -1443,7 +1443,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
         #endif
           DEBUG_PIN4_TOGGLE();
   
-          SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
+          SEGMENT_I(seg_i).animator->UpdateAnimations();
   
           update_output = true; // Animator updated, so trigger SHOW
         #ifdef ENABLE_DEVFEATURE_LIGHT__REMOVE_BACKOFF_TIME

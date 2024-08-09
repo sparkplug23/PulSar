@@ -556,7 +556,9 @@ void AddLog_Array2(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 
 enum ERROR_MESSAGE_TYPES
 {
-  ERROR_MESSAGE_TYPE_INVALID_FORMAT=0
+  ERROR_MESSAGE=0, // Just print
+  ERROR_MESSAGE_TYPE_INVALID_FORMAT
+
 };
 
 void ErrorMessage_P(uint8_t error_type, const char* message);

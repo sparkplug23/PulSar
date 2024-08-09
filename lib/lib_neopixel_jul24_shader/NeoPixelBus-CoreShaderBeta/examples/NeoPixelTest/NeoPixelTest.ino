@@ -19,7 +19,7 @@ const uint8_t PixelPin = 2;  // make sure to set this to the correct pin, ignore
 #define colorSaturation 128
 
 // three element pixels, in different order and speeds
-NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod> strip(PixelCount, PixelPin);
+NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod, RgbwColor> strip(PixelCount, PixelPin);
 //NeoPixelBus<NeoRgbFeature, Neo400KbpsMethod> strip(PixelCount, PixelPin);
 
 // For Esp8266, the Pin is omitted and it uses GPIO3 due to DMA hardware use.  

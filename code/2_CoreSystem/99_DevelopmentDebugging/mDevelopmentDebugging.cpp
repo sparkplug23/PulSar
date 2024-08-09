@@ -81,10 +81,33 @@ void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF(PSTR("DebugInput Float1: %s"), buffer);
 	}
 
+  subparse_JSONCommand_OldCommandError(obj);
+
 
 
     
 }
+
+
+void mDevelopmentDebugging::subparse_JSONCommand_OldCommandError(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+	if(jtok = obj["Transition"].getObject()["TimeMs"])
+	{  
+    ErrorMessage_P(ERROR_MESSAGE, PSTR("Transition.TimeMs:July24"));
+	}
+	if(jtok = obj["Transition"].getObject()["RateMs"])
+	{  
+    ALOG_ERR(PSTR("Transition.RateMs:July24"));
+	}
+
+    
+}
+
+
 
 void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
 {

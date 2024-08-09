@@ -1524,8 +1524,6 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
-#define ENABLE_DEVFEATURE__NEOPIXELBUS_JULY_ONWARDS
-
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
@@ -1720,7 +1718,7 @@
         1000
       ],
       "ColourPalette":172,
-      "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
+      "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[55,55,55,0,255,0]},
       "Effects": {
         "Function":"Static Palette",
         "Speed":127,

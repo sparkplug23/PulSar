@@ -22,6 +22,7 @@ class mDevelopmentDebugging :
       float input_float1 = 0;
     }debug_data;
     void parse_JSONCommand(JsonParserObject obj);
+    void subparse_JSONCommand_OldCommandError(JsonParserObject obj);
 
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);

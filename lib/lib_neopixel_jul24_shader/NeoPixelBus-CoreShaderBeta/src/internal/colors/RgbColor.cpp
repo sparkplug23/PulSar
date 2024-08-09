@@ -37,8 +37,11 @@ License along with NeoPixel.  If not, see
 
 #include "RgbwColor.h"
 #include "RgbwwColor.h"
-#include "RgbcctColor.h"
 #include "RgbwwwColor.h"
+
+// ADDED BY MICHAEL
+#include "RgbcctColor.h"
+
 #include "Rgbw64Color.h"
 #include "Rgbww80Color.h"
 

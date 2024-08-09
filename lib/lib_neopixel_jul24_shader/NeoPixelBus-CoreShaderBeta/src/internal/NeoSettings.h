@@ -181,7 +181,7 @@ public:
     const uint16_t W3TenthMilliAmpere; // in 1/10th ma
 };
 
-
+// ADDED BY MICHAEL
 class NeoRgbcctCurrentSettings
 {
 public:
