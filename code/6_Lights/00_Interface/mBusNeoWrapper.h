@@ -149,8 +149,9 @@ enum EM_BUS_TYPE
 #define NEOPIXELBUS_32_I1_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS   // New parallel output
-#define NEOPIXELBUS_32_8PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X8Ws2812xMethod>  
+// #define NEOPIXELBUS_32_8PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X8Ws2812xMethod>   //working on older neopixel
 // #define NEOPIXELBUS_32_8PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8DblWs2812xMethod>  
+#define NEOPIXELBUS_32_8PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X16Ws2812xMethod >  
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS   // New parallel output
 #define NEOPIXELBUS_32_16PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod>
