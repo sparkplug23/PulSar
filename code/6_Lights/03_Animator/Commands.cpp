@@ -26,22 +26,13 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     if(jtok = obj[buffer])
     { 
 
-      ALOG_INF(PSTR("Seg: \"%s\" with %d Slots Active"), buffer, segments.size());
+      ALOG_INF(PSTR("Seg: \"%s\""), buffer);
 
-      /**
-       * @brief Add check here that only sets the segment if it is already permitted
-       * 
-       */
-    
-        // ALOG_HGL(PSTR("CHECKING segment %d|%d"), segment_i, segments.size());
-
-      // if(segment_i > segments.size()-1)
       if(segment_i >= segments.size())
       { 
-        ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,segments.size());
-        // Segment_AppendNew(0, 0, segment_i+1);
+        ALOG_HGL(PSTR("Creating new segment i%d|%dB"), segment_i, segments.size());
         Segment_AppendNew(0, 100, segment_i); // STRIP_SIZE_MAX
-        ALOG_HGL(PSTR("size check Creating new segment %d|%d"),segment_i,segments.size());
+        ALOG_HGL(PSTR("Segments size %dB"), segments.size());
       }
       
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
@@ -52,11 +43,12 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   }
 
   /**
-   * @brief If no segments have been directly set, then assume default of Segment0
+   * @brief 
+   * When commands are not inside a {"Segment#":{commands}} then assume direct control of first segment (ie 0)
    **/
   if(segments_found == 0)
   {
-    data_buffer.isserviced += subparse_JSONCommand(obj); // Legacy commands
+    data_buffer.isserviced += subparse_JSONCommand(obj, 0); // Legacy commands
   }
 
   ALOG_DBM(PSTR(D_LOG_LIGHT D_TOPIC "mAnimatorLight::parse_JSONCommand::End"));
@@ -80,21 +72,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   char buffer[50];
 
   uint16_t isserviced_start_count = data_buffer.isserviced; // to know if anything was serviced in this function
-
-
-  /**
-   * @brief Critical this is always parsed first, as many other commands rely on this value
-   **/
-  if(segment_index == 255)
-  {
-    ALOG_COM( PSTR("Segment Index assumed \"0\"") );
-
-    segment_index = 0;
-
-    // purgeSegments(true); // reduce to single segment
-    ALOG_DBM(PSTR("purgeSegments(true); // reduce to single segment REMOVED THIS, NEEDS BETETR HOME"));
-   
-  }
 
   /**
    * @brief Exit if segment has not been created to stop errors

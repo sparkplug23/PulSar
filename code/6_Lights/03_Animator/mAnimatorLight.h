@@ -448,7 +448,7 @@ class mAnimatorLight :
      * SECTION: Commands
      ************************************************************************************************/
 
-    uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 255);    
+    uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 0);    
     
     #ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION_SHORTCUT
     void parsesub_json_object_notification_shortcut(JsonParserObject obj);

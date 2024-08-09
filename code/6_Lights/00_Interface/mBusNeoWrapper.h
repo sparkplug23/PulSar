@@ -114,24 +114,24 @@ enum EM_BUS_TYPE
 #ifdef ESP8266
 //RGB
 #ifdef ENABLE_NEOPIXELBUS_8266_U0_NEO_TYPES
-#define NEOPIXELBUS_8266_U0_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Uart0Ws2813Method, RgbwColor, NeoGammaNullMethod> //3 chan, esp8266, gpio1
+#define NEOPIXELBUS_8266_U0_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Uart0Ws2813Method> //3 chan, esp8266, gpio1
 #endif
 #ifdef ENABLE_NEOPIXELBUS_8266_U1_NEO_TYPES
-#define NEOPIXELBUS_8266_U1_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Uart1Ws2813Method, RgbwColor, NeoGammaNullMethod> //3 chan, esp8266, gpio2
+#define NEOPIXELBUS_8266_U1_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Uart1Ws2813Method> //3 chan, esp8266, gpio2
 #endif 
 #ifdef ENABLE_NEOPIXELBUS_8266_DM_NEO_TYPES
-#define NEOPIXELBUS_8266_DM_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Dma800KbpsMethod, RgbwColor, NeoGammaNullMethod>  //3 chan, esp8266, gpio3
+#define NEOPIXELBUS_8266_DM_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Dma800KbpsMethod>  //3 chan, esp8266, gpio3
 #endif
 // #define NEOPIXELBUS_8266_BB_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266BitBang800KbpsMethod> //3 chan, esp8266, bb (any pin but 16)
 //RGBW
 #ifdef ENABLE_NEOPIXELBUS_8266_U0_NEO_TYPES
-#define NEOPIXELBUS_8266_U0_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Uart0Ws2813Method, RgbwColor, NeoGammaNullMethod>   //4 chan, esp8266, gpio1
+#define NEOPIXELBUS_8266_U0_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Uart0Ws2813Method>   //4 chan, esp8266, gpio1
 #endif 
 #ifdef ENABLE_NEOPIXELBUS_8266_U1_NEO_TYPES
-#define NEOPIXELBUS_8266_U1_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Uart1Ws2813Method, RgbwColor, NeoGammaNullMethod>   //4 chan, esp8266, gpio2
+#define NEOPIXELBUS_8266_U1_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Uart1Ws2813Method>   //4 chan, esp8266, gpio2
 #endif
 #ifdef ENABLE_NEOPIXELBUS_8266_DM_NEO_TYPES
-#define NEOPIXELBUS_8266_DM_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Dma800KbpsMethod, RgbwColor, NeoGammaNullMethod>    //4 chan, esp8266, gpio3
+#define NEOPIXELBUS_8266_DM_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Dma800KbpsMethod>    //4 chan, esp8266, gpio3
 #endif
 // #define NEOPIXELBUS_8266_BB_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266BitBang800KbpsMethod> //4 chan, esp8266, bb (any pin)
 //400Kbps
@@ -144,33 +144,33 @@ enum EM_BUS_TYPE
 /*** ESP32 Neopixel methods ***/
 #ifdef ARDUINO_ARCH_ESP32
 //RGB
-#define NEOPIXELBUS_32_RN_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtNWs2812xMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_RN_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtNWs2812xMethod>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-#define NEOPIXELBUS_32_I0_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0800KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I0_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0800KbpsMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-#define NEOPIXELBUS_32_I1_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I1_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS   // New parallel output
-#define NEOPIXELBUS_32_8PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_8PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS   // New parallel output
-#define NEOPIXELBUS_32_16PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_16PARALLEL_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod>
 #endif
 
 //RGBW
-#define NEOPIXELBUS_32_RN_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32RmtNWs2812xMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_RN_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32RmtNWs2812xMethod>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-#define NEOPIXELBUS_32_I0_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0800KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I0_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0800KbpsMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-#define NEOPIXELBUS_32_I1_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1800KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I1_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1800KbpsMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS   // New parallel output
-#define NEOPIXELBUS_32_8PARALLEL_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_8PARALLEL_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS   // New parallel output
-#define NEOPIXELBUS_32_16PARALLEL_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_16PARALLEL_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method>
 #endif
 
 
@@ -193,29 +193,29 @@ enum EM_BUS_TYPE
 #endif // ENABLE_DEVFEATURE__WS2805
 
 //400Kbps
-#define NEOPIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtN400KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtN400KbpsMethod>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-#define NEOPIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-#define NEOPIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod>
 #endif
 //TM1814 (RGBW)
-#define NEOPIXELBUS_32_RN_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp32RmtNTm1814Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_RN_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp32RmtNTm1814Method>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-#define NEOPIXELBUS_32_I0_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp32I2s0Tm1814Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I0_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp32I2s0Tm1814Method>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-#define NEOPIXELBUS_32_I1_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp32I2s1Tm1814Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I1_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp32I2s1Tm1814Method>
 #endif
 //Bit Bang theoratically possible, but very undesirable and not needed (no pin restrictions on RMT and I2S)
 //TM1829 (RGB)
-#define NEOPIXELBUS_32_RN_TM2_3 NeoPixelBus<NeoBrgFeature, NeoEsp32RmtNTm1829Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_RN_TM2_3 NeoPixelBus<NeoBrgFeature, NeoEsp32RmtNTm1829Method>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-#define NEOPIXELBUS_32_I0_TM2_3 NeoPixelBus<NeoBrgFeature, NeoEsp32I2s0Tm1829Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I0_TM2_3 NeoPixelBus<NeoBrgFeature, NeoEsp32I2s0Tm1829Method>
 #endif
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-#define NEOPIXELBUS_32_I1_TM2_3 NeoPixelBus<NeoBrgFeature, NeoEsp32I2s1Tm1829Method, RgbwColor, NeoGammaNullMethod>
+#define NEOPIXELBUS_32_I1_TM2_3 NeoPixelBus<NeoBrgFeature, NeoEsp32I2s1Tm1829Method>
 #endif
 //Bit Bang theoratically possible, but very undesirable and not needed (no pin restrictions on RMT and I2S)
 #endif
