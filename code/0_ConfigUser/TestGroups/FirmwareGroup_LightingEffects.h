@@ -1645,9 +1645,10 @@
 
   #define USE_LIGHTING_TEMPLATE
 
-  #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO
+  // #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO
+  #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__TEST
 
-  #ifdef ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO
+  #if defined(ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO)
   
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  // side 2
   R"=====(
@@ -1732,6 +1733,63 @@
     "BrightnessCCT": 0
   }
   )=====";
+
+  #elif defined(ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__TEST)
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  // side 2
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":500,
+        "Length":250
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":750,
+        "Length":250
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        1000
+      ],
+      "ColourPalette":"Cyan",
+      "Effects": {
+        "Function":"Candles",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+
 
   #else
 
