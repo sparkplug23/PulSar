@@ -62,6 +62,22 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_BRANCH_NAME_STRING "development"
 
 
+/**
+ * @brief Version names used to set limits on when code can be included
+ * 
+ * 0V124 ie MAJORvMINOR
+ */
+#define CHECK_FIRMWARE_VERSION(major, minor) \
+  ((FIRMWARE_VERSION_MAJOR > (major)) || \
+   (FIRMWARE_VERSION_MAJOR == (major) && FIRMWARE_VERSION_MINOR >= (minor)))
+
+  // #if CHECK_FIRMWARE_VERSION(0, 123)
+  //   // Code for FIRMWARE_MINIMUM__0V124
+  //   ALOG_INF(PSTR("TEST"));
+  // #endif
+  
+
+
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           1//                (random(1,1000))
 #endif

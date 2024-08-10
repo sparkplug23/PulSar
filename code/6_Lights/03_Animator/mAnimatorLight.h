@@ -468,7 +468,7 @@ class mAnimatorLight :
 
     void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
 
-    void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
+    void CommandSet_PaletteID(uint16_t value, uint8_t segment_index = 0);
 
     void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
     int8_t GetFlasherFunctionIDbyName(const char* f);
