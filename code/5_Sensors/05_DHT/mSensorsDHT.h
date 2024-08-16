@@ -8,7 +8,7 @@
 #ifdef USE_MODULE_SENSORS_DHT
 
 #include "stdint.h"
-// #include "2_CoreSystem/02_Time/mTime.h"
+// #include "2_CoreSystem/07_Time/mTime.h"
 // class mTime;
 #include "DHTesp.h"
 class DHTesp;

@@ -589,12 +589,6 @@ void mAnimatorLight::Segment::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, ui
   }
 }
 
-// #include "src/font/console_font_4x6.h"
-// #include "src/font/console_font_5x8.h"
-// #include "src/font/console_font_5x12.h"
-// #include "src/font/console_font_6x8.h"
-// #include "src/font/console_font_7x9.h"
-
 #include "font/console_font_4x6.h"
 #include "font/console_font_5x8.h"
 #include "font/console_font_5x12.h"

@@ -23,7 +23,7 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
     #define ARDUINO_ISR_ATTR IRAM_ATTR 
     #endif
     void ARDUINO_ISR_ATTR resetModule() {
-      ets_printf("reboot\n");
+      ets_printf("reboot resetModule\n");
       Serial.println("WDT REBOOTING!!"); Serial.flush();
       esp_restart();
     }
@@ -862,11 +862,12 @@ void mSupport::ArduinoOTAInit(void)
 
 void mSupport::ArduinoOtaLoop(void)
 {
-  // MDNS.update(); // THIS NEEDS ADDED!
+  // Serial.println(ota_init_success);
+  // if(!ota_init_success){ Serial.println("block OTA"); return; }
   ArduinoOTA.handle();
   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
   // Note async stuff can still occur, so I need to disable them
-  while (arduino_ota_triggered){ ArduinoOTA.handle(); }
+  while (arduino_ota_triggered){ ArduinoOTA.handle(); Serial.println("ota_triggered"); }
 }
 
 // #endif // ENABLE_DEVFEATURE_OTA_METHOD

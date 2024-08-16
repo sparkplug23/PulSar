@@ -2,7 +2,7 @@
 #ifndef _MSUPPORT_H_
 #define _MSUPPORT_H_
 
-#define D_UNIQUE_MODULE_CORE_SUPPORT_ID 2
+#define D_UNIQUE_MODULE_CORE_SUPPORT_ID ((2*1000)+6)
 
 
 
@@ -125,9 +125,9 @@ struct functionhandler {
 
 #include "1_TaskerManager/mTaskerManager.h"
 //#include "//2_CoreSystem/11_Languages/mLanguage.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
-#include "2_CoreSystem/05_Logging/mLogging.h"
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
 
@@ -233,10 +233,12 @@ bool ArrayCompare(A x, B x_len, C y, D y_len)
 
 }
 
+
 template<typename A,typename B,typename C,typename D,typename E>
 E mapvalue(A a, B b, C c, D d, E e){ //should be returning at largest, the size of E range
   return map(a,b,c,d,e);
 }
+
 
 template <typename T, typename U>
 T ArrayCountUntilNull(T* buffer, U buflen){

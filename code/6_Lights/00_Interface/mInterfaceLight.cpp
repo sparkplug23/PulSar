@@ -35,6 +35,9 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_LOOP:
       EveryLoop();
     break;
+    case FUNC_EVERY_SECOND:
+      EverySecond_AutoOff();
+    break;
     /************
      * STORAGE SECTION * 
     *******************/    
@@ -52,6 +55,14 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
+    /************
+     * TRIGGERS SECTION * 
+    *******************/
+    #ifdef USE_MODULE_CORE_RULES
+    case FUNC_EVENT_SET_POWER_ID:
+      RulesEvent_Set_Power();
+    break;
+    #endif// USE_MODULE_CORE_RULES
     /************
      * MQTT SECTION * 
     *******************/
@@ -90,6 +101,32 @@ void mInterfaceLight::Pre_Init(void)
 
 }
 
+void mInterfaceLight::EverySecond_AutoOff()
+{
+
+  /**
+   * @brief Master AutoOff DeCounter
+   **/
+  //ALOG_DBM( PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
+  if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
+    // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
+    #endif       
+    
+    CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
+    //#ifdef ENABLE_LOG_LEVEL_INFO
+    auto_off_settings.time_decounter_secs=0;
+    //#endif
+  }else
+  if(auto_off_settings.time_decounter_secs>1){ //if =1 then turn off and clear to 0
+    auto_off_settings.time_decounter_secs--; //decrease    
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs=%d dec"), auto_off_settings.time_decounter_secs);
+    #endif
+  }
+
+}
 
 void mInterfaceLight::Template_Load()
 {
@@ -222,14 +259,13 @@ void mInterfaceLight::Template_Load()
 
 void mInterfaceLight::Init(void)
 {
-  #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-  Init_NeoPixelBus_PinnedTask(void)
-  #endif  
   
   pCONT_set->Settings.pwm_range = PWM_RANGE;
   pCONT_set->Settings.light_settings.light_fade = 1;
   pCONT_set->Settings.light_settings.light_speed = 5*2;
   pCONT_set->runtime.power = 1;
+
+  auto_off_settings.time_decounter_secs = 0;
 
   module_state.mode = ModuleStatus::Running;
 
@@ -512,8 +548,8 @@ void mInterfaceLight::LightCalcPWMRange(void) {
   _pwm_min = _pwm_min > 0 ? mapvalue(_pwm_min, 1, 1023, 1, pCONT_set->Settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
   _pwm_max = mapvalue(_pwm_max, 1, 1023,  1, pCONT_set->Settings.pwm_range);  // _pwm_max cannot be zero
 
-    pCONT_iLight->pwm_min = _pwm_min;
-    pCONT_iLight->pwm_max = _pwm_max;
+    pwm_min = _pwm_min;
+    pwm_max = _pwm_max;
   // AddLog_P2(LOG_LEVEL_TEST, PSTR("LightCalcPWMRange %d %d - %d %d"), settings.dimmer_hw_min, settings.dimmer_hw_max, pwm_min, pwm_max);
 }
 // Calculate the gamma corrected value for LEDS
@@ -657,6 +693,38 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
 }
 
 #endif // ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+
+bool mInterfaceLight::CommandGet_LightPowerState()
+{
+  return 
+  light_power_state
+  // getBri_Global() 
+  ? true : false;
+}
+
+#ifdef USE_MODULE_CORE_RULES
+void mInterfaceLight::RulesEvent_Set_Power()
+{
+
+  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+
+  uint8_t index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+  uint8_t state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+
+  bool get_state = CommandGet_LightPowerState(); 
+
+  AddLog(LOG_LEVEL_TEST, PSTR("CommandGet_LightPowerState() = %d"), get_state);
+
+  // get state
+  ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());
+
+  // apply invert if needed
+  CommandSet_LightPowerState(state);
+
+}
+#endif // USE_MODULE_CORE_RULES
+
 
 
 void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
@@ -939,16 +1007,11 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 
   char buffer[50];
   JsonParserToken jtok = 0; 
-  JsonParserToken jtok2 = 0; 
   int8_t tmp_id = 0;
-
-  // uint16_t isserviced_start_count = data_buffer.isserviced;  
-
 
   /**
    * @brief Bus needs to be configured first, and probably built immediately from within here so plattes etc next are added properly, otherwise EVERY_LOOP would have to happen
-   * 
-   */
+   **/
   if(jtok = obj["BusConfig"])
   { 
     if(jtok.isArray())
@@ -960,81 +1023,135 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
         parseJSONObject__BusConfig(value.getObject());
       }
     }
-  }else{
-    ALOG_DBM(PSTR("BusConfig MISSING"));
-    
-    #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
-    if(jtok = obj["Segment0"])
-    {
-      ALOG_INF(PSTR("Segment0 YES"));
-    }else{
-      ALOG_INF(PSTR("Segment0 MISSING"));
-    }
-    // delay(5000);
-    #endif
   }
 
-
+  #if FIRMWARE_VERSION_MAX(0,125)
   /**
    * @brief First thing after parsing the BusConfig, Segments should be created before any further commands
-   * 
-   */
-  pCONT_lAni->parse_JSONCommand(obj);
-  
+   **/
+  pCONT_lAni->parse_JSONCommand(obj); // I think this should be removed to stop any double calling of the animation commands.
+  #endif
 
 
   /**
    * @brief Master (previously global) shall control the final output, but per segment within animator can exist. 
    * Ie the true colour out is 
    * 
-   * SetBrightnessOutput <= Raw255Colour * MasterBrightness * SegmentBrightness
+   * SetBrightnessOutput <= scale8( scale8(Raw255Colour, SegmentBrightness), MasterBrightness) 
    * 
    */
-
-  if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Assume range 0-100
-    CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), jtok.getInt());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // alternate full range 0-255
-    CommandSet_Brt_255(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
-    CommandSet_Global_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB_Global());
+  if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Range 0-100
+    float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
+    CommandSet_Brt_255( (uint8_t)value );
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), getBri_Global());
     data_buffer.isserviced++;
   }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
-    CommandSet_Global_BrtRGB_255(jtok.getInt());
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB_Global());
-    data_buffer.isserviced++;
-  }
-
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
-    CommandSet_Global_BrtCCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCCT_Global());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
-    CommandSet_Global_BrtCCT_255(jtok.getInt());
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCCT_Global());
+  if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // Range 0-255
+    CommandSet_Brt_255( jtok.getInt() );
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), getBri_Global());
     data_buffer.isserviced++;
   }
 
 
+  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Range 0-100
+    float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
+    CommandSet_Global_BrtRGB_255( (uint8_t)value );
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB_Global());
+    data_buffer.isserviced++;
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // Range 0-255
+    CommandSet_Global_BrtRGB_255( jtok.getInt() );
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB_Global());
+    data_buffer.isserviced++;
+  }
 
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Range 0-100
+    float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
+    CommandSet_Global_BrtCCT_255( (uint8_t)value );
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCCT_Global());
+    data_buffer.isserviced++;
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // Range 0-255
+    CommandSet_Global_BrtCCT_255( jtok.getInt() );
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCCT_Global());
+    data_buffer.isserviced++;
+  }
+
+
+  if(jtok = obj[PM_JSON_LIGHTPOWER])
+  {
+    int8_t state = 0;
+    if(jtok.isStr()){
+      state = pCONT_sup->GetStateNumber(jtok.getStr());
+    }else
+    if(jtok.isNum()){
+      state = jtok.getInt(); 
+    }
+    ModifyStateNumberIfToggled(&state, light_power_state);
+    CommandSet_LightPowerState(state);
+    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+  }
+
+  if(jtok = obj[PM_JSON_LIGHT].getObject()[PM_JSON_TIME_ON]){ // default to secs
+    CommandSet_Auto_Time_Off_Secs(jtok.getInt());
+    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), auto_off_settings.time_decounter_secs ); 
+    data_buffer.isserviced++;
+  }
 
   ALOG_DBM(PSTR("void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)======================"));
   
 }
 
+
+void mInterfaceLight::CommandSet_Auto_Time_Off_Secs(uint16_t value){    
+  auto_off_settings.time_decounter_secs = value;
+}
+
+
+
+void mInterfaceLight::CommandSet_LightPowerState(uint8_t state)
+{
+
+  ALOG_INF( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+
+  if(state == LIGHT_POWER_STATE_OFF_ID) // turn off
+  {
+    // CommandSet_Animation_Transition_Rate_Ms(10000);
+    pSEGMENT_I(0).intensity = 255;    
+    pSEGMENT_I(0).single_animation_override.time_ms =  pSEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
+    ALOG_INF(PSTR("Setting override for off %d"), pSEGMENT_I(0).single_animation_override.time_ms);
+    pSEGMENT_I(0).flags.fForceUpdate = true;
+    CommandSet_Brt_255(0);    
+  }
+  else
+  if(state == 1) // turn on
+  {
+
+    // CommandSet_Animation_Transition_Time_Ms(1000);
+
+    pSEGMENT_I(0).single_animation_override.time_ms = 1000; // slow turn on
+    pSEGMENT_I(0).flags.fForceUpdate = true;
+
+
+    // CommandSet_Animation_Transition_Rate_Ms(1000);
+    // CommandSet_LightsCountToUpdateAsPercentage(100);
+    
+    CommandSet_Brt_255(255);
+
+    //make sure both are set
+    // CommandSet_Global_BrtRGB_255(255);
+    // CommandSet_Global_BrtCCT_255(255);
+    
+    // CommandSet_PaletteID(10, 0);
+    
+    // CommandSet_Flasher_FunctionID(0 /**Add define later for "DEFAULT_EFFECT" */);//EFFECTS_FUNCTION__SOLID_COLOUR__ID);
+
+
+
+  }
+
+}
 
 
 void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){

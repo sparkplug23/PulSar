@@ -21,8 +21,7 @@
 #define PROGMEM
 #endif
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "6_Lights/03_Animator/EffectNames/defines.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 
 /************************************************************************************************************************************************************

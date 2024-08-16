@@ -29,7 +29,7 @@
 ;                           lib/lib_display
 ;                           lib/lib_onewire2023 
 ;                           lib/lib_sensor
-;                           lib/libg_neopixel
+;                           
 ; upload_protocol = espota
 ; upload_port = 192.168.0.50
 ; ; upload_port = testbed_animation_segment_01
@@ -104,7 +104,7 @@
 ;                                 -D DEVICE_H801_INSIDE_BEDROOM_WARDROBE -w
 ;                                 -D D_USER_MICHAEL
 ; lib_extra_dirs              = ${library.lib_extra_dirs}
-;                               lib/libg_neopixel
+;                               
 ; upload_protocol = espota
 ; extra_scripts             = gzip_fw.py
 ; ; upload_port = h801_sunlight_2
@@ -120,7 +120,7 @@
 ;                                 -D D_USER_MICHAEL
                                 
 ; lib_extra_dirs              = ${library.lib_extra_dirs}
-;                               lib/libg_neopixel
+;                               
 ; upload_protocol = espota
 ; extra_scripts             = gzip_fw.py
 ; ; upload_port = h801_sunlight_2
@@ -140,8 +140,8 @@
 ;                 lib/lib_display
 ;                 lib/lib_onewire2023 
 ;                 lib/lib_sensor
-;                 lib/libg_neopixel
-;                 ; lib/libg_neopixel
+;                 
+;                 ; 
 ; ; upload_protocol = espota
 ; ; upload_port = 192.168.0.79
 ; ; upload_port = desksensor.local

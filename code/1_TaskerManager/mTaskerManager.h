@@ -72,7 +72,7 @@
 
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
-#include "2_CoreSystem/09_Events/mEvents.h"
+#include "2_CoreSystem/16_Events/mEvents.h"
 
 #include <DeCounter.h>
 
@@ -89,7 +89,7 @@
 
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "1_TaskerManager/mTaskerManager_Defines.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
 
 #include "1_TaskerManager/mTasks.h"
@@ -140,7 +140,7 @@
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  #ifdef USE_MODULE_CORE_FILESYSTEM
 
 
     #define LOROL_LITTLEFS 
@@ -170,7 +170,7 @@
 
 
 
-  #endif // USE_MODULE_DRIVERS_FILESYSTEM
+  #endif // USE_MODULE_CORE_FILESYSTEM
 
 // #include <variant>
 
@@ -241,10 +241,10 @@ enum ModuleStatus{
   #endif //USE_MODULE_NETWORK_WEBSERVER
 #endif
 
-#include "2_CoreSystem/08_JSON/mJSON.h"
+#include "2_CoreSystem/20_JSON/mJSON.h"
 #include "2_CoreSystem/06_Support/mSupport.h"
 
-#include "2_CoreSystem/01b_RtcMemory/mRtcSettings.h"
+#include "2_CoreSystem/02_RtcMemory/mRtcSettings.h"
 
 
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
@@ -281,17 +281,23 @@ enum TaskerID
   #ifdef USE_MODULE_CORE_SETTINGS
     EM_MODULE_CORE_SETTINGS_ID,
   #endif 
-  #ifdef USE_MODULE_CORE_TIME
-    EM_MODULE_CORE_TIME_ID,
-  #endif 
+  #ifdef USE_MODULE_CORE_FILESYSTEM
+    EM_MODULE_CORE_FILESYSTEM_ID,
+  #endif
   #ifdef USE_MODULE_CORE_HARDWAREPINS
     EM_MODULE_CORE_HARDWAREPINS_ID,
   #endif 
-  #ifdef USE_MODULE_CORE_LOGGING
-    EM_MODULE_CORE_LOGGING_ID,
-  #endif 
+
   #ifdef USE_MODULE_CORE_SUPPORT
     EM_MODULE_CORE_SUPPORT_ID,
+  #endif 
+  #ifdef USE_MODULE_CORE_TIME
+    EM_MODULE_CORE_TIME_ID,
+  #endif 
+
+
+  #ifdef USE_MODULE_CORE_LOGGING
+    EM_MODULE_CORE_LOGGING_ID,
   #endif 
   #ifdef USE_MODULE_CORE_TELEMETRY
     EM_MODULE_CORE_TELEMETRY_ID,
@@ -301,7 +307,7 @@ enum TaskerID
   #endif 
   #ifdef USE_MODULE_CORE_UPDATES
     EM_MODULE_CORE_UPDATES_ID,
-  #endif 
+  #endif   
   // #ifdef USE_MODULE_CORE_SERIAL_UART
   //   EM_MODULE_CORE_SERIAL_UART_ID,
   // #endif
@@ -337,9 +343,6 @@ enum TaskerID
    **/
   #ifdef USE_MODULE_DRIVERS_INTERFACE
     EM_MODULE_DRIVERS_INTERFACE_ID,
-  #endif
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-    EM_MODULE_DRIVERS_FILESYSTEM_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
     EM_MODULE_DRIVERS_LEDS_ID,
@@ -644,24 +647,24 @@ enum TaskerID
   #include "2_CoreSystem/01_Settings/mSettings.h"
   #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
 #endif 
-#ifdef USE_MODULE_CORE_TIME
-  #include "2_CoreSystem/02_Time/mTime.h"
-  #define   pCONT_time                              static_cast<mTime*>(pCONT->pModule[EM_MODULE_CORE_TIME_ID])
-#endif 
+#ifdef USE_MODULE_CORE_FILESYSTEM
+  #include "2_CoreSystem/03_FileSystem/mFileSystem.h"
+  #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_CORE_FILESYSTEM_ID])
+#endif
 #ifdef USE_MODULE_CORE_HARDWAREPINS
-  #include "2_CoreSystem/04_HardwarePins/mHardwarePins.h"
+  #include "2_CoreSystem/05_HardwarePins/mHardwarePins.h"
   #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
 #endif 
+#ifdef USE_MODULE_CORE_TIME
+  #include "2_CoreSystem/07_Time/mTime.h"
+  #define   pCONT_time                              static_cast<mTime*>(pCONT->pModule[EM_MODULE_CORE_TIME_ID])
+#endif 
 #ifdef USE_MODULE_CORE_LOGGING
-  #include "2_CoreSystem/05_Logging/mLogging.h"
+  #include "2_CoreSystem/08_Logging/mLogging.h"
   #define   pCONT_log                               static_cast<mLogging*>(pCONT->pModule[EM_MODULE_CORE_LOGGING_ID])
 #endif 
-#ifdef USE_MODULE_CORE_SUPPORT
-  #include "2_CoreSystem/06_Support/mSupport.h"
-  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->pModule[EM_MODULE_CORE_SUPPORT_ID])
-#endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
-  #include "2_CoreSystem/07_Telemetry/mTelemetry.h"
+  #include "2_CoreSystem/09_Telemetry/mTelemetry.h"
   #define   pCONT_tel                               static_cast<mTelemetry*>(pCONT->pModule[EM_MODULE_CORE_TELEMETRY_ID])
 #endif 
 #ifdef USE_MODULE_CORE_RULES
@@ -672,14 +675,18 @@ enum TaskerID
   #include "2_CoreSystem/14_Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
 #endif
-// #ifdef USE_MODULE_CORE_SERIAL_UART
-//   #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
-//   #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
-// #endif
 #ifdef USE_MODULE_CORE__SERIAL
   #include "2_CoreSystem/15_SerialUART/mSerial.h"
   #define   tkr_Serial                              static_cast<mSerial*>(pCONT->pModule[TaskerID::CORE__SERIAL])
 #endif
+// #ifdef USE_MODULE_CORE_SERIAL_UART
+//   #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
+//   #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
+// #endif
+#ifdef USE_MODULE_CORE_SUPPORT
+  #include "2_CoreSystem/06_Support/mSupport.h"
+  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->pModule[EM_MODULE_CORE_SUPPORT_ID])
+#endif 
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   #include "2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h"
   #define   pCONT_debug             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
@@ -716,10 +723,6 @@ enum TaskerID
 #ifdef USE_MODULE_DRIVERS_INTERFACE
   #include "4_Drivers/00_Interface/mDriverInterface.h"
   #define pCONT_iDrivers                           static_cast<mDriverInterface*>(pCONT->pModule[EM_MODULE_DRIVERS_INTERFACE_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  #include "4_Drivers/02_FileSystem/mFileSystem.h"
-  #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/03_LEDs/mLEDs.h"

@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 /**
  * @brief Memory is still held in settings, but internal pointers are used to write and read from

@@ -99,7 +99,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
     case FUNC_EVERY_MINUTE:
 
       
-      #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+      #ifdef USE_MODULE_CORE_FILESYSTEM
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
         // Copy Settings as Last Known Good if no changes have been saved since 30 minutes
         if (!runtime.settings_lkg && (pCONT_time->UtcTime() > START_VALID_UTC_TIME) && (Settings.cfg_timestamp < pCONT_time->UtcTime() - (3 * 60))) 
@@ -117,7 +117,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
          );
         }
       #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-      #endif // USE_MODULE_DRIVERS_FILESYSTEM
+      #endif // USE_MODULE_CORE_FILESYSTEM
 
       
     break;

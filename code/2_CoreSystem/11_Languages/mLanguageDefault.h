@@ -22,6 +22,10 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 
+
+#define D_UNIQUE_MODULE_CORE_LANGUAGES_ID ((2*1000)+11)
+
+
 #define STR_HELPER2(x)  #x
 #ifndef STR2
 #define STR2(x)  STR_HELPER2(x)
@@ -155,8 +159,8 @@
   #define D_MODULE_DRIVERS_STATUS_LEDS_CTR              "mSTATUS_LEDS"
   #define D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR              "statusleds"
 
-  #define D_MODULE_DRIVERS_FILESYSTEM_CTR "mFileSystem"
-  #define D_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR "filesystem"
+  #define D_MODULE_CORE_FILESYSTEM_CTR "mFileSystem"
+  #define D_MODULE_CORE_FILESYSTEM_FRIENDLY_CTR "filesystem"
 
   #define D_MODULE_DRIVERS_BUZZER_CTR "mBuzzer"
   #define D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR "buzzer"
@@ -1988,6 +1992,8 @@
 #define D_JSON_ONTIME "OnTime"
 #define D_JSON_OFFTIME "OffTime"
 
+#define D_JSON_OVERRIDE "Override"
+
 #define D_JSON_PIXELS_UPDATE_NUMBER "PixelUpdateNum"
 #define D_JSON_PIXELS_UPDATE_PERCENTAGE "PixelUpdatePerc"
 
@@ -2082,7 +2088,9 @@
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
 
-#define D_JSON_COLOUR_TYPE "ColourType"
+
+#define D_JSON_EFFECT_COLOUR_TYPE "ColourType" // rename later
+#define D_JSON_COLOUR_TYPE "ColourType"  //phase out
 
 
 #define D_JSON_HARDWARE_TYPE "HardwareType"

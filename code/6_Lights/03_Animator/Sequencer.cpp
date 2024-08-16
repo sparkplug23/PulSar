@@ -5,9 +5,7 @@
  * @version 0.1
  * @date 2023-11-13
  * 
- * Mixer is the original playlist, and will contain hardcoded functions that are called to sequence desired effects on devices.
- * This is main while playlist via json is under development, though may be useful or future methods.
- * 
+ * Sequencer will likely be replaced by playlists
  * 
  * @copyright Copyright (c) 2023
  * 

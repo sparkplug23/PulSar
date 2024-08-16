@@ -121,11 +121,11 @@ class mSerial :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-    #if defined(ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS) && defined(USE_MODULE_DRIVERS_FILESYSTEM)
+    #if defined(ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS) && defined(USE_MODULE_CORE_FILESYSTEM)
     void Load_Module(bool erase = false);
     void Save_Module(void);
     bool Restore_Module(void);
-    #endif // USE_MODULE_DRIVERS_FILESYSTEM
+    #endif // USE_MODULE_CORE_FILESYSTEM
 
 
     /************************************************************************************************

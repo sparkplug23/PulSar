@@ -1623,6 +1623,48 @@ DEF_PGM_UINT8(PM_PALETTE_SKY_GLOW_01__DATA)
   255, 0, 0,  255, 0, 0,
 };
 
+
+
+  /**
+   * First RGBCCT Strip Test
+   * */
+  #ifndef D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR
+  #define D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR        "Colourful CCT 01"   
+  #endif
+  #define        D_PALETTE__COLOURFUL_WITH_CCT_01__ENCODING        (PALETTE_ENCODING_INCLUDES_RGBCCT)     
+  DEF_PGM_UINT8(PM_PALETTE__COLOURFUL_WITH_CCT_01__DATA)
+  { //R,G,B,WW,CW
+    255, 0, 0, 0, 0,
+    0, 255, 0, 0, 0,
+    0, 0, 255, 0, 0,
+    0, 0, 0, 255, 0,
+    0, 0, 0, 0, 255, 
+    0, 0, 0, 127, 127, 
+
+    
+    // D_RGB_RED_FULL
+    // D_RGB_GREEN_FADED_2
+    // D_RGB_PINK_ALT_1
+    // D_RGB_BLUE_FADED_1
+    // D_RGB_ORANGE_FULL   
+    // D_RGB_GREEN_PASTEL
+    // D_RGB_CYAN_FADED_3
+    // D_RGB_PINK_FADED_1
+    // D_RGB_RED_PASTEL_1
+    // D_RGB_ORANGE_WARM_1
+    // D_RGB_YELLOW_WARM_2 
+
+
+  };
+
+
+
+
+
+
+
+
+
 /**
  * https://www.schemecolor.com/hot-pink-neon-with-navy.php
  * */
@@ -2603,6 +2645,7 @@ DEFINE_PGM_CTR(PM_STATIC__PALETTES_NAMES_CTR)
   D_PALETTE_SUNSET_RED_NAME_CTR "|"
   D_PALETTE_SUNSET_BEACH_NAME_CTR "|"
   D_PALETTE_SKY_GLOW_01_NAME_CTR "|"
+  D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR "|"
   D_PALETTE_CANDLE_FLAME_01_NAME_CTR "|"
   D_PALETTE_GRADIENT_FIRE_01_NAME_CTR "|"
   D_PALETTE_OCEAN_01_NAME_CTR "|"

@@ -7,7 +7,7 @@
 
 #ifdef USE_MODULE_SENSORS_MOTION
 
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 
 #include "5_Sensors/00_Interface/mSensorsInterface.h"
 

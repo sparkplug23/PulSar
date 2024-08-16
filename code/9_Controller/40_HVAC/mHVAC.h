@@ -48,9 +48,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 
 #define USE_HVAC_TIMERS
@@ -136,13 +136,13 @@ class mHVAC :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
     void Load_Module(bool erase = false);
     void Save_Module(void);
     bool Restore_Module(void);
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
-    #endif // USE_MODULE_DRIVERS_FILESYSTEM
+    #endif // USE_MODULE_CORE_FILESYSTEM
 
     /************************************************************************************************
      * SECTION: Internal Functions

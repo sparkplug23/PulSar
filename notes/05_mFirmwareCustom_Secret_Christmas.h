@@ -9,7 +9,7 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 //--------------------------------[Enable Device]-------------------------------------
 
@@ -178,7 +178,6 @@
 //     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
 //     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
-  // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
 
 //     // #define USE_BUILD_TYPE_LIGHTING
 //     // #define USE_MODULE_LIGHTS_INTERFACE
@@ -227,8 +226,6 @@
 
     //#define ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 
-// get code stable before worrying about "flickering"
-    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
 
 // #define ENABLE_PIXEL_AUTOMATION_PLAYLIST
 #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS

@@ -40,7 +40,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * STORAGE SECTION * 
     *******************/  
-    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
     case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
@@ -49,7 +49,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       Load_Module();
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
-    #endif // USE_MODULE_DRIVERS_FILESYSTEM
+    #endif // USE_MODULE_CORE_FILESYSTEM
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -91,7 +91,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+#ifdef USE_MODULE_CORE_FILESYSTEM
 #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
 
 void mRelays::Save_Module()
@@ -107,7 +107,7 @@ void mRelays::Load_Module(bool erase)
 }
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
-#endif // USE_MODULE_DRIVERS_FILESYSTEM
+#endif // USE_MODULE_CORE_FILESYSTEM
 
 
 void mRelays::Pre_Init(void){

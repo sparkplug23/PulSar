@@ -18,6 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - aim to make these quarterly
+ * #124 : 11Aug24, optimising starting and partial NPB update but using older methods with double buffer.
  * #122 : April 2024, lighting refactor and 2D
  * #121 : Jan 2024, starting with LTE tracing
  * #120 : XMAS 2023
@@ -32,7 +33,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    123 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    124 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #06 : New BME680 added, bme/p 180/280 manual without library
@@ -67,15 +68,14 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * 
  * 0V124 ie MAJORvMINOR
  */
-#define CHECK_FIRMWARE_VERSION(major, minor) \
+#define FIRMWARE_VERSION_MIN(major, minor) \
   ((FIRMWARE_VERSION_MAJOR > (major)) || \
    (FIRMWARE_VERSION_MAJOR == (major) && FIRMWARE_VERSION_MINOR >= (minor)))
 
-  // #if CHECK_FIRMWARE_VERSION(0, 123)
-  //   // Code for FIRMWARE_MINIMUM__0V124
-  //   ALOG_INF(PSTR("TEST"));
-  // #endif
-  
+#define FIRMWARE_VERSION_MAX(major, minor) \
+  ((FIRMWARE_VERSION_MAJOR < (major)) || \
+   (FIRMWARE_VERSION_MAJOR == (major) && FIRMWARE_VERSION_MINOR <= (minor)))
+
 
 
 #ifndef SETTINGS_HOLDER

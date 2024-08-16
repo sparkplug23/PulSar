@@ -16,7 +16,7 @@ typedef struct  FREEMEM_HANDLER{
 #endif
 
 #include <Arduino.h>
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 // #include "html_ui.h"
 #include "1_TaskerManager/mTaskerManager.h"
@@ -50,7 +50,7 @@ static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN co
 
 
 // #include <DNSServer.h>
-// #include "2_CoreSystem/02_Time/mTime.h"
+// #include "2_CoreSystem/07_Time/mTime.h"
 // #include "2_CoreSystem/01_Settings/mSettings.h"
 
 // #define HTTP_RESTART_RECONNECT_TIME           9000       // milliseconds

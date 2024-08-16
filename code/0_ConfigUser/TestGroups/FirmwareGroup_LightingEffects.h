@@ -10,14 +10,13 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "6_Lights/03_Animator/EffectNames/defines.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 //--------------------------------[Enable Device]-------------------------------------
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__01__ESP32_1CH                               // original, no parallel
-        // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__02__ESP32_PARALLEL_4CH                      // garage (100 x4) - this could become the garden lights for a practical test                     
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__02__ESP32_PARALLEL_4CH                      // garage (100 x4)                    
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__03__ESP32_PARALLEL_8CH                      // garage (100 x8)                         
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__04__ESP32_PARALLEL_16CH                     // garage (100 x16)                        
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__05__ESP32_PARALLEL_4CH_VARIED_BUSTYPE       // varied strings (ws2812, sk6812)
@@ -29,7 +28,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__30__ESP32_PWM_RGBCCT_5CH_RGBCCT              // Garage as lighting at night, long term tester
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__31__ESP32_PWM_RGBCCT_2x2CH_WHITE_CHANNELS   // For testing the dual white channels
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__32__ESP32_PWM_RGBCCT_5x1CH_WHITE_CHANNELS   // For testing single white channels
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__41__ESP32_PARALLEL_4CH_DEV                  // desk/wall testbed (10 leds per channel) 
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__41__ESP32_PARALLEL_4CH_DEV                  // desk/wall testbed (10 leds per channel) 
         // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__42__ESP32_PWM_RGBCCT_5CH_RGBWW_DEV          // Desk/under Testbed - do sun elevation white control
 
 //    ;;;;;;;;;;;; ESP8266 ;;;;;;;;;;;;;;;;
@@ -81,7 +80,7 @@
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -269,7 +268,7 @@
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -392,6 +391,8 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
+
+
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
@@ -406,7 +407,8 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
@@ -414,19 +416,39 @@
 
   // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
 
-  #define LOG_BUFFER_SIZE 2000
+  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+ 
+  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
+  #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
+  
 
   /***********************************
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-
-  
-
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -446,9 +468,6 @@
   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -472,6 +491,19 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/  
+ 
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
+
+    // #undef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+    // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -485,7 +517,44 @@
 
   #define USE_LIGHTING_TEMPLATE
 
-  #define STRIP_SIZE_MAX 600
+  #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__TESTCASE_SINGLE_OUTPUT
+
+  #ifdef ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__TESTCASE_SINGLE_OUTPUT
+  
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        250
+      ],
+      "ColourPalette":"Rainbow 16",
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  #else
+
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -495,54 +564,55 @@
         "ColourOrder":"BGR",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":100
+        "Length":10
       },
       {
         "Pin":4,
         "ColourOrder":"BGR",
         "BusType":"WS2812_RGB",
-        "Start":100,
-        "Length":100
+        "Start":10,
+        "Length":10
       },
       {
         "Pin":18,
         "ColourOrder":"BGR",
         "BusType":"WS2812_RGB",
-        "Start":200,
-        "Length":100
+        "Start":20,
+        "Length":10
       },
       {
         "Pin":19,
         "ColourOrder":"BGR",
         "BusType":"WS2812_RGB",
-        "Start":300,
-        "Length":100
+        "Start":30,
+        "Length":10
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        400
+        40
       ],
       "ColourPalette":"Snowy 02",
       "Effects": {
-        "Function":"Static Palette",
+        "Function":"Slow Glow",
         "Speed":127,
         "Intensity":127,
         "Grouping":1
       },
       "Transition": {
-        "TimeMs": 0,
+        "TimeMs": 500,
         "RateMs": 1000
       },
       "BrightnessRGB": 100
     },
-    "BrightnessRGB": 35,
+    "BrightnessRGB": 100,
     "BrightnessCCT": 0
   }
   )=====";
   
-
+  #endif // 
+  
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L2__ESP32_I2S_PARALLEL_4CH
 
 
@@ -594,7 +664,7 @@
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -799,6 +869,8 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
+
+
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
@@ -806,34 +878,56 @@
   // #define DISABLE_SERIAL0_CORE
   // #define DISABLE_SERIAL_LOGGING
   
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
   // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
   // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
 
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
 
-  #define ENABLE_DEVFEATURE__WS2805
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
 
-  #define LOG_BUFFER_SIZE 2000
+  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
+  #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
+
 
   /***********************************
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023  
-
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -876,14 +970,21 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/  
-
- #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
  
-    
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
 
+    // #undef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+    // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+// #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -903,30 +1004,28 @@
     "BusConfig":[
       {
         "Pin":2,
-        "ColourOrder":"RGBWC",
+        "ColourOrder":"GRBWC",
         "BusType":"WS2805_RGBWW",
         "Start":0,
-        "Length":60
+        "Length":100
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        60
+        100
       ],
-      "ColourPalette":"Sunset",
+      "ColourPalette":0,
       "Effects": {
         "Function":"Static Palette",
         "Speed":127,
         "Intensity":127,
-        "Grouping":1
+        "Grouping":1,
+        "RateMs": 1000,
+        "ColourType":4
       },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 5,
-      "BrightnessCCT": 5
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 100
     },
     "BrightnessRGB": 5,
     "BrightnessCCT": 5
@@ -995,7 +1094,7 @@
   #define ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
   #define DEBUG_FUNC_SETTINGSUPDATETEXT
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -1152,7 +1251,7 @@
 
 //   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-//   // #define USE_MODULE_DRIVERS_FILESYSTEM
+//   // #define USE_MODULE_CORE_FILESYSTEM
 //   //   #define WLED_ENABLE_FS_EDITOR
 //   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 //   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -1524,7 +1623,7 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
-#define ENABLE_DEVFEATURE__NEOPIXELBUS_JULY_ONWARDS
+
 
   /***********************************
    * SECTION: System Debug Options
@@ -1554,6 +1653,9 @@
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
+ 
+  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
    * Longer term, a mixture of JSON/Binary for space.
@@ -1578,7 +1680,7 @@
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -1622,9 +1724,9 @@
    * SECTION: Lighting Configs
   ************************************/  
  
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
@@ -1647,7 +1749,7 @@
 
   #define USE_LIGHTING_TEMPLATE
 
-  #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO
+  // #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO
 
   #ifdef ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__GAZEBO
   
@@ -1841,7 +1943,7 @@
    * SECTION: System Configs
   ************************************/    
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -1995,7 +2097,7 @@
    * SECTION: System Configs
   ************************************/    
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -2140,7 +2242,7 @@
    * SECTION: System Configs
   ************************************/    
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -2293,7 +2395,7 @@
    * SECTION: System Configs
   ************************************/    
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -2451,7 +2553,7 @@
    * SECTION: System Configs
   ************************************/    
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -2660,7 +2762,7 @@
    * SECTION: System Configs
   ************************************/    
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -2942,7 +3044,7 @@
     
 
     
-    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+    // #
 
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -3115,7 +3217,7 @@
 
 //     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-//     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+//     // #
 
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -3626,7 +3728,7 @@
 
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+    // #
 
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -3785,7 +3887,7 @@
 
 //     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-//     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+//     // #
 
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -4051,7 +4153,7 @@
 
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+    // #
 
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -4217,7 +4319,6 @@
 
 //     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-//     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
 
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -4561,7 +4662,7 @@
 
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
+    // #
 
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -4727,7 +4828,6 @@
 
 //     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-//     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
 
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
@@ -5220,7 +5320,7 @@
  
 //   #define SETTINGS_HOLDER 1239
 
-//   // #define USE_MODULE_DRIVERS_FILESYSTEM
+//   // #define USE_MODULE_CORE_FILESYSTEM
 //   //   #define WLED_ENABLE_FS_EDITOR
 //   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 //   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -5825,7 +5925,7 @@
  
   #define SETTINGS_HOLDER 1239
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -6088,7 +6188,7 @@
  
   #define SETTINGS_HOLDER 1239
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT

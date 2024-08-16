@@ -92,14 +92,14 @@ extern struct DATA_BUFFER data_buffer;
 
 
 #include "2_CoreSystem/06_Support/mSupport.h"
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 #include "2_CoreSystem/mFirmwareDefaults.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "2_CoreSystem/11_Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 
 
 #ifdef ESP32

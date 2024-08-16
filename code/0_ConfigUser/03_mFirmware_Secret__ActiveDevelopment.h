@@ -14,7 +14,7 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -22,7 +22,7 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// #define DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+#define DEVICE_HVAC_DESK
 // #define DEVICE_TREADMILL_POWER_MONITOR
 // #define DEVICE_LIGHTING__LED_MATRIX_BOX_01
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__10INCH
@@ -266,7 +266,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
  * 
 
 */
-#ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+#ifdef DEVICE_HVAC_DESK
   #define DEVICENAME_CTR          "hvac_desk"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
@@ -325,6 +325,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
+  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
    * Longer term, a mixture of JSON/Binary for space.
@@ -342,7 +344,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -386,6 +388,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
   /***********************************
    * SECTION: Network Configs
   ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   /***********************************
    * SECTION: Sensor Configs
@@ -493,9 +498,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #ifdef ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
 
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
     // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
     // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
@@ -514,7 +519,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 
-    #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+    // #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+    
 
     
     
@@ -526,7 +532,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 
-  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+  // #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
 
   
   #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
@@ -648,6 +654,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "BrightnessCCT": 0
     }
     )=====";
+
+    
 
   #endif // ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
 
@@ -984,7 +992,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -1592,7 +1600,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -1813,7 +1821,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -2846,7 +2854,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -4268,7 +4276,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   /***********************************
    * SECTION: Core Configs
   ************************************/     
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -4495,7 +4503,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -4890,7 +4898,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -5102,7 +5110,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -5125,7 +5133,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
-  #define USE_MODULE_DRIVERS_FILESYSTEM
+  #define USE_MODULE_CORE_FILESYSTEM
 
   
       #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
@@ -5329,7 +5337,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT

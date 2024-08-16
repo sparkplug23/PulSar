@@ -13,7 +13,7 @@ enum TASKER_FUNCTION_TYPES {
    * module load should only be things that can happen before the init phase, 
    * or, I need to call this twice, so some functions required before init and after init are handled (yes, do this)
    * */
-  FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
+  FUNC_TEMPLATES__LOAD_MODULE,  // Read progmem configs if needed, read settings configuration
   FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
 
   FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID, // progmem is only loaded when file system is reset
@@ -52,6 +52,9 @@ enum TASKER_FUNCTION_TYPES {
    * Eg. parse_jsonCommand from template sets energy (pzem) to have X sensors during boot. Prior to leaving setup, this will be called to refresh these buffers based on the latest dynamic buffers needed
    * */
   FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID,
+
+  // Boot filesystem
+  FUNC_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM,
   
 
   FUNC_FUNCTION_LAMBDA_INIT,

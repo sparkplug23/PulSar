@@ -53,10 +53,12 @@ typedef struct Segment {
     uint8_t  spacing = 0;
 
     /**
-     * @brief Animation ColourType of the minimal output. Full Rgbcct is calculated anyway and then output bus type dictates this, so remove? 
-     * Although, it is used for saving of the buffer
-     * Rename this one to "AnimationColourType" "animation_colour_type"
-     * @NOTE: minimal/default should be RGB, only when white channels are needed should that also be computed
+     * @brief
+     * The colours that are generated directly within the effect function, and is used to define the type of storage buffered required to hold the colour buffer
+     * This should work in tandem with another variable, which can define how the white components are handled
+     * Option 1: Only RGB is created, white is ignored
+     * Option 2: Effect creates colour and white components
+     * Option 3: Effects creates colours, but white is generated after based on different options
      **/
     #ifdef ENABLE_DEVFEATURE_LIGHT__FORCE_EFFECT_COLOUR_TYPE_AS_RGBCCT
     ColourType colour_type__used_in_effect_generate = ColourType::COLOUR_TYPE__RGBCCT__ID; 
@@ -135,22 +137,6 @@ typedef struct Segment {
      */
     uint8_t getBrightnessRGB_WithGlobalApplied(); 
     uint8_t getBrightnessCCT_WithGlobalApplied();
-
-    /**
-     * Transition settings
-     * */
-    // struct TRANSITION_SETTINGS
-    // {
-      /**
-       * Refresh rate, calculate new colours
-       * */
-      // uint16_t time_ms(uint16_t time)
-      // {
-      //   cycle_time__rate_ms = map(time, 0,255, );//(cycle_time__rate_ms * 255)/255;
-      // }
-
-      
-    // }transition;
 
     // Flags and states that are used during one transition and reset when completed
     struct ANIMATION_SINGLE_USE_OVERRIDES_ANYTIME

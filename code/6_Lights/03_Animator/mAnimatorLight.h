@@ -9,7 +9,7 @@
 
 #include "6_Lights/00_Interface/mBusManager.h"
 
-#include "2_CoreSystem/02_Time/Toki.h"
+#include "2_CoreSystem/07_Time/Toki.h"
 
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -182,8 +182,8 @@
  * Note: WLED used full colour RGB SEGCOLOR_U32, here SEGCOLOR_U32 going forward will also have brightness applied otherwise it is assumed as 100% brightness and therefore the same as WLED
  * 
  */
-#define SEGCOLOR_U32(x)      RgbcctColor::GetU32ColourBrightnessApplied(segments[getCurrSegmentId()].rgbcctcolors[x])
-#define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
+#define SEGCOLOR_U32(x)      segments[getCurrSegmentId()].rgbcctcolors[x].WithBrightness().getU32()
+#define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].WithBrightness()
 
 #define SEGMENT          segments[getCurrSegmentId()]
 #define SEGMENT_I(X)     segments[X] // can this be changed later to "getSegment(X)" and hence protect against out of bounds
@@ -341,17 +341,11 @@ class mAnimatorLight :
     rt;
 
     
-    uint8_t light_power_state = 0;
-    uint8_t light_power_Saved = 0;
     bool    pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
     bool    fade_initialized = false;      // dont't fade at startup
     bool doInitBusses = false; // debug
     bool     doSerializeConfig = false; // debug
     int8_t loadLedmap = -1;
-    struct AUTO_OFF_SETTINGS{
-      uint16_t time_decounter_secs = 0;
-    }auto_off_settings;
-
     uint16_t fAnyLEDsOnOffCount = 0;
     uint8_t blocking_force_animate_to_complete = true;
     uint8_t fPixelsUpdated = false;
@@ -379,9 +373,6 @@ class mAnimatorLight :
     #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
     void EveryLoop();    
-    #ifdef USE_MODULE_CORE_RULES
-    void RulesEvent_Set_Power();
-    #endif // rules
      
     void EverySecond_AutoOff();
     void BootMessage();
@@ -455,12 +446,8 @@ class mAnimatorLight :
     #endif
 
     void CommandSet_CustomPalette(uint8_t index, uint16_t encoding, uint8_t* data, uint8_t data_length);
-    void CommandSet_LightPowerState(uint8_t value);
-    bool CommandGet_LightPowerState();
-    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
    
-    void CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
-    const char* GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
+    void CommandSet_Effect_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
 
     #ifdef ENABLE_DEVFEATURE_LIGHTING__COLOURHEATMAP_PALETTE
     void CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t array_length, uint8_t style_index = 0, uint8_t palette_id = 255);
@@ -482,7 +469,6 @@ class mAnimatorLight :
     // const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
     // const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
 
-    void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
     void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
   
     void CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index = 0);
@@ -494,7 +480,6 @@ class mAnimatorLight :
     void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
     void CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
-    void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
 
 
     uint8_t GetNumberOfColoursInPalette(uint16_t palette_id);
@@ -3293,9 +3278,6 @@ bool useMainSegmentOnly _INIT(false);
       void MQTTHandler_Sender();
       #ifdef USE_MODULE_NETWORK_WEBSERVER
       void MQTTHandler_AddWebURL_PayloadRequests();
-      #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-      void MQTTHandler_AddWebURL_PayloadRequests2();
-      #endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
       #endif // USE_MODULE_NETWORK_WEBSERVER
       
       std::vector<struct handler<mAnimatorLight>*> mqtthandler_list;

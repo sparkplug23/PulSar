@@ -348,7 +348,7 @@ lib_extra_dirs              = ${library.lib_extra_dirs}
 ; *** ESP32 lib. ALWAYS needed for ESP32 !!!
                             lib/libesp32
 ; *** ESP32 lib. ALWAYS needed for ESP32 !!!
-                            lib/libg_neopixel   
+                               
 ; *** Only disabled for Tasmota minimal and Tasmota light. For all other variants needed!
                             lib/lib_basic
                             ; lib/lib_sensor_db
@@ -400,7 +400,7 @@ lib_extra_dirs              =
 ;                               lib/lib_div
                             lib/libesp8266/network 
                             lib/lib_network 
-                            lib/libg_neopixel
+                            
                             lib/lib_basic      
                             ; lib/lib_sensor  
 
@@ -519,7 +519,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                             lib/lib_gps
                             lib/libesp32/network
                             lib/lib_network
-                            lib/libg_neopixel
+                            
 ; upload_port = 192.168.1.171
 ; upload_port = rgbfireplace_tester.local
 ; extra_scripts   = gzip_fw.py
@@ -696,7 +696,7 @@ upload_port = COM5
 [env:esp_32_gpsparser_tester_interrupt]
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -D DEVICE_GPSPARSER_TESTER_INTERRUPT -Wcpp -w
-lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_gps
+lib_extra_dirs          = lib/libesp32, , lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_gps
 lib_deps =
   # RECOMMENDED
   # Accept new functionality in a backwards compatible manner and patches
@@ -716,7 +716,7 @@ upload_port = COM3
 [env:esp_32_sdlogger1_tester]
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -D DEVICE_SDLOGGER1_TESTER -Wcpp -w
-lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_gps, lib/lib_display
+lib_extra_dirs          = lib/libesp32, , lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_gps, lib/lib_display
 lib_deps =
   # RECOMMENDED
   # Accept new functionality in a backwards compatible manner and patches
@@ -984,7 +984,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_display
                           lib/lib_onewire2023 
                           lib/lib_sensor
-                          lib/libg_neopixel
+                          
 ; upload_protocol = espota
 ; upload_port = heating
 ; upload_port = 192.168.0.34
@@ -1001,7 +1001,7 @@ extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel   
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display,    
 lib_deps =
   # RECOMMENDED
   # Accept new functionality in a backwards compatible manner and patches
@@ -1077,7 +1077,7 @@ upload_port = COM31
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1092,7 +1092,7 @@ upload_protocol = espota
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_BASIC_02
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1108,7 +1108,7 @@ extra_scripts   = ${scripts_defaults.extra_scripts}
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_ESP32_DEBUG
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1123,7 +1123,7 @@ extra_scripts   = ${scripts_defaults.extra_scripts}
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_ADVANCED_01
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1193,7 +1193,7 @@ upload_protocol = espota
 [env:esp_32_tree_segment]
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_RGBSTRING_DEVBOARD_SEGMENT_ESP32 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1207,7 +1207,7 @@ extra_scripts   = gzip_fw.py
 [env:esp_32_outside_tree_segments]
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_RGBSTRING_OUTSIDE_TREE_SEGMENTS 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, 
 lib_deps =
 monitor_filters = esp32_exception_decoder, colorize
 build_type = debug
@@ -1297,7 +1297,7 @@ upload_port = COM6
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_TESTBED_H801_LONGTERM_DESK  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_port = 192.168.0.116
@@ -1312,7 +1312,7 @@ upload_port = 192.168.0.53
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_TESTBED_CRASHREPORT  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_port = 192.168.0.116
@@ -1326,7 +1326,7 @@ upload_port = COM18
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_TESTBED_CRASHREPORT  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_port = 192.168.0.116
@@ -1343,7 +1343,7 @@ upload_port = COM18
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_TESTBED_FASTBOOT_ESP8266  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_port = 192.168.0.116
@@ -1367,7 +1367,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1402,7 +1402,7 @@ upload_port = COM5
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_STRING_ROSEBUD
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1469,7 +1469,7 @@ upload_port = COM5
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1484,7 +1484,7 @@ upload_port = COM5
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_3PIXELS_MATRIX_E131_PROTOCOL
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1499,7 +1499,7 @@ upload_port = COM19
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS_ENABLING_WEBUI
 ; -D DEVICE_MEASUREMENT_SYSTEM_1 
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1540,7 +1540,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1602,7 +1602,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1638,7 +1638,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1672,7 +1672,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1707,7 +1707,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1745,7 +1745,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1780,7 +1780,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1815,7 +1815,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1851,7 +1851,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1886,7 +1886,7 @@ extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_TESTBED_LIGHT_SEGMENT_ESP8266__BEDROOM_ROOF
                                      -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; upload_port = rgbshelf.local
 ; upload_protocol = espota
 ; extra_scripts             = gzip_fw.py
@@ -1915,7 +1915,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1955,7 +1955,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -1989,7 +1989,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -2024,7 +2024,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -2051,7 +2051,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -2218,7 +2218,7 @@ upload_port = 192.168.1.18
 [env:esp_32_testbed_motion]
 extends = env:tasmota32_base
 build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_MOTION -D ESP32
-lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_onewire2023, lib/libg_neopixel
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_onewire2023, 
 lib_deps =
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -2383,7 +2383,7 @@ extra_scripts   = gzip_fw.py
 [env:testbed_led_matrix_seg]
 extends = env:whitehall_32
 build_flags             = ${common32.build_flags} -D DEVICE_LED_MATRIX_SEGMENTS -Wcpp -w
-lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_extra_dirs          = lib/libesp32, , lib/lib_basic, lib/libesp32/network, lib/lib_network
 ; lib_extra_dirs          = lib/libesp32
 monitor_filters = esp32_exception_decoder
 build_type = debug

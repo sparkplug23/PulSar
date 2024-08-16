@@ -90,8 +90,11 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   {     
         
   DEBUG_LINE_HERE;
-    // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
+    #ifdef ENABLE_ADVANCED_DEBUGGING
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
+    #endif
     
+  DEBUG_LINE_HERE;
     // If target_tasker != 0, then use it, else, use indexed array
     switch_index = target_tasker ? GetEnumNumber_UsingModuleUniqueID(target_tasker) : i; // passed value module is in unique_module_id format
       
@@ -107,8 +110,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       {
       #endif
   DEBUG_LINE_HERE;
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIS_%d\t %02d %02d T:%S\tM:%S"), millis(), switch_index, i, 
-        GetTaskName(function, buffer_taskname), 
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIS_%d\t %02d %02d T:%d%S\tM:%S"), millis(), switch_index, i, 
+        function, GetTaskName(function, buffer_taskname), 
         GetModuleFriendlyName(switch_index));  
   DEBUG_LINE_HERE;    
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
@@ -179,7 +182,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     if(fExitTaskerWithCompletion)
     {
       fExitTaskerWithCompletion=false;
-      ALOG_DBM(PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+      ALOG_INF(PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+  DEBUG_LINE_HERE;
       break; //only run for loop for the class set. if 0, rull all
     }
   
@@ -284,17 +288,24 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_SETTINGS
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif 
-  #ifdef USE_MODULE_CORE_TIME
-  addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
-  #endif 
+  #ifdef USE_MODULE_CORE_FILESYSTEM
+  addTasker(EM_MODULE_CORE_FILESYSTEM_ID, new mFileSystem());
+  #endif
   #ifdef USE_MODULE_CORE_HARDWAREPINS
   addTasker(EM_MODULE_CORE_HARDWAREPINS_ID, new mHardwarePins());
   #endif 
-  #ifdef USE_MODULE_CORE_LOGGING
-  addTasker(EM_MODULE_CORE_LOGGING_ID, new mLogging());
-  #endif 
+
+
   #ifdef USE_MODULE_CORE_SUPPORT
   addTasker(EM_MODULE_CORE_SUPPORT_ID, new mSupport());
+  #endif 
+  #ifdef USE_MODULE_CORE_TIME
+  addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
+  #endif 
+
+
+  #ifdef USE_MODULE_CORE_LOGGING
+  addTasker(EM_MODULE_CORE_LOGGING_ID, new mLogging());
   #endif 
   #ifdef USE_MODULE_CORE_TELEMETRY
   addTasker(EM_MODULE_CORE_TELEMETRY_ID, new mTelemetry());
@@ -337,13 +348,10 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_NETWORK_WEBSERVER_ID, new mWebServer());
   #endif
   /**
-   * @brief Displays
+   * @brief Drivers
    **/
   #ifdef USE_MODULE_DRIVERS_INTERFACE
   addTasker(EM_MODULE_DRIVERS_INTERFACE_ID, new mDriverInterface());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  addTasker(EM_MODULE_DRIVERS_FILESYSTEM_ID, new mFileSystem());
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
   INCLUDE_FIX"4_Drivers/03_LEDs/mLEDs.h"
@@ -880,16 +888,20 @@ mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
  */
 bool mTaskerManager::ValidTaskID(uint8_t id)
 {
+  DEBUG_LINE_HERE;
   return id <= GetClassCount() ? true : false;
 }
 
 
 PGM_P mTaskerManager::GetModuleFriendlyName(uint16_t id)
 {
+  DEBUG_LINE_HERE;
   if(ValidTaskID(id))
   {
+  DEBUG_LINE_HERE;
     return pModule[id]->GetModuleFriendlyName();
   }  
+  DEBUG_LINE_HERE;
   return PM_SEARCH_NOMATCH;
 }
 
@@ -925,11 +937,12 @@ PGM_P mTaskerManager::GetModuleName(uint8_t id)
 // Use progmem WITHOUT buffer for speed improvements, should be read as expected progmem and handled that way
 const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
 
+  DEBUG_LINE_HERE;    
   switch(task){
     default:
                                                       return PM_SEARCH_NOMATCH;
     case FUNC_POINTER_INIT:                           return PM_FUNC_POINTER_INIT_CTR;
-    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:      return PM_FUNC_TEMPLATE_LOAD_CTR;
+    case FUNC_TEMPLATES__LOAD_MODULE:      return PM_FUNC_TEMPLATE_LOAD_CTR;
     case FUNC_PRE_INIT:                               return PM_FUNC_PRE_INIT_CTR;
     case FUNC_INIT:                                   return PM_FUNC_INIT_CTR;
     case FUNC_CONFIGURE_MODULES_FOR_DEVICE:           return PM_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR;

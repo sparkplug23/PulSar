@@ -59,12 +59,13 @@ class mSensorsInterface :
   public mTaskerInterface
 {
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
 	  mSensorsInterface(){};
     void Pre_Init(void);
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void EveryLoop();
-
     
     static const char* PM_MODULE_SENSORS_INTERFACE_CTR;
     static const char* PM_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR;
@@ -75,21 +76,36 @@ class mSensorsInterface :
     uint16_t GetClassSize(){      return sizeof(mSensorsInterface);    };
     #endif
 
-    void parse_JSONCommand(JsonParserObject obj);
-
-    struct SETTINGS
+    struct ClassState
     {
-      uint8_t fEnableSensor = false;
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    void Load_Module(bool erase);
+    void Save_Module(void);
+    bool Restore_Module(void);
+
+    struct MODULE_RUNTIME{ // these will be saved and recovered on boot      
       uint8_t tTicker_Splash_Sensors_To_Logs = 30;
       float sealevel_pressure; 
-    }
-    settings;
+    }rt;
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
 
     #ifdef USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
     uint32_t GetColourValueUsingMaps_FullBrightness(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     uint32_t GetColourValueUsingMaps_AdjustedBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     void HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t* g8, uint8_t* b8);
     #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+
+    void EveryLoop();
 
     void MQTT_Report_Event_Button();
 
@@ -99,35 +115,60 @@ class mSensorsInterface :
     #endif // USE_MODULE_LIGHTS_INTERFACE
         
     void CommandEvent_Motion(uint8_t event_type);
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+
+    void parse_JSONCommand(JsonParserObject obj);
+
     
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+   
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_appending = true);
-
-  
+    
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+      
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    
+    void MQTTHandler_Set_DefaultPeriodRate();    
     void MQTTHandler_Sender();
+
+    std::vector<struct handler<mSensorsInterface>*> mqtthandler_list;
     struct handler<mSensorsInterface> mqtthandler_settings_teleperiod;
-    void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
     struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
-    void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
-
-    struct handler<mSensorsInterface>* mqtthandler_list[5] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod,
-      &mqtthandler_sensor_temperature_colours,
-      &mqtthandler_motion_event_ifchanged
-    };
     #endif // USE_MODULE_NETWORK_MQTT
+
+    /******************************************************************************************************************
+     * WEBSERVER
+    *******************************************************************************************************************/
+
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
+
+    These would be good just on the interface files, to enable HTTP requests for data overview
+
+      /**
+       * @brief MQTTHandler_AddWebURL_PayloadRequests
+       * */
+      void MQTTHandler_AddWebURL_PayloadRequests();
+
+    #endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
+    #endif // USE_MODULE_NETWORK_WEBSERVER
+
+
+
 
 };
 

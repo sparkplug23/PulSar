@@ -33,7 +33,7 @@ void mSettings::SettingsSaveAll(void)
 uint32_t mSettings::SettingsRead(void *data, size_t size) 
 {
   DEBUG_LINE_HERE;
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  #ifdef USE_MODULE_CORE_FILESYSTEM
   if (pCONT_mfile->TfsLoadFile(TASM_FILE_SETTINGS, (uint8_t*)data, size)) 
   {
   DEBUG_LINE_HERE;
@@ -143,7 +143,7 @@ void mSettings::SettingsLoad(void)
      */
     bool settings_reset_by_defaults = false;
     
-    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef USE_MODULE_CORE_FILESYSTEM
     /**
      * Load as temporary settings, to enable testing of cfg_size 
      **/
@@ -161,7 +161,7 @@ void mSettings::SettingsLoad(void)
         settings_reset_by_defaults = true;
       }
     } 
-    #endif  // USE_MODULE_DRIVERS_FILESYSTEM
+    #endif  // USE_MODULE_CORE_FILESYSTEM
 
     if(settings_reset_by_defaults)
     {
@@ -186,9 +186,9 @@ void mSettings::SettingsWrite(const void *pSettings, unsigned nSettingsLen)
 {
 
 DEBUG_LINE_HERE;
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  #ifdef USE_MODULE_CORE_FILESYSTEM
   pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)pSettings, nSettingsLen);
-  #endif // USE_MODULE_DRIVERS_FILESYSTEM
+  #endif // USE_MODULE_CORE_FILESYSTEM
   
 
 DEBUG_LINE_HERE;
@@ -242,9 +242,9 @@ void mSettings::SettingsSave(uint8_t rotate)
 #endif
 
 #ifdef ESP8266
-#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+#ifdef USE_MODULE_CORE_FILESYSTEM
     // pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, &Settings, sizeof(SETTINGS));
-#endif  // USE_MODULE_DRIVERS_FILESYSTEM
+#endif  // USE_MODULE_CORE_FILESYSTEM
     // if (ESP.flashEraseSector(settings_location)) {
     //   ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, &Settings, sizeof(SETTINGS));
     // }

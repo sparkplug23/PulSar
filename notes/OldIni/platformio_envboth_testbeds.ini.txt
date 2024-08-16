@@ -84,7 +84,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
 monitor_filters = esp32_exception_decoder
 build_type = debug
 upload_port = COM6
@@ -330,7 +330,7 @@ upload_port = COM5
 [env:esp_8266_rgbcrystal2]
 build_flags = ${common.build_flags} -D DEVICE_RGBCRYSTAL2  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; -DRGB_POWER_LIMIT_MA=1000 -w
 ;upload_port = rgbcrystal1.local
 upload_port = 192.168.1.249
@@ -394,7 +394,7 @@ upload_port = COM3
 [env:esp_8266_rgbclock_01]
 build_flags = ${common.build_flags} -D DEVICE_RGBCLOCK_01 -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_protocol = espota
 ; upload_port = 192.168.1.135
 upload_port = rgbclock_01.local
@@ -404,7 +404,7 @@ extra_scripts   = gzip_fw.py
 [env:esp_8266_testbed_rgbclock]
 build_flags = ${common.build_flags} -D DEVICE_TESTBED_RGBCLOCK -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_protocol = espota
 ; upload_port = 192.168.1.98
 upload_port = testbed_rgbclock
@@ -415,7 +415,7 @@ extra_scripts   = gzip_fw.py
 [env:esp_8266_rgbdisplay_garage]
 build_flags = ${common.build_flags} -D DEVICE_RGBDISPLAY_GARAGE -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 ; upload_protocol = espota
 ; upload_port = 192.168.1.118
 ; extra_scripts   = gzip_fw.py
@@ -486,7 +486,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -502,7 +502,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -519,7 +519,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -537,7 +537,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -555,7 +555,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -573,7 +573,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -590,7 +590,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -608,7 +608,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -626,7 +626,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -645,7 +645,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -667,7 +667,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}
@@ -684,7 +684,7 @@ build_flags               = ${common.build_flags}
             ;  -DENABLE_BUG_TRACING
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
-; lib_extra_dirs          = lib/libg_neopixel
+; lib_extra_dirs          = 
 ;                   lib/lib_basic
 ;                   lib/libesp8266/network
 ; lib_extra_dirs          = ${common.lib_extra_dirs}

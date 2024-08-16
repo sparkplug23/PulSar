@@ -324,48 +324,6 @@ char* mMQTT::TopicFormatted(const char* module_name, uint8_t topic_type_id, cons
 
 }
 
-
-#ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-// template<typename T>
-// void mMQTT::MQTTHandler_AddWebURL(T& class_ptr, uint16_t class_id, handler<T>* handle)
-// {
-
-//   PGM_P module_ctr = pCONT->GetModuleFriendlyName(class_id);
-
-//   char uri_buffer[70] = {0};
-//   snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, module_ctr);
-//   pCONT_web->server->on(uri_buffer, HTTP_GET, [class_ptr, handle](AsyncWebServerRequest *request)
-//   {
-//     char handle_url[100] = {0};
-//     // for(auto& handle:mqtthandler_list)
-//     // {      
-//     // PGM_P module_ctr = pCONT->GetModuleFriendlyName(class_id);
-
-//     TopicFormatted(  class_ptr->GetModuleFriendlyName(),
-//             handle->topic_type,
-//             handle->postfix_topic, handle_url, sizeof(handle_url));  
-
-//     ALOG_INF(PSTR("handle_url=%s"), handle_url);
-//     ALOG_INF(PSTR("%s in %s?"), handle->postfix_topic, request->url().c_str());      
-
-//     const String& incoming_uri = request->url();
-//     if(incoming_uri.indexOf(handle_url) > 0)
-//     {
-//       ALOG_INF(PSTR("%s"), request->url().c_str());            
-//       uint8_t fSendPayload = CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, true);
-//       ALOG_INF(PSTR("data_buffer.payload.ctr=%s"), data_buffer.payload.ctr);
-//       request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
-//       // break; // to stop accidental double matches, only respond once
-//     }
-//     // }
-//   });
-
-// }
-#endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-
-
-
-
 /**
  * @brief This is not thread safe
  * 

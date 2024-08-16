@@ -72,7 +72,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * STORAGE SECTION * 
     *******************/  
-    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
     case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
@@ -81,7 +81,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
       // Load_Module();
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
-    #endif // USE_MODULE_DRIVERS_FILESYSTEM
+    #endif // USE_MODULE_CORE_FILESYSTEM
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -108,7 +108,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
 } // END Tasker
 
 
-#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+#ifdef USE_MODULE_CORE_FILESYSTEM
 #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
 void mHVAC::Save_Module()
 {
@@ -149,7 +149,7 @@ void mHVAC::Load_Module(bool erase)
   ALOG_INF(PSTR("%d Load_Module %d"), 3, rt.zone[3].program_timer_method.GetTimer_Seconds());
 }
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
-#endif // USE_MODULE_DRIVERS_FILESYSTEM
+#endif // USE_MODULE_CORE_FILESYSTEM
 
 
 

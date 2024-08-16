@@ -1,3 +1,9 @@
+
+#include "6_Lights/03_Animator/mAnimatorLight.h"
+
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 // font courtesy of https://github.com/idispatch/raster-fonts
 static const unsigned char console_font_5x12[] PROGMEM = {
 
@@ -4100,3 +4106,7 @@ static const unsigned char console_font_5x12[] PROGMEM = {
     // 0x00,  /* 00000 */
     // 0x00,  /* 00000 */
 };
+
+#endif // USE_MODULE_LIGHTS_ANIMATOR
+
+#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS

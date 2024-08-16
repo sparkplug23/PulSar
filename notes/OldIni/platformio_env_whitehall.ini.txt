@@ -108,7 +108,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                             lib/lib_network
                             lib/lib_energy
                             lib/lib_sensor
-                            lib/libg_neopixel
+                            
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
 ; upload_port = COM16
@@ -138,7 +138,7 @@ build_flags               = ${core_2_6_1.build_flags}
                                  -D DEVICE_H801_RGBGAZEBO -w
 lib_extra_dirs              = ${library.lib_extra_dirs}
                             ;   lib/lib_neopixel_old
-                              lib/libg_neopixel
+                              
 ; upload_port=COM19
 upload_protocol = espota
 extra_scripts             = gzip_fw.py
@@ -188,7 +188,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
               lib/lib_irremote
 ; upload_port = COM24
 upload_protocol = espota
@@ -259,7 +259,7 @@ upload_port = 192.168.0.45
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_RGBCOOKER  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_port = 192.168.0.63
 ; upload_port = rgbcooker
 upload_protocol = espota
@@ -270,7 +270,7 @@ extra_scripts             = gzip_fw.py
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_RGBFRIDGE  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_port = 192.168.0.150
 ; upload_port = rgbfridge
 upload_protocol = espota
@@ -283,7 +283,7 @@ extra_scripts             = gzip_fw.py
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_RGBLIGHTS_GLASSBOX  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_port = rgbglassbox.local
 upload_protocol = espota
 extra_scripts             = gzip_fw.py
@@ -300,7 +300,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_basic
               lib/libesp32/network
@@ -375,7 +375,7 @@ upload_port = COM18
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_RGBUTILITY  -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_port = 192.168.0.68
 ; upload_port = rgbutility
 upload_protocol = espota
@@ -391,7 +391,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
               lib/lib_basic
               lib/lib_network
-              lib/libg_neopixel
+              
 ; upload_port = COM6
 upload_protocol = espota
 ; upload_port = rgblamp_cylinder
@@ -412,7 +412,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
               lib/lib_irremote
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -437,7 +437,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
 ; upload_port = COM8
@@ -456,7 +456,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_display
                           lib/lib_onewire2023 
                           lib/lib_sensor
-                          lib/libg_neopixel
+                          
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
 ; upload_port = COM9
@@ -474,7 +474,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_display
                           lib/lib_onewire2023 
                           lib/lib_sensor
-                          lib/libg_neopixel
+                          
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
 ; upload_port = COM9
@@ -513,7 +513,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_display
                           lib/lib_onewire2023 
                           lib/lib_sensor
-                          lib/libg_neopixel
+                          
 ; upload_protocol = espota
 ; upload_port = heating.local
 ; upload_port = 192.168.0.34
@@ -535,7 +535,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_display
                           lib/lib_onewire2023 
                           lib/lib_sensor
-                          lib/libg_neopixel
+                          
 upload_protocol = espota
 ; upload_port = heating.local
 upload_port = 192.168.0.215
@@ -575,7 +575,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
               lib/lib_irremote
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -914,7 +914,7 @@ extra_scripts   =  gzip_fw.py
 extends = env:whitehall_32
 build_flags = ${common.build_flags} -D DEVICE_ENSUITESENSOR -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              
 upload_port = 192.168.1.118
 ; upload_port = ensuitesensor.local
 upload_protocol = espota
@@ -953,7 +953,7 @@ upload_port = atticsensor.local
 [env:wh_rgbfireplace]
 extends = env:whitehall_32
 build_flags             = ${common32.build_flags} -D DEVICE_RGBFIREPLACE -Wcpp -w
-lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_extra_dirs          = lib/libesp32, , lib/lib_basic, lib/libesp32/network, lib/lib_network
 ; lib_extra_dirs          = lib/libesp32
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1082,7 +1082,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
               lib/lib_irremote
               lib/lib_rf_extended
 ; monitor_filters = esp32_exception_decoder
@@ -1254,7 +1254,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_display
               lib/lib_onewire2023 
               lib/lib_sensor
-              lib/libg_neopixel
+              
               lib/lib_irremote
 upload_port = COM10
 ; upload_protocol = espota

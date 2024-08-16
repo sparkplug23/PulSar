@@ -8,8 +8,7 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "6_Lights/03_Animator/EffectNames/defines.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 //--------------------------------[Enable Device]-------------------------------------
 
@@ -3151,7 +3150,7 @@ Blue (Upstairs Link) ***********************************************************
   //   #define ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
 
   
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   // #define WLED_ENABLE_FS_EDITOR
   // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
@@ -3196,7 +3195,7 @@ Blue (Upstairs Link) ***********************************************************
   /***********************************
    * SECTION: Core Configs
   ************************************/     
-  #define USE_MODULE_DRIVERS_FILESYSTEM
+  #define USE_MODULE_CORE_FILESYSTEM
     #define WLED_ENABLE_FS_EDITOR
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT

@@ -21,7 +21,7 @@ enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCO
 #ifdef ENABLE_USER_CONFIG_OVERRIDE 
   #include "0_ConfigUser/G1_mUserConfig_Secret.h"
 #endif
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
@@ -46,7 +46,7 @@ enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCO
 
 
 #include "1_TaskerManager/mTaskerInterface.h"
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 
 class mWiFi :
   public mTaskerInterface

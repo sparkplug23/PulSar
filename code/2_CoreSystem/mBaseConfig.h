@@ -184,7 +184,7 @@ With latest version, all longer term shared debug features should be added here 
    * SECTION: Lighting Configs: Features
   ************************************/    
 
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  // #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
 
   #ifndef ANIMATION_UPDATOR_TIME_MINIMUM
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20

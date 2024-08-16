@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 
 

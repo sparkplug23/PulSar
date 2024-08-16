@@ -51,11 +51,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       CommandSet_Physical_UserInput_Buttons();
       #endif
     break;
-    #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
-      RulesEvent_Set_Power();
-    break;
-    #endif// USE_MODULE_CORE_RULES
     /************
      * MQTT SECTION * 
     *******************/   
@@ -406,7 +401,6 @@ void mAnimatorLight::Init(void)
   pwm_multi_channels = 0;
 
 
-  auto_off_settings.time_decounter_secs = 0;
 
   #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
@@ -536,53 +530,9 @@ void mAnimatorLight::Reset_CustomPalette_NamesDefault()
 
 
 
-#ifdef USE_MODULE_CORE_RULES
-void mAnimatorLight::RulesEvent_Set_Power()
-{
-
-  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
-
-  uint8_t index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
-  uint8_t state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
-
-  bool get_state = CommandGet_LightPowerState();
-
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandGet_LightPowerState() = %d"), get_state);
-
-  // get state
-  ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());
-
-  // apply invert if needed
-  CommandSet_LightPowerState(state);
-
-}
-#endif // USE_MODULE_CORE_RULES
-
 
 void mAnimatorLight::EverySecond_AutoOff()
 {
-
-  /**
-   * @brief Master AutoOff DeCounter
-   **/
-  //ALOG_DBM( PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
-  if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
-    // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
-    #endif       
-    
-    pCONT_lAni->CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
-    //#ifdef ENABLE_LOG_LEVEL_INFO
-    auto_off_settings.time_decounter_secs=0;
-    //#endif
-  }else
-  if(auto_off_settings.time_decounter_secs>1){ //if =1 then turn off and clear to 0
-    auto_off_settings.time_decounter_secs--; //decrease    
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs=%d dec"),auto_off_settings.time_decounter_secs);
-    #endif
-  }
 
   /**
    * @brief Segment(s) AutoOff DeCounter
@@ -1480,11 +1430,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
    */
   if(update_output)
   {
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-      pCONT_iLight->neopixel_runner->execute();   
-    #else
-      pCONT_iLight->ShowInterface(); 
-    #endif
+    pCONT_iLight->ShowInterface(); 
   } 
   
   
@@ -5906,84 +5852,6 @@ void mAnimatorLight::MQTTHandler_Sender()
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
   }
 }
-
-/**
- * @brief MQTTHandler_AddWebURL_PayloadRequests
- * */
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-#ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
-void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
-{    
-
-  #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-  // MQTTHandler_AddWebURL_PayloadRequests2();
-  #else
-  char uri_buffer[70] = {0};
-  snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, GetModuleFriendlyName());
-  pCONT_web->server->on(uri_buffer, HTTP_GET, 
-  [this](AsyncWebServerRequest *request)
-    {
-      char handle_url[100] = {0};       
-      for(auto& handle:mqtthandler_list)
-      {      
-        pCONT_mqtt->TopicFormatted( GetModuleFriendlyName(), handle->topic_type, handle->postfix_topic, handle_url, sizeof(handle_url)); 
-        ALOG_INF(PSTR("handle_url \"%s\" -> \"%s\""), request->url().c_str(), handle_url);
-        const String& incoming_uri = request->url();
-        if(incoming_uri.indexOf(handle_url) > 0)
-        {        
-          uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, ha4ndle->ConstructJSON_function)(handle->json_level, true);
-          ALOG_INF(PSTR("data_buffer=%s"), data_buffer.payload.ctr);
-          request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
-          break; // to stop accidental double matches, only respond once
-        }
-      }
-    }
-  );
-  #endif
-
-  // pCONT_web->server->on(uri_buffer, HTTP_GET, 
-  // []({AsyncWebServerRequest *request, uint8_t test})
-  //   {
-  //     // char handle_url[100] = {0};       
-  //     // for(auto& handle:mqtthandler_list)
-  //     // {      
-  //     //   pCONT_mqtt->TopicFormatted( GetModuleFriendlyName(), handle->topic_type, handle->postfix_topic, handle_url, sizeof(handle_url)); 
-  //     //   ALOG_INF(PSTR("handle_url \"%s\" -> \"%s\""), request->url().c_str(), handle_url);
-  //     //   const String& incoming_uri = request->url();
-  //     //   if(incoming_uri.indexOf(handle_url) > 0)
-  //     //   {        
-  //     //     uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, handle->ConstructJSON_function)(handle->json_level, true);
-  //     //     ALOG_INF(PSTR("data_buffer=%s"), data_buffer.payload.ctr);
-  //     //     request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
-  //     //     break; // to stop accidental double matches, only respond once
-  //     //   }
-  //     // }
-  //   }
-  // );
-
-
-}
-#endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
-#endif // USE_MODULE_NETWORK_WEBSERVER
-
-
-#ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests2()
-{    
-  for(auto& handle:mqtthandler_list){
-    // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
-
-    pCONT_mqtt->MQTTHandler_AddWebURL(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
-
-
-  }
-}
-#endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-
-
-
-
-
   
 #endif// USE_MODULE_NETWORK_MQTT
 

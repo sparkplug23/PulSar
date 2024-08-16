@@ -286,7 +286,7 @@ void setup(void)
  ** File System : Init *****************************************************************************
  ********************************************************************************************/
 
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  #ifdef USE_MODULE_CORE_FILESYSTEM
     pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
   #endif
 
@@ -416,13 +416,17 @@ void setup(void)
   // configure any memory address needed as part of module init or templates
   pCONT->Tasker_Interface(FUNC_POINTER_INIT);
 
+  #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  pCONT->Tasker_Interface(FUNC_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
+  #endif
+  
   /**
    * @brief DEBUG: Load template from progmem and override settings to ensure my developing devices always enter a known state.
    *               This should be disabled for production devices, and only enabled for development devices.
    **/
   #ifdef ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
   ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
+  pCONT->Tasker_Interface(FUNC_TEMPLATES__LOAD_MODULE); // loading module, only interface modules will have these
   #else
   #warning "FORCE_TEMPLATE_LOADING is disabled, and production/release is assumed. This REQUIRES valid settings/storage or device may be unstable"
   #endif
@@ -453,6 +457,10 @@ void setup(void)
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
 
+
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
+  #endif  
 
   /********************************************************************************************
    ** File System : Load after settings for now, so this method overrides any defaults   ******
@@ -517,6 +525,8 @@ void setup(void)
 
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
+  Serial.println("END OF SETUP REACHED"); Serial.flush();
+
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif  
@@ -526,10 +536,12 @@ void setup(void)
 
 void LoopTasker()
 {
+  // Serial.println("LOOP STARTED"); Serial.flush();
 
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif
+  // Serial.println("ArduinoOtaLoop passed STARTED"); Serial.flush();
    
   pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
  

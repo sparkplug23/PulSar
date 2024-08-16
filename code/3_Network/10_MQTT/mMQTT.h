@@ -609,49 +609,6 @@ Serial.flush();
     };
 
     
-    #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-    /**
-     * @brief Function will take the struct storing the mqtt handler options, and check the variables, sending if required
-     * @param class_ptr Pointer to the instance of a class
-     * @param class_id  Numerical (Enum) value of the class, which is used to acquire the mqtt topic
-     * @param handler_ptr Pointer to the handler struct with timing and function to be called
-     * @param optional_desired_id Optional handler_id, if set (>=0) then only matching handler IDs will be sent. Used for group triggering by a type.
-     * @note  Optional desired_id will check if the handler id was set, and if it does not match, will return without servicing handler
-     * */
-    template<typename T>
-    void MQTTHandler_AddWebURL(T& class_ptr, uint16_t class_id, handler<T>* handle)
-    {
-      PGM_P module_ctr = pCONT->GetModuleFriendlyName(class_id);
-
-      char uri_buffer[70] = {0};
-      snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, module_ctr);
-      pCONT_web->server->on(uri_buffer, HTTP_GET, [class_ptr, handle](AsyncWebServerRequest *request)
-      {
-        char handle_url[100] = {0};
-        // // for(auto& handle:mqtthandler_list)
-        // // {      
-        // // PGM_P module_ctr = pCONT->GetModuleFriendlyName(class_id);
-
-        // TopicFormatted(  class_ptr->GetModuleFriendlyName(),
-        //         handle->topic_type,
-        //         handle->postfix_topic, handle_url, sizeof(handle_url));  
-
-        // // ALOG_INF(PSTR("handle_url=%s"), handle_url);
-        // // ALOG_INF(PSTR("%s in %s?"), handle->postfix_topic, request->url().c_str());      
-
-        // const String& incoming_uri = request->url();
-        // if(incoming_uri.indexOf(handle_url) > 0)
-        // {
-        //   // ALOG_INF(PSTR("%s"), request->url().c_str());            
-        //   uint8_t fSendPayload = CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, true);
-        //   // ALOG_INF(PSTR("data_buffer.payload.ctr=%s"), data_buffer.payload.ctr);
-        //   request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
-        //   // break; // to stop accidental double matches, only respond once
-        // }
-        // }
-      });
-    }
-    #endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
 
 };
 

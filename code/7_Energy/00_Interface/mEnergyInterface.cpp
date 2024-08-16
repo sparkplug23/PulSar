@@ -630,7 +630,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   //   }
 //   // AddLog(LOG_LEVEL_TEST, PSTR("address.size() = %d"),address.size());
 
-// #ifdef DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+// #ifdef DEVICE_HVAC_DESK
 //   return address_id + 1;
 //   #endif
 
@@ -1187,7 +1187,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   JsonParserToken jtok = 0; 
 //   int8_t tmp_id = 0;
 
-//   // #ifndef  DEVICE_HVAC_BEDROOM_4CHANNEL_WITH_ENERGY_SENSORS
+//   // #ifndef  DEVICE_HVAC_DESK
 //   // Using a desired address, the sensor is searched for, then index (id) is updated
 //   if(jtok = obj["Energy"].getObject()["DeviceCount"])
 //   {

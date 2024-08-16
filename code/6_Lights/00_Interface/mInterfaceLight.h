@@ -15,24 +15,19 @@
 #define SAT_F2N(s) round(s*100.0f)
 #define BRT_F2N(v) round(v*100.0f)
 
-
-#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 #include "6_Lights/00_Interface/mBusManager.h"
-#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Colour %02d"
 #define D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR  "Palette %02d"
 
-
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
-#include "6_Lights/03_Animator/EffectNames/defines.h"
 #include "JsonParser.h"
 #include "6_Lights/02_Palette/mPaletteLoaded.h"
 #include "6_Lights/02_Palette/mPalette.h"
 #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 
 enum LIHGT_POWER_STATE_IDS{
@@ -177,6 +172,10 @@ class mInterfaceLight :
     bool Restore_Module(void);
 
     // Add all data here that needs to be saved to filesystem
+    struct MODULE_RUNTIME{ 
+
+
+    }rt;
 
 
     /************************************************************************************************
@@ -184,10 +183,10 @@ class mInterfaceLight :
      ************************************************************************************************/
 
 
-    struct SETTINGS
-    {
+    // struct SETTINGS
+    // {
       
-    }settings;
+    // }settings;
 
     COLOUR_ORDER_T GetColourOrder_FromName(const char* c);
     
@@ -199,23 +198,31 @@ class mInterfaceLight :
         
     void Template_Load();
     void Template_Load_DefaultConfig();
-
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
-    NeoPixelShowTask* neopixel_runner = nullptr;
-    Init_NeoPixelBus_PinnedTask(void)
-    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32__WARNING_REQUIRES_FUTURE_LOCKING_OF_UPDATES_DURING_TASK_RUNNING
         
     uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
     uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
-
 
     BusManager* bus_manager = nullptr;
     BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
     
 
+    #ifdef USE_MODULE_CORE_RULES
+    void RulesEvent_Set_Power();
+    #endif // rules
+    
+    void EverySecond_AutoOff();
+
     void BusManager_Create_DefaultSingleNeoPixel();
     void BusManager_Create_DefaultSinglePWM_5CH();
+
+    uint8_t light_power_state = 0;
+    uint8_t light_power_Saved = 0;
+    void CommandSet_LightPowerState(uint8_t value);
+    bool CommandGet_LightPowerState();
+    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
+    struct AUTO_OFF_SETTINGS{
+      uint16_t time_decounter_secs = 0;
+    }auto_off_settings;
 
 
     #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION

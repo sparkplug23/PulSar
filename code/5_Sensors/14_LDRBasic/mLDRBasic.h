@@ -11,12 +11,12 @@
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-#include "2_CoreSystem/02_Time/mTime.h"
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/07_Time/mTime.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 // #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 // #include "3_Network/MQTT/mMQTT.h"
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 
 
 #define MAX_LDR_BASIC 2             // Max number of switches

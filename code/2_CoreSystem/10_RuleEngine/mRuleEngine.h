@@ -3,7 +3,7 @@
 #ifndef _MRULEENGINE_H
 #define _MRULEENGINE_H
 
-#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID 6
+#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID ((2*1000)+10)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 #include "3_Network/10_MQTT/mMQTT.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 #include "1_TaskerManager/mTaskerInterface.h"
 

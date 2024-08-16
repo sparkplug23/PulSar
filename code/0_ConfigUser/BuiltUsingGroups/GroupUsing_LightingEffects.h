@@ -10,8 +10,7 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "6_Lights/03_Animator/EffectNames/defines.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 //--------------------------------[Enable Device]-------------------------------------
 
@@ -62,7 +61,7 @@
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -235,7 +234,7 @@
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
@@ -440,7 +439,7 @@
   #define ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
   #define DEBUG_FUNC_SETTINGSUPDATETEXT
 
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT

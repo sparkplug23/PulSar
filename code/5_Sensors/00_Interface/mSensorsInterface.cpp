@@ -1,23 +1,5 @@
 #include "mSensorsInterface.h" 
 
-/***
- * New joint motion triggered class, all future motion events will also trigger a response from this class (no rules required)
- * */
-
-// All sensors should have generic functions for getting their status
-// We should get it from their name, as this would be truly unique and doesnt need any module name or indexing (unless I use that as identifier)
-//
-
-/*
-
-struct to return "sensors"
-
-
-float GetSensorTemperature(module_id, sensor_id)
-*/
-
-
-
 #ifdef USE_MODULE_SENSORS_INTERFACE 
 
 const char* mSensorsInterface::PM_MODULE_SENSORS_INTERFACE_CTR = D_MODULE_SENSORS_INTERFACE_CTR;
@@ -38,6 +20,8 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       Init();
     break;
   }
+  
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -54,12 +38,12 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       // Serial.println(pCONT_dht->test123());
 
       // Make nicer later with json command to enable and time period to show
-      if(settings.tTicker_Splash_Sensors_To_Logs-- == 1)
+      if(rt.tTicker_Splash_Sensors_To_Logs-- == 1)
       {
         // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
         ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
         pCONT->Tasker_Interface(FUNC_SENSOR_SHOW_LATEST_LOGGED_ID);
-        settings.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
+        rt.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
       }
       
   
@@ -77,17 +61,10 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //     }
       //   }
       // }
-
-//REMOTE SENSOR NEEDS TO INCLUDE THE UTC TIME IT WAS READ FOR "AGE" TO WORK REMOTELY
-      
+     
       //   pModule[switch_index]->Tasker(function, obj);
 
-
-      // pCONT_db18->test1234(&val);
-      // Serial.println(val.data[0]);
-      // pCONT_dht->test1234(&val);
-      // Serial.println(val.data[0]);
-  }break;
+    }break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -103,7 +80,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     #ifdef ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES    
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
       MQTT_Report_Event_Button();
-      break;
+    break;
     #endif
     /************
      * RULES SECTION * 
@@ -134,18 +111,16 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-   
-
 void mSensorsInterface::Pre_Init(void)
 {
-
+  module_state.mode = ModuleStatus::Initialising;
 }
 
 
 void mSensorsInterface::Init(void)
 {
-  settings.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
-  settings.fEnableSensor = true;
+  rt.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
+  module_state.mode = ModuleStatus::Running;
 }
 
 
@@ -179,8 +154,6 @@ RgbcctColor mSensorsInterface::GetColourValueUsingMaps_ForUnifiedSensor(float te
 #endif // USE_MODULE_LIGHTS_INTERFACE
 
 
-
-
 void mSensorsInterface::CommandEvent_Motion(uint8_t event_type)
 {
 
@@ -191,38 +164,25 @@ void mSensorsInterface::CommandEvent_Motion(uint8_t event_type)
 }
 
 
-
 void mSensorsInterface::MQTT_Report_Event_Button()
 {
 
-    char event_ctr[20]; memset(event_ctr,0,sizeof(event_ctr));
+  char event_ctr[20]; memset(event_ctr,0,sizeof(event_ctr));
 
   JBI->Start();
   
-  // if(pCONT_rules->event_triggered.device_id == 0)
-  // {
     sprintf(event_ctr,"%s-%d","Button",pCONT_rules->event_triggered.device_id);
-
-  // }
-
     JBI->Add("Event", event_ctr);
 
     JBI->Add("Device", pCONT_rules->event_triggered.device_id);
     JBI->Add("Function", "ButtonPress");
-
     JBI->Add("Task", "Button");
-    // JBI->Add("Task", "Button");
-
-    JBI->Add("State", "SHORT_PRESS");// : "LONG_PRESS");
-    
+    JBI->Add("State", "SHORT_PRESS");// : "LONG_PRESS");    
     // JBI->Add("value", (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS");
     JBI->Add("Duration", 0);//tSavedTimeSincePressOn);
   JBI->End();
 
-
-
   pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JBI->GetBufferPtr(),false);
-
 
   /**
    * If event was serviced, then clear it
@@ -234,13 +194,11 @@ void mSensorsInterface::MQTT_Report_Event_Button()
 }
 
 
-
-  
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
 
-  
+
 void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 {
 
@@ -271,17 +229,12 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 		}
 
 	}
-
-
-
     
 }
 
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/
-
-
 
 uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
@@ -768,60 +721,13 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //       flag_level_started = false;     // closed level
 //     }
 
-
-
-
-
-
     JBI->Add("Rate", mqtthandler_sensor_ifchanged.tRateSecs);
-
-
-
-
-
-
-
 
   return JBI->End();
     
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// void mSensorsInterface::JsonAdd_
 
 
 /**
@@ -1353,117 +1259,6 @@ void mSensorsInterface::HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t
 #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
 
-
-
-
-//   JBI->Start();
-
-//   // #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-
-//   char buffer[50];
-
-// //   for(auto& pmod:pCONT->pModule)
-// //   {
-// //     //Get any sensors in module
-// //     uint8_t sensors_available = pmod->GetSensorCount();
-
-// //     if(sensors_available)
-// //     {
-
-// //       JBI->Level_Start_P(PSTR("Temperature"));
-// //       for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-// //       {
-// //         sensors_reading_t val;
-// //         pmod->GetSensorReading(&val, sensor_id);
-// //         if(val.isFloatWaiting_WithSensorType(SENSOR_TYPE_TEMPERATURE_ID))
-// //         {
-// //           JBI->Add(
-// //             DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
-// //             val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID)
-// //           );
-// //         }
-// //       }
-// //       JBI->Object_End();
-// //     }
-// //   }
-
-
-// // {
-// //   "Temperature":{},
-// //   "Temperature":{"BedroomDesk-DHT1":24.400,"BedroomDesk-DHT2":24.800},
-// //   "Temperature":{"BedroomDesk-BME":26.280,"BedroomDesk-BME2":25.280},
-// //   "Temperature":{},
-// //   "Temperature":{"DB_04":25.250,"DB_03":25.125,"DB_01":25.687,"DB_02":26.063}
-// // }
-
-
-
-
-//   #ifdef USE_MODULE_LIGHTS_INTERFACE
-
-//   //     // JBI->Level_Start_P(PSTR("HeatMap"));
-//   //     // for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-//   //     // {
-//   //     //   sensors_reading_t val;
-//   //     //   pmod->GetSensorReading(&val, sensor_id);
-//   //     //   if(val.Valid())
-//   //     //   {
-//   //     //     // Convert into colour
-//   //     //     float temperature = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-//   //     //     RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
-
-//   //     //     JBI->Add_FV(
-//   //     //       DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
-//   //     //       PSTR("\"%02X%02X%02X\""),
-//   //     //       colour.R, colour.G, colour.B
-//   //     //     );
-
-//   //     //   }
-//   //     // }
-//   //     // JBI->Object_End();
-
-//     // Need to loop for each type of sensor
-//     for(auto& pmod:pCONT->pModule)
-//     {
-//       //Get any sensors in module
-//       uint8_t sensors_available = pmod->GetSensorCount();
-
-//       if(sensors_available)
-//       {
-
-//         JBI->Level_Start_P(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);
-//         for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-//         {
-//           sensors_reading_t val;
-//           pmod->GetSensorReading(&val, sensor_id);
-//           if(val.isFloatWaiting_WithSensorType(sensor_id))
-//           {
-//             // Convert into colour
-//             float temperature = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-//             RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
-
-//             JBI->Add_FV(
-//               DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
-//               PSTR("\"%02X%02X%02X\""),
-//               colour.R, colour.G, colour.B
-//             );
-//           }
-//         }
-//       // JBI->Object_End();
-
-//       }
-
-//     }
-  
-//   #endif // USE_MODULE_LIGHTS_INTERFACE
-
-//   return JBI->End();
-
-// }
-
-
-
-
 uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool json_appending){
 
   JBI->Start();
@@ -1526,6 +1321,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -1536,6 +1332,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -1546,6 +1343,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_temperature_colours;
   ptr->tSavedLastSent = millis();
@@ -1556,6 +1354,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
+  mqtthandler_list.push_back(ptr);
 
   //motion events
   ptr = &mqtthandler_motion_event_ifchanged;
@@ -1567,6 +1366,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Motion_Event;
+  mqtthandler_list.push_back(ptr);
 
 } //end "MQTTHandler_Init"
 
@@ -1610,9 +1410,6 @@ void mSensorsInterface::MQTTHandler_Sender()
 /******************************************************************************************************************
  * WebServer
 *******************************************************************************************************************/
-
-
-
 
 
 #endif

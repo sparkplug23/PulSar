@@ -53,9 +53,9 @@ class ProgramTemperature;
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/07_Time/mTime.h"
 
-#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 
 #define USE_FAILSAFES
