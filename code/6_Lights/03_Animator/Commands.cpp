@@ -35,7 +35,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
         ALOG_INF(PSTR("Created new segment%02d %dB (T%dB)"), segment_i, segments.size()-seg_size, segments.size());
       }
       
-      data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
+      subparse_JSONCommand(jtok.getObject(), segment_i);
 
       segments_found++;
 
@@ -48,7 +48,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
    **/
   if(segments_found == 0)
   {
-    data_buffer.isserviced += subparse_JSONCommand(obj, 0); // Legacy commands
+    subparse_JSONCommand(obj, 0); // Legacy commands
   }
 
   ALOG_DBM(PSTR(D_LOG_LIGHT D_TOPIC "mAnimatorLight::parse_JSONCommand::End"));
@@ -63,7 +63,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
  *        Calling it without any set index, will default to segment of 0 index and turn the other segments off 
  * @param obj 
  */
-uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index)
+void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index)
 {
 
   JsonParserToken jtok = 0; 
@@ -76,7 +76,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   /**
    * @brief Exit if segment has not been created to stop errors
    **/
-  if(!segments.size()){ return 0; }
+  if(!segments.size()){ return; }
 
 
   if (jtok = obj["PaletteMappingValues"]) { 

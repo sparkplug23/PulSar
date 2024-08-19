@@ -318,3 +318,40 @@ void JsonBuilder::AppendBuffer(const char* formatP, ...)
   writer.length += vsnprintf_P(&writer.buffer[writer.length], writer.buffer_size, formatP, arg);
   va_end(arg);
 }
+
+
+// Function to estimate the number of key-value pairs in a JSON buffer
+int JsonBuilder::estimateJsonKeyValuePairs(const char* json, size_t len) {
+    int keyValuePairs = 0;  // Initialize the key-value pair count
+    int nestingLevel = 0;   // Track the nesting level
+    bool inString = false;  // Track whether we're inside a string
+
+    for (size_t i = 0; i < len; ++i) {
+        char c = json[i];
+
+        // Toggle inString flag when encountering a double quote
+        if (c == '"') {
+            inString = !inString;
+        }
+
+        // If we're inside a string, skip the rest of the loop
+        if (inString) continue;
+
+        // Increase nesting level when encountering an opening brace
+        if (c == '{') {
+            nestingLevel++;
+        }
+
+        // Decrease nesting level when encountering a closing brace
+        if (c == '}') {
+            nestingLevel--;
+        }
+
+        // If we encounter a colon at any nesting level, count it as a key-value pair
+        if (c == ':' && nestingLevel > 0) {
+            keyValuePairs++;
+        }
+    }
+
+    return keyValuePairs;
+}

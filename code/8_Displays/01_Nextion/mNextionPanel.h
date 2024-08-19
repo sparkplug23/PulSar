@@ -128,7 +128,7 @@ class mNextionPanel :
 
     void Load_Module(bool erase);
     void Save_Module(void);
-    bool Restore_Module(void);
+    bool Default_Module(void);
 
 
 

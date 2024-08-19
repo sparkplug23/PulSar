@@ -1070,12 +1070,6 @@ void mSupport::CommandSet_Restart(int8_t command)
 //         }
 //         if ((XdrvMailbox.payload >= param_low) && (XdrvMailbox.payload <= param_high)) {
 //           Settings.setoption_255[pindex] = XdrvMailbox.payload;
-// #ifdef USE_LIGHT
-//           if (P_RGB_REMAP == pindex) {
-//             LightUpdateColorMapping();
-//             restart_flag = 2;              // SetOption37 needs a reboot in most cases
-//           }
-// #endif
 // #if (defined(USE_IR_REMOTE) && defined(USE_IR_RECEIVE)) || defined(USE_IR_REMOTE_FULL)
 //           if (P_IR_UNKNOW_THRESHOLD == pindex) {
 //             IrReceiveUpdateThreshold();
@@ -2563,11 +2557,6 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //           if ((payload >= param_low) && (payload <= param_high)) {
 //             Settings.setoption_255[pindex] = payload;
 //             switch (pindex) {
-// #ifdef USE_LIGHT
-//              case P_RGB_REMAP:
-//                 LightUpdateColorMapping();
-//                 break;
-// #endif
 // #if defined(USE_IR_REMOTE) && defined(USE_IR_RECEIVE)
 //               case P_IR_UNKNOW_THRESHOLD:
 //                 IrReceiveUpdateThreshold();

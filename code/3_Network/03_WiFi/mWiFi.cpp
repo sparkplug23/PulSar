@@ -40,8 +40,8 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       }
             
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active]);
-      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
+      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active, pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active) );
+      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"), pCONT_set->Settings.sta_active, pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active) );
       #endif// ENABLE_LOG_LEVEL_INFO
 
       //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
@@ -207,22 +207,18 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 //  SetSSIDofAPwithIndex();
   switch (flag) {
     default:
-    case WIFIBEGIN_FLAG_SSID0_ID:  // AP1
-    case WIFIBEGIN_FLAG_SSID1_ID:  // AP2
-    case WIFIBEGIN_FLAG_SSID2_ID:  // AP3
+    case 0:  // AP1
+    case 1:  // AP2
       pCONT_set->Settings.sta_active = flag;
-      break;
-    case WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID:  // Toggle now CYCLE
-      if(pCONT_set->Settings.sta_active>=2){ pCONT_set->Settings.sta_active = WIFIBEGIN_FLAG_SSID0_ID; }
-      else{ pCONT_set->Settings.sta_active++; } 
+    break;
+    case 2:  // Toggle
+      pCONT_set->Settings.sta_active ^= 1;
     break;
   }        // 3: Current AP
 
-  //cant toggle, needs to shift between 3
-  if ('\0' == pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active][0]) { 
-    if(pCONT_set->Settings.sta_active>=2){ pCONT_set->Settings.sta_active = WIFIBEGIN_FLAG_SSID0_ID; }
-    else{ pCONT_set->Settings.sta_active++; } 
-  }  // Skip empty SSID
+  if (!strlen(pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active))) {
+    pCONT_set->Settings.sta_active ^= 1;  // Skip empty SSID
+  }
 
 
 
@@ -241,18 +237,18 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
   // }
   
   #ifdef ESP8266
-    WiFi.hostname(pCONT_set->runtime.my_hostname);
+    WiFi.hostname(pCONT_set->runtime.my_hostname);   // ESP8266 needs this here (after WiFi.mode)
   #endif
   
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active]);
-    AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
+    AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"), pCONT_set->Settings.sta_active, pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active));
+    AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"), pCONT_set->Settings.sta_active, pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active));
     #endif// ENABLE_LOG_LEVEL_INFO
 
   if (channel) {
     WiFi.begin(
-      pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], 
-      pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active], 
+      pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active), 
+      pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active), 
       channel, 
       connection.bssid
     );
@@ -264,7 +260,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
   
   } else {
     
-    WiFi.begin(pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
+    WiFi.begin(pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active), pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active));
   }
   
   #ifdef ESP8266
@@ -407,32 +403,25 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
         uint8_t* bssid_scan;
         int32_t chan_scan;
         bool hidden_scan;
-/**
- * loads all infos from a scanned wifi in to the ptr parameters
- * @param networkItem uint8_t
- * @param ssid  const char**
- * @param encryptionType uint8_t *
- * @param RSSI int32_t *
- * @param BSSID uint8_t **
- * @param channel int32_t *
- * @return (true if ok)
- */
-
-// DEBUG_LINE_HERE;
-// delay(2000);
+        
+        // WiFiHelper::getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, bssid_scan, chan_scan, hidden_scan);
         #ifdef ESP8266
           WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, bssid_scan, chan_scan, hidden_scan);
         #else
           WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, bssid_scan, chan_scan);
         #endif
-// DEBUG_LINE_HERE;
-// delay(2000);
+        
         bool known = false;
         uint8_t j;
         // DEBUG_LINE_HERE;
-        for (j = 0; j < D_MAX_SSIDS; j++) {
+        for (j = 0; j < MAX_SSIDS; j++) {
           // DEBUG_LINE_HERE;
-          if (ssid_scan == pCONT_set->Settings.sta_ssid[j]) {  // SSID match
+
+          // if (ssid_scan == pCONT_set->Settings.sta_ssid[j]) {  // SSID match
+          if (ssid_scan == pCONT_set->SettingsText(SET_STASSID1 + j)) {  // SSID match
+
+
+
           // DEBUG_LINE_HERE;
           // #ifdef 
           //   AddLog(LOG_LEVEL_TEST, PSTR("%s"),ssid_scan);
@@ -443,9 +432,9 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
             AddLog(LOG_LEVEL_TEST, PSTR("rssi_scan > best_network_db"));
     #endif// ENABLE_LOG_LEVEL_INFO
                #ifdef ESP8266
-                if (sec_scan == ENC_TYPE_NONE || pCONT_set->Settings.sta_pwd[j]) {  // Check for passphrase if not open wlan
+                if (sec_scan == ENC_TYPE_NONE || pCONT_set->SettingsText(SET_STAPWD1 + j)) {  // Check for passphrase if not open wlan
                #else
-                if (pCONT_set->Settings.sta_pwd[j]) {  // Check for passphrase if not open wlan               
+                if (pCONT_set->SettingsText(SET_STAPWD1 + j)) {  // Check for passphrase if not open wlan               
                #endif
                 best_network_db = (int8_t)rssi_scan;
                 channel = chan_scan;
@@ -804,7 +793,7 @@ void mWiFi::WifiCheckIp(void)
           #endif// ENABLE_LOG_LEVEL_INFO
           pCONT_set->Settings.wifi_channel = 0;  // Disable stored AP
         } else {
-          if (('\0' == pCONT_set->Settings.sta_ssid[0][0]) && ('\0' == pCONT_set->Settings.sta_ssid[1][0])) {
+          if (('\0' == pCONT_set->SettingsText(SET_STASSID1)) && ('\0' == pCONT_set->SettingsText(SET_STASSID2))) {
           pCONT_set->Settings.wifi_channel = 0;  // Disable stored AP
             wifi_config_tool = WIFI_CONFIG_NO_SSID; // SHOULD BE WIFI_MANAGER   // Skip empty SSIDs and start Wifi config tool
             connection.retry = 0;
@@ -932,23 +921,23 @@ void mWiFi::WifiCheck(uint8_t param)
     
         connection.config_counter--;
         connection.counter = connection.config_counter +5;
-        if (connection.config_counter) {
+    //     if (connection.config_counter) {
           
-          // If we reach ZERO, then retry connection on default
-          if (!connection.config_counter) {
-            if (strlen(WiFi.SSID().c_str())) {
-              strlcpy(pCONT_set->Settings.sta_ssid[0], WiFi.SSID().c_str(), sizeof(pCONT_set->Settings.sta_ssid[0]));
-            }
-            if (strlen(WiFi.psk().c_str())) {
-              strlcpy(pCONT_set->Settings.sta_pwd[0], WiFi.psk().c_str(), sizeof(pCONT_set->Settings.sta_pwd[0]));
-            }
-            pCONT_set->Settings.sta_active = 0;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_JSON_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
-    #endif// ENABLE_LOG_LEVEL_INFO
-          }
+    //       // If we reach ZERO, then retry connection on default
+    //       if (!connection.config_counter) {
+    //         if (strlen(WiFi.SSID().c_str())) {
+    //           strlcpy(pCONT_set->Settings.sta_ssid[0], WiFi.SSID().c_str(), sizeof(pCONT_set->Settings.sta_ssid[0]));
+    //         }
+    //         if (strlen(WiFi.psk().c_str())) {
+    //           strlcpy(pCONT_set->Settings.sta_pwd[0], WiFi.psk().c_str(), sizeof(pCONT_set->Settings.sta_pwd[0]));
+    //         }
+    //         pCONT_set->Settings.sta_active = 0;
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_JSON_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
+    // #endif// ENABLE_LOG_LEVEL_INFO
+    //       }
 
-        }
+    //     }
         // Delayed by the above code by 5 seconds
         if (!connection.config_counter) 
         {

@@ -379,7 +379,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
   //   sprintf(buffer+strlen(buffer), "%d,", test_temp[ii]);
   // }
   // pCONT_mqtt->Send_Prefixed_P(PSTR("debug/2"), buffer);
-  // pCONT_mqtt->ppublish("/debug", buffer, false);
+  // pCONT_mqtt->publish_device("/debug", buffer, false);
 
 }
 

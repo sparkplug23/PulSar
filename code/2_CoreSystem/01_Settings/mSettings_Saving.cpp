@@ -16,8 +16,6 @@ void mSettings::SettingsSaveAll(void)
   ALOG_ERR(PSTR(D_LOG_SETTINGS "SettingsSaveAll: Not enabled"));
   #endif
 
-  snprintf(Settings.settings_time_ctr, sizeof(Settings.settings_time_ctr), "%02d:%02d:%02d", pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second);
-
   Serial.println("SettingsSaveAll -- should only be called prior to planned reboot/restart; OTA start/commanded");
   // if (Settings.flag_system.save_state) {
   //   Settings.power = power;
@@ -184,6 +182,13 @@ void mSettings::SettingsLoad(void)
 
 void mSettings::SettingsWrite(const void *pSettings, unsigned nSettingsLen) 
 {
+
+  #ifdef ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
+  snprintf(Settings.local_time_ascii_debug, sizeof(Settings.local_time_ascii_debug), pCONT_time->GetDateAndTime(DT_LOCAL).c_str() );
+  #endif
+
+
+
 
 DEBUG_LINE_HERE;
   #ifdef USE_MODULE_CORE_FILESYSTEM
@@ -457,16 +462,14 @@ void mSettings::SettingsLoad_CheckSuccessful()
   //   }
   // }
 
-  memset(Settings.mqtt.topic,0,sizeof(Settings.mqtt.topic));
-  memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
-  
   // Configure hostname 
   memset(runtime.my_hostname,0,sizeof(runtime.my_hostname));
   sprintf(runtime.my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
 
   //Only load wifi here or else set fallback
 
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_PROJECT " %s %s " D_VERSION " %s%s-" ARDUINO_ESP8266_RELEASE), pCONT_set->Settings.system_name.device, Settings.system_name.friendly, my_version, my_image);
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_PROJECT " %s %s " D_VERSION " %s%s-" ARDUINO_ESP8266_RELEASE), 
+  // pCONT_set->Settings.system_name.device, Settings.system_name.friendly, my_version, my_image);
   
 
 }

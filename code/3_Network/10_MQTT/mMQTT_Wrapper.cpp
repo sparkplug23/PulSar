@@ -28,7 +28,7 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
       CallMQTTSenders();
     break;
     case FUNC_MQTT_CONNECTED:
-    ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
+    // ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
       Load_New_Subscriptions_From_Function_Template();
     break;
     case FUNC_NETWORK_CONNECTION_ESTABLISHED:
@@ -62,12 +62,99 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
     case FUNC_UPTIME_10_MINUTES:
       flag_uptime_reached_reduce_frequency = true;
     break;     
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
+     * STORAGE SECTION * 
+    *******************/  
+    #ifdef USE_MODULE_CORE_FILESYSTEM
+    #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
+    case FUNC_FILESYSTEM__RESET__MODULE_DATA__ID:
+      Default_Module();
+    break;
+    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+      Save_Module();
+    break;
+    case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
+      // Load_Module();
+    break;
+    #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
+    #endif // USE_MODULE_CORE_FILESYSTEM
+    /************
+     * MQTT SECTION * 
+    *******************/
     case FUNC_MQTT_SUBSCRIBE:
       MQTTSubscribe();
     break;
   } // END switch
 
 } // END function
+
+/**
+ * @brief Should be called from Init now, its the new way of setting up as a new device with default settings
+ * 
+ */
+void mMQTT::Default_Module()
+{
+  ALOG_INF(PSTR(D_LOG_MQTT "Default_Module"));
+  
+  memset((uint8_t*)&dt, 0, sizeof(dt));
+
+  MODULE_STORAGE::CONNECTION* con = &dt.connection[0];
+
+  uint8_t idx = 0;
+  
+  strlcpy(dt.connection[idx].host_address, MQTT_HOST, sizeof(dt.connection[idx].host_address));
+  dt.connection[idx].port = MQTT_PORT;
+  strlcpy(dt.connection[idx].user, MQTT_USER, sizeof(dt.connection[idx].user));
+  strlcpy(dt.connection[idx].pwd, MQTT_PASS, sizeof(dt.connection[idx].pwd));
+  strlcpy(dt.connection[idx].topic, MQTT_PASS, sizeof(dt.connection[idx].topic));
+  strlcpy(dt.connection[idx].topic, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].topic));  
+  dt.connection[idx].retry = MQTT_RETRY_SECS;
+  strlcpy(dt.connection[idx].client_name, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].client_name));
+  snprintf_P(dt.connection[idx].client_name, sizeof(dt.connection[idx].client_name)-1, PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str());
+  strncpy(dt.connection[idx].prefixtopic, pCONT_set->Settings.system_name.device, strlen(pCONT_set->Settings.system_name.device));
+  dt.connection[idx].status = 1;
+
+  idx = 1;
+  strlcpy(dt.connection[idx].host_address, MQTT_HOST, sizeof(dt.connection[idx].host_address));
+  dt.connection[idx].port = MQTT_PORT;
+  strlcpy(dt.connection[idx].user, MQTT_USER, sizeof(dt.connection[idx].user));
+  strlcpy(dt.connection[idx].pwd, MQTT_PASS, sizeof(dt.connection[idx].pwd));
+  strlcpy(dt.connection[idx].topic, MQTT_PASS, sizeof(dt.connection[idx].topic));
+  strlcpy(dt.connection[idx].topic, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].topic));  
+  dt.connection[idx].retry = MQTT_RETRY_SECS;
+  strlcpy(dt.connection[idx].client_name, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].client_name));
+  snprintf_P(dt.connection[idx].client_name, sizeof(dt.connection[idx].client_name)-1, PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str());
+  strncpy(dt.connection[idx].prefixtopic, pCONT_set->Settings.system_name.device, strlen(pCONT_set->Settings.system_name.device));
+  dt.connection[idx].status = 0;
+ 
+
+}
+
+#ifdef USE_MODULE_CORE_FILESYSTEM
+#ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
+
+void mMQTT::Save_Module()
+{
+  ALOG_INF(PSTR(D_LOG_MQTT "Save_Module"));
+  pCONT_mfile->ByteFile_Save("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
+}
+
+void mMQTT::Load_Module(bool erase)
+{
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  pCONT_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
+}
+
+#endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
+#endif // USE_MODULE_CORE_FILESYSTEM
+
+
 
 
 void mMQTT::MQTTSubscribe()
@@ -159,6 +246,12 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
+  uint8_t connection_idx = 0; // should be like Segments, assumes 0 when only 1
+
+  if(jtok = obj["MQTT"].getObject()["RetrySecs"])
+  {
+    dt.connection[0].retry = jtok.getInt();
+  }
 
   if(jtok = obj["MQTTSend"])
   {
@@ -195,7 +288,7 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
     AddLog(LOG_LEVEL_TEST,PSTR("buffer_escaped=%s"),buffer_escaped);
     #endif // ENABLE_LOG_LEVEL_INFO
 
-    // ppublish(jtok_topic.getStr(),jtok_payload.getStr(),false);
+    // publish_device(jtok_topic.getStr(),jtok_payload.getStr(),false);
     brokers[0]->pubsub->publish(topic_ctr,buffer_escaped,false);
 
   }
@@ -212,16 +305,10 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
 
 void mMQTT::Init(void)
 {
-
-  memset(pCONT_set->Settings.mqtt.client_name,0,sizeof(pCONT_set->Settings.mqtt.client_name));
-  snprintf_P(pCONT_set->Settings.mqtt.client_name,sizeof(pCONT_set->Settings.mqtt.client_name)-1,PSTR("%s-%s"),pCONT_set->Settings.system_name.device,WiFi.macAddress().c_str());
-
-  setprefixtopic(pCONT_set->Settings.system_name.device);
-
-  memset(pCONT_set->Settings.mqtt.lwt_topic,0,sizeof(pCONT_set->Settings.mqtt.lwt_topic));
-  snprintf_P(pCONT_set->Settings.mqtt.lwt_topic,sizeof(pCONT_set->Settings.mqtt.lwt_topic)-1,PSTR("%s/status/LWT"),pCONT_set->Settings.system_name.device);
-
+  Default_Module();
+  
 }
+
 
 
 void mMQTT::CallMQTTSenders()
@@ -256,7 +343,7 @@ boolean mMQTT::Publish(const char* topic, const char* payload, boolean retained)
       {
         if(broker->pubsub->connected())
         {
-          return broker->ppublish(topic,payload,retained);
+          return broker->publish_device(topic,payload,retained);
         }
       }
     }
@@ -294,12 +381,6 @@ boolean mMQTT::Subscribe(const char* topic, uint8_t qos)
 }
 
 
-
-
-void mMQTT::setprefixtopic(const char* _prefixtopic){
-  memset(pCONT_set->Settings.mqtt.prefixtopic,0,sizeof(pCONT_set->Settings.mqtt.prefixtopic));
-  strncpy(pCONT_set->Settings.mqtt.prefixtopic,_prefixtopic,strlen(_prefixtopic));
-}
 
 
 char* mMQTT::TopicFormatted(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, char* buffer, uint8_t buflen)

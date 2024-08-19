@@ -4,35 +4,30 @@
 
 void MQTTConnection::MqttConnected(void)
 {
-  // here
+  
   connected = true;
   retry_counter = 0;
   cConnectionAttempts = 0; // reset
 
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"), pCONT_sup->GetResetReason().c_str(), pCONT_time->GetUptime().c_str() );
+  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, pCONT_sup->GetResetReason().c_str(), pCONT_time->GetUptime().c_str() );
   
   #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
-    pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, lwt_message_ondisconnect_ctr, true); // onconnect message
+    char lwt_topic[40];
+    snprintf_P(lwt_topic, sizeof(lwt_topic), PSTR("%s/status/LWT"), pCONT_set->Settings.system_name.device);
+    pubsub->publish(lwt_topic, lwt_message_ondisconnect_ctr, true); // onconnect message
     delay(100);
   #endif
   
   Send_LWT_Online();
-  
-  #ifdef USE_MQTT_RETAINED_VERSION_HISTORY_CHECK // for checking version history
-    psubscribe(PSTR("TBD_firmware/set/settings/firmware"));
-  #endif
-  
+    
   // Group name for setting all devices
-  psubscribe(PSTR("group_all/#"));
-  
-  // subscribe("<devicename>/sync"); //namesake sync name
-  psubscribe(PSTR(D_MQTT_SYNC "/#"));
-  
+  subscribe(PSTR("group_all/#"));
+    
   // subscribe("<devicename>/set/#");
-  psubscribe(PSTR(D_MQTT_COMMAND "/#"));
+  subscribe_device(PSTR(D_MQTT_COMMAND "/#"));
 
-  // if succesful, clear flag
+  // if successful, clear flag
   flag_start_reconnect = false;
   
   #ifndef ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
@@ -45,7 +40,9 @@ void MQTTConnection::MqttConnected(void)
 
 void MQTTConnection::Send_LWT_Online()
 {
-  pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true);
+  char lwt_topic[40];
+  snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, pCONT_set->Settings.system_name.device);
+  pubsub->publish(lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true);
 }
     
 
@@ -105,7 +102,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   ALOG_HGL(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION " to \"%s:%d\""), broker_url, port);
   
   connected = false;
-  retry_counter = pCONT_set->Settings.mqtt_retry;
+  retry_counter = pCONT_mqtt->dt.connection[0].retry;
   pCONT_set->runtime.global_state.mqtt_down = 1;
 
   if(pubsub!=nullptr)
@@ -123,21 +120,24 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->GetUptime().c_str());
+  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, pCONT_sup->GetResetReason().c_str(), pCONT_time->GetUptime().c_str());
+
+  char lwt_topic[40];
+  snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, pCONT_set->Settings.system_name.device);
 
   uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
-  // #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
+  #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
   loglevel = LOG_LEVEL_TEST;
-  // #endif
+  #endif
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);
-  AddLog(loglevel, PSTR("lwt_topic = %s"),pCONT_set->Settings.mqtt.lwt_topic);
-  AddLog(loglevel, PSTR("lwt_message_ondisconnect_ctr = %s"),lwt_message_ondisconnect_ctr);
+  AddLog(loglevel, PSTR("client_name = %s"), pCONT_mqtt->dt.connection[0].client_name);
+  AddLog(loglevel, PSTR("lwt_topic = %s"), lwt_topic);
+  AddLog(loglevel, PSTR("lwt_message_ondisconnect_ctr = %s"), lwt_message_ondisconnect_ctr);
   #endif// ENABLE_LOG_LEVEL_INFO
 
   AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect START                 Connect"));
 
-  if(pubsub->connect(pCONT_set->Settings.mqtt.client_name,pCONT_set->Settings.mqtt.lwt_topic,WILLQOS_CTR,WILLRETAIN_CTR,lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
+  if(pubsub->connect(pCONT_mqtt->dt.connection[0].client_name, lwt_topic, WILLQOS_CTR ,WILLRETAIN_CTR, lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
     
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Connected"));
@@ -174,7 +174,7 @@ void MQTTConnection::MqttDisconnected(int state)
   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "Connection FAILED, state = [%s], retrying in %d ms"),state_ctr(),rSavedReconnectAttempt);
 
   connected = false;
-  retry_counter = pCONT_set->Settings.mqtt_retry; // begin reconnect phase
+  retry_counter = pCONT_mqtt->dt.connection[0].retry; // begin reconnect phase
 
   // pubsub->disconnect();
 
@@ -195,11 +195,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
     return;
   }
 
-  // Save MQTT data ASAP as it's data is discarded by PubSubClient with next publish as used in MQTTlog
-  D_DATA_BUFFER_CLEAR();
-  // memset(data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr));
-  // memset(data_buffer.payload.ctr,0,sizeof(data_buffer.payload.ctr));
-
+  D_DATA_BUFFER_SOFT_CLEAR();
 
   data_buffer.topic.length_used = strlen(mqtt_topic);
   strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.length_used);
@@ -220,28 +216,51 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
       level = LOG_LEVEL_TEST;
       #endif
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.length_used,  data_buffer.topic.ctr);
-      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.length_used,data_buffer.payload.ctr);
+      AddLog(level, PSTR(D_LOG_MQTT "<-- Topic   [len:%d] %s"), data_buffer.topic.length_used,  data_buffer.topic.ctr);
+      AddLog(level, PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 
     data_buffer.isserviced = 0;
 
+    #ifdef ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
+    uint16_t estimated_commands = JBI->estimateJsonKeyValuePairs(data_buffer.payload.ctr, data_buffer.payload.length_used);
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+    ALOG_HGL(PSTR("estimated_commands %d"), estimated_commands);
+
+    #endif
+
+      ALOG_INF( PSTR(D_LOG_MQTT "{\"CommandsMatched before parsing started\":%d}"), data_buffer.isserviced);
+      
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
-    ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"),data_buffer.isserviced);
+    ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
+
+    #ifdef ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
+
+    #endif
+    /**
+     * @brief Check if there is a way to know how many commands are in the json, perhaps counting tokens and escapses? hence, to know how many commands are ignored and send warning.
+     * Count ":"? as a quick indicator, without requiring time consuming code.
+     */
     
   }
 
 }
 
-boolean MQTTConnection::psubscribe(const char* topic) {
+boolean MQTTConnection::subscribe(const char* topic) {
+  ALOG_INF( PSTR("Subscribing to \"%s\""), topic );
+  return pubsub->subscribe(topic, 0);
+}
+
+boolean MQTTConnection::subscribe_device(const char* topic) {
   char ttopic[70];
   memset(ttopic,0,sizeof(ttopic));
-  sprintf(ttopic,PSTR("%s/%s"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+  sprintf(ttopic,PSTR("%s/%s"),pCONT_mqtt->dt.connection[0].prefixtopic,topic);
   ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
   return pubsub->subscribe(ttopic, 0);
 }
+
 
 
 /**
@@ -251,9 +270,7 @@ boolean MQTTConnection::psubscribe(const char* topic) {
  */
 void MQTTConnection::SetPubSubClient(Client* client_in)
 {
-      Serial.printf("MQTT::SetPubSubClient A\n\r"); Serial.flush();
   pubsub = new PubSubClient(*client_in);
-      Serial.printf("MQTT::SetPubSubClient B\n\r"); Serial.flush();
   flag_start_reconnect = true;
   DEBUG_LINE_HERE;
 }
@@ -267,7 +284,7 @@ void MQTTConnection::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
   vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);
   va_end(arg);
 
-  ppublish(topic, data_buffer.payload.ctr, false);
+  publish_device(topic, data_buffer.payload.ctr, false);
 
 }// END function
 
@@ -341,10 +358,10 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
 
   }
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  ALOG_TRA( PSTR(D_LOG_MQTT "topic_ctr=\"%s\""), topic_ctr );
+  ALOG_INF( PSTR(D_LOG_MQTT "topic_ctr=\"%s\""), topic_ctr );
   #endif
   
-  return ppublish(topic_ctr,payload_ctr,retain_flag);
+  return publish_device(topic_ctr,payload_ctr,retain_flag);
 
 }
 
@@ -356,12 +373,12 @@ void MQTTConnection::publish_status_module(const char* module_name, const char* 
   
   sprintf_P(topic_ctr,PSTR("%s/%s/%s"),D_TOPIC_STATUS,module_name,topic_postfix); 
   
-  ppublish(topic_ctr,payload_ctr,retain_flag);
+  publish_device(topic_ctr,payload_ctr,retain_flag);
 
 }
 
 
-boolean MQTTConnection::ppublish(const char* topic, const char* payload, boolean retained)
+boolean MQTTConnection::publish_device(const char* topic, const char* payload, boolean retained)
 {
 
   /**
@@ -390,7 +407,7 @@ boolean MQTTConnection::ppublish(const char* topic, const char* payload, boolean
   }
 
   char convctr[100]; memset(convctr,0,sizeof(convctr));
-  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_mqtt->dt.connection[0].prefixtopic,topic);
   
   ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
   ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
@@ -408,10 +425,10 @@ boolean MQTTConnection::ppublish(const char* topic, const char* payload, boolean
  * @param retained 
  * @return boolean 
  */
-boolean MQTTConnection::ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained){
+boolean MQTTConnection::publish_device_P(const char* topic, const char* payload, boolean retained){
 
   char convctr[100]; memset(convctr,0,sizeof(convctr));
-  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_mqtt->dt.connection[0].prefixtopic,topic);
   return pubsub->publish_P(convctr, payload, retained);
     
 }

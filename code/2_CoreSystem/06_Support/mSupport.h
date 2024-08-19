@@ -650,7 +650,7 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
     void SetShortcut(char* str, uint8_t action);
     uint8_t Shortcut(const char* str);
     bool ValidIpAddress(const char* str);
-    bool ParseIp(uint32_t* addr, const char* str);
+    bool ParseIPv4(uint32_t* addr, const char* str);
     bool NewerVersion(char* version_str);
     // char* GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option);
     // char* GetPowerDevice(char* dest, uint8_t idx, size_t size);

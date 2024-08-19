@@ -40,15 +40,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
     case FUNC_EVERY_SECOND:{
 
     // Function_Template_Load();
-
-  // SettingsUpdateText(SET_NTPSERVER1, PSTR(NTP_SERVER1));
-  // SettingsUpdateText(SET_NTPSERVER2, PSTR(NTP_SERVER2));
-  // SettingsUpdateText(SET_NTPSERVER3, PSTR(NTP_SERVER3));
-  // for (uint32_t i = 0; i < MAX_NTP_SERVERS; i++) {
-  //   SettingsUpdateText(SET_NTPSERVER1 +i, pCONT_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 +i)));
-  // }
-
-    // 
+ 
     // TestSettingsLoad();
 
     /**
@@ -92,6 +84,11 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
      } break;
     case FUNC_EVERY_FIVE_SECOND:{
 
+      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+        #ifdef ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
+        pCONT_set->SettingsSaveAll();
+        #endif
+      #endif
 
 
     }break;
@@ -118,6 +115,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
         }
       #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
       #endif // USE_MODULE_CORE_FILESYSTEM
+
 
       
     break;

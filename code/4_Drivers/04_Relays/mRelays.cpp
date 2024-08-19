@@ -193,13 +193,11 @@ void mRelays::SubTask_Relay_CycleTimer()
 6) Enable mode to start with, on, off, as saved
 7) Schedule automatic tod on/off, include duty cycle (with variable for scele, seconds, minutes, hours)
 
-
 Time_On : Auto turn off after x seconds (or minutes)
 Scheduled time, time on/off by a scheduled time, or,
 Disable via internal setters (use flag to check or not) when outside permitted time windows
 
 time_short = 4 bytes, on/off pair = 8 bytes, 4 periods = 32 bytes per relay, 4 relays = 128 bytes ram (passible)
-
 
 add table (optional flag to turn this on/off)
 Relay Name:    ontime, offtime, timeon, last controlled by//
@@ -207,18 +205,15 @@ Relay Name:    ontime, offtime, timeon, last controlled by//
 
 */
 
-
-
 void mRelays::SubTask_Every_Minute(){
 
   #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
     // Check if time is outside limits and set flag
 
-
   #endif
 
-
 }
+
 
 #ifdef USE_MODULE_CORE_RULES
 
@@ -545,7 +540,7 @@ DEBUG_LINE;
 
 //       AddLog(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
 
-//       pCONT_mqtt->ppublish(remote_url,remote_command,false);
+//       pCONT_mqtt->publish_device(remote_url,remote_command,false);
 
 //       // AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html);
 //       // response->addHeader("Server","ESP Async Web Server");
@@ -849,7 +844,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF( PSTR("relay_id = %d"), relay_id );
   }
 
-  // Primary method since v0.86.14.21
+
   if(jtok = obj[PM_JSON_POWER_STATE]){
     if(jtok.isStr()){
       state = pCONT_sup->GetStateNumber(jtok.getStr());

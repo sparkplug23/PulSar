@@ -22,8 +22,6 @@
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
-
-
 enum DATA_BUFFER_FLAG_SOURCE_IDS
 {
   DATA_BUFFER_FLAG_SOURCE_MQTT=0,
@@ -42,6 +40,7 @@ typedef union {
   };
 } TimeRule;
 
+
 typedef union 
 {
   uint16_t data;
@@ -53,7 +52,7 @@ typedef union
     // Waiting
     uint16_t waiting : 1;
     // Encoding format
-    uint16_t encoded_type_id : 1; //json,raw
+    uint16_t encoded_type_id : 1; // json,raw
     uint16_t reserved : 10;
   };
 } DATA_BUFFER_FLAGS;
@@ -63,12 +62,10 @@ struct DATA_BUFFER{
   struct TOPIC{
     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
     uint16_t length_used = 0;
-    // uint16_t length_max = DATA_BUFFER_TOPIC_MAX_LENGTH;
   }topic;
   struct PAYLOAD{
     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
     uint16_t length_used = 0;
-    // uint16_t length_max = DATA_BUFFER_PAYLOAD_MAX_LENGTH;
   }payload;
   uint16_t isserviced = 0; // Set to 0 on new mqtt
   DATA_BUFFER_FLAGS flags;
@@ -76,15 +73,15 @@ struct DATA_BUFFER{
 extern struct DATA_BUFFER data_buffer;
 
 
-
 /**
  * @brief Complete, slow
  **/
-// #define D_DATA_BUFFER_CLEAR()  memset(&data_buffer,0,sizeof(data_buffer))
+#define D_DATA_BUFFER_CLEAR()             \
+    memset(&data_buffer,0,sizeof(data_buffer))
 /**
  * @brief Minimal, fast
  **/
-#define D_DATA_BUFFER_CLEAR()             \
+#define D_DATA_BUFFER_SOFT_CLEAR()             \
     data_buffer.topic.ctr[0]=0;           \
     data_buffer.topic.length_used = 0;    \
     data_buffer.payload.ctr[0]=0;         \
@@ -117,52 +114,46 @@ extern struct DATA_BUFFER data_buffer;
 
 
 #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
-// Later I may want to just use this for the settings stuff (not buttons, just the core stuff)
 enum SettingsTextIndex { 
-                        //  SET_OTAURL,
-                        //  SET_MQTTPREFIX1, SET_MQTTPREFIX2, SET_MQTTPREFIX3,  // MAX_MQTT_PREFIXES
-                        //  SET_STASSID1, SET_STASSID2,  // MAX_SSIDS
-                        //  SET_STAPWD1, SET_STAPWD2,  // MAX_SSIDS
-                        //  SET_HOSTNAME, SET_SYSLOG_HOST,
-                        //  SET_WEBPWD, SET_CORS,
-                        //  SET_MQTT_HOST, SET_MQTT_CLIENT,
-                        //  SET_MQTT_USER, SET_MQTT_PWD,
-                        //  SET_MQTT_FULLTOPIC, SET_MQTT_TOPIC,
-                        //  SET_MQTT_BUTTON_TOPIC, SET_MQTT_SWITCH_TOPIC, SET_MQTT_GRP_TOPIC,
-                        //  SET_STATE_TXT1, SET_STATE_TXT2, SET_STATE_TXT3, SET_STATE_TXT4,  // MAX_STATE_TEXT
-                         SET_NTPSERVER1, SET_NTPSERVER2, SET_NTPSERVER3,  // MAX_NTP_SERVERS
-//                          SET_MEM1, SET_MEM2, SET_MEM3, SET_MEM4, SET_MEM5, SET_MEM6, SET_MEM7, SET_MEM8,
-//                          SET_MEM9, SET_MEM10, SET_MEM11, SET_MEM12, SET_MEM13, SET_MEM14, SET_MEM15, SET_MEM16,  // MAX_RULE_MEMS
-//                          SET_FRIENDLYNAME1, SET_FRIENDLYNAME2, SET_FRIENDLYNAME3, SET_FRIENDLYNAME4,
-//                          SET_FRIENDLYNAME5, SET_FRIENDLYNAME6, SET_FRIENDLYNAME7, SET_FRIENDLYNAME8,  // MAX_FRIENDLYNAMES
-//                          SET_BUTTON1, SET_BUTTON2, SET_BUTTON3, SET_BUTTON4, SET_BUTTON5, SET_BUTTON6, SET_BUTTON7, SET_BUTTON8,
-//                          SET_BUTTON9, SET_BUTTON10, SET_BUTTON11, SET_BUTTON12, SET_BUTTON13, SET_BUTTON14, SET_BUTTON15, SET_BUTTON16,  // MAX_BUTTON_TEXT
-//                          SET_MQTT_GRP_TOPIC2, SET_MQTT_GRP_TOPIC3, SET_MQTT_GRP_TOPIC4,  // MAX_GROUP_TOPICS
-//                          SET_TEMPLATE_NAME,
-//                          SET_DEV_GROUP_NAME1, SET_DEV_GROUP_NAME2, SET_DEV_GROUP_NAME3, SET_DEV_GROUP_NAME4,  // MAX_DEV_GROUP_NAMES
-//                          SET_DEVICENAME,
-//                          SET_TELEGRAM_TOKEN, SET_TELEGRAM_CHATID,
-// #ifdef ESP8266
-//                          SET_ADC_PARAM1,
-//                          SET_SWITCH_TXT1, SET_SWITCH_TXT2, SET_SWITCH_TXT3, SET_SWITCH_TXT4, SET_SWITCH_TXT5, SET_SWITCH_TXT6, SET_SWITCH_TXT7, SET_SWITCH_TXT8,  // MAX_SWITCHES_TXT
-// #endif  // ESP8266
-// #ifdef ESP32
-//                          SET_ADC_PARAM1, SET_ADC_PARAM2, SET_ADC_PARAM3, SET_ADC_PARAM4, SET_ADC_PARAM5, SET_ADC_PARAM6, SET_ADC_PARAM7, SET_ADC_PARAM8,  // MAX_ADCS
-//                          SET_SWITCH_TXT1, SET_SWITCH_TXT2, SET_SWITCH_TXT3, SET_SWITCH_TXT4, SET_SWITCH_TXT5, SET_SWITCH_TXT6, SET_SWITCH_TXT7, SET_SWITCH_TXT8,  // MAX_SWITCHES_TXT
-//                          SET_SWITCH_TXT9, SET_SWITCH_TXT10, SET_SWITCH_TXT11, SET_SWITCH_TXT12, SET_SWITCH_TXT13, SET_SWITCH_TXT14, SET_SWITCH_TXT15, SET_SWITCH_TXT16,  // MAX_SWITCHES_TXT
-//                          SET_SWITCH_TXT17, SET_SWITCH_TXT18, SET_SWITCH_TXT19, SET_SWITCH_TXT20, SET_SWITCH_TXT21, SET_SWITCH_TXT22, SET_SWITCH_TXT23, SET_SWITCH_TXT24,  // MAX_SWITCHES_TXT
-//                          SET_SWITCH_TXT25, SET_SWITCH_TXT26, SET_SWITCH_TXT27, SET_SWITCH_TXT28,  // MAX_SWITCHES_TXT
-// #endif  // ESP32
-//                          SET_SHD_PARAM,
-//                          SET_RGX_SSID, SET_RGX_PASSWORD,
-//                          SET_INFLUXDB_HOST, SET_INFLUXDB_PORT, SET_INFLUXDB_ORG, SET_INFLUXDB_TOKEN, SET_INFLUXDB_BUCKET, SET_INFLUXDB_RP,
-//                          SET_CANVAS,
-                         SET_MAX, // limit of texts stored in Settings
-                         // Index above are not stored in Settings and should be handled specifically in SettingText()
-                         SET_BUTTON17, SET_BUTTON18, SET_BUTTON19, SET_BUTTON20, SET_BUTTON21, SET_BUTTON22, SET_BUTTON23, SET_BUTTON24,
-                         SET_BUTTON25, SET_BUTTON26, SET_BUTTON27, SET_BUTTON28, SET_BUTTON29, SET_BUTTON30, SET_BUTTON31, SET_BUTTON32,
-                         SET_FINAL_MAX
-                         };
+    SET_OTAURL,
+    SET_STASSID1, SET_STASSID2,  // MAX_SSIDS
+    SET_STAPWD1, SET_STAPWD2,  // MAX_SSIDS
+    SET_HOSTNAME, SET_SYSLOG_HOST,
+    SET_WEBPWD, SET_CORS,
+    SET_STATE_TXT1, SET_STATE_TXT2, SET_STATE_TXT3, SET_STATE_TXT4,  // MAX_STATE_TEXT
+    SET_NTPSERVER1, SET_NTPSERVER2, SET_NTPSERVER3,  // MAX_NTP_SERVERS
+    SET_MEM1, SET_MEM2, SET_MEM3, SET_MEM4, SET_MEM5, SET_MEM6, SET_MEM7, SET_MEM8,
+    SET_MEM9, SET_MEM10, SET_MEM11, SET_MEM12, SET_MEM13, SET_MEM14, SET_MEM15, SET_MEM16,  // MAX_RULE_MEMS
+    SET_FRIENDLYNAME1, SET_FRIENDLYNAME2, SET_FRIENDLYNAME3, SET_FRIENDLYNAME4,
+    SET_FRIENDLYNAME5, SET_FRIENDLYNAME6, SET_FRIENDLYNAME7, SET_FRIENDLYNAME8,  // MAX_FRIENDLYNAMES
+    SET_BUTTON1, SET_BUTTON2, SET_BUTTON3, SET_BUTTON4, SET_BUTTON5, SET_BUTTON6, SET_BUTTON7, SET_BUTTON8,
+    SET_BUTTON9, SET_BUTTON10, SET_BUTTON11, SET_BUTTON12, SET_BUTTON13, SET_BUTTON14, SET_BUTTON15, SET_BUTTON16,  // MAX_BUTTON_TEXT
+    SET_TEMPLATE_NAME,
+    SET_DEV_GROUP_NAME1, SET_DEV_GROUP_NAME2, SET_DEV_GROUP_NAME3, SET_DEV_GROUP_NAME4,  // MAX_DEV_GROUP_NAMES
+    SET_DEVICENAME,
+    SET_TELEGRAM_TOKEN, SET_TELEGRAM_CHATID,
+  #ifdef ESP8266
+    SET_ADC_PARAM1,
+    SET_SWITCH_TXT1, SET_SWITCH_TXT2, SET_SWITCH_TXT3, SET_SWITCH_TXT4, SET_SWITCH_TXT5, SET_SWITCH_TXT6, SET_SWITCH_TXT7, SET_SWITCH_TXT8,  // MAX_SWITCHES_TXT
+  #endif  // ESP8266
+  #ifdef ESP32
+    SET_ADC_PARAM1, SET_ADC_PARAM2, SET_ADC_PARAM3, SET_ADC_PARAM4, SET_ADC_PARAM5, SET_ADC_PARAM6, SET_ADC_PARAM7, SET_ADC_PARAM8,  // MAX_ADCS
+    SET_SWITCH_TXT1, SET_SWITCH_TXT2, SET_SWITCH_TXT3, SET_SWITCH_TXT4, SET_SWITCH_TXT5, SET_SWITCH_TXT6, SET_SWITCH_TXT7, SET_SWITCH_TXT8,  // MAX_SWITCHES_TXT
+    SET_SWITCH_TXT9, SET_SWITCH_TXT10, SET_SWITCH_TXT11, SET_SWITCH_TXT12, SET_SWITCH_TXT13, SET_SWITCH_TXT14, SET_SWITCH_TXT15, SET_SWITCH_TXT16,  // MAX_SWITCHES_TXT
+    SET_SWITCH_TXT17, SET_SWITCH_TXT18, SET_SWITCH_TXT19, SET_SWITCH_TXT20, SET_SWITCH_TXT21, SET_SWITCH_TXT22, SET_SWITCH_TXT23, SET_SWITCH_TXT24,  // MAX_SWITCHES_TXT
+    SET_SWITCH_TXT25, SET_SWITCH_TXT26, SET_SWITCH_TXT27, SET_SWITCH_TXT28,  // MAX_SWITCHES_TXT
+  #endif  // ESP32
+    SET_SHD_PARAM,
+    SET_RGX_SSID, SET_RGX_PASSWORD,
+    SET_INFLUXDB_HOST, SET_INFLUXDB_PORT, SET_INFLUXDB_ORG, SET_INFLUXDB_TOKEN, SET_INFLUXDB_BUCKET, SET_INFLUXDB_RP,
+    SET_CANVAS,
+    SET_TELEGRAM_FINGERPRINT,
+    SET_MAX, // limit of texts stored in Settings
+    // Index above are not stored in Settings and should be handled specifically in SettingText()
+    SET_BUTTON17, SET_BUTTON18, SET_BUTTON19, SET_BUTTON20, SET_BUTTON21, SET_BUTTON22, SET_BUTTON23, SET_BUTTON24,
+    SET_BUTTON25, SET_BUTTON26, SET_BUTTON27, SET_BUTTON28, SET_BUTTON29, SET_BUTTON30, SET_BUTTON31, SET_BUTTON32,
+    SET_FINAL_MAX
+   };
 #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 
@@ -191,6 +182,7 @@ DEFINE_PGM_CTR(PM_JSON_LEVEL_NONE_CTR)        "None";
 DEFINE_PGM_CTR(PM_JSON_LEVEL_IFCHANGED_CTR)   "IfChanged";
   
 
+// Phase out
 enum SWITCH_SPLIT_TASK_IDS{
   SPLIT_TASK_NOT_RUNNING_ID=0,
   SPLIT_TASK_SUCCESS_ID=1,
@@ -286,8 +278,7 @@ const uint8_t MAX_IRSEND = 16;              // Max number of IRSEND GPIOs
 const uint8_t MAX_RULE_SETS = 3;            // Max number of rule sets of size 512 characters
 const uint16_t MAX_RULE_SIZE = 512;         // Max number of characters in rules
 const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
-const uint8_t MAX_FRIENDLYNAMES = 4;        // Max number of Friendly names
-const char WIFI_HOSTNAME[]  = "%s"; //!PROGMEM    // Expands to <MQTT_TOPIC>-<last 4 decimal chars of MAC address>
+const char WIFI_HOSTNAME[]  = "%s-%04d"; //!PROGMEM    // Expands to <MQTT_TOPIC>-<last 4 decimal chars of MAC address>
 const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
 const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V
 const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
@@ -310,9 +301,41 @@ const uint16_t FLOATSZ = 16;                // Max number of characters in float
 const uint16_t TBUFFER_SIZE_FLOAT = 16; // TBUFFER are (T)emporary Buffers that are used for conversions
 #define STANDARD_SMS_CHAR_LENGTH 160
 const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
-const uint8_t MAX_NTP_SERVERS = 3;          // Max number of NTP servers
 const uint32_t SOFT_BAUDRATE = 9600;        // Default software serial baudrate
 const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
+
+const uint8_t MAX_MQTT_CONNECTIONS = 2;
+
+
+// Changes to the following MAX_ defines need to be in line with enum SettingsTextIndex
+const uint8_t MAX_MQTT_PREFIXES = 3;        // Max number of MQTT prefixes (cmnd, stat, tele)
+const uint8_t MAX_SSIDS = 2;                // Max number of SSIDs
+const uint8_t MAX_STATE_TEXT = 4;           // Max number of State names (OFF, ON, TOGGLE, HOLD)
+const uint8_t MAX_NTP_SERVERS = 3;          // Max number of NTP servers
+const uint8_t MAX_RULE_MEMS = 16;           // Max number of saved vars
+const uint8_t MAX_FRIENDLYNAMES = 8;        // Max number of Friendly names
+const uint8_t MAX_BUTTON_TEXT = 32;         // Max number of GUI button labels
+const uint8_t MAX_GROUP_TOPICS = 4;         // Max number of Group Topics
+const uint8_t MAX_DEV_GROUP_NAMES = 4;      // Max number of Device Group names
+
+#ifdef ESP8266
+const uint8_t MAX_ADCS = 1;                 // Max number of ESP8266 ADC pins
+const uint8_t MAX_SWITCHES_TXT = 8;         // Max number of switches user text
+#endif  // ESP8266
+#ifdef ESP32
+  #if CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3
+  const uint8_t MAX_ADCS = 5;               // Max number of ESP32-C3 ADC pins (ADC2 pins are unusable with Wifi enabled)
+  #elif CONFIG_IDF_TARGET_ESP32C6
+  const uint8_t MAX_ADCS = 7;               // Max number of ESP32 ADC pins (ADC2 pins are unusable with Wifi enabled)
+  #else   // ESP32
+  const uint8_t MAX_ADCS = 8;               // Max number of ESP32 ADC pins (ADC2 pins are unusable with Wifi enabled)
+  #endif  // ESP32C3
+const uint8_t MAX_SWITCHES_TXT = 28;        // Max number of switches user text
+#endif  // ESP32
+
+
+
+
 
 // const uint32_t START_VALID_TIME = 1451602800;  // Time is synced and after 2016-01-01   // Will need adjusting when NTP code is updated
 const uint32_t START_VALID_UTC_TIME = 1697014158;  // Time is synced and after 2023 October 11, this will need adjusting when NTP code is updated
@@ -370,12 +393,18 @@ enum INPUT_TYPE_IDS{ //style fron nextion
   INPUT_TYPE_LENGTH_ID
 };
 
+/**
+ * @brief 
+ * 
+ * Just delete these, dont like the params8
+ * 
+ */
 enum SO32_49Index { P_HOLD_TIME,              // SetOption32 - (Button/Switch) Key hold time detection in decaseconds (default 40)
                     P_MAX_POWER_RETRY,        // SetOption33 - (Energy) Maximum number of retries before deciding power limit overflow (default 5)
                     P_BACKLOG_DELAY,          // SetOption34 - (Backlog) Minimal delay in milliseconds between executing backlog commands (default 200)
                     P_MDNS_DELAYED_START,     // SetOption35 - (mDNS) Number of seconds before mDNS is started (default 0) - Obsolete
                     P_BOOT_LOOP_OFFSET,       // SetOption36 - (Restart) Number of restarts to start detecting boot loop (default 1)
-                    P_RGB_REMAP,              // SetOption37 - (Light) RGB and White channel separation (default 0)
+                    P_SO37_FREE,              // SetOption37 - (Light) RGB and White channel separation (default 0)
                     P_IR_UNKNOW_THRESHOLD,    // SetOption38 - (IR) Set the smallest sized "UNKNOWN" message packets we actually care about (default 6, max 255)
                     P_CSE7766_INVALID_POWER,  // SetOption39 - (CSE7766) Number of invalid power measurements before declaring it invalid allowing low load measurments (default 128)
                     P_HOLD_IGNORE,            // SetOption40 - (Button/Shutter) Ignore button change in seconds (default 0)

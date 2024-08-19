@@ -88,7 +88,7 @@ class mSensorsInterface :
 
     void Load_Module(bool erase);
     void Save_Module(void);
-    bool Restore_Module(void);
+    bool Default_Module(void);
 
     struct MODULE_RUNTIME{ // these will be saved and recovered on boot      
       uint8_t tTicker_Splash_Sensors_To_Logs = 30;

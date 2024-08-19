@@ -78,8 +78,6 @@ void mSettings::SystemSettings_DefaultBody(void)
    *********************************************************************************************/
 
   Settings.bootcount_errors_only = 0;     // E01
-  Settings.module = MODULE;
-  Settings.last_module = MODULE;
   
   Settings.save_data = SAVE_DATA;
   Settings.enable_sleep = true; //on
@@ -90,17 +88,35 @@ void mSettings::SystemSettings_DefaultBody(void)
 
   runtime.sleep = Settings.sleep;
   Settings.flag_system.save_state = SAVE_STATE;
+
+  Settings.unified_interface_reporting_invalid_reading_timeout_seconds = UNIFIED_INTERFACE_REPORTING_INVALID_SECONDS;
   
+
+
   /*********************************************************************************************
-   ******* Template/GPIO ***********************************************************************
+   ******* Module/Template/GPIO ***********************************************************************
    *********************************************************************************************/
 
   snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s","fallback");
   snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s","fallback");
   snprintf(pCONT_set->Settings.room_hint,sizeof(pCONT_set->Settings.room_hint),"%s","none_set");
 
-  for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) { Settings.module_pins.io[i] = GPIO_NONE_ID; }
   
+  Settings.module = MODULE;
+  Settings.last_module = MODULE;
+  
+  #ifndef FIRMWARE_MINIMAL    // not needed in minimal/safeboot because of disabled feature and Settings are not saved anyways
+
+  #endif
+  // ModuleDefault(WEMOS);  // to do
+  for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) { Settings.module_pins.io[i] = GPIO_NONE_ID; }
+  SettingsUpdateText(SET_FRIENDLYNAME1, PSTR(FRIENDLY_NAME)); // Init
+  #ifdef DEVICENAME_CTR
+  SettingsUpdateText(SET_DEVICENAME, PSTR(DEVICENAME_CTR));
+  #else
+  SettingsUpdateText(SET_DEVICENAME, SettingsText(SET_FRIENDLYNAME1));
+  #endif
+
   /*********************************************************************************************
    ******* Serial *****************************************************************************
    *********************************************************************************************/
@@ -121,31 +137,38 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.logging.web_level = WEB_LOG_LEVEL;
   Settings.logging.telnet_level = TELNET_LOG_LEVEL;
   Settings.logging.time_isshort = LOGTIME_DEFAULT_FORMAT;
+  
+  SettingsUpdateText(SET_SYSLOG_HOST, PSTR(SYS_LOG_HOST));
 
   /*********************************************************************************************
    ******* Networking: Wifi/Network/Cellular ***************************************************
    *********************************************************************************************/
 
+  SettingsUpdateText(SET_OTAURL, PSTR(D_OTA_URL));
 
+  pCONT_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
+  pCONT_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
+  pCONT_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
+  pCONT_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
+  pCONT_sup->ParseIPv4(&Settings.ipv4_address[4], PSTR(WIFI_DNS2));
+  pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
+  pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
+  
   Settings.sta_config = WIFI_CONFIG_TOOL;
   Settings.sta_active = 0;
-  strlcpy(Settings.sta_ssid[0], STA_SSID1, sizeof(Settings.sta_ssid[0]));
-  strlcpy(Settings.sta_ssid[1], STA_SSID2, sizeof(Settings.sta_ssid[1]));
-  strlcpy(Settings.sta_ssid[2], STA_SSID3, sizeof(Settings.sta_ssid[2]));
-  strlcpy(Settings.sta_pwd[0], STA_PASS1, sizeof(Settings.sta_pwd[0]));
-  strlcpy(Settings.sta_pwd[1], STA_PASS2, sizeof(Settings.sta_pwd[1]));
-  strlcpy(Settings.sta_pwd[2], STA_PASS3, sizeof(Settings.sta_pwd[2]));
-  strlcpy(Settings.hostname, WIFI_HOSTNAME, sizeof(Settings.hostname));
-  strlcpy(Settings.syslog_host, SYS_LOG_HOST, sizeof(Settings.syslog_host));
-  pCONT_sup->ParseIp(&Settings.ip_address[0], WIFI_IP_ADDRESS);
-  pCONT_sup->ParseIp(&Settings.ip_address[1], WIFI_GATEWAY);
-  pCONT_sup->ParseIp(&Settings.ip_address[2], WIFI_SUBNETMASK);
-  pCONT_sup->ParseIp(&Settings.ip_address[3], WIFI_DNS); 
+  SettingsUpdateText(SET_STASSID1, PSTR(STA_SSID1));
+  SettingsUpdateText(SET_STASSID2, PSTR(STA_SSID2));
+  SettingsUpdateText(SET_STAPWD1, PSTR(STA_PASS1));
+  SettingsUpdateText(SET_STAPWD2, PSTR(STA_PASS2));
+  SettingsUpdateText(SET_HOSTNAME, WIFI_HOSTNAME);
+  SettingsUpdateText(SET_RGX_SSID, PSTR(WIFI_RGX_SSID));
+  SettingsUpdateText(SET_RGX_PASSWORD, PSTR(WIFI_RGX_PASSWORD));
+
+
+  
 
   Settings.flag_network.network_wifi = 1;
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
-  Settings.webserver = WEB_SERVER;
-  strlcpy(Settings.web_password, WEB_PASSWORD, sizeof(Settings.web_password));
 
   Settings.flag_network.timers_enable = 0;
   Settings.flag_network.use_wifi_rescan = 1;
@@ -156,17 +179,23 @@ void mSettings::SystemSettings_DefaultBody(void)
   sprintf(runtime.my_hostname,"%s",pCONT_set->Settings.system_name.device);
 
   /*********************************************************************************************
+   ******* Networking: WebServer ********************************************************************
+   *********************************************************************************************/
+  
+  Settings.webserver = WEB_SERVER;
+
+  SettingsUpdateText(SET_WEBPWD, PSTR(WEB_PASSWORD));
+  SettingsUpdateText(SET_CORS, PSTR(CORS_DOMAIN));
+
+  /*********************************************************************************************
    ******* Networking: MQTT ********************************************************************
    *********************************************************************************************/
 
   Settings.flag_system.mqtt_enabled = 1;
-  strlcpy(Settings.mqtt.host_address, MQTT_HOST, sizeof(Settings.mqtt.host_address));
-  strlcpy(Settings.mqtt.user, MQTT_USER, sizeof(Settings.mqtt.user));
-  strlcpy(Settings.mqtt.pwd, MQTT_PASS, sizeof(Settings.mqtt.pwd));
-  
-  Settings.mqtt_retry = MQTT_RETRY_SECS;
+
+
+
   Settings.flag_system.mqtt_enabled = true;
-  Settings.mqtt.retry = MQTT_RETRY_SECS;
 
   Settings.sensors.ifchanged_secs = SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS; // ifchanged etc timing should be moved into mqtt substruct
   Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
@@ -190,8 +219,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.setoption_255[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
   #ifdef USE_NETWORK_MDNS
   Settings.setoption_255[P_MDNS_DELAYED_START] = 0;
-  #endif // #ifdef USE_NETWORK_MDNS
-  Settings.setoption_255[P_RGB_REMAP] = 0;//RGB_REMAP_RGBW;
+  #endif
   Settings.setoption_255[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
 
   /*********************************************************************************************
@@ -213,16 +241,6 @@ void mSettings::SystemSettings_DefaultBody(void)
   SettingsResetStd();
   SettingsResetDst();
 
-  // strlcpy(Settings.ntp_server[0], NTP_SERVER1, sizeof(Settings.ntp_server[0]));
-  // strlcpy(Settings.ntp_server[1], NTP_SERVER2, sizeof(Settings.ntp_server[1]));
-  // strlcpy(Settings.ntp_server[2], NTP_SERVER3, sizeof(Settings.ntp_server[2]));
-  // for (uint8_t j = 0; j < 3; j++) {
-  //   for (uint8_t i = 0; i < strlen(Settings.ntp_server[j]); i++) {
-  //     if (Settings.ntp_server[j][i] == ',') {
-  //       Settings.ntp_server[j][i] = '.';
-  //     }
-  //   }
-  // }
   #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
   SettingsUpdateText(SET_NTPSERVER1, PSTR(NTP_SERVER1));
   SettingsUpdateText(SET_NTPSERVER2, PSTR(NTP_SERVER2));
@@ -288,6 +306,12 @@ void mSettings::SystemSettings_DefaultBody(void)
   // Settings.flag_sensor.humidity_resolution = HUMIDITY_RESOLUTION;
   // Settings.flag_sensor.temperature_resolution = TEMP_RESOLUTION;
   
+  // Some user descriptions of switches or buttons, eg "ON" could be "Door Open"
+  SettingsUpdateText(SET_STATE_TXT1, PSTR(D_OFF));
+  SettingsUpdateText(SET_STATE_TXT2, PSTR(D_ON));
+  SettingsUpdateText(SET_STATE_TXT3, PSTR(D_TOGGLE));
+  SettingsUpdateText(SET_STATE_TXT4, PSTR(D_HOLD));
+
   /*********************************************************************************************
    ******* Drivers *****************************************************************************
    *********************************************************************************************/

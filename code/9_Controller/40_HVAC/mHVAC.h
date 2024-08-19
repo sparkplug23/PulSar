@@ -140,7 +140,7 @@ class mHVAC :
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
     void Load_Module(bool erase = false);
     void Save_Module(void);
-    bool Restore_Module(void);
+    bool Default_Module(void);
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
     #endif // USE_MODULE_CORE_FILESYSTEM
 

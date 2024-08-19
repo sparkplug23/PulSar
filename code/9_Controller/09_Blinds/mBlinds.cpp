@@ -100,7 +100,7 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   // pCONT->mso->print(payload);  
   // pCONT->mso->println();
 
-//  pCONT->mqt->ppublish("payload/mrelays",data_buffer.payload.ctr,false);
+//  pCONT->mqt->publish_device("payload/mrelays",data_buffer.payload.ctr,false);
 
   uint8_t name_num=-1,state=-1;
 
@@ -170,8 +170,8 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     pCONT->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
   }
 
-  pCONT->mqt->ppublish("results/topic",data_buffer.topic.ctr,false);
-  pCONT->mqt->ppublish("results/payload",data_buffer.payload.ctr,false);
+  pCONT->mqt->publish_device("results/topic",data_buffer.topic.ctr,false);
+  pCONT->mqt->publish_device("results/payload",data_buffer.payload.ctr,false);
 
   uint8_t name_num=-1,state=-1;
 
@@ -347,7 +347,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 // void mBlinds::MQQTSendFanStatus(void){
 //     ConstructJSON_FanStatus();
 //     if(data_buffer.payload.len){ // if something to send
-//       pCONT->mqt->ppublish("status/blinds", data_buffer.payload.ctr,false);
+//       pCONT->mqt->publish_device("status/blinds", data_buffer.payload.ctr,false);
 //     }
 // }
 // void mBlinds::ConstructJSON_FanStatus(){
@@ -399,7 +399,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //   if(data_buffer.payload.len){ // if something to send
-//     pCONT->mqt->ppublish("status/event/blinds", data_buffer.payload.ctr,false);
+//     pCONT->mqt->publish_device("status/event/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -419,7 +419,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //   if(data_buffer.payload.len){ // if something to send
-//     pCONT->mqt->ppublish("status/event/blinds", data_buffer.payload.ctr,false);
+//     pCONT->mqt->publish_device("status/event/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -459,7 +459,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //   if(data_buffer.payload.len){ // if something to send
-//     pCONT->mqt->ppublish("status/blinds", data_buffer.payload.ctr,false);
+//     pCONT->mqt->publish_device("status/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }

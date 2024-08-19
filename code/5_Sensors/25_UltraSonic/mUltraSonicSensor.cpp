@@ -504,9 +504,9 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void)
     JBI->End();
 
     if(motion_detect.isactive){
-      pCONT_mqtt->ppublish("status/motion/detected",JBI->GetBufferPtr(),false);
+      pCONT_mqtt->publish_device("status/motion/detected",JBI->GetBufferPtr(),false);
     }else{
-      pCONT_mqtt->ppublish("status/motion/over",JBI->GetBufferPtr(),false);
+      pCONT_mqtt->publish_device("status/motion/over",JBI->GetBufferPtr(),false);
     }
 
   }
@@ -661,7 +661,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
       if(motion_detect.state!=object_detected_static.ispresent){
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF motion_detect"));
 
-        pCONT_mqtt->ppublish("status/motion/event",object_detected_static.ispresent?"Present":"Not Present",false);
+        pCONT_mqtt->publish_device("status/motion/event",object_detected_static.ispresent?"Present":"Not Present",false);
         
         
         motion_detect.state = object_detected_static.ispresent;

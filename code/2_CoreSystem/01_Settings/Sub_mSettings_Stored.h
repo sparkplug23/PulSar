@@ -105,24 +105,14 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 } SysBitfield_Network;
 
 // Due to the muliple connections required, mqtt connection settings will be moved into its own file as json format
-struct SettingsMQTT
-{
-  char          host_address[33];             // 1E9 - Keep together with below as being copied as one chunck with reset 6
-  uint16_t      port;                 // 20A - Keep together
-  char          client[33];           // 20C - Keep together
-  char          user[33];             // 22D - Keep together
-  char          pwd[33];              // 24E - Keep together
-  char          topic[33];            // 26F - Keep together with above items as being copied as one chunck with reset 6
-  uint16_t      retry;                // 396  
-  char lwt_topic[40];
-  char client_name[50]; 
-  char hostname_ctr[50];
-  char prefixtopic[50]; // "<devicename>/User extras?"
-  struct interface_priority_flags_s{
-    uint8_t energy = 0;
-    uint8_t light = 0;
-  }interface_reporting_priority;
-};
+/**
+ * @brief Instead this will be used for "ActiveMQTT" and hence will be loaded from memory. Though will need to be a vector to hold multiple, so 
+ * this likely needs totally moved into the module itself (and class header)
+ * 
+ */
+// struct SettingsMQTT
+// {
+// };
 
 
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
@@ -437,7 +427,7 @@ struct SETTINGS {
   uint32_t      version;                   // 008
   uint16_t      bootcount;              // 00C
   // Body (All other settings)
-  // System/Core
+  // Modules
   uint16_t      bootcount_errors_only;     // E01
   uint8_t       module;                    // 474
   uint8_t       last_module;               // 399
@@ -458,30 +448,33 @@ struct SETTINGS {
   uint8_t       sbaudrate;                 // 452
   uint8_t       sleep;                     // 453
   uint8_t       setoption_255[PARAM8_SIZE];
+  // Core
+  char debug[10];
+  uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
+  
   // Network
   uint8_t       sta_config;                // 09F
   uint8_t       sta_active;                // 0A0
-  char          sta_ssid[3][33];           // 0A1 - Keep together with sta_pwd as being copied as one chunck with reset 5
-  char          sta_pwd[3][65];            // 0E3 - Keep together with sta_ssid as being copied as one chunck with reset 5
-  char          hostname[33];              // 165
-  char          syslog_host[33];           // 186
-  uint32_t      ip_address[4];             // 544
+  // char          sta_ssid[3][33];           // 0A1 - Keep together with sta_pwd as being copied as one chunck with reset 5
+  // char          sta_pwd[3][65];            // 0E3 - Keep together with sta_ssid as being copied as one chunck with reset 5
+  // char          hostname[33];              // 165
+  // char          syslog_host[33];           // 186
+  uint32_t      ip_address[5];             // 544
   uint8_t       wifi_channel;
   uint8_t       wifi_bssid[6];             // F0A
   SysBitfield_Network  flag_network;                     // 3A0
   // Webserver
   uint8_t       webserver;                 // 1AB
-  char          web_password[33];          // 4A9
+  // char          web_password[33];          // 4A9
   uint16_t      web_refresh;               // 7CC
   // MQTT
-  SettingsMQTT  mqtt;
+  // SettingsMQTT  mqtt; // Moved to mqtt module
   // Time
   int8_t        timezone;                  // 016
   uint8_t       timezone_minutes;          // 66D 
   int8_t        timezone2;                  // 016
   uint8_t       timezone_minutes2;          // 66D 
   uint8_t       ina219_mode;               // 531
-  uint16_t      mqtt_retry;                // 396
   SysBitfield_Drivers    flag_drivers;  
   int16_t       toffset[2];                // 30E
   char          ntp_server[3][33];         // 4CE
@@ -526,13 +519,19 @@ struct SETTINGS {
   WebCamCfg     webcam_config;             // 44C
   WebCamCfg2    webcam_config2;            // 460
   #endif
+  #ifdef ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   char settings_holder_ctr[10];
-  char settings_time_ctr[10];
+  #endif
   uint32_t      bootcount_reset_time;      // FD4
   TimeRule      tflag[2];                  // 2E2
   SOBitfield3   flag3;                     // 3A0
   uint32_t      ipv4_address[5];           // 544
+  uint32_t      ipv4_rgx_address;          // 558
+  uint32_t      ipv4_rgx_subnetmask;       // 55C
   uint16_t      dns_timeout;               // 4C8
+  #ifdef ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
+  char local_time_ascii_debug[20];
+  #endif
   // E00 - FFF (4095 ie eeprom size) free locations
   uint32_t      cfg_timestamp;
   uint32_t      cfg_crc32;                 // 32 bit CRC, must remain at last 4 bytes

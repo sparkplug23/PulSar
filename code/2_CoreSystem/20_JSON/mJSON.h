@@ -458,6 +458,8 @@ class JsonBuilder{
   void Append(const char* buff);
   void Append_P(const char* formatP, ...);
 
+  int estimateJsonKeyValuePairs(const char* json, size_t len);
+
 };
 
 #define JsonBuilderI JsonBuilder::GetInstance()

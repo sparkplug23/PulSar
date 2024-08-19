@@ -54,7 +54,6 @@ class mWiFi :
   public:
     mWiFi(){};
     
-    #define D_MAX_SSIDS 3
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
       return sizeof(mWiFi);
@@ -169,7 +168,7 @@ class mWiFi :
     enum WIFIBEGIN_Flags{ 
       WIFIBEGIN_FLAG_SSID0_ID=0,
       WIFIBEGIN_FLAG_SSID1_ID,
-      WIFIBEGIN_FLAG_SSID2_ID,
+      // WIFIBEGIN_FLAG_SSID2_ID,
       WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID
     };
 

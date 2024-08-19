@@ -122,7 +122,7 @@ void mDriverInterface::MQTT_Report_Event_Button()
 
 
 
-  pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JBI->GetBufferPtr(),false);
+  pCONT_mqtt->brokers[0]->publish_device("status/sensors_interface/event",JBI->GetBufferPtr(),false);
 
 
   /**

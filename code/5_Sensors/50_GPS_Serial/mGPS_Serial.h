@@ -200,7 +200,7 @@ class mGPS_Serial :
 
     void Load_Module(bool erase);
     void Save_Module(void);
-    bool Restore_Module(void);
+    bool Default_Module(void);
 
     struct MODULE_RUNTIME{ // these will be saved and recovered on boot
       uint32_t last_message = 0;

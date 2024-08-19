@@ -131,6 +131,16 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     ALOG_INF(PSTR("buffer_writer START ------------------------------- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif
 
+    /**
+     * @brief Special debug cases, when I want to insert debug code that acts on one function type, but for all module calls to aid to tracing an error
+     * Uncomment when needed
+     */
+    // if(function == FUNC_JSON_COMMAND_ID)
+    // {
+      // ALOG_COM( PSTR(D_LOG_TASKER "switch_index %d}"), switch_index);
+      // ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
+    // }
+
     pModule[switch_index]->Tasker(function, obj);    
 
     // if(millis()-long_start_millis > 100)

@@ -206,6 +206,7 @@ void mBME::BmpRead(void)
       #endif // ENABLE_DEVFEATURE_BME680
     }
     bmp_sensors[bmp_idx].ischangedtLast = millis();
+    bmp_sensors[bmp_idx].utc_measured_timestamp = pCONT_time->UtcTime();
   }
 }
 
@@ -599,7 +600,11 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
         JBI->Add(D_JSON_ALTITUDE, bmp_sensors[sensor_id].altitude);
         #ifdef ENABLE_DEVFEATURE_BME680
         JBI->Add(D_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
-         #endif // ENABLE_DEVFEATURE_BME680
+        #endif // ENABLE_DEVFEATURE_BME680
+        JBI->Add("UTC", bmp_sensors[sensor_id].utc_measured_timestamp);
+        uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - bmp_sensors[sensor_id].utc_measured_timestamp;
+        JBI->Add("Age", sensor_elapsed_time);
+
         // if(json_level >=  JSON_LEVEL_DETAILED)
         // {          
         //   JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);

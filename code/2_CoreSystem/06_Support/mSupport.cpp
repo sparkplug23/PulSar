@@ -620,7 +620,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
       {
         if(pCONT_mqtt->pubsub->connected())
         {
-          pCONT_mqtt->ppublish_device_name_prefix_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
+          pCONT_mqtt->publish_device_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
         }
       }
       #endif // ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
@@ -1576,7 +1576,7 @@ void mSupport::SlowAllTemplatesOnSerial(){
 //     char topic2[100];
 //     sprintf_P(topic2,PSTR("status/templates/my_module"));
     
-//     pCONT_mqtt->ppublish(topic2,data_buffer.payload.ctr,false);
+//     pCONT_mqtt->publish_device(topic2,data_buffer.payload.ctr,false);
 
 //   AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"), data_buffer.payload.ctr);
 
@@ -1614,7 +1614,7 @@ void mSupport::SlowAllTemplatesOnSerial(){
 //     char topic[100];
 //     sprintf_P(topic,PSTR("status/templates/%02d"),mod);
     
-//     pCONT->mqt->ppublish(topic,data_buffer.payload.ctr,false);
+//     pCONT->mqt->publish_device(topic,data_buffer.payload.ctr,false);
     
 //     //delay(100);
 
@@ -2089,7 +2089,7 @@ bool mSupport::ValidIpAddress(const char* str)
   return (*p == '\0');
 }
 
-bool mSupport::ParseIp(uint32_t* addr, const char* str)
+bool mSupport::ParseIPv4(uint32_t* addr, const char* str)
 {
   uint8_t *part = (uint8_t*)addr;
   uint8_t i;

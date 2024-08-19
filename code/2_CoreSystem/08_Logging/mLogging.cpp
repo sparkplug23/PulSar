@@ -707,7 +707,7 @@ int Response_mP(const char* format, ...)     // Content send snprintf_P char dat
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESPONSE "%s"), pCONT_set->response_msg);
 //   //Send via mqtt
 //   #ifdef USE_MODULE_NETWORK_MQTT
-//   pCONT_mqtt->ppublish("status/result",pCONT_set->response_msg,false);
+//   pCONT_mqtt->publish_device("status/result",pCONT_set->response_msg,false);
 //   #endif
   
   return 0;// len;

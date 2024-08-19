@@ -338,6 +338,8 @@ public:
   // const JsonParserObject getRootObject(void) { return JsonParserObject(&_tokens[0]); }
   const JsonParserObject getRootObject(void) const;
 
+  // void countJsonElements(const char* json, int &objectCount, int &arrayCount, int &pairCount);
+
   // pointer arithmetic
   // ptrdiff_t index(JsonParserToken token) const;
 

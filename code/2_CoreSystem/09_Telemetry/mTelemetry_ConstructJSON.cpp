@@ -240,9 +240,8 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_JSON_WIFICONFIG_STATE, pCONT_set->Settings.sta_config);
 
     JBI->Array_Start(PM_JSON_AP_LIST);
-      JBI->Add(pCONT_set->Settings.sta_ssid[0]);
-      JBI->Add(pCONT_set->Settings.sta_ssid[1]);
-      JBI->Add(pCONT_set->Settings.sta_ssid[2]);
+      JBI->Add(pCONT_set->SettingsText(SET_STASSID1));
+      JBI->Add(pCONT_set->SettingsText(SET_STASSID2));
     JBI->Array_End();
 
   return JBI->End();
@@ -260,9 +259,9 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
      * 
      */
 
-    JBI->Add(PM_JSON_CLIENT_NAME, pCONT_set->Settings.mqtt.client_name);
+    JBI->Add(PM_JSON_CLIENT_NAME, pCONT_mqtt->dt.connection[0].client_name);
 
-    JBI->Add("RetrySecs", pCONT_set->Settings.mqtt_retry);
+    JBI->Add("RetrySecs", pCONT_mqtt->dt.connection[0].retry);
 
     JBI->Object_Start(PM_JSON_REFRESH_RATES);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_set->Settings.sensors.ifchanged_secs);
@@ -274,7 +273,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
     #ifdef ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
     JBI->Object_Start("Interface_Priority");
-      JBI->Add(D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR, pCONT_set->Settings.mqtt.interface_reporting_priority.energy);
+      JBI->Add(D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR, pCONT_mqtt->dt.connection[0].interface_reporting_priority.energy);
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
 

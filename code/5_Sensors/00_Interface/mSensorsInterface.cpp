@@ -182,7 +182,7 @@ void mSensorsInterface::MQTT_Report_Event_Button()
     JBI->Add("Duration", 0);//tSavedTimeSincePressOn);
   JBI->End();
 
-  pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JBI->GetBufferPtr(),false);
+  pCONT_mqtt->brokers[0]->publish_device("status/sensors_interface/event",JBI->GetBufferPtr(),false);
 
   /**
    * If event was serviced, then clear it
@@ -290,7 +290,10 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
         //Get any sensors in module
         uint8_t sensors_available = pmod->GetSensorCount();
         // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-        
+
+        uint16_t unified_sensor_reporting_invalid_reading_timeout_seconds = pCONT_set->Settings.unified_interface_reporting_invalid_reading_timeout_seconds;
+        // ALOG_WRN(PSTR("reading_timeout_seconds %d"), unified_sensor_reporting_invalid_reading_timeout_seconds);
+                  
         if(sensors_available) 
         {
           // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
@@ -299,6 +302,24 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
           {
             sensors_reading_t val;
             pmod->GetSensorReading(&val, sensor_id);
+
+            if(unified_sensor_reporting_invalid_reading_timeout_seconds != 0) // Check active
+            {
+              uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - val.timestamp;
+              if(sensor_elapsed_time) // If positive
+              {
+                if(sensor_elapsed_time > unified_sensor_reporting_invalid_reading_timeout_seconds)
+                {
+                  #ifdef ENABLE_DEVFEATURE_UNIFIED_REPORTING_SKIPPING_INVALID_TIMEOUT_READINGS
+                  ALOG_WRN(PSTR("sensor time invalid %d > %d"), sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                  continue; // skip the result in this loop
+                  #else
+                  DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
+                  ALOG_WRN(PSTR("Age needs adding to module %s %d %d"), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                  #endif
+                }
+              }
+            }
             
             if(val.Valid())
             {
@@ -318,7 +339,6 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
               if(val.isFloatWaiting_WithSensorType(type_id_adjusted))
               {
-
                 
                 // val.sensor_id is used to since the order of devicename list may not match in accending order
                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));

@@ -1562,6 +1562,7 @@
   #define D_LOG_FILESYSTEM "UFS: "
   #define D_LOG_MODULE "MOD: "       // Module
   #define D_LOG_MDNS "DNS: "         // mDNS
+  #define D_LOG_TASKER "TSK: "
   #define D_LOG_MQTT "MQT: "         // MQTT
   #define D_LOG_PUBSUB "PSB: "         // PubSub
   #define D_LOG_OTHER "OTH: "        // Other
@@ -1961,6 +1962,8 @@
 #define D_SPACING "Spacing"
 #define D_REVERSE "Reverse"
 #define D_MIRROR "Mirror"
+
+#define D_HOLD "Hold"
 
 #define D_JSON_MEMORY_INSUFFICIENT "Memory Insufficient"
 

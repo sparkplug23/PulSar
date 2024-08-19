@@ -744,3 +744,39 @@ void JsonParser::allocate(void) {
     _tokens = new jsmntok_t[_size];
   }
 }
+
+
+// // Function to count total tokens and specific types
+// void JsonParser::countJsonElements(const char* json, int &objectCount, int &arrayCount, int &pairCount) {
+//   jsmn_parser parser;
+//   jsmntok_t tokens[128];  // Adjust size according to your needs
+//   jsmn_init(&parser);
+  
+//   int tokenCount = jsmn_parse(&parser, json, strlen(json), tokens, 128);
+//   if (tokenCount < 0) {
+//       Serial.printf("Failed to parse JSON: %d\n", tokenCount);
+//       return;
+//   }
+  
+//   for (int i = 0; i < tokenCount; i++) {
+//     switch (tokens[i].type) {
+//       case JSMN_OBJECT:
+//         objectCount++;
+//         pairCount += tokens[i].size;  // Assuming each key-value pair in the object is counted
+//         break;
+//       case JSMN_ARRAY:
+//         arrayCount++;
+//         break;
+//       case JSMN_STRING:
+//         // Strings are typically part of key-value pairs, so they can be counted differently if needed
+//         break;
+//       case JSMN_PRIMITIVE:
+//         // Primitives include numbers, booleans, and null
+//         break;
+//       default:
+//         break;
+//     }
+//   }
+// }
+
+

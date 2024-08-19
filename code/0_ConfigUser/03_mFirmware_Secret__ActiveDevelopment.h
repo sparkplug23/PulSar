@@ -274,8 +274,15 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
     #define MQTT_PORT     1883
     
-  #define SETTINGS_HOLDER 1239
-
+  #define SETTINGS_HOLDER 1240
+  #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
+  #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
+  #define USE_MODULE_CORE_FILESYSTEM
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+  #define ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
 
   /***********************************
    * SECTION: System Debug Options
@@ -698,6 +705,19 @@ May need to add two power connections too, so its not just the cat5e wire to let
    //   // Make all the water tank sensors be "remote sensors", then internally they will let me do the colour bar in the same way with IDs
 
   /***********************************
+   * SECTION: MQTT Template Test Loading
+  ************************************/  
+
+  #define USE_MQTT_TEMPLATE
+  DEFINE_PGM_CTR(MQTT_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
    * SECTION: GPIO Template
   ************************************/  
 
@@ -736,6 +756,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
+  
 
   /**
    * @brief Drivers and Sensors for HVAC zones

@@ -369,6 +369,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
       for(auto val : array) {
           AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
           nextionSendCmd(val.getStr());
+          data_buffer.isserviced++;
       }
   }
 

@@ -169,7 +169,7 @@ class mInterfaceLight :
 
     void Load_Module(bool erase);
     void Save_Module(void);
-    bool Restore_Module(void);
+    bool Default_Module(void);
 
     // Add all data here that needs to be saved to filesystem
     struct MODULE_RUNTIME{ 

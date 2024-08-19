@@ -196,69 +196,6 @@ void mEnergyINA219::EveryLoop(){
   
 }
 
-//     #ifdef USE_MODULE_NETWORK_WEBSERVER
-// void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
-
-//   char buffer[30];
-   
-//   BufferWriterI->Append_P(PSTR("{t}"));  
-//   BufferWriterI->Append_P(PSTR("<tr><td><b>INA219 Current Sensor</b></td></tr>"));//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr));
-
-//   //headers
-//   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//   for(int col=0;col<settings.fSensorCount+1;col++){ //sensors + title colomn
-//     if(col==0){ //first column blank
-//       BufferWriterI->Append_P(PSTR("<th></th>"));
-//     }else{
-//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,col-1,buffer,sizeof(buffer)));
-//     }
-//   }    
-//   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-//   //rows
-//   for(int row=0;row<TABLE_ROW_ITEMS_COUNT+1;row++){
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//     for(int col=0;col<settings.fSensorCount+1;col++){
-//       if(col==0){ //row name
-//         BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS_INA219));
-//       }else{
-//         BufferWriterI->Append_P(PSTR("<td>{dc}%s'>" D_DEFAULT_HTML_VALUE "</div></td>"),"ina219_tab");  
-//       }
-//     }
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//   }
-//   BufferWriterI->Append_P(PSTR("{t2}")); 
-
-// }
-
-
-// //append to internal buffer if any root messages table
-// void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
-  
-//   uint8_t count = 0;
-
-//   JBI->Array_Start("ina219_tab");// Class name
-//   for(int row=0;row<6;row++){
-//     for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++){
-//       JBI->Object_Start();
-//         JBI->Add("id",count++);
-//         if(sensor[sensor_id].power_mw>30){ JBI->Add("fc","#ff0000");
-//         }else{ JBI->Add("fc","#ffffff"); }
-//         switch(row){
-//           case 0: JBI->Add("ih",sensor[sensor_id].bus_voltage_mv); break;
-//           case 1: JBI->Add("ih",sensor[sensor_id].shunt_voltage_mv); break;
-//           case 2: JBI->Add("ih",sensor[sensor_id].load_voltage_mv); break;
-//           case 3: JBI->Add("ih",sensor[sensor_id].current_ma); break;
-//           case 4: JBI->Add("ih",sensor[sensor_id].power_mw); break;
-//         } //switch      
-//       JBI->Object_End();
-//     }
-//   }//end for
-//   JBI->Array_End();
-
-// }
-
-//     #endif // USE_MODULE_NETWORK_WEBSERVER
-
 // New function that breaks things up into switch statements
 // Extra argument -- "require_completion" ie loop until status SPLIT_TASK_DONE_ID
 void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
@@ -294,68 +231,6 @@ void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comp
   sensor[sensor_id].ischanged = true;
   sensor[sensor_id].sReadSensor=SPLIT_TASK_DONE_ID;
 
-  // unsigned long timeout = millis();
-  // do{
-
-  //   switch(sensor[sensor_id].sReadSensor){
-  //     case SPLIT_TASK_SUCCESS_ID: // allow it to run into task1
-  //     case SPLIT_TASK_TIMEOUT_ID:
-  //     case SPLIT_TASK_SEC1_ID:
-
-  //       sensor[sensor_id].bme->takeForcedMeasurement(); // has no effect in normal mode
-
-  //       sensor[sensor_id].isvalid = true;
-
-  //       if(
-  //         (sensor[sensor_id].temperature != sensor[sensor_id].bme->readTemperature())||
-  //         (sensor[sensor_id].humidity != sensor[sensor_id].bme->readHumidity())         
-  //         ){
-  //         sensor[sensor_id].ischanged = true; // check if updated
-  //       }else{
-  //         sensor[sensor_id].ischanged = false;
-  //       }
-        
-  //       if(
-  //         (fabsf(sensor[sensor_id].temperature-sensor[sensor_id].bme->readTemperature())>0.1)||
-  //         (sensor[sensor_id].temperature != sensor[sensor_id].bme->readTemperature())&&(abs(millis()-sensor[sensor_id].ischangedtLast)>60000)  
-  //       ){
-  //         sensor[sensor_id].ischanged_over_threshold = true;
-  //         mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  //         sensor[sensor_id].ischangedtLast = millis();
-  //       }else{
-  //         sensor[sensor_id].ischanged_over_threshold = false;
-  //       }
-
-  //       sensor[sensor_id].temperature = sensor[sensor_id].bme->readTemperature();
-  //       sensor[sensor_id].humidity =    sensor[sensor_id].bme->readHumidity();
-  //       sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
-  //       sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(sealevel_pressure);
-
-  //       AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
-  //       ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
-  //       ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
-  //       ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
-
-  //       sensor[sensor_id].sReadSensor = SPLIT_TASK_DONE_ID;
-
-  //     break;
-  //     case SPLIT_TASK_DONE_ID: //exiting
-  //       fWithinLimit = 1;
-  //     break;
-  //     default:
-  //     break;
-  //   } // end switch
-
-  //   if(require_completion){ //delay required if we are going to do multiple calls
-  //   //  delay(100);
-  //   }
-
-  //   if(abs(millis()-timeout)>=2000){
-  //     sensor[sensor_id].sReadSensor = SPLIT_TASK_TIMEOUT_ID;
-  //     break;
-  //   }
-
-  // }while(require_completion); // loops once even if false
 
 }//end function
 

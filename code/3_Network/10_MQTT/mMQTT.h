@@ -121,6 +121,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_TIMED_CTR) "timed";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR) "debug";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_CTR) "motion";
 
+DEFINE_PGM_CTR(PM_MQTT_LWT_PAYLOAD_FORMATED)  "{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}";
+DEFINE_PGM_CTR(PM_MQTT_LWT_TOPIC_FORMATED)    "%s/status/LWT";
+
 
 typedef union {
   uint8_t data;
@@ -152,6 +155,8 @@ class PubSubClient;
 #include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/06_Support/mSupport.h"
 class mSupport;
+
+#include "2_CoreSystem/01_Settings/mSettings.h"
 
 #ifdef ESP32
   #include <WiFi.h> //esp32
@@ -276,7 +281,8 @@ class MQTTConnection
     
     
     void MqttConnected(void);
-    boolean psubscribe(const char* topic);
+    boolean subscribe_device(const char* topic);
+    boolean subscribe(const char* topic);
     void MqttReconnect();  
 
     void MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len);  
@@ -290,9 +296,8 @@ class MQTTConnection
 
     
 
-    boolean ppublish(const char* topic, const char* payload, boolean retained = false);
-    
-    boolean ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained = false);
+    boolean publish_device(const char* topic, const char* payload, boolean retained = false);
+    boolean publish_device_P(const char* topic, const char* payload, boolean retained = false);
     
 };
 
@@ -303,8 +308,13 @@ class mMQTT :
 {
 
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mMQTT(){};
     void Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+
     static const char* PM_MODULE_NETWORK_MQTT_CTR;
     static const char* PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_MQTT_CTR; }
@@ -313,9 +323,73 @@ class mMQTT :
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mMQTT);     };
     #endif
-    
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      // uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    #if defined(ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT) && defined(USE_MODULE_CORE_FILESYSTEM)
+    void Load_Module(bool erase = false);
+    void Save_Module(void);
+    void Default_Module(void);
+    #endif // USE_MODULE_CORE_FILESYSTEM
+
+
+    struct MODULE_STORAGE{ // these will be saved and recovered on boot
+
+      struct CONNECTION{
+        /**
+         * @brief 
+         * 0: Disabled
+         * 1: Enabled and connected
+         * 2: Enabled, not connected
+         *  
+         */
+        uint8_t   status = 0;
+        char      host_address[33];
+        uint16_t  port;
+        char      client[33];
+        char      user[33];
+        char      pwd[33];
+        char      topic[33];
+        uint16_t  retry;
+        char      client_name[50]; 
+        char      prefixtopic[50]; // "<devicename>/"
+        struct interface_priority_flags_s{
+          uint8_t energy = 0;
+          uint8_t light = 0;
+        }interface_reporting_priority;
+      }connection[2];
+
+
+    }dt;
+
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+
     void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
 
     std::vector<MQTTConnection*> brokers;
 
@@ -429,12 +503,12 @@ Serial.flush();
     }
     
 
-    boolean psubscribe(const char* topic)
+    boolean subscribe_device(const char* topic)
     {
       uint8_t count = 0;
       for(auto& con:brokers)
       {
-        count += con->psubscribe(topic);
+        count += con->subscribe_device(topic);
       }
       return (count == brokers.size()) ? true : false;
     }
@@ -445,8 +519,6 @@ Serial.flush();
     const char* GetState_PCtr(int8_t state);
     void Load_New_Subscriptions_From_Function_Template();
     
-    void setprefixtopic(const char* _prefixtopic);
-
     void CallMQTTSenders();
 
 

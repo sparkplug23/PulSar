@@ -190,12 +190,15 @@ typedef struct
 
   std::vector<float> data_f;
   std::vector<String> data_s;
+  
+
 
   String error = String("error");
 
   // std::vector<uint8_t> 
 
   uint8_t sensor_id;
+  uint32_t timestamp;
   // Do I need these? perhaps just so I can pass that information back, or, assume detailed info like this will not be passed but accessed only directly within module
   float    max_value;                       /**< maximum value of this sensor's value in SI units */
   float    min_value;                       /**< minimum value of this sensor's value in SI units */
@@ -289,7 +292,6 @@ Temporary fix, not most efficient code but makes other calls easier. Clean up
     }
 
     return false;
-
 
   }
 

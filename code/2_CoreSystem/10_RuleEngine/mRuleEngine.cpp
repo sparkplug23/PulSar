@@ -365,7 +365,7 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
         // char message[50];
         // memset(message,0,sizeof(message));
         // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
-        // pCONT_mqtt->ppublish("status/debug/rules",message,false); //reconnect message
+        // pCONT_mqtt->publish_device("status/debug/rules",message,false); //reconnect message
         // ^^ Add this later as a topic so I can know when rule triggers
 
         /**

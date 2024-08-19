@@ -32,11 +32,6 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  if(jtok = obj["MQTT"].getObject()["RetrySecs"])
-  {
-    Settings.mqtt_retry = jtok.getInt();
-  }
-
 
 
   /**

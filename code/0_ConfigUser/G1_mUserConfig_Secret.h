@@ -32,12 +32,6 @@
 #undef  STA_PASS2
 #define STA_PASS2            ""                // [Password2] Optional alternate AP Wifi password
 
-// Will remain unpowered, and will only be used if failsafe SSID is needed when primary does not work
-#undef  STA_SSID3
-#define STA_SSID3            ""                // [Ssid1] Wifi SSID
-#undef  STA_PASS3
-#define STA_PASS3            ""                // [Password1] Wifi password
-
 #else // garage or other
 
 // Dedicated SSID for home controllers
@@ -51,12 +45,6 @@
 #define STA_SSID2            "HACS2400"                // [Ssid2] Optional alternate AP Wifi SSID
 #undef  STA_PASS2
 #define STA_PASS2            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
-
-// Will remain unpowered, and will only be used if failsafe SSID is needed when primary does not work
-#undef  STA_SSID3
-#define STA_SSID3            "RecoverySSID"                // [Ssid1] Wifi SSID
-#undef  STA_PASS3
-#define STA_PASS3            "af4d8bc9ab"                // [Password1] Wifi password
 
 #endif
 

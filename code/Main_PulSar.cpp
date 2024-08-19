@@ -317,6 +317,7 @@ void setup(void)
   // Check Load was successful
   pCONT_set->SettingsLoad_CheckSuccessful();
 
+  sprintf(pCONT_set->Settings.debug, "debug12\0");
 
 /********************************************************************************************
  ** LOGGING: Set boot log levels again to override settings load *********************************************************************

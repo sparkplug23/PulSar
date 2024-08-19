@@ -353,7 +353,7 @@ class mAnimatorLight :
 
     void Load_Module(bool erase);
     void Save_Module(void);
-    bool Restore_Module(void);
+    bool Default_Module(void);
     void FileSystem_JsonAppend_Save_Module();
 
     /************************************************************************************************
@@ -439,7 +439,7 @@ class mAnimatorLight :
      * SECTION: Commands
      ************************************************************************************************/
 
-    uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 0);    
+    void subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 0);    
     
     #ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION_SHORTCUT
     void parsesub_json_object_notification_shortcut(JsonParserObject obj);

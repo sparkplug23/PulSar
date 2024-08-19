@@ -133,8 +133,8 @@ class mBME :
        * if change exceeds this, it is a significant change
        * */
       float temperature_threshold_value;
-      uint8_t isvalid=false;
-      uint8_t ischanged=false;
+      uint8_t isvalid  =false;
+      uint8_t ischanged = false;
       uint8_t ischanged_over_threshold=false;
       uint32_t ischangedtLast = millis();
       float heatIndex;
@@ -152,6 +152,7 @@ class mBME :
       uint8_t bme680_state;
       float bmp_gas_resistance;
     #endif  // USE_BME68X
+      uint32_t utc_measured_timestamp = 0;
     } bmp_sensors_t;
 
     uint8_t bmp_count = 0;
@@ -288,6 +289,9 @@ class mBME :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       if(index > settings.fSensorCount-1) {value->sensor_type.push_back(0); return ;}  
+      
+      value->timestamp = bmp_sensors[index].utc_measured_timestamp;
+
       switch (bmp_sensors[index].bmp_type) 
       {
         case BME280_CHIPID:

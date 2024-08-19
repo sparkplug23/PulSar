@@ -54,8 +54,8 @@
 
 #define FILE_EXTENSION_JSON ".json"
 
-#define FILE_EXTENSION_BIN ".bin" //release version
-// #define FILE_EXTENSION_BIN ".txt"   //debug version so the editor can open the file
+// #define FILE_EXTENSION_BIN ".bin" //release version
+#define FILE_EXTENSION_BIN ".txt"   //debug version so the editor can open the file
 
 
 /*

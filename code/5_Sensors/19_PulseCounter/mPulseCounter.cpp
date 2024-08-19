@@ -204,7 +204,7 @@ void mPulseCounter::EveryLoop(){
     if(Change_Detected(sensor_id)!=sensor[sensor_id].instant.state){
   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Change_Detected_Ctr(sensor_id)",sensor_id);
       //if(pCONT_time->RtcTime.seconds_nonreset<20){ break; }
-      // pCONT->mqt->ppublish("status/motion/event",Change_Detected_Ctr(sensor_id),false);
+      // pCONT->mqt->publish_device("status/motion/event",Change_Detected_Ctr(sensor_id),false);
 
       sensor[sensor_id].instant.state = Change_Detected(sensor_id);
 

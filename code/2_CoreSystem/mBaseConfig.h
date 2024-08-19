@@ -157,13 +157,12 @@ With latest version, all longer term shared debug features should be added here 
   #define WIFI_GATEWAY                  "192.168.1.1"     // [IpAddress2] If not using DHCP set Gateway IP address
   #define WIFI_SUBNETMASK               "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
   #define WIFI_DNS                      "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
+  #define WIFI_DNS2              "0.0.0.0"         // [IpAddress5] If not using DHCP set DNS2 IP address (might be equal to WIFI_GATEWAY)
 
   #define STA_SSID1                     ""                // [Ssid1] Wifi SSID
   #define STA_PASS1                     ""                // [Password1] Wifi password
   #define STA_SSID2                     ""                // [Ssid2] Optional alternate AP Wifi SSID
   #define STA_PASS2                     ""                // [Password2] Optional alternate AP Wifi password
-  #define STA_SSID3                     ""                // [Ssid2] Optional alternate AP Wifi SSID
-  #define STA_PASS3                     ""                // [Password2] Optional alternate AP Wifi password
 
   #define WIFI_CONFIG_TOOL              4//WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
                                                           //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
@@ -307,9 +306,18 @@ With latest version, all longer term shared debug features should be added here 
 #define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
 #endif // #ifdef USE_NETWORK_MDNS
 
+#define MQTT_TOPIC             "PulSar_%06X"   // [Topic] unique MQTT device topic including (part of) device MAC address
+#define MQTT_BUTTON_TOPIC      "0"               // [ButtonTopic] MQTT button topic, "0" = same as MQTT_TOPIC, set to 'PROJECT "_BTN_%06X"' for unique topic including device MAC address
+#define MQTT_SWITCH_TOPIC      "0"               // [SwitchTopic] MQTT button topic, "0" = same as MQTT_TOPIC, set to 'PROJECT "_SW_%06X"' for unique topic including device MAC address
+#define MQTT_GRPTOPIC          "pulsars"        // [GroupTopic] MQTT Group topic
+
 // #define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
-#define MQTT_USER                     "DVES_USER"       // [MqttUser] MQTT user
-#define MQTT_PASS                     "DVES_PASS"       // [MqttPassword] MQTT password
+#define MQTT_USER                     "MQTT_USER"       // [MqttUser] MQTT user
+#define MQTT_PASS                     "MQTT_PASS"       // [MqttPassword] MQTT password
+
+#define MQTT_CLIENT_ID         "DVES_%06X"       // [MqttClient] Also fall back topic using last 6 characters of MAC address or use "DVES_%12X" for complete MAC address
+
+
 
 #ifndef   MQTT_MAX_PACKET_SIZE
 #define   MQTT_MAX_PACKET_SIZE          2000
@@ -366,6 +374,9 @@ With latest version, all longer term shared debug features should be added here 
 #ifndef D_COL_TEXT_MODULE_TITLE_CTR
   #define D_COL_TEXT_MODULE_TITLE_CTR "#fff"
 #endif
+//#define USE_CORS                                 // [Cors] Enable CORS - Be aware that this feature is unsecure ATM (https://github.com/arendst/Tasmota/issues/6767)
+  #define CORS_DOMAIN            ""                // [Cors] CORS Domain for preflight requests
+
 
 #define PWM_MAX_SLEEP          10                // Sleep will be lowered to this value when light is on, to avoid flickering
 
@@ -427,6 +438,8 @@ With latest version, all longer term shared debug features should be added here 
 #define PRESSURE_RESOLUTION    1                 // [PressRes] Maximum number of decimals (0 - 3) showing sensor Pressure
 #define ENERGY_RESOLUTION      3                 // [EnergyRes] Maximum number of decimals (0 - 5) showing energy usage in kWh
 #define CALC_RESOLUTION        3                 // [CalcRes] Maximum number of decimals (0 - 7) used in commands ADD, SUB, MULT and SCALE
+#define UNIFIED_INTERFACE_REPORTING_INVALID_SECONDS 180 // If any sensor/driver/energy reports greater than this since the last reading in seconds, it is excluded from the unified reporting
+#define UNIFIED_INTERFACE_REPORTING_REPLACES_SUBMODULE_REPORTING false
 
 
 #define FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES   false
@@ -501,6 +514,26 @@ With latest version, all longer term shared debug features should be added here 
 #define WIFI_SOFT_AP_CHANNEL   1                 // Soft Access Point Channel number between 1 and 13 as used by Wifi Manager web GUI
 //#define USE_WPS                                  // Add support for WPS as initial wifi configuration tool (+33k code, 1k mem (5k mem with core v2.4.2+))
 //#define USE_SMARTCONFIG                          // Add support for Wifi SmartConfig as initial wifi configuration tool (+23k code, +0.6k mem)
+
+
+#ifndef WIFI_RGX_STATE
+#define WIFI_RGX_STATE              0
+#endif
+#ifndef WIFI_RGX_NAPT
+#define WIFI_RGX_NAPT               0
+#endif
+#ifndef WIFI_RGX_SSID
+#define WIFI_RGX_SSID               ""
+#endif
+#ifndef WIFI_RGX_PASSWORD
+#define WIFI_RGX_PASSWORD           ""
+#endif
+#ifndef WIFI_RGX_IP_ADDRESS
+#define WIFI_RGX_IP_ADDRESS         "192.168.99.1"
+#endif
+#ifndef WIFI_RGX_SUBNETMASK
+#define WIFI_RGX_SUBNETMASK         "255.255.255.0"
+#endif
 
 // -- OTA -----------------------------------------
 #define USE_ARDUINO_OTA                          // Add optional support for Arduino OTA (+13k code)
