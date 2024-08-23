@@ -29,8 +29,8 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       #endif // USE_NETWORK_MDNS
     
     break;
-    case FUNC_EVERY_SECOND:
-
+    case FUNC_EVERY_SECOND:{
+      
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "network_wifi=%d"), pCONT_set->Settings.flag_network.network_wifi);
 
       if (pCONT_set->Settings.flag_network.network_wifi) 
@@ -38,14 +38,13 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
         WifiCheck(pCONT_set->runtime.wifi_state_flag);
         pCONT_set->runtime.wifi_state_flag = WIFI_RESTART;
       }
-            
+
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active, pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active) );
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"), pCONT_set->Settings.sta_active, pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active) );
-      #endif// ENABLE_LOG_LEVEL_INFO
+      #endif
 
-      //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
-
+    }
     break;
     case FUNC_EVERY_MINUTE:
     
@@ -67,26 +66,36 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_FIVE_MINUTE:
       // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
     break;
-    case FUNC_WIFI_CONNECTED:
+    case FUNC_WIFI_CONNECTED:{
 
-      DEBUG_LINE_HERE;
-    
       #ifdef USE_NETWORK_MDNS
         StartMdns();
       #endif  // USE_NETWORK_MDNS
-      DEBUG_LINE_HERE;
 
       #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-      ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
-      #ifdef USE_MODULE_NETWORK_MQTT
-      mqtt_client = new WiFiClient();
-      DEBUG_LINE_HERE;
-      pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
-      DEBUG_LINE_HERE;
-      #endif // USE_MODULE_NETWORK_MQTT
+
+        ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
+
+        #ifdef USE_MODULE_NETWORK_MQTT
+
+          mqtt_client = new WiFiClient();
+
+          pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          
+          pCONT_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+
+          pCONT_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+
+          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+          pCONT_mqtt->brokers.back()->SetClientName(client_name);
+
+          pCONT_mqtt->brokers.back()->SetTopicPrefix(pCONT_set->Settings.system_name.device);
+
+        #endif // USE_MODULE_NETWORK_MQTT
       #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
       
       DEBUG_LINE_HERE;
+    }
     break;
   }
 
@@ -267,8 +276,8 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
     #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECTING_TO_AP "%d \"%s\" \"%s\" " D_IN_MODE " 11%c " D_AS " %s"),
     pCONT_set->Settings.sta_active +1, 
-    pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], 
-    pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active], 
+    pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active), 
+    pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active), 
     kWifiPhyMode[WiFi.getPhyMode() & 0x3], 
     pCONT_set->runtime.my_hostname);
     #endif// ENABLE_LOG_LEVEL_INFO
@@ -594,7 +603,7 @@ void mWiFi::WifiSetState(uint8_t state)
     } else {
       // pCONT_set->rules_flag.wifi_disconnected = 1;
       connection.last_event = pCONT_time->UpTime();
-    }
+    }DEBUG_LINE_HERE
 
   }
   // if(pCONT_time==NULL){
@@ -606,8 +615,8 @@ void mWiFi::WifiSetState(uint8_t state)
     pCONT_set->runtime.global_state.network_down = 0;
   }
 
-    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),"WifiSetState end");
-  
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),"WifiSetState end");
+    
 }
 
 
@@ -723,7 +732,7 @@ void mWiFi::WifiCheckIp(void)
    // AddLog(LOG_LEVEL_INFO, PSTR("%s" " NOT connected"),__FUNCTION__);//WiFi.status() %s, IP \"%s\" %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str(),WiFi.localIP().toString()=="(IP unset)"?"matched":"nomatch");
     #endif// ENABLE_LOG_LEVEL_INFO
 
-    WifiSetState(0);
+    WifiSetState(0);DEBUG_LINE_HERE
     uint8_t wifi_config_tool = pCONT_set->Settings.sta_config;
     connection.status = WiFi.status();
     switch (connection.status) {
@@ -744,24 +753,24 @@ void mWiFi::WifiCheckIp(void)
 
         if (WIFI_WAIT == pCONT_set->Settings.sta_config) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "%s"),"WIFI_WAIT == pCONT_set->Settings.sta_config");
+          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "1%s"),"WIFI_WAIT == pCONT_set->Settings.sta_config");
     #endif// ENABLE_LOG_LEVEL_INFO
           connection.retry = connection.retry_init;
         } else {
           if (connection.retry > (connection.retry_init / 2)) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry>");
+            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "2%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry>");
     #endif// ENABLE_LOG_LEVEL_INFO
             connection.retry = connection.retry_init / 2;
           }
           else if (connection.retry) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry else");
+            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "3%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry else");
     #endif// ENABLE_LOG_LEVEL_INFO
             connection.retry = 0;
           }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "%s %d %s %d"),"retry else",connection.retry,"connection.retry_init",connection.retry_init);
+            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "4%s %d %s %d"),"retry else",connection.retry,"connection.retry_init",connection.retry_init);
     #endif // ENABLE_LOG_LEVEL_INFO
           }
         }
@@ -1018,13 +1027,13 @@ void mWiFi::WifiCheck(uint8_t param)
 
 
             WifiSetState(1);
-
+            
             if (pCONT_set->Settings.flag_network.use_wifi_rescan) {  // SetOption57 - Scan wifi network every 44 minutes for configured AP's
               if (!(pCONT_time->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
                 connection.scan_state = 2;
               }
             }
-
+            
             
             // #ifdef USE_MODULE_NETWORK_WEBSERVER
             //   if (pCONT_set->Settings.webserver) {
@@ -1038,7 +1047,7 @@ void mWiFi::WifiCheck(uint8_t param)
           } 
           else 
           {
-            
+            DEBUG_LINE_HERE
         Serial.println( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
             WifiSetState(0);
             Mdns.begun = 0;

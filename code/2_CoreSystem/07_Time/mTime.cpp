@@ -179,12 +179,9 @@ String mTime::GetDuration(uint32_t time)
 {
   char dt[16];
   datetime_t ut;
-  DEBUG_LINE_HERE
   BreakTime(time, ut);
   // "P128DT14H35M44S" - ISO8601:2004 - https://en.wikipedia.org/wiki/ISO_8601 Durations
-  DEBUG_LINE_HERE
   snprintf_P(dt, sizeof(dt), PSTR("%dT%02d:%02d:%02d"), ut.days, ut.hour, ut.minute, ut.second);
-  DEBUG_LINE_HERE
   return String(dt);  // 128T14:35:44
 }
 

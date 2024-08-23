@@ -18,17 +18,9 @@
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mRuleEngine :
-  // public mTaskerInterface, public mEvent // WORKS
   public mTaskerInterface
 {
-    
-  private:
-    /* Prevent others from being created */
-    // RuleEngine(RuleEngine const& other) = delete;
-    // RuleEngine(RuleEngine&& other) = delete;
-    /* Private constructor to prevent instancing. */
-    // RuleEngine(){};
-    
+        
   public:
     #define D_MAX_RULES 5
     
@@ -58,7 +50,6 @@ class mRuleEngine :
       char data[D_JSON_COMMAND_BUFFER_LENGTH] = {0}; //use | delims
       uint8_t bytes_used = 0;
       int8_t delims_used = 0;
-
     }jsonbuffer;
 
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names

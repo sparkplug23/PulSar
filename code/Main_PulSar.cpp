@@ -317,7 +317,7 @@ void setup(void)
   // Check Load was successful
   pCONT_set->SettingsLoad_CheckSuccessful();
 
-  sprintf(pCONT_set->Settings.debug, "debug12\0");
+  // sprintf(pCONT_set->Settings.debug, "debug12\0");
 
 /********************************************************************************************
  ** LOGGING: Set boot log levels again to override settings load *********************************************************************
@@ -455,8 +455,11 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
+  
+  DEBUG_LINE_HERE
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
+  DEBUG_LINE_HERE
 
 
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
@@ -526,7 +529,7 @@ void setup(void)
 
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
-  Serial.println("END OF SETUP REACHED"); Serial.flush();
+  // Serial.println("END OF SETUP REACHED"); Serial.flush();
 
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();

@@ -66,7 +66,6 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
      * 
      */
 
-  DEBUG_LINE_HERE
 
   #ifdef DEBUG_FOR_FAULT
     pCONT_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
@@ -100,14 +99,11 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
 
-  DEBUG_LINE_HERE 
 
   va_list arg;
   va_start(arg, formatP);
   vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
   va_end(arg);
-
-  DEBUG_LINE_HERE
 
   //AddLogAddLog(loglevel);
 
@@ -145,7 +141,6 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       pCONT_time->GetUptime().c_str());
   // }
 
-  DEBUG_LINE_HERE
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
   char level_buffer[10];
 

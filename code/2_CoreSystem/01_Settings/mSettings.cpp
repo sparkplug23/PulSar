@@ -406,6 +406,8 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
     return false;  // Setting not supported - internal error
   }
 
+  DEBUG_LINE_HERE
+
   // Make a copy first in case we use source from Settings->text
   uint32_t replace_len = strlen_P(replace_me);
   char replace[replace_len +1];
@@ -427,43 +429,50 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   }
   uint32_t char_len = position - Settings.text_pool;
 
+  DEBUG_LINE_HERE
   uint32_t current_len = end_pos - start_pos;
   int diff = replace_len - current_len;
 
  AddLog(LOG_LEVEL_INFO, PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
    start_pos, end_pos, char_len, current_len, replace_len, diff);
 
+  DEBUG_LINE_HERE
   int too_long = (char_len + diff) - settings_text_size;
   if (too_long > 0) {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
     return false;  // Replace text too long
   }
 
+  DEBUG_LINE_HERE
   if (settings_text_mutex && !SettingsUpdateFinished()) {
     settings_text_busy_count++;
   } else {
     settings_text_mutex = true;
 
+  DEBUG_LINE_HERE
     if (diff != 0) {
       // Shift Settings->text up or down
       memmove_P(Settings.text_pool + start_pos + replace_len, Settings.text_pool + end_pos, char_len - end_pos);
     }
+  DEBUG_LINE_HERE
     // Replace text
     memmove_P(Settings.text_pool + start_pos, replace, replace_len);
+  DEBUG_LINE_HERE
     // Fill for future use
     memset(Settings.text_pool + char_len + diff, 0x00, settings_text_size - char_len - diff);
+  DEBUG_LINE_HERE
 
     settings_text_mutex = false;
   }
 
 #ifdef DEBUG_FUNC_SETTINGSUPDATETEXT
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d, Id %02d = \"%s\""), GetSettingsTextLen(), settings_text_size, settings_text_busy_count, index_save, replace);
-Serial.println("test_pool");
-for(int i=0;i<100;i++)
-{
-  Serial.print(Settings.text_pool[i]);
-}
-Serial.println();
+  Serial.println("test_pool");
+  for(int i=0;i<100;i++)
+  {
+    Serial.print(Settings.text_pool[i]);
+  }
+  Serial.println();
 #else
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d"), GetSettingsTextLen(), settings_text_size, settings_text_busy_count);
 #endif

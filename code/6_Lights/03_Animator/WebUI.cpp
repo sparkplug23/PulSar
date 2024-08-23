@@ -2630,18 +2630,22 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   {
     // uint32_t c = BUS_getPixelColor(i);
     uint32_t c = getPixelColor(i);
-    if(i==0)
-      ALOG_INF(PSTR("c %d,%d,%d,%d"), R(c), G(c), B(c), W(c));
-      #ifdef ENABLE_FEATURE_LIGHTS__ADD_WHITE_TO_LIVEVIEW
-      uint8_t r = qadd8(W(c), R(c)); //add white channel to RGB channels as a simple RGBW -> RGB map
-      uint8_t g = qadd8(W(c), G(c));
-      uint8_t b = qadd8(W(c), B(c));
-      #else
-      uint8_t r = R(c); //add white channel to RGB channels as a simple RGBW -> RGB map
-      uint8_t g = G(c);
-      uint8_t b = B(c);
-      #endif
+
+    // if(i==0)
+    //   ALOG_INF(PSTR("c %d,%d,%d,%d"), R(c), G(c), B(c), W(c));
+
+    #ifdef ENABLE_FEATURE_LIGHTS__ADD_WHITE_TO_LIVEVIEW
+    uint8_t r = qadd8(W(c), R(c)); //add white channel to RGB channels as a simple RGBW -> RGB map
+    uint8_t g = qadd8(W(c), G(c));
+    uint8_t b = qadd8(W(c), B(c));
+    #else
+    uint8_t r = R(c); //add white channel to RGB channels as a simple RGBW -> RGB map
+    uint8_t g = G(c);
+    uint8_t b = B(c);
+    #endif
+
     olen += sprintf(obuf + olen, "\"%06X\",", RGBW32(r,g,b,0));
+    
   }
   olen -= 1;
   oappend((const char*)F("],\"n\":"));

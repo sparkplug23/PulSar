@@ -144,6 +144,8 @@ void mAnimatorLight::EffectAnim__Static_Palette()
 
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
+  ALOG_ERR( PSTR("GetPixelColor(0) = %d,%d,%d,%d,%d"), SEGMENT.GetPixelColor(0).R,SEGMENT.GetPixelColor(0).G,SEGMENT.GetPixelColor(0).B,SEGMENT.GetPixelColor(0).CW,SEGMENT.GetPixelColor(0).WW);
+
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
@@ -19189,6 +19191,18 @@ void mAnimatorLight::LoadEffects()
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__2D__FFT_AKEMI__ID,   &mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_Akemi, PM_EFFECT_CONFIG__AUDIOREACTIVE__2D__FFT_AKEMI__INDEXING);  
   #endif
 
+
+/**
+ * @brief Effect X: New effect of "Static Palette Mix"
+ * 
+ * The aim is to make the "Colour and Warm White Stripe" but in a way I can mix them. 
+ * 
+ * Palette1 ABCD
+ * Palette2 abcde
+ * 
+ * So mix would be AaBbCcDdAe (notice shorter palettes that mix already)
+ * 
+ */
 
 
 

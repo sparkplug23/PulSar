@@ -18,15 +18,15 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "mEnergyOnOLED.h"
+#include "mDeskSensorsOnOLED.h"
 
-#ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
 
-const char* mEnergyOLED::PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR;
-const char* mEnergyOLED::PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR = D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR;
+const char* mDeskSensorsOnOLED::PM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR;
+const char* mDeskSensorsOnOLED::PM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_FRIENDLY_CTR = D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_FRIENDLY_CTR;
 
 
-int8_t mEnergyOLED::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mDeskSensorsOnOLED::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     /************
@@ -79,13 +79,13 @@ int8_t mEnergyOLED::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
-void mEnergyOLED::Pre_Init(void)
+void mDeskSensorsOnOLED::Pre_Init(void)
 {
 
 }
 
 
-void mEnergyOLED::Init(void)
+void mDeskSensorsOnOLED::Init(void)
 {
 
   module_state.mode = ModuleStatus::Running;
@@ -93,7 +93,7 @@ void mEnergyOLED::Init(void)
 }
 
 
-void mEnergyOLED::EverySecond()
+void mDeskSensorsOnOLED::EverySecond()
 {
   
   SubTask_UpdateOLED();
@@ -113,12 +113,34 @@ void mEnergyOLED::EverySecond()
  * 
  * 
  * */
-void mEnergyOLED::SubTask_UpdateOLED()
+void mDeskSensorsOnOLED::SubTask_UpdateOLED()
+{
+  
+  ALOG_INF(PSTR("mDeskSensorsOnOLED::SubTask_UpdateOLED"));
+
+  switch(page_showing_index)
+  {
+    default:
+    case 0:
+      SubTask_UpdateOLED_Page1();
+    break;
+    case 1:
+      SubTask_UpdateOLED_Page2();
+    break;
+  }
+
+  if(page_showing_index++ > pages_active)
+  {
+    page_showing_index = 0;
+  }
+
+}
+
+
+
+void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
 {
 
-ALOG_INF(PSTR("SubTask_UpdateOLED"));
-
-    DEBUG_LINE_HERE_MILLIS
 
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
   char buffer[100] = {0};
@@ -156,13 +178,13 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
       if(strcmp(buffer_n, D_DEVICE_HEATER_0_NAME)==0)
       {
         memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "Hai");
+        sprintf(buffer_n, "%s", "TEST");
         line = 0;
       }else 
       if(strcmp(buffer_n, D_DEVICE_HEATER_1_NAME)==0)
       {
         memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "Flr");
+        sprintf(buffer_n, "%s", "1Flr");
         line = 1;
       }
       else 
@@ -199,7 +221,90 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
 
   }
 
-  DEBUG_LINE_HERE_MILLIS
+}
+
+void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
+{
+
+
+  pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+  char buffer[100] = {0};
+  char buffer_f[100] = {0};
+  char buffer_n[100] = {0};
+  
+  snprintf(buffer, sizeof(buffer), "%s", pCONT_time->GetTime().c_str() );
+
+  float sensor_data = -1;
+
+  /**
+   * @brief Add each sensor on new line
+   */
+   
+  uint8_t sensors_available = 4;//pCONT_db18->GetSensorCount();
+
+  int8_t line = -1;
+
+  for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+  {
+    line = -1;
+    sensors_reading_t val;
+    #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+    pCONT_pzem->GetSensorReading(&val, sensor_id);
+    if(val.Valid())
+    {
+
+      sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
+      DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+
+      /**
+       * @brief Check for name and replace with OLED friendly short name
+       * 
+       */
+      if(strcmp(buffer_n, D_DEVICE_HEATER_0_NAME)==0)
+      {
+        memset(buffer_n, 0, sizeof(buffer_n));
+        sprintf(buffer_n, "%s", "p22");
+        line = 0;
+      }else 
+      if(strcmp(buffer_n, D_DEVICE_HEATER_1_NAME)==0)
+      {
+        memset(buffer_n, 0, sizeof(buffer_n));
+        sprintf(buffer_n, "%s", "2Flr");
+        line = 1;
+      }
+      else 
+      if(strcmp(buffer_n, D_DEVICE_HEATER_2_NAME)==0)
+      {
+        memset(buffer_n, 0, sizeof(buffer_n));
+        sprintf(buffer_n, "%s", "Fan");
+        line = 2;
+      }else 
+      if(strcmp(buffer_n, D_DEVICE_HEATER_3_NAME)==0)
+      {
+        memset(buffer_n, 0, sizeof(buffer_n));
+        sprintf(buffer_n, "%s", "Oil");
+        line = 3;
+      }
+
+      if(line >= 0)
+      {
+        snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
+        pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+      }
+
+    }
+    #endif
+
+  }
+
+  if(line =- 1) // no valid readings
+  {
+    memset(buffer_n, 0, sizeof(buffer_n));
+    sprintf(buffer_n, "%s", "PZEM d/c");
+    line = 0;
+    pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+
+  }
 
 }
 
@@ -209,7 +314,7 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
 *******************************************************************************************************************/
 
 
-void mEnergyOLED::parse_JSONCommand(JsonParserObject obj)
+void mDeskSensorsOnOLED::parse_JSONCommand(JsonParserObject obj)
 {
 
   JsonParserToken jtok = 0; 
@@ -225,14 +330,14 @@ void mEnergyOLED::parse_JSONCommand(JsonParserObject obj)
 
 
 
-uint8_t mEnergyOLED::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+uint8_t mDeskSensorsOnOLED::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
   return JBI->End();
 
 }
 
-uint8_t mEnergyOLED::ConstructJSON_State(uint8_t json_level, bool json_appending){
+uint8_t mDeskSensorsOnOLED::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 
@@ -250,10 +355,10 @@ uint8_t mEnergyOLED::ConstructJSON_State(uint8_t json_level, bool json_appending
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mEnergyOLED::MQTTHandler_Init()
+void mDeskSensorsOnOLED::MQTTHandler_Init()
 {
 
-  struct handler<mEnergyOLED>* ptr;
+  struct handler<mDeskSensorsOnOLED>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -263,7 +368,7 @@ void mEnergyOLED::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mEnergyOLED::ConstructJSON_Settings;
+  ptr->ConstructJSON_function = &mDeskSensorsOnOLED::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
@@ -274,7 +379,7 @@ void mEnergyOLED::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
-  ptr->ConstructJSON_function = &mEnergyOLED::ConstructJSON_State;
+  ptr->ConstructJSON_function = &mDeskSensorsOnOLED::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);
 
 } //end "MQTTHandler_Init"
@@ -283,7 +388,7 @@ void mEnergyOLED::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mEnergyOLED::MQTTHandler_Set_RefreshAll()
+void mDeskSensorsOnOLED::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -293,7 +398,7 @@ void mEnergyOLED::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mEnergyOLED::MQTTHandler_Set_DefaultPeriodRate()
+void mDeskSensorsOnOLED::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
@@ -306,10 +411,10 @@ void mEnergyOLED::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mEnergyOLED::MQTTHandler_Sender()
+void mDeskSensorsOnOLED::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED__ID, handle);
   }
 }
 

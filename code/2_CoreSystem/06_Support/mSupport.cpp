@@ -2090,19 +2090,25 @@ bool mSupport::ValidIpAddress(const char* str)
 }
 
 bool mSupport::ParseIPv4(uint32_t* addr, const char* str)
-{
+{DEBUG_LINE_HERE
+
+  // #Issue: PSTR with stroul will crash on esp8266
+  char buf[16];  // IPv4 addresses are at most 15 characters plus null terminator.
+  strcpy_P(buf, str);  // Copy string from flash (PSTR) to RAM
+  
   uint8_t *part = (uint8_t*)addr;
   uint8_t i;
-
+DEBUG_LINE_HERE
   *addr = 0;
   for (i = 0; i < 4; i++) {
-    part[i] = strtoul(str, nullptr, 10);        // Convert byte
-    str = strchr(str, '.');
-    if (str == nullptr || *str == '\0') {
+    DEBUG_LINE_HERE
+    part[i] = strtoul(buf, nullptr, 10);        // Convert byte
+    str = strchr(buf, '.');DEBUG_LINE_HERE
+    if (str == nullptr || *str == '\0') {DEBUG_LINE_HERE
       break;  // No more separators, exit
     }
     str++;                                   // Point to next character after separator
-  }
+  }DEBUG_LINE_HERE
   return (3 == i);
 }
 

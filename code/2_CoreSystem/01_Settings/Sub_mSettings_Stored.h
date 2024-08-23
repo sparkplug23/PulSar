@@ -449,7 +449,7 @@ struct SETTINGS {
   uint8_t       sleep;                     // 453
   uint8_t       setoption_255[PARAM8_SIZE];
   // Core
-  char debug[10];
+  // char debug[10];
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
   
   // Network
@@ -477,7 +477,7 @@ struct SETTINGS {
   uint8_t       ina219_mode;               // 531
   SysBitfield_Drivers    flag_drivers;  
   int16_t       toffset[2];                // 30E
-  char          ntp_server[3][33];         // 4CE
+  // char          ntp_server[3][33];         // 4CE
   char          text_pool[138];            // 017  Size is settings_text_size
   // Lighting
   SysBitfield_Lighting    flag_lighting;

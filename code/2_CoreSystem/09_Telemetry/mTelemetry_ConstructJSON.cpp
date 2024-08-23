@@ -259,9 +259,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
      * 
      */
 
-    JBI->Add(PM_JSON_CLIENT_NAME, pCONT_mqtt->dt.connection[0].client_name);
-
-    JBI->Add("RetrySecs", pCONT_mqtt->dt.connection[0].retry);
+    // JBI->Add("RetrySecs", pCONT_mqtt->dt.connection[0].retry);
 
     JBI->Object_Start(PM_JSON_REFRESH_RATES);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_set->Settings.sensors.ifchanged_secs);
@@ -269,6 +267,19 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
     JBI->Object_End();
     
     JBI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
+
+// {
+//   "ClientName":"tg_lighting_70-08:D1:F9:CA:0B:74",
+//   "RetrySecs":10,
+//   "RefreshRates":{
+//     "IfChanged":10,
+//     "Teleperiod":60},
+//     "MQTT Enable Restart":0,
+//     "Instance":[
+//       [
+//         "broker_url":"192.168.1.70",
+//         "port":1883,"connect_count":0,"retry_counter":0,"downtime_counter":0,"connected":1,"allowed":0,"mqtt_tls":0,,"tSaved_LastOutGoingTopic":18664,"flag_start_reconnect":0,"cConnectionAttempts":0,"host_server_type":0]],"Connection":[["status":1,"client_name":"tg_lighting_70-08:D1:F9:CA:0B:74","prefixtopic":"tg_lighting_70"]]}
+
 
 
     #ifdef ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
@@ -282,43 +293,57 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
      * @brief Show each instance info
      * 
     **/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    JBI->Array_Start("Instance");
+    // #ifdef USE_MODULE_NETWORK_MQTT
+    JBI->Array_Start("Connection");
     for(auto& con:pCONT_mqtt->brokers)
-    {
-      
-      JBI->Array_Start();
-        JBI->Add("broker_url", con->broker_url);
+    {      
+      JBI->Object_Start();
+        JBI->Add("host_address", con->host_address);
         JBI->Add("port", con->port);
 
-        JBI->Add("connect_count", con->connect_count);
-        JBI->Add("retry_counter", con->retry_counter);
-        JBI->Add("downtime_counter", con->downtime_counter);
-        // JBI->Add("initial_connection_state", con->initial_connection_state);
-        JBI->Add("connected", con->connected);
-        JBI->Add("allowed", con->allowed);
-        JBI->Add("mqtt_tls", con->mqtt_tls);
+    //     JBI->Add("connect_count", con->connect_count);
+    //     JBI->Add("retry_counter", con->retry_counter);
+    //     JBI->Add("downtime_counter", con->downtime_counter);
+    //     // JBI->Add("initial_connection_state", con->initial_connection_state);
+    //     JBI->Add("connected", con->connected);
+    //     JBI->Add("allowed", con->allowed);
+    //     JBI->Add("mqtt_tls", con->mqtt_tls);
 
-        JBI->Add("mqtt_client_type", con->client_type);
+    //     JBI->Add("mqtt_client_type", con->client_type);
 
-        JBI->Add("tSaved_LastOutGoingTopic", con->tSaved_LastOutGoingTopic);
+    //     JBI->Add("tSaved_LastOutGoingTopic", con->tSaved_LastOutGoingTopic);
 
-        JBI->Add("flag_start_reconnect", con->flag_start_reconnect);
-        JBI->Add("cConnectionAttempts", con->cConnectionAttempts);
+    //     JBI->Add("flag_start_reconnect", con->flag_start_reconnect);
+    //     JBI->Add("cConnectionAttempts", con->cConnectionAttempts);
 
-        JBI->Add("host_server_type", con->host_server_type);
+    //     JBI->Add("host_server_type", con->host_server_type);
 
-        #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
-        JBI->Add("payload_publish_sent", con->debug_stats.payload_publish_sent);
-        JBI->Add("payload_publish_missed", con->debug_stats.payload_publish_missed);
-        JBI->Add("payload_publish_success_percentage", con->debug_stats.payload_publish_success_percentage);
-        #endif
-      JBI->Array_End();
+    //     #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+    //     JBI->Add("payload_publish_sent", con->debug_stats.payload_publish_sent);
+    //     JBI->Add("payload_publish_missed", con->debug_stats.payload_publish_missed);
+    //     JBI->Add("payload_publish_success_percentage", con->debug_stats.payload_publish_success_percentage);
+    //     #endif
+      JBI->Object_End();
 
     }
     JBI->Array_End();
-    #endif // USE_MODULE_NETWORK_MQTT
-  
+
+    JBI->Array_Start("Manager");
+    for(auto& con:pCONT_mqtt->brokers)
+    {
+      JBI->Object_Start();
+        JBI->Add("status", con->status);
+        JBI->Add("host_address", con->host_address);
+        JBI->Add("port", con->port);
+        JBI->Add("client", con->client_name);
+        JBI->Add("user", con->user);
+        JBI->Add("pwd", con->password);
+        JBI->Add("retry", con->retry);
+        JBI->Add("prefixtopic", con->prefix_topic);
+      JBI->Object_End();
+    }
+    JBI->Array_End();
+    
   return JBI->End();
 
 }

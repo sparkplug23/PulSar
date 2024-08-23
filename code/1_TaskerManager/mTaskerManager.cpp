@@ -12,10 +12,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     ALOG_INF(PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
   }
 
-  DEBUG_LINE_HERE;
   JsonParserObject obj = 0;
   
-  DEBUG_LINE_HERE;
   if(function == FUNC_JSON_COMMAND_ID)
   { 
     
@@ -25,7 +23,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     JsonParser parser(data_buffer.payload.ctr);
   ALOG_DBM(PSTR("buffer_writer after parser ------------- >>>>>>>>>> %d"), JBI->GetBufferSize());
 
-  DEBUG_LINE_HERE;
   if(JBI->GetBufferSize()==0)
   {
     Serial.println("error occured");
@@ -33,7 +30,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     return 0;
   }
     
-  DEBUG_LINE_HERE;
     // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
     obj = parser.getRootObject();   
     if (!obj) {
@@ -69,36 +65,29 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
         ALOG_DBG( PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"), target_tasker, GetModuleFriendlyName_WithUniqueID(target_tasker) );
         break; 
       }
-  DEBUG_LINE_HERE;
 
     }
     
-  DEBUG_LINE_HERE;
     return 0; // needs to return via "Tasker"
   } 
 
-  DEBUG_LINE_HERE;
   #ifdef  ENABLE_DEBUG_FUNCTION_NAMES
     char buffer_taskname[50];
   #endif
 
-  DEBUG_LINE_HERE;
   /**
    * @brief ==============================================================================================================================
    **/
   for(uint8_t i=0;i<GetClassCount();i++)
   {     
         
-  DEBUG_LINE_HERE;
     #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
     #endif
     
-  DEBUG_LINE_HERE;
     // If target_tasker != 0, then use it, else, use indexed array
     switch_index = target_tasker ? GetEnumNumber_UsingModuleUniqueID(target_tasker) : i; // passed value module is in unique_module_id format
       
-  DEBUG_LINE_HERE;
     #ifdef ENABLE_ADVANCED_DEBUGGING
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
@@ -136,9 +125,14 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
      * Uncomment when needed
      */
     // if(function == FUNC_JSON_COMMAND_ID)
+    // if(function == FUNC_EVERY_SECOND)
     // {
       // ALOG_COM( PSTR(D_LOG_TASKER "switch_index %d}"), switch_index);
       // ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
+      
+  // ALOG_INF(PSTR("%dM6host_address: %s"), switch_index, pCONT_mqtt->dt.connection[0].host_address);
+
+  // ALOG_INF(PSTR("M---host_address-------- %s"), pCONT_mqtt->dt.connection[0].host_address);
     // }
 
     pModule[switch_index]->Tasker(function, obj);    
@@ -157,7 +151,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       debug_module_time[switch_index].max_function_id = function;
     }
     #endif 
-  DEBUG_LINE_HERE;
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
     ALOG_INF(PSTR("buffer_writerT ------------------------------- <<<<<<<<<<< END %d"),JBI->GetBufferSize());
@@ -187,19 +180,16 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       break; //only run for loop for the class set. if 0, rull all
     }
     
-  DEBUG_LINE_HERE;
     // Special flag that can be set to end interface ie event handled, no need to check others
     if(fExitTaskerWithCompletion)
     {
       fExitTaskerWithCompletion=false;
       ALOG_INF(PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
-  DEBUG_LINE_HERE;
       break; //only run for loop for the class set. if 0, rull all
     }
   
   } // end for
 
-  DEBUG_LINE_HERE;
 
   #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
   if(!pCONT_set->flag_boot_complete){
@@ -352,7 +342,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE__NETWORK_CELLULAR__ID, new mCellular());
   #endif
   #ifdef USE_MODULE_NETWORK_MQTT
-  addTasker(EM_MODULE_NETWORK_MQTT_ID, new mMQTT());
+  addTasker(EM_MODULE_NETWORK_MQTT_ID, new mMQTTManager());
   #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   addTasker(EM_MODULE_NETWORK_WEBSERVER_ID, new mWebServer());
@@ -776,6 +766,9 @@ uint8_t mTaskerManager::Instance_Init()
     #define pCONT_serial_calibration_log                  static_cast<mSerialCalibrationMeasurmentLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID])
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
+  addTasker(EM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED__ID, new mDeskSensorsOnOLED());
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     INCLUDE_FIX"9_Controller/UserMod_01/mUserMod_01.h"
     #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
@@ -898,20 +891,16 @@ mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
  */
 bool mTaskerManager::ValidTaskID(uint8_t id)
 {
-  DEBUG_LINE_HERE;
   return id <= GetClassCount() ? true : false;
 }
 
 
 PGM_P mTaskerManager::GetModuleFriendlyName(uint16_t id)
 {
-  DEBUG_LINE_HERE;
   if(ValidTaskID(id))
   {
-  DEBUG_LINE_HERE;
     return pModule[id]->GetModuleFriendlyName();
-  }  
-  DEBUG_LINE_HERE;
+  }
   return PM_SEARCH_NOMATCH;
 }
 

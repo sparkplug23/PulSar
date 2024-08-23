@@ -73,10 +73,10 @@
 
 #define D_MODULE_NETWORK_WIFI_CTR              "mWiFi"
 #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
-#define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
+#define D_MODULE_NETWORK_MQTT_CTR              "mMQTTManager"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
 
-#define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR              "mMQTT"
+#define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR              "mMQTTManager"
 #define D_MODULE_NETWORK_MQTT_MULTIPLE_FRIENDLY_CTR              "system"
 
 #define D_MODULE_NETWORK_MQTT_CELLULAR_CTR              "mMQTT_CELLULAR"
@@ -459,6 +459,9 @@
 
 #define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_FRIENDLY_CTRL "treadmill_logger"
 #define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR "treadmill_logger"
+
+#define D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR "sensors_oled"
+#define D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_FRIENDLY_CTR "sensors_oled"
 
 
 #define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR "sensor_colourbar"

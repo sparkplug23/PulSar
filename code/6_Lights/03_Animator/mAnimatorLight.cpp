@@ -405,8 +405,7 @@ void mAnimatorLight::Init(void)
   #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
-  char buffer[30];
-  snprintf(serverDescription, sizeof(serverDescription), "%s - %s", pCONT_set->Settings.system_name.friendly, pCONT_time->GetBuildDateAndTime().c_str() );
+  snprintf(serverDescription, sizeof(serverDescription), "PulSar %s - %s", pCONT_set->Settings.system_name.friendly, pCONT_time->GetBuildDateAndTime().c_str() );
   #else
   snprintf(serverDescription, sizeof(serverDescription), pCONT_set->Settings.system_name.friendly);
   #endif
@@ -497,20 +496,20 @@ void mAnimatorLight::Init_Pins()
    * @brief Check if any pin is set
    * Note: this is going to clash with PWM types in Lighting and should probably be moved into there, leaving here to check in both
    **/
-  bool flag_any_pin_set = false;
-  for(uint16_t gpio = GPIO_PIXELBUS_01_A_ID; gpio < GPIO_PIXELBUS_10_E_ID; gpio++)
-  {
-    if(pCONT_pins->PinUsed(gpio))
-    {
-      flag_any_pin_set = true;
-      break;
-    }
-  }
+  // bool flag_any_pin_set = false;
+  // for(uint16_t gpio = GPIO_PIXELBUS_01_A_ID; gpio < GPIO_PIXELBUS_10_E_ID; gpio++)
+  // {
+  //   if(pCONT_pins->PinUsed(gpio))
+  //   {
+  //     flag_any_pin_set = true;
+  //     break;
+  //   }
+  // }
 
-  if(!flag_any_pin_set)
-  {
-    ALOG_ERR(PSTR("NO PIN FOUND"));
-  }
+  // if(!flag_any_pin_set)
+  // {
+  //   ALOG_ERR(PSTR("NO PIN FOUND"));
+  // }
 
 }
 
@@ -3703,8 +3702,8 @@ uint32_t mAnimatorLight::getPixelColor(uint16_t i)
   if (i >= _length) return 0;
   if (i < customMappingSize) i = customMappingTable[i];
   RgbcctColor c = pCONT_iLight->bus_manager->getPixelColor(i);
-  if(i==0 || i==1)
-    c.debug_print("getPixelColor");
+  // if(i==0 || i==1)
+  //   c.debug_print("getPixelColor");
   return c.getU32();
 }
 

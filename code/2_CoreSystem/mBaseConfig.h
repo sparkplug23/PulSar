@@ -39,7 +39,7 @@ With latest version, all longer term shared debug features should be added here 
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #else
-// #error"here"
+#error "here"
 #endif // D_USER_MICHAEL
 
 /*********************************************************************************************\
@@ -279,6 +279,13 @@ With latest version, all longer term shared debug features should be added here 
 #ifndef MQTT_HOST
 #define MQTT_HOST "192.168.0.70" // default
 #endif
+
+
+#define DEFAULT_MQTT_SYSTEM_BOOT_RATE_SECS 1
+#define DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS 120
+#define DEFAULT_MQTT_SENSOR_MINIMAL_RATE_SECS 10
+#define DEFAULT_MQTT_DRIVER_MINIMAL_RATE_SECS 10
+
 
 
 // #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2

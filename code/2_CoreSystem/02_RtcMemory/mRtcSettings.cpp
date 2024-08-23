@@ -135,6 +135,10 @@ bool RtcFastboot_Valid(void)
   return (RTC_MEM_VALID == RtcFastboot.valid);
 }
 
+#else
+
+const uint16_t RTC_MEM_VALID = 0xABCD; // Value does not matter
+
 
 #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 

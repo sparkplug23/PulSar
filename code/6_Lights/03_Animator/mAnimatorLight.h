@@ -23,8 +23,12 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
-
+#ifdef ESP32
 #define PIXEL_RANGE_LIMIT 3000
+#else
+#define PIXEL_RANGE_LIMIT 1000
+#endif 
+
 
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
   #ifndef PIXEL_COUNTS
@@ -2803,12 +2807,13 @@ bool doReboot = false;
 #define _INIT_N(x) UNPACK x
 // #endif
 
-// User Interface CONFIG
-// #ifndef SERVERNAME
-char serverDescription[60];// = {"WLED"};  // Name of module - use default
-// #else
-// char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
-// #endif
+#ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+char serverDescription[80];
+#else
+char serverDescription[40];
+#endif
+
+
 bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
 bool simplifiedUI          _INIT(false);   // enable simplified UI
 byte cacheInvalidate       _INIT(0);       // used to invalidate browser cache when switching from regular to simplified UI
@@ -2929,13 +2934,6 @@ bool fadeTransition      _INIT(true);   // enable crossfading color transition
 uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
 
 byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
-
-// // User Interface CONFIG
-// #ifndef SERVERNAME
-// char serverDescription[33] _INIT("WLED");  // Name of module - use default
-// #else
-// char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
-// #endif
 
 // //Button type
 // #define BTN_TYPE_NONE             0

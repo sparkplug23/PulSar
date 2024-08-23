@@ -145,8 +145,11 @@ void mSettings::SystemSettings_DefaultBody(void)
    *********************************************************************************************/
 
   SettingsUpdateText(SET_OTAURL, PSTR(D_OTA_URL));
+  
+  DEBUG_LINE_HERE
 
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
+  DEBUG_LINE_HERE
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
@@ -154,6 +157,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
   pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
   
+  DEBUG_LINE_HERE
   Settings.sta_config = WIFI_CONFIG_TOOL;
   Settings.sta_active = 0;
   SettingsUpdateText(SET_STASSID1, PSTR(STA_SSID1));

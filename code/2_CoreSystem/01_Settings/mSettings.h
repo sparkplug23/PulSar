@@ -16,7 +16,7 @@
     #ifdef ESP32
       #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
     #else
-      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
+      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000
     #endif
   #endif
 #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -86,6 +86,10 @@ extern struct DATA_BUFFER data_buffer;
     data_buffer.topic.length_used = 0;    \
     data_buffer.payload.ctr[0]=0;         \
     data_buffer.payload.length_used = 0; 
+
+
+// Easy way to add to the counter
+#define D_MQTT_COMMAND_HANDLED_COUNT_INC data_buffer.isserviced++
 
 
 #include "2_CoreSystem/06_Support/mSupport.h"

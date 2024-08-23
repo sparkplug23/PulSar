@@ -901,7 +901,7 @@ Bathroom
   #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
-  #define USE_MODULE_NETWORKS_MQTT
+  #define USE_MODULE_NETWORK_MQTT
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -1103,7 +1103,7 @@ Bathroom
   #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
-  #define USE_MODULE_NETWORKS_MQTT
+  #define USE_MODULE_NETWORK_MQTT
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -1388,10 +1388,7 @@ Bathroom
     "ColourPalette":"Pastel 02",
     "Effects": {
       "Function":1,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
+      "Intensity":50,
       "RateMs": 1000
     },
     "BrightnessRGB": 100
@@ -1915,11 +1912,8 @@ R"=====(
     "Effects": {
       "Function": 1,
       "Speed":1,
-      "Intensity":255
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 2000
+      "Intensity":255,
+      "RateMs": 1000
     },
     "BrightnessRGB": 100,
     "BrightnessCCT": 0
@@ -2812,7 +2806,7 @@ R"=====(
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
   // #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
-  #define USE_MODULE_NETWORKS_MQTT
+  #define USE_MODULE_NETWORK_MQTT
 
   #define USE_MODULE_CORE_RULES // I still need the rule to report motion!!
 
@@ -3800,7 +3794,7 @@ R"=====(
   // #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
     // #define ENABLE_DRIVERS_RELAYS_TIME_LOCKS
 
-  #define USE_MODULE_NETWORKS_MQTT
+  #define USE_MODULE_NETWORK_MQTT
 
   #define USE_MODULE_CORE_RULES
 
@@ -4581,7 +4575,7 @@ R"=====(
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
    
-  #define USE_MODULE_NETWORKS_MQTT
+  #define USE_MODULE_NETWORK_MQTT
 
   #define USE_MODULE_CORE_RULES
     #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 60
@@ -4813,10 +4807,7 @@ R"=====(
     "ColourPalette":"Rgbcct 01",
     "Effects": {
       "Function":0,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
+      "Intensity":50,
       "RateMs": 1000
     },
     "SegColour": {

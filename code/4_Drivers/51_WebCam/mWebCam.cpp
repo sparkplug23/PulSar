@@ -1218,7 +1218,7 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * MQTT SECTION * 
     *******************/
-    // #ifdef USE_MODULE_NETWORKS_MQTT
+    // #ifdef USE_MODULE_NETWORK_MQTT
     // case FUNC_MQTT_HANDLERS_INIT:
     // case FUNC_MQTT_HANDLERS_RESET:
     //   MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather

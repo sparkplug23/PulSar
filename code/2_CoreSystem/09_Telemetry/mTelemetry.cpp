@@ -98,7 +98,7 @@ void mTelemetry::MQTTHandler_Init()
   #if defined(ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS) || defined(ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS)
   ptr->tRateSecs = 1; 
   #else
-  ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  ptr->tRateSecs = 1;//DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
   #endif // ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -342,12 +342,12 @@ void mTelemetry::MQTTHandler_Set_RefreshAll()
  * */
 void mTelemetry::MQTTHandler_Set_DefaultPeriodRate()
 {
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
 }
 
 /**

@@ -38,7 +38,7 @@ enum EM_BUS_TYPE
   BUSTYPE__NONE__ID = 0,
   // ESP8266 RGB
   BUSTYPE__8266_U0_NEO_3__ID = 1,
-  BUSTYPE__8266_U1_NEO_3__ID = 2,
+  BUSTYPE__8266_U1_NEO_3__ID = 2,  // i want this
   BUSTYPE__8266_DM_NEO_3__ID = 3,
   BUSTYPE__8266_BB_NEO_3__ID = 4,
   // RGBW
@@ -134,12 +134,6 @@ enum EM_BUS_TYPE
 #ifdef ENABLE_NEOPIXELBUS_8266_DM_NEO_TYPES
 #define NEOPIXELBUS_8266_DM_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266Dma800KbpsMethod>    //4 chan, esp8266, gpio3
 #endif
-// #define NEOPIXELBUS_8266_BB_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp8266BitBang800KbpsMethod> //4 chan, esp8266, bb (any pin)
-//400Kbps
-// #define NEOPIXELBUS_8266_U0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Uart0400KbpsMethod>   //3 chan, esp8266, gpio1
-// #define NEOPIXELBUS_8266_U1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Uart1400KbpsMethod>   //3 chan, esp8266, gpio2
-// #define NEOPIXELBUS_8266_DM_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Dma400KbpsMethod>     //3 chan, esp8266, gpio3
-// #define NEOPIXELBUS_8266_BB_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266BitBang400KbpsMethod> //3 chan, esp8266, bb (any pin)
 #endif
 
 /*** ESP32 Neopixel methods ***/
@@ -245,9 +239,9 @@ class PolyBus
   static void begin(void* busPtr, uint8_t busType, uint8_t* pins) 
   {
     
-    // #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+    #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     DEBUG_PRINTF("PolyBus::begin busPtr UNSET, busType %d, pin[0] %d\n\r", busType, pins[0]);
-    // #endif
+    #endif
 
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
@@ -273,10 +267,6 @@ class PolyBus
       case BUSTYPE__8266_DM_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_DM_NEO_4*>(busPtr))->Begin(); break;
       #endif
       // case BUSTYPE__8266_BB_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_BB_NEO_4*>(busPtr))->Begin(); break;
-      // case BUSTYPE__8266_U0_400_3__ID: (static_cast<NEOPIXELBUS_8266_U0_400_3*>(busPtr))->Begin(); break;
-      // case BUSTYPE__8266_U1_400_3__ID: (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->Begin(); break;
-      // case BUSTYPE__8266_DM_400_3__ID: (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->Begin(); break;
-      // case BUSTYPE__8266_BB_400_3__ID: (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->Begin(); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
 
@@ -736,6 +726,9 @@ class PolyBus
     #endif // ENABLE_DEVFEATURE_DEBUG_GARGAE_PIXEL_OUTPUT
 // colour_hardware = RgbColor(255-(pix*15),0,pix*15);
 
+// if(pix==0)
+// Serial.println(busType);
+
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
     #ifdef ESP8266
@@ -1115,13 +1108,13 @@ class PolyBus
         case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
         case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
         case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
-        default: t=BUSTYPE__NONE__ID;
+        default: t = BUSTYPE__NONE__ID;
       }
       if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
       return t;
     } else {
       #ifdef ESP8266
-      uint8_t offset_method_inside_group = pins[0] -1; //for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
+      uint8_t offset_method_inside_group = pins[0] - 1; // for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
       if (offset_method_inside_group > 3) offset_method_inside_group = 3;
       switch (busType) {
         case BUSTYPE_WS2812_RGB:
@@ -1151,53 +1144,60 @@ class PolyBus
       if (num > 3) return I_NONE;
       //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
       #else
+
+        #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
+
+
+        #else
         
-        #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS // Primary method for single pin output
-        // I2S0 and I2S1 are 0 and 1
-        // RMT0 to 7 as 2 to 9
-        if(num < 2)
-        {
-          offset_method_inside_group = num + 1; // to skip that RMT was entered first in enum
-        }
-        else
-        if(num < 9)
-        {
-          offset_method_inside_group = num - 7;
-        }
-        else
-        {
-          return BUSTYPE__NONE__ID;
-        }
-        #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
-        #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-        if(num < 8)
-        {
-          // Assume a max of 8 pins supported for now, using the I2S1 (which supports 8) and maybe later I2S0 (which supports 16)
-          offset_method_inside_group = 4; // handled inside library automatically for I2S1 types
-        }
-        else
-        {
-          return BUSTYPE__NONE__ID;
-        }
-        #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-        #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
-        if(num < 16)
-        {
-          // Assume a max of 8 pins supported for now, using the I2S1 (which supports 8) and maybe later I2S0 (which supports 16)
-          offset_method_inside_group = 5; // handled inside library automatically for I2S1 types
-        }
-        else
-        {
-          return BUSTYPE__NONE__ID;
-        }
-        #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
-        #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
-        #error "I2S methods cause flickering on ESP32, use RMT methods instead -- needs debugging"
-        // standard ESP32 has 8 RMT and 2 I2S channels
-        if (num > 9) return BUSTYPE__NONE__ID;
-        if (num > 7) offset_method_inside_group = num -7;
-        #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
-        #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+          #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS // Primary method for single pin output
+          // I2S0 and I2S1 are 0 and 1
+          // RMT0 to 7 as 2 to 9
+          if(num < 2)
+          {
+            offset_method_inside_group = num + 1; // to skip that RMT was entered first in enum
+          }
+          else
+          if(num < 9)
+          {
+            offset_method_inside_group = num - 7;
+          }
+          else
+          {
+            return BUSTYPE__NONE__ID;
+          }
+          #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+          #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+          if(num < 8)
+          {
+            // Assume a max of 8 pins supported for now, using the I2S1 (which supports 8) and maybe later I2S0 (which supports 16)
+            offset_method_inside_group = 4; // handled inside library automatically for I2S1 types
+          }
+          else
+          {
+            return BUSTYPE__NONE__ID;
+          }
+          #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+          #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+          if(num < 16)
+          {
+            // Assume a max of 8 pins supported for now, using the I2S1 (which supports 8) and maybe later I2S0 (which supports 16)
+            offset_method_inside_group = 5; // handled inside library automatically for I2S1 types
+          }
+          else
+          {
+            return BUSTYPE__NONE__ID;
+          }
+          #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+          #ifdef ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+          #error "I2S methods cause flickering on ESP32, use RMT methods instead -- needs debugging"
+          // standard ESP32 has 8 RMT and 2 I2S channels
+          if (num > 9) return BUSTYPE__NONE__ID;
+          if (num > 7) offset_method_inside_group = num -7;
+          #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
+          #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+
+        #endif // ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
 
         #if !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS) &&  \
             !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE) &&                 \

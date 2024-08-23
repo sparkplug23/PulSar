@@ -2,11 +2,14 @@
 
 #if defined(USE_MODULE_NETWORK_MQTT)
 
-const char* mMQTT::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
-const char* mMQTT::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
+const char* mMQTTManager::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
+const char* mMQTTManager::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
 
 
-int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
+int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
+
+  // ALOG_INF(PSTR("M0host_address===================: %s"), dt.connection[0].host_address);
+
 
   switch(function){
     /************
@@ -36,7 +39,8 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
       /**
        * @brief If status is down, and awaiting connection, immediate try reconnect
        * */
-      if(brokers.size())   
+      if(brokers.size()) 
+      // if(brokers_active)   
         if(brokers[0]->retry_counter)
           brokers[0]->retry_counter = 1; //retry immediate
           ALOG_HGL(PSTR(D_LOG_PUBSUB "retry_counter IMMEDIATE = %d"),brokers[0]->retry_counter);
@@ -50,11 +54,43 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
       //     Serial.printf(D_LOG_PUBSUB "retry_counter = %d\n\r", brokers[0]->retry_counter);
 
     break;
-    case FUNC_EVERY_SECOND:      
-      MM_EverySecond();
+    case FUNC_EVERY_SECOND:      {
+      
+  // ALOG_INF(PSTR("M4host_address: %s"), dt.connection[0].host_address);
+
+  
+  strlcpy(test, "tesT MESSAGE FROM INIT", sizeof(test));
+      MM_EverySecond();  
+
+//   ALOG_INF(PSTR("M5host_address: %s"), dt.connection[0].host_address);
+
+//       for(int i=0;i<50;i++)
+//       {
+//         Serial.write(dt.connection[0].prefixtopic[i]);
+//       }
+//       Serial.println();
+
+//   ALOG_INF(PSTR("M6host_address: %s"), dt.connection[0].host_address);
+
+// uint8_t idx=0;
+//   ALOG_INF(PSTR("Fhost_address: %s"), dt.connection[idx].host_address);
+//   ALOG_INF(PSTR("port: %d"), dt.connection[idx].port);
+//   ALOG_INF(PSTR("user: %s"), dt.connection[idx].user);
+//   ALOG_INF(PSTR("pwd: %s"), dt.connection[idx].pwd);
+//   ALOG_INF(PSTR("retry: %d"), dt.connection[idx].retry);
+//   ALOG_INF(PSTR("client: %s"), dt.connection[idx].client);
+//   ALOG_INF(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
+//   ALOG_INF(PSTR("status: %d"), dt.connection[idx].status);
+
+//   pCONT_tel->mqtthandler_mqtt.flags.SendNow = true;
+
+
+
+    }
     break;
     case FUNC_EVERY_HOUR:
       if(brokers.size())
+      // if(brokers_active)   
       {
         brokers[0]->Send_LWT_Online(); // this does work, but how about wrapping the LWT into the normal status messages? Just the LWT offline would be its own.
       }
@@ -98,57 +134,112 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
  * @brief Should be called from Init now, its the new way of setting up as a new device with default settings
  * 
  */
-void mMQTT::Default_Module()
+void mMQTTManager::Default_Module()
 {
   ALOG_INF(PSTR(D_LOG_MQTT "Default_Module"));
   
-  memset((uint8_t*)&dt, 0, sizeof(dt));
+  // memset((uint8_t*)&dt, 0, sizeof(dt));
 
-  MODULE_STORAGE::CONNECTION* con = &dt.connection[0];
+  // MODULE_STORAGE::CONNECTION* con = &dt.connection[0];
+
+
+  strlcpy(test, "TEST MESSAGE FROM INIT", sizeof(test));
 
   uint8_t idx = 0;
-  
-  strlcpy(dt.connection[idx].host_address, MQTT_HOST, sizeof(dt.connection[idx].host_address));
-  dt.connection[idx].port = MQTT_PORT;
-  strlcpy(dt.connection[idx].user, MQTT_USER, sizeof(dt.connection[idx].user));
-  strlcpy(dt.connection[idx].pwd, MQTT_PASS, sizeof(dt.connection[idx].pwd));
-  strlcpy(dt.connection[idx].topic, MQTT_PASS, sizeof(dt.connection[idx].topic));
-  strlcpy(dt.connection[idx].topic, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].topic));  
-  dt.connection[idx].retry = MQTT_RETRY_SECS;
-  strlcpy(dt.connection[idx].client_name, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].client_name));
-  snprintf_P(dt.connection[idx].client_name, sizeof(dt.connection[idx].client_name)-1, PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str());
-  strncpy(dt.connection[idx].prefixtopic, pCONT_set->Settings.system_name.device, strlen(pCONT_set->Settings.system_name.device));
-  dt.connection[idx].status = 1;
 
-  idx = 1;
-  strlcpy(dt.connection[idx].host_address, MQTT_HOST, sizeof(dt.connection[idx].host_address));
-  dt.connection[idx].port = MQTT_PORT;
-  strlcpy(dt.connection[idx].user, MQTT_USER, sizeof(dt.connection[idx].user));
-  strlcpy(dt.connection[idx].pwd, MQTT_PASS, sizeof(dt.connection[idx].pwd));
-  strlcpy(dt.connection[idx].topic, MQTT_PASS, sizeof(dt.connection[idx].topic));
-  strlcpy(dt.connection[idx].topic, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].topic));  
-  dt.connection[idx].retry = MQTT_RETRY_SECS;
-  strlcpy(dt.connection[idx].client_name, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].client_name));
-  snprintf_P(dt.connection[idx].client_name, sizeof(dt.connection[idx].client_name)-1, PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str());
-  strncpy(dt.connection[idx].prefixtopic, pCONT_set->Settings.system_name.device, strlen(pCONT_set->Settings.system_name.device));
-  dt.connection[idx].status = 0;
- 
+  /**
+   * @brief Init with a wifi one
+   **/
+  Default_Module__Connection_WiFi();
+
+  
+  // strlcpy(dt.connection[idx].host_address, MQTT_HOST, sizeof(dt.connection[idx].host_address));
+  // dt.connection[idx].port = MQTT_PORT;
+  // strlcpy(dt.connection[idx].user, MQTT_USER, sizeof(dt.connection[idx].user));
+  // strlcpy(dt.connection[idx].pwd, MQTT_PASS, sizeof(dt.connection[idx].pwd));
+  // dt.connection[idx].retry = MQTT_RETRY_SECS;
+  // snprintf_P(dt.connection[idx].client, sizeof(dt.connection[idx].client), PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str());
+  // strlcpy(dt.connection[idx].prefixtopic, pCONT_set->Settings.system_name.device, sizeof(dt.connection[idx].prefixtopic));
+  // dt.connection[idx].status = 1;
+    
+  // ALOG_INF(PSTR("Ghost_address: %s"), dt.connection[idx].host_address);
+  // ALOG_INF(PSTR("port: %d"), dt.connection[idx].port);
+  // ALOG_INF(PSTR("user: %s"), dt.connection[idx].user);
+  // ALOG_INF(PSTR("pwd: %s"), dt.connection[idx].pwd);
+  // ALOG_INF(PSTR("retry: %d"), dt.connection[idx].retry);
+  // ALOG_INF(PSTR("client: %s"), dt.connection[idx].client);
+  // ALOG_INF(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
+  // ALOG_INF(PSTR("status: %d"), dt.connection[idx].status);
 
 }
+
+
+void mMQTTManager::Default_Module__Connection_WiFi()
+{
+
+  uint8_t broker_index_next = brokers.size();
+
+  uint8_t idx = broker_index_next; //size with index from 0, will already give next slot
+
+  // pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID, pCONT_mqtt->dt.connection[idx].client, pCONT_mqtt->dt.connection[idx].prefixtopic);
+      
+
+  // MQTTConnection* con = brokers[idx];
+
+  // strlcpy(con->host_address, MQTT_HOST, sizeof(con->host_address));
+  // con->port = MQTT_PORT;
+  // strlcpy(con->user, MQTT_USER, sizeof(con->user));
+  // strlcpy(con->pwd, MQTT_PASS, sizeof(con->pwd));
+  // con->retry = MQTT_RETRY_SECS;
+  // snprintf_P(con->client_name, sizeof(con->client_name), PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str());
+  // strlcpy(con->prefix_topic, pCONT_set->Settings.system_name.device, sizeof(con->prefix_topic));
+  // con->status = 1;
+    
+  // ALOG_INF(PSTR("Ghost_address: %s"), con->host_address);
+  // ALOG_INF(PSTR("port: %d"), con->port);
+  // ALOG_INF(PSTR("user: %s"), con->user);
+  // ALOG_INF(PSTR("pwd: %s"), con->pwd);
+  // ALOG_INF(PSTR("retry: %d"), con->retry);
+  // ALOG_INF(PSTR("client: %s"), con->client_name);
+  // ALOG_INF(PSTR("prefixtopic: %s"), con->prefix_topic);
+  // ALOG_INF(PSTR("status: %d"), con->status);
+
+
+
+}
+
+
+
 
 #ifdef USE_MODULE_CORE_FILESYSTEM
 #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 
-void mMQTT::Save_Module()
+void mMQTTManager::Save_Module()
 {
   ALOG_INF(PSTR(D_LOG_MQTT "Save_Module"));
   pCONT_mfile->ByteFile_Save("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
-void mMQTT::Load_Module(bool erase)
+void mMQTTManager::Load_Module(bool erase)
 {
   ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  pCONT_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  // pCONT_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
@@ -157,7 +248,7 @@ void mMQTT::Load_Module(bool erase)
 
 
 
-void mMQTT::MQTTSubscribe()
+void mMQTTManager::MQTTSubscribe()
 {
 
   // Probably needs moved into main parsing, if this does not need redoing with each new connection, parsing it once may be enough. Or else, reparsing again.
@@ -205,7 +296,7 @@ void mMQTT::MQTTSubscribe()
 }
 
 
-void mMQTT::Load_New_Subscriptions_From_Function_Template()
+void mMQTTManager::Load_New_Subscriptions_From_Function_Template()
 {
 
   DEBUG_LINE_HERE
@@ -241,7 +332,7 @@ void mMQTT::Load_New_Subscriptions_From_Function_Template()
 }
 
 
-void mMQTT::parse_JSONCommand(JsonParserObject obj){
+void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -250,20 +341,20 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTT"].getObject()["RetrySecs"])
   {
-    dt.connection[0].retry = jtok.getInt();
+    // dt.connection[0].retry = jtok.getInt();
   }
 
   if(jtok = obj["MQTTSend"])
   {
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend"));
+    AddLog(LOG_LEVEL_TEST,PSTR("mMQTTManager::parse_JSONCommand MQTTSend"));
     #endif //
     JsonParserToken jtok_topic = jtok.getObject()["Topic"];
     JsonParserToken jtok_payload = jtok.getObject()["Payload"];
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
-    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+    AddLog(LOG_LEVEL_TEST,PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+    AddLog(LOG_LEVEL_TEST,PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
     #endif // 
 
     char topic_ctr[100] = {0};
@@ -303,7 +394,7 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
 }//end function
 
 
-void mMQTT::Init(void)
+void mMQTTManager::Init(void)
 {
   Default_Module();
   
@@ -311,10 +402,11 @@ void mMQTT::Init(void)
 
 
 
-void mMQTT::CallMQTTSenders()
+void mMQTTManager::CallMQTTSenders()
 {
 
-  if(brokers.size())
+  if(brokers.size())  
+      // if(brokers_active)   
   {
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
@@ -332,10 +424,11 @@ void mMQTT::CallMQTTSenders()
  * @param retained 
  * @return boolean 
  */
-boolean mMQTT::Publish(const char* topic, const char* payload, boolean retained)
+boolean mMQTTManager::Publish(const char* topic, const char* payload, boolean retained)
 {
   
   if(brokers.size())
+      // if(brokers_active)   
   {
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
@@ -361,10 +454,11 @@ boolean mMQTT::Publish(const char* topic, const char* payload, boolean retained)
  * @param retained 
  * @return boolean 
  */
-boolean mMQTT::Subscribe(const char* topic, uint8_t qos)
+boolean mMQTTManager::Subscribe(const char* topic, uint8_t qos)
 {
   
   if(brokers.size())
+      // if(brokers_active)   
   {
     // if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     // {
@@ -381,36 +475,12 @@ boolean mMQTT::Subscribe(const char* topic, uint8_t qos)
 }
 
 
-
-
-char* mMQTT::TopicFormatted(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, char* buffer, uint8_t buflen)
-{
-
-  char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
-  
-  //can be replaced with a function call
-  switch(topic_type_id){
-    case MQTT_TOPIC_TYPE_SYSTEM_ID: break; // nothing
-    case MQTT_TOPIC_TYPE_IFCHANGED_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
-    case MQTT_TOPIC_TYPE_ROC1M_ID: sprintf(topic_id_ctr,"%s/","roc1m"); break;
-    case MQTT_TOPIC_TYPE_ROC10M_ID: sprintf(topic_id_ctr,"%s/","roc10m"); break;
-    case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_TELEPERIOD_CTR); break;
-    case MQTT_TOPIC_TYPE__DEBUG__ID: sprintf(topic_id_ctr,"%s/","debug"); break;
-    default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
-  }
-
-  snprintf_P(buffer, buflen, "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
-
-  return buffer;
-
-}
-
 /**
  * @brief This is not thread safe
  * 
  * @return const char* 
  */
-const char* mMQTT::GetState_PCtr(int8_t state)
+const char* mMQTTManager::GetState_PCtr(int8_t state)
 {
   switch(state){
     case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");

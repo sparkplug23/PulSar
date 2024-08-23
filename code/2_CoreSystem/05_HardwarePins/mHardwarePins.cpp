@@ -1005,75 +1005,26 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
 int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   if(*c=='\0'){ return -1; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_NONE_CTR)==0){       return GPIO_NONE_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA1_CTR)==0){   return GPIO_RGB_DATA_ID; } // force legacy pin version for now
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA_CTR)==0){   return GPIO_RGB_DATA_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_CLOCK_CTR)==0){  return GPIO_RGB_CLOCK_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA1_CTR)==0){   return GPIO_RGB_DATA_ID; } // force legacy pin version for now
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA_CTR)==0){   return GPIO_RGB_DATA_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_CLOCK_CTR)==0){  return GPIO_RGB_CLOCK_ID; }
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR)==0){   return GPIO_UNUSED_FORCED_HIGH_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR)==0){  return GPIO_UNUSED_FORCED_LOW_ID; }
-
-  #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_A_CTR)==0){   return GPIO_PIXELBUS_01_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_B_CTR)==0){   return GPIO_PIXELBUS_01_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_C_CTR)==0){   return GPIO_PIXELBUS_01_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_D_CTR)==0){   return GPIO_PIXELBUS_01_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_E_CTR)==0){   return GPIO_PIXELBUS_01_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_A_CTR)==0){   return GPIO_PIXELBUS_02_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_B_CTR)==0){   return GPIO_PIXELBUS_02_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_C_CTR)==0){   return GPIO_PIXELBUS_02_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_D_CTR)==0){   return GPIO_PIXELBUS_02_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_E_CTR)==0){   return GPIO_PIXELBUS_02_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_A_CTR)==0){   return GPIO_PIXELBUS_03_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_B_CTR)==0){   return GPIO_PIXELBUS_03_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_C_CTR)==0){   return GPIO_PIXELBUS_03_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_D_CTR)==0){   return GPIO_PIXELBUS_03_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_E_CTR)==0){   return GPIO_PIXELBUS_03_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_A_CTR)==0){   return GPIO_PIXELBUS_04_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_B_CTR)==0){   return GPIO_PIXELBUS_04_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_C_CTR)==0){   return GPIO_PIXELBUS_04_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_D_CTR)==0){   return GPIO_PIXELBUS_04_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_E_CTR)==0){   return GPIO_PIXELBUS_04_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_A_CTR)==0){   return GPIO_PIXELBUS_05_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_B_CTR)==0){   return GPIO_PIXELBUS_05_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_C_CTR)==0){   return GPIO_PIXELBUS_05_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_D_CTR)==0){   return GPIO_PIXELBUS_05_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_E_CTR)==0){   return GPIO_PIXELBUS_05_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_A_CTR)==0){   return GPIO_PIXELBUS_06_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_B_CTR)==0){   return GPIO_PIXELBUS_06_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_C_CTR)==0){   return GPIO_PIXELBUS_06_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_D_CTR)==0){   return GPIO_PIXELBUS_06_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_E_CTR)==0){   return GPIO_PIXELBUS_06_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_A_CTR)==0){   return GPIO_PIXELBUS_07_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_B_CTR)==0){   return GPIO_PIXELBUS_07_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_C_CTR)==0){   return GPIO_PIXELBUS_07_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_D_CTR)==0){   return GPIO_PIXELBUS_07_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_E_CTR)==0){   return GPIO_PIXELBUS_07_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_A_CTR)==0){   return GPIO_PIXELBUS_08_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_B_CTR)==0){   return GPIO_PIXELBUS_08_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_C_CTR)==0){   return GPIO_PIXELBUS_08_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_D_CTR)==0){   return GPIO_PIXELBUS_08_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_E_CTR)==0){   return GPIO_PIXELBUS_08_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_A_CTR)==0){   return GPIO_PIXELBUS_09_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_B_CTR)==0){   return GPIO_PIXELBUS_09_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_C_CTR)==0){   return GPIO_PIXELBUS_09_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_D_CTR)==0){   return GPIO_PIXELBUS_09_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_E_CTR)==0){   return GPIO_PIXELBUS_09_E_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_A_CTR)==0){   return GPIO_PIXELBUS_10_A_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_B_CTR)==0){   return GPIO_PIXELBUS_10_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_C_CTR)==0){   return GPIO_PIXELBUS_10_C_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_D_CTR)==0){   return GPIO_PIXELBUS_10_D_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_E_CTR)==0){   return GPIO_PIXELBUS_10_E_ID; }
-  #endif // ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
 
   
 
 
 
+  #ifdef USE_MODULE_SENSORS_DHT
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DHT22_1_CTR)==0){  return GPIO_DHT22_1OF2_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DHT22_2_CTR)==0){  return GPIO_DHT22_2OF2_ID; }
+  #endif
 
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DS18X20_1_CTR)==0){  return GPIO_DSB_1OF2_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DS18X20_2_CTR)==0){  return GPIO_DSB_2OF2_ID; }
+  #endif
 
   
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
@@ -1083,6 +1034,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LDR_BASIC_ANALOG2_CTR)==0){   return GPIO_LDR_BASIC_ANALOG2_ID; }
   #endif // USE_MODULE_SENSORS_LDR_BASIC
   
+  #ifdef USE_MODULE_SENSORS_SWITCHES
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_NP_CTR)==0){  return GPIO_SWT1_NP_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_NP_CTR)==0){  return GPIO_SWT2_NP_ID; }
 
@@ -1104,7 +1056,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT6_CTR)==0){  return GPIO_SWT6_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT7_CTR)==0){  return GPIO_SWT7_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT8_CTR)==0){  return GPIO_SWT8_ID; }
+  #endif
 
+  #ifdef USE_MODULE_DRIVERS_RELAY
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL1_INV_CTR)==0){  return GPIO_REL1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL2_INV_CTR)==0){  return GPIO_REL2_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL3_INV_CTR)==0){  return GPIO_REL3_INV_ID; }
@@ -1113,38 +1067,48 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL2_CTR)==0){       return GPIO_REL2_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL3_CTR)==0){       return GPIO_REL3_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL4_CTR)==0){       return GPIO_REL4_ID; }
-
+  #endif
   
+  #ifdef USE_MODULE_CONTROLLER_FAN
   else if(strcmp_P(c,PM_GPIO_FUNCTION_FAN_PWM1_CTR)==0){  return GPIO_FAN_PWM1_ID; }
+  #endif
 
+  #ifdef USE_I2C
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SCL_CTR)==0){  return GPIO_I2C_SCL_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SDA_CTR)==0){  return GPIO_I2C_SDA_ID; }
+  #endif
 
+  
+  #if defined(USE_MODULE_DISPLAYS_OLED_SH1106) || defined(USE_MODULE_DISPLAYS_OLED_SSD1306)
   else if(strcmp_P(c,PM_GPIO_FUNCTION_OLED_RESET_CTR)==0){  return GPIO_OLED_RESET_ID; }
+  #endif
 
-  // #ifdef USE_MODULE_SENSORS_MOTION
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_CTR)==0){  return GPIO_PIR_1_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_CTR)==0){  return GPIO_PIR_2_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_CTR)==0){  return GPIO_PIR_3_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_NP_CTR)==0){  return GPIO_PIR_1_NP_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_NP_CTR)==0){  return GPIO_PIR_2_NP_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_NP_CTR)==0){  return GPIO_PIR_3_NP_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_NP_INV_CTR)==0){  return GPIO_PIR_1_NP_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_NP_INV_CTR)==0){  return GPIO_PIR_2_NP_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_NP_INV_CTR)==0){  return GPIO_PIR_3_NP_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_INV_CTR)==0){  return GPIO_PIR_1_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_INV_CTR)==0){  return GPIO_PIR_2_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_INV_CTR)==0){  return GPIO_PIR_3_INV_ID; }
-  // #endif
+  // // #ifdef USE_MODULE_SENSORS_MOTION
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_CTR)==0){  return GPIO_PIR_1_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_CTR)==0){  return GPIO_PIR_2_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_CTR)==0){  return GPIO_PIR_3_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_NP_CTR)==0){  return GPIO_PIR_1_NP_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_NP_CTR)==0){  return GPIO_PIR_2_NP_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_NP_CTR)==0){  return GPIO_PIR_3_NP_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_NP_INV_CTR)==0){  return GPIO_PIR_1_NP_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_NP_INV_CTR)==0){  return GPIO_PIR_2_NP_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_NP_INV_CTR)==0){  return GPIO_PIR_3_NP_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_INV_CTR)==0){  return GPIO_PIR_1_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_INV_CTR)==0){  return GPIO_PIR_2_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_INV_CTR)==0){  return GPIO_PIR_3_INV_ID; }
+  // // #endif
   // #ifdef USE_MODULE_SENSORS_DOOR
   // else if(strcmp_P(c,PM_GPIO_FUNCTION_DOOR_DETECT_CTR)==0){  return GPIO_DOOR_OPEN_ID; }
   // #endif
+  
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
   else if(strcmp_P(c,PM_GPIO_FUNCTION_CHIME_INPUT_CTR)==0){  return GPIO_CHIME_INPUT_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_CHIME_RINGER_CTR)==0){  return GPIO_CHIME_RINGER_ID; }
+  #endif
 
-
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
   else if(strcmp_P(c,PM_GPIO_FUNCTION_BUZZER_CTR)==0){  return GPIO_BUZZER_ID; }
-
+  #endif
 
 
   
@@ -1152,33 +1116,35 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
 
 
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_IRSEND_CTR)==0){  return GPIO_IRSEND_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_FAN_IRSEND_CTR)==0){  return GPIO_FAN_IRSEND_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_IRSEND_CTR)==0){  return GPIO_IRSEND_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_FAN_IRSEND_CTR)==0){  return GPIO_FAN_IRSEND_ID; }
 
 
+  #ifdef USE_MODULE_DRIVERS_PWM
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PWM1_CTR)==0){  return GPIO_PWM1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PWM2_CTR)==0){  return GPIO_PWM2_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PWM3_CTR)==0){  return GPIO_PWM3_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PWM4_CTR)==0){  return GPIO_PWM4_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PWM5_CTR)==0){  return GPIO_PWM5_ID; }
+  #endif
 
-  
+  #ifdef USE_MODULE_CORE__SERIAL
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_TX_CTR)==0){  return GPIO_HWSERIAL1_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RX_CTR)==0){  return GPIO_HWSERIAL1_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_TX_CTR)==0){  return GPIO_HWSERIAL2_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RX_CTR)==0){  return GPIO_HWSERIAL2_RX_ID; }
+  #endif
 
-
-#ifdef ESP32
+  #ifdef ESP32
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL1_RING_BUFFER_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL1_RING_BUFFER_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_TX_ID; }
-#endif
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR)==0){  return GPIO_GPS_SERIAL0_TX_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR)==0){  return GPIO_GPS_SERIAL0_RX_ID; }
+  #endif
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR)==0){  return GPIO_GPS_SERIAL0_TX_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR)==0){  return GPIO_GPS_SERIAL0_RX_ID; }
   #ifdef ESP32
   #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL1_TX_CTR)==0){  return GPIO_GPS_SERIAL1_TX_ID; }
@@ -1193,17 +1159,19 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   //else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_INV_CTR)==0){  return GPIO_LEDLNK_INV_ID; }
 
 
+  #ifdef USE_MODULE_SENSORS_DOOR
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DOOR_OPEN_CTR)==0){  return GPIO_DOOR_OPEN_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DOOR_LOCK_CTR)==0){  return GPIO_DOOR_LOCK_ID; }
+  #endif
 
-
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SERIAL_DEBUG_TX_CTR)==0){  return GPIO_SERIAL_DEBUG_TX_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SERIAL_DEBUG_RX_CTR)==0){  return GPIO_SERIAL_DEBUG_RX_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SERIAL_DEBUG_TX_CTR)==0){  return GPIO_SERIAL_DEBUG_TX_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SERIAL_DEBUG_RX_CTR)==0){  return GPIO_SERIAL_DEBUG_RX_ID; }
 
 
   
 
 
+    #ifdef USE_MODULE_DRIVERS_LEDS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LED1_INV_CTR)==0){  return GPIO_LED1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LED2_INV_CTR)==0){  return GPIO_LED2_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LED3_INV_CTR)==0){  return GPIO_LED3_INV_ID; }
@@ -1212,24 +1180,25 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LED2_CTR)==0){  return GPIO_LED2_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LED3_CTR)==0){  return GPIO_LED3_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LED4_CTR)==0){  return GPIO_LED4_ID; }
+  #endif
+  
   // if(strcmp_P(c,PM_GPIO_FUNCTION_LED5_CTR)==0){  return GPIO_LED5_ID; }
   // if(strcmp_P(c,PM_GPIO_FUNCTION_LED5_INV_CTR)==0){  return GPIO_LED5_INV_ID; }
 
-  // #if defined(USE_MODULE_ENERGY_PZEM004T_V3) || defined(USE_PZEM_DC)
+  #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_TX_CTR)==0){  return GPIO_PZEM0XX_TX_ID; }
-  // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM004_RX_CTR)==0){  return GPIO_PZEM004_RX_ID; }
-  // #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR)==0){  return GPIO_PZEM0XX_RX_MODBUS_ID; }
-  // #endif
-  // #ifdef USE_MODULE_SENSORS_ULTRASONICS
+  #endif
+  #ifdef USE_MODULE_SENSORS_SR04
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SR04_ECHO_CTR)==0){  return GPIO_SR04_ECHO_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SR04_TRIG_CTR)==0){  return GPIO_SR04_TRIG_ID; }
-  // #endif
+  #endif
   // #ifdef USE_MODULE_SENSORS_ULTRASONICS
-  else if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR)==0){  return GPIO__ROTARY_ENCODER_A__ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR)==0){  return GPIO__ROTARY_ENCODER_B__ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR)==0){  return GPIO__ROTARY_ENCODER_A__ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR)==0){  return GPIO__ROTARY_ENCODER_B__ID; }
   // #endif
+  #ifdef USE_MODULE_SENSORS_BUTTONS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_INV_CTR)==0){  return GPIO_KEY2_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_INV_CTR)==0){  return GPIO_KEY3_INV_ID; }
@@ -1245,18 +1214,25 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
   
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_NP_CTR)==0){  return GPIO_KEY1_NP_ID; }
+  #endif
 
   // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_PULLDOWN_CTR)==0){  return GPIO_KEY1_PULLDOWN_ID; }
 
 
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
   else if(strcmp_P(c,PM_GPIO_FUNCTION__RF_433MHZ_RX__CTR)==0){  return GPIO_RF_433MHZ_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION__RF_433MHZ_TX__CTR)==0){  return GPIO_RF_433MHZ_TX_ID; }
+  #endif
 
-
+  /******************************************************************************************************************
+   * Displays
+  *******************************************************************************************************************/
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_RX_CTR)==0){  return GPIO_NEXTION_RX_ID; }
+  #endif
 
-  #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+  #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
   else if(strcmp_P(c,PM_GPIO_FUNCTION__FONA_POWER_KEY__CTR)==0){  return GPIO_FUNCTION__FONA_POWER_KEY__ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION__FONA_POWER_STATUS__CTR)==0){  return GPIO_FUNCTION__FONA_POWER_STATUS__ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION__FONA_NETWORK_STATUS__CTR)==0){  return GPIO_FUNCTION__FONA_NETWORK_STATUS__ID; }
@@ -1267,21 +1243,30 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   #endif // ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
 
   
-  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR)==0){  return GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_TX__CTR)==0){  return GPIO_FUNCTION__MODEM_TX__ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_RX__CTR)==0){  return GPIO_FUNCTION__MODEM_RX__ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_POWER__CTR)==0){  return GPIO_FUNCTION__MODEM_POWER__ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR)==0){  return GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_TX__CTR)==0){  return GPIO_FUNCTION__MODEM_TX__ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_RX__CTR)==0){  return GPIO_FUNCTION__MODEM_RX__ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_POWER__CTR)==0){  return GPIO_FUNCTION__MODEM_POWER__ID; }
 
 
 
+  #ifdef USE_MODULE_DRIVERS_HBRIDGE
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IA_CTR)==0){  return GPIO_HBRIDGE_L9110_IA_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IB_CTR)==0){  return GPIO_HBRIDGE_L9110_IB_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_OA_CTR)==0){  return GPIO_HBRIDGE_L9110_OA_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_OB_CTR)==0){  return GPIO_HBRIDGE_L9110_OB_ID; }
+  #endif
 
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_ANALOG_POSITION_CTR)==0){  return GPIO_ANALOG_POSITION_ID; }
 
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_ANALOG_POSITION_CTR)==0){  return GPIO_ANALOG_POSITION_ID; }
+
+  /******************************************************************************************************************
+   * Energy
+  *******************************************************************************************************************/
+
+  #ifdef USE_MODULE_ENERGY_ADE7953
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADE7953_IRQ_CTR)==0){  return GPIO_ADE7953_IRQ_ID; }
+  #endif
 
   
   #ifdef ESP32
@@ -1354,65 +1339,66 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
     case GPIO_NONE_ID: return PM_GPIO_FUNCTION_NONE_CTR;
     // case GPIO_NONE_ID: return PM_GPIO_NONE_CTR;
 
-    case GPIO_RGB_DATA_ID: return PM_GPIO_FUNCTION_RGB_DATA_CTR;
+    // case GPIO_RGB_DATA_ID: return PM_GPIO_FUNCTION_RGB_DATA_CTR;
 
     #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
-    case GPIO_PIXELBUS_01_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_A_CTR;
-    case GPIO_PIXELBUS_01_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_B_CTR;
-    case GPIO_PIXELBUS_01_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_C_CTR;
-    case GPIO_PIXELBUS_01_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_D_CTR;
-    case GPIO_PIXELBUS_01_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_E_CTR;
-    case GPIO_PIXELBUS_02_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_A_CTR;
-    case GPIO_PIXELBUS_02_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_B_CTR;
-    case GPIO_PIXELBUS_02_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_C_CTR;
-    case GPIO_PIXELBUS_02_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_D_CTR;
-    case GPIO_PIXELBUS_02_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_E_CTR;
-    case GPIO_PIXELBUS_03_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_A_CTR;
-    case GPIO_PIXELBUS_03_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_B_CTR;
-    case GPIO_PIXELBUS_03_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_C_CTR;
-    case GPIO_PIXELBUS_03_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_D_CTR;
-    case GPIO_PIXELBUS_03_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_E_CTR;
-    case GPIO_PIXELBUS_04_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_A_CTR;
-    case GPIO_PIXELBUS_04_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_B_CTR;
-    case GPIO_PIXELBUS_04_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_C_CTR;
-    case GPIO_PIXELBUS_04_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_D_CTR;
-    case GPIO_PIXELBUS_04_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_E_CTR;
-    case GPIO_PIXELBUS_05_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_A_CTR;
-    case GPIO_PIXELBUS_05_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_B_CTR;
-    case GPIO_PIXELBUS_05_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_C_CTR;
-    case GPIO_PIXELBUS_05_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_D_CTR;
-    case GPIO_PIXELBUS_05_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_E_CTR;
-    case GPIO_PIXELBUS_06_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_A_CTR;
-    case GPIO_PIXELBUS_06_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_B_CTR;
-    case GPIO_PIXELBUS_06_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_C_CTR;
-    case GPIO_PIXELBUS_06_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_D_CTR;
-    case GPIO_PIXELBUS_06_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_E_CTR;
-    case GPIO_PIXELBUS_07_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_A_CTR;
-    case GPIO_PIXELBUS_07_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_B_CTR;
-    case GPIO_PIXELBUS_07_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_C_CTR;
-    case GPIO_PIXELBUS_07_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_D_CTR;
-    case GPIO_PIXELBUS_07_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_E_CTR;
-    case GPIO_PIXELBUS_08_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_A_CTR;
-    case GPIO_PIXELBUS_08_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_B_CTR;
-    case GPIO_PIXELBUS_08_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_C_CTR;
-    case GPIO_PIXELBUS_08_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_D_CTR;
-    case GPIO_PIXELBUS_08_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_E_CTR;
-    case GPIO_PIXELBUS_09_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_A_CTR;
-    case GPIO_PIXELBUS_09_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_B_CTR;
-    case GPIO_PIXELBUS_09_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_C_CTR;
-    case GPIO_PIXELBUS_09_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_D_CTR;
-    case GPIO_PIXELBUS_09_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_E_CTR;
-    case GPIO_PIXELBUS_10_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_A_CTR;
-    case GPIO_PIXELBUS_10_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_B_CTR;
-    case GPIO_PIXELBUS_10_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_C_CTR;
-    case GPIO_PIXELBUS_10_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_D_CTR;
-    case GPIO_PIXELBUS_10_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_E_CTR;
+    // case GPIO_PIXELBUS_01_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_A_CTR;
+    // case GPIO_PIXELBUS_01_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_B_CTR;
+    // case GPIO_PIXELBUS_01_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_C_CTR;
+    // case GPIO_PIXELBUS_01_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_D_CTR;
+    // case GPIO_PIXELBUS_01_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_01_E_CTR;
+    // case GPIO_PIXELBUS_02_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_A_CTR;
+    // case GPIO_PIXELBUS_02_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_B_CTR;
+    // case GPIO_PIXELBUS_02_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_C_CTR;
+    // case GPIO_PIXELBUS_02_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_D_CTR;
+    // case GPIO_PIXELBUS_02_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_02_E_CTR;
+    // case GPIO_PIXELBUS_03_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_A_CTR;
+    // case GPIO_PIXELBUS_03_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_B_CTR;
+    // case GPIO_PIXELBUS_03_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_C_CTR;
+    // case GPIO_PIXELBUS_03_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_D_CTR;
+    // case GPIO_PIXELBUS_03_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_03_E_CTR;
+    // case GPIO_PIXELBUS_04_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_A_CTR;
+    // case GPIO_PIXELBUS_04_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_B_CTR;
+    // case GPIO_PIXELBUS_04_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_C_CTR;
+    // case GPIO_PIXELBUS_04_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_D_CTR;
+    // case GPIO_PIXELBUS_04_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_04_E_CTR;
+    // case GPIO_PIXELBUS_05_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_A_CTR;
+    // case GPIO_PIXELBUS_05_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_B_CTR;
+    // case GPIO_PIXELBUS_05_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_C_CTR;
+    // case GPIO_PIXELBUS_05_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_D_CTR;
+    // case GPIO_PIXELBUS_05_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_05_E_CTR;
+    // case GPIO_PIXELBUS_06_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_A_CTR;
+    // case GPIO_PIXELBUS_06_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_B_CTR;
+    // case GPIO_PIXELBUS_06_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_C_CTR;
+    // case GPIO_PIXELBUS_06_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_D_CTR;
+    // case GPIO_PIXELBUS_06_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_06_E_CTR;
+    // case GPIO_PIXELBUS_07_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_A_CTR;
+    // case GPIO_PIXELBUS_07_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_B_CTR;
+    // case GPIO_PIXELBUS_07_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_C_CTR;
+    // case GPIO_PIXELBUS_07_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_D_CTR;
+    // case GPIO_PIXELBUS_07_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_07_E_CTR;
+    // case GPIO_PIXELBUS_08_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_A_CTR;
+    // case GPIO_PIXELBUS_08_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_B_CTR;
+    // case GPIO_PIXELBUS_08_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_C_CTR;
+    // case GPIO_PIXELBUS_08_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_D_CTR;
+    // case GPIO_PIXELBUS_08_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_08_E_CTR;
+    // case GPIO_PIXELBUS_09_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_A_CTR;
+    // case GPIO_PIXELBUS_09_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_B_CTR;
+    // case GPIO_PIXELBUS_09_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_C_CTR;
+    // case GPIO_PIXELBUS_09_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_D_CTR;
+    // case GPIO_PIXELBUS_09_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_09_E_CTR;
+    // case GPIO_PIXELBUS_10_A_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_A_CTR;
+    // case GPIO_PIXELBUS_10_B_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_B_CTR;
+    // case GPIO_PIXELBUS_10_C_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_C_CTR;
+    // case GPIO_PIXELBUS_10_D_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_D_CTR;
+    // case GPIO_PIXELBUS_10_E_ID: return PM_GPIO_FUNCTION_PIXELBUS_10_E_CTR;
     #endif
     
     
 
 
 
+    #ifdef USE_MODULE_SENSORS_BUTTONS
     case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
     case GPIO_KEY2_ID: return PM_GPIO_FUNCTION_KEY2_CTR;
     case GPIO_KEY3_ID: return PM_GPIO_FUNCTION_KEY3_CTR;
@@ -1425,29 +1411,35 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
     case GPIO_KEY6_INV_ID: return PM_GPIO_FUNCTION_KEY6_INV_CTR;
     case GPIO_KEY7_INV_ID: return PM_GPIO_FUNCTION_KEY7_INV_CTR;
     case GPIO_KEY8_INV_ID: return PM_GPIO_FUNCTION_KEY8_INV_CTR;
+    #endif
 
+    #ifdef USE_MODULE_SENSORS_SWITCHES
     case GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR; 
     case GPIO_SWT2_ID: return PM_GPIO_FUNCTION_SWT2_CTR; 
     case GPIO_SWT3_ID: return PM_GPIO_FUNCTION_SWT3_CTR; 
 
 
+    case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
+    //   GPIO_SWT1_NP_ID,
+    //   GPIO_SWT2_ID,
+    case  GPIO_SWT2_NP_ID: return PM_GPIO_FUNCTION_SWT2_NP_CTR;        
+    //   GPIO_SWT3_ID,
+    //   GPIO_SWT3_NP_ID,
+    //   GPIO_SWT4_ID,
+    //   GPIO_SWT4_NP_ID,
+    //   GPIO_SWT5_ID,
+    //   GPIO_SWT5_NP_ID,
+    //   GPIO_SWT6_ID,
+    //   GPIO_SWT6_NP_ID,
+    //   GPIO_SWT7_ID,
+    //   GPIO_SWT7_NP_ID,
+    //   GPIO_SWT8_ID,
+    //   GPIO_SWT8_NP_ID,
 
-      case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
-//   GPIO_SWT1_NP_ID,
-//   GPIO_SWT2_ID,
-      case  GPIO_SWT2_NP_ID: return PM_GPIO_FUNCTION_SWT2_NP_CTR;        
-//   GPIO_SWT3_ID,
-//   GPIO_SWT3_NP_ID,
-//   GPIO_SWT4_ID,
-//   GPIO_SWT4_NP_ID,
-//   GPIO_SWT5_ID,
-//   GPIO_SWT5_NP_ID,
-//   GPIO_SWT6_ID,
-//   GPIO_SWT6_NP_ID,
-//   GPIO_SWT7_ID,
-//   GPIO_SWT7_NP_ID,
-//   GPIO_SWT8_ID,
-//   GPIO_SWT8_NP_ID,
+    #endif
+
+
+    #ifdef USE_MODULE_DRIVERS_RELAY
     case  GPIO_REL1_ID: return PM_GPIO_FUNCTION_REL1_CTR;           // Relays
     case  GPIO_REL1_INV_ID: return PM_GPIO_FUNCTION_REL1_INV_CTR;           // Relays
     case  GPIO_REL2_ID: return PM_GPIO_FUNCTION_REL2_CTR;           // Relays
@@ -1456,12 +1448,18 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
     case  GPIO_REL3_INV_ID: return PM_GPIO_FUNCTION_REL3_INV_CTR;           // Relays
     case  GPIO_REL4_ID: return PM_GPIO_FUNCTION_REL4_CTR;           // Relays
     case  GPIO_REL4_INV_ID: return PM_GPIO_FUNCTION_REL4_INV_CTR;           // Relays
+    #endif
 
 
+    #ifdef USE_MODULE_CONTROLLER_FAN
     case  GPIO_FAN_PWM1_ID: return PM_GPIO_FUNCTION_FAN_PWM1_CTR;           // Relays
-
+    #endif 
+    
+    #if defined(USE_MODULE_DISPLAYS_OLED_SH1106) || defined(USE_MODULE_DISPLAYS_OLED_SSD1306)
     case  GPIO_OLED_RESET_ID: return PM_GPIO_FUNCTION_OLED_RESET_CTR;           // Relays
+    #endif
 
+    #ifdef USE_MODULE_DRIVERS_LEDS
     case GPIO_LED1_ID:      return PM_GPIO_FUNCTION_LED1_CTR;
     case GPIO_LED1_INV_ID:  return PM_GPIO_FUNCTION_LED1_INV_CTR;
     case GPIO_LED2_ID:      return PM_GPIO_FUNCTION_LED2_CTR;
@@ -1470,7 +1468,9 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
     case GPIO_LED3_INV_ID:  return PM_GPIO_FUNCTION_LED3_INV_CTR;
     case GPIO_LED4_ID:      return PM_GPIO_FUNCTION_LED4_CTR;
     case GPIO_LED4_INV_ID:  return PM_GPIO_FUNCTION_LED4_INV_CTR;
-
+    #endif
+    
+    #ifdef USE_MODULE_DRIVERS_PWM
     case GPIO_PWM1_ID:      return PM_GPIO_FUNCTION_PWM1_CTR;
     case GPIO_PWM1_INV_ID:  return PM_GPIO_FUNCTION_PWM1_INV_CTR;
     case GPIO_PWM2_ID:      return PM_GPIO_FUNCTION_PWM2_CTR;
@@ -1481,7 +1481,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
     case GPIO_PWM4_INV_ID:  return PM_GPIO_FUNCTION_PWM4_INV_CTR;
     case GPIO_PWM5_ID:      return PM_GPIO_FUNCTION_PWM5_CTR;
     case GPIO_PWM5_INV_ID:  return PM_GPIO_FUNCTION_PWM5_INV_CTR;
-
+    #endif
 
 
 
@@ -1512,20 +1512,21 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 //   GPIO_BACKLIGHT_ID,      // Display backlight control
 // #endif
 
-  case GPIO_ANALOG_ID: return PM_GPIO_FUNCTION_ANALOG_CTR;
+  // case GPIO_ANALOG_ID: return PM_GPIO_FUNCTION_ANALOG_CTR;
 
+  #ifdef USE_MODULE_SENSORS_DHT
   case GPIO_DHT11_1OF2_ID: return PM_GPIO_FUNCTION_DHT11_1_CTR;
   case GPIO_DHT11_2OF2_ID: return PM_GPIO_FUNCTION_DHT11_2_CTR;
   case GPIO_DHT22_1OF2_ID: return PM_GPIO_FUNCTION_DHT22_1_CTR;
   case GPIO_DHT22_2OF2_ID: return PM_GPIO_FUNCTION_DHT22_2_CTR;
-//   GPIO_SI7021_ID,         // iTead SI7021
-// #if defined(USE_DS18B20) || defined(USE_DS18x20) || defined(USE_DS18x20_LEGACY)
-//   GPIO_DSB_1OF2_ID,            // Single wire DS18B20 or DS18S20
-//   GPIO_DSB_2OF2_ID,            // Single wire DS18B20 or DS18S20
+  #endif // USE_MODULE_SENSORS_DHT
 
+//   GPIO_SI7021_ID,         // iTead SI7021
+
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
   case GPIO_DSB_1OF2_ID: return PM_GPIO_FUNCTION_DS18X20_1_CTR;
   case GPIO_DSB_2OF2_ID: return PM_GPIO_FUNCTION_DS18X20_2_CTR;
-// #endif
+  #endif
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
   case GPIO_LDR_BASIC_DIGITAL1_ID: return PM_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR;
@@ -1535,7 +1536,9 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
   #endif // USE_MODULE_SENSORS_LDR_BASIC
 
   
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
   case GPIO_BUZZER_ID: return PM_GPIO_FUNCTION_BUZZER_CTR;
+  #endif
 
 
 // #ifdef USE_WS2812
@@ -1576,9 +1579,6 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 //   GPIO_HJL_CF_ID,         // HJL-01/BL0937 CF power
 // #endif
 
-// #if defined(USE_ENERGY_SENSOR) && defined(USE_I2C) && defined(USE_ADE7953)
-    case  GPIO_ADE7953_IRQ_ID: return PM_GPIO_FUNCTION_ADE7953_IRQ_CTR;        // ADE7953 IRQ
-// #endif
 
 //   GPIO_CSE7766_TX_ID,     // CSE7766 Serial interface (S31 and Pow R2)
 //   GPIO_CSE7766_RX_ID,     // CSE7766 Serial interface (S31 and Pow R2)
@@ -1677,9 +1677,6 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 //   GPIO_HRE_CLOCK_ID,
 //   GPIO_HRE_DATA
 // #endif
-// #ifdef USE_MODULE_SENSORS_DOOR
-    case GPIO_DOOR_OPEN_ID: return PM_GPIO_FUNCTION_DOOR_OPEN_CTR;
-// #endif
 // #ifdef USE_SENSOR_DOOR_LOCK
 //   GPIO_DOOR_LOCK_ID,
 // #endif
@@ -1691,33 +1688,59 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 //    GPIO_HBRIDGE_ANALOG_SENSE_ID,
 // #endif
 
-    case GPIO_PIR_1_ID: return PM_GPIO_FUNCTION_PIR_1_CTR;
-    case GPIO_PIR_1_NP_ID: return PM_GPIO_FUNCTION_PIR_1_NP_CTR;
-    case GPIO_PIR_1_INV_ID: return PM_GPIO_FUNCTION_PIR_1_INV_CTR;
+  /******************************************************************************************************************
+   * Network
+  *******************************************************************************************************************/
 
-    case GPIO_PIR_2_ID: return PM_GPIO_FUNCTION_PIR_2_CTR;
-    case GPIO_PIR_2_NP_ID: return PM_GPIO_FUNCTION_PIR_2_NP_CTR;
-    case GPIO_PIR_2_INV_ID: return PM_GPIO_FUNCTION_PIR_2_INV_CTR;
+  /******************************************************************************************************************
+   * Drivers
+  *******************************************************************************************************************/
 
-    case GPIO_PIR_3_ID: return PM_GPIO_FUNCTION_PIR_3_CTR;
-    case GPIO_PIR_3_NP_ID: return PM_GPIO_FUNCTION_PIR_3_NP_CTR;
-    case GPIO_PIR_3_INV_ID: return PM_GPIO_FUNCTION_PIR_3_INV_CTR;
+  /******************************************************************************************************************
+   * Sensors
+  *******************************************************************************************************************/
+
+#ifdef USE_MODULE_SENSORS_DOOR
+    case GPIO_DOOR_OPEN_ID: return PM_GPIO_FUNCTION_DOOR_OPEN_CTR;
+#endif
+    // case GPIO_PIR_1_ID: return PM_GPIO_FUNCTION_PIR_1_CTR;
+    // case GPIO_PIR_1_NP_ID: return PM_GPIO_FUNCTION_PIR_1_NP_CTR;
+    // case GPIO_PIR_1_INV_ID: return PM_GPIO_FUNCTION_PIR_1_INV_CTR;
+
+    // case GPIO_PIR_2_ID: return PM_GPIO_FUNCTION_PIR_2_CTR;
+    // case GPIO_PIR_2_NP_ID: return PM_GPIO_FUNCTION_PIR_2_NP_CTR;
+    // case GPIO_PIR_2_INV_ID: return PM_GPIO_FUNCTION_PIR_2_INV_CTR;
+
+    // case GPIO_PIR_3_ID: return PM_GPIO_FUNCTION_PIR_3_CTR;
+    // case GPIO_PIR_3_NP_ID: return PM_GPIO_FUNCTION_PIR_3_NP_CTR;
+    // case GPIO_PIR_3_INV_ID: return PM_GPIO_FUNCTION_PIR_3_INV_CTR;
+
+  /******************************************************************************************************************
+   * Lights
+  *******************************************************************************************************************/
+
+  /******************************************************************************************************************
+   * Energy
+  *******************************************************************************************************************/
+
+  #ifdef USE_MODULE_ENERGY_ADE7953
+  case  GPIO_ADE7953_IRQ_ID: return PM_GPIO_FUNCTION_ADE7953_IRQ_CTR;        // ADE7953 IRQ
+  #endif
 
 
-    
-
-//GPS?
-//  case GPIO_GPS_SERIAL0_RX
-
+  /******************************************************************************************************************
+   * Displays
+  *******************************************************************************************************************/
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
   case GPIO_NEXTION_RX_ID: return PM_GPIO_FUNCTION_NEXTION_RX_CTR;
   case GPIO_NEXTION_TX_ID: return PM_GPIO_FUNCTION_NEXTION_TX_CTR;
+  #endif // USE_MODULE_DISPLAYS_NEXTION
 
 
-
-  case GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__ID: return PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR;
-  case GPIO_FUNCTION__MODEM_TX__ID: return PM_GPIO_FUNCTION__MODEM_TX__CTR;
-  case GPIO_FUNCTION__MODEM_RX__ID: return PM_GPIO_FUNCTION__MODEM_RX__CTR;
-  case GPIO_FUNCTION__MODEM_POWER__ID: return PM_GPIO_FUNCTION__MODEM_POWER__CTR;
+  // case GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__ID: return PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR;
+  // case GPIO_FUNCTION__MODEM_TX__ID: return PM_GPIO_FUNCTION__MODEM_TX__CTR;
+  // case GPIO_FUNCTION__MODEM_RX__ID: return PM_GPIO_FUNCTION__MODEM_RX__CTR;
+  // case GPIO_FUNCTION__MODEM_POWER__ID: return PM_GPIO_FUNCTION__MODEM_POWER__CTR;
 
 
 

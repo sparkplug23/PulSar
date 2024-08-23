@@ -7,7 +7,7 @@
  * ** Will be turned off when I leave
 \*********************************************************************************************/
 
-// #define USE_MODULE_NETWORKS_MQTT
+// #define USE_MODULE_NETWORK_MQTT
 // #define DEVICE_FORCED_TO_BE_TESTER
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
@@ -1734,11 +1734,8 @@
       "Effects": {
         "Function":"Clock Basic 01",
         "Speed":1,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 2000
+        "Intensity":255,
+        "RateMs": 1000
       },
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
@@ -2065,10 +2062,7 @@
         "Function":"Static Palette",
         "Speed":127,
         "Intensity":127,
-        "Grouping":1
-      },
-      "Transition": {
-        "TimeMs": 0,
+        "Grouping":1,
         "RateMs": 1000
       },
       "BrightnessRGB": 100

@@ -149,7 +149,7 @@
         #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
           #define CONFIG_LITTLEFS_FOR_IDF_3_2
         #endif
-        #include <LITTLEFS.h>
+        #include <LittleFS.h>
       #else
         #include <LittleFS.h>
       #endif
@@ -634,6 +634,9 @@ enum TaskerID
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
     CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
+    EM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED__ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -711,7 +714,7 @@ enum TaskerID
 #endif
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/10_MQTT/mMQTT.h"
-  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
+  #define pCONT_mqtt                                static_cast<mMQTTManager*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/21_WebServer/mWebServer.h"
@@ -1108,6 +1111,11 @@ enum TaskerID
   #include "10_ConSpec/19_MAVLinkFlyingLEDS/mMAVLinkFlyingLEDS.h"
   #define tkr_mavlink_leds                            static_cast<mMavlinkFlyingLEDS*>(pCONT->pModule[TaskerID::CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
+  #include "10_ConSpec/20_DeskSensorsOnOLED/mDeskSensorsOnOLED.h"
+  #define pCONT_DeskSensorsOnOLED        static_cast<mDeskSensorsOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED__ID]) 
+  // Can the above be removed and instead lets get it via the tasker? pCONT->GetModule()
+#endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
@@ -1121,13 +1129,9 @@ class mTaskerManager{
   friend class mTaskerInterface;
 
   public:
-  
-    // mTaskerInterface* pModule[EM_MODULE_LENGTH_ID] = {nullptr}; // Set to nullptr so init can be checked
 
     std::vector<mTaskerInterface*> pModule;
-
-    // vectorise this!
-
+    
   private:
     /* Prevent others from being created */
     mTaskerManager(mTaskerManager const& other) = delete;

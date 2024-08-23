@@ -812,7 +812,7 @@ void mFileSystem::init(void)
 }
 
 
-// Called from tasmota.ino at restart. This inits flash file only
+// This inits flash file only
 void mFileSystem::UfsInit(void) 
 {
 
@@ -825,10 +825,16 @@ void mFileSystem::UfsInit(void)
     fsinit = FILE_SYSTEM.begin(true);
   #else
     fsinit = FILE_SYSTEM.begin();
+    // if(!fsinit)
+    // {
+    //   LittleFS.format();
+    //   fsinit = FILE_SYSTEM.begin();
+    // }
   #endif
   if (!fsinit) {
     DEBUG_PRINTLN(F("FS failed!"));
     // errorFlag = ERR_FS_BEGIN;
+    // delay(5000);
   }else{
     DEBUG_PRINTLN(F("FS mounted."));
   }
@@ -858,10 +864,12 @@ void mFileSystem::UfsInitOnce(void) {
   ffsp = &LittleFS;
   if (!LittleFS.begin()) {
   	AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "!LittleFS.begin()"));
-    ffsp = 0;
+    ffsp = nullptr;
+    delay(5000);
     return;
   }
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM  "LittleFS.begin()"));
+  delay(5000);
 #endif  // ESP8266
 
 #ifdef ESP32

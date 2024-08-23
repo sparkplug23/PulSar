@@ -9,24 +9,31 @@ void MQTTConnection::MqttConnected(void)
   retry_counter = 0;
   cConnectionAttempts = 0; // reset
 
+DEBUG_LINE_HERE
   char lwt_message_ondisconnect_ctr[200];
   sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, pCONT_sup->GetResetReason().c_str(), pCONT_time->GetUptime().c_str() );
   
+DEBUG_LINE_HERE
   #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
     char lwt_topic[40];
-    snprintf_P(lwt_topic, sizeof(lwt_topic), PSTR("%s/status/LWT"), pCONT_set->Settings.system_name.device);
+    snprintf_P(lwt_topic, sizeof(lwt_topic), PSTR("%s/status/LWT"), prefix_topic);
+DEBUG_LINE_HERE
     pubsub->publish(lwt_topic, lwt_message_ondisconnect_ctr, true); // onconnect message
+DEBUG_LINE_HERE
     delay(100);
   #endif
   
+DEBUG_LINE_HERE
   Send_LWT_Online();
     
+DEBUG_LINE_HERE
   // Group name for setting all devices
   subscribe(PSTR("group_all/#"));
     
+DEBUG_LINE_HERE
   // subscribe("<devicename>/set/#");
   subscribe_device(PSTR(D_MQTT_COMMAND "/#"));
-
+DEBUG_LINE_HERE
   // if successful, clear flag
   flag_start_reconnect = false;
   
@@ -34,23 +41,24 @@ void MQTTConnection::MqttConnected(void)
   pCONT->Tasker_Interface(FUNC_MQTT_CONNECTED);
   pCONT->Tasker_Interface(FUNC_MQTT_SUBSCRIBE);
   #endif
+DEBUG_LINE_HERE
 
 }
 
 
 void MQTTConnection::Send_LWT_Online()
 {
-  char lwt_topic[40];
-  snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, pCONT_set->Settings.system_name.device);
-  pubsub->publish(lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true);
+  char lwt_topic[40]; snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, prefix_topic);
+  char payload[40];   snprintf_P(payload, sizeof(payload), PM_MQTT_LWT_PAYLOAD_ONLINE); // Required for ESP8266
+  pubsub->publish(lwt_topic, payload, true);
 }
     
 
 void MQTTConnection::EverySecond()
 {
-
+  
   #ifdef ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-  ALOG_INF(PSTR("MQTTConnection::CheckConnection \"%s\""), broker_url);
+  ALOG_HGL(PSTR("MQTTConnection::CheckConnection \"%s\""), broker_url);
   #endif
   
   if (MqttIsConnected()==false) 
@@ -66,7 +74,6 @@ void MQTTConnection::EverySecond()
 
     if(retry_counter == 0)
     {
-      // reconnect disabled, will be enabled elsewhere
       ALOG_INF(PSTR("reconnect disabled, will be enabled elsewhere"));
     }
     else
@@ -86,7 +93,7 @@ void MQTTConnection::EverySecond()
   {
     #ifdef ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
     ALOG_INF(PSTR("MqttIsConnected == TRUE"));
-    #endif
+    #endif 
     pCONT_set->runtime.global_state.mqtt_down = 0;
     downtime_counter = 0;
     uptime_seconds++;
@@ -99,10 +106,10 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   uint32_t before_millis = millis();
 
-  ALOG_HGL(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION " to \"%s:%d\""), broker_url, port);
+  ALOG_HGL(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION " to \"%s:%d\""), host_address, port);
   
   connected = false;
-  retry_counter = pCONT_mqtt->dt.connection[0].retry;
+  // retry_counter = retry_counter_start_value;// pCONT_mqtt->dt.connection[0].retry;
   pCONT_set->runtime.global_state.mqtt_down = 1;
 
   if(pubsub!=nullptr)
@@ -116,7 +123,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
     }
   );
 
-  pubsub->setServer(broker_url, port); // main broker
+  pubsub->setServer(host_address, port); // main broker
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
@@ -125,25 +132,28 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   char lwt_topic[40];
   snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, pCONT_set->Settings.system_name.device);
 
-  uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
+  uint8_t loglevel = LOG_LEVEL_INFO;
   #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
   loglevel = LOG_LEVEL_TEST;
   #endif
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel, PSTR("client_name = %s"), pCONT_mqtt->dt.connection[0].client_name);
+  AddLog(loglevel, PSTR("client_name = %s"), client_name);
   AddLog(loglevel, PSTR("lwt_topic = %s"), lwt_topic);
   AddLog(loglevel, PSTR("lwt_message_ondisconnect_ctr = %s"), lwt_message_ondisconnect_ctr);
   #endif// ENABLE_LOG_LEVEL_INFO
 
-  AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect START                 Connect"));
+  AddLog(LOG_LEVEL_INFO, PSTR("mMQTTManager::MqttReconnect START              Connect"));
 
-  if(pubsub->connect(pCONT_mqtt->dt.connection[0].client_name, lwt_topic, WILLQOS_CTR ,WILLRETAIN_CTR, lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
+DEBUG_LINE_HERE
+  if(pubsub->connect(client_name, lwt_topic, WILLQOS_CTR, WILLRETAIN_CTR, lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
     
+DEBUG_LINE_HERE
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Connected"));
+    AddLog(LOG_LEVEL_INFO, PSTR("mMQTTManager::MqttReconnect Connected"));
     #endif // ENABLE_LOG_LEVEL_INFO
     MqttConnected();
     
+DEBUG_LINE_HERE
     flag_start_reconnect = false;
     retry_counter = 0; // disables it running again
 
@@ -153,11 +163,12 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   else
   {
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Failed %d"),pubsub->state());
+    AddLog(LOG_LEVEL_INFO, PSTR("mMQTTManager::MqttReconnect Failed %d"),pubsub->state());
     #endif // 
     MqttDisconnected(pubsub->state());  // status codes are documented here http://pubsubclient.knolleary.net/api.html#state
   }
   
+DEBUG_LINE_HERE
   uint32_t elapsed_millis = millis() - before_millis;
 
   ALOG_INF(PSTR("MqttReconnect elapsed_millis = %d"), elapsed_millis);
@@ -174,7 +185,7 @@ void MQTTConnection::MqttDisconnected(int state)
   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "Connection FAILED, state = [%s], retrying in %d ms"),state_ctr(),rSavedReconnectAttempt);
 
   connected = false;
-  retry_counter = pCONT_mqtt->dt.connection[0].retry; // begin reconnect phase
+  retry_counter = retry_counter_start_value;// pCONT_mqtt->dt.connection[0].retry; // begin reconnect phase
 
   // pubsub->disconnect();
 
@@ -225,16 +236,16 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
 
     #ifdef ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
     uint16_t estimated_commands = JBI->estimateJsonKeyValuePairs(data_buffer.payload.ctr, data_buffer.payload.length_used);
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
-    ALOG_HGL(PSTR("estimated_commands %d"), estimated_commands);
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+    ALOG_INF(PSTR("estimated_commands %d"), estimated_commands);
 
     #endif
 
-      ALOG_INF( PSTR(D_LOG_MQTT "{\"CommandsMatched before parsing started\":%d}"), data_buffer.isserviced);
-      
+      // ALOG_INF( PSTR(D_LOG_MQTT "{\"CommandsMatched before parsing started\":%d}"), data_buffer.isserviced);
+
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
-    ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
+    ALOG_INF( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
 
     #ifdef ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
 
@@ -248,15 +259,23 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
 
 }
 
-boolean MQTTConnection::subscribe(const char* topic) {
-  ALOG_INF( PSTR("Subscribing to \"%s\""), topic );
-  return pubsub->subscribe(topic, 0);
+boolean MQTTConnection::subscribe(const char* topic) {  
+  char ttopic[70] = {0};
+DEBUG_LINE_HERE
+DEBUG_LINE_HERE
+  strncpy_P(ttopic, topic, strlen(topic));
+DEBUG_LINE_HERE
+  ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
+DEBUG_LINE_HERE
+if(pubsub)
+DEBUG_LINE_HERE
+  return pubsub->subscribe(ttopic, 0); // Expects topic in RAM (not PSTR)
 }
 
 boolean MQTTConnection::subscribe_device(const char* topic) {
   char ttopic[70];
   memset(ttopic,0,sizeof(ttopic));
-  sprintf(ttopic,PSTR("%s/%s"),pCONT_mqtt->dt.connection[0].prefixtopic,topic);
+  sprintf(ttopic, PSTR("%s/%s"), prefix_topic, topic);
   ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
   return pubsub->subscribe(ttopic, 0);
 }
@@ -332,31 +351,24 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
   char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
 
-  // pCONT_mqtt->TopicFormatted(module_name, topic_type_id, topic_postfix, topic_ctr, sizeof(topic_ctr));  // Needs fixed
-
   if(topic_type_id == MQTT_TOPIC_LWT_ONLINE_ID)
   {
-
-    // case MQTT_TOPIC_TYPE_LWT_ONLINE_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
-
-    snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/LWT", D_TOPIC_STATUS);//, D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
+    snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/LWT", D_TOPIC_STATUS);
   }
   else
-  {
-    //can be replaced with a function call
+  {    
     switch(topic_type_id){
-      case MQTT_TOPIC_TYPE_SYSTEM_ID: break; // nothing
-      case MQTT_TOPIC_TYPE_IFCHANGED_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
-      case MQTT_TOPIC_TYPE_ROC1M_ID: sprintf(topic_id_ctr,"%s/","roc1m"); break;
-      case MQTT_TOPIC_TYPE_ROC10M_ID: sprintf(topic_id_ctr,"%s/","roc10m"); break;
-      case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_TELEPERIOD_CTR); break;
-      case MQTT_TOPIC_TYPE__DEBUG__ID: sprintf(topic_id_ctr,"%s/","debug"); break;
-      default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
+      default:    
+      case MQTT_TOPIC_TYPE_IFCHANGED_ID:  sprintf(topic_id_ctr,"ifchanged/"); break;
+      case MQTT_TOPIC_TYPE_ROC1M_ID:      sprintf(topic_id_ctr,"roc1m/");     break;
+      case MQTT_TOPIC_TYPE_ROC10M_ID:     sprintf(topic_id_ctr,"roc10m/");    break;
+      case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"tele/");      break;
+      case MQTT_TOPIC_TYPE__DEBUG__ID:    sprintf(topic_id_ctr,"debug/");     break;
+      case MQTT_TOPIC_TYPE_SYSTEM_ID:      /*** none ***/                     break;
     }
-
-    snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
-
+    snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix); // PSTR will crash
   }
+
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
   ALOG_INF( PSTR(D_LOG_MQTT "topic_ctr=\"%s\""), topic_ctr );
   #endif
@@ -407,7 +419,7 @@ boolean MQTTConnection::publish_device(const char* topic, const char* payload, b
   }
 
   char convctr[100]; memset(convctr,0,sizeof(convctr));
-  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_mqtt->dt.connection[0].prefixtopic,topic);
+  snprintf(convctr, sizeof(convctr), PSTR("%s/%S"), prefix_topic, topic);
   
   ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
   ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
@@ -428,7 +440,7 @@ boolean MQTTConnection::publish_device(const char* topic, const char* payload, b
 boolean MQTTConnection::publish_device_P(const char* topic, const char* payload, boolean retained){
 
   char convctr[100]; memset(convctr,0,sizeof(convctr));
-  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_mqtt->dt.connection[0].prefixtopic,topic);
+  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"), prefix_topic, topic);
   return pubsub->publish_P(convctr, payload, retained);
     
 }
