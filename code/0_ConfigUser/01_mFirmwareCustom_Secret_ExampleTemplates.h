@@ -15,7 +15,6 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 /**
  * TESTBED_PRODUCTION

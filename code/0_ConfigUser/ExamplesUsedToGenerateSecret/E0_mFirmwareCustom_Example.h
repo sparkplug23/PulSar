@@ -22,7 +22,6 @@
 // #endif
 // #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 // #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-// #include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 
 // /************************************************************************************************************************************************************

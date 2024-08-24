@@ -16,9 +16,6 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 
-//#include "//2_CoreSystem/11_Languages/mLanguage.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
-
 #ifdef ESP32
   #include <WiFi.h>
 #endif
