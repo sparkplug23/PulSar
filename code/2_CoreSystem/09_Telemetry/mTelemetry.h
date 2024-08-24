@@ -9,7 +9,6 @@
 #include "3_Network/10_MQTT/mMQTT.h"
 #include "2_CoreSystem/08_Logging/mLogging.h"
 #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 #include "2_CoreSystem/07_Time/mTime.h"
 #include <Ticker.h>
 

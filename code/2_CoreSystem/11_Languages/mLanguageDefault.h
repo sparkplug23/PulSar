@@ -2376,6 +2376,18 @@
 #define D_JSON_DESERIALIZATION_ERROR "DeserializationError"
 
   
+  #define            D_MODULE_NAME_NODEMCU_CTR            "NodeMCU"
+  #define            D_MODULE_NAME_USERMODULE_CTR            "User Module"
+  #define            D_MODULE_NAME_SONOFF_BASIC_CTR       "Sonoff Basic"
+  #define            D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR       "Sonoff BasEx"
+  #define            D_MODULE_NAME_H801_CTR               "H801"
+  #define            D_MODULE_NAME_MAGICHOME_CTR          "MagicHome"
+  #define            D_MODULE_NAME_SHELLY1_CTR       "Shelly 1"
+  #define            D_MODULE_NAME_SHELLY2P5_CTR       "Shelly 2"
+  #define            D_MODULE_NAME_SHELLY_DIMMER2_CTR       "Shelly Dimmer 2"
+  #define            D_MODULE_NAME_SONOFF_4CHPRO_CTR       "Sonoff 4CHPRO"
+  #define            D_MODULE_NAME_SONOFF_IFAN03_CTR       "Sonoff IFAN03"
+
 
 /********************************************************************************************/
 

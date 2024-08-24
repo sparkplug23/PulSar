@@ -16,7 +16,6 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 
 /**************************************************************************************************************************************************
@@ -572,7 +571,6 @@
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
     
-    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
     #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -734,7 +732,6 @@
 //     
 //     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 //     #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-//     #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
 //     #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
 //     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 //     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER

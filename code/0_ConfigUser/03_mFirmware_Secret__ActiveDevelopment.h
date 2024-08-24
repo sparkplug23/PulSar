@@ -14,7 +14,6 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -285,7 +284,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   #define ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
 
-
+  #define ESP32
 
   /***********************************
    * SECTION: System Debug Options

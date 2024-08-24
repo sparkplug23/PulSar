@@ -124,8 +124,6 @@ struct functionhandler {
 #endif
 
 #include "1_TaskerManager/mTaskerManager.h"
-//#include "//2_CoreSystem/11_Languages/mLanguage.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"
 #include "2_CoreSystem/08_Logging/mLogging.h"
 #include "2_CoreSystem/07_Time/mTime.h"
 #include "2_CoreSystem/01_Settings/mSettings.h"

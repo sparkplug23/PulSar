@@ -89,7 +89,7 @@
 
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "1_TaskerManager/mTaskerManager_Defines.h"
-#include "2_CoreSystem/04_HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
+#include "2_CoreSystem/05_HardwarePins/mHardwarePins_Templates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
 
 #include "1_TaskerManager/mTasks.h"
