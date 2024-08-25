@@ -51,7 +51,7 @@ void mOLED_SH1106::MQTTHandler_Set_DefaultPeriodRate()
 void mOLED_SH1106::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_OLED_SH1106_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

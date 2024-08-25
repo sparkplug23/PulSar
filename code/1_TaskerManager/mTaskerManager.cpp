@@ -272,10 +272,10 @@ void mTaskerManager::JSONCommand_Run(char* json)
 
 
 
-void mTaskerManager::addTasker(TaskerID id, mTaskerInterface* mod)
+void mTaskerManager::addTasker(mTaskerInterface* mod)
 {
   pModule.push_back(mod);
-  Serial.printf("AddTasker[%d]\t%S\n\r", id, mod->GetModuleName());
+  Serial.printf("AddTasker[]\t%S\n\r", mod->GetModuleName());
 }
 
 
@@ -286,35 +286,35 @@ uint8_t mTaskerManager::Instance_Init()
    * @brief Core Modules
    **/
   #ifdef USE_MODULE_CORE_SETTINGS
-  addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
+  addTasker(new mSettings());
   #endif 
   #ifdef USE_MODULE_CORE_FILESYSTEM
-  addTasker(EM_MODULE_CORE_FILESYSTEM_ID, new mFileSystem());
+  addTasker(new mFileSystem());
   #endif
   #ifdef USE_MODULE_CORE_HARDWAREPINS
-  addTasker(EM_MODULE_CORE_HARDWAREPINS_ID, new mHardwarePins());
+  addTasker(new mHardwarePins());
   #endif 
 
 
   #ifdef USE_MODULE_CORE_SUPPORT
-  addTasker(EM_MODULE_CORE_SUPPORT_ID, new mSupport());
+  addTasker(new mSupport());
   #endif 
   #ifdef USE_MODULE_CORE_TIME
-  addTasker(EM_MODULE_CORE_TIME_ID, new mTime());
+  addTasker(new mTime());
   #endif 
 
 
   #ifdef USE_MODULE_CORE_LOGGING
-  addTasker(EM_MODULE_CORE_LOGGING_ID, new mLogging());
+  addTasker(new mLogging());
   #endif 
   #ifdef USE_MODULE_CORE_TELEMETRY
-  addTasker(EM_MODULE_CORE_TELEMETRY_ID, new mTelemetry());
+  addTasker(new mTelemetry());
   #endif 
   #ifdef USE_MODULE_CORE_RULES
-  addTasker(EM_MODULE_CORE_RULES_ID, new mRuleEngine());
+  addTasker(new mRuleEngine());
   #endif
   #ifdef USE_MODULE_CORE_UPDATES
-  addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());
+  addTasker(new mUpdates());
   #endif
   // #ifdef USE_MODULE_CORE_SERIAL_UART
   // addTasker(EM_MODULE_CORE_SERIAL_UART_ID, new mSerialUART());
@@ -323,16 +323,16 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(TaskerID::CORE__SERIAL, new mSerial());
   #endif
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
-  addTasker(EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID, new mDevelopmentDebugging());
+  addTasker(new mDevelopmentDebugging());
   #endif 
   /**
    * @brief Network
    **/
   #ifdef USE_MODULE_NETWORK_INTERFACE
-  addTasker(EM_MODULE__NETWORK_INTERFACE__ID, new mInterfaceNetwork());
+  addTasker(new mInterfaceNetwork());
   #endif 
   #ifdef USE_MODULE_NETWORK_WIFI
-  addTasker(EM_MODULE_NETWORK_WIFI_ID, new mWiFi());
+  addTasker(new mWiFi());
   #endif 
   #ifdef USE_MODULE_NETWORK_ETHERNET
     //EM_MODULE_NETWORK_ETHERNET_ID,
@@ -342,16 +342,16 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE__NETWORK_CELLULAR__ID, new mCellular());
   #endif
   #ifdef USE_MODULE_NETWORK_MQTT
-  addTasker(EM_MODULE_NETWORK_MQTT_ID, new mMQTTManager());
+  addTasker(new mMQTTManager());
   #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
-  addTasker(EM_MODULE_NETWORK_WEBSERVER_ID, new mWebServer());
+  addTasker(new mWebServer());
   #endif
   /**
    * @brief Drivers
    **/
   #ifdef USE_MODULE_DRIVERS_INTERFACE
-  addTasker(EM_MODULE_DRIVERS_INTERFACE_ID, new mDriverInterface());
+  addTasker(new mDriverInterface());
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
   INCLUDE_FIX"4_Drivers/03_LEDs/mLEDs.h"
@@ -359,7 +359,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
-  addTasker(EM_MODULE_DRIVERS_RELAY_ID, new mRelays());
+  addTasker(new mRelays());
   #endif
   #ifdef USE_MODULE_DRIVERS_PWM
     INCLUDE_FIX"4_Drivers/PWM/mPWM.h"
@@ -471,7 +471,7 @@ uint8_t mTaskerManager::Instance_Init()
    * @brief Sensors
    **/
   #ifdef USE_MODULE_SENSORS_INTERFACE
-  addTasker(EM_MODULE_SENSORS_INTERFACE_ID, new mSensorsInterface());
+  addTasker(new mSensorsInterface());
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSwitches());
@@ -480,13 +480,13 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_SENSORS_BUTTONS_ID, new mButtons());
   #endif
   #ifdef USE_MODULE_SENSORS_BME
-  addTasker(EM_MODULE_SENSORS_BME_ID, new mBME());
+  addTasker(new mBME());
   #endif
   #ifdef USE_MODULE_SENSORS_DHT
   addTasker(EM_MODULE_SENSORS_DHT_ID, new mSensorsDHT());
   #endif
   #ifdef USE_MODULE_SENSORS_BH1750
-  addTasker(EM_MODULE_SENSORS_BH1750_ID, new mBH1750());
+  addTasker(new mBH1750());
   #endif
   #ifdef USE_MODULE_SENSORS_MOTION
   addTasker(EM_MODULE_SENSORS_MOTION_ID, new mMotion());
@@ -538,7 +538,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
-  addTasker(EM_MODULE_SENSORS_SOLAR_LUNAR_ID, new mSolarLunar());
+  addTasker(new mSolarLunar());
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     INCLUDE_FIX"5_Sensors/UltraSonic/mUltraSonicSensor.h"
@@ -561,7 +561,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  addTasker(EM_MODULE_SENSORS__DS18X20__ID, new mDB18x20_ESP32());
+  addTasker(new mDB18x20_ESP32());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   addTasker(EM_MODULE__SENSORS_GPS_SERIAL__ID, new mGPS_Serial());
@@ -580,19 +580,19 @@ uint8_t mTaskerManager::Instance_Init()
    * @brief Lights
    **/
   #ifdef USE_MODULE_LIGHTS_INTERFACE
-  addTasker(EM_MODULE_LIGHTS_INTERFACE_ID, new mInterfaceLight());
+  addTasker(new mInterfaceLight());
   #endif
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  addTasker(EM_MODULE_LIGHTS_ANIMATOR_ID, new mAnimatorLight());
+  addTasker(new mAnimatorLight());
   #endif
   /**
    * @brief Energy
    **/
   #ifdef USE_MODULE_ENERGY_INTERFACE
-  addTasker(EM_MODULE_ENERGY_INTERFACE_ID, new mEnergyInterface());
+  addTasker(new mEnergyInterface());
   #endif
   #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  addTasker(EM_MODULE_ENERGY_PZEM004T_V3_ID, new mEnergyPZEM004T());
+  addTasker(new mEnergyPZEM004T());
   #endif
   #ifdef USE_MODULE_ENERGY_ADE7953
     INCLUDE_FIX"7_Energy/02_ADE7953/mADE7953.h"
@@ -600,16 +600,16 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_ENERGY_INA219
-  addTasker(EM_MODULE_ENERGY_INA219_ID, new mEnergyINA219());
+  addTasker(new mEnergyINA219());
   #endif
   /**
    * @brief Displays
    **/
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
-  addTasker(EM_MODULE_DISPLAYS_INTERFACE_ID, new mDisplaysInterface());
+  addTasker(new mDisplaysInterface());
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-  addTasker(EM_MODULE_DISPLAYS_NEXTION_ID, new mNextionPanel());
+  addTasker(new mNextionPanel());
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
     INCLUDE_FIX"8_Displays/02_OLED_SSD1606/mOLED_SSD1306.h"
@@ -617,7 +617,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-  addTasker(EM_MODULE_DISPLAYS_OLED_SH1106_ID, new mOLED_SH1106());
+  addTasker(new mOLED_SH1106());
   #endif
   /**
    * @brief Controller Generic (Generic)
@@ -665,7 +665,7 @@ uint8_t mTaskerManager::Instance_Init()
   // USE_MODULE_CONTROLLER_UARTLOGGER
   // USE_MODULE_CONTROLLER_INTERNAL_CLOCK
   #ifdef USE_MODULE_CONTROLLER_HVAC
-  addTasker(EM_MODULE_CONTROLLER__HVAC__ID, new mHVAC());
+  addTasker(new mHVAC());
   #endif
   #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
     INCLUDE_FIX"9_Controller/41_HVAC_Remote/mHVAC.h"
@@ -673,10 +673,10 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
-  addTasker(EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID, new mSensorColourBar());
+  addTasker(new mSensorColourBar());
   #endif
   #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
-  addTasker(EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID, new mRelayStateLEDStrip());
+  addTasker(new mRelayStateLEDStrip());
   #endif
   // 50_Animator_Input_Controller
   // 51_Animator_Playlists
@@ -767,7 +767,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(EM_MODULE_CORE_SETTINGS_ID, new mSettings());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
-  addTasker(EM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED__ID, new mDeskSensorsOnOLED());
+  addTasker(new mDeskSensorsOnOLED());
   #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     INCLUDE_FIX"9_Controller/UserMod_01/mUserMod_01.h"
@@ -791,7 +791,7 @@ uint8_t mTaskerManager::Instance_Init()
 
 uint16_t mTaskerManager::GetClassCount()
 {
-  return EM_MODULE_LENGTH_ID;
+  return pModule.size();
 }
 
 

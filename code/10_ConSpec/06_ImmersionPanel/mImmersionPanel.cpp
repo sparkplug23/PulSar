@@ -404,7 +404,7 @@ void mImmersionPanel::MQTTHandler_Set_DefaultPeriodRate()
 void mImmersionPanel::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

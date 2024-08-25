@@ -397,7 +397,7 @@ void mInternalClock::MQTTHandler_Set_DefaultPeriodRate()
 void mInternalClock::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_INTERNAL_CLOCK_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

@@ -72,7 +72,7 @@ void mLDRBasic::MQTTHandler_Set_DefaultPeriodRate()
 void mLDRBasic::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_LDR_BASIC_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

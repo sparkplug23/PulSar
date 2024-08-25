@@ -468,7 +468,7 @@ void mSensorsMPU9250::MQTTHandler_Set_DefaultPeriodRate()
 void mSensorsMPU9250::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_MPU9250_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

@@ -406,7 +406,7 @@ void mUserMod_01::MQTTHandler_Set_DefaultPeriodRate()
 void mUserMod_01::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_USERMOD_01_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

@@ -746,7 +746,7 @@ void mSensorsLSM303D::MQTTHandler_Set_DefaultPeriodRate()
 void mSensorsLSM303D::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_LSM303D_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

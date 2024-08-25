@@ -344,6 +344,41 @@ bool MQTTConnection::MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t mod
 
 }
 
+/**
+ * @brief 
+ * 
+ * @param topic_type 
+ * @param module_id 
+ * @param postfix_topic_ctr 
+ * @return true  if packet was sent
+ * @return false if not successful
+ */
+bool MQTTConnection::MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uint16_t unique_id, const char* postfix_topic_ctr)
+{
+
+  PGM_P module_ctr = pCONT->FindModuleClassNameByID(unique_id);
+
+  #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  Serial.printf("buffer length = %d\n\r", strlen(data_buffer.payload.ctr));
+  #endif
+
+  bool sent_status = false;
+
+  sent_status =  publish_ft(module_ctr,
+             topic_type,
+             postfix_topic_ctr,
+             data_buffer.payload.ctr,
+             pCONT_set->Settings.sensors.flags.mqtt_retain
+            );
+
+  if(sent_status)
+  {
+    tSaved_LastOutGoingTopic = millis();
+  }
+
+  return sent_status;
+
+}
 
 
 bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){

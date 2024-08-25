@@ -61,7 +61,7 @@ void mWebCamera::MQTTHandler_Set_DefaultPeriodRate()
 void mWebCamera::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

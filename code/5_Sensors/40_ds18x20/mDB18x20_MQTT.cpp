@@ -69,7 +69,7 @@ void mDoorSensor::MQTTHandler_Set_DefaultPeriodRate()
 void mDoorSensor::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_DOOR_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 
