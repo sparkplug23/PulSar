@@ -10,11 +10,6 @@
 String messageHead, messageSub;
 byte optionType;
 
-
-const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
-const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR;
-
-
 // uint8_t webserver_state = HTTP_OFF;
 
 // void mWebServer::init(void){

@@ -3,9 +3,6 @@
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
 
 
-const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE_CONTROLLER_DOORBELL_CTR;
-const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR = D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR;
-
 /**
  * phase out, this will be a button instead, linked via rules
  * so "Init()" will append the neccesary rule

@@ -216,7 +216,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 
 ; [env:esp_8266_hvac_bedroom]
 ; build_flags = ${common.build_flags} -D DEVICE_HVAC_BEDROOM -w 
-;                                     -D D_USER_MICHAEL
+;                                     -D USE_USER_MICHAEL
 ; lib_extra_dirs = ${common.lib_extra_dirs}
 ;               lib/lib_sensor
 ; ; upload_port = heating
@@ -255,7 +255,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 
 ; [env:esp_8266_rgbroof]
 ; build_flags = ${common.build_flags} 
-;                 -D DEVICE_RGBROOF -w -D D_USER_MICHAEL
+;                 -D DEVICE_RGBROOF -w -D USE_USER_MICHAEL
 ; ; lib_deps =
 ; ;     FastLED@3.3.2
 ; ; monitor_filters = esp8266_exception_decoder
@@ -295,7 +295,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 
 ; [env:esp_8266_bedroompanel]
 ; build_flags = ${common.build_flags} -D DEVICE_BEDROOMPANEL -w
-;                 -D D_USER_MICHAEL
+;                 -D USE_USER_MICHAEL
 ; ; upload_port = bedroompanel.local
 ; ; upload_protocol = espota
 ; ; extra_scripts             =   gzip_fw.py
@@ -378,7 +378,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 
 ; [env:esp_8266_bedroomblinds]
 ; build_flags = ${common.build_flags} -D DEVICE_BEDROOMBLINDS -w
-;                 -D D_USER_MICHAEL
+;                 -D USE_USER_MICHAEL
 ; ;upload_port = bedroomblinds.local
 ; upload_port = 192.168.1.226
 
@@ -411,7 +411,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_rgbstring_lights1]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_LIGHTS1 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_LIGHTS1 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -428,7 +428,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_rgbstring_lights2]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_LIGHTS2 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_LIGHTS2 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -446,7 +446,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_rgbstring_garden_tree_1]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_GARDEN_TREE_1 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_GARDEN_TREE_1 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -464,7 +464,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_rgb_controller_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_CONTROLLER_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_CONTROLLER_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -482,7 +482,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_rgbstatic_controller_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -499,7 +499,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_jacqueline_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_JACQUELINE_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_JACQUELINE_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -517,7 +517,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_paula_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_PAULA_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_PAULA_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -535,7 +535,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_therese_rgb_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_THERESE_RGB_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_THERESE_RGB_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -554,7 +554,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_therese_grb_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_THERESE_GRB_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_CONTROLLER_STATIC_THERESE_GRB_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -576,7 +576,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_diningroom_01]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_DININGROOM_CONTROLLER_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_DININGROOM_CONTROLLER_01 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -593,7 +593,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_diningroom_02]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_DININGROOM_CONTROLLER_02 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_DININGROOM_CONTROLLER_02 -w -D USE_USER_MICHAEL
 ; ; board                     = esp12e
 ;             ;  -DENABLE_BUG_TRACING
 ; ; monitor_filters = esp8266_exception_decoder
@@ -611,7 +611,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_hallway_tree]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01 -w -D USE_USER_MICHAEL
 ; upload_protocol = espota
 ; extra_scripts   =  gzip_fw.py
 ; ; upload_port=COM5
@@ -621,7 +621,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; [env:esp_8266_xmas_hallway_tree2]
 ; platform                  = ${common.platform}
 ; build_flags               = ${common.build_flags}
-;                                  -D DEVICE_RGBSTRING_HALLWAY2_CONTROLLER_01 -w -D D_USER_MICHAEL
+;                                  -D DEVICE_RGBSTRING_HALLWAY2_CONTROLLER_01 -w -D USE_USER_MICHAEL
 ; upload_protocol = espota
 ; extra_scripts   =  gzip_fw.py
 ; ; upload_port=COM5
@@ -661,7 +661,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; platform                  = ${core_2_6_1.platform}
 ; build_flags               = ${core_2_6_1.build_flags}
 ;                                  -D DEVICE_H801_SUNLIGHT -w
-;                 -D D_USER_MICHAEL
+;                 -D USE_USER_MICHAEL
 ; upload_protocol = espota
 ; extra_scripts             = gzip_fw.py
 ; upload_port = h801_sunlight
@@ -674,7 +674,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
 ; platform                  = ${core_2_6_1.platform}
 ; build_flags               = ${core_2_6_1.build_flags}
 ;                                  -D DEVICE_RGBBEDROOMFLOOR -w
-;                 -D D_USER_MICHAEL
+;                 -D USE_USER_MICHAEL
 ; upload_protocol = espota
 ; extra_scripts             = gzip_fw.py
 ; ; upload_port = rgbbedroomfloor

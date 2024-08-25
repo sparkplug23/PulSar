@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_SENSORS_EXAMPLE
 
-const char* mExampleClass::PM_MODULE_SENSORS_EXAMPLE_CTR = D_MODULE_SENSORS_EXAMPLE_CTR;
-const char* mExampleClass::PM_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR = D_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR;
-
 int8_t mExampleClass::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;

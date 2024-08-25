@@ -79,7 +79,7 @@ upload_port = 192.168.1.215
 
 [env:esp_8266_hvac_kitchen]
 build_flags = ${common.build_flags} -D DEVICE_HVAC_KITCHEN -w 
-                                    -D D_USER_MICHAEL
+                                    -D USE_USER_MICHAEL
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_sensor
 ; upload_port = COM34
@@ -94,7 +94,7 @@ upload_port = 192.168.0.54
 
 [env:esp_8266_hvac_bedroom_rad]
 build_flags = ${common.build_flags} -D DEVICE_HVAC_BEDROOM_RAD -w 
-                                    -D D_USER_MICHAEL
+                                    -D USE_USER_MICHAEL
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_sensor
 ; upload_port = COM5

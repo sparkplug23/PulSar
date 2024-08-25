@@ -1,11 +1,5 @@
 #include "2_CoreSystem/08_Logging/mLogging.h"
 
-
-const char* mLogging::PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
-const char* mLogging::PM_MODULE_CORE_LOGGING_FRIENDLY_CTR = D_MODULE_CORE_LOGGING_FRIENDLY_CTR;
-
-
-
 void mLogging::init(void){
   // StartTelnetServer();
 }

@@ -22,9 +22,6 @@
 
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
 
-const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
-const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
-
 // /*********************************************************************************************/
 
 void mShellyDimmer::init(void)

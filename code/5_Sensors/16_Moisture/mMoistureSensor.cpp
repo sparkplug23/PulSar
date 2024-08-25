@@ -2,11 +2,6 @@
 
 #ifdef USE_MODULE_SENSORS_MOISTURE
 
-const char* mMoistureSensor::PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_MOTION_CTR;
-const char* mMoistureSensor::PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR = D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
-
-
-
 void mMoistureSensor::init(void){
   //PIR_DETECT_INIT();
 

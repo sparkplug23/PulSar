@@ -114,10 +114,8 @@ class mFurnaceSensor :
     // };
 
 
-    static const char* PM_MODULE_CONTROLLER_FURNACE_SENSOR_CTR;
-    static const char* PM_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_FURNACE_SENSOR_CTR = D_MODULE_CONTROLLER_FURNACE_SENSOR_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_FURNACE_SENSOR_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_FURNACE_SENSOR_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

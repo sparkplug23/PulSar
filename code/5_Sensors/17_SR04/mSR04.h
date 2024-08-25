@@ -41,10 +41,8 @@ class mSR04 :
     void Pre_Init(void);
     void Init(void);
     
-    static const char* PM_MODULE_SENSORS_SR04_CTR;
-    static const char* PM_MODULE_SENSORS_SR04_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_SR04_CTR = D_MODULE_SENSORS_SR04_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SR04_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_SR04_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SR04_ID; }
 
     #define MAX_SENSORS_SR04_COUNT 1

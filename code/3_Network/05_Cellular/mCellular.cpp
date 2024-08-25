@@ -18,8 +18,6 @@
 
 #ifdef USE_MODULE_NETWORK_CELLULAR
 
-const char* mCellular::PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
-const char* mCellular::PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR = D_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR;
 
 int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
 {

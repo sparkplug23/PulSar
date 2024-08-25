@@ -2,10 +2,6 @@
 
 // #ifdef USE_MODULE_CORE_TIME
 
-const char* mTime::PM_MODULE_CORE_TIME_CTR = D_MODULE_CORE_TIME_CTR;
-const char* mTime::PM_MODULE_CORE_TIME_FRIENDLY_CTR = D_MODULE_CORE_TIME_FRIENDLY_CTR;
-
-
 /**
  * @brief: Module Interface
  * */

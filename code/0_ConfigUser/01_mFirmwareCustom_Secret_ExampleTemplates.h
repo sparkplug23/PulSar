@@ -47,7 +47,7 @@
 /**
  * Device Type: Shelly 1
  * Modules:   
- *  - 2 Mains " D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "
+ *  - 2 Mains " D_MODULE_DRIVERS_RELAY_CTR "
  *  - 2 Mains Inputs
  *  - Energy monitoring (Voltage, Current and power)
  *  - Reset button on PCB
@@ -107,10 +107,10 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
@@ -128,13 +128,13 @@
     // Switch0 Toggle = Relay0 Power Toggle
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -167,13 +167,13 @@
     // Switch0 HIGH = Relay0 Power ON for Timed seconds
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
@@ -182,7 +182,7 @@
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
@@ -208,7 +208,7 @@
 /**
  * Device Type: Shelly 2.5
  * Modules:   
- *  - 2 Mains " D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "
+ *  - 2 Mains " D_MODULE_DRIVERS_RELAY_CTR "
  *  - 2 Mains Inputs
  *  - Energy monitoring (Voltage, Current and power)
  *  - Reset button on PCB
@@ -279,11 +279,11 @@
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\""
       "],"
@@ -311,13 +311,13 @@
     // Switch0 Toggle = Relay0 Power Toggle
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -326,13 +326,13 @@
     // Switch1 Toggle = Relay1 Power Toggle
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -347,7 +347,7 @@
         "\"State\":2" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
@@ -386,13 +386,13 @@
     // Switch0 HIGH = Relay0 Power ON for Timed seconds
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
@@ -401,7 +401,7 @@
     // Switch1 HIGH = Relay1 Power ON for Timed seconds
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1"      // 2 meaning either low or high, 1 would be high only
@@ -414,7 +414,7 @@
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule2\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
@@ -429,7 +429,7 @@
     // Switch1 HIGH = Motion1 Event Started, ie report as motion with motion name
     "\"Rule3\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1" // 
@@ -486,7 +486,7 @@
     // Motion Event = Switch0
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
@@ -501,7 +501,7 @@
     // Motion Event = Switch1
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
@@ -553,7 +553,7 @@
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
       "]"
@@ -565,7 +565,7 @@
   "{"
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
@@ -580,7 +580,7 @@
     "},"
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
@@ -851,7 +851,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
       "]"
@@ -899,7 +899,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
       "]"
@@ -948,7 +948,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
       "]"
@@ -993,7 +993,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
       "]"
@@ -1131,35 +1131,35 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
       "],"      
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_BME_CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\""
       "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
       "],"
-      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
       "],"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
       "},"  
-      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
       "]"  
     "},"
@@ -1170,12 +1170,12 @@
       "],"
       "\"" "SetOutput" "\":["
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "},"
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"

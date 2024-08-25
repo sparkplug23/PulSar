@@ -20,9 +20,6 @@
 
 #ifdef USE_MODULE_SENSORS_DHT
 
-const char* mSensorsDHT::PM_MODULE_SENSORS_DHT_CTR = D_MODULE_SENSORS_DHT_CTR;
-const char* mSensorsDHT::PM_MODULE_SENSORS_DHT_FRIENDLY_CTR = D_MODULE_SENSORS_DHT_FRIENDLY_CTR;
-
 int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){

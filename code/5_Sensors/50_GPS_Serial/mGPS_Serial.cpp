@@ -273,12 +273,6 @@ static void static_disableUBX()
 }
 
 
-
-
-const char* mGPS_Serial::PM_MODULE_SENSORS__GPS_SERIAL_CTR = D_MODULE_SENSORS__GPS_SERIAL__CTR;
-const char* mGPS_Serial::PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR = D_MODULE_SENSORS__GPS_SERIAL__FRIENDLY_CTR;
-
-
 int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
 
   /************

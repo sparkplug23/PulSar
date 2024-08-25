@@ -17,9 +17,6 @@
 
 #ifdef USE_MODULE_NETWORK_INTERFACE
 
-const char* mInterfaceNetwork::PM_MODULE__NETWORK_INTERFACE__CTR = D_MODULE__NETWORK_INTERFACE__CTR;
-const char* mInterfaceNetwork::PM_MODULE__NETWORK_INTERFACE__FRIENDLY_CTR = D_MODULE__NETWORK_INTERFACE__FRIENDLY_CTR;
-
 int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
 
   /************

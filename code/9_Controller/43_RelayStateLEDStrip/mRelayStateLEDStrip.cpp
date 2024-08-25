@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
 
-const char* mRelayStateLEDStrip::PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR = D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR;
-const char* mRelayStateLEDStrip::PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__FRIENDLY_CTR = D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__FRIENDLY_CTR;
-
 /**
  * @brief: Module Interface
  * */
@@ -251,7 +248,7 @@ uint8_t mRelayStateLEDStrip::ConstructJSON_State(uint8_t json_level, bool json_a
  */
 uint8_t mRelayStateLEDStrip::AppendJSONResponse_Drivers_Unified()
 {
-  JBI->Level_Start_P(PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__FRIENDLY_CTR);
+  JBI->Level_Start_P(PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR);
     ConstructJSON_State(JSON_LEVEL_SHORT, false);
   JBI->Object_End();
 }

@@ -3,9 +3,6 @@
 
 #ifdef USE_MODULE_SENSORS_BUTTONS
 
-const char* mButtons::PM_MODULE_SENSORS_BUTTONS_CTR = D_MODULE_SENSORS_BUTTONS_CTR;
-const char* mButtons::PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR = D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR;
-
 int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){

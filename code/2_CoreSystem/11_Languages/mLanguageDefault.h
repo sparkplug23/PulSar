@@ -35,445 +35,124 @@
 #include "2_CoreSystem/11_Languages/mLanguageDefault_Extended.h"
 #endif
 
-// Module names
-#define D_MODULE_CORE_HARDWAREPINS_CTR            "mHardwarePins"
-#define D_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR   "hardwarepins"
-
-  #define D_MODULE_CORE_SERIAL_UART_CTR           "serialuart"
-  #define D_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR  "serialuart"
-
-#define D_MODULE_CORE_SETTINGS_CTR                "mSettings"
-#define D_MODULE_CORE_SETTINGS_FRIENDLY_CTR       "settings"
-#define D_MODULE_CORE_SUPPORT_CTR                  "mSupport"
-#define D_MODULE_CORE_SUPPORT_FRIENDLY_CTR         "support"
-#define D_MODULE_CORE_LOGGING_CTR                 "mLogging"
-#define D_MODULE_CORE_LOGGING_FRIENDLY_CTR        "logging"
-#define D_MODULE_CORE_TELEMETRY_CTR                "mTelemetry"
-#define D_MODULE_CORE_TELEMETRY_FRIENDLY_CTR       "telemetry"
-#define D_MODULE_CORE_TIME_CTR                     "mTime"
-#define D_MODULE_CORE_TIME_FRIENDLY_CTR            "time"
-
-#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR                     "mDevelopmentDebugging"
-#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR            "debug_development"
-
-#define D_MODULE_CORE_RULES_CTR            "Rules"
-#define D_MODULE_CORE_RULES_FRIENDLY_CTR   "rules"
-
-#define D_MODULE_CORE_UPDATES_CTR            "Updates"
-#define D_MODULE_CORE_UPDATES_FRIENDLY_CTR   "update"
-
-#define D_MODULE_SENSORS_SOLAR_LUNAR_CTR            "solarlunar"
-#define D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR   "solarlunar"
-
-
-  
-#define D_MODULE__NETWORK_INTERFACE__CTR "interface_network"
-#define D_MODULE__NETWORK_INTERFACE__FRIENDLY_CTR "interface_network"
-
-
-#define D_MODULE_NETWORK_WIFI_CTR              "mWiFi"
-#define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
-#define D_MODULE_NETWORK_MQTT_CTR              "mMQTTManager"
-#define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
-
-#define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR              "mMQTTManager"
-#define D_MODULE_NETWORK_MQTT_MULTIPLE_FRIENDLY_CTR              "system"
-
-#define D_MODULE_NETWORK_MQTT_CELLULAR_CTR              "mMQTT_CELLULAR"
-#define D_MODULE_NETWORK_MQTT_FRIENDLY_CELLULAR_CTR              "mqtt_cellular"
-
-#define D_MODULE__NETWORK_CELLULAR__CTR "Cellular"
-#define D_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR "cellular"
-
-
-#define D_MODULE_CORE__SERIAL__CTR                  "Serial"
-#define D_MODULE_CORE__SERIAL__FRIENDLY_CTR         "Serial"
-
-
-
-
-//#ifdef USE_MODULE_NETWORK_WEBSERVER
-  #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
-  #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
-//#endif
-
-
-// Displays (30-39
-//#ifdef USE_MODULE_DISPLAYS_INTERFACE
-  #define D_MODULE_DISPLAYS_INTERFACE_CTR              "interface_displays"
-  #define D_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR              "interface_displays"
-//#endif
-//#ifdef USE_MODULE_DISPLAYS_NEXTION
-  #define D_MODULE_DISPLAYS_NEXTION_CTR              "mNextionPanel"
-  #define D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR              "nextion"
-//#endif
-
-  #define D_MODULE_DISPLAYS_OLED_SSD1306_CTR      "display_1306"
-  #define D_MODULE_DISPLAYS_OLED_SSD1306_FRIENDLY_CTR              "display_1306"
-
-
-  #define D_MODULE_DISPLAYS_OLED_SH1106_CTR      "display_sh1106"
-  #define D_MODULE_DISPLAYS_OLED_SH1106_FRIENDLY_CTR              "display_sh1106"
-
-
-#define D_MODULE_DRIVERS_INTERFACE_FRIENDLY_CTR "interface_drivers"
-#define D_MODULE_DRIVERS_INTERFACE_CTR          "interface_drivers"
-
-// Drivers (Range 40-129
-//#ifdef USE_MODULE_DRIVERS_INTERFACE
-  // #define D_MODULE_DRIVERS_HBRIDGE_CTR              "mHBridge"
-  // #define D_MODULE_DRIVERS_HBRIDGE_FRIENDLY_CTR              "hbridge"
-//#endif
-//#ifdef USE_MODULE_DRIVERS_HBRIDGE
-  #define D_MODULE_DRIVERS_HBRIDGE_CTR              "mHBridge"
-  #define D_MODULE_DRIVERS_HBRIDGE_FRIENDLY_CTR              "hbridge"
-//#endif
-//#ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-  #define D_MODULE_DRIVERS_IRTRANSCEIVER_CTR              "mIRtransceiver"
-  #define D_MODULE_DRIVERS_IRTRANSCEIVER_FRIENDLY_CTR              "ir"
-//#endif
-//#ifdef USE_MODULE_DRIVERS_RELAY
-  #define D_MODULE_DRIVERS_RELAY_CTR           "relays"
-  #define D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR  "relays"
-//#endif
-//#ifdef USE_MODULE_DRIVERS_PWM
-  #define D_MODULE_DRIVERS_PWM_CTR           "pwm"
-  #define D_MODULE_DRIVERS_PWM_FRIENDLY_CTR  "pwm"
-//#endif
-  #define D_MODULE_DRIVERS_SDCARD_CTR           "sdcard"
-  #define D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR  "sdcard"
-
-  #define D_MODULE_SENSORS__GPS_SERIAL__CTR           "GPS"
-  #define D_MODULE_SENSORS__GPS_SERIAL__FRIENDLY_CTR  "gps"
-
-
-  #define D_MODULE_DRIVERS_SHELLY_DIMMER_CTR "shellydimmer"
-  #define D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "shellydimmer"
-
-  #define D_MODULE_DRIVERS_CAMERA_OV2640_CTR "Camera"
-  #define D_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR "camera"
-  
-  #define D_MODULE_DRIVERS_CAMERA_WEBCAM_CTR "Camera"
-  #define D_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR "camera"
-
-  #define D_MODULE_DRIVERS_STATUS_LEDS_CTR              "mSTATUS_LEDS"
-  #define D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR              "statusleds"
-
-  #define D_MODULE_CORE_FILESYSTEM_CTR "mFileSystem"
-  #define D_MODULE_CORE_FILESYSTEM_FRIENDLY_CTR "filesystem"
-
-  #define D_MODULE_DRIVERS_BUZZER_CTR "mBuzzer"
-  #define D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR "buzzer"
-
-  #define D_MODULE__DRIVERS_BUZZER_TONES__CTR "buzzer"
-  #define D_MODULE__DRIVERS_BUZZER_TONES__FRIENDLY_CTR "buzzer"
-  
-  #define D_MODULE_DRIVERS_RF433_RCSWITCH_CTR "rcswitch"
-  #define D_MODULE_DRIVERS_RF433_RCSWITCH_FRIENDLY_CTR "rcswitch"
-
-  #define D_MODULE_DRIVERS_LEDS_CTR "leds"
-  #define D_MODULE_DRIVERS_LEDS_FRIENDLY_CTR "leds"
-
-
-  #define D_MODULE_DRIVERS_IRREMOTE_CTR "irremote"
-  #define D_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR "irremote"
-
-
-  #define D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR          "camera_arduino"
-  #define D_MODULE_DRIVERS__CAMERA_ARDUINO__FRIENDLY_CTR "camera_arduino"
-  #define D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR          "camera_tas"
-  #define D_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR "camera_tas"
-  #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR          "camera_mulitclient"
-  #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__FRIENDLY_CTR "camera_multiclient"
-
-  #define D_MODULE_DRIVERS__TINYGSM__CTR          "tinygsm"
-  #define D_MODULE_DRIVERS__TINYGSM__FRIENDLY_CTR "tinygsm"
-
-
-  #define D_MODULE__DRIVERS_MAVLINK_DECODER__CTR          "mavlink"
-  #define D_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR "mavlink"
-
-  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_telemetry"
-  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__FRIENDLY_CTR "mavlink_telemetry"
-  
-  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__CTR "mavlink_telemetry"
-  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__FRIENDLY_CTR "mavlink_telemetry"
-
-//#ifdef USE_MODULE_DRIVERS_RF433MHZ
-  // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
-  // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
-//#endif
-// Energy (Range 130-139
-//#ifdef USE_MODULE_ENERGY_INTERFACE
-  #define D_MODULE_ENERGY_INTERFACE_CTR              "interface_energy"
-  #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "interface_energy"
-
-  #define D_MODULE_ENERGY_ADE7953_CTR              "ADE7953"
-  #define D_MODULE_ENERGY_ADE7953_FRIENDLY_CTR     "ade7953"
-
-  #define D_MODULE_ENERGY_INA219_CTR "ina219"
-  #define D_MODULE_ENERGY_INA219_FRIENDLY_CTR "ina219"
-
-
-
-//#endif
-// Lights (Range 140-169
-//#ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define D_MODULE_LIGHTS_INTERFACE_CTR              "interface_lights"
-  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "interface_lights"
-//#endif
-//#ifdef USE_MODULE_LIGHTS_ANIMATOR
-  #define D_MODULE_LIGHTS_ADDRESSABLE_CTR              "mRGBAnimator"
-  #define D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR              "addressable"
-
-  #define D_MODULE_LIGHTS_ANIMATOR_CTR              "ANIMATOR"
-  #define D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR              "pixels"
-//#endif
-//#ifdef USE_MODULE_LIGHTS_PWMCONTROLLED
-
-#define D_MODULE_LIGHTS_PWM_FRIENDLY_CTR "pwmlight"
-#define D_MODULE_LIGHTS_PWM_CTR "Pwmlight"
-
-#define D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR "wled_effects"
-#define D_MODULE_LIGHTS_WLED_EFFECTS_CTR "wled_effects"
-
-#define D_MODULE_LIGHTS_WLED_FRIENDLY_CTR "wled_effects"
-#define D_MODULE_LIGHTS_WLED_CTR "wled_effects"
-
-
-
-//#endif
-// Sensors (Range 120-169
-
-  #define D_MODULE_SENSORS_INTERFACE_CTR              "mSensorsInterface"
-  #define D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR              "interface_sensor"
-//#ifdef USE_MODULE_SENSORS_BUTTONS
-  #define D_MODULE_SENSORS_BUTTONS_CTR              "mButtons"
-  #define D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR              "buttons"
-//#endif
-//#ifdef USE_MODULE_SENSORS_SWITCHES
-  #define D_MODULE_SENSORS_SWITCHES_CTR              "mSwitches"
-  #define D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR              "switches"
-
-  #define D_MODULE_SENSORS_LDR_BASIC_CTR              "mLDRBasic"
-  #define D_MODULE_SENSORS_LDR_BASIC_FRIENDLY_CTR              "ldr_basic"
-//#endif
-//#ifdef USE_MODULE_SENSORS_SWITCHES
-  #define D_MODULE_SENSORS_ANALOG_CTR              "mSensorsAnalog"
-  #define D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR              "analog"
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_DOORCHIME
-  #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
-  #define D_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR              "doorbell"
-//#endif
-//#ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  #define D_MODULE_ENERGY_PZEM004T_CTR              "pzem004t"
-  #define D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR              "pzem004t"
-//#endif
-//#ifdef USE_MODULE_SENSORS_DHT
-  #define D_MODULE_SENSORS_DHT_CTR               "mSensorsDHT"
-  #define D_MODULE_SENSORS_DHT_FRIENDLY_CTR      "dht"
-//#endif
-//#ifdef USE_MODULE_SENSORS_BME
-  #define D_MODULE_SENSORS_BME_CTR              "mBME"
-  #define D_MODULE_SENSORS_BME_FRIENDLY_CTR     "bme"
-//#endif
-//#ifdef USE_MODULE_SENSORS_DS18X
-  #define D_MODULE_SENSORS_DB18S20_CTR              "mDS18X"
-  #define D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR              "db18s20"
-//#endif
-//#ifdef USE_MODULE_SENSORS_DS18X
-  #define D_MODULE_SENSORS_INA219_CTR              "mEnergyINA219"
-  #define D_MODULE_SENSORS_INA219_FRIENDLY_CTR              "ina219"
-//#endif
-//#ifdef USE_MODULE_SENSORS_ULTRASONICS
-  #define D_MODULE_SENSORS_ULTRASONIC_CTR           "mUltraSonicSensor"
-  #define D_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR     "ultrasonic"
-//#endif
-//#ifdef USE_MODULE_SENSORS_DOOR
-  #define D_MODULE_SENSORS_DOOR_CTR              "mDoorSensor"
-  #define D_MODULE_SENSORS_DOOR_FRIENDLY_CTR              "doorsensor"
-//#endif
-//#ifdef USE_MODULE_SENSORS_MOTION
-  #define D_MODULE_SENSORS_MOTION_CTR              "mMotionSensor"
-  #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR              "motion"
-
-  // #define D_MODULE_SENSORS_MOTION_CTR "MOTION"
-  // #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "motion"
-#define D_MODULE_SENSORS_LSM303D_CTR "lsm303d"
-#define D_MODULE_SENSORS_LSM303D_FRIENDLY_CTR "lsm303d"
-
-#define D_MODULE_SENSORS_L3G_FRIENDLY_CTR "l3g"
-#define D_MODULE_SENSORS_L3G_CTR "l3g"
-
-#define D_MODULE_SENSORS_MPU9250_CTR "mpu9250"
-#define D_MODULE_SENSORS_MPU9250_FRIENDLY_CTR "mpu9250"
-
-
-#define D_MODULE__SENSORS_BATTERY_MODEM__CTR "battery_modem"
-#define D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "battery_modem"
-
-//#endif
-//#ifdef USE_MODULE_SENSORS_MOISTURE
-  #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR              "mMoistureSensor"
-  #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_FRIENDLY_CTR              "moisture"
-//#endif
-
-#define D_MODULE_SENSORS_ADC_INTERNAL_CTR "adc_internal"
-#define D_MODULE_SENSORS_ADC_INTERNAL_FRIENDLY_CTR "adc_internal"
-
-#define D_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR "adc_i2s"
-#define D_MODULE_SENSORS_ADC_I2S_INTERNAL_FRIENDLY_CTR "adc_i2s"
-
-
-//#ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-  #define D_MODULE_SENSORS_PULSECOUNTER_CTR              "mPulseCounter"
-  #define D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR              "pulsecounter"
-
-  #define D_MODULE_SENSORS_BH1750_CTR              "mBH1750"
-  #define D_MODULE_SENSORS_BH1750_FRIENDLY_CTR              "bh1750"
-
-  #define D_MODULE_SENSORS_SR04_CTR              "mSR04"
-  #define D_MODULE_SENSORS_SR04_FRIENDLY_CTR              "sr04"
-
-  #define D_MODULE_SENSORS_REMOTE_DEVICE_CTR "mRemoteDevice"
-  #define D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "remotedevice"
-
-  #define D_MODULE_SENSORS_ROTARY_ENCODER_CTR "mRotaryEncoder"
-  #define D_MODULE_SENSORS_ROTARY_ENCODER_FRIENDLY_CTR "rotary_encoder"
-  
-  #define D_MODULE_SENSORS__DS18X20_ESP32_2023__CTR "db18_esp32_2023"
-  #define D_MODULE_SENSORS__DS18X20_ESP32_2023__FRIENDLY_CTR "db18_esp32_2023"
-
-  #define D_MODULE_SENSORS__DS18X20_ESP8266_2023__CTR "db18_esp82_2023"
-  #define D_MODULE_SENSORS__DS18X20_ESP8266_2023__FRIENDLY_CTR "db18_esp82_2023"
-
-  #define D_MODULE__SENSORS_GPS_MODEM__CTR "gps_modem"
-  #define D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "gps_modem"
-
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_BLINDS
-  #define D_MODULE_CONTROLLER_BLINDS_CTR              "mBlinds"
-  #define D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR              "blinds"
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_HEATING
-  #define D_MODULE_CONTROLLER_HVAC_CTR              "mHVAC"
-  #define D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR              "hvac"
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-  #define D_MODULE_CONTROLLER_RADIATORFAN_CTR              "mRadiatorFan"
-  #define D_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
-  #define D_MODULE_CONTROLLER_CEILINGFAN_CTR               "mCeilingFan"
-  #define D_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR      "ceilingfan"
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
-  #define D_MODULE_CONTROLLER_IRTRANSMITTER_CTR              "infrared"
-  #define D_MODULE_CONTROLLER_IRTRANSMITTER_FRIENDLY_CTR              "infrared"
-//#endif
-//#ifdef USE_MODULE_CONTROLLER_TANKVOLUME
-  #define D_MODULE_CONTROLLER_TANKVOLUME_CTR              "mTankVolume"
-  #define D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR              "tankvolume"
-//#endif
-
-
-
-// currently fanpwm
-  #define D_MODULE_CONTROLLER_FAN_PWM_CTR              "mFan"
-  #define D_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR              "fan"
-
-  #define D_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_CTR "hvac_strip_colour"
-  #define D_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_FRIENDLY_CTR "hvac_strip_colour"
-
-#define D_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR "mImmersionTankColour"
-#define D_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_FRIENDLY_CTR "sensor_colours"
-
-#define D_MODULE_CONTROLLER_TREADMILL_CTR "mTreadmill"
-#define D_MODULE_CONTROLLER_TREADMILL_FRIENDLY_CTR "treadmill"
-
-#define D_MODULE_CONTROLLER_DOORBELL_CTR "doorbell"
-#define D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR "doorbell"
-
-#define D_MODULE_CONTROLLER_SDCARDLOGGER_CTR "sdcardlogger"
-#define D_MODULE_CONTROLLER_SDCARDLOGGER_FRIENDLY_CTR "sdcardlogger"
-
-#define D_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR "sdcardlogger"
-#define D_MODULE_CONTROLLER_GPS_SD_LOGGER_FRIENDLY_CTR "sdcardlogger"
-
-
+#define D_MODULE_CORE_HARDWAREPINS_CTR            "hardwarepins"
+#define D_MODULE_CORE_SERIAL_UART_CTR             "serialuart"
+#define D_MODULE_CORE_SETTINGS_CTR                "settings"
+#define D_MODULE_CORE_SUPPORT_CTR                 "support"
+#define D_MODULE_CORE_LOGGING_CTR                 "logging"
+#define D_MODULE_CORE_TELEMETRY_CTR               "telemetry"
+#define D_MODULE_CORE_TIME_CTR                    "time"
+#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR   "debug_development"
+#define D_MODULE_CORE_RULES_CTR                   "rules"
+#define D_MODULE_CORE_UPDATES_CTR                 "update"
+#define D_MODULE_SENSORS_SOLAR_LUNAR_CTR          "solarlunar"
+#define D_MODULE__NETWORK_INTERFACE__CTR          "interface_network"
+#define D_MODULE_NETWORK_WIFI_CTR                 "wifi"
+#define D_MODULE_NETWORK_MQTT_CTR                 "system"
+#define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR        "system"
+#define D_MODULE_NETWORK_MQTT_CELLULAR_CTR        "mqtt_cellular"
+#define D_MODULE__NETWORK_CELLULAR__CTR           "cellular"
+#define D_MODULE_CORE__SERIAL__CTR                "Serial"
+#define D_MODULE_NETWORK_WEBSERVER_CTR            "webserver"
+#define D_MODULE_DISPLAYS_INTERFACE_CTR           "interface_displays"
+#define D_MODULE_DISPLAYS_NEXTION_CTR             "nextion"
+#define D_MODULE_DISPLAYS_OLED_SSD1306_CTR        "display_1306"
+#define D_MODULE_DISPLAYS_OLED_SH1106_CTR         "display_sh1106"
+#define D_MODULE_DRIVERS_INTERFACE_CTR            "interface_drivers"
+#define D_MODULE_DRIVERS_HBRIDGE_CTR              "hbridge"
+#define D_MODULE_DRIVERS_IRTRANSCEIVER_CTR        "ir"
+#define D_MODULE_DRIVERS_RELAY_CTR                "relays"
+#define D_MODULE_DRIVERS_PWM_CTR                  "pwm"
+#define D_MODULE_DRIVERS_SDCARD_CTR               "sdcard"
+#define D_MODULE_SENSORS__GPS_SERIAL__CTR         "gps"
+#define D_MODULE_DRIVERS_SHELLY_DIMMER_CTR        "shellydimmer"
+#define D_MODULE_DRIVERS_CAMERA_OV2640_CTR        "camera"
+#define D_MODULE_DRIVERS_CAMERA_WEBCAM_CTR        "camera"
+#define D_MODULE_DRIVERS_STATUS_LEDS_CTR          "statusleds"
+#define D_MODULE_CORE_FILESYSTEM_CTR              "filesystem"
+#define D_MODULE_DRIVERS_BUZZER_CTR               "buzzer"
+#define D_MODULE__DRIVERS_BUZZER_TONES__CTR       "buzzer"
+#define D_MODULE_DRIVERS_RF433_RCSWITCH_CTR       "rcswitch"
+#define D_MODULE_DRIVERS_LEDS_CTR                 "leds"
+#define D_MODULE_DRIVERS_IRREMOTE_CTR             "irremote"
+#define D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR     "camera_arduino"
+#define D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR     "camera_tas"
+#define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR "camera_multiclient"
+#define D_MODULE_DRIVERS__TINYGSM__CTR            "tinygsm"
+#define D_MODULE__DRIVERS_MAVLINK_DECODER__CTR    "mavlink"
+#define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_telemetry"
+#define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__CTR "mavlink_telemetry"
+#define D_MODULE_ENERGY_INTERFACE_CTR             "interface_energy"
+#define D_MODULE_ENERGY_ADE7953_CTR               "ade7953"
+#define D_MODULE_ENERGY_INA219_CTR                "ina219"
+#define D_MODULE_LIGHTS_INTERFACE_CTR             "interface_lights"
+#define D_MODULE_LIGHTS_ADDRESSABLE_CTR           "addressable"
+#define D_MODULE_LIGHTS_ANIMATOR_CTR              "pixels"
+#define D_MODULE_LIGHTS_PWM_CTR                   "pwmlight"
+#define D_MODULE_LIGHTS_WLED_EFFECTS_CTR          "wled_effects"
+#define D_MODULE_SENSORS_INTERFACE_CTR            "interface_sensor"
+#define D_MODULE_SENSORS_BUTTONS_CTR              "buttons"
+#define D_MODULE_SENSORS_SWITCHES_CTR             "switches"
+#define D_MODULE_SENSORS_LDR_BASIC_CTR            "ldr_basic"
+#define D_MODULE_SENSORS_ANALOG_CTR               "analog"
+#define D_MODULE_SENSORS_DOORBELL_CTR             "doorbell"
+#define D_MODULE_ENERGY_PZEM004T_CTR              "pzem004t"
+#define D_MODULE_SENSORS_DHT_CTR                  "dht"
+#define D_MODULE_SENSORS_BME_CTR                  "bme"
+#define D_MODULE_SENSORS_DB18S20_CTR              "db18s20"
+#define D_MODULE_SENSORS_INA219_CTR               "ina219"
+#define D_MODULE_SENSORS_ULTRASONIC_CTR           "ultrasonic"
+#define D_MODULE_SENSORS_DOOR_CTR                 "doorsensor"
+#define D_MODULE_SENSORS_MOTION_CTR               "motion"
+#define D_MODULE_SENSORS_LSM303D_CTR              "lsm303d"
+#define D_MODULE_SENSORS_L3G_CTR                  "l3g"
+#define D_MODULE_SENSORS_MPU9250_CTR              "mpu9250"
+#define D_MODULE__SENSORS_BATTERY_MODEM__CTR      "battery_modem"
+#define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR   "moisture"
+#define D_MODULE_SENSORS_ADC_INTERNAL_CTR         "adc_internal"
+#define D_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR     "adc_i2s"
+#define D_MODULE_SENSORS_PULSECOUNTER_CTR         "pulsecounter"
+#define D_MODULE_SENSORS_BH1750_CTR               "bh1750"
+#define D_MODULE_SENSORS_SR04_CTR                 "sr04"
+#define D_MODULE_SENSORS_REMOTE_DEVICE_CTR        "remotedevice"
+#define D_MODULE_SENSORS_ROTARY_ENCODER_CTR       "rotary_encoder"
+#define D_MODULE_SENSORS__DS18X20_ESP32_2023__CTR "db18_esp32_2023"
+#define D_MODULE_SENSORS__DS18X20_ESP8266_2023__CTR "db18_esp82_2023"
+#define D_MODULE__SENSORS_GPS_MODEM__CTR          "gps_modem"
+#define D_MODULE_CONTROLLER_BLINDS_CTR            "blinds"
+#define D_MODULE_CONTROLLER_HVAC_CTR              "hvac"
+#define D_MODULE_CONTROLLER_RADIATORFAN_CTR       "radiatorfan"
+#define D_MODULE_CONTROLLER_CEILINGFAN_CTR        "ceilingfan"
+#define D_MODULE_CONTROLLER_IRTRANSMITTER_CTR     "infrared"
+#define D_MODULE_CONTROLLER_TANKVOLUME_CTR        "tankvolume"
+#define D_MODULE_CONTROLLER_FAN_PWM_CTR           "fan"
+#define D_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_CTR "hvac_strip_colour"
+#define D_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR "sensor_colours"
+#define D_MODULE_CONTROLLER_TREADMILL_CTR         "treadmill"
+#define D_MODULE_CONTROLLER_DOORBELL_CTR          "doorbell"
+#define D_MODULE_CONTROLLER_SDCARDLOGGER_CTR      "sdcardlogger"
+#define D_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR     "sdcardlogger"
 #define D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR "serial_positional_logger"
-#define D_MODULE_CONTROLLER_SERIAL_POSITIONAL_FRIENDLY_LOGGER_CTR "serial_positional_logger"
-
 #define D_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_CTR "serial_calib_pic32"
-#define D_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_FRIENDLY_LOGGER_CTR "serial_calib_pic32"
-
-#define D_MODULE_CONTROLLER_USERMOD_01_CTR "usermod_01"
-#define D_MODULE_CONTROLLER_USERMOD_01_FRIENDLY_CTR  "usermod_01"
-
+#define D_MODULE_CONTROLLER_USERMOD_01_CTR        "usermod_01"
 #define D_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_CTR "imu_radiation_pattern"
-#define D_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_FRIENDLY_CTR "imu_radiation_pattern"
-
-
-
 #define D_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_CTR "bucket_water_level"
-#define D_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_FRIENDLY_CTR "bucket_water_level"
-
-
-
-#define D_MODULE_CONTROLLER_FURNACE_SENSOR_CTR "furnace_sensor"
-#define D_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR "furnace_sensor"
-
-
-#define D_MODULE_CONTROLLER_LOUVOLITE_HUB_CTR "louvolite"
-#define D_MODULE_CONTROLLER_LOUVOLITE_HUB_FRIENDLY_CTR "louvolite"
-
+#define D_MODULE_CONTROLLER_FURNACE_SENSOR_CTR    "furnace_sensor"
+#define D_MODULE_CONTROLLER_LOUVOLITE_HUB_CTR     "louvolite"
 #define D_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_CTR "sidedoor_lights"
-#define D_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_FRIENDLY_CTR "sidedoor_lights"
-
 #define D_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL_CTR "immersion_panel"
-#define D_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL_FRIENDLY_CTR "immersion_panel"
-
-
 #define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_CTR "blackbox"
-#define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_FRIENDLY_CTR "blackbox"
-
-#define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR  "controller_mavlink_oled"
 #define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_CTR "controller_mavlink_oled"
-
-#define D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_TESTER__FRIENDLY_CTR  "webui_wled_tester"
 #define D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_TESTER__CTR "webui_wled_tester"
-
-#define D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__FRIENDLY_CTR  "webui_wled_dev"
 #define D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__CTR "webui_wled_dev"
-
-#define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_FRIENDLY_CTR  "printer_enclosure"
 #define D_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE_CTR "printer_enclosure"
-
-#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_FRIENDLY_CTR  "oled_show_power"
-#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR           "oled_show_power"
-
-#define D_MODULE_CONTROLLER__ENERGY_OLED_FRIENDLY_CTR "energy_oled"
-#define D_MODULE_CONTROLLER__ENERGY_OLED_CTR          "energy_oled"
-
-
-#define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_FRIENDLY_CTRL "treadmill_logger"
+#define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR "oled_show_power"
+#define D_MODULE_CONTROLLER__ENERGY_OLED_CTR      "energy_oled"
 #define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR "treadmill_logger"
-
 #define D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR "sensors_oled"
-#define D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_FRIENDLY_CTR "sensors_oled"
-
-
 #define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR "sensor_colourbar"
-#define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR "sensor_colourbar"
-
-#define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR             "relay_state_ledstrip"
-#define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__FRIENDLY_CTR    "relay_state_ledstrip"
-
-
+#define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR "relay_state_ledstrip"
 #define D_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_CTR "mavlink_flying_leds"
-#define D_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_FRIENDLY_CTR "mavlink_flying_leds"
-
 
 
 /**

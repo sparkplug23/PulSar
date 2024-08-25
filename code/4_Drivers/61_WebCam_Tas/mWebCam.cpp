@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
 
-const char* mWebCamera::PM_MODULE_DRIVERS__CAMERA_TASMOTA__CTR = D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR;
-const char* mWebCamera::PM_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR = D_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR;
-
 /*********************************************************************************************
  * @SECTION: Interface
 **********************************************************************************************/

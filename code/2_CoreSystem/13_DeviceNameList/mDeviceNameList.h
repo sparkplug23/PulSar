@@ -100,6 +100,8 @@ class DeviceNameList{
     const char* GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found = false);
     
     
+    bool GetModuleAndSensorIDs(const char* module_name, const char* sensor_name, int16_t* out_module_id, int8_t* out_sensor_id);
+    bool GetModuleAndSensorIDs(uint16_t module_id, const char* sensor_name, int16_t* out_module_id, int8_t* out_sensor_id);
     
     // const char* GetDeviceNameWithEnumNumber_NoBuffer(int16_t module_id, int8_t device_id);
 

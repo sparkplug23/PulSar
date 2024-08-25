@@ -28,10 +28,8 @@ class mWebCam :
       #define MAX_RELAYS 4
     #endif
 
-    static const char* PM_MODULE_DRIVERS_CAMERA_WEBCAM_CTR;
-    static const char* PM_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_CAMERA_WEBCAM_CTR = D_MODULE_DRIVERS_CAMERA_WEBCAM_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_CAMERA_WEBCAM_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_CAMERA_WEBCAM_ID; }
 
     

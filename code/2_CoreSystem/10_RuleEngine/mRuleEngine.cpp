@@ -3,10 +3,6 @@
 #ifdef USE_MODULE_CORE_RULES
 
 
-const char* mRuleEngine::PM_MODULE_CORE_RULES_CTR = D_MODULE_CORE_RULES_CTR;
-const char* mRuleEngine::PM_MODULE_CORE_RULES_FRIENDLY_CTR = D_MODULE_CORE_RULES_FRIENDLY_CTR;
-
-
 // /* Null, because instance will be initialized on demand. */
 // RuleEngine* RuleEngine::instance = nullptr;
 
@@ -521,7 +517,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
     if(jtok = jobj["Module"]){
       if(jtok.isStr()){
-        if((matched_id=pCONT->GetModule_UniqueID_byFriendlyName(jtok.getStr()))>=0){
+        if((matched_id=pCONT->GetModule_UniqueID_byName(jtok.getStr()))>=0){
           event->module_id = matched_id;
           data_buffer.isserviced++;
         }
@@ -540,7 +536,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
     if(jtok = jobj["Function"]){
       if(jtok.isStr()){
-        if((matched_id=pCONT_set->GetFunctionIDbyFriendlyName(jtok.getStr()))>=0){
+        if((matched_id=pCONT_set->GetFunctionIDbyName(jtok.getStr()))>=0){
           event->function_id = matched_id;
           data_buffer.isserviced++;
         }

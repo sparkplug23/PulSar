@@ -403,7 +403,7 @@ extends = env:whitehall_32
 build_unflags               = ${esp32_defaults.build_unflags}
 build_flags                 = ${esp32_defaults.build_flags}
                                     -D DEVICE_UTILITYSENSOR
-                                    -D D_USER_MICHAEL
+                                    -D USE_USER_MICHAEL
                                     -w                                     
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
@@ -566,7 +566,7 @@ extends = env:whitehall_32
 build_unflags               = ${esp32_defaults.build_unflags}
 build_flags                 = ${esp32_defaults.build_flags}
                                     -D DEVICE_RADIATORFAN
-                                    -D D_USER_MICHAEL
+                                    -D USE_USER_MICHAEL
                                     -w                                     
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32
@@ -605,7 +605,7 @@ extends = env:whitehall_82
 platform                  = ${core_2_6_1.platform}
 build_flags               = ${core_2_6_1.build_flags}
                                  -D DEVICE_TVROOM_H801_UPLIGHTS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 upload_protocol = espota
 extra_scripts             = gzip_fw.py
 ; upload_port = rgbbedroomfloor
@@ -836,7 +836,7 @@ extra_scripts   =  gzip_fw.py
 extends = env:whitehall_82
 build_flags = ${common.build_flags} 
                 -D DEVICE_MASTERBEDROOM_DRESSER_LIGHTS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 upload_protocol = espota
 extra_scripts   = gzip_fw.py
 upload_port = 192.168.0.39
@@ -847,7 +847,7 @@ upload_port = 192.168.0.39
 [env:wh_hvac_masterbedroom]
 extends = env:whitehall_82
 build_flags = ${common.build_flags} -D DEVICE_HVAC_MASTERBEDROOM -w 
-                                    -D D_USER_MICHAEL
+                                    -D USE_USER_MICHAEL
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_sensor
 ; upload_port = heating
@@ -1073,7 +1073,7 @@ extends = env:whitehall_32
 build_unflags               = ${esp32_defaults.build_unflags}
 build_flags                 = ${esp32_defaults.build_flags}
                                     -D DEVICE_BEDROOMSENSOR
-                                    -D D_USER_MICHAEL
+                                    -D USE_USER_MICHAEL
                                     -w                                     
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/libesp32

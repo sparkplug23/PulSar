@@ -22,10 +22,6 @@
 
 #ifdef USE_MODULE_SENSORS_L3G
 
-const char* mSensorsL3G::PM_MODULE_SENSORS_L3G_CTR = D_MODULE_SENSORS_L3G_CTR;
-const char* mSensorsL3G::PM_MODULE_SENSORS_L3G_FRIENDLY_CTR = D_MODULE_SENSORS_L3G_FRIENDLY_CTR;
-
-
 int8_t mSensorsL3G::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){

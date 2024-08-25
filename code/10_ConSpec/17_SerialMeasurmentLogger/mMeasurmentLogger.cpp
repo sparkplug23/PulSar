@@ -2,9 +2,6 @@
 
 // #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
 
-// const char* mSerialCalibrationMeasurmentLogger::PM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_CTR = D_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_CTR;
-// const char* mSerialCalibrationMeasurmentLogger::PM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_FRIENDLY_CTR = D_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_FRIENDLY_LOGGER_CTR;
-
 // /***
 //  * Do this the super simple way.
 //  * if(uart EOF was detected, in next loop create and append json) 

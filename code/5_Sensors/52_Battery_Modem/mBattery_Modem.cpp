@@ -26,9 +26,6 @@
 
 #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
 
-const char* mBattery_Modem::PM_MODULE__SENSORS_BATTERY_MODEM__CTR          = D_MODULE__SENSORS_BATTERY_MODEM__CTR;
-const char* mBattery_Modem::PM_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR = D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR;
-
 int8_t mBattery_Modem::Tasker(uint8_t function, JsonParserObject obj)
 {
   

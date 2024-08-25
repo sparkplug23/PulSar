@@ -15,11 +15,6 @@
 
 
 
-// const char* mTankVolumeUltrasonic::PM_MODULE_CONTROLLER_TANKVOLUME_CTR = D_MODULE_CONTROLLER_TANKVOLUME_CTR;
-// const char* mTankVolumeUltrasonic::PM_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR = D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR;
-
-
-
 // // void CmndMqttUser(void)
 // // {
 

@@ -22,10 +22,6 @@
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
 
-const char* mDeskSensorsOnOLED::PM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR;
-const char* mDeskSensorsOnOLED::PM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_FRIENDLY_CTR = D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_FRIENDLY_CTR;
-
-
 int8_t mDeskSensorsOnOLED::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
@@ -137,10 +133,17 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED()
 }
 
 
-
+/**
+ * @brief 
+ * 
+ * BME680 Temp
+ * BME280 Temp
+ * Light
+ * LED Amps
+ * 
+ */
 void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
 {
-
 
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
   char buffer[100] = {0};
@@ -149,80 +152,193 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   
   snprintf(buffer, sizeof(buffer), "%s", pCONT_time->GetTime().c_str() );
 
+  int sensor_id=0;
   float sensor_data = -1;
+  int8_t line = 0;
 
-  /**
-   * @brief Add each sensor on new line
-   */
-   
-  uint8_t sensors_available = 4;//pCONT_db18->GetSensorCount();
 
-  int8_t line = -1;
+  int16_t out_module_id = 0;
+  int8_t  out_sensor_id = 0;
 
-  for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+  sensors_reading_t val;
+
+  /*****************************
+   * Row 1: BME680 Temp
+   *****************************/
+  #ifdef USE_MODULE_SENSORS_BME
+
+  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_BME_CTR, D_DEVICE_SENSOR_BME_680_NAME, &out_module_id, &out_sensor_id ) )
   {
-    line = -1;
-    sensors_reading_t val;
-    #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-    pCONT_pzem->GetSensorReading(&val, sensor_id);
+    ALOG_INF(PSTR("mod %d %d"), out_module_id, out_sensor_id );
+    pCONT->GetModule_IndexUnique(out_module_id)->GetSensorReading(&val, out_sensor_id);
     if(val.Valid())
     {
-
-      sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
-
-      /**
-       * @brief Check for name and replace with OLED friendly short name
-       * 
-       */
-      if(strcmp(buffer_n, D_DEVICE_HEATER_0_NAME)==0)
-      {
-        memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "TEST");
-        line = 0;
-      }else 
-      if(strcmp(buffer_n, D_DEVICE_HEATER_1_NAME)==0)
-      {
-        memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "1Flr");
-        line = 1;
-      }
-      else 
-      if(strcmp(buffer_n, D_DEVICE_HEATER_2_NAME)==0)
-      {
-        memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "Fan");
-        line = 2;
-      }else 
-      if(strcmp(buffer_n, D_DEVICE_HEATER_3_NAME)==0)
-      {
-        memset(buffer_n, 0, sizeof(buffer_n));
-        sprintf(buffer_n, "%s", "Oil");
-        line = 3;
-      }
-
-      if(line >= 0)
-      {
-        snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-        pCONT_iDisp->LogBuffer_AddRow(buffer, line);
-      }
-
+      sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);   
+      sprintf(buffer_n, "%s\0", "BM6");
+      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));    
+    }else{
+      snprintf(buffer, sizeof(buffer), "Invalid"); 
     }
-    #endif
-
   }
 
-  if(line =- 1) // no valid readings
+  ALOG_INF(PSTR("buffer %d %s"), line, buffer );
+  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+
+  #endif
+  /*****************************
+   * Row 2: BME280 Temp
+   *****************************/
+  #ifdef USE_MODULE_SENSORS_BME
+
+  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_BME_CTR, D_DEVICE_SENSOR_BME_280_NAME, &out_module_id, &out_sensor_id ) )
   {
-    memset(buffer_n, 0, sizeof(buffer_n));
-    sprintf(buffer_n, "%s", "PZEM d/c");
-    line = 0;
-    pCONT_iDisp->LogBuffer_AddRow(buffer, line);
-
+    ALOG_INF(PSTR("mod %d %d"), out_module_id, out_sensor_id );
+    pCONT->GetModule_IndexUnique(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    if(val.Valid())
+    {
+      sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);   
+      sprintf(buffer_n, "%s\0", "BM2");
+      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));    
+    }else{
+      snprintf(buffer, sizeof(buffer), "Invalid"); 
+    }
   }
+
+  ALOG_INF(PSTR("buffer %d %s"), line, buffer );
+  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+
+  #endif
+  /*****************************
+   * Row 3: BH1750 Light
+   *****************************/
+  #ifdef USE_MODULE_SENSORS_BME
+
+  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_BH1750_CTR, D_DEVICE_SENSOR_BH1750_NAME, &out_module_id, &out_sensor_id ) )
+  {
+    ALOG_INF(PSTR("mod %d %d"), out_module_id, out_sensor_id );
+    pCONT->GetModule_IndexUnique(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    if(val.Valid())
+    {
+      sensor_data = val.GetFloat(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);   
+      sprintf(buffer_n, "%s\0", "Lgt");
+      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));    
+    }else{
+      snprintf(buffer, sizeof(buffer), "Invalid"); 
+    }
+  }
+
+  ALOG_INF(PSTR("buffer %d %s"), line, buffer );
+  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+
+  #endif
+  /*****************************
+   * Row 3: LED Amps
+   *****************************/
+  #ifdef USE_MODULE_ENERGY_INA219
+
+  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_INA219_CTR, D_DEVICE_SENSOR_CURRENT, &out_module_id, &out_sensor_id ) )
+  {
+    ALOG_INF(PSTR("mod %d %d"), out_module_id, out_sensor_id );
+    pCONT->GetModule_IndexUnique(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    if(val.Valid())
+    {
+      sensor_data = val.GetFloat(SENSOR_TYPE_CURRENT_ID);   
+      sprintf(buffer_n, "%s\0", "Amp");
+      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));    
+    }else{
+      snprintf(buffer, sizeof(buffer), "Invalid"); 
+    }
+  }
+
+  ALOG_INF(PSTR("buffer %d %s"), line, buffer );
+  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+
+  #endif
+
+
+
+
+  // /**
+  //  * @brief Add each sensor on new line
+  //  */
+   
+  // uint8_t sensors_available = 4;//pCONT_db18->GetSensorCount();
+
+  // int8_t line = -1;
+
+  // for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+  // {
+  //   line = -1;
+  //   sensors_reading_t val;
+  //   #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+  //   pCONT_pzem->GetSensorReading(&val, sensor_id);
+  //   if(val.Valid())
+  //   {
+
+  //     sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
+  //     DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+
+  //     /**
+  //      * @brief Check for name and replace with OLED friendly short name
+  //      * 
+  //      */
+  //     if(strcmp(buffer_n, D_DEVICE_HEATER_0_NAME)==0)
+  //     {
+  //       memset(buffer_n, 0, sizeof(buffer_n));
+  //       sprintf(buffer_n, "%s", "TEST");
+  //       line = 0;
+  //     }else 
+  //     if(strcmp(buffer_n, D_DEVICE_HEATER_1_NAME)==0)
+  //     {
+  //       memset(buffer_n, 0, sizeof(buffer_n));
+  //       sprintf(buffer_n, "%s", "1Flr");
+  //       line = 1;
+  //     }
+  //     else 
+  //     if(strcmp(buffer_n, D_DEVICE_HEATER_2_NAME)==0)
+  //     {
+  //       memset(buffer_n, 0, sizeof(buffer_n));
+  //       sprintf(buffer_n, "%s", "Fan");
+  //       line = 2;
+  //     }else 
+  //     if(strcmp(buffer_n, D_DEVICE_HEATER_3_NAME)==0)
+  //     {
+  //       memset(buffer_n, 0, sizeof(buffer_n));
+  //       sprintf(buffer_n, "%s", "Oil");
+  //       line = 3;
+  //     }
+
+  //     if(line >= 0)
+  //     {
+  //       snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
+  //       pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+  //     }
+
+  //   }
+  //   #endif
+
+  // }
+
+  // if(line =- 1) // no valid readings
+  // {
+  //   memset(buffer_n, 0, sizeof(buffer_n));
+  //   sprintf(buffer_n, "%s", "PZEM d/c");
+  //   line = 0;
+  //   pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+
+  // }
 
 }
 
+/**
+ * @brief 
+ * 
+ * DB18 1
+ * DB18 2
+ * DB18 3
+ * DB18 4
+ * 
+ */
 void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
 {
 

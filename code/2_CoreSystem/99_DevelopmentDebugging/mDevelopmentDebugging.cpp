@@ -18,10 +18,6 @@
 #include "mDevelopmentDebugging.h"
 
 
-const char* mDevelopmentDebugging::PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR = D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR;
-const char* mDevelopmentDebugging::PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR = D_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR;
-
-
 int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
 
 

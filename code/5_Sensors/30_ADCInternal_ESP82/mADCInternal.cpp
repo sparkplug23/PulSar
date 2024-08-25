@@ -29,9 +29,6 @@
 
 #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
 
-const char* mADCInternal::PM_MODULE_SENSORS_ADC_INTERNAL_CTR = D_MODULE_SENSORS_ADC_INTERNAL_CTR;
-const char* mADCInternal::PM_MODULE_SENSORS_ADC_INTERNAL_FRIENDLY_CTR = D_MODULE_SENSORS_ADC_INTERNAL_FRIENDLY_CTR;
-
 #ifdef ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
 
 
@@ -576,10 +573,6 @@ void mADCInternal::MQTTHandler_Sender()
 // #ifdef USE_MODULE_SENSORS_ANALOG
 
 // // Make basic class, report adc via mqtt (for tree level)
-
-// const char* mSensorsAnalog::PM_MODULE_SENSORS_ANALOG_CTR = D_MODULE_SENSORS_ANALOG_CTR;
-// const char* mSensorsAnalog::PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR = D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR;
-
 
 
 // void mSensorsAnalog::Pre_Init(void){

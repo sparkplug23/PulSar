@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
 
-const char* mSolarLunar::PM_MODULE_SENSORS_SOLAR_LUNAR_CTR = D_MODULE_SENSORS_SOLAR_LUNAR_CTR;
-const char* mSolarLunar::PM_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR = D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR;
-
 int8_t mSolarLunar::Tasker(uint8_t function, JsonParserObject obj)
 {
 

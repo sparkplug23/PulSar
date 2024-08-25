@@ -23,9 +23,6 @@ ie p[2].b[2] command, should be able to be parsed json style message and sharing
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
-const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_CTR = D_MODULE_DISPLAYS_NEXTION_CTR;
-const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR = D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR;
-
 int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
 {
 

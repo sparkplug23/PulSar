@@ -17,8 +17,6 @@
 
 uint8_t extern_flag_sdcard_writer_status = 0;
 
-const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE_DRIVERS_SDCARD_CTR;
-const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR = D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR;
 
 SPIClass spiSD(HSPI);
 

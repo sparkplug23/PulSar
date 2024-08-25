@@ -1,9 +1,9 @@
 #ifndef mInterfaceController_H2
 #define mInterfaceController_H2 1.1
 
-#define D_USER_MICHAEL
+#define USE_USER_MICHAEL
 
-#ifdef D_USER_MICHAEL
+#ifdef USE_USER_MICHAEL
 #warning "------------------------------------------------------------------------------- Development by Author, may not compile for others"
 #endif
 
@@ -50,10 +50,10 @@
 
 // #include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
 
-#ifndef D_USER_MICHAEL // Include my personally named secret file
+#ifndef USE_USER_MICHAEL // Include my personally named secret file
   #include "0_ConfigUser/mFirmwareCustom_Secret.h"
-#endif // D_USER_MICHAEL // Include my personally named secret file
-#ifdef D_USER_MICHAEL // Include my personally named secret file
+#endif // USE_USER_MICHAEL // Include my personally named secret file
+#ifdef USE_USER_MICHAEL // Include my personally named secret file
   /**
    * In order of importance
    * */
@@ -64,7 +64,7 @@
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
-#endif // D_USER_MICHAEL
+#endif // USE_USER_MICHAEL
 
 
 #include "2_CoreSystem/06_Support/mSensorType.h"
@@ -1151,14 +1151,6 @@ class mTaskerManager{
 
     void addTasker(TaskerID id, mTaskerInterface* mod);
 
-    int16_t GetModuleIndexbyFriendlyName(const char* c);
-    int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
-    uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
-
-    uint16_t GetModule_UniqueID_byFriendlyName(const char* c);
-    
-    PGM_P GetModuleFriendlyName_WithUniqueID(uint16_t unique_id);
-
     #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
       char buffer_taskname[50];
     #endif
@@ -1168,10 +1160,27 @@ class mTaskerManager{
     
     int8_t Tasker_Interface(uint16_t function, uint16_t target_tasker = 0);    
     
-    uint16_t GetClassSizeByID(uint8_t class_id);
+    
+    int16_t GetModuleIndexbyName(const char* c);
+    int16_t GetModuleUniqueIDbyName(const char* c);
 
-    PGM_P GetModuleName(uint8_t id);
-    PGM_P GetModuleFriendlyName(uint16_t module_id);
+    uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
+
+    uint16_t GetModule_UniqueID_byName(const char* c);
+    PGM_P GetModuleName_WithUniqueID(uint16_t unique_id);
+
+    uint16_t GetClassSizeByID(uint8_t class_id);
+    
+    PGM_P GetModuleName_WithEnum(uint16_t id);
+    PGM_P GetModuleName(uint16_t module_id);
+
+    uint16_t GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id);
+
+
+
+    mTaskerInterface* GetModule_IndexEnum(uint8_t id_enum);
+    mTaskerInterface* GetModule_IndexUnique(uint16_t id_enum);
+  
 
     uint16_t GetClassCount();
 
@@ -1179,7 +1188,6 @@ class mTaskerManager{
     const char* GetTaskName(uint8_t task, char* buffer);
     #endif
     
-    uint16_t GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id);
 
     bool ValidTaskID(uint8_t module_id);
     

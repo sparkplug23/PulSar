@@ -28,7 +28,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "stdint.h"
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
-#ifdef D_USER_MICHAEL
+#ifdef USE_USER_MICHAEL
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
@@ -39,8 +39,8 @@ With latest version, all longer term shared debug features should be added here 
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #else
-#error "here"
-#endif // D_USER_MICHAEL
+// #error "here"
+#endif // USE_USER_MICHAEL
 
 /*********************************************************************************************\
  * This file is one of two user configurable files

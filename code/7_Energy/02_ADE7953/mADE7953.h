@@ -24,10 +24,8 @@ class mEnergyADE7953 :
     void Pre_Init(void);
     void Init(void);
     
-    static const char* PM_MODULE_ENERGY_ADE7953_CTR;
-    static const char* PM_MODULE_ENERGY_ADE7953_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_ENERGY_ADE7953_CTR = D_MODULE_ENERGY_ADE7953_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_ADE7953_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_ADE7953_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_ADE7953_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

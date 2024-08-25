@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_DRIVERS_INTERFACE 
 
-const char* mDriverInterface::PM_MODULE_DRIVERS_INTERFACE_CTR = D_MODULE_DRIVERS_INTERFACE_CTR;
-const char* mDriverInterface::PM_MODULE_DRIVERS_INTERFACE_FRIENDLY_CTR = D_MODULE_DRIVERS_INTERFACE_FRIENDLY_CTR;
-
 int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
 {
   

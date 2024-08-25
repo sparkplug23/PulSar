@@ -3,9 +3,6 @@
 
 #ifdef USE_MODULE_SENSORS_SR04
 
-const char* mSR04::PM_MODULE_SENSORS_SR04_CTR = D_MODULE_SENSORS_SR04_CTR;
-const char* mSR04::PM_MODULE_SENSORS_SR04_FRIENDLY_CTR = D_MODULE_SENSORS_SR04_FRIENDLY_CTR;
-
 int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;

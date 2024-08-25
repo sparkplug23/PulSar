@@ -42,10 +42,8 @@ class mRemoteDevice :
     }settings;
 
 
-    static const char* PM_MODULE_SENSORS_REMOTE_DEVICE_CTR;
-    static const char* PM_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_REMOTE_DEVICE_CTR = D_MODULE_SENSORS_REMOTE_DEVICE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_REMOTE_DEVICE_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_REMOTE_DEVICE_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

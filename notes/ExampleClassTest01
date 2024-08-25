@@ -1,0 +1,105 @@
+
+
+This is the tasker class
+
+enum TaskerID
+{
+  /**
+   * @brief Core Modules
+   **/
+  #ifdef USE_MODULE_CORE_SETTINGS
+    EM_MODULE_CORE_SETTINGS_ID,
+  #endif 
+  //Others
+  EM_MODULE_LENGTH_ID
+};
+
+
+#include "2_CoreSystem/01_Settings/mSettings.h"
+#define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
+
+This gives me a global way of accessing this class from inside any other class pCONT_set
+
+
+#include  "1_TaskerManager/mTaskerInterface.h"
+
+class mTaskerManager{
+
+  friend class mTaskerInterface;
+
+  public:
+
+    std::vector<mTaskerInterface*> pModule;
+    
+  private:
+    /* Prevent others from being created */
+    mTaskerManager(mTaskerManager const& other) = delete;
+    mTaskerManager(mTaskerManager&& other) = delete;
+    /* Private constructor to prevent instancing. */
+    mTaskerManager(){};
+    /* Here will be the instance stored. */
+    static mTaskerManager* instance;
+  public:
+    // External function to get instance
+    static mTaskerManager* GetInstance(){
+      if (instance == nullptr){
+        instance = new mTaskerManager();
+      }
+      return instance;
+    };
+
+
+};
+
+/**
+ * @brief 
+ * Superclass that all modules includes
+ **/
+class mTaskerInterface
+  {
+  public:
+
+    mTaskerInterface(){};
+    virtual int8_t Tasker(uint8_t function, JsonParserObject obj);
+    virtual PGM_P GetModuleName();
+    virtual uint16_t GetModuleUniqueID();
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    virtual uint16_t GetClassSize();
+    #endif    
+
+    /**
+     * Get device count for each module that should be in module.settings
+     * */
+    virtual uint8_t GetSensorCount(void) {return 0;}
+    
+    /**
+     * Push 0 if none are used, maybe internalise
+     * Rename to "GetDeviceReading"
+     * */
+    virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->sensor_type.push_back(0); }
+  
+};
+
+pCONT
+An example of one of the classes 
+
+
+class mSettings :
+  public mTaskerInterface
+{
+  public:
+    mSettings(){};
+    
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void parse_JSONCommand(JsonParserObject obj);
+
+    static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){ return sizeof(mSettings); };
+    #endif
+
+
+}

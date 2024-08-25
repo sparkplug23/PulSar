@@ -24,10 +24,6 @@
 
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
 
-const char* mDB18x20_ESP32::PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR = D_MODULE_SENSORS_DB18S20_CTR;
-const char* mDB18x20_ESP32::PM_MODULE_SENSORS__DS18X20_ESP32_2023__FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
-
-
 // DS18S20: Fixed 9-bit resolution (1/2°C). Measures temperature in 750 mS.
 // DS18B20: Resolution of 9 to 12 bits (12-1/16°C).
 const char kDs18x20Types[] PROGMEM = "DS18x20|DS18S20|DS1822|DS18B20|MAX31850";
@@ -452,7 +448,7 @@ void mDB18x20_ESP32::parse_JSONCommand(JsonParserObject obj)
    *        A uint8_t saves that index, so looking up the name of the address will require the correct index (or left as -1 to unknown)
    * 
    */
-  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR])
+  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_CTR])
   {
     
     JsonParserArray array_group = jtok; 

@@ -105,10 +105,8 @@ class mIRRemote :
     mIRRemote(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static const char* PM_MODULE_DRIVERS_IRREMOTE_CTR;
-    static const char* PM_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_IRREMOTE_CTR = D_MODULE_DRIVERS_IRREMOTE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_IRREMOTE_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID; }
     
     #ifdef USE_DEBUG_CLASS_SIZE

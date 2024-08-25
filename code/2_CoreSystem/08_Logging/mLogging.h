@@ -631,10 +631,8 @@ public:
     };
     #endif
 
-    static const char* PM_MODULE_CORE_LOGGING_CTR;
-    static const char* PM_MODULE_CORE_LOGGING_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_LOGGING_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
 
     void parse_JSONCommand(JsonParserObject obj);

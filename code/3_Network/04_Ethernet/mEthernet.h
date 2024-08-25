@@ -25,10 +25,8 @@ class mWiFi :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);    
 
-    static const char* PM_MODULE_NETWORK_ETHERNET_CTR;
-    static const char* PM_MODULE_NETWORK_ETHERNET_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_NETWORK_ETHERNET_CTR = D_MODULE_NETWORK_ETHERNET_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_ETHERNET_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_ETHERNET_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_ETHERNET_ID; }
 
     void parse_JSONCommand(JsonParserObject obj);

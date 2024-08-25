@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_SENSORS_DOOR
 
-const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_CTR = D_MODULE_SENSORS_DOOR_CTR;
-const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR = D_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
-
 // Should this be a controller? Since the underlying input is from switches sensor. This would also mean motion should be controller.
 // But then how does motion + others become an "event"
 // Event should be anything really, not just switch ie power level threshold crossed

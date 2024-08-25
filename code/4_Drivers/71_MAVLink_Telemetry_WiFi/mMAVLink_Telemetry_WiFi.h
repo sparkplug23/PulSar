@@ -60,10 +60,8 @@ class mMAVLink_Telemetry_WiFi :
     mMAVLink_Telemetry_WiFi(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static const char* PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR;
-    static const char* PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR = D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID; }
     
     #ifdef USE_DEBUG_CLASS_SIZE

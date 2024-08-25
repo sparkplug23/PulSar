@@ -21,10 +21,8 @@ class mWebCamera :
   public:
     mWebCamera(){};
 
-    static const char* PM_MODULE_DRIVERS__CAMERA_ARDUINO__CTR;
-    static const char* PM_MODULE_DRIVERS__CAMERA_ARDUINO__FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS__CAMERA_ARDUINO__CTR = D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS__CAMERA_ARDUINO__CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS__CAMERA_ARDUINO__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS__CAMERA_ARDUINO__ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){    return sizeof(mWebCamera); };

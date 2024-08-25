@@ -1127,9 +1127,6 @@ settings.fEnableSensor = true;
 // }
 
 
-const char* mWebCam::PM_MODULE_DRIVERS_CAMERA_WEBCAM_CTR = D_MODULE_DRIVERS_CAMERA_WEBCAM_CTR;
-const char* mWebCam::PM_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR = D_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR;
-
 /**
  * @brief: Module Interface
  * */

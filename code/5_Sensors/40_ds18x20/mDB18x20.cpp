@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
 
-const char* mDS18X::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
-const char* mDS18X::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
-
 // Should this be a controller? Since the underlying input is from switches sensor. This would also mean motion should be controller.
 // But then how does motion + others become an "event"
 // Event should be anything really, not just switch ie power level threshold crossed

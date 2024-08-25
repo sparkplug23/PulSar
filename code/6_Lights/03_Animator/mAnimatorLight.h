@@ -312,10 +312,8 @@ class mAnimatorLight :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
     
-    static const char* PM_MODULE_LIGHTS_ANIMATOR_CTR;
-    static const char* PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ANIMATOR_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mAnimatorLight);    };

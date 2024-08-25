@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
 
-const char* mSensorColourBar::PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR = D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR;
-const char* mSensorColourBar::PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR = D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR;
-
 /**
  * @brief: Module Interface
  * */
@@ -255,7 +252,7 @@ uint8_t mSensorColourBar::ConstructJSON_State(uint8_t json_level, bool json_appe
  */
 uint8_t mSensorColourBar::AppendJSONResponse_Drivers_Unified()
 {
-  JBI->Level_Start_P(PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR);
+  JBI->Level_Start_P(PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR);
     ConstructJSON_State(JSON_LEVEL_SHORT, false);
   JBI->Object_End();
 }

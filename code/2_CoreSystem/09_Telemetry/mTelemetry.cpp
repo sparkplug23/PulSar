@@ -22,9 +22,6 @@
  **/
 #include "mTelemetry.h"
 
-const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
-const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
-
 int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
 {
   

@@ -24,10 +24,8 @@ class mDoorSensor :
     void init(void);
     void Pre_Init(void);
     
-    static const char* PM_MODULE_SENSORS_DOOR_CTR;
-    static const char* PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_DOOR_CTR = D_MODULE_SENSORS_DB18S20_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DOOR_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DOOR_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

@@ -14,9 +14,6 @@
 
 #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
 
-const char* mADC_I2S_Sampler::PM_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR = D_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR;
-const char* mADC_I2S_Sampler::PM_MODULE_SENSORS_ADC_I2S_INTERNAL_FRIENDLY_CTR = D_MODULE_SENSORS_ADC_I2S_INTERNAL_FRIENDLY_CTR;
-
 /***********************************************************************************************************************************************************************
 ***********************************************************************************************************************************************************************
 ****** RXON_TIMESLOT_ENABLED = Where the pic32 RXON sampling timeslot is happening *****************************************************************************************************************************************************************

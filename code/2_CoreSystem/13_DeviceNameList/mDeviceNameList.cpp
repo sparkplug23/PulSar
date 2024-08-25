@@ -145,7 +145,7 @@ const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_
 // DEBUG_LINE_HERE;
 // I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
 
-      snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName(pCONT->GetEnumVectorIndexbyModuleUniqueID(module_id)), device_id);
+      snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName_WithUniqueID(module_id), device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
       ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
@@ -252,9 +252,9 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
  * 
  */
 
-      // snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), device_id);
+      // snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName_WithUniqueID(unique_module_id), device_id);
 
-      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), random(1000));//device_id);
+      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName_WithUniqueID(unique_module_id), random(1000));//device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
       // ALOG_INF( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
@@ -297,6 +297,79 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
   return buffer;
   
 }
+
+bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* sensor_name, int16_t* out_module_id, int8_t* out_sensor_id) {
+   ALOG_INF(PSTR("GetModuleAndSensorIDsByName(%s, %s)"), module_name, sensor_name);
+
+    int8_t found_index = -1;
+    char buffer[64];  // Adjust the size according to your needs
+
+    DEBUG_LINE_HERE
+        ALOG_INF(PSTR("name_buffer.ptr %s"), name_buffer.ptr);
+        ALOG_INF(PSTR("DLI->GetLengthIndexUsed() %d"), DLI->GetLengthIndexUsed());
+
+    // Iterate over the buffer to find the matching module name and sensor name
+    for (int i = 0; i < DLI->GetLengthIndexUsed(); i++) {
+        const char* current_module_name = pCONT->GetModuleName_WithUniqueID(number_buffer.unique_group_ids[i]);
+        const char* current_sensor_name = pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), i, name_buffer.ptr);
+
+        ALOG_INF(PSTR("GetModuleAndSensorIDs %s %s"), current_module_name, current_sensor_name);
+
+    DEBUG_LINE_HERE
+        if (current_module_name && current_sensor_name) {
+            if (strcmp(current_module_name, module_name) == 0 && strcmp(current_sensor_name, sensor_name) == 0) {
+                found_index = i;
+                break;
+            }
+        }
+    }
+
+    DEBUG_LINE_HERE
+    if (found_index != -1) {
+        // Match found, return the IDs
+        *out_module_id = number_buffer.unique_group_ids[found_index];
+        *out_sensor_id = number_buffer.index_ids[found_index];
+        ALOG_INF(PSTR("Match found: Module ID = %d, Sensor ID = %d"), *out_module_id, *out_sensor_id);
+        return true;
+    } else {
+        // No match found
+        ALOG_WRN(PSTR("No match found for Module Name = %s, Sensor = %s"), module_name, sensor_name);
+        return false;
+    }
+}
+
+bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* sensor_name, int16_t* out_module_id, int8_t* out_sensor_id) {
+    ALOG_DBM(PSTR("GetModuleAndSensorIDs(%d, %s)"), module_id, sensor_name);
+
+    int8_t found_index = -1;
+    char buffer[64];  // Adjust the size according to your needs
+
+    // Check if the provided module ID and sensor name match any in the buffers
+    for(int i = 0; i < DEVICENAMEBUFFER_NAME_INDEX_LENGTH; i++) {
+        uint16_t current_module_id = number_buffer.unique_group_ids[i];
+        const char* current_sensor_name = pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), number_buffer.index_ids[i], name_buffer.ptr);
+
+        if (current_sensor_name) {
+            if (current_module_id == module_id && strcmp(current_sensor_name, sensor_name) == 0) {
+                found_index = i;
+                break;
+            }
+        }
+    }
+
+    if (found_index != -1) {
+        // Match found, return the IDs
+        *out_module_id = number_buffer.unique_group_ids[found_index];
+        *out_sensor_id = number_buffer.index_ids[found_index];
+        ALOG_INF(PSTR("Match found: Module ID = %d, Sensor ID = %d"), *out_module_id, *out_sensor_id);
+        return true;
+    } else {
+        // No match found
+        ALOG_WRN(PSTR("No match found for Module ID = %d, Sensor = %s"), module_id, sensor_name);
+        return false;
+    }
+}
+
 
 
 

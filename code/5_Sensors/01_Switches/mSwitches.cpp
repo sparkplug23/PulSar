@@ -3,9 +3,6 @@
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
 
-const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHES_CTR;
-const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR = D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR;
-
 int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
 {
 

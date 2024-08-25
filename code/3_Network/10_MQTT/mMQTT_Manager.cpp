@@ -2,10 +2,6 @@
 
 #if defined(USE_MODULE_NETWORK_MQTT)
 
-const char* mMQTTManager::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
-const char* mMQTTManager::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
-
-
 int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
 
   // ALOG_INF(PSTR("M0host_address===================: %s"), dt.connection[0].host_address);

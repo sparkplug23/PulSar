@@ -23,8 +23,6 @@
 
 #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
 
-const char* mRemoteDevice::PM_MODULE_SENSORS_REMOTE_DEVICE_CTR = D_MODULE_SENSORS_REMOTE_DEVICE_CTR;
-const char* mRemoteDevice::PM_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR = D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR;
 
 int8_t mRemoteDevice::Tasker(uint8_t function, JsonParserObject obj){
   

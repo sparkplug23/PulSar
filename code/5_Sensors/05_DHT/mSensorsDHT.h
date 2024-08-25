@@ -44,10 +44,8 @@ class mSensorsDHT :
     }settings;
 
 
-    static const char* PM_MODULE_SENSORS_DHT_CTR;
-    static const char* PM_MODULE_SENSORS_DHT_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_DHT_CTR = D_MODULE_SENSORS_DHT_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DHT_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_DHT_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DHT_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

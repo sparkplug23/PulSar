@@ -102,7 +102,7 @@
 ; platform                  = ${core_2_6_1.platform}
 ; build_flags               = ${core_2_6_1.build_flags}
 ;                                 -D DEVICE_H801_INSIDE_BEDROOM_WARDROBE -w
-;                                 -D D_USER_MICHAEL
+;                                 -D USE_USER_MICHAEL
 ; lib_extra_dirs              = ${library.lib_extra_dirs}
 ;                               
 ; upload_protocol = espota
@@ -117,7 +117,7 @@
 ; platform                  = ${core_2_6_1.platform}
 ; build_flags               = ${core_2_6_1.build_flags}
 ;                                 -D DEVICE_H801_BEDROOM_UNDERDESK -w
-;                                 -D D_USER_MICHAEL
+;                                 -D USE_USER_MICHAEL
                                 
 ; lib_extra_dirs              = ${library.lib_extra_dirs}
 ;                               

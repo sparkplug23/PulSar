@@ -2,9 +2,6 @@
 
 // #ifdef USE_MODULE_DRIVERS_LEDS
 
-// const char* mLEDs::PM_MODULE_DRIVERS_LEDS_CTR = D_MODULE_DRIVERS_LEDS_CTR;
-// const char* mLEDs::PM_MODULE_DRIVERS_LEDS_FRIENDLY_CTR = D_MODULE_DRIVERS_LEDS_FRIENDLY_CTR;
-
 
 // int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 

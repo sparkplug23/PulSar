@@ -456,10 +456,8 @@ class mSettings :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void parse_JSONCommand(JsonParserObject obj);
 
-    static const char* PM_MODULE_CORE_SETTINGS_CTR;
-    static const char* PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){ return sizeof(mSettings); };
@@ -493,7 +491,7 @@ class mSettings :
     int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
     void Function_Template_Load();
     void SettingsWrite(const void *pSettings, unsigned nSettingsLen);
-  int16_t GetFunctionIDbyFriendlyName(const char* c);
+  int16_t GetFunctionIDbyName(const char* c);
 
   void SettingsLoad_CheckSuccessful();
 

@@ -1495,11 +1495,6 @@ void startCameraServer()
   //https://randomnerdtutorials.com/esp32-cam-video-streaming-face-recognition-arduino-ide/
 }
 
-
-const char* mWebCamera::PM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_CTR = D_MODULE_DRIVERS_CAMERA_WEBCAM_CTR;
-const char* mWebCamera::PM_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_V4_CTR = D_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR;
-
-
 int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
 {
 

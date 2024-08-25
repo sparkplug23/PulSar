@@ -69,7 +69,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
       // module_list_id;//pCONT->mTasksIDs[module_list_id];
       // module_settings.list[module_list_id];
 
-      sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_list_id));
+      sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleName_WithEnum(module_list_id));
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
       ALOG_DBM( PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
       #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS    

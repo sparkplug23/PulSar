@@ -76,10 +76,8 @@
 // // #define D_TOPIC_SENSORS_IFCHANGED_OILFURNACE_BASIC    "status/sensors/ifchanged/oilfurnace"
 // // #define D_TOPIC_SENSORS_IFCHANGED_OILFURNACE_DETAILED "status/sensors/ifchanged/oilfurnace/detailed"
 
-//     static const char* PM_MODULE_CONTROLLER_TANKVOLUME_CTR;
-//     static const char* PM_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR;
+//     static constexpr const char* PM_MODULE_CONTROLLER_TANKVOLUME_CTR;
 //     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_TANKVOLUME_CTR; }
-//     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID; }
 
     

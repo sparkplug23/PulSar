@@ -13,10 +13,6 @@
 
 #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
 
-const char* mTankVolume::PM_MODULE_CONTROLLER_TANKVOLUME_CTR = D_MODULE_CONTROLLER_TANKVOLUME_CTR;
-const char* mTankVolume::PM_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR = D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR;
-
-
 int8_t mTankVolume::Tasker(uint8_t function, JsonParserObject obj){
 
   int8_t function_result = 0;

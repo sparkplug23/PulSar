@@ -23,10 +23,8 @@ class mEnergyInterface :
     void EveryLoop();
 
     
-    static const char* PM_MODULE_ENERGY_INTERFACE_CTR;
-    static const char* PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mEnergyInterface);    };
@@ -133,10 +131,8 @@ class mEnergyInterface :
 //     void Pre_Init(void);
 //     //#define D_MODULE_TOPIC_NAME "energy"
 
-//     static const char* PM_MODULE_ENERGY_INTERFACE_CTR;
-//     static const char* PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
+//     static constexpr const char* PM_MODULE_ENERGY_INTERFACE_CTR;
 //     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
-//     PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
 
 //     #ifdef USE_DEBUG_CLASS_SIZE

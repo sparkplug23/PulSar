@@ -12,9 +12,6 @@
 
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
 
-const char* mDisplaysInterface::PM_MODULE_DISPLAYS_INTERFACE_CTR = D_MODULE_DISPLAYS_INTERFACE_CTR;
-const char* mDisplaysInterface::PM_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR = D_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR;
-
 int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;

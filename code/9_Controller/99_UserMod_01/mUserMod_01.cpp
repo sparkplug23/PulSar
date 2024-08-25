@@ -5,9 +5,6 @@
 
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
 
-const char* mUserMod_01::PM_MODULE_CONTROLLER_USERMOD_01_CTR = D_MODULE_CONTROLLER_USERMOD_01_CTR;
-const char* mUserMod_01::PM_MODULE_CONTROLLER_USERMOD_01_FRIENDLY_CTR = D_MODULE_CONTROLLER_USERMOD_01_FRIENDLY_CTR;
-
 int8_t mUserMod_01::Tasker(uint8_t function, JsonParserObject obj){
 
   /************

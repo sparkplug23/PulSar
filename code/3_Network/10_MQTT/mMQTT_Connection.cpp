@@ -320,7 +320,7 @@ void MQTTConnection::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 bool MQTTConnection::MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t module_id, const char* postfix_topic_ctr)
 {
 
-  PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
+  PGM_P module_ctr = pCONT->GetModuleName_WithEnum(module_id);
 
   #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
   Serial.printf("buffer length = %d\n\r", strlen(data_buffer.payload.ctr));

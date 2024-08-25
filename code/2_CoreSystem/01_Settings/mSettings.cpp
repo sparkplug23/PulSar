@@ -3,11 +3,6 @@
 
 struct DATA_BUFFER data_buffer;
 
-const char* mSettings::PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
-const char* mSettings::PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR = D_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
-
-
-
 // Settings will contain all jsoncommands for "CoreSystem"
 
 //overload fix when only one parameter is called
@@ -259,7 +254,7 @@ void mSettings::Function_Template_Load(){
   
 }
 
-int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
+int16_t mSettings::GetFunctionIDbyName(const char* c){
 
   if(*c=='\0'){
     return -1;

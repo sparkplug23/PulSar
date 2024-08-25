@@ -284,7 +284,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
     #ifdef ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
     JBI->Object_Start("Interface_Priority");
-      // JBI->Add(D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR, pCONT_mqtt->dt.connection[0].interface_reporting_priority.energy);
+      // JBI->Add(D_MODULE_ENERGY_INTERFACE_CTR, pCONT_mqtt->dt.connection[0].interface_reporting_priority.energy);
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
 
@@ -631,7 +631,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool
   JBI->Array_Start("ModuleIDs");
   for(int ii=0;ii<pCONT->GetClassCount();ii++)
   {
-    snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
+    snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleName()  );
 
     JBI->Add(buffer);
   }

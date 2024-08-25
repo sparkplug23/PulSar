@@ -23,10 +23,8 @@ class mRuleEngine :
   public:
     #define D_MAX_RULES 5
     
-    static const char* PM_MODULE_CORE_RULES_CTR;
-    static const char* PM_MODULE_CORE_RULES_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CORE_RULES_CTR = D_MODULE_CORE_RULES_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_RULES_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

@@ -25,7 +25,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 #include "2_CoreSystem/mBaseConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
-#ifdef D_USER_MICHAEL
+#ifdef USE_USER_MICHAEL
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
@@ -37,7 +37,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #else
   // #error "error"
-#endif // D_USER_MICHAEL
+#endif // USE_USER_MICHAEL
 
 /*********************************************************************************************\
  * Default global defines
@@ -213,7 +213,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
   "{" // for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""

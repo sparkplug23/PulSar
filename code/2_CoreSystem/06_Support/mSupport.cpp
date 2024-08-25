@@ -1,9 +1,6 @@
 
 #include "2_CoreSystem/06_Support/mSupport.h"
 
-const char* mSupport::PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
-const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
-
 /*********************************************************************************************
  * Watchdog related
 \*********************************************************************************************/

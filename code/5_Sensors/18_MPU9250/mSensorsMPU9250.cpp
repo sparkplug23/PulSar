@@ -20,10 +20,6 @@
 
 #ifdef USE_MODULE_SENSORS_MPU9250
 
-const char* mSensorsMPU9250::PM_MODULE_SENSORS_MPU9250_CTR = D_MODULE_SENSORS_MPU9250_CTR;
-const char* mSensorsMPU9250::PM_MODULE_SENSORS_MPU9250_FRIENDLY_CTR = D_MODULE_SENSORS_MPU9250_FRIENDLY_CTR;
-
-
 int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){

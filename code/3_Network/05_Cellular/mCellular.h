@@ -98,10 +98,8 @@ class mCellular :
      * @brief Class Naming, used for mTaskerManager
      * 
      */
-    static const char* PM_MODULE__NETWORK_CELLULAR__CTR;
-    static const char* PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mCellular); };

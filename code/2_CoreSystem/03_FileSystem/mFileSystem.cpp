@@ -50,10 +50,6 @@
 
 #ifdef USE_MODULE_CORE_FILESYSTEM
 
-const char* mFileSystem::PM_MODULE_CORE_FILESYSTEM_CTR          = D_MODULE_CORE_FILESYSTEM_CTR;
-const char* mFileSystem::PM_MODULE_CORE_FILESYSTEM_FRIENDLY_CTR = D_MODULE_CORE_FILESYSTEM_FRIENDLY_CTR;
-
-
 #ifndef ERR_FS_QUOTA
 #define ERR_FS_QUOTA    11  // The FS is full or the maximum file size is reached
 #endif

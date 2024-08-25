@@ -39,9 +39,6 @@
 
 #ifdef USE_MODULE_SENSORS_GPS_MODEM
 
-const char* mGPS_Modem::PM_MODULE__SENSORS_GPS_MODEM__CTR          = D_MODULE__SENSORS_GPS_MODEM__CTR;
-const char* mGPS_Modem::PM_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR = D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR;
-
 int8_t mGPS_Modem::Tasker(uint8_t function, JsonParserObject obj)
 {
   

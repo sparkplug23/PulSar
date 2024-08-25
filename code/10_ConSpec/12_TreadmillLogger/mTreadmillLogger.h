@@ -44,10 +44,8 @@ class mTreadmillLogger :
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static const char* PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR;
-    static const char* PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR = D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mTreadmillLogger); };

@@ -4,8 +4,6 @@
 
 #ifdef USE_MODULE_DRIVERS_PWM
 
-const char* mPWM::PM_MODULE_DRIVERS_PWM_CTR = D_MODULE_DRIVERS_PWM_CTR;
-const char* mPWM::PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR = D_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
 
 int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj)
 {

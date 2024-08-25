@@ -32,9 +32,6 @@
 
 #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
 
-const char* mFona_Cellular::PM_MODULE_DRIVERS_FONA_CELLULAR_CTR = D_MODULE_DRIVERS_FONA_CELLULAR_CTR;
-const char* mFona_Cellular::PM_MODULE_DRIVERS_FONA_CELLULAR_FRIENDLY_CTR = D_MODULE_DRIVERS_FONA_CELLULAR_FRIENDLY_CTR;
-
 
 int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
 

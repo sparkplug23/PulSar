@@ -171,10 +171,8 @@ struct ISR_DUAL_CAPTURE{
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static const char* PM_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR;
-    static const char* PM_MODULE_SENSORS_ADC_I2S_INTERNAL_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR = D_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_ADC_I2S_INTERNAL_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ADC_I2S_INTERNAL_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

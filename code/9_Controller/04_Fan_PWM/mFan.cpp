@@ -4,9 +4,6 @@
 
 #ifdef USE_MODULE_CONTROLLER_FAN
 
-const char* mFan::PM_MODULE_CONTROLLER_FAN_PWM_CTR = D_MODULE_CONTROLLER_FAN_PWM_CTR;
-const char* mFan::PM_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR = D_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR;
-
 uint8_t mFan::GetFanspeed(void)
 {
   // if (ifan_fanspeed_timer) {

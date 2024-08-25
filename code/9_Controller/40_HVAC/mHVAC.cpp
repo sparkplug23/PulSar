@@ -33,9 +33,6 @@
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
-const char* mHVAC::PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE_CONTROLLER_HVAC_CTR;
-const char* mHVAC::PM_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR = D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR;
-
 
 /******************************************************************************************************************
  * SECTION: Tasker

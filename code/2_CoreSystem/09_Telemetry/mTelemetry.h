@@ -32,10 +32,8 @@ class mTelemetry :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void WebPage_Root_AddHandlers();
     
-    static const char* PM_MODULE_CORE_TELEMETRY_CTR;
-    static const char* PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
-    PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mTelemetry);    };

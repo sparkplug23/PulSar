@@ -1,8 +1,5 @@
 #include "mHardwarePins.h"
 
-const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_CTR = D_MODULE_CORE_HARDWAREPINS_CTR;
-const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR = D_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR;
-
 /**
  * @brief 
  * 

@@ -3,9 +3,6 @@
 
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
 
-const char* mLDRBasic::PM_MODULE_SENSORS_LDR_BASIC_CTR = D_MODULE_SENSORS_LDR_BASIC_CTR;
-const char* mLDRBasic::PM_MODULE_SENSORS_LDR_BASIC_FRIENDLY_CTR = D_MODULE_SENSORS_LDR_BASIC_FRIENDLY_CTR;
-
 int8_t mLDRBasic::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){

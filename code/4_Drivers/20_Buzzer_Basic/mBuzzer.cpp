@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
 
-const char* mBuzzer::PM_MODULE_DRIVERS_BUZZER_CTR = D_MODULE_DRIVERS_BUZZER_CTR;
-const char* mBuzzer::PM_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR = D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR;
-
 int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;

@@ -21,10 +21,6 @@
 
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
 
-const char* mIRRemote::PM_MODULE_DRIVERS_IRREMOTE_CTR = D_MODULE_DRIVERS_IRREMOTE_CTR;
-const char* mIRRemote::PM_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR = D_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR;
-
-
 int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
 
   /************

@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_SENSORS_INTERFACE 
 
-const char* mSensorsInterface::PM_MODULE_SENSORS_INTERFACE_CTR = D_MODULE_SENSORS_INTERFACE_CTR;
-const char* mSensorsInterface::PM_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR = D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR;
-
 int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;

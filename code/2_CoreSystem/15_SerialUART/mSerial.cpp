@@ -16,10 +16,6 @@
 
 #ifdef USE_MODULE_CORE__SERIAL
 
-const char* mSerial::PM_MODULE_CORE__SERIAL__CTR = D_MODULE_CORE__SERIAL__CTR;
-const char* mSerial::PM_MODULE_CORE__SERIAL__FRIENDLY_CTR = D_MODULE_CORE__SERIAL__FRIENDLY_CTR;
-
-
 uint8_t simple_uart2_receive_frame_for_calibration[4] = {0};
 bool flag_simple_uart2_receive_frame_for_calibration_updated = false;
 

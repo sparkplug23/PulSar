@@ -33,10 +33,8 @@ class mDoorBell :
     int8_t pin_doorbell_button = -1;
     int8_t pin_relay_chime = -1;
     
-    static const char* PM_MODULE_CONTROLLER_DOORBELL_CTR;
-    static const char* PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE_CONTROLLER_DOORBELL_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_DOORBELL_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_DOORBELL_ID; }
 
     

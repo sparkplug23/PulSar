@@ -27,10 +27,8 @@ class mFan :
     mFan(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static const char* PM_MODULE_CONTROLLER_FAN_PWM_CTR;
-    static const char* PM_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_FAN_PWM_CTR = D_MODULE_CONTROLLER_FAN_PWM_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_FAN_PWM_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_FAN_PWM_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

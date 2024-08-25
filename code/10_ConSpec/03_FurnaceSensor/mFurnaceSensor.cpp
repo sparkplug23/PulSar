@@ -12,11 +12,6 @@
  * 
  */
 
-
-
-const char* mFurnaceSensor::PM_MODULE_CONTROLLER_FURNACE_SENSOR_CTR = D_MODULE_CONTROLLER_FURNACE_SENSOR_CTR;
-const char* mFurnaceSensor::PM_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR = D_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR;
-
 int8_t mFurnaceSensor::Tasker(uint8_t function, JsonParserObject obj)
 {
 

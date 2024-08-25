@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 
-const char* mRelays::PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
-const char* mRelays::PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR = D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
-
 /**
  * @brief: Module Interface
  * */
@@ -1236,7 +1233,7 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
  */
 uint8_t mRelays::AppendJSONResponse_Drivers_Unified()
 {
-  JBI->Level_Start_P(PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR);
+  JBI->Level_Start_P(PM_MODULE_DRIVERS_RELAY_CTR);
     ConstructJSON_State(JSON_LEVEL_SHORT, false);
   JBI->Object_End();
 }

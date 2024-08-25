@@ -3,9 +3,6 @@
 
 #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER 
 
-const char* mRotaryEncoder::PM_MODULE_SENSORS_ROTARY_ENCODER_CTR = D_MODULE_SENSORS_ROTARY_ENCODER_CTR;
-const char* mRotaryEncoder::PM_MODULE_SENSORS_ROTARY_ENCODER_FRIENDLY_CTR = D_MODULE_SENSORS_ROTARY_ENCODER_FRIENDLY_CTR;
-
 int8_t mRotaryEncoder::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;

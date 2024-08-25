@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
-const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
-
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
 
@@ -155,7 +152,7 @@ void mAnimatorLight::Save_Module()
   JBI->End();
 
   char filename_json[50];
-  snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleFriendlyName());
+  snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleName());
 
   pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
 

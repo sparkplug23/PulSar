@@ -100,10 +100,8 @@ class mFileSystem :
     void JsonFile_Load__Stored_Secure();
     
 
-    static const char* PM_MODULE_CORE_FILESYSTEM_CTR;
-    static const char* PM_MODULE_CORE_FILESYSTEM_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CORE_FILESYSTEM_CTR = D_MODULE_CORE_FILESYSTEM_CTR;
     PGM_P GetModuleName(){         return PM_MODULE_CORE_FILESYSTEM_CTR; }
-    PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_FILESYSTEM_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_FILESYSTEM_ID; }
 
 

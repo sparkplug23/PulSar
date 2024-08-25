@@ -20,9 +20,6 @@ float GetSensorTemperature(module_id, sensor_id)
 
 #ifdef USE_MODULE_ENERGY_INTERFACE 
 
-const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
-const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR = D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
-
 int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
@@ -388,9 +385,6 @@ void mEnergyInterface::MQTTHandler_Sender()
 // #include "mEnergyInterface.h"
 
 // #ifdef USE_MODULE_ENERGY_INTERFACE
-
-// const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
-// const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR = D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
 
 
 // int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj)
@@ -1209,9 +1203,9 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   int8_t tmp_id = 0;
 
 //   // Using a desired address, the sensor is searched for, then index (id) is updated
-//   if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR]){
+//   if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_INTERFACE_CTR]){
      
-//     JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR];
+//     JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_INTERFACE_CTR];
       
 //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
@@ -1251,7 +1245,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   //     AddLog(LOG_LEVEL_TEST, PSTR(" NOT FOUND group_iter.getInt()) = %d"));
 //   // }
 
-//   if(jtok = obj["MQTT_Interface_Priority"].getObject()[D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR])
+//   if(jtok = obj["MQTT_Interface_Priority"].getObject()[D_MODULE_ENERGY_INTERFACE_CTR])
 //   {
 //     CommandSet_MQTT_Reporting_Priority(jtok.getInt());
 //   }
@@ -1282,7 +1276,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 // //   // Using a desired address, the sensor is searched for, then index (id) is updated
 // //   // if(jtok = obj["Set"].getObject()[""]){
      
-// //   //   JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR];
+// //   //   JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_PZEM004T_CTR];
       
 // //   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
 // //   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 

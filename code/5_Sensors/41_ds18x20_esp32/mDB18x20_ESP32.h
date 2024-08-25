@@ -35,10 +35,8 @@ class mDB18x20_ESP32 :
     void init(void);
     void Pre_Init(void);
     
-    static const char* PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR;
-    static const char* PM_MODULE_SENSORS__DS18X20_ESP32_2023__FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR = D_MODULE_SENSORS_DB18S20_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS__DS18X20_ESP32_2023__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mDB18x20_ESP32); };

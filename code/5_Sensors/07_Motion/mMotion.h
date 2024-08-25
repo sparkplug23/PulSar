@@ -25,10 +25,8 @@ class mMotion :
     void Pre_Init(void);
     void Init(void);
     
-    static const char* PM_MODULE_SENSORS_MOTION_CTR;
-    static const char* PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_MOTION_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOTION_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE

@@ -21,10 +21,8 @@ class mSensorColourBar :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static const char* PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR;
-    static const char* PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR = D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mSensorColourBar);    };

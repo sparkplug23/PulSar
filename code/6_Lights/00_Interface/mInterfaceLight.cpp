@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE 
 
-const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
-const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR = D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
-
 int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 {
   
@@ -330,7 +327,7 @@ void mInterfaceLight::Save_Module()
    * ******************************************************************/
 
   char filename_byte[50];
-  snprintf_P(filename_byte, sizeof(filename_byte), "/lgt_%S_byte.txt", GetModuleFriendlyName()); // debugging in .txt so webui/edt can read it
+  snprintf_P(filename_byte, sizeof(filename_byte), "/lgt_%S_byte.txt", GetModuleName()); // debugging in .txt so webui/edt can read it
   // snprintf_P(filename_byte, sizeof(filename_byte), "/lgt_%S.bin", GetModuleFriendlyName()); // possibly switch to .bin for binary data, though UI wont be able to read it
 
   struct TEST{
@@ -387,7 +384,7 @@ void mInterfaceLight::Save_Module()
   JBI->End();
 
   char filename_json[50];
-  snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleFriendlyName());
+  snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleName());
 
   pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
 

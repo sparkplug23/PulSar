@@ -19,9 +19,6 @@
 #ifdef USE_MODULE_CORE_UPDATES
 
 
-const char* mUpdates::PM_MODULE_CORE_UPDATES_CTR = D_MODULE_CORE_UPDATES_CTR;
-const char* mUpdates::PM_MODULE_CORE_UPDATES_FRIENDLY_CTR = D_MODULE_CORE_UPDATES_FRIENDLY_CTR;
-
 void mUpdates::init(void)
 {
   

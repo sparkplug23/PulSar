@@ -20,8 +20,6 @@
 
 // #ifdef USE_MODULE_CORE_SERIAL_UART
 
-// const char* mSerialUART::PM_MODULE_CORE_SERIAL_UART_CTR = D_MODULE_CORE_SERIAL_UART_CTR;
-// const char* mSerialUART::PM_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR = D_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR;
 
 //   uint8_t simple_uart2_receive_frame_for_calibration[4] = {0};
 //   bool flag_simple_uart2_receive_frame_for_calibration_updated = false;

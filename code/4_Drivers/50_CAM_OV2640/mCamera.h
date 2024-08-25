@@ -18,10 +18,8 @@ class mCameraOV2640 :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     
-    static const char* PM_MODULE_DRIVERS_CAMERA_OV2640_CTR;
-    static const char* PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_CAMERA_OV2640_CTR = D_MODULE_DRIVERS_CAMERA_OV2640_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_CAMERA_OV2640_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID; }
 
     

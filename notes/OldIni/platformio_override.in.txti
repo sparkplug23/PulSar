@@ -1161,7 +1161,7 @@ upload_protocol = espota
 [env:esp_8266_devboard_segment]
 build_flags = ${common.build_flags} 
                 -D DEVICE_RGBSTRING_DEVBOARD_SEGMENT -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
                 ;-D USE_BUILD_TYPE_LIGHTING
                 ;-w
 ; monitor_filters = esp8266_exception_decoder
@@ -1384,7 +1384,7 @@ upload_port = 192.168.0.180
 [env:esp_8266_testbed_segments_roof]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_ANIMATION_SEGMENTS_3PIXELS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
                 ; -D 
                 ;-D USE_BUILD_TYPE_LIGHTING
                 ;-w
@@ -1420,7 +1420,7 @@ upload_port = COM5
 [env:esp_8266_testbed_segments_4pixel]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
                 ; -D 
                 ;-D USE_BUILD_TYPE_LIGHTING
                 ;-w
@@ -1436,7 +1436,7 @@ upload_port = 192.168.0.199
 [env:esp_8266_testbed_rtc_fastboot]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_RTC_FASTBOOT -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_protocol = espota
@@ -1450,7 +1450,7 @@ upload_port = COM5
 [env:esp_8266_testbed_status_leds]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_STATUS_LEDS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
                 ; -D 
                 ;-D USE_BUILD_TYPE_LIGHTING
                 ;-w
@@ -1514,7 +1514,7 @@ upload_port = COM5
 [env:esp_8266_testbed_webui_basic_gui]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266 -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 lib_extra_dirs = ${library.lib_extra_dirs}
                  lib/lib_basic
                  lib/lib_network
@@ -2081,7 +2081,7 @@ upload_port = COM8
 [env:esp_8266_testbed_webui_segments_3pixels]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_protocol = espota
@@ -2093,7 +2093,7 @@ upload_port = COM5
 [env:esp_8266_testbed_webui_4pixel]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_protocol = espota
@@ -2106,7 +2106,7 @@ upload_port = COM5
 [env:esp_8266_testbed_pixel_heart]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_PIXEL_HEART -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 ; monitor_filters = esp8266_exception_decoder
 ; build_type = debug
 ; upload_protocol = espota
@@ -2119,7 +2119,7 @@ upload_port = COM12
 [env:esp_8266_testbed_hardware_bme]
 build_flags = ${common.build_flags} 
                 -D DEVICE_TESTBED_HARDWARE_BME_ESP8266 -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_sensor
 ; monitor_filters = esp8266_exception_decoder
@@ -2157,7 +2157,7 @@ upload_port = COM24
 [env:esp_8266_bedroom_wallclock_01]
 build_flags = ${common.build_flags} 
                 -D DEVICE_BEDROOM_WALLCLOCK_01 -w
-                -D D_USER_MICHAEL
+                -D USE_USER_MICHAEL
                 ; -D 
                 ;-D USE_BUILD_TYPE_LIGHTING
                 ;-w
@@ -2175,7 +2175,7 @@ upload_port = COM5
 ; [env:esp_8266_testbed_segments_roof]
 ; build_flags = ${common.build_flags} 
 ;                 -D DEVICE_TESTBED_ANIMATION_SEGMENTS_3PIXELS -w
-;                 -D D_USER_MICHAEL
+;                 -D USE_USER_MICHAEL
 ;                 ;-D USE_BUILD_TYPE_LIGHTING
 ;                 ;-w
 ; ; monitor_filters = esp8266_exception_decoder
@@ -2322,7 +2322,7 @@ upload_port = COM18
 platform                  = ${core_2_6_1.platform}
 build_flags               = ${core_2_6_1.build_flags}
                                 -D DEVICE_TESTBED_H801_PWM_MANUAL -w
-                                -D D_USER_MICHAEL
+                                -D USE_USER_MICHAEL
                                 ; for h801 boards
                                 -D USE_SERIAL_ALTERNATE_TX
 upload_protocol = espota
@@ -2336,7 +2336,7 @@ upload_port = 192.168.0.153
 platform                  = ${core_2_6_1.platform}
 build_flags               = ${core_2_6_1.build_flags}
                                 -D DEVICE_TESTBED_H801_SUNELEVATION_REACTIVE_PALETTES -w
-                                -D D_USER_MICHAEL
+                                -D USE_USER_MICHAEL
                                 ; for h801 boards
                                 -D USE_SERIAL_ALTERNATE_TX
 upload_protocol = espota
@@ -2352,7 +2352,7 @@ upload_port = 192.168.0.202
 platform                  = ${core_2_6_1.platform}
 build_flags               = ${core_2_6_1.build_flags}
                                 -D DEVICE_TESTBED_BLENDING_VARIABLES -w
-                                -D D_USER_MICHAEL
+                                -D USE_USER_MICHAEL
 upload_protocol = espota
 extra_scripts   = gzip_fw.py
 upload_port = 192.168.0.153

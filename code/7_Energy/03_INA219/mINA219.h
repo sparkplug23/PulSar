@@ -150,15 +150,10 @@ class mEnergyINA219 :
   private:
   public:
     mEnergyINA219(){};
-
     
-    static const char* PM_MODULE_ENERGY_INA219_CTR;
-    static const char* PM_MODULE_ENERGY_INA219_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_ENERGY_INA219_CTR = D_MODULE_ENERGY_INA219_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INA219_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_INA219_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INA219_ID; }
-
-
 
 
     void Pre_Init(void);

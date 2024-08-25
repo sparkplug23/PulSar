@@ -178,10 +178,8 @@ class mGPS_Serial :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static const char* PM_MODULE_SENSORS__GPS_SERIAL_CTR;
-    static const char* PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR;
+    static constexpr const char* PM_MODULE_SENSORS__GPS_SERIAL_CTR = D_MODULE_SENSORS__GPS_SERIAL__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__GPS_SERIAL_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS__GPS_SERIAL_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID; }    
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mGPS_Serial);    };
