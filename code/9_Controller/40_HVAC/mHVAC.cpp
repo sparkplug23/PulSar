@@ -233,7 +233,7 @@ void mHVAC::FunctionHandler_Init(){
 void mHVAC::FunctionHandler_Loop()
 {  
   for(auto& handle:functionhandler_list){
-    pCONT_sup->FunctionHandler_Call(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
+    pCONT_sup->FunctionHandler_Call(*this, GetModuleUniqueID(), handle);
   }
 }
 
@@ -1695,7 +1695,7 @@ void mHVAC::MQTTHandler_Set_DefaultPeriodRate()
 void mHVAC::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){  
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
   

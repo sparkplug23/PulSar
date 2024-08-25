@@ -381,7 +381,7 @@ void mDriverInterface::MQTTHandler_Set_DefaultPeriodRate()
 void mDriverInterface::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_INTERFACE_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

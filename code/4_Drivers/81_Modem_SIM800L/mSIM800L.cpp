@@ -2528,7 +2528,7 @@ void mSIM800L::MQTTHandler_Set_DefaultPeriodRate()
 void mSIM800L::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS__MODEM_800L__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

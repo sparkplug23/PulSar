@@ -408,7 +408,7 @@ void mBuzzer::MQTTHandler_Set_DefaultPeriodRate()
 void mBuzzer::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__DRIVERS_BUZZER_BASIC__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

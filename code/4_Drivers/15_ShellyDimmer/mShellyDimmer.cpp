@@ -1198,7 +1198,7 @@ void mShellyDimmer::MQTTHandler_Set_DefaultPeriodRate()
 void mShellyDimmer::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_SHELLY_DIMMER_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

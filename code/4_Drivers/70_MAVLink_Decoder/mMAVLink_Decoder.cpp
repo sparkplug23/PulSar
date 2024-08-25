@@ -2361,7 +2361,7 @@ void mMAVLink_Decoder::MQTTHandler_Set_DefaultPeriodRate()
 void mMAVLink_Decoder::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__DRIVERS_MAVLINK_DECODER__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
   

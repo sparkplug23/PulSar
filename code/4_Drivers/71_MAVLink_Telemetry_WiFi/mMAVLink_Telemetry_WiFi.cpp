@@ -195,7 +195,7 @@ void mMAVLink_Telemetry_WiFi::MQTTHandler_Set_DefaultPeriodRate()
 void mMAVLink_Telemetry_WiFi::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

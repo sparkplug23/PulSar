@@ -456,7 +456,7 @@ void mRCSwitch::MQTTHandler_Set_DefaultPeriodRate()
 void mRCSwitch::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_RF433_RCSWITCH_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

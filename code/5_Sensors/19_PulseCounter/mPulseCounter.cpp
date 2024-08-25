@@ -543,7 +543,8 @@ void mPulseCounter::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     } // switch
 
     // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_PULSECOUNTER_ID,ptr); }
+    if(handler_found){ pCONT->mqt->MQTTHandler_Comm and(*this,D_MODULE_SENSORS_PULSECOUNTER_ID,ptr); }
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 
     // stop searching
     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

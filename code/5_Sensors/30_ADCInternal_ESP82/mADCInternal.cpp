@@ -498,7 +498,7 @@ void mADCInternal::MQTTHandler_Set_DefaultPeriodRate()
 void mADCInternal::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ADC_INTERNAL_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 
@@ -830,7 +830,7 @@ void mADCInternal::MQTTHandler_Sender()
 // void mSensorsAnalog::MQTTHandler_Sender()
 // {
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ANALOG_ID, handle);
+//     pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 //   }
 // }
 

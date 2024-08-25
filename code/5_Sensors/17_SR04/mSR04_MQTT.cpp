@@ -59,7 +59,7 @@ void mSR04::MQTTHandler_Set_DefaultPeriodRate()
 void mSR04::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_SR04_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

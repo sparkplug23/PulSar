@@ -83,7 +83,7 @@ void mGPS_SD_Logger::MQTTHandler_Set_DefaultPeriodRate()
 void mGPS_SD_Logger::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

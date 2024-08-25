@@ -791,7 +791,7 @@ void mMavlinkFlyingLEDS::MQTTHandler_Set_DefaultPeriodRate()
 void mMavlinkFlyingLEDS::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, TaskerID::CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

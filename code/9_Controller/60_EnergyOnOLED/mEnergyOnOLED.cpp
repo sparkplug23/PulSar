@@ -397,7 +397,7 @@ void mEnergyOLED::MQTTHandler_Set_DefaultPeriodRate()
 void mEnergyOLED::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER__ENERGY_OLED__ID, handle);
+    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 
