@@ -26,8 +26,6 @@
 #include <String>
 #include <Arduino.h>
 
-
-
 /* Constants */
 #define SENSORS_GRAVITY_EARTH                   (9.80665F) /**< Earth's gravity in m/s^2 */
 #define SENSORS_GRAVITY_MOON                    (1.6F)      /**< The moon's gravity in m/s^2 */
@@ -40,17 +38,12 @@
 #define SENSORS_RADS_TO_DPS                     (57.29577793F) /**< Rad/s to degrees/s  multiplier */
 #define SENSORS_GAUSS_TO_MICROTESLA             (100) /**< Gauss to micro-Tesla multiplier */
 
-// #define SENSOR_TYPE_INVALID_READING -2.0f 
-// #define SENSOR_TYPE_INVALID_READING std::numeric_limits<float>::min;
-#define SENSOR_TYPE_INVALID_READING -10000.0f//std::numeric_limits<float>::min;
-/**
- * List of sensor types
- * */
+#define SENSOR_TYPE_INVALID_READING std::numeric_limits<float>::lowest()
 
 /**
- * @brief For types that come in triples (e.g x/y/z axis, it will always be assumed the data is packed in three)
- * 
- */
+ * List of sensor types
+ * For types that come in triples (e.g x/y/z axis, it will always be assumed the data is packed in three)
+ **/
 typedef enum
 {
   /**
@@ -90,23 +83,17 @@ typedef enum
    * @brief Distance
    **/
   SENSOR_TYPE_PROXIMITY_ID,
-
-
-
+  SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID,
+  /**
+   * @brief Global Position
+   **/
   SENSOR_TYPE_LATITUDE_ID,
   SENSOR_TYPE_LONGITUDE_ID,
   SENSOR_TYPE_ALTITUDE_ID,
-
-
   /**
    * @brief Speed
    **/
   SENSOR_TYPE_SPEED_ID,
-  
-  
-  SENSOR_TYPE_GRAVITY_ID,
-
-
   /**
    * @brief Energy
    **/
@@ -116,12 +103,13 @@ typedef enum
   SENSOR_TYPE_FREQUENCY_ID,
   SENSOR_TYPE_POWER_FACTOR_ID,
   SENSOR_TYPE_ENERGY_ID,
-
-
+  /**
+   * @brief Other
+   **/  
+  SENSOR_TYPE_GRAVITY_ID,
   SENSOR_TYPE_COLOR_ID,
   SENSOR_TYPE_SUN_AZIMUTH_ID,
   SENSOR_TYPE_SUN_ELEVATION_ID,
-
   SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED_ID,
   SENSOR_TYPE_GAME_ROTATION_VECTOR_ID,
   SENSOR_TYPE_GYROSCOPE_UNCALIBRATED_ID,
@@ -140,25 +128,15 @@ typedef enum
   SENSOR_TYPE_HEART_BEAT_ID,
   SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED_ID,
   SENSOR_TYPE_HINGE_ANGLE_ID,
-
-  
-  SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID,
-
   /**
    * @brief Door states
    **/
   SENSOR_TYPE_DOOR_POSITION_ID,
   SENSOR_TYPE_DOOR_LOCKED_ID,
-
   /**
    * @brief Basic logic
-   * 
-   */
-
+   **/
   SENSOR_TYPE_STATE_ACTIVE_ID, //ie on/off
-
-
-
   SENSOR_TYPE_FLOATS_LENGTH_ID // 256 max types
 } sensors_type_floats_t;
 
@@ -169,11 +147,6 @@ typedef enum
 
   SENSOR_TYPE_LENGTH_ID // 256 max types
 } sensors_type_string_t;
-
-// String invalid = String("invalid");
-
-// #define SENSOR_STRING_TYPE_INVALID String("invalid")
-
 
 /**
 * @brief https://github.com/aosp-mirror/platform_hardware_libhardware/blob/master/include/hardware/sensors.h
@@ -190,8 +163,6 @@ typedef struct
 
   std::vector<float> data_f;
   std::vector<String> data_s;
-  
-
 
   String error = String("error");
 
@@ -242,7 +213,7 @@ typedef struct
           (type_search >= SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID) && // sanity check type is float
           (type_search <  SENSOR_TYPE_LENGTH_ID)
         ){
-          return data_s[0];
+          return data_s[i];
         }
       }
     }
@@ -273,16 +244,7 @@ typedef struct
 
 /**
  * @brief 
- * 
- *
- * 
  * Note: not only does there need to be data, it also needs to be the right sensor... name change "isFloatWaiting_WithSensorType"
- * 
-   if((sensor_data = val.GetFloat(type_id)) != SENSOR_TYPE_INVALID_READING) // "has float needs to perform this check!"
-
-
-Temporary fix, not most efficient code but makes other calls easier. Clean up
-
   **/        
   bool isFloatWaiting_WithSensorType(uint8_t type_search)
   {
@@ -311,7 +273,6 @@ Temporary fix, not most efficient code but makes other calls easier. Clean up
 } sensors_reading_t;
 
 
-// move into sensor type?? YES!! -- so its not duplicated
 static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
 {
   

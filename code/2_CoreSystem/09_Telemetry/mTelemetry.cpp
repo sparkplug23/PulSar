@@ -30,17 +30,17 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
-    case FUNC_MQTT_STATUS_REFRESH_SEND_ALL:
+    case TASK_MQTT_CONNECTED:
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -48,7 +48,7 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
      * WEB SECTION * 
     *******************/   
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_HANDLER:    
+    case TASK_WEB_ADD_HANDLER:    
       WebPage_Root_AddHandlers();
     break;
     #endif // USE_MODULE_NETWORK_WEBSERVER
@@ -77,9 +77,10 @@ void mTelemetry::MQTTHandler_Init()
   handler<mTelemetry>* ptr;
   
   ptr = &mqtthandler_lwt_online;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = 3600; // Hourly 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_LWT_ONLINE_ID;
@@ -89,15 +90,16 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_health;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   #if defined(ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS) || defined(ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS)
   ptr->tRateSecs = 1; 
   #else
-  ptr->tRateSecs = 1;//DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
   #endif // ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
-  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_1_MINUTES_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
@@ -107,9 +109,10 @@ void mTelemetry::MQTTHandler_Init()
   #ifndef FIRMWARE_MINIMAL2
   
   ptr = &mqtthandler_settings;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -119,9 +122,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_log;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -131,9 +135,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_firmware;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -143,9 +148,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_memory;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -155,9 +161,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_network;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -167,9 +174,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_mqtt;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -179,9 +187,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_time;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -191,9 +200,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
     
   ptr = &mqtthandler_reboot;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -203,9 +213,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_reboot_event;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR;  
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -214,12 +225,13 @@ void mTelemetry::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
   mqtthandler_list.push_back(ptr);
 
-  #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+  // #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
   
   ptr = &mqtthandler_devices;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -229,9 +241,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_pins;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -241,9 +254,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_template;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -253,7 +267,7 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_moduleinterface;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
@@ -265,9 +279,10 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_debug_system_saved_settings;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -278,9 +293,10 @@ void mTelemetry::MQTTHandler_Init()
 
   #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   ptr = &mqtthandler_debug_tasker_interface_performance; 
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = 60; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -293,8 +309,9 @@ void mTelemetry::MQTTHandler_Init()
   #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
   ptr = &mqtthandler_debug__settings_storage;
   ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_SETTINGS_STORAGE;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
+  ptr->flags.retain = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
@@ -305,12 +322,13 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
 
-  #endif // ENABLE_MQTT_DEBUG_TELEMETRY
+  // #endif // ENABLE_MQTT_DEBUG_TELEMETRY
   
   ptr = &mqtthandler_debug_minimal;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
   ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -341,9 +359,9 @@ void mTelemetry::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   // }
 }
 

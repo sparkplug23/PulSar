@@ -11,9 +11,7 @@
 #include <stdint.h>
 #include <string.h>
 
-
 #include <ext_printf.h>
-
 
 #define SET_FLAG   true
 #define RESET_FLAG false
@@ -29,27 +27,7 @@
 #include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
-
-/***
- * Include template structure
- * 
- * First add the base level defaults
- * Then add any custom header layouts
- * finish with firmware defaults that may ovverride above
- * 
- * 
- * 
- * 
-*/
-
-
-
-// Minimal base configurations required for stable operation
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
-// Optional user configs, which override defaults
-
-// #include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
-
 #ifndef USE_USER_MICHAEL // Include my personally named secret file
   #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #endif // USE_USER_MICHAEL // Include my personally named secret file
@@ -66,10 +44,7 @@
   #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #endif // USE_USER_MICHAEL
 
-
 #include "2_CoreSystem/06_Support/mSensorType.h"
-
-
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
 #include "2_CoreSystem/16_Events/mEvents.h"
@@ -82,13 +57,7 @@
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 
-
-
-
-
-
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
-#include "1_TaskerManager/mTaskerManager_Defines.h"
 #include "2_CoreSystem/05_HardwarePins/mHardwarePins_Templates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
 
@@ -107,72 +76,61 @@
   #define mSupportHardware SupportESP32
 #endif
 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-      
-    #define LOROL_LITTLEFS 
-
-    #ifdef ESP8266
-      #include <ESP8266WiFi.h>
-      #include <ESP8266mDNS.h>
-      #include <ESPAsyncTCP.h>
-      #include <LittleFS.h>
-      extern "C"
-      {
-      #include <user_interface.h>
-      }
-      #ifndef WLED_DISABLE_ESPNOW
-        #include <espnow.h>
-      #endif
-    #else // ESP32
-      #include <HardwareSerial.h>  // ensure we have the correct "Serial" on new MCUs (depends on ARDUINO_USB_MODE and ARDUINO_USB_CDC_ON_BOOT)
-      #include <WiFi.h>
-      #include <ETH.h>
-      #include "esp_wifi.h"
-      #include <ESPmDNS.h>
-      #include <AsyncTCP.h>
-      #include "esp_task_wdt.h"
-
-      #ifndef WLED_DISABLE_ESPNOW
-        #include <esp_now.h>
-      #endif
-    #endif
-
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-
-
-  #ifdef USE_MODULE_CORE_FILESYSTEM
-
-
-    #define LOROL_LITTLEFS 
+#ifdef USE_MODULE_NETWORK_WEBSERVER
     
-      #ifdef LOROL_LITTLEFS
-        #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
-          #define CONFIG_LITTLEFS_FOR_IDF_3_2
-        #endif
-        #include <LittleFS.h>
-      #else
-        #include <LittleFS.h>
-      #endif
+  #define LOROL_LITTLEFS 
 
-
-    //Filesystem to use for preset and config files. SPIFFS or LittleFS on ESP8266, SPIFFS only on ESP32 (now using LITTLEFS port by lorol)
-    #ifdef ESP8266
-      #define FILE_SYSTEM LittleFS
-    #else
-      #ifdef LOROL_LITTLEFS
-        #define FILE_SYSTEM LITTLEFS
-      #else
-        #define FILE_SYSTEM LittleFS
-      #endif
+  #ifdef ESP8266
+    #include <ESP8266WiFi.h>
+    #include <ESP8266mDNS.h>
+    #include <ESPAsyncTCP.h>
+    #include <LittleFS.h>
+    extern "C"
+    {
+    #include <user_interface.h>
+    }
+    #ifndef WLED_DISABLE_ESPNOW
+      #include <espnow.h>
     #endif
+  #else // ESP32
+    #include <HardwareSerial.h>  // ensure we have the correct "Serial" on new MCUs (depends on ARDUINO_USB_MODE and ARDUINO_USB_CDC_ON_BOOT)
+    #include <WiFi.h>
+    #include <ETH.h>
+    #include "esp_wifi.h"
+    #include <ESPmDNS.h>
+    #include <AsyncTCP.h>
+    #include "esp_task_wdt.h"
+
+    #ifndef WLED_DISABLE_ESPNOW
+      #include <esp_now.h>
+    #endif
+  #endif
+
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
+#ifdef USE_MODULE_CORE_FILESYSTEM
+  #define LOROL_LITTLEFS   
+    #ifdef LOROL_LITTLEFS
+      #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
+        #define CONFIG_LITTLEFS_FOR_IDF_3_2
+      #endif
+      #include <LittleFS.h>
+    #else
+      #include <LittleFS.h>
+    #endif
+  //Filesystem to use for preset and config files. SPIFFS or LittleFS on ESP8266, SPIFFS only on ESP32 (now using LITTLEFS port by lorol)
+  #ifdef ESP8266
+    #define FILE_SYSTEM LittleFS
+  #else
+    #ifdef LOROL_LITTLEFS
+      #define FILE_SYSTEM LITTLEFS
+    #else
+      #define FILE_SYSTEM LittleFS
+    #endif
+  #endif
+#endif // USE_MODULE_CORE_FILESYSTEM
 
-
-
-  #endif // USE_MODULE_CORE_FILESYSTEM
-
-// #include <variant>
 
 // Returns via tasker that report special status
 // Can also be interpeted as basic numbers
@@ -204,15 +162,15 @@ enum ModuleStatus{
 
 
 // Libraries
-#include <StreamString.h>                   // Webserver, Updater
+// #include <StreamString.h>                   // Webserver, Updater
 
 #ifdef USE_ARDUINO_OTA
   #include <ArduinoOTA.h>                   // Arduino OTA
 #endif  // USE_ARDUINO_OTA
 
-//#ifdef USE_I2C
+#ifdef USE_MODULE_CORE_I2C
   #include <Wire.h>                         // I2C support library
-//#endif  // USE_I2C
+#endif
 
 #ifdef ESP32
   #include <WiFi.h>
@@ -260,423 +218,53 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #define pCONT mTaskerManager::GetInstance()
 
 
-
-
 // macro to know if a module is a type (ie within a range)
 #define IS_MODULE_SENSOR_SUBMODULE(x)   (x >= 5001 && x <= 5999) // skipping the interface
 #define IS_MODULE_LIGHTING_SUBMODULE(x) (x >= 6001 && x <= 6999) // skipping the interface
 #define IS_MODULE_ENERGY_SUBMODULE(x)   (x >= 7001 && x <= 7999) // skipping the interface
 #define IS_MODULE_DISPLAY_SUBMODULE(x)  (x >= 8001 && x <= 8999) // skipping the interface
 
-
-
-
-#define D_TARGET_TASKER_NONE 0
-
-// enum TaskerID
-// {
-//   /**
-//    * @brief Core Modules
-//    **/
-//   #ifdef USE_MODULE_CORE_SETTINGS
-//     EM_MODULE_CORE_SETTINGS_ID,
-//   #endif 
-//   #ifdef USE_MODULE_CORE_FILESYSTEM
-//     EM_MODULE_CORE_FILESYSTEM_ID,
-//   #endif
-//   #ifdef USE_MODULE_CORE_HARDWAREPINS
-//     EM_MODULE_CORE_HARDWAREPINS_ID,
-//   #endif 
-
-//   #ifdef USE_MODULE_CORE_SUPPORT
-//     EM_MODULE_CORE_SUPPORT_ID,
-//   #endif 
-//   #ifdef USE_MODULE_CORE_TIME
-//     EM_MODULE_CORE_TIME_ID,
-//   #endif 
-
-
-//   #ifdef USE_MODULE_CORE_LOGGING
-//     EM_MODULE_CORE_LOGGING_ID,
-//   #endif 
-//   #ifdef USE_MODULE_CORE_TELEMETRY
-//     EM_MODULE_CORE_TELEMETRY_ID,
-//   #endif 
-//   #ifdef USE_MODULE_CORE_RULES
-//     EM_MODULE_CORE_RULES_ID,
-//   #endif 
-//   #ifdef USE_MODULE_CORE_UPDATES
-//     EM_MODULE_CORE_UPDATES_ID,
-//   #endif   
-//   // #ifdef USE_MODULE_CORE_SERIAL_UART
-//   //   EM_MODULE_CORE_SERIAL_UART_ID,
-//   // #endif
-//   #ifdef USE_MODULE_CORE__SERIAL //merge into above
-//     CORE__SERIAL,
-//   #endif 
-//   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
-//     EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID,
-//   #endif 
-//   /**
-//    * @brief Network
-//    **/
-//   #ifdef USE_MODULE_NETWORK_INTERFACE
-//     EM_MODULE__NETWORK_INTERFACE__ID,
-//   #endif
-//   #ifdef USE_MODULE_NETWORK_WIFI
-//     EM_MODULE_NETWORK_WIFI_ID,
-//   #endif 
-//   #ifdef USE_MODULE_NETWORK_ETHERNET
-//     EM_MODULE_NETWORK_ETHERNET_ID,
-//   #endif 
-//   #ifdef USE_MODULE_NETWORK_CELLULAR
-//     EM_MODULE__NETWORK_CELLULAR__ID,
-//   #endif
-//   #ifdef USE_MODULE_NETWORK_MQTT
-//     EM_MODULE_NETWORK_MQTT_ID,
-//   #endif 
-//   #ifdef USE_MODULE_NETWORK_WEBSERVER
-//     EM_MODULE_NETWORK_WEBSERVER_ID,
-//   #endif
-//   /**
-//    * @brief Displays
-//    **/
-//   #ifdef USE_MODULE_DRIVERS_INTERFACE
-//     EM_MODULE_DRIVERS_INTERFACE_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_LEDS
-//     EM_MODULE_DRIVERS_LEDS_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_RELAY
-//     EM_MODULE_DRIVERS_RELAY_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_PWM
-
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-//     EM_MODULE_DRIVERS_IRTRANSCEIVER_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_IRREMOTE
-//     EM_MODULE_DRIVERS_IRREMOTE_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
-//     EM_MODULE_DRIVERS_RF433_RCSWITCH_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-//     EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_HBRIDGE
-//     EM_MODULE_DRIVERS_HBRIDGE_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_SDCARD
-//     EM_MODULE_DRIVERS_SDCARD_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-//     EM_MODULE_DRIVERS_SHELLY_DIMMER_ID,
-//   #endif
-//   #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-//     EM_MODULE__DRIVERS_BUZZER_BASIC__ID,
-//   #endif
-//   #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
-//     EM_MODULE__DRIVERS_BUZZER_TONES__ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-//     EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
-//     EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
-//     EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
-//     EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO 
-//     EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
-//     EM_MODULE_DRIVERS__CAMERA_TASMOTA__ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT 
-//     EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID,
-//   #endif
-//   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-//     EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
-//   #endif
-//   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
-//     EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID,
-//   #endif
-//   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
-//     EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-//     EM_MODULE_DRIVERS__MODEM_7000G__ID,
-//   #endif
-//   #ifdef USE_MODULE_DRIVERS_MODEM_800L
-//     EM_MODULE_DRIVERS__MODEM_800L__ID,
-//   #endif
-//   /**
-//    * @brief Sensors
-//    **/
-//   #ifdef USE_MODULE_SENSORS_INTERFACE
-//     EM_MODULE_SENSORS_INTERFACE_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_SWITCHES
-//     EM_MODULE_SENSORS_SWITCHES_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_BUTTONS
-//     EM_MODULE_SENSORS_BUTTONS_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_BME
-//     EM_MODULE_SENSORS_BME_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_DHT
-//     EM_MODULE_SENSORS_DHT_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_BH1750
-//     EM_MODULE_SENSORS_BH1750_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_MOTION
-//     EM_MODULE_SENSORS_MOTION_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_DOOR
-//     EM_MODULE_SENSORS_DOOR_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_L3G
-//     EM_MODULE_SENSORS_L3G_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_LDR_BASIC
-//     EM_MODULE_SENSORS_LDR_BASIC_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_LSM303D
-//     EM_MODULE_SENSORS_LSM303D_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_MOISTURE
-//     EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_SR04
-//     EM_MODULE_SENSORS_SR04_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_MPU9250
-//     EM_MODULE_SENSORS_MPU9250_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-//     EM_MODULE_SENSORS_PULSECOUNTER_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
-//     EM_MODULE_SENSORS_REMOTE_DEVICE_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
-//     EM_MODULE_SENSORS_ROTARY_ENCODER_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
-//     EM_MODULE_SENSORS_SOLAR_LUNAR_ID,
-//   #endif 
-//   #ifdef USE_MODULE_SENSORS_ULTRASONICS
-//     EM_MODULE_SENSORS_ULTRASONIC_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
-//     EM_MODULE_SENSORS_ADC_INTERNAL_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-//     EM_MODULE_SENSORS_ADC_INTERNAL_ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-//     EM_MODULE_SENSORS__DS18X20__ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-//     EM_MODULE_SENSORS__DS18X20__ID,
-//   #endif  
-//   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-//   EM_MODULE__SENSORS_GPS_SERIAL__ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_GPS_MODEM
-//   EM_MODULE__SENSORS_GPS_MODEM__ID,
-//   #endif
-//   #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-//   EM_MODULE__SENSORS_BATTERY_MODEM__ID,
-//   #endif
-//   /**
-//    * @brief Lights
-//    **/
-//   #ifdef USE_MODULE_LIGHTS_INTERFACE
-//     EM_MODULE_LIGHTS_INTERFACE_ID,
-//   #endif
-//   #ifdef USE_MODULE_LIGHTS_ANIMATOR
-//     EM_MODULE_LIGHTS_ANIMATOR_ID,
-//   #endif
-//   /**
-//    * @brief Energy
-//    **/
-//   #ifdef USE_MODULE_ENERGY_INTERFACE
-//     EM_MODULE_ENERGY_INTERFACE_ID,
-//   #endif
-//   #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-//     EM_MODULE_ENERGY_PZEM004T_V3_ID,
-//   #endif
-//   #ifdef USE_MODULE_ENERGY_ADE7953
-//     EM_MODULE_ENERGY_ADE7953_ID,
-//   #endif
-//   #ifdef USE_MODULE_ENERGY_INA219
-//     EM_MODULE_ENERGY_INA219_ID,
-//   #endif
-//   /**
-//    * @brief Displays
-//    **/
-//   #ifdef USE_MODULE_DISPLAYS_INTERFACE
-//     EM_MODULE_DISPLAYS_INTERFACE_ID,
-//   #endif
-//   #ifdef USE_MODULE_DISPLAYS_NEXTION
-//     EM_MODULE_DISPLAYS_NEXTION_ID,
-//   #endif
-//   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
-//     EM_MODULE_DISPLAYS_OLED_SSD1306_ID,
-//   #endif
-//   #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-//     EM_MODULE_DISPLAYS_OLED_SH1106_ID,
-//   #endif
-//   /**
-//    * @brief Controller Generic (Generic)
-//    **/
-//   #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
-//     EM_MODULE_CONTROLLER_SONOFF_IFAN_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_FAN
-//     EM_MODULE_CONTROLLER_FAN_ID,
-//   #endif
-//   // 3d printer encoder here
-//   #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
-//     EM_MODULE_CONTROLLER_TANKVOLUME_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_BLINDS
-//     EM_MODULE_CONTROLLER_BLINDS_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
-//     EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-//     EM_MODULE_CONTROLLER_DOORBELL_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
-//     EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
-//     EM_MODULE_CONTROLLER_SDCARDLOGGER_ID,
-//   #endif
-//   // USE_MODULE_CONTROLLER_UARTLOGGER
-//   // USE_MODULE_CONTROLLER_INTERNAL_CLOCK
-//   #ifdef USE_MODULE_CONTROLLER_HVAC
-//     EM_MODULE_CONTROLLER__HVAC__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
-//     EM_MODULE_CONTROLLER__HVAC_REMOTE__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
-//     EM_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
-//     EM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID,
-//   #endif
-//   // 50_Animator_Input_Controller
-//   // 51_Animator_Playlists
-//   #ifdef USE_MODULE_CONTROLLER__ENERGY_OLED
-//     EM_MODULE_CONTROLLER__ENERGY_OLED__ID,
-//   #endif
-//   /**
-//    * @brief 10 Controller Custom
-//    **/  
-//   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-//     EM_MODULE_CONTROLLER_RADIATORFAN_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-//     EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
-//     EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID,
-//   #endif
-//   #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
-//     EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
-//     EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
-//     EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
-//     EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
-//     EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
-//     EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
-//     EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE
-//     EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
-//     EM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
-//     EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
-//     EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
-//     EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
-//     CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
-//     EM_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED__ID,
-//   #endif
-//   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
-//     EM_MODULE_CONTROLLER_USERMOD_01_ID,
-//   #endif
-//   EM_MODULE_LENGTH_ID
-// };
+// Added to maybe fix header include issue
+#include "3_Network/10_MQTT/mMQTT.h"
 
 /**
  * @brief Core Modules
  **/
 #ifdef USE_MODULE_CORE_SETTINGS
   #include "2_CoreSystem/01_Settings/mSettings.h"
-  #define   pCONT_set                               static_cast<mSettings*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_SETTINGS_ID))
+  #define   pCONT_set                               static_cast<mSettings*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_SETTINGS_ID))
 #endif 
 #ifdef USE_MODULE_CORE_FILESYSTEM
   #include "2_CoreSystem/03_FileSystem/mFileSystem.h"
-  #define pCONT_mfile                               static_cast<mFileSystem*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_FILESYSTEM_ID))
+  #define pCONT_mfile                               static_cast<mFileSystem*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_FILESYSTEM_ID))
+#endif
+#ifdef USE_MODULE_CORE__JSON_TEMPLATE
+  #include "2_CoreSystem/04_JsonTemplate/mJsonTemplate.h"
+  #define pCONT_json_template                       static_cast<mJsonTemplate*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_JSON_TEMPLATE_ID))
 #endif
 #ifdef USE_MODULE_CORE_HARDWAREPINS
   #include "2_CoreSystem/05_HardwarePins/mHardwarePins.h"
-  #define   pCONT_pins                              static_cast<mHardwarePins*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID))
+  #define   pCONT_pins                              static_cast<mHardwarePins*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID))
 #endif 
 #ifdef USE_MODULE_CORE_TIME
   #include "2_CoreSystem/07_Time/mTime.h"
-  #define   pCONT_time                              static_cast<mTime*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_TIME_ID))
+  #define   pCONT_time                              static_cast<mTime*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TIME_ID))
 #endif 
 #ifdef USE_MODULE_CORE_LOGGING
   #include "2_CoreSystem/08_Logging/mLogging.h"
-  #define   pCONT_log                               static_cast<mLogging*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_LOGGING_ID))
+  #define   pCONT_log                               static_cast<mLogging*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_LOGGING_ID))
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
   #include "2_CoreSystem/09_Telemetry/mTelemetry.h"
-  #define   pCONT_tel                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
+  #define   pCONT_tel                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
 #endif 
 #ifdef USE_MODULE_CORE_RULES
   #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
-  #define   pCONT_rules                             static_cast<mRuleEngine*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID))
+  #define   pCONT_rules                             static_cast<mRuleEngine*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID))
 #endif
 #ifdef USE_MODULE_CORE_UPDATES
   #include "2_CoreSystem/14_Updates/mUpdates.h"
-  #define   pCONT_updates                           static_cast<mUpdates*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_UPDATES_ID))
+  #define   pCONT_updates                           static_cast<mUpdates*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_UPDATES_ID))
 #endif
 #ifdef USE_MODULE_CORE__SERIAL
   #include "2_CoreSystem/15_SerialUART/mSerial.h"
@@ -686,24 +274,32 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 //   #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
 //   #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
 // #endif
+#ifdef USE_MODULE_CORE_I2C
+  #include "2_CoreSystem/31_I2C/mI2C.h"
+  #define pCONT_i2c                       static_cast<mI2C*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__I2C__ID))
+#endif
+#ifdef USE_MODULE_CORE_SPI
+  #include "2_CoreSystem/32_SPI/mSPI.h"
+  #define pCONT_spi                       static_cast<mSPI*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__SPI__ID))
+#endif
 #ifdef USE_MODULE_CORE_SUPPORT
   #include "2_CoreSystem/06_Support/mSupport.h"
-  #define   pCONT_sup                               static_cast<mSupport*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_SUPPORT_ID))
+  #define   pCONT_sup                               static_cast<mSupport*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_SUPPORT_ID))
 #endif 
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   #include "2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h"
-  #define   pCONT_debug             static_cast<mDevelopmentDebugging*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID))
+  #define   pCONT_debug             static_cast<mDevelopmentDebugging*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID))
 #endif 
 /**
  * @brief Network
  **/
 #ifdef USE_MODULE_NETWORK_INTERFACE
   #include "3_Network/00_Interface/mInterface.h"
-  #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE__NETWORK_INTERFACE__ID))
+  #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_INTERFACE__ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WIFI
   #include "3_Network/03_WiFi/mWiFi.h"
-  #define pCONT_wif                                 static_cast<mWiFi*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_NETWORK_WIFI_ID))
+  #define pCONT_wif                                 static_cast<mWiFi*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_WIFI_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_ETHERNET
   //EM_MODULE_NETWORK_ETHERNET_ID,
@@ -714,18 +310,18 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/10_MQTT/mMQTT.h"
-  #define pCONT_mqtt                                static_cast<mMQTTManager*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
+  #define pCONT_mqtt                                static_cast<mMQTTManager*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/21_WebServer/mWebServer.h"
-  #define pCONT_web                                 static_cast<mWebServer*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID))
+  #define pCONT_web                                 static_cast<mWebServer*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID))
 #endif
 /**
  * @brief Displays
  **/
 #ifdef USE_MODULE_DRIVERS_INTERFACE
   #include "4_Drivers/00_Interface/mDriverInterface.h"
-  #define pCONT_iDrivers                           static_cast<mDriverInterface*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_DRIVERS_INTERFACE_ID))
+  #define pCONT_iDrivers                           static_cast<mDriverInterface*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/03_LEDs/mLEDs.h"
@@ -733,7 +329,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/04_Relays/mRelays.h"
-  #define pCONT_mry                                 static_cast<mRelays*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_DRIVERS_RELAY_ID))
+  #define pCONT_mry                                 static_cast<mRelays*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_RELAY_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
   #include "4_Drivers/PWM/mPWM.h"
@@ -828,7 +424,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
  **/
 #ifdef USE_MODULE_SENSORS_INTERFACE
   #include "5_Sensors/00_Interface/mSensorsInterface.h"
-  #define pCONT_iSensors                         static_cast<mSensorsInterface*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_SENSORS_INTERFACE_ID))
+  #define pCONT_iSensors                         static_cast<mSensorsInterface*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_SWITCHES
   #include "5_Sensors/01_Switches/mSwitches.h"
@@ -840,7 +436,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_BME
   #include "5_Sensors/03_BME/mBME.h"
-  #define pCONT_bme                             static_cast<mBME*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_SENSORS_BME_ID))
+  #define pCONT_bme                             static_cast<mBME*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BME_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/05_DHT/mSensorsDHT.h"
@@ -848,7 +444,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_BH1750
   #include "5_Sensors/06_BH1750Light/mBH1750.h"
-  #define pCONT_motion                          static_cast<mBH1750*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_SENSORS_BH1750_ID))
+  #define pCONT_motion                          static_cast<mBH1750*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BH1750_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_MOTION
   #include "5_Sensors/07_Motion/mMotion.h"
@@ -894,9 +490,9 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
   #define pCONT_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
-  #include "5_Sensors/22_SolarLunar/mSolarLunar.h"
-  #define   pCONT_solar                             static_cast<mSolarLunar*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_SENSORS_SOLAR_LUNAR_ID))
+#ifdef USE_MODULE_SENSORS_SUN_TRACKING
+  #include "5_Sensors/22_SolarLunar/mSunTracking.h"
+  #define   pCONT_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
@@ -916,7 +512,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
   #include "5_Sensors/41_ds18x20_esp32/mDB18x20_ESP32.h"
-  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID))
+  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID))
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   #include "5_Sensors/50_GPS_Serial/mGPS_Serial.h"
@@ -935,22 +531,22 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
  **/
 #ifdef USE_MODULE_LIGHTS_INTERFACE
   #include "6_Lights/00_Interface/mInterfaceLight.h"
-  #define pCONT_iLight                          static_cast<mInterfaceLight*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID))
+  #define pCONT_iLight                          static_cast<mInterfaceLight*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/03_Animator/mAnimatorLight.h"
-  #define pCONT_lAni                            static_cast<mAnimatorLight*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID))
+  #define pCONT_lAni                            static_cast<mAnimatorLight*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID))
 #endif
 /**
  * @brief Energy
  **/
 #ifdef USE_MODULE_ENERGY_INTERFACE
   #include "7_Energy/00_Interface/mEnergyInterface.h"
-  #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_ENERGY_INTERFACE_ID))
+  #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_ENERGY_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   #include "7_Energy/01_Pzem004T_v3/mPZEM004T.h"
-  #define pCONT_pzem                              static_cast<mEnergyPZEM004T*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_ENERGY_PZEM004T_ID))
+  #define pCONT_pzem                              static_cast<mEnergyPZEM004T*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_ENERGY_PZEM004T_ID))
 #endif
 #ifdef USE_MODULE_ENERGY_ADE7953
   #include "7_Energy/02_ADE7953/mADE7953.h"
@@ -958,18 +554,18 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_ENERGY_INA219
   #include "7_Energy/03_INA219/mINA219.h"
-  #define pCONT_mina219                         static_cast<mEnergyINA219*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_ENERGY_INA219_ID))
+  #define pCONT_mina219                         static_cast<mEnergyINA219*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_ENERGY_INA219_ID))
 #endif
 /**
  * @brief Displays
  **/
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
   #include "8_Displays/00_Interface/mDisplaysInterface.h"
-  #define pCONT_iDisp                               static_cast<mDisplaysInterface*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID))
+  #define pCONT_iDisp                               static_cast<mDisplaysInterface*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
   #include "8_Displays/01_Nextion/mNextionPanel.h"
-  #define pCONT_nex                                 static_cast<mNextionPanel*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID))
+  #define pCONT_nex                                 static_cast<mNextionPanel*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID))
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
   #include "8_Displays/02_OLED_SSD1606/mOLED_SSD1306.h"
@@ -977,7 +573,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
   #include "8_Displays/03_OLED_SH1106/mOLED_SH1106.h"
-  #define pCONT_oled1306                            static_cast<mOLED_SH1106*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_DISPLAYS_OLED_SH1106_ID))
+  #define pCONT_oled1306                            static_cast<mOLED_SH1106*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DISPLAYS_OLED_SH1106_ID))
 #endif
 /**
  * @brief Controller Generic (Generic)
@@ -1020,7 +616,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 // USE_MODULE_CONTROLLER_INTERNAL_CLOCK
 #ifdef USE_MODULE_CONTROLLER_HVAC
   #include "9_Controller/40_HVAC/mHVAC.h"
-  #define pCONT_hvac                        static_cast<mHVAC*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CONTROLLER_HVAC_ID))
+  #define pCONT_hvac                        static_cast<mHVAC*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_HVAC_ID))
 #endif
 #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
   #include "9_Controller/41_HVAC_Remote/mHVAC.h"
@@ -1028,11 +624,11 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
   #include "9_Controller/42_SensorColourBar/mSensorColourBar.h"
-  #define pCONT_colourbar                        static_cast<mSensorColourBar*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID))
+  #define pCONT_colourbar                        static_cast<mSensorColourBar*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__ID))
 #endif
 #ifdef USE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP
   #include "9_Controller/43_RelayStateLEDStrip/mRelayStateLEDStrip.h"
-  #define pCONT_relay_strip                      static_cast<mRelayStateLEDStrip*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID))
+  #define pCONT_relay_strip                      static_cast<mRelayStateLEDStrip*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID))
 #endif
 // 50_Animator_Input_Controller
 // 51_Animator_Playlists
@@ -1113,7 +709,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
   #include "10_ConSpec/20_DeskSensorsOnOLED/mDeskSensorsOnOLED.h"
-  #define pCONT_DeskSensorsOnOLED        static_cast<mDeskSensorsOnOLED*>(mTaskerManager::GetInstance()->FindModuleByID(D_UNIQUE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_ID))
+  #define pCONT_DeskSensorsOnOLED        static_cast<mDeskSensorsOnOLED*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_ID))
   // Can the above be removed and instead lets get it via the tasker? pCONT->GetModule()
 #endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
@@ -1153,7 +749,7 @@ class mTaskerManager{
     void addTasker(mTaskerInterface* module);
 
     // Find a module by unique ID
-    mTaskerInterface* FindModuleByID(uint16_t uniqueID) const {
+    mTaskerInterface* GetModule(uint16_t uniqueID) const {
         auto it = std::find_if(pModule.begin(), pModule.end(), 
             [uniqueID](mTaskerInterface* module) {
                 return module->GetModuleUniqueID() == uniqueID;
@@ -1162,16 +758,27 @@ class mTaskerManager{
     }
 
     // Find a module by name
-    mTaskerInterface* FindModuleByName(const char* name) const {
+    // Flash only
+    mTaskerInterface* GetModule_F(const char* name) const {
+        char buffer[64];  // Adjust size as needed
+        auto it = std::find_if(pModule.begin(), pModule.end(),
+            [name, &buffer](mTaskerInterface* module) {
+                strcpy_P(buffer, module->GetModuleName());  // Copy from PROGMEM to RAM
+                return strcmp(name, buffer) == 0;
+            });
+        return (it != pModule.end()) ? *it : nullptr;
+    }
+    mTaskerInterface* GetModule_P(const char* name) const {
         auto it = std::find_if(pModule.begin(), pModule.end(),
             [name](mTaskerInterface* module) {
-                return strcmp(module->GetModuleName(), name) == 0;
+                return strcmp_P(name, module->GetModuleName()) == 0; // GetModuleName is PROGMEM, and strcmp is RAM only, PROGMEM is read only
             });
         return (it != pModule.end()) ? *it : nullptr;
     }
 
+
     // Function to find a module class name by unique ID
-    const char* FindModuleClassNameByID(uint16_t uniqueID) const {
+    const char* GetModuleName(uint16_t uniqueID) const {
         auto it = std::find_if(pModule.begin(), pModule.end(),
             [uniqueID](mTaskerInterface* module) {
                 return module->GetModuleUniqueID() == uniqueID;
@@ -1183,67 +790,41 @@ class mTaskerManager{
 
         return nullptr; // Return nullptr if the module is not found
     }
+    
+    // Function to find a module unique ID by class name
+    // From now on, no module is allowed to be called number 0 as unique ID so it can be reserved for no match
+    uint16_t GetModuleID(const char* name) const {
+      auto it = std::find_if(pModule.begin(), pModule.end(),
+          [name](mTaskerInterface* module) {
+              // Use strcmp_P if name is stored in PROGMEM
+              return strcmp_P(name, module->GetModuleName()) == 0;
+          });
 
+          if (it != pModule.end()) {
+              return (*it)->GetModuleUniqueID();
+        }
 
-    #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-      char buffer_taskname[50];
-    #endif
+        return 0; // Return 0 or another appropriate invalid ID if the module is not found
+    }
+
 
     uint8_t Instance_Init();
-    // uint8_t CheckPointersPass();
     
-    int8_t Tasker_Interface(uint16_t function, uint16_t target_tasker = 0);    
-    
-    
-    int16_t GetModuleIndexbyName(const char* c);
-    int16_t GetModuleUniqueIDbyName(const char* c);
-
-    uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
-
-    uint16_t GetModule_UniqueID_byName(const char* c);
-    PGM_P GetModuleName_WithUniqueID(uint16_t unique_id);
-
-    uint16_t GetClassSizeByID(uint8_t class_id);
-    
-    PGM_P GetModuleName_WithEnum(uint16_t id);
-    PGM_P GetModuleName(uint16_t module_id);
-
-    uint16_t GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id);
-
-
-
-    mTaskerInterface* GetModule_IndexEnum(uint8_t id_enum);
-    mTaskerInterface* GetModule_IndexUnique(uint16_t id_enum);
-  
-
-    uint16_t GetClassCount();
+    int8_t Tasker_Interface(uint16_t function);    
+        
+    uint16_t GetClassCount()
+    {
+      return pModule.size();
+    }
 
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-    const char* GetTaskName(uint8_t task, char* buffer);
+    const char* GetTaskName(uint8_t task);
     #endif
-    
-
-    bool ValidTaskID(uint8_t module_id);
     
     void JSONCommand_Run(char* json);
     
-    mTaskerInterface* GetModuleObjectbyUniqueID(uint16_t id);
-    
-    int16_t GetEnumVectorIndexbyModuleUniqueID(int16_t unique_id);
 
-    #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-    struct DEBUG_MODULE_TIME
-    {
-      uint16_t seconds_to_keep_stats_before_reset = 0;
-      uint16_t max_time = 0;
-      // uint16_t min_time = 0;
-      uint16_t avg_time = 0;
-      uint32_t last_loop_time = 0;
-      uint16_t max_function_id = 0; // func_task that caused the max_time
-      // Only record them after boot sucessful
-    }debug_module_time[EM_MODULE_LENGTH_ID];
-    #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-
+    uint16_t last_function = 255; // 0 will be first
 
     #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
 
@@ -1264,15 +845,28 @@ class mTaskerManager{
     std::vector<FUNCTION_EXECUTION_EVENT> function_event_queue;
     #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
 
+
+
+    #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+      char buffer_taskname[50];
+    #endif
+
+    #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    struct DEBUG_MODULE_TIME
+    {
+      uint16_t seconds_to_keep_stats_before_reset = 0;
+      uint16_t max_time = 0;
+      // uint16_t min_time = 0;
+      uint16_t avg_time = 0;
+      uint32_t last_loop_time = 0;
+      uint16_t max_function_id = 0; // func_task that caused the max_time
+      // Only record them after boot sucessful
+    };
+    std::vector<DEBUG_MODULE_TIME> debug_module_time;
+    #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
+
     
-
-    uint16_t last_function = 255; // 0 will be first
-
-    uint8_t fExitTaskerWithCompletion = false;
-
-    uint16_t switch_index = 0;
-    
-    int16_t GetModuleIDbyFriendlyName(const char* c);
 
 };
 

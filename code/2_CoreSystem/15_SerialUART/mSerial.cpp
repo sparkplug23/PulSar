@@ -65,7 +65,7 @@ void mSerial::Init(void)
 
     settings.uart2.initialised = true;
     // init_UART2_pins();
-    AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"), settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+    ALOG_INF(PSTR("UART2 pins: TX[%d] RX[%d]"), settings.uart2.gpio.tx, settings.uart2.gpio.rx);
 
     
 
@@ -87,7 +87,7 @@ void mSerial::Pre_Init()
     settings.uart0.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_TX_ID);
     settings.uart0.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_RX_ID);
     // init_UART1_pins();
-    AddLog(LOG_LEVEL_INFO, PSTR("UART0 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart0.gpio.tx, settings.uart0.gpio.rx);
+    ALOG_INF(PSTR("UART0 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart0.gpio.tx, settings.uart0.gpio.rx);
   }else{
     settings.uart0.receive_interrupts_enable = false;
   }
@@ -100,7 +100,7 @@ void mSerial::Pre_Init()
     settings.uart1.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID);
     settings.uart1.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID);
     // init_UART1_pins();
-    AddLog(LOG_LEVEL_INFO, PSTR("UART1 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart1.gpio.tx, settings.uart1.gpio.rx);
+    ALOG_INF(PSTR("UART1 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart1.gpio.tx, settings.uart1.gpio.rx);
   }else{
     settings.uart1.receive_interrupts_enable = false;
   }
@@ -114,7 +114,7 @@ void mSerial::Pre_Init()
   //   settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RX_ID);
   //   settings.uart2.configured = true;
   //   // init_UART2_pins();
-  //   AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+  //   ALOG_INF(PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
 
     
 
@@ -128,7 +128,7 @@ void mSerial::Pre_Init()
   //   settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
   //   settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
   //   // init_UART2_pins();
-  //   AddLog(LOG_LEVEL_INFO, PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+  //   ALOG_INF(PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
   // }else{
   //   settings.uart2.receive_interrupts_enable = false;
   // }
@@ -166,7 +166,7 @@ void mSerial::Pre_Init()
 
     settings.uart2.initialised = true;
     // init_UART1_pins();
-    AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+    ALOG_INF(PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
   }else{
     // settings.uart1.receive_interrupts_enable = false;
   }
@@ -181,10 +181,10 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     Init();
   }
 
@@ -192,7 +192,7 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 //     /**
 //      * Special case, I want to loop and init this when another modules says
 //      * */
-//     case FUNC_LOOP:
+//     case TASK_LOOP:
 
 //       #ifndef USE_MODULE_SENSORS_GPS_SERIAL
 //         // Finsihed with manual control, start ISRs
@@ -221,8 +221,8 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 //       }
 //       #endif // USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
 
-//     // case FUNC_UPTIME_10_SECONDS: 
-//     // case FUNC_UPTIME_30_SECONDS: 
+//     // case TASK_UPTIME_10_SECONDS: 
+//     // case TASK_UPTIME_30_SECONDS: 
 //     //   StartISR_RingBuffers(); 
 //     break;
 
@@ -234,12 +234,12 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-   case FUNC_LOOP:{
+   case TASK_LOOP:{
 
       // BufferWriterI->Clear();
       // uint16_t bytes_in_line = tkr_Serial->GetRingBufferDataAndClear(2, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
       // if(BufferWriterI->GetLength()){
-      //   AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 2, bytes_in_line, BufferWriterI->GetPtr());
+      //   ALOG_TST(PSTR("GPS UART%d >> [%d] \"%s\""), 2, bytes_in_line, BufferWriterI->GetPtr());
       // }
 
 
@@ -251,8 +251,8 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
     //   BufferWriterI->Clear();
     //   uint16_t bytes_in_line = GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
     //   if(bytes_in_line){
-    //     AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d]"), i, bytes_in_line);
-    //     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    //     ALOG_TST(PSTR("UART%d >> [%d]"), i, bytes_in_line);
+    //     // ALOG_TST(PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
     //   }
     // // }
     // #endif
@@ -261,11 +261,11 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
       // uint16_t bytes_in_line2 = GetRingBufferDataAndClear(2, buffer2, sizeof(buffer2), '\n', false);
 
       // if(buffer2[0]){
-      //   AddLog(LOG_LEVEL_TEST, PSTR("UART2 >> [%d] \"%s\""), bytes_in_line2, buffer2);
+      //   ALOG_TST(PSTR("UART2 >> [%d] \"%s\""), bytes_in_line2, buffer2);
       // }
    }
    break;
-   case FUNC_EVERY_SECOND:{
+   case TASK_EVERY_SECOND:{
 
 
 // // for(
@@ -275,21 +275,21 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 //       BufferWriterI->Clear();
 //       uint16_t bytes_in_line = GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
 //       if(bytes_in_line){//strlen(BufferWriterI->GetPtr())){
-//         AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+//         ALOG_TST(PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
 //       }else{
-//         AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> EMPTY"));//, i, bytes_in_line, BufferWriterI->GetPtr());
+//         ALOG_TST(PSTR("UART%d >> EMPTY"));//, i, bytes_in_line, BufferWriterI->GetPtr());
 
 //       }
 //     // }
 //     // #endif
 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("[%d] \"%s\""),tkr_Serial->urxlen2,(char*)tkr_Serial->rxbuf2);
+    // ALOG_TST(PSTR("[%d] \"%s\""),tkr_Serial->urxlen2,(char*)tkr_Serial->rxbuf2);
 
     // Serial.println(tkr_Serial->urxlen2);
     // for(int i=0;i<10;i++){   Serial.print((char)tkr_Serial->rxbuf2[i]); }
     // Serial.println();
-      // AddLog(LOG_LEVEL_INFO, PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(tkr_Serial->settings.uart2.ringbuffer_handle));
+      // ALOG_INF(PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(tkr_Serial->settings.uart2.ringbuffer_handle));
   
       // xRingbufferPrintInfo(settings.uart2.ringbuffer_handle);
       // //Receive an item from no-split ring buffer
@@ -319,7 +319,7 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 
     }
     break;
-    case FUNC_EVERY_MINUTE: {
+    case TASK_EVERY_MINUTE: {
 
 
     }
@@ -327,23 +327,23 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -365,29 +365,29 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
   //   /************
   //    * PERIODIC SECTION * 
   //   *******************/
-  //   case FUNC_EVERY_SECOND:  
+  //   case TASK_EVERY_SECOND:  
     
   //   break;
   //   /************
   //    * COMMANDS SECTION * 
   //   *******************/
-  //   case FUNC_JSON_COMMAND_ID:
+  //   case TASK_JSON_COMMAND_ID:
   //     parse_JSONCommand(obj);
   //   break;
   //   /************
   //    * MQTT SECTION * 
   //   *******************/
   //   #ifdef USE_MODULE_NETWORK_MQTT
-  //   case FUNC_MQTT_HANDLERS_INIT:
+  //   case TASK_MQTT_HANDLERS_INIT:
   //     MQTTHandler_Init();
   //   break;
-  //   case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+  //   case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
   //     MQTTHandler_Set_DefaultPeriodRate();
   //   break;
-  //   case FUNC_MQTT_SENDER:
+  //   case TASK_MQTT_SENDER:
   //     MQTTHandler_Sender();
   //   break;
-  //   case FUNC_MQTT_CONNECTED:
+  //   case TASK_MQTT_CONNECTED:
   //     MQTTHandler_Set_RefreshAll();
   //   break;
   //   #endif // USE_MODULE_NETWORK_MQTT
@@ -411,7 +411,7 @@ HardwareSerial* mSerial::GetSerial(uint8_t index)
 void mSerial::StartISR_RingBuffers()
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR("delayed start of uart interrupts for methods which need basic serial.read"));
+  ALOG_TST(PSTR("delayed start of uart interrupts for methods which need basic serial.read"));
 
   #ifdef ENABLE_HARDWARE_UART_1
   if(settings.uart1.receive_interrupts_enable)
@@ -578,7 +578,7 @@ switch(ringbuffer_format_type_tmp)
     // Read from buffer
     memcpy(buffer,item,item_size);
 
-    //AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
+    //ALOG_TST(PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
 
     // if(flag_clear_buffer_after_read)
     // {
@@ -705,7 +705,7 @@ switch(ringbuffer_format_type_tmp)
 //     // Read from buffer
 //     memcpy(buffer,item,item_size);
 
-//     AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
+//     ALOG_TST(PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
 
 //     // if(flag_clear_buffer_after_read)
 //     // {
@@ -802,7 +802,7 @@ switch(ringbuffer_format_type_tmp)
     // Read from buffer
     memcpy(buffer,item,item_size);
 
-    //AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
+    //ALOG_TST(PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
 
     // if(flag_clear_buffer_after_read)
     // {
@@ -876,7 +876,7 @@ void mSerial::init_UART1_pins()
  */
 void mSerial::init_UART1_ISR(){
 
-  AddLog(LOG_LEVEL_DEBUG, PSTR("init_UART1_ISR Starting..."));
+  ALOG_DBG(PSTR("init_UART1_ISR Starting..."));
 
   // If serial2 has already been activated by a library, disable it first so the new driver can attach
   Serial1.end();  
@@ -908,7 +908,7 @@ void mSerial::init_UART1_ISR(){
     uart1_handle_console        // Pointer to return handle. If non-NULL, a handle for the interrupt will be returned here.
   );
 
-  AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "init_UART1_ISR Started %d buffer size"),settings.uart1.ring_buffer_size_rx);
+  ALOG_DBG(PSTR(DEBUG_INSERT_PAGE_BREAK "init_UART1_ISR Started %d buffer size"),settings.uart1.ring_buffer_size_rx);
 
   #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
   gpio_pad_select_gpio(BLINK_GPIO);
@@ -1065,7 +1065,7 @@ void mSerial::init_UART2_RingBuffer()
     settings.uart2.initialised = false; //disable if false
   }else{
     
-    AddLog(LOG_LEVEL_TEST, PSTR("%s SUCCESS"),data_ctr);
+    ALOG_TST(PSTR("%s SUCCESS"),data_ctr);
   }
 
   assert(settings.uart2.ringbuffer_handle != NULL);
@@ -1123,7 +1123,7 @@ void mSerial::init_UART2_pins()
  */
 void mSerial::init_UART2_ISR(){
 
-  AddLog(LOG_LEVEL_DEBUG, PSTR("init_UART2_ISR Starting..."));
+  ALOG_DBG(PSTR("init_UART2_ISR Starting..."));
 
   // If serial2 has already been activated by a library, disable it first so the new driver can attach
   Serial2.end();
@@ -1165,7 +1165,7 @@ void mSerial::init_UART2_ISR(){
     uart2_handle_console        // Pointer to return handle. If non-NULL, a handle for the interrupt will be returned here.
   );
   
-  AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "init_UART2_ISR RSS Started %d buffer size"),settings.uart2.ring_buffer_size_rx);
+  ALOG_DBG(PSTR(DEBUG_INSERT_PAGE_BREAK "init_UART2_ISR RSS Started %d buffer size"),settings.uart2.ring_buffer_size_rx);
 
   #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
   gpio_pad_select_gpio(BLINK_GPIO);
@@ -1686,10 +1686,10 @@ void mSerial::MQTTHandler_Init(){
   struct handler<mSerial>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1698,10 +1698,10 @@ void mSerial::MQTTHandler_Init(){
 
 
   ptr = &mqtthandler_uartinfo_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR;
@@ -1728,9 +1728,9 @@ void mSerial::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

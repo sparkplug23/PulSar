@@ -13,7 +13,7 @@ void ProgramTemperature::EverySecond(void)
 {
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR("ProgramTemperature::EverySecond"));
+    ALOG_DBG(PSTR("ProgramTemperature::EverySecond"));
   #endif
 
   /**
@@ -46,11 +46,11 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
      * @note TimeMaintain includes/overlaps the "on" period
      * */
     if(time_running.on < time_running.limit){     //stay on
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_running = on [%d] < limit [%d]"),time_running.on,time_running.limit);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_running = on [%d] < limit [%d]"),time_running.on,time_running.limit);
       isrunning_heating = true;
     }
     else{       
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time On Exceeded - Turn Zone OFF"));
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time On Exceeded - Turn Zone OFF"));
       time_running.on = -1; //deactviate
       time_maintaining.on = -1; // Turn maintaining period on
       isrunning_heating = false;
@@ -62,7 +62,7 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
      * @note Currently, maintain in the home heating assumes the cycling is handled by a physical real world thermostat
      * */
     if(temperature.current >= temperature.desired){   
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] > Set [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] > Set [%d]"),(int)temperature.current,(int)temperature.desired);
 
       /**
        * If maintain was not counting yet, turn it on for first temp crossing above threshold
@@ -74,19 +74,19 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
 
       // Check if temp should be maintained above desired point
       if((time_maintaining.on>=0)&&(time_maintaining.on < time_maintaining.limit)){
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_maintaining = on [%d] < limit [%d]"),time_maintaining.on,time_maintaining.limit);
+        ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_maintaining = on [%d] < limit [%d]"),time_maintaining.on,time_maintaining.limit);
         isrunning_heating = true;
       }
       // Turn off
       else{
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceededon%d [%d] < limit [%d]"),time_maintaining.on, time_maintaining.on,time_maintaining.limit);
+        ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceededon%d [%d] < limit [%d]"),time_maintaining.on, time_maintaining.on,time_maintaining.limit);
         time_running.on = -2;
         time_maintaining.on = -1;
         isrunning_heating = false;
       }
     }
     else{ 
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] < Set [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] < Set [%d]"),(int)temperature.current,(int)temperature.desired);
     }
 
   }// time_on is not running
@@ -111,7 +111,7 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
      *  Time checks - If limit is hit, stop, or else continue maintaining on
      * */
     if(time_running.on > time_running.limit){   
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),time_running.on,time_running.limit);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),time_running.on,time_running.limit);
       time_running.on = -2; //deactviate
       time_maintaining.limit = -1;
       isrunning_cooling = false;
@@ -124,8 +124,8 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
      * Temp checks (Has the current values reached the desired)
      * */
     if(temperature.current <= temperature.desired){    // Also need to add a "fudge" value
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] > Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Exceeded Set Point"));
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] > Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Exceeded Set Point"));
 
       // Check if temp should be maintained above desired point
       if((time_maintaining.on>=0)&&(time_maintaining.on < time_maintaining.limit)){
@@ -133,14 +133,14 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
       }
       // Turn off
       else{
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceeded"));
+        ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceeded"));
         time_running.on = -2;
         time_maintaining.limit = -1;
         isrunning_cooling = false;
       }
     }
     else{ 
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] < Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] < Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
     }
 
   }// time_on is not running
@@ -181,7 +181,7 @@ void mHVAC::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_id, u
 
   //   program_temps[device_id].time_running.limit = value;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
+  //   ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
   // #endif
   //   // fForceHeatingTempsUpdate = true;
   //   data_buffer.isserviced++;
@@ -196,7 +196,7 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   // program_temps[device_id].schedule.mode_sch = value;
   // // fForceHeatingTempsUpdate = true;
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("mode_sch=%d"),program_temps[device_id].schedule.mode_sch);
+  // ALOG_TST(PSTR("mode_sch=%d"),program_temps[device_id].schedule.mode_sch);
   
   // if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID)
   // {
@@ -209,13 +209,13 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   //   SetHeater(device_id,0);
   // }
   
-  // AddLog(LOG_LEVEL_TEST, PSTR("mode_sch=%d %d %d %d"),
+  // ALOG_TST(PSTR("mode_sch=%d %d %d %d"),
   // device_id,
   // program_temps[device_id].time_running.on,
   // program_temps[device_id].time_maintaining.on,
   // program_temps[device_id].schedule.mode_sch);
 
-  //   //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   //ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)value);
@@ -255,12 +255,12 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   //   // If negative error, we must heat
   //   if(GetErrorTemperature()<0)
   //   {
-  //     AddLog(LOG_LEVEL_INFO, PSTR("We must heat"));
+  //     ALOG_INF(PSTR("We must heat"));
   //   }
 
   //   if(GetErrorTemperature()>0)
   //   {
-  //     AddLog(LOG_LEVEL_INFO, PSTR("We must cool"));
+  //     ALOG_INF(PSTR("We must cool"));
   //   }
 
 
@@ -296,7 +296,7 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
 
   //   //   //   schedule.untilontime = pCONT_time->GetDifferenceInDateTimes(&pCONT_time->RtcTime,&schedule.ontime);
 
-  //   //   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
+  //   //   //   ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
 
   //   //   //   // uint8_t hours, minutes, seconds;
   //   //   //   // pCONT_time->DateTimeWeek2HHMMSS(&schedule.untilontime,&hours,&minutes,&seconds);

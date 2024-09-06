@@ -25,10 +25,10 @@
 int8_t mSensorsL3G::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -39,26 +39,26 @@ int8_t mSensorsL3G::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;   
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
     //  parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
       break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -82,21 +82,21 @@ void mSensorsL3G::Pre_Init(){
     // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
   
     // sensor[settings.fSensorCount].L3G = new Adafruit_L3G280();
-    // if (sensor[settings.fSensorCount].L3G->begin(0x77, pCONT_sup->wire)) {
-    //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_L3G "L3G280 sensor detected"));// Serial.flush();
+    // if (sensor[settings.fSensorCount].L3G->begin(0x77, pCONT_i2c->wire)) {
+    //   ALOG_INF(PSTR(D_LOG_L3G "L3G280 sensor detected"));// Serial.flush();
     //   settings.fSensorCount++;
     // }else{
     //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_L3G "L3G280 sensor not detected"));
     // }
 
 // Mine were LSM - 0x1D, L3G - 0x6B, BMP - 0x77
-    gyro = new L3G(pCONT_sup->wire, 0);
+    gyro = new L3G(pCONT_i2c->wire, 0);
 
 
   if (gyro->init())
   {
     gyro->enableDefault();
-    AddLog(LOG_LEVEL_INFO, PSTR( "L3G sensor detected"));// Serial.flush();
+    ALOG_INF(PSTR( "L3G sensor detected"));// Serial.flush();
     settings.fSensorCount++;
   }
 
@@ -200,30 +200,30 @@ void mSensorsL3G::MQTTHandler_Init(){
   struct handler<mSensorsL3G>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsL3G::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsL3G::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = 1;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -250,9 +250,9 @@ void mSensorsL3G::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     // if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-    //   handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    //   handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     // if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-    //   handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+    //   handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

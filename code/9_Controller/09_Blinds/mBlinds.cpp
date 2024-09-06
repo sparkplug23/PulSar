@@ -21,13 +21,13 @@ void mBlinds::init(void){
 int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj){ //Serial.println("mBlinds::Tasker");
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       //SubTasker_ADC_Measure();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       //SubTasker_MQTTSender();
       
       // if(abs(millis()-tSaved)>(ISACTIVE()?1000:120000)){tSaved=millis();
@@ -39,7 +39,7 @@ int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj){ //Serial.println
       // }
 
     break;
-    // case FUNC_JSON_COMMAND:
+    // case TASK_JSON_COMMAND:
     //   parse_JSONCommand();
     // break;
   }
@@ -49,10 +49,10 @@ int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj){ //Serial.println
 
 int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
   switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
+    case TASK_JSON_COMMAND_OBJECT:
       parse_JSONCommand(obj);
     break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+    case TASK_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);
     break;
   }
@@ -62,7 +62,7 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
+      ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
@@ -596,7 +596,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
   
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
-//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
+//       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return 0; // not meant for here

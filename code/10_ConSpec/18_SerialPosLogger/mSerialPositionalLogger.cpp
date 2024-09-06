@@ -504,10 +504,10 @@ int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -518,22 +518,22 @@ int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
       EverySecond();
 
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
+      // ALOG_DBG(PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
 
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       UpdateInternalRTCTimeWithGPSTime();
     break;
     /************
      * TRIGGERS SECTION * 
     *******************/
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       #ifdef USE_MODULE_DRIVERS_SDCARD
       pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
       #endif
@@ -543,20 +543,20 @@ int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -713,13 +713,13 @@ void mSerialPositionalLogger::Handle_Primary_Service_RSS_Stream_To_Create_SDCard
   // if(pCONT_serial_pos_log->sync_frame_data.flag_started)
   // {
   //   pCONT_serial_pos_log->sync_frame_data.flag_started = false;
-  //   // AddLog(LOG_LEVEL_INFO, PSTR("sync_frame_data.flag_started"));
+  //   // ALOG_INF(PSTR("sync_frame_data.flag_started"));
   // }
   
   // if(pCONT_serial_pos_log->sync_frame_data.flag_ended)
   // {
   //   pCONT_serial_pos_log->sync_frame_data.flag_ended = false;
-  //   // AddLog(LOG_LEVEL_INFO, PSTR("sync_frame_data.flag_ended"));
+  //   // ALOG_INF(PSTR("sync_frame_data.flag_ended"));
   //   SubTask_Generate_SyncFrame_To_SDCard_Stream();
   // }
 
@@ -736,8 +736,8 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
     //   BufferWriterI->Clear();
     //   uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
     //   if(bytes_in_line){
-    //     AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d]"), i, bytes_in_line);
-    //     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    //     ALOG_TST(PSTR("SDCardStream UART%d >> [%d]"), i, bytes_in_line);
+    //     // ALOG_TST(PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
     //   }
     // // }
     // #endif
@@ -752,9 +752,9 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
     sync_frame_data.buffer_bytes_read = pCONT_uart->GetRingBufferDataAndClear(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
 
     // if(sync_frame_data.buffer_bytes_read){
-    //   AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
+    //   ALOG_TST(PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
     //   // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
-    //   // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    //   // ALOG_TST(PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
     // }
 
     /**
@@ -768,7 +768,7 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
     #ifdef USE_MODULE_DRIVERS_SDCARD
       pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
     #else
-     // AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
+     // ALOG_TST(PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
     #endif //USE_MODULE_DRIVERS_SDCARD
 
     /**
@@ -875,9 +875,9 @@ void mSerialPositionalLogger::Construct_SuperFrame_Data_From_RingBuffer()
 
   
   if(sync_frame_data.buffer_bytes_read){
-  //  AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
+  //  ALOG_TST(PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
     // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
-    // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    // ALOG_TST(PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
   }
 
   #endif // USE_MODULE_DRIVERS_SERIAL_UART
@@ -903,7 +903,7 @@ void mSerialPositionalLogger::EverySecond()
 
 
 // ConstructJSON_SDCardSuperFrame();
-//   AddLog(LOG_LEVEL_TEST, PSTR("SuperFrame=\"%s\""), JBI->GetBufferPtr());
+//   ALOG_TST(PSTR("SuperFrame=\"%s\""), JBI->GetBufferPtr());
 
 
   
@@ -926,7 +926,7 @@ void mSerialPositionalLogger::EverySecond()
 //   // {
 
 //   //   ConstructJSON_SDCardSuperFrame();
-//   //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+//   //   ALOG_TST(PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
 
 //   //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
@@ -941,7 +941,7 @@ void mSerialPositionalLogger::EverySecond()
     
 //   //   // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
 //   //   // {
-//   //   //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+//   //   //   ALOG_TST(PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
 //   //   // }
 
 //   //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
@@ -958,7 +958,7 @@ void mSerialPositionalLogger::EverySecond()
     
 //     // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
 //     // {
-//     //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+//     //   ALOG_TST(PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
 //     // }
 
 //     // pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
@@ -989,12 +989,12 @@ void mSerialPositionalLogger::EverySecond()
 //   sprintf(pCONT_sdcard->writer_settings.file_name, "/%s%d.txt", "SDCardTest",1);
 //   File file = SD.open(pCONT_sdcard->writer_settings.file_name, FILE_APPEND);
 //   if(!file){
-//     AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" did not open"),pCONT_sdcard->writer_settings.file_name);
+//     ALOG_TST(PSTR("file \"%s\" did not open"),pCONT_sdcard->writer_settings.file_name);
 //   }
-//   AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" Opened!"),pCONT_sdcard->writer_settings.file_name);
+//   ALOG_TST(PSTR("file \"%s\" Opened!"),pCONT_sdcard->writer_settings.file_name);
 
 //   ConstructJSON_SDCardSuperFrame();
-//   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+//   ALOG_TST(PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
 //   // write all bytes
 //   char* buffer_to_write = BufferWriterI->GetPtr();
 //   for(int i=0; i<strlen(BufferWriterI->GetPtr()); i++)
@@ -1036,7 +1036,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   float latitude = pCONT_gps->gps_result_stored.latitudeL();
   uint32_t latitude_U32 = (uint32_t)latitude;
-  uint8_t latitude_num_digits = mSupport::NumDigitsT(latitude_U32);
+  uint8_t latitude_num_digits = mSupport::NumDigits(latitude_U32);
   uint32_t latitude_three_largest_chars = 0;
   if(latitude_num_digits>3){
     latitude_three_largest_chars = latitude_U32;
@@ -1050,7 +1050,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
 
   float longitude = pCONT_gps->gps_result_stored.longitudeL();
   uint32_t longitude_U32 = (uint32_t)fabs(longitude);
-  uint8_t longitude_num_digits = mSupport::NumDigitsT(longitude_U32);
+  uint8_t longitude_num_digits = mSupport::NumDigits(longitude_U32);
   uint32_t longitude_three_largest_chars = 0;
   if(longitude_num_digits>3){
     longitude_three_largest_chars = longitude_U32;
@@ -1062,7 +1062,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
     longitude_three_largest_chars = longitude_U32;
   }
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_UpdateOLED %d %d %d"), latitude_U32, latitude_num_digits, latitude_three_largest_chars);
+  // ALOG_TST(PSTR("SubTask_UpdateOLED %d %d %d"), latitude_U32, latitude_num_digits, latitude_three_largest_chars);
 
   char quality[4] = {0};
   //if valid, then simply show valid, if not, show satellites
@@ -1350,7 +1350,7 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_lev
 //     sprintf(rule_name, "RelayEnabled%d", ii);
       
 // 		if(jtok = obj[rule_name]){
-// 			AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
+// 			ALOG_INF(PSTR("MATCHED %s"),rule_name);
 // 			SubCommandSet_EnabledTime(jtok.getObject(), ii);
 // 		}
 
@@ -1408,7 +1408,7 @@ void mSerialPositionalLogger::CommandSet_SDCard_OpenClose_Toggle()
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("mSerialPositionalLogger CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
+  ALOG_TST(PSTR("mSerialPositionalLogger CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
@@ -1427,12 +1427,12 @@ void mSerialPositionalLogger::CommandSet_LoggingState(uint8_t state)
   if(state == 2) //toggle
   {
     logger_status.enable ^= 1; 
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
+    ALOG_TST(PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
 
   }else
   {
     logger_status.enable = state;
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
+    ALOG_TST(PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
 
   }
 
@@ -1445,7 +1445,7 @@ void mSerialPositionalLogger::CommandSet_LoggingState(uint8_t state)
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState %d"),logger_status.enable);
+  ALOG_TST(PSTR("CommandSet_LoggingState %d"),logger_status.enable);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
@@ -1468,7 +1468,7 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   struct handler<mSerialPositionalLogger>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1478,7 +1478,7 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1488,7 +1488,7 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1498,7 +1498,7 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sdcard_superframe;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1526,9 +1526,9 @@ void mSerialPositionalLogger::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

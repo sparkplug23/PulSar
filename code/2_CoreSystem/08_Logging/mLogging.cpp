@@ -1,13 +1,5 @@
 #include "2_CoreSystem/08_Logging/mLogging.h"
 
-void mLogging::init(void){
-  // StartTelnetServer();
-}
- 
-void mLogging::parse_JSONCommand(JsonParserObject obj){};
-
-// for quick prototyping, set to test level
-
 void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...){
   if(ABS_FUNCTION(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
     va_list arg;
@@ -18,48 +10,18 @@ void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP
 
 void ErrorMessage_P(uint8_t error_type, const char* message)
 {
-
   AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %S"), message);
-
 }
 
 
 void ErrorMessage(uint8_t error_type, const char* message)
 {
-
   AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %s"), message);
-
 }
 
 
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
-  //Block software stream for now
-  // if(fDebugOutputMode==DEBUG_OUTPUT_SOFTWARE_ID){return;}
-  // if(!fDebugSerialMode){return;}
-
-  // if(pCONT_log->Telnet!=nullptr){
-    //   if(!pCONT_log->client.connected()) {
-      
-    //     pCONT_log->client = pCONT_log->server->available();
-    //   }
-//     if(pCONT_time->uptime_seconds_nonreset>30){
-  // pCONT_log->Telnet.println("AddLog: ");
-//     //   if(pCONT_log->client.connected()) {
-//     //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
-//     //   }
-//     // }
-//     // }else{
-// }
-    //   Serial.println("Telnet else");
-    // }
-
-    /**
-     * @brief 
-     * Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
-     * 
-     */
-
 
   #ifdef DEBUG_FOR_FAULT
     pCONT_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
@@ -93,13 +55,10 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
 
-
   va_list arg;
   va_start(arg, formatP);
   vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
   va_end(arg);
-
-  //AddLogAddLog(loglevel);
 
   char mxtime[25];  // "13:45:21 " //9
 
@@ -145,7 +104,8 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   #ifndef DISABLE_SERIAL_LOGGING
   // LOG : SERIAL
-  if (loglevel <= pCONT_set->Settings.logging.serial_level) {
+  if (loglevel <= pCONT_set->Settings.logging.serial_level) 
+  {
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
       // register uint32_t *sp asm("a1"); 
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
@@ -181,12 +141,12 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     // Only flush if we all doing all for debugging
     
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
-	// IMPORTANT!!! The code will pause here if flush is set, only for ms until the serial print has been sent
-	// Normally, serial is passed to hardware internal the the chip, and serial is printed in the background. However, if a problem/bug with forced reseting exists,
-	// you want to print all serial BEFORE tripping the reset, so only enable when fault tracing
-	// #ifdef ENABLE_SERIAL_DEBUG_FLUSH
+    // IMPORTANT!!! The code will pause here if flush is set, only for ms until the serial print has been sent
+    // Normally, serial is passed to hardware internal the the chip, and serial is printed in the background. However, if a problem/bug with forced reseting exists,
+    // you want to print all serial BEFORE tripping the reset, so only enable when fault tracing
+    // #ifdef ENABLE_SERIAL_DEBUG_FLUSH
 
-    if(pCONT_set->Settings.logging.serial_level == LOG_LEVEL_ALL){ SERIAL_DEBUG.flush(); } 
+    if((pCONT_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG)||(pCONT_set->Settings.logging.serial_level == LOG_LEVEL_ALL)){ SERIAL_DEBUG.flush(); } 
   } 
   #endif //DISABLE_SERIAL_LOGGING
 
@@ -194,34 +154,17 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     SERIAL_DEBUG.flush(); 
   #endif 
 
-  // SERIAL_DEBUG.printf("%s %d\r\n","telnet",millis());
   // LOG : TELNET
-  // #ifdef ENABLE_TELNET_LOGGING // off by default for performance
-  // if (loglevel <= pCONT_set->Settings.telnetlog_level) {
-    // if(pCONT_log->server!=nullptr){ // needs ignored before it has been started!
-    
-  if(pCONT_log->Telnet){
-    //   if(!pCONT_log->client.connected()) {
-      
-    //     pCONT_log->client = pCONT_log->server->available();
-    //   }
-    
-  pCONT_log->Telnet.printf(
-    // "uptime2: ");
-    //   if(pCONT_log->client.connected()) {
-    //     pCONT_log->client.printf(
-      "%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
-    //   }
-    // }
+  if (loglevel <= pCONT_set->Settings.logging.telnet_level) 
+  {    
+    if(pCONT_log->Telnet)
+    {
+      pCONT_log->Telnet.printf( "%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
     }
+  }
 
-
-  // }
-  // #endif
-
-  // SERIAL_DEBUG.printf("%s %d\r\n","webserver",millis());
   // LOG : WEBSERVER
-  // #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   // if(pCONT_web->fConsole_active && !pCONT_web->fConsole_history){ //only append values when active, however, this stops history
   //   if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.logging.web_level)) {
   //     // Delimited, zero-terminated buffer of log lines.
@@ -244,13 +187,9 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     
   //   }
   // }
-  // #endif  // USE_MODULE_NETWORK_WEBSERVER
+  #endif  // USE_MODULE_NETWORK_WEBSERVER
   
-  // SERIAL_DEBUG.printf("%s %d\r\n","end",millis());
-
-
 }
-
 
 
 void mLogging::handleTelnet(){
@@ -273,83 +212,6 @@ void mLogging::handleTelnet(){
       // do other stuff with client input here
   } 
 }
-
-
-// // For sending without network during uploads
-// void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...)
-// {
-
-//   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
-//   if(
-//     (loglevel>pCONT_set->Settings.logging.serial_level)
-//     ){
-//     return;
-//   }
-  
-//   // Filtering
-//   if(pCONT_set->enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
-//     if(loglevel == pCONT_set->Settings.logging.serial_level){
-//       //permit messages
-//     }else{
-//       return;
-//     }
-//   }
-
-//   va_list arg;
-//   va_start(arg, formatP);
-//   vsnprintf_P(log_data, sizeof(log_data), formatP, arg);
-//   va_end(arg);
-
-//   //AddLogAddLog(loglevel);
-
-//   char mxtime[25];  // "13:45:21 " //9
-//   char level_buffer[10];
-
-//   uint8_t hour = 0;
-//   uint8_t minute = 0;
-//   uint8_t second = 0;
-//   uint8_t uday = 0;
-//   uint8_t uhour = 0;
-//   uint8_t uminute = 0;
-//   uint8_t usecond = 0;
-//   if(pCONT_time!=NULL){ 
-//     hour = pCONT_time->RtcTime.hour; 
-//     minute = pCONT_time->RtcTime.minute; 
-//     second = pCONT_time->RtcTime.second; 
-//     uday = pCONT_time->uptime.Mday; 
-//     uhour = pCONT_time->uptime.hour;   
-//     uminute = pCONT_time->uptime.minute; 
-//     usecond = pCONT_time->uptime.second; 
-//   }
-
-//   memset(mxtime,0,sizeof(mxtime));
-//   if(pCONT_set->Settings.log_time_isshort){
-    
-//     if(uhour<1){
-//       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "),minute,second,uminute,usecond);
-//     }
-
-//   }else{
-//     // Show all information
-//     snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),hour,minute,second,uday,uhour,uminute,usecond);
-//   }
-
-
-//   // Overrides
-//   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
-//   //pCONT_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
-//   //pCONT_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG;
-//   //pCONT_set->Settings.logging.web_level = LOG_LEVEL_INFO;
-
-//   // LOG : SERIAL
-//   if (loglevel <= pCONT_set->Settings.logging.serial_level) {
-//     SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  log_data);
-//     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
-//     // SERIAL_DEBUG.flush();
-//   }
-
-// }
-
 
 
 void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
@@ -670,7 +532,7 @@ void mLogging::AddLogSerial(uint8_t loglevel)
 
 void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 {
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("SNS: %s missed %d"), sensor, SENSOR_MAX_MISS - misses);
+  // ALOG_DBG(PSTR("SNS: %s missed %d"), sensor, SENSOR_MAX_MISS - misses);
 }
 
 
@@ -693,7 +555,7 @@ int Response_mP(const char* format, ...)     // Content send snprintf_P char dat
   va_end(args);
 
 //   //Share on serial/telnet
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESPONSE "%s"), pCONT_set->response_msg);
+  ALOG_DBG(PSTR(D_LOG_RESPONSE "%s"), pCONT_set->response_msg);
 //   //Send via mqtt
 //   #ifdef USE_MODULE_NETWORK_MQTT
 //   pCONT_mqtt->publish_device("status/result",pCONT_set->response_msg,false);
@@ -715,19 +577,14 @@ int ResponseAppend_mP(const char* format, ...)  // Content send snprintf_P char 
 }
 
 
-void mLogging::StartTelnetServer(){
-  
-  // TelnetServer.begin();
-
+void mLogging::StartTelnetServer()
+{  
   // if(pCONT_set->global_state.network_down) return;
-
-
   TelnetServer = new WiFiServer(TELNET_PORT);  // set port here
   TelnetServer->begin();
-
   telnet_started = true;
   // if(seriallog)
-  // AddLog(LOG_LEVEL_INFO, PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
+  // ALOG_INF(PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
 }
 
 
@@ -759,17 +616,17 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer, uint8_t bufl
   if(buffer == nullptr){ return 0;}
   switch(id){ 
     default:
-    case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_LONG_CTR, sizeof(PM_LOG_LEVEL_NONE_LONG_CTR)); break;
-    case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR)); break;
-    case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_LONG_CTR, sizeof(PM_LOG_LEVEL_ERROR_LONG_CTR)); break;
-    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
-    case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_LONG_CTR, sizeof(PM_LOG_LEVEL_TEST_LONG_CTR)); break;
-    case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_LONG_CTR)); break;
-    case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_LONG_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_LONG_CTR)); break;
-    case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LONG_CTR)); break;
-    case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR)); break;
-    case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR)); break;
-    case LOG_LEVEL_ALL:            memcpy_P(buffer, PM_LOG_LEVEL_ALL_LONG_CTR, sizeof(PM_LOG_LEVEL_ALL_LONG_CTR)); break;
+    case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
+    case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)); break;
+    case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
+    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
+    case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
+    case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
+    case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_SHORT_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)); break;
+    case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_SHORT_CTR)); break;
+    case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)); break;
+    case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)); break;
+    case LOG_LEVEL_ALL:            memcpy_P(buffer, PM_LOG_LEVEL_ALL_SHORT_CTR, sizeof(PM_LOG_LEVEL_ALL_SHORT_CTR)); break;
   }
   return buffer;        
 }
@@ -806,17 +663,16 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
 
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       // init();
       // StartTelnetServer();
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
     // Serial.println("mLogging::Tasker");
       // if(!Telnet) StartTelnetServer();
       if(telnet_started){      handleTelnet();    }
-      // pCONT_log->Telnet.println("FUNC_LOOP: ");
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       // Serial.println("mLogging::Tasker");
       
       #ifdef ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING
@@ -824,12 +680,12 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
       {
         SetSeriallog(LOG_LEVEL_INFO);
         Serial.printf("Reducing log level to %d to improve performance when not debugging", pCONT_set->Settings.logging.serial_level);
-        // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "Reducing log level to %d to improve performance when not debugging"), pCONT_set->Settings.logging.serial_level);
+        // ALOG_INF(PSTR(D_LOG_APPLICATION "Reducing log level to %d to improve performance when not debugging"), pCONT_set->Settings.logging.serial_level);
       }
       #endif
 
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
 
 
 
@@ -840,7 +696,7 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
   //   seriallog_timer--;
   //   if (!seriallog_timer) {
   //     if (seriallog_level) {
-  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
+  //       ALOG_INF(PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
   //     }
   //     seriallog_level = 0;
   //   }
@@ -851,71 +707,21 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
   //   if (!syslog_timer) {
   //     syslog_level = Settings.syslog_level;
   //     if (Settings.syslog_level) {
-  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
+  //       ALOG_INF(PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
   //     }
   //   }
   // }
 
     break;
-    case FUNC_WIFI_CONNECTED:
+    case TASK_WIFI_CONNECTED:
       StartTelnetServer();
     break;
   }
 
-}//end
+}
 
 
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-// void telnetHandleClient()
-// { // Basic telnet client handling code from: https://gist.github.com/tablatronix/4793677ca748f5f584c95ec4a2b10303
-//   if (debugTelnetEnabled)
-//   { // Only do any of this if we're actually enabled
-//     static unsigned long telnetInputIndex = 0;
-//     if (telnetServer.hasClient())
-//     { // client is connected
-//       if (!telnetClient || !telnetClient.connected())
-//       {
-//         if (telnetClient)
-//         {
-//           telnetClient.stop(); // client disconnected
-//         }
-//         telnetClient = telnetServer.available(); // ready for new client
-//         telnetInputIndex = 0;                    // reset input buffer index
-//       }
-//       else
-//       {
-//         telnetServer.available().stop(); // have client, block new connections
-//       }
-//     }
-//     // Handle client input from telnet connection.
-//     if (telnetClient && telnetClient.connected() && telnetClient.available())
-//     { // client input processing
-//       static char telnetInputBuffer[telnetInputMax];
-
-//       if (telnetClient.available())
-//       {
-//         char telnetInputByte = telnetClient.read(); // Read client byte
-//         if (telnetInputByte == 5)
-//         { // If the telnet client sent a bunch of control commands on connection (which end in ENQUIRY/0x05), ignore them and restart the buffer
-//           telnetInputIndex = 0;
-//         }
-//         else if (telnetInputByte == 13)
-//         { // telnet line endings should be CRLF: https://tools.ietf.org/html/rfc5198#appendix-C
-//           // If we get a CR just ignore it
-//         }
-//         else if (telnetInputByte == 10)
-//         {                                          // We've caught a LF (DEC 10), send buffer contents to the Nextion
-//           telnetInputBuffer[telnetInputIndex] = 0; // null terminate our char array
-//           nextionSendCmd(String(telnetInputBuffer));
-//           telnetInputIndex = 0;
-//         }
-//         else if (telnetInputIndex < telnetInputMax)
-//         { // If we have room left in our buffer add the current byte
-//           telnetInputBuffer[telnetInputIndex] = telnetInputByte;
-//           telnetInputIndex++;
-//         }
-//       }
-//     }
-//   }
-// }
+void mLogging::init(void)
+{
+  
+}

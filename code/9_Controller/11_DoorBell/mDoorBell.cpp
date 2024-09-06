@@ -129,31 +129,31 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 int8_t mDoorBell::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;    
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
   }
@@ -242,7 +242,7 @@ uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 void mDoorBell::MQTTHandler_Init(){
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -252,7 +252,7 @@ void mDoorBell::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mDoorBell::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -262,7 +262,7 @@ void mDoorBell::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mDoorBell::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -285,8 +285,8 @@ void mDoorBell::MQTTHandler_Set_RefreshAll(){
 
 void mDoorBell::MQTTHandler_Set_DefaultPeriodRate(){
 
-  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 

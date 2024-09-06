@@ -88,7 +88,7 @@ With latest version, all longer term shared debug features should be added here 
 /*********************************************************************************************\
  *  Module Settings
 \*********************************************************************************************/
-#define MODULE                        MODULE_WEMOS_ID      // [Module] Select default model from mHardwareTemplates.h
+#define MODULE                        MODULE_DEFAULT      // [Module] Select default model from mHardwareTemplates.h
 
 #define SAVE_DATA                     1                 // [SaveData] Save changed parameters to Flash (0 = disable, 1 - 3600 seconds)
 #define SAVE_STATE                    1                 // [SetOption0] Save changed power state to Flash (0 = disable, 1 = enable)
@@ -146,8 +146,10 @@ With latest version, all longer term shared debug features should be added here 
 
   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
-  
+  #define USE_MODULE_CORE__JSON_TEMPLATE
   #define USE_MODULE_CORE_TIME
+  #define USE_MODULE_CORE_SPI
+  #define USE_MODULE_CORE_I2C
 
 
   /***********************************
@@ -190,7 +192,7 @@ With latest version, all longer term shared debug features should be added here 
   #endif 
 
   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-  #define ENABLE_DEBUG_MANUAL_DELAYS
+  // #define ENABLE_DEBUG_MANUAL_DELAYS
 
   // #if !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE) && !defined(ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
   // // Enable the default method must devices need to use
@@ -207,7 +209,7 @@ With latest version, all longer term shared debug features should be added here 
   #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP // Phase in
   #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL // Phase in
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Phase in
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Phase in
+   // Phase in
   #define USE_MODULE_LIGHTS_ADDRESSABLE // Phase in, with busses its always enabled
   #define USE_MODULE_LIGHTS_PWM // Phase in, with busses its always enabled
 
@@ -245,7 +247,7 @@ With latest version, all longer term shared debug features should be added here 
   ************************************/    
 
 
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
   //   #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
 
 
@@ -279,6 +281,7 @@ With latest version, all longer term shared debug features should be added here 
 #define MQTT_HOST "192.168.0.70" // default
 #endif
 
+  #define ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
 
 #define DEFAULT_MQTT_SYSTEM_BOOT_RATE_SECS 1
 #define DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS 120
@@ -391,9 +394,12 @@ With latest version, all longer term shared debug features should be added here 
 #define ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 // -- Time - Up to three NTP servers in your region
-#define NTP_SERVER1            "pool.ntp.org"       // [NtpServer1] Select first NTP server by name or IP address (129.250.35.250)
-#define NTP_SERVER2            "nl.pool.ntp.org"    // [NtpServer2] Select second NTP server by name or IP address (5.39.184.5)
-#define NTP_SERVER3            "0.nl.pool.ntp.org"  // [NtpServer3] Select third NTP server by name or IP address (93.94.224.67)
+#define NTP_SERVER2            "pool.ntp.org"       // [NtpServer1] automatically redirects your request to a geographically close server, ensuring low latency and accurate time. 
+#define NTP_SERVER1            "ie.pool.ntp.org"    // [NtpServer2] This directs your request specifically to servers within Ireland.
+#define NTP_SERVER3            "europe.pool.ntp.org"  // This directs your request to servers located in Europe.
+
+
+
 
 // -- Time - Start Daylight Saving Time and timezone offset from UTC in minutes
 #define TIME_DST_HEMISPHERE    North             // [TimeDst] Hemisphere (0 or North, 1 or South)

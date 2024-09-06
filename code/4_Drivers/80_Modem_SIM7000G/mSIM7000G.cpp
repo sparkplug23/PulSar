@@ -25,10 +25,10 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -39,7 +39,7 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
     {      
 
       Handler_ModemResponses(LOG_LEVEL_DEBUG_MORE);
@@ -70,7 +70,7 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
 
     }
     break;
-    case FUNC_EVERY_50_MSECOND:{
+    case TASK_EVERY_50_MSECOND:{
 
       if(modem){
         modem->maintain();
@@ -83,7 +83,7 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
       }
 
     }break;
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
 
       if(!flag_modem_initialized)
       {
@@ -149,10 +149,10 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
       #endif // ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS
 
     break;
-    case FUNC_EVERY_FIVE_SECOND:   
+    case TASK_EVERY_FIVE_SECOND:   
     {
       
-      // pCONT->function_event_queue.push_back(pCONT->FunctionEvent(FUNC_LOG__SHOW_UPTIME,1000));
+      // pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_LOG__SHOW_UPTIME,1000));
   
       #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       ALOG_INF(PSTR(D_LOG_CELLULAR "GPS u/v_sat %d/%d Fix (%d cm)"), gps.usat, gps.vsat, (int)(gps.accuracy*100)); 
@@ -160,7 +160,7 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
 
     }
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
 
         // SendATCommand_SMSImmediateForwardOverSerial();
       // ModemUpdate_BatteryStatus();
@@ -171,7 +171,7 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
       #endif 
 
     break;
-    case FUNC_EVERY_HOUR:
+    case TASK_EVERY_HOUR:
       #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       SMS_Send_TimedHeartbeat();
       #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
@@ -179,23 +179,23 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
@@ -589,7 +589,7 @@ void mSIM7000G::SMSReadAndEraseSavedSMS()
 {
 
   #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- START"));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- START"));
   #endif 
 
   for(auto& id:sms.messages_incoming_index_list)
@@ -613,7 +613,7 @@ void mSIM7000G::SMSReadAndEraseSavedSMS()
   sms.messages_incoming_index_list.clear(); // for now assumed its done
 
   #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- END"));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- END"));
   #endif
 
 }
@@ -946,7 +946,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF( PSTR(D_LOG_CELLULAR "ATCommands"));
     JsonParserArray array = jtok;
     for(auto val : array) {
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
+      ALOG_INF(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
       SerialAT.println(val.getStr());  
       delay(500);
       if (SerialAT.available()) {
@@ -961,7 +961,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF( PSTR(D_LOG_CELLULAR "ATCommandsParsing"));
     JsonParserArray array = jtok;
     for(auto val : array) {
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
+      ALOG_INF(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
       SerialAT.println(val.getStr());  
       delay(500);
 
@@ -997,7 +997,7 @@ bool mSIM7000G::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
 {
 
   // #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-  //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "parse_ATCommands %d>> Buffer[%d] \"%s\""),response_loglevel, buflen, buffer);
+  //ALOG_DBG(PSTR(D_LOG_CELLULAR "parse_ATCommands %d>> Buffer[%d] \"%s\""),response_loglevel, buflen, buffer);
   // #endif
 
   // +CDS:  A GSM/GPRS modem or mobile phone uses +CDS to forward a newly received SMS status report to the computer / PC.
@@ -1599,7 +1599,7 @@ void mSIM7000G::SMS_CommandIntoJSONCommand(char* sms_command)
 
     ALOG_COM( PSTR(DEBUG_INSERT_PAGE_BREAK  "SMS->JsonCommandBuffer = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     ALOG_INF(PSTR(D_LOG_CELLULAR "JsonCommand Finished"));
 
@@ -1926,18 +1926,18 @@ void mSIM7000G::GPRS_UpdateConnectionState(bool state)
     if(state)
     {
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(FUNC_CELLULAR_CONNECTION_ESTABLISHED));
+      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_CELLULAR_CONNECTION_ESTABLISHED));
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(FUNC_NETWORK_CONNECTION_ESTABLISHED));
+      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_NETWORK_CONNECTION_ESTABLISHED));
   DEBUG_LINE_HERE;
       gprs.reconnect_init_counts++;
     }
     else
     {
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(FUNC_CELLULAR_CONNECTION_LOST));
+      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_CELLULAR_CONNECTION_LOST));
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(FUNC_NETWORK_CONNECTION_LOST));
+      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_NETWORK_CONNECTION_LOST));
   DEBUG_LINE_HERE;
     }
     #endif //ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
@@ -2427,7 +2427,7 @@ void mSIM7000G::MQTTHandler_Init()
   struct handler<mSIM7000G>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 60; 
@@ -2438,7 +2438,7 @@ void mSIM7000G::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -2470,9 +2470,9 @@ void mSIM7000G::MQTTHandler_Set_DefaultPeriodRate()
 
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   // }
 }
 

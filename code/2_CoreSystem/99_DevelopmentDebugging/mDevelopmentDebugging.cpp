@@ -22,17 +22,17 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
 
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       //
     break;
   }
 
   switch(function){
     
-    case FUNC_LOOP: {
+    case TASK_LOOP: {
       
     }break;
-    case FUNC_EVERY_SECOND:{
+    case TASK_EVERY_SECOND:{
 
       #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
         ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
@@ -44,18 +44,18 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
       // ALOG_INF( PSTR("loop_load_avg %d"), pCONT_set->loop_load_avg);
     
     }break;
-    case FUNC_EVERY_FIVE_SECOND:
+    case TASK_EVERY_FIVE_SECOND:
 
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
 
       SubTask_Show_Defines_Ready_To_Phase_Out();
 
     break;
-    case FUNC_EVERY_MIDNIGHT:
+    case TASK_EVERY_MIDNIGHT:
     
     break;
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
   }
@@ -86,45 +86,9 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
 {
   
   /**
-   * @brief Phasing out list, so remind me via messages that this should either be properly added into the code, or deleted code depending on the flag
-   * 
-   */
-  #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
-    #ifdef ENABLE_LOG_LEVEL_WARNING
-    AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS: Ready to remove 10Apr22")); // Save to remove
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-    #warning "ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS"
-  #endif 
-  // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #ifdef ENABLE_LOG_LEVEL_WARNING
-  //   AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS: Not ready to remove 10May22")); // Save to remove
-  //   #endif // ENABLE_LOG_LEVEL_COMMANDS
-  //   #warning "ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS"
-  // #endif 
-
-
-  
-
-
-  /**
    * @brief When a define has been stripped from code, but not templates, this will alert user to ensure new commands
    * are properly integrated into the newer code format.    * 
    */
-  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    // #error "ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS -- Can be removed"
-  #endif 
-  #ifdef ENABLE_FEATURE_INCLUDE_WLED_PALETTES
-    #error "ENABLE_FEATURE_INCLUDE_WLED_PALETTES -- Can be removed"
-  #endif 
-  #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-    #error "ENABLE_CRGBPALETTES_IN_PROGMEM -- Can be removed"
-  #endif 
-  #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
-    #error "ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT -- Can be removed"
-  #endif 
-  #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
-    #error "ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS -- Can be removed"
-  #endif 
   #ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
     #error "ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE -- Can be removed"
   #endif 
@@ -136,18 +100,6 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #endif
   #ifdef ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
   #error "ENABLE_DEVFEATURE_BUTTON_MULTIPRESS - Needs to be removed"
-  #endif
-  #ifdef USE_DEVFEATURE_MOTION_EVENT_WITH_RULE_IDS_FOR_DOORSENSOR
-  #error "USE_DEVFEATURE_MOTION_EVENT_WITH_RULE_IDS_FOR_DOORSENSOR - Needs to be removed"
-  #endif
-  #ifdef USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME
-  #error "USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME - Needs to be removed"
-  #endif
-  #ifdef ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
-  #error "ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD"
-  #endif
-  #ifdef ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  #error "ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID"
   #endif
   #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
   #error "ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS"
@@ -223,49 +175,23 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
   #error "ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS"
   #endif 
-  #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-  #error "ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS"
-  #endif 
+
+  /**
+   * @brief Remove ASAP
+   * 
+   */
   #ifdef STRIP_SIZE_MAX
-  #error "STRIP_SIZE_MAX is not longer used since multi-pin"
+  #error "STRIP_SIZE_MAX is no longer used since multi-pin"
   #endif
+
+  /*
+  To be used sometimes
+  */
   #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
   #warning "ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS should stay, but I dont want this enabled by default until motion bug is fixed"
   #endif
-
   #ifdef ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
   #error "ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL"
   #endif
-  #ifdef ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
-  #error "ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF" // removed 2022-03-02
-  #endif
-
-
 
 }
-
-
-/**
- * @brief DEBUG_NOTES
- * 
- * Describing planned unified define methods to be used everywhere
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
-
-/**
- * @brief 
- * "DEBUG_TRACE"
- * Debug via serial that should only be active when needed
- * 
- * ENABLE_DEBUG_TRACE__##
- * 
- * eg
- * ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
- * ENABLE_DEBUG_MESSAGE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
- */

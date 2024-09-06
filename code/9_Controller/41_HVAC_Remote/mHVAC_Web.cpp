@@ -25,19 +25,19 @@
 int8_t mHVAC::Tasker_Web(uint8_t function){
 
   switch(function){    
-    case FUNC_WEB_COMMAND:
+    case TASK_WEB_COMMAND:
       //WebCommand_Parse();
     break;  
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;    
-    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+    case TASK_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
       WebAppend_Root_Draw_Table();
     break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
-    case FUNC_WEB_APPEND_ROOT_BUTTONS:
+    case TASK_WEB_APPEND_ROOT_BUTTONS:
       WebAppend_Root_ControlUI();
     break;
   }
@@ -391,7 +391,7 @@ void mHVAC::WebPage_Root_AddHandlers(){
 //   //   ExecuteCommandPower(0,POWER_TOGGLE,SRC_MQTT);
 
 //   //   // update_all = true; //refresh all
-//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
+//     ALOG_TST(PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
 //   // }
 
 //   for(uint8_t relay_id=0;relay_id<4;relay_id++){
@@ -402,8 +402,8 @@ void mHVAC::WebPage_Root_AddHandlers(){
 //       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //       // animation.brightness = BrtN2F(arg_value);
-//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-//       // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       ALOG_TST(PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // ALOG_TST(PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //       // SetRefreshLEDs();
 
     
@@ -427,8 +427,8 @@ void mHVAC::WebPage_Root_AddHandlers(){
 //       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //       // animation.brightness = BrtN2F(arg_value);
-//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-//       // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       ALOG_TST(PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // ALOG_TST(PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //       // SetRefreshLEDs();
 
     

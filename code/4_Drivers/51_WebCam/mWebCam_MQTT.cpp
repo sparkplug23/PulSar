@@ -10,7 +10,7 @@ void mWebCam::MQTTHandler_Init()
   struct handler<mWebCam>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
@@ -20,7 +20,7 @@ void mWebCam::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mWebCam::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -30,7 +30,7 @@ void mWebCam::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mWebCam::ConstructJSON_State;
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -42,7 +42,7 @@ void mWebCam::MQTTHandler_Init()
   
   ptr = &mqtthandler_scheduled_teleperiod;
   ptr->handler_id = MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60;//SEC_IN_HOUR; 
@@ -72,9 +72,9 @@ void mWebCam::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

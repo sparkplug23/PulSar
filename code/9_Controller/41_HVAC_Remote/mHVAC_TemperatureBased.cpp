@@ -91,7 +91,7 @@ void mHVAC::FunctionHandler_Programs_Temps(void){
       ALOG_DBM( PSTR("program_temp_method IsChangedThenReset %d"), zone_id);
       if(zone[zone_id].program_temp_method->OutputDesiredState())
       {
-        SetZoneActive(zone_id, 1); // This can be changed to "FUNC_SET_POWER" for internal relay driver control
+        SetZoneActive(zone_id, 1); // This can be changed to "TASK_SET_POWER" for internal relay driver control
       }
       else
       {

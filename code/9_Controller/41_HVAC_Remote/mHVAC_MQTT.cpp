@@ -37,7 +37,7 @@ void mHVAC::MQTTHandler_Init(){
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
@@ -48,7 +48,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_program_timers_ifchanged;
   ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TIMERS_IFCHANGED_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -59,7 +59,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_program_timers_teleperiod;
   ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TIMERS_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -70,7 +70,7 @@ void mHVAC::MQTTHandler_Init(){
 
   ptr = &mqtthandler_program_temps_ifchanged;
   ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TEMPS_IFCHANGED_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -81,7 +81,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_program_temps_teleperiod;
   ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TEMPS_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -92,7 +92,7 @@ void mHVAC::MQTTHandler_Init(){
 
   ptr = &mqtthandler_program_overview_ifchanged;
   ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_OVERVIEW_IFCHANGED_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -103,7 +103,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_program_overview_teleperiod;
   ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_OVERVIEW_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -114,7 +114,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_relays_ifchanged;
   ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_IFCHANGED_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -125,7 +125,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_relays_teleperiod;
   ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -136,7 +136,7 @@ void mHVAC::MQTTHandler_Init(){
 
   ptr = &mqtthandler_sensor_zone_ifchanged;
   ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_IFCHANGED_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -147,7 +147,7 @@ void mHVAC::MQTTHandler_Init(){
 
   ptr = &mqtthandler_sensor_zone_teleperiod;
   ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -158,7 +158,7 @@ void mHVAC::MQTTHandler_Init(){
 
   ptr = &mqtthandler_sensor_zone_roc1m;
   ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_ROC1M_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 60; 
@@ -169,7 +169,7 @@ void mHVAC::MQTTHandler_Init(){
   
   ptr = &mqtthandler_sensor_zone_roc10m;
   ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_ROC10M_ID;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 60*10; 
@@ -197,9 +197,9 @@ void mHVAC::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

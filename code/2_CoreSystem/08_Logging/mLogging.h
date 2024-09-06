@@ -1,7 +1,7 @@
 #ifndef _MSTREAMOUT_H
 #define _MSTREAMOUT_H 0.5
 
-#define D_UNIQUE_MODULE_CORE_LOGGING_ID ((2*1000)+8)
+#define D_UNIQUE_MODULE_CORE_LOGGING_ID   2008 // ((2*1000)+8)
 
 #include <Arduino.h>
 #ifdef ESP32
@@ -27,28 +27,16 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                     LOG_LEVEL_DEBUG_TRACE, // Highest level of trace debug that will always be shown when called, but should always be disabled via ifdef calls ie "ENABLE_DEBUG_TRACE__##"
                     LOG_LEVEL_ERROR, 
                     LOG_LEVEL_WARNING, 
-                    /**
-                     * Used when developing a new thing
-                     * */
                     LOG_LEVEL_TEST, // New level with elevated previledge - during code development use only
-                    /**
-                     * Should be used only when I want to highlight it in the serial monitor, it will add new lines to show it better
-                     * */
-                    LOG_LEVEL_HIGHLIGHT, // New level with elevated previledge - during code development use only
+                    LOG_LEVEL_HIGHLIGHT, // Should be used only when I want to highlight it in the serial monitor, it will add new lines to show it better
                     LOG_LEVEL_INFO,
                     LOG_LEVEL_COMMANDS, // extra case, this will show when cases are matched 
                     LOG_LEVEL_DEBUG, 
                     LOG_LEVEL_DEBUG_MORE,
-                    //#ifdef ENABLE_ADVANCED_DEBUGGING 
                     LOG_LEVEL_DEBUG_LOWLEVEL, 
-                    //#endif
                     LOG_LEVEL_ALL
                   };
-// Put around ALL addlog_p
-
   
-//  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
 
 // Can only be used when hardware serial is enabled
 #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
@@ -61,15 +49,6 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #endif
 
 
-// Can only be used when hardware serial is enabled
-// #if defined(ENABLE_DEBUG_MANUAL_DELAYS)
-//   #define DEBUG_MANUAL_DELAY(X)    delay(X)
-// #else
-//   #define DEBUG_MANUAL_DELAY   //nothing, no code
-// #endif
-/**
- * Use this macro to turn on delays that I can easily turn off again (in case I forget about one). Stoped using "delay" directly, do with macros
- * */
 // #define ENABLE_DEBUG_DELAYS
 #if defined(ENABLE_DEBUG_MANUAL_DELAYS)
 #define DEBUG_DELAY(x) delay(x)
@@ -79,33 +58,29 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 
 // Can only be used when hardware serial is enabled
-// #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+#if defined(USE_DEBUG_CHECK_AND_PRINT_NULLPTR) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_CHECK_AND_PRINT_NULLPTR(X)    if(X==nullptr){ \
                         SERIAL_DEBUG.printf("nullptr true"); }else{  SERIAL_DEBUG.printf("nullptr false"); }\
                         SERIAL_DEBUG.print(__FILE__);\
                         SERIAL_DEBUG.println(__LINE__);\
                         SERIAL_DEBUG.flush();
-// #else
-//   #define DEBUG_LINE   //nothing, no code
-// #endif
+#else
+  #define DEBUG_CHECK_AND_PRINT_NULLPTR   //nothing, no code
+#endif
 
 
-// #ifdef ENABLE_DEBUG_MULTIPIN
+#ifdef USE_DEBUG_PRINT
   #define DEBUG_PRINT(x) SERIAL_DEBUG.print(x)
   #define DEBUG_PRINTLN(x) SERIAL_DEBUG.println(x); \
                             Serial.flush();
   #define DEBUG_PRINTF(x...) SERIAL_DEBUG.printf(x)
-// #else
-//   #define DEBUG_PRINT(x)
-//   #define DEBUG_PRINTLN(x)
-//   #define DEBUG_PRINTF(x...)
-// #endif
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTF(x...)
+#endif
 
 
-
-
-
-// DEEP DEBUG, added throughout code
 #if defined(USE_DEBUG_PRINT_FUNCTION_NAME) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_PRINT_FUNCTION_NAME   SERIAL_DEBUG.print(__FILE__);\
                                       SERIAL_DEBUG.print("\t");\
@@ -116,7 +91,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #else
   #define DEBUG_PRINT_FUNCTION_NAME   //nothing, no code
 #endif
-// TEST VERSION, to be used once (not left in code) for development
+
 #if defined(USE_DEBUG_PRINT_FUNCTION_NAME_TEST) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_PRINT_FUNCTION_NAME_TEST   SERIAL_DEBUG.print(__FILE__);\
                                       SERIAL_DEBUG.print("\t");\
@@ -127,97 +102,6 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #else
   #define DEBUG_PRINT_FUNCTION_NAME_TEST   //nothing, no code
 #endif
-
-
-/** Easy copy and paste for insitu header debug
-
-  Serial.printf("DEBUG HERE: ");\
-                        SERIAL_DEBUG.print(__FILE__);\
-                        SERIAL_DEBUG.println(__LINE__);\
-                        SERIAL_DEBUG.flush();
-**/
-
-/**
- * @brief Compact ways of adding a log and compile disabling it
- * 
- * #ifdef ENABLE_LOG_LEVEL_INFO
- *   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
- * #endif// ENABLE_LOG_LEVEL_INFO
- * 
-enum LoggingLevels {LOG_LEVEL_NONE, 
-                    LOG_LEVEL_ERROR, 
-                    LOG_LEVEL_WARN, 
-                    /**
-                     * Used when developing a new thing
-                     * *
-                    LOG_LEVEL_TEST, // New level with elevated previledge - during code development use only
-                    /**
-                     * Should be used only when I want to highlight it in the serial monitor, it will add new lines to show it better
-                     * *
-                    LOG_LEVEL_HIGHLIGHT, // New level with elevated previledge - during code development use only
-                    LOG_LEVEL_INFO,
-                    LOG_LEVEL_COMMANDS, // extra case, this will show when cases are matched 
-                    LOG_LEVEL_DEBUG, 
-                    LOG_LEVEL_DEBUG_MORE,
-                    //#ifdef ENABLE_ADVANCED_DEBUGGING 
-                    LOG_LEVEL_DEBUG_LOWLEVEL, 
-                    //#endif
-                    LOG_LEVEL_ALL
-                  };
- */
-#ifdef ENABLE_LOG_LEVEL_ERROR
-#define ALOG_ERR(...) AddLog(LOG_LEVEL_ERROR, __VA_ARGS__)
-#else
-#define ALOG_ERR(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL_WARNING
-#define ALOG_WRN(...) AddLog(LOG_LEVEL_WARNING, __VA_ARGS__)
-#else
-#define ALOG_WRN(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL_INFO
-#define ALOG_INF(...) AddLog(LOG_LEVEL_INFO, __VA_ARGS__)
-#else
-#define ALOG_INF(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL_DEBUG
-#define ALOG_DBG(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
-#else
-#define ALOG_DBG(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-#define ALOG_DBM(...) AddLog(LOG_LEVEL_DEBUG_MORE,  __VA_ARGS__)
-#else
-#define ALOG_DBM(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL__DEBUG_TRACE
-#define ALOG_TRA(...) AddLog(LOG_LEVEL_DEBUG_TRACE, __VA_ARGS__)
-#else
-#define ALOG_TRA(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL_COMMANDS
-#define ALOG_COM(...) AddLog(LOG_LEVEL_COMMANDS, __VA_ARGS__)
-#else
-#define ALOG_COM(...)
-#endif
-
-#ifdef ENABLE_LOG_LEVEL_HIGHLIGHT
-#define ALOG_HGL(...) AddLog(LOG_LEVEL_HIGHLIGHT, __VA_ARGS__)
-#else
-#define ALOG_HGL(...)
-#endif
-
-
-
-
-#define ALOG_DEBUG_LINE_HERE ALOG_DBG(PSTR("DP:%s|%d"),__FILE__,__LINE__);
-
 
 #if defined(ENABLE_DEBUG_LINE_HERE_TRACE)
   #define DEBUG_LINE_HERE_TRACE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
@@ -308,7 +192,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                       Serial.flush();
 
 // Can only be used when hardware serial is enabled
-// #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+#if defined(USE_DEBUG_HOLD_POINT) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_HOLD_POINT   while(1) { \
                               SERIAL_DEBUG.printf("Debug Hold Point: ");\
                               SERIAL_DEBUG.print(__FILE__);\
@@ -316,20 +200,9 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                               SERIAL_DEBUG.flush(); \
                               delay(1000); \
                             }
-// #else
-//   #define DEBUG_HOLD_POINT   //nothing, no code
-// #endif
-
-// #define DEBUG_CRITICAL_FORCE_CRASH  volatile uint32_t dummy; \
-//                               dummy = *((uint32_t*) 0x00000000);
-
-/**
- * Compact forms of basic AddLog, to make prototyping faster. 
- * Release versions should avoid these, as they don't allow for changing the log_level at runtime
- * */
-// #define AddLogI(...)  AddLog(LOG_LEVEL_INFO, 
-// ...)
-
+#else
+  #define DEBUG_HOLD_POINT   //nothing, no code
+#endif
 
 
 
@@ -354,6 +227,72 @@ enum LoggingLevels {LOG_LEVEL_NONE,
   #define DEBUG_LINE_LED   //nothing, no code
 #endif
 
+
+/**
+ * @brief Compact ways of adding a log and compile disabling it
+ **/
+#ifdef ENABLE_LOG_LEVEL_ERROR
+#define ALOG_ERR(...) AddLog(LOG_LEVEL_ERROR, __VA_ARGS__)
+#else
+#define ALOG_ERR(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_WARNING
+#define ALOG_WRN(...) AddLog(LOG_LEVEL_WARNING, __VA_ARGS__)
+#else
+#define ALOG_WRN(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_INFO
+#define ALOG_INF(...) AddLog(LOG_LEVEL_INFO, __VA_ARGS__)
+#else
+#define ALOG_INF(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_DEBUG
+#define ALOG_DBG(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+#define ALOG_DBG(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+#define ALOG_DBM(...) AddLog(LOG_LEVEL_DEBUG_MORE,  __VA_ARGS__)
+#else
+#define ALOG_DBM(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL__DEBUG_TRACE
+#define ALOG_TRA(...) AddLog(LOG_LEVEL_DEBUG_TRACE, __VA_ARGS__)
+#else
+#define ALOG_TRA(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_COMMANDS
+#define ALOG_COM(...) AddLog(LOG_LEVEL_COMMANDS, __VA_ARGS__)
+#else
+#define ALOG_COM(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_HIGHLIGHT
+#define ALOG_HGL(...) AddLog(LOG_LEVEL_HIGHLIGHT, __VA_ARGS__)
+#else
+#define ALOG_HGL(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_TEST
+#define ALOG_TST(...) AddLog(LOG_LEVEL_TEST, __VA_ARGS__)
+#else
+#define ALOG_TST(...)
+#endif
+
+
+#define ALOG_DEBUG_LINE_HERE ALOG_DBG(PSTR("DP:%s|%d"),__FILE__,__LINE__);
+
+
+#define DEBUG_CRITICAL_FORCE_CRASH  volatile uint32_t dummy; \
+                              dummy = *((uint32_t*) 0x00000000);
+
+
 #include "2_CoreSystem/07_Time/mTime.h"
 class mTime;
 
@@ -367,59 +306,36 @@ extern "C" {
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
 
-  #define D_LOG_LEVEL_NONE_SHORT_CTR            "NON"
-  #define D_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR  "DTR"
-  #define D_LOG_LEVEL_ERROR_SHORT_CTR           "ERR"
-  #define D_LOG_LEVEL_WARN_SHORT_CTR            "WRN"
-  #define D_LOG_LEVEL_TEST_SHORT_CTR            "TST"
-  #define D_LOG_LEVEL_INFO_SHORT_CTR            "INF"
-  #define D_LOG_LEVEL_COMMANDS_SHORT_CTR        "INP"
-  #define D_LOG_LEVEL_DEBUG_SHORT_CTR           "DBG"
-  #define D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR      "DBM"
-  #define D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR  "DBL"
-  #define D_LOG_LEVEL_ALL_SHORT_CTR             "ALL"
+#define D_LOG_LEVEL_NONE_SHORT_CTR            "NON"
+#define D_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR     "DTR"
+#define D_LOG_LEVEL_ERROR_SHORT_CTR           "ERR"
+#define D_LOG_LEVEL_WARN_SHORT_CTR            "WRN"
+#define D_LOG_LEVEL_TEST_SHORT_CTR            "TST"
+#define D_LOG_LEVEL_INFO_SHORT_CTR            "INF"
+#define D_LOG_LEVEL_HIGHLIGHT_SHORT_CTR       "HGL"
+#define D_LOG_LEVEL_COMMANDS_SHORT_CTR        "INP"
+#define D_LOG_LEVEL_DEBUG_SHORT_CTR           "DBG"
+#define D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR      "DBM"
+#define D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR  "DBL"
+#define D_LOG_LEVEL_ALL_SHORT_CTR             "ALL"
 
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_NONE_SHORT_CTR)            D_LOG_LEVEL_NONE_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)  D_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_ERROR_SHORT_CTR)           D_LOG_LEVEL_ERROR_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_WARN_SHORT_CTR)            D_LOG_LEVEL_WARN_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_TEST_SHORT_CTR)            D_LOG_LEVEL_TEST_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)       "HLT";
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_INFO_SHORT_CTR)            D_LOG_LEVEL_INFO_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)    D_LOG_LEVEL_COMMANDS_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_SHORT_CTR)           D_LOG_LEVEL_DEBUG_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)      D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_ALL_SHORT_CTR)             D_LOG_LEVEL_ALL_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_NONE_SHORT_CTR)            D_LOG_LEVEL_NONE_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)     D_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_ERROR_SHORT_CTR)           D_LOG_LEVEL_ERROR_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_WARN_SHORT_CTR)            D_LOG_LEVEL_WARN_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_TEST_SHORT_CTR)            D_LOG_LEVEL_TEST_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)       D_LOG_LEVEL_HIGHLIGHT_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_INFO_SHORT_CTR)            D_LOG_LEVEL_INFO_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)        D_LOG_LEVEL_COMMANDS_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_SHORT_CTR)           D_LOG_LEVEL_DEBUG_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)      D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR;
+DEFINE_PGM_CTR(PM_LOG_LEVEL_ALL_SHORT_CTR)             D_LOG_LEVEL_ALL_SHORT_CTR;
 
-  #define D_LOG_LEVEL_NONE_LONG_CTR            "NON"
-  #define D_LOG_LEVEL_DEBUG_TRACE_LONG_CTR  "DTR"
-  #define D_LOG_LEVEL_ERROR_LONG_CTR           "ERR"
-  #define D_LOG_LEVEL_WARN_LONG_CTR            "WRN"
-  #define D_LOG_LEVEL_TEST_LONG_CTR            "TST"
-  #define D_LOG_LEVEL_INFO_LONG_CTR            "INF"
-  #define D_LOG_LEVEL_COMMANDS_LONG_CTR        "INP"
-  #define D_LOG_LEVEL_DEBUG_LONG_CTR           "DBG"
-  #define D_LOG_LEVEL_DEBUG_MORE_LONG_CTR      "DBM"
-  #define D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR  "DBL"
-  #define D_LOG_LEVEL_ALL_LONG_CTR             "ALL"
-
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_NONE_LONG_CTR)            D_LOG_LEVEL_NONE_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR)  D_LOG_LEVEL_DEBUG_TRACE_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_ERROR_LONG_CTR)           D_LOG_LEVEL_ERROR_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_WARN_LONG_CTR)            D_LOG_LEVEL_WARN_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_TEST_LONG_CTR)            D_LOG_LEVEL_TEST_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_INFO_LONG_CTR)            D_LOG_LEVEL_INFO_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_COMMANDS_LONG_CTR)    D_LOG_LEVEL_COMMANDS_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_LONG_CTR)           D_LOG_LEVEL_DEBUG_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR)      D_LOG_LEVEL_DEBUG_MORE_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR;
-  DEFINE_PGM_CTR(PM_LOG_LEVEL_ALL_LONG_CTR)             D_LOG_LEVEL_ALL_LONG_CTR;
 
 //https://eli.thegreenplace.net/2014/variadic-templates-in-c/
 
@@ -634,8 +550,6 @@ public:
     static constexpr const char* PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
-
-    void parse_JSONCommand(JsonParserObject obj);
 
     void handleTelnet();
 

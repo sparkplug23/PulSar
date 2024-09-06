@@ -196,7 +196,7 @@ uint32_t WcSetup(int32_t fsiz)
 
   // if (Wc.up) {
   //   esp_camera_deinit();
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Deinit"));
+  //   ALOG_DBG(PSTR("CAM: Deinit"));
   //   //return Wc.up;
   // }
   // Wc.up = 0;
@@ -223,7 +223,7 @@ uint32_t WcSetup(int32_t fsiz)
   // //   config.pin_pwdn = Pin(GPIO_WEBCAM_PWDN);       // PWDN_GPIO_NUM;
   // //   config.pin_reset = Pin(GPIO_WEBCAM_RESET);    // RESET_GPIO_NUM;
 
-  // //   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: User template"));
+  // //   ALOG_DBG(PSTR("CAM: User template"));
   // // } else {
   //   // defaults to AI THINKER
   //   config.pin_d0 = Y2_GPIO_NUM;
@@ -242,7 +242,7 @@ uint32_t WcSetup(int32_t fsiz)
   //   config.pin_sscb_scl = SIOC_GPIO_NUM;
   //   config.pin_pwdn = PWDN_GPIO_NUM;
   //   config.pin_reset = RESET_GPIO_NUM;
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Default template"));
+  //   ALOG_DBG(PSTR("CAM: Default template"));
   // // }
   
   // // int32_t ledc_channel = analogAttach(config.pin_xclk);
@@ -266,16 +266,16 @@ uint32_t WcSetup(int32_t fsiz)
 //     config.frame_size = FRAMESIZE_UXGA;
 //     config.jpeg_quality = 10;
 //     config.fb_count = 2;
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM found"));
+//     ALOG_DBG(PSTR("CAM: PSRAM found"));
 //   } else {
 //     config.frame_size = FRAMESIZE_VGA;
 //     config.jpeg_quality = 12;
 //     config.fb_count = 1;
 //     // config.fb_location = CAMERA_FB_IN_DRAM;
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM not found"));
+//     ALOG_DBG(PSTR("CAM: PSRAM not found"));
 //   }
 
-// //  AddLog(LOG_LEVEL_INFO, PSTR("CAM: heap check 1: %d"),ESP_getFreeHeap());
+// //  ALOG_INF(PSTR("CAM: heap check 1: %d"),ESP_getFreeHeap());
 
 //   // stupid workaround camera diver eats up static ram should prefer PSRAM
 //   // so we steal static ram to force driver to alloc PSRAM
@@ -286,11 +286,11 @@ uint32_t WcSetup(int32_t fsiz)
 //   if (x) { free(x); }
 
 //   if (err != ESP_OK) {
-//     AddLog(LOG_LEVEL_INFO, PSTR("CAM: Init failed with error 0x%x"), err);
+//     ALOG_INF(PSTR("CAM: Init failed with error 0x%x"), err);
 //     return 0;
 //   }
 
-// //  AddLog(LOG_LEVEL_INFO, PSTR("CAM: heap check 2: %d"),ESP_getFreeHeap());
+// //  ALOG_INF(PSTR("CAM: heap check 2: %d"),ESP_getFreeHeap());
 
 //   sensor_t * wc_s = esp_camera_sensor_get();
 
@@ -305,7 +305,7 @@ uint32_t WcSetup(int32_t fsiz)
 
   // camera_fb_t *wc_fb = esp_camera_fb_get();
   // if (!wc_fb) {
-  //   AddLog(LOG_LEVEL_INFO, PSTR("CAM: Init failed to get the frame on time"));
+  //   ALOG_INF(PSTR("CAM: Init failed to get the frame on time"));
   //   return 0;
   // }
   // Wc.width = wc_fb->width;
@@ -316,7 +316,7 @@ uint32_t WcSetup(int32_t fsiz)
   fd_init();
 #endif
 
-  AddLog(LOG_LEVEL_INFO, PSTR("CAM: Initialized"));
+  ALOG_INF(PSTR("CAM: Initialized"));
 
   Wc.up = 1;
   // if (psram) { Wc.up = 2; }
@@ -539,7 +539,7 @@ uint32_t WcSetup(int32_t fsiz)
 
 //     image_matrix = dl_matrix3du_alloc(1, fb->width, fb->height, 3);
 //     if (!image_matrix) {
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: dl_matrix3du_alloc failed"));
+//       ALOG_DBG(PSTR("CAM: dl_matrix3du_alloc failed"));
 //       esp_camera_fb_return(fb);
 //       return ESP_FAIL;
 //     }
@@ -553,7 +553,7 @@ uint32_t WcSetup(int32_t fsiz)
 //     esp_camera_fb_return(fb);
 //     if (!s){
 //       dl_matrix3du_free(image_matrix);
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: to rgb888 failed"));
+//       ALOG_DBG(PSTR("CAM: to rgb888 failed"));
 //       return ESP_FAIL;
 //     }
 
@@ -620,7 +620,7 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 
 //   wc_fb = esp_camera_fb_get();
 //   if (!wc_fb) {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Can't get frame"));
+//     ALOG_DBG(PSTR("CAM: Can't get frame"));
 //     return 0;
 //   }
 //   if (!bnum) {
@@ -651,7 +651,7 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 //     memcpy(Wc.picstore[bnum].buff, _jpg_buf, _jpg_buf_len);
 //     Wc.picstore[bnum].len = _jpg_buf_len;
 //   } else {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Can't allocate picstore"));
+//     ALOG_DBG(PSTR("CAM: Can't allocate picstore"));
 //     Wc.picstore[bnum].len = 0;
 //   }
 //   if (wc_fb) { esp_camera_fb_return(wc_fb); }
@@ -695,7 +695,7 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 //   } else {
 //     bnum--;
 //     if (!Wc.picstore[bnum].len) {
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: No image #: %d"), bnum);
+//       ALOG_DBG(PSTR("CAM: No image #: %d"), bnum);
 //       return;
 //     }
 //     client.write((char *)Wc.picstore[bnum].buff, Wc.picstore[bnum].len);
@@ -719,7 +719,7 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 //   camera_fb_t *wc_fb;
 //   wc_fb = esp_camera_fb_get();  // Acquire frame
 //   if (!wc_fb) {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Frame buffer could not be acquired"));
+//     ALOG_DBG(PSTR("CAM: Frame buffer could not be acquired"));
 //     return;
 //   }
 
@@ -750,12 +750,12 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 // }
 
 void HandleWebcamMjpeg(void) {
-  AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Handle camserver"));
+  ALOG_DBG(PSTR("CAM: Handle camserver"));
 //  if (!Wc.stream_active) {
 // always restart stream
     // Wc.stream_active = 1;
     // Wc.client = Wc.CamServer->client();
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Create client"));
+    // ALOG_DBG(PSTR("CAM: Create client"));
 //  }
 }
 
@@ -769,13 +769,13 @@ void HandleWebcamMjpegTask(void) {
   bool jpeg_converted = false;
 
 //   if (!Wc.client.connected()) {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Client fail"));
+//     ALOG_DBG(PSTR("CAM: Client fail"));
 //     Wc.stream_active = 0;
 //   }
 //   if (1 == Wc.stream_active) {
 //     Wc.client.flush();
 //     Wc.client.setTimeout(3);
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Start stream"));
+//     ALOG_DBG(PSTR("CAM: Start stream"));
 //     Wc.client.print("HTTP/1.1 200 OK\r\n"
 //       "Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n"
 //       "\r\n");
@@ -784,7 +784,7 @@ void HandleWebcamMjpegTask(void) {
 //   if (2 == Wc.stream_active) {
 //     wc_fb = esp_camera_fb_get();
 //     if (!wc_fb) {
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Frame fail"));
+//       ALOG_DBG(PSTR("CAM: Frame fail"));
 //       Wc.stream_active = 0;
 //     }
 //   }
@@ -792,7 +792,7 @@ void HandleWebcamMjpegTask(void) {
 //     if (wc_fb->format != PIXFORMAT_JPEG) {
 //       jpeg_converted = frame2jpg(wc_fb, 80, &_jpg_buf, &_jpg_buf_len);
 //       if (!jpeg_converted){
-//         AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: JPEG compression failed"));
+//         ALOG_DBG(PSTR("CAM: JPEG compression failed"));
 //         _jpg_buf_len = wc_fb->len;
 //         _jpg_buf = wc_fb->buf;
 //       }
@@ -810,7 +810,7 @@ void HandleWebcamMjpegTask(void) {
 //     if (tlen!=_jpg_buf_len) {
 //       esp_camera_fb_return(wc_fb);
 //       Wc.stream_active=0;
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Send fail"));
+//       ALOG_DBG(PSTR("CAM: Send fail"));
 //     }*/
 // //    Wc.client.print("\r\n--" BOUNDARY "\r\n");
 //     Wc.client.print("\r\n");
@@ -828,10 +828,10 @@ void HandleWebcamMjpegTask(void) {
 
 //     if (jpeg_converted) { free(_jpg_buf); }
 //     esp_camera_fb_return(wc_fb);
-//     //AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: send frame"));
+//     //ALOG_DBG(PSTR("CAM: send frame"));
 //   }
 //   if (0 == Wc.stream_active) {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
+//     ALOG_DBG(PSTR("CAM: Stream exit"));
 //     Wc.client.flush();
 //     Wc.client.stop();
 //   }
@@ -843,7 +843,7 @@ void HandleWebcamMjpegTask(void) {
 //   //CamServer->redirect("http://" + String(ip) + ":81/cam.mjpeg");
 //   Wc.CamServer->sendHeader("Location", WiFi.localIP().toString() + ":81/cam.mjpeg");
 //   Wc.CamServer->send(302, "", "");
-//   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Root called"));
+//   ALOG_DBG(PSTR("CAM: Root called"));
 // }
 
 /*********************************************************************************************/
@@ -860,7 +860,7 @@ void HandleWebcamMjpegTask(void) {
 //       Wc.CamServer->on("/cam.mjpeg", HandleWebcamMjpeg);
 //       Wc.CamServer->on("/cam.jpg", HandleWebcamMjpeg);
 //       Wc.CamServer->on("/stream", HandleWebcamMjpeg);
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream init"));
+//       ALOG_DBG(PSTR("CAM: Stream init"));
 //       Wc.CamServer->begin();
 //     }
 //   } else {
@@ -868,7 +868,7 @@ void HandleWebcamMjpegTask(void) {
 //       Wc.CamServer->stop();
 //       delete Wc.CamServer;
 //       Wc.CamServer = NULL;
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
+//       ALOG_DBG(PSTR("CAM: Stream exit"));
 //     }
 //   }
 //   return 0;
@@ -909,7 +909,7 @@ void EveryLoop(void)
 //         Wc.rtspp = new WiFiServer(8554);
 //         Wc.rtspp->begin();
 //         Wc.rtsp_start = 1;
-//         AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP init"));
+//         ALOG_INF(PSTR("CAM: RTSP init"));
 //         Wc.rtsp_lastframe_time = millis();
 //       }
 
@@ -922,7 +922,7 @@ void EveryLoop(void)
 //         if ((now-Wc.rtsp_lastframe_time) > RTSP_FRAME_TIME) {
 //             Wc.rtsp_session->broadcastCurrentFrame(now);
 //             Wc.rtsp_lastframe_time = now;
-//           //  AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP session frame"));
+//           //  ALOG_INF(PSTR("CAM: RTSP session frame"));
 //         }
 
 //         if (Wc.rtsp_session->m_stopped) {
@@ -930,7 +930,7 @@ void EveryLoop(void)
 //             delete Wc.rtsp_streamer;
 //             Wc.rtsp_session = NULL;
 //             Wc.rtsp_streamer = NULL;
-//             AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP stopped"));
+//             ALOG_INF(PSTR("CAM: RTSP stopped"));
 //         }
 //       }
 //       else {
@@ -938,7 +938,7 @@ void EveryLoop(void)
 //         if (Wc.rtsp_client) {
 //             Wc.rtsp_streamer = new OV2640Streamer(&Wc.rtsp_client, Wc.cam);        // our streamer for UDP/TCP based RTP transport
 //             Wc.rtsp_session = new CRtspSession(&Wc.rtsp_client, Wc.rtsp_streamer); // our threads RTSP session and state
-//             AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP stream created"));
+//             ALOG_INF(PSTR("CAM: RTSP stream created"));
 //         }
 //       }
 //     }
@@ -1106,19 +1106,19 @@ settings.fEnableSensor = true;
 //   bool result = false;
 
 //   switch (function) {
-//     case FUNC_LOOP:
+//     case TASK_LOOP:
 //       WcLoop();
 //       break;
-//     case FUNC_WEB_ADD_HANDLER:
+//     case TASK_WEB_ADD_HANDLER:
 //       WcPicSetup();
 //       break;
-//     case FUNC_WEB_ADD_MAIN_BUTTON:
+//     case TASK_WEB_ADD_MAIN_BUTTON:
 //       WcShowStream();
 //      break;
-//     case FUNC_COMMAND:
+//     case TASK_COMMAND:
 //       result = DecodeCommand(kWCCommands, WCCommand);
 //       break;
-//     case FUNC_PRE_INIT:
+//     case TASK_PRE_INIT:
 //       WcInit();
 //       break;
 
@@ -1141,10 +1141,10 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       // Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -1155,7 +1155,7 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
     //   SubTask_Relay_Time_To_Remain_On_Seconds();
     //   SubTask_Relay_PulseOff();
     
@@ -1174,10 +1174,10 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
 
 
     break;
-    // case FUNC_EVERY_MINUTE:
+    // case TASK_EVERY_MINUTE:
     //   SubTask_Every_Minute();
     // break;
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
     
 //  vTaskDelay(pdMS_TO_TICKS(100)); 
@@ -1186,7 +1186,7 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
 
 
     break;  
-    case FUNC_WIFI_CONNECTED:
+    case TASK_WIFI_CONNECTED:
     {
 
       // setup_cam();
@@ -1198,17 +1198,17 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    // case FUNC_JSON_COMMAND_ID:
+    // case TASK_JSON_COMMAND_ID:
     //   parse_JSONCommand(obj);
     // break;
-    // case FUNC_SET_POWER_ON_ID:
+    // case TASK_SET_POWER_ON_ID:
     //   CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
     // break;    
     /************
      * RULES SECTION * 
     *******************/
     // #ifdef USE_MODULE_CORE_RULES
-    // case FUNC_EVENT_SET_POWER_ID:
+    // case TASK_EVENT_SET_POWER_ID:
     //   RulesEvent_Set_Power();
     // break;
     // #endif// USE_MODULE_CORE_RULES
@@ -1216,17 +1216,17 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // case FUNC_MQTT_HANDLERS_INIT:
-    // case FUNC_MQTT_HANDLERS_RESET:
-    //   MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+    // case TASK_MQTT_HANDLERS_INIT:
+    // case TASK_MQTT_HANDLERS_RESET:
+    //   MQTTHandler_Init(); //make a TASK_MQTT_INIT and group mqtt togather
     // break;
-    // case FUNC_MQTT_SENDER:
+    // case TASK_MQTT_SENDER:
     //   MQTTHandler_Sender(); //optional pass parameter
     // break;
-    // case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    // case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
     //   MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     // break; 
-    // case FUNC_MQTT_CONNECTED:
+    // case TASK_MQTT_CONNECTED:
     //   MQTTHandler_Set_RefreshAll();
     // break;
     // #endif    
@@ -1234,13 +1234,13 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
      * WEBPAGE SECTION * 
     *******************/
     // #ifndef DISABLE_WEBSERVER
-    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    // case TASK_WEB_ADD_ROOT_TABLE_ROWS:
     //   WebAppend_Root_Draw_PageTable();
     // break;
-    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    // case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
     //   WebAppend_Root_Status_Table();
     // break;
-    // case FUNC_WEB_APPEND_ROOT_BUTTONS:
+    // case TASK_WEB_APPEND_ROOT_BUTTONS:
     //   WebAppend_Root_Add_Buttons();
     // break;
     // #endif // DISABLE_WEBSERVER
@@ -1898,7 +1898,7 @@ void mWebCam::Pre_Init(void){
         
 //     //   }
 //     // }
-//   // AddLog(LOG_LEVEL_INFO, PSTR("mWebCam::ConstructJSON_State %d"),JBI->GetLength());
+//   // ALOG_INF(PSTR("mWebCam::ConstructJSON_State %d"),JBI->GetLength());
 //   JBI->End();
 
 // }

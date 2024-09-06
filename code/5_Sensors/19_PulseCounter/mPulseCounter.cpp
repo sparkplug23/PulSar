@@ -139,7 +139,7 @@ void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
   
   // some functions must run regardless
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
   }
@@ -148,23 +148,23 @@ void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
   if(!fEnableSensor){ return; }
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
     break;
     /************
      * WEBPAGE SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    case TASK_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Status_Table_Draw();
     break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
     break;
     #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -172,13 +172,13 @@ void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -231,7 +231,7 @@ void mPulseCounter::EveryLoop(){
       }
 
 
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),Change_Detected_Ctr(sensor_id));
+      // ALOG_DBG(PSTR(D_LOG_PIR "pir_detect \"%s\""),Change_Detected_Ctr(sensor_id));
       
     }
 
@@ -461,30 +461,30 @@ for(uint8_t sensor_id=0;sensor_id<fSensorCount;sensor_id++){
 void mPulseCounter::MQTTHandler_Init(){
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mPulseCounter::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mPulseCounter::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs;
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs;
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -504,8 +504,8 @@ void mPulseCounter::MQTTHandler_Set_RefreshAll(){
 
 void mPulseCounter::MQTTHandler_Set_DefaultPeriodRate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 

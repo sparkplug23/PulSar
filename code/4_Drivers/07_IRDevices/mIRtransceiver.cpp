@@ -63,10 +63,10 @@ void mIRtransceiver::TransmitCode(uint32_t code, uint8_t code_bits, uint8_t repe
 int8_t mIRtransceiver::Tasker(uint8_t func){
 
   switch(func){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       //init();
     break;
   }
@@ -189,7 +189,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //   irrecv->setUnknownThreshold(IR_RCV_MIN_UNKNOWN_SIZE);
 //   irrecv->enableIRIn();                  // Start the receiver
 
-//   //  AddLog(LOG_LEVEL_DEBUG, PSTR("IrReceive initialized"));
+//   //  ALOG_DBG(PSTR("IrReceive initialized"));
 // }
 
 // void IrReceiveCheck(void)
@@ -481,7 +481,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 
 //   if ((pin[GPIO_IRSEND] < 99) || (pin[GPIO_IRRECV] < 99)) {
 //     switch (function) {
-//       case FUNC_PRE_INIT:
+//       case TASK_PRE_INIT:
 //         if (pin[GPIO_IRSEND] < 99) {
 //           IrSendInit();
 //         }
@@ -491,7 +491,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //         }
 // #endif  // USE_IR_RECEIVE
 //         break;
-//       case FUNC_EVERY_50_MSECOND:
+//       case TASK_EVERY_50_MSECOND:
 // #ifdef USE_IR_RECEIVE
 //         if (pin[GPIO_IRRECV] < 99) {
 //           IrReceiveCheck();  // check if there's anything on IR side
@@ -499,7 +499,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 // #endif  // USE_IR_RECEIVE
 //         irsend_active = false;  // re-enable IR reception
 //         break;
-//       case FUNC_COMMAND:
+//       case TASK_COMMAND:
 //         if (pin[GPIO_IRSEND] < 99) {
 //           result = IrSendCommand();
 //         }

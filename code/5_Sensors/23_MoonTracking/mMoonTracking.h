@@ -1,11 +1,11 @@
-#ifndef MSOLARLUNAR_H
-#define MSOLARLUNAR_H
+#ifndef MODULE_SENSORS_MOON_TRACKING_H
+#define MODULE_SENSORS_MOON_TRACKING_H
 
-#define D_UNIQUE_MODULE_SENSORS_SOLAR_LUNAR_ID ((5*1000)+22)
+#define D_UNIQUE_MODULE_SENSORS_MOON_TRACKING_ID ((5*1000)+23)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+#ifdef USE_MODULE_SENSORS_MOON_TRACKING
 #include "3_Network/10_MQTT/mMQTT.h"
 
 #include <cmath> 
@@ -19,14 +19,14 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-class mSolarLunar :
+class mMoonTracking :
   public mTaskerInterface
 {
   
   private:
   /* data */
   public:
-    mSolarLunar(/* args */){};
+    mMoonTracking(/* args */){};
 
   
     void Init(void);
@@ -34,11 +34,11 @@ class mSolarLunar :
     
     int8_t Tasker(uint8_t function, JsonParserObject obj);
     
-    static constexpr const char* PM_MODULE_SENSORS_SOLAR_LUNAR_CTR = D_MODULE_SENSORS_SOLAR_LUNAR_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SOLAR_LUNAR_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SOLAR_LUNAR_ID; }
+    static constexpr const char* PM_MODULE_SENSORS_MOON_TRACKING_CTR = D_MODULE_SENSORS_MOON_TRACKING_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOON_TRACKING_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOON_TRACKING_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mSolarLunar);    };
+    uint16_t GetClassSize(){      return sizeof(mMoonTracking);    };
     #endif
 
     
@@ -53,7 +53,18 @@ class mSolarLunar :
 
     void Update_Solar_Tracking_Data();
 
+    struct SolarTimes {
+        time_t sunrise;
+        time_t sunset;
+        time_t dawn;
+        time_t dusk;
+        time_t solar_noon;
+        double daylight_duration;
+        bool is_rising;
+    };
     
+    SolarTimes CalculateSolarTimes(double latitude, double longitude, time_t utc_time) ;
+        
 
     
 		/**
@@ -135,6 +146,7 @@ class mSolarLunar :
     }    
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
+      value->timestamp = 0; // Constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
       value->sensor_type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
       value->data_f.push_back(solar_position.azimuth);
       value->sensor_type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
@@ -153,19 +165,19 @@ class mSolarLunar :
     void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender();
     
-    struct handler<mSolarLunar> mqtthandler_settings_teleperiod;
-    struct handler<mSolarLunar> mqtthandler_sensor_ifchanged;
-    struct handler<mSolarLunar> mqtthandler_sensor_teleperiod;
+    struct handler<mMoonTracking> mqtthandler_settings_teleperiod;
+    struct handler<mMoonTracking> mqtthandler_sensor_ifchanged;
+    struct handler<mMoonTracking> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     
 
-    std::vector<struct handler<mSolarLunar>*> mqtthandler_list;    
+    std::vector<struct handler<mMoonTracking>*> mqtthandler_list;    
     #endif // USE_MODULE_NETWORK_MQTT 
 
 
 };
 
-#endif // USE_MODULE_SENSORS_SOLAR_LUNAR
+#endif // USE_MODULE_SENSORS_MOON_TRACKING
 
 #endif // HEADER GUARD

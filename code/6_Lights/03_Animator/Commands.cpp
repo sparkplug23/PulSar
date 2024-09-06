@@ -31,7 +31,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
       if(segment_i >= segments.size())
       { 
         uint16_t seg_size = segments.size();
-        Segment_AppendNew(0, 100, segment_i);
+        Segment_AppendNew(0, 16, segment_i);
         ALOG_INF(PSTR("Created new segment%02d %dB (T%dB)"), segment_i, segments.size()-seg_size, segments.size());
       }
       
@@ -134,6 +134,12 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
         SEGMENT_I(segment_index).stop = PIXEL_RANGE_LIMIT;
       }
 
+      if(arrobj.size() == 4)
+      {
+        SEGMENT_I(segment_index).startY = arrobj[3].getInt();
+        SEGMENT_I(segment_index).stopY  = arrobj[4].getInt();
+      }
+
       ALOG_COM( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).start, SEGMENT_I(segment_index).stop );
       data_buffer.isserviced++;
     }
@@ -224,6 +230,13 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     { 
       SEGMENT_I(segment_index).spacing = jtok.getInt();  
       ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_SPACING)), SEGMENT_I(segment_index).spacing);
+      data_buffer.isserviced++;
+    }
+      
+    if(jtok = jobj[PM_JSON_OFFSET])
+    { 
+      SEGMENT_I(segment_index).offset = jtok.getInt();  
+      ALOG_COM( PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_OFFSET)), SEGMENT_I(segment_index).offset);
       data_buffer.isserviced++;
     }
       
@@ -425,7 +438,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
         data_buffer.isserviced++;
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
+      ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     }
     #endif // ENABLE_DEVFEATURE_LIGHTING__COMMANDS_CHANGE_ANIMATION_MODE

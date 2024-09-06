@@ -8,7 +8,7 @@ void mSR04::parse_JSONCommand(JsonParserObject obj)
 
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mSR04::parse_JSONCommand %d"),obj.isNull());
+  ALOG_TST(PSTR(D_LOG_LIGHT D_TOPIC "mSR04::parse_JSONCommand %d"),obj.isNull());
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   char buffer[50];
@@ -43,7 +43,7 @@ void mSR04::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["SR04"].getObject()["ConversionMethod"])
   {
     readings.conversion_settings.flag_distance_conversion_method = jtok.getInt();
-    AddLog(LOG_LEVEL_TEST, PSTR("ConversionMethod %d"),readings.conversion_settings.flag_distance_conversion_method);
+    ALOG_TST(PSTR("ConversionMethod %d"),readings.conversion_settings.flag_distance_conversion_method);
     
     mqtthandler_settings_teleperiod.flags.SendNow = true;
   }

@@ -21,6 +21,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+// #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+
+#ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+// In Main_PulSar.cpp or another relevant file
+int channels_resolution = 10;  // or whatever the appropriate value/type is
+#include <gpio_viewer.h> // Must me the first include in your project
+GPIOViewer gpio_viewer;
+#endif
+
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 /*********************************************************************************************
@@ -268,16 +278,16 @@ void setup(void)
  ********************************************************************************************/
 
   #ifdef ESP32
-    // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
+    // ALOG_INF(PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
     //           SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), SupportESP32::FoundPSRAM(), SupportESP32::CanUsePSRAM());
+    // ALOG_DBG(PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), SupportESP32::FoundPSRAM(), SupportESP32::CanUsePSRAM());
     // #if !defined(HAS_PSRAM_FIX)
     // if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
-    //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+    //   ALOG_INF(PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
     // }
     // #endif
   #else // ESP32
-    // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+    // ALOG_INF(PSTR("HDW: %s"), GetDeviceHardware().c_str());
   #endif // ESP32
   DEBUG_LINE_HERE
 
@@ -312,11 +322,9 @@ void setup(void)
   pCONT_set->SettingsDefault();
   ALOG_DBG(PSTR("Loading minimal defaults"));
    // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
-  ALOG_DBG(PSTR("Loading settings from saved memory"));    
+  ALOG_DBG(PSTR("Loading settings from saved memory"));
   pCONT_set->SettingsLoad();                   // Only the system level settings are loaded here, not the module settings which should happen below
-  // Check Load was successful
-  pCONT_set->SettingsLoad_CheckSuccessful();
-
+  
   // sprintf(pCONT_set->Settings.debug, "debug12\0");
 
 /********************************************************************************************
@@ -415,10 +423,10 @@ void setup(void)
  ********************************************************************************************/
   
   // configure any memory address needed as part of module init or templates
-  pCONT->Tasker_Interface(FUNC_POINTER_INIT);
+  pCONT->Tasker_Interface(TASK_POINTER_INIT);
 
   #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-  pCONT->Tasker_Interface(FUNC_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
+  pCONT->Tasker_Interface(TASK_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
   #endif
   
   /**
@@ -427,7 +435,7 @@ void setup(void)
    **/
   #ifdef ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
   ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-  pCONT->Tasker_Interface(FUNC_TEMPLATES__LOAD_MODULE); // loading module, only interface modules will have these
+  pCONT->Tasker_Interface(TASK_TEMPLATES__LOAD_MODULE); // loading module, only interface modules will have these
   #else
   #warning "FORCE_TEMPLATE_LOADING is disabled, and production/release is assumed. This REQUIRES valid settings/storage or device may be unstable"
   #endif
@@ -446,19 +454,19 @@ void setup(void)
   // Init the GPIOs
   pCONT_pins->GpioInit();
   // Start pins in modules
-  pCONT->Tasker_Interface(FUNC_PRE_INIT);
+  pCONT->Tasker_Interface(TASK_PRE_INIT);
   // Init devices
-  pCONT->Tasker_Interface(FUNC_INIT);
+  pCONT->Tasker_Interface(TASK_INIT);
   // Init devices after others have been configured fully
-  pCONT->Tasker_Interface(FUNC_POST_INIT);
+  pCONT->Tasker_Interface(TASK_POST_INIT);
   // Run system functions 
-  pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
+  pCONT->Tasker_Interface(TASK_FUNCTION_LAMBDA_INIT);
   // Load any stored user values into module
-  pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
+  pCONT->Tasker_Interface(TASK_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
   
   DEBUG_LINE_HERE
   // Init any dynamic memory buffers
-  pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
+  pCONT->Tasker_Interface(TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
   DEBUG_LINE_HERE
 
 
@@ -476,25 +484,25 @@ void setup(void)
   #endif
   #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
-  pCONT->Tasker_Interface(FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID);
+  pCONT->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
   #endif // ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
 
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
    * */
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM); //USED
+  pCONT->Tasker_Interface(TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM); //USED
   // Configure sensor/drivers to values desired for modules
-  pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE); //??
+  pCONT->Tasker_Interface(TASK_CONFIGURE_MODULES_FOR_DEVICE); //??
 
   /********************************************************************************************
    ** MQTT: Configure mqtt handlers in modules   ******
   ********************************************************************************************/
 
-  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
+  pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_INIT);  
 
   // Init the refresh periods for mqtt
   #ifndef ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
-  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+  pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #endif
 
   /********************************************************************************************
@@ -502,7 +510,7 @@ void setup(void)
   ********************************************************************************************/
 
   #ifdef USE_MODULE_CORE_RULES
-  pCONT->Tasker_Interface(FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
+  pCONT->Tasker_Interface(TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
   #endif 
   
 /********************************************************************************************
@@ -516,24 +524,32 @@ void setup(void)
   ********************************************************************************************/
   
   #ifdef ENABLE_FUNCTION_DEBUG
-    pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
+    pCONT->Tasker_Interface(TASK_DEBUG_CONFIGURE);
   #endif
 
   #ifdef ENABLE_BOOT_OVERRIDE_INIT
-  pCONT->Tasker_Interface(FUNC_OVERRIDE_BOOT_INIT);
+  pCONT->Tasker_Interface(TASK_OVERRIDE_BOOT_INIT);
   #endif
 
   /********************************************************************************************
    ** Boot Completed **************************************************************************
   ********************************************************************************************/
 
-  pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
+  pCONT->Tasker_Interface(TASK_ON_BOOT_COMPLETE);
 
   // Serial.println("END OF SETUP REACHED"); Serial.flush();
 
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif  
+
+  
+  #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+  // Must be at the end of your setup
+  // gpio_viewer.setSamplingInterval(25); // You can set the sampling interval in ms, if not set default is 100ms
+  gpio_viewer.begin();
+  #endif
+
 
 }
 
@@ -547,58 +563,58 @@ void LoopTasker()
   #endif
   // Serial.println("ArduinoOtaLoop passed STARTED"); Serial.flush();
    
-  pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
+  pCONT->Tasker_Interface(TASK_LOOP); DEBUG_LINE;
  
-  if(pCONT_time->UpTime() > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
+  if(pCONT_time->UpTime() > 30){ pCONT->Tasker_Interface(TASK_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
  
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(TASK_EVERY_50_MSECOND);  }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(TASK_EVERY_100_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(TASK_EVERY_250_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000))
   {
 
     /**Since this only gets checked every second, we can use the uptime ticking to make sure it runs just once*/
     #ifdef ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
     if(pCONT_time->UpTime()==ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS){
-      pCONT->Tasker_Interface(FUNC_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
-      pCONT->Tasker_Interface(FUNC_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
-      pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT_DELAYED);
+      pCONT->Tasker_Interface(TASK_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
+      pCONT->Tasker_Interface(TASK_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
+      pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_INIT_DELAYED);
     }
     #endif // ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
 
 
-    pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
+    pCONT->Tasker_Interface(TASK_EVERY_SECOND); 
 
-    if((pCONT_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    if((pCONT_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(TASK_EVERY_MINUTE); }
     
     if(
       ((pCONT_time->UpTime()%5)==0)&&
       (pCONT_time->UpTime()>20)
-    ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
+    ){                                      pCONT->Tasker_Interface(TASK_EVERY_FIVE_SECOND); }
 
     if(
       ((pCONT_time->UpTime()%300)==0)&&
       (pCONT_time->UpTime()>60)
-    ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
+    ){                                    pCONT->Tasker_Interface(TASK_EVERY_FIVE_MINUTE); }
 
     // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
-    if(pCONT_time->UpTime() == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
-    if(pCONT_time->UpTime() == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
-    if(pCONT_time->UpTime() == 60){   pCONT->Tasker_Interface(FUNC_UPTIME_1_MINUTES); }
-    if(pCONT_time->UpTime() == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
-    if(pCONT_time->UpTime() == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+    if(pCONT_time->UpTime() == 10){   pCONT->Tasker_Interface(TASK_UPTIME_10_SECONDS); }
+    if(pCONT_time->UpTime() == 30){   pCONT->Tasker_Interface(TASK_UPTIME_30_SECONDS); }
+    if(pCONT_time->UpTime() == 60){   pCONT->Tasker_Interface(TASK_UPTIME_1_MINUTES); }
+    if(pCONT_time->UpTime() == 600){   pCONT->Tasker_Interface(TASK_UPTIME_10_MINUTES); }
+    if(pCONT_time->UpTime() == 36000){ pCONT->Tasker_Interface(TASK_UPTIME_60_MINUTES); }
 
     // Check for midnight
     if((pCONT_time->RtcTime.hour==0)&&(pCONT_time->RtcTime.minute==0)&&(pCONT_time->RtcTime.second==0)&&(pCONT_time->lastday_run != pCONT_time->RtcTime.day_of_year)){
       pCONT_time->lastday_run = pCONT_time->RtcTime.day_of_year;
-      pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
+      pCONT->Tasker_Interface(TASK_EVERY_MIDNIGHT); 
     }
 
-    if(pCONT_time->UpTime()==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+    if(pCONT_time->UpTime()==10){       pCONT->Tasker_Interface(TASK_BOOT_MESSAGE);}
 
-    if(pCONT_time->UpTime()==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+    if(pCONT_time->UpTime()==120){       pCONT->Tasker_Interface(TASK_ON_BOOT_SUCCESSFUL);}
       
-    pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
+    pCONT->Tasker_Interface(TASK_INIT_DELAYED_SECONDS);
 
   } // END secondloop
 

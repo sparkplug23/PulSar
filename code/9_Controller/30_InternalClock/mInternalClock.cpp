@@ -28,7 +28,7 @@ int8_t mInternalClock::Tasker(uint8_t function, JsonParserObject obj)
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     init();
   }
 
@@ -39,36 +39,36 @@ int8_t mInternalClock::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_250_MSECOND:
+    case TASK_EVERY_250_MSECOND:
       SpeedRefresh();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case FUNC_SERIAL:
+    case TASK_SERIAL:
       SerialInput();
     break;
     /************
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_SPEED_ID:
+    case TASK_EVENT_SET_SPEED_ID:
       RulesEvent_Set_Speed();
     break;
     #endif
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
   }
@@ -94,13 +94,13 @@ void mInternalClock::RulesEvent_Set_Speed(){
   //   uint8_t state;
   // }rule_event_layout;
 
-  // case FUNC_EVENT_SET_SPEED_ID:
+  // case TASK_EVENT_SET_SPEED_ID:
   //   CommandSet_FanSpeed_Inching();
   // break;     
 
   // Set value directly, or its an instruction ie increment
 
-  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Speed"));
+  ALOG_TST(PSTR("MATCHED RulesEvent_Set_Speed"));
 
   uint8_t index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
 
@@ -117,7 +117,7 @@ void mInternalClock::RulesEvent_Set_Speed(){
     #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
       pCONT_buzzer->BuzzerBeep(current_speed);
     #endif
-    AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Increment %d"),current_speed);
+    ALOG_TST(PSTR("MATCHED Increment %d"),current_speed);
   }
   else
   {
@@ -337,7 +337,7 @@ void mInternalClock::MQTTHandler_Init(){
   struct handler<mInternalClock>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -347,7 +347,7 @@ void mInternalClock::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mInternalClock::ConstructJSON_Settings;
 
   ptr = &mqtthandler_power_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -357,7 +357,7 @@ void mInternalClock::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mInternalClock::ConstructJSON_Power;
 
   ptr = &mqtthandler_power_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -385,9 +385,9 @@ void mInternalClock::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

@@ -377,7 +377,7 @@ Bathroom
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   // #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   // #define ENABLE_DEBUGFEATURE__RELOAD_TEMPLATE__RULES_EVER_MINUTE
 
@@ -417,7 +417,7 @@ Bathroom
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -489,7 +489,7 @@ Bathroom
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -504,7 +504,7 @@ Bathroom
     "\"Rule1\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -588,7 +588,7 @@ Bathroom
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -603,7 +603,7 @@ Bathroom
     "\"Rule1\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -694,7 +694,7 @@ Bathroom
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -851,7 +851,7 @@ Bathroom
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -865,7 +865,7 @@ Bathroom
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -908,7 +908,6 @@ Bathroom
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
-    #define ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
     #define MAX_RELAYS 2
   
   // #define USE_MODULE_ENERGY_INTERFACE
@@ -955,13 +954,13 @@ Bathroom
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
       "}"
@@ -970,13 +969,13 @@ Bathroom
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
       "}"
@@ -985,13 +984,13 @@ Bathroom
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
@@ -1068,13 +1067,13 @@ Bathroom
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\"," //mqtt function
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\"," //mqtt_send
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\"," //mqtt_send
         "\"DeviceName\":0,"
         "\"State\":0,"
         // Even though I will use sonoff basics for cupboard lights (or else buy shelly 2.5), the command will be set as kitchenlight#
@@ -1110,7 +1109,6 @@ Bathroom
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
-    #define ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
     #define MAX_RELAYS 2
   
   #define USE_MODULE_ENERGY_INTERFACE
@@ -1157,13 +1155,13 @@ Bathroom
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
       "}"
@@ -1172,13 +1170,13 @@ Bathroom
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
       "}"
@@ -1187,13 +1185,13 @@ Bathroom
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
@@ -1311,54 +1309,235 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  // #define DISABLE_NETWORK
-
-  #define DISABLE_SERIAL
-  #define DISABLE_SERIAL0_CORE
-  #define DISABLE_SERIAL_LOGGING
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+  #define MQTT_PORT     1883
     
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+  #define SETTINGS_HOLDER 1240
+  #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
+  #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
+  #define USE_MODULE_CORE_FILESYSTEM
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
+  #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+
+  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+  #define ENABLE_DEVFEATURE_SETTINGS__TFS
+
+  #define ENABLE_FEATURE_SETTINGS__LOAD_PRECODED_SETTINGS_ON_BOOT_NO_SAVED_STATES
+
+  #define ESP32
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE 
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRASNMITTED
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  // #define ENABLE_DEBUG_LINE_HERE_MILLIS
+
+  // #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_UI_VIEWER
+
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+  #define ENABLE_TEMPLATE_SECTION__ENERGY
+  #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+  #define ENABLE_TEMPLATE_SECTION__ENERGY__INA219
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  
+
+  #define USE_MODULE_CORE_RULES
+  
+
+  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  // #define USE_MODULE_CORE_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/    
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+
+  // #define ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
+
+  // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
+  // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SWITCHES
+    #define USE_MODULE_SENSORS_MOTION
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+      
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #define ENABLE_LIGHTING_TEMPLATE__GREENLESS
+  
+  #ifdef ENABLE_LIGHTING_TEMPLATE__GREENLESS
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":25,
+          "ColourOrder":"RGB",
+          "BusType":"WS2812_RGB",
+          "Start":0,
+          "Length":100
+        },
+        {
+          "Pin":26,
+          "ColourOrder":"RGB",
+          "BusType":"WS2812_RGB",
+          "Start":100,
+          "Length":100
+        }
+      ],
+      "Segment0": {
+        "PixelRange": [
+          0,
+          200
+        ],
+        "ColourPalette":"Colourful Greenless",
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":100,
+          "BrightnessRGB":5
+        },
+        "Effects": {
+          "Function":"Static Palette",
+          "Speed":127,
+          "Intensity":255,
+          "Decimate":0,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 0
+      },
+      "BrightnessRGB": 45,
+      "BrightnessCCT": 0
+    }
+    )=====";
+  #endif 
+
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: MQTT Template Test Loading
+  ************************************/  
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1366,34 +1545,144 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"18\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
+      "\"4\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR   "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 33
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"WS28XX",
-    "ColourOrder":"RGB",
-    "AnimationMode":"Effects",
-    "ColourPalette":"Pastel 02",
-    "Effects": {
-      "Function":1,
-      "Intensity":50,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG  "DiningRoom"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+  
+  /***********************************
+   * SECTION: Shelf
+  ************************************/  
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"// for PIR to follow
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "}"
+  "}";
+
 
 #endif
+
+
+// #ifdef DEVICE_RGBSHELF
+//   #define DEVICENAME_CTR          "rgbshelf"
+//   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
+//   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+//   // #define DISABLE_NETWORK
+
+//   #define DISABLE_SERIAL
+//   #define DISABLE_SERIAL0_CORE
+//   #define DISABLE_SERIAL_LOGGING
+
+//   #define ENABLE_FEATURE_WATCHDOG_TIMER
+//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+//   #define USE_BUILD_TYPE_LIGHTING
+//   #define USE_MODULE_LIGHTS_INTERFACE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
+//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+//     
+//     /********* Group: Needed to build ************************/
+//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+//     /********* Group: Ready for full integration ************************/
+//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     /********* Group: Testing ************************/
+//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+//     
+//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+//     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    
+//     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+//     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+//     /********* Group: Debug options only ************************/
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+//     #define ENABLE_DEBUG_SERIAL
+//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+//     // #define ENABLE_LOG_LEVEL_DEBUG
+//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+//       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+//       #endif
+//       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//   "}";
+
+//   #define STRIP_SIZE_MAX 33
+//   #define USE_LIGHTING_TEMPLATE
+//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+//   R"=====(
+//   {
+//     "HardwareType":"WS28XX",
+//     "ColourOrder":"RGB",
+//     "AnimationMode":"Effects",
+//     "ColourPalette":"Pastel 02",
+//     "Effects": {
+//       "Function":1,
+//       "Intensity":50,
+//       "RateMs": 1000
+//     },
+//     "BrightnessRGB": 100
+//   }
+//   )=====";
+
+// #endif
 
 
 #ifdef DEVICE_RGBCOOKER
@@ -1411,7 +1700,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -1420,7 +1709,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
@@ -1552,13 +1841,13 @@ Bathroom
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -1583,7 +1872,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -1592,7 +1881,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
@@ -1674,7 +1963,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -1683,7 +1972,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
@@ -1819,13 +2108,13 @@ Bathroom
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -2082,7 +2371,7 @@ R"=====(
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
     #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -2236,13 +2525,13 @@ R"=====(
    "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -2415,13 +2704,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -3383,7 +3672,7 @@ R"=====(
       "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
@@ -3406,13 +3695,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -3487,7 +3776,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -3502,7 +3791,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -3755,13 +4044,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":2,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":2" // Started
       "}"
@@ -3857,7 +4146,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -3872,7 +4161,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
@@ -3887,13 +4176,13 @@ R"=====(
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
@@ -3932,7 +4221,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
@@ -3948,7 +4237,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1"      // 2 meaning either low or high, 1 would be high only
       "},"
@@ -3964,13 +4253,13 @@ R"=====(
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started
       "}"
@@ -3979,13 +4268,13 @@ R"=====(
     "\"Rule3\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1" // 
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started        
         // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
@@ -3995,13 +4284,13 @@ R"=====(
     "\"Rule4\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
@@ -4040,13 +4329,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -4055,13 +4344,13 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
       "}"
@@ -4128,7 +4417,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -4143,7 +4432,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -4218,7 +4507,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\"," 
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -4233,7 +4522,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -4299,7 +4588,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\"," 
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -4314,7 +4603,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -4448,13 +4737,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -4513,7 +4802,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\"," 
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0," //Switch 0 of 1
         "\"State\":2" // Toggle
       "},"
@@ -4528,7 +4817,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1," // Closest to bathroom door
         "\"State\":2"
       "},"
@@ -4618,13 +4907,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":120}}\""
       "}"
@@ -4633,13 +4922,13 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":0"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":0" // Started
       "}"
@@ -4715,14 +5004,14 @@ R"=====(
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define STRIP_SIZE_MAX 60
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -4825,13 +5114,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -4900,7 +5189,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -4915,7 +5204,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -5040,7 +5329,7 @@ R"=====(
   // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 110
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
 // Change to only update the immersion nextion every 10 seconds to reduce load on esp32 to check for stability
 
@@ -5404,13 +5693,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -5418,13 +5707,13 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
       "}"
@@ -5524,7 +5813,7 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
@@ -5539,7 +5828,7 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"
       "},"
@@ -5683,13 +5972,13 @@ R"=====(
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -5697,13 +5986,13 @@ R"=====(
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
       "}"
@@ -5711,13 +6000,13 @@ R"=====(
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":2,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":2," 
         "\"State\":\"Follow\""
       "}"

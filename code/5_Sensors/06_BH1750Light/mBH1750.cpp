@@ -36,10 +36,10 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -50,26 +50,26 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       SubTask_ReadSensor();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -83,7 +83,7 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
 void mBH1750::Pre_Init(void)
 {
   
-  if (pCONT_sup->I2cEnabled(XI2C_11)) 
+  if (pCONT_i2c->I2cEnabled(XI2C_11)) 
   {
     ALOG_INF( PSTR(D_LOG_BH1750 "I2cEnabled(XI2C_11)") );
   }
@@ -99,7 +99,7 @@ void mBH1750::Init(void)
   for (uint32_t i = 0; i < sizeof(Bh1750.addresses); i++) 
   {
 
-    if (pCONT_sup->I2cActive(Bh1750.addresses[i])) { continue; }
+    if (pCONT_i2c->I2cActive(Bh1750.addresses[i])) { continue; }
 
     device_data[settings.sensor_count].address = Bh1750.addresses[i];
 
@@ -134,23 +134,23 @@ uint8_t mBH1750::Get_Resolution(uint32_t sensor_index)
 
 
 bool mBH1750::Set_Resolution(uint32_t sensor_index) {
-  pCONT_sup->wire->beginTransmission(device_data[sensor_index].address);
-  pCONT_sup->wire->write(Bh1750.resolution[Get_Resolution(sensor_index)]);
-  return (!pCONT_sup->wire->endTransmission());
+  pCONT_i2c->wire->beginTransmission(device_data[sensor_index].address);
+  pCONT_i2c->wire->write(Bh1750.resolution[Get_Resolution(sensor_index)]);
+  return (!pCONT_i2c->wire->endTransmission());
 }
 
 
 bool mBH1750::Set_MeasurementTimeRegister(uint32_t sensor_index)
 {
 
-  pCONT_sup->wire->beginTransmission(device_data[sensor_index].address);
+  pCONT_i2c->wire->beginTransmission(device_data[sensor_index].address);
   uint8_t data = BH1750_MEASUREMENT_TIME_HIGH | ((device_data[sensor_index].mtreg >> 5) & 0x07);
-  pCONT_sup->wire->write(data);
-  if (pCONT_sup->wire->endTransmission()) { return false; }
-  pCONT_sup->wire->beginTransmission(device_data[sensor_index].address);
+  pCONT_i2c->wire->write(data);
+  if (pCONT_i2c->wire->endTransmission()) { return false; }
+  pCONT_i2c->wire->beginTransmission(device_data[sensor_index].address);
   data = BH1750_MEASUREMENT_TIME_LOW | (device_data[sensor_index].mtreg & 0x1F);
-  pCONT_sup->wire->write(data);
-  if (pCONT_sup->wire->endTransmission()) { return false; }
+  pCONT_i2c->wire->write(data);
+  if (pCONT_i2c->wire->endTransmission()) { return false; }
 
   return Set_Resolution(sensor_index);
 
@@ -162,12 +162,12 @@ bool mBH1750::Get_SensorReading(uint32_t sensor_index)
 
   if (device_data[sensor_index].valid) { device_data[sensor_index].valid--; }
 
-  if (2 != pCONT_sup->wire->requestFrom(device_data[sensor_index].address, (uint8_t)2)) 
+  if (2 != pCONT_i2c->wire->requestFrom(device_data[sensor_index].address, (uint8_t)2)) 
   { 
     return false;
   }
 
-  float level = (pCONT_sup->wire->read() << 8) | pCONT_sup->wire->read();
+  float level = (pCONT_i2c->wire->read() << 8) | pCONT_i2c->wire->read();
   float illuminance = level;
   illuminance /= (1.2 * (69 / (float)device_data[sensor_index].mtreg));
   if (1 == Get_Resolution(sensor_index)) {
@@ -275,7 +275,7 @@ void mBH1750::parse_JSONCommand(JsonParserObject obj)
   //   CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
   //   data_buffer.isserviced++;
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
@@ -313,7 +313,7 @@ void mBH1750::MQTTHandler_Init()
   struct handler<mBH1750>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
@@ -323,7 +323,7 @@ void mBH1750::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
@@ -333,7 +333,7 @@ void mBH1750::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -361,9 +361,9 @@ void mBH1750::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

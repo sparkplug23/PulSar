@@ -136,13 +136,13 @@
     // #define USE_MODULE_LIGHTS_INTERFACE
     // #define USE_MODULE_LIGHTS_ANIMATOR
     // #define USE_MODULE_LIGHTS_ADDRESSABLE
-    // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // 
     // // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
     // // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
     // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
     // // enable some wled conerted aniamtions
-    // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // 
     // #define DEBUG_WLED_EFFECT_FUNCTIONS
     // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -152,7 +152,7 @@
 
     // #define  ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 
-    // #define ENABLE_CRGBPALETTES_IN_PROGMEM
+    // 
 
     // #define STRIP_SIZE_MAX 100
     
@@ -174,7 +174,7 @@
 //     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
 //     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+//     
 //     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
 
@@ -182,13 +182,13 @@
 //     // #define USE_MODULE_LIGHTS_INTERFACE
 //     // #define USE_MODULE_LIGHTS_ANIMATOR
 //     // #define USE_MODULE_LIGHTS_ADDRESSABLE
-//     // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//     // 
 //     // // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
 //     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
 //     // // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
 //     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
 //     // // enable some wled conerted aniamtions
-//     // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//     // 
 //     // #define DEBUG_WLED_EFFECT_FUNCTIONS
 //     // // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -208,7 +208,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
     // #define STRIP_SIZE_MAX 16+1 //still needs extra +1
     #define STRIP_SIZE_MAX 2000 //still needs extra +1
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -216,7 +216,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     
     // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS    
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
@@ -756,7 +756,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
     #define STRIP_SIZE_MAX 101 //still needs extra +1
 
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -842,7 +842,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
   
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
@@ -924,7 +924,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
     #define STRIP_SIZE_MAX 101 //still needs extra +1
 
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -1014,7 +1014,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
   
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
@@ -1110,14 +1110,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -1330,7 +1330,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
   
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
@@ -1421,14 +1421,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -1685,14 +1685,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -1895,7 +1895,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
   
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
@@ -1995,7 +1995,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
 
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
@@ -2100,7 +2100,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
   
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
@@ -2192,13 +2192,13 @@
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
     #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
     // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
     // enable some wled conerted aniamtions
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     #define DEBUG_WLED_EFFECT_FUNCTIONS
     #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -2211,11 +2211,11 @@
     // to merge h801 rgbcct animation into the new method
     #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 
-    #define ENABLE_CRGBPALETTES_IN_PROGMEM
+    
 
     #define STRIP_SIZE_MAX 1300
 
-    #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+    
   
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
 

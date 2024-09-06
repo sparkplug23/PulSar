@@ -33,34 +33,11 @@ class mTaskerInterface
     /**
      * Push 0 if none are used, maybe internalise
      * Rename to "GetDeviceReading"
+     * 
+        sensors_reading_t val;
+        Must use a new one for each, or it will append them on the end of a previous one
+
      * */
-    virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->sensor_type.push_back(0); }
-
-
-    
-    // mTaskerInterface() = default;
-    // virtual ~mTaskerInterface() = default;
-
-
-    // virtual int8_t Tasker(uint8_t function, JsonParserObject obj) = 0;
-    // virtual PGM_P GetModuleName() const = 0;
-    // virtual uint16_t GetModuleUniqueID() const = 0;
-    
-    // #ifdef USE_DEBUG_CLASS_SIZE
-    // virtual uint16_t GetClassSize() const = 0;
-    // #endif    
-
-    // /**
-    //  * Get device count for each module that should be in module.settings
-    //  * */
-    // virtual uint8_t GetSensorCount() { return 0; } // If I want to force it, but not all modules need this
-    // // virtual uint8_t GetSensorCount() const { return 0; }
-    
-    // /**
-    //  * Push 0 if none are used, maybe internalise
-    //  * Rename to "GetDeviceReading"
-    //  * */
-    // // virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) const { value->sensor_type.push_back(0); } // If I want to force it, but not all modules need this
-    // virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) { value->sensor_type.push_back(0); }
+    virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->sensor_type.push_back(0); value->timestamp = 1; }
   
 };

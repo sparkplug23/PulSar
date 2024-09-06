@@ -8,7 +8,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 {
 
 
-  AddLog(LOG_LEVEL_INFO, PSTR("mWebCam::parse_JSONCommand"));
+  ALOG_INF(PSTR("mWebCam::parse_JSONCommand"));
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -103,7 +103,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
   //   sprintf(rule_name, "RelayEnabled%d", ii);
       
 	// 	if(jtok = obj[rule_name]){
-	// 		AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
+	// 		ALOG_INF(PSTR("MATCHED %s"),rule_name);
 	// 		SubCommandSet_EnabledTime(jtok.getObject(), ii);
 	// 	}
 
@@ -195,7 +195,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   // Only apply changes when state is changed
 // void mWebCam::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
-//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
+//   ALOG_INF(PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
 //     ,"CommandSet_Relay_Power","num",num,"state",state);  
 
 // 	// Check state if it needs to toggle result
@@ -222,12 +222,12 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //         if(!IsRelayTimeWindowAllowed(num))
 //         {
 //           state = 0; // forcing off
-//           AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "Relay %d is locked: Outside enabled time window"), num);
+//           ALOG_INF(PSTR(D_LOG_RELAYS "Relay %d is locked: Outside enabled time window"), num);
 //           //   return;
 //         }
 //         else
 //         {
-//           AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "Relay %d is permitted: Inside enabled time window"), num);
+//           ALOG_INF(PSTR(D_LOG_RELAYS "Relay %d is permitted: Inside enabled time window"), num);
 //         }
 //       }
 //     }

@@ -16,17 +16,17 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
   #endif
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       WifiConnect();
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
     
       #if defined(USE_NETWORK_MDNS) && defined(ESP8266)
         MdnsUpdate();
       #endif // USE_NETWORK_MDNS
     
     break;
-    case FUNC_EVERY_SECOND:{
+    case TASK_EVERY_SECOND:{
       
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "network_wifi=%d"), pCONT_set->Settings.flag_network.network_wifi);
 
@@ -43,7 +43,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
     }
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
     
 // #ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 //       if (pCONT_set->Settings.flag_network.network_wifi) 
@@ -60,10 +60,10 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 // #endif
 
     break;
-    case FUNC_EVERY_FIVE_MINUTE:
+    case TASK_EVERY_FIVE_MINUTE:
       // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
     break;
-    case FUNC_WIFI_CONNECTED:{
+    case TASK_WIFI_CONNECTED:{
 
       #ifdef USE_NETWORK_MDNS
         StartMdns();
@@ -82,8 +82,11 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
           pCONT_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
 
           pCONT_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
-
-          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+          
+          // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), pCONT_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+          
+          uint8_t mac[6];           WiFi.macAddress(mac);
+          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), pCONT_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
           pCONT_mqtt->brokers.back()->SetClientName(client_name);
 
           pCONT_mqtt->brokers.back()->SetTopicPrefix(pCONT_set->Settings.system_name.device);
@@ -116,18 +119,18 @@ void mWiFi::init(void){
 void mWiFi::WifiConfig(uint8_t type)
 {
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "mWiFi::WifiConfig=%s"),GetWiFiConfigTypeCtr());
+  ALOG_INF(PSTR(D_LOG_DEBUG "mWiFi::WifiConfig=%s"),GetWiFiConfigTypeCtr());
     #endif// ENABLE_LOG_LEVEL_INFO
 
   if (!connection.config_type) {
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("!connection.config_type"));
+    ALOG_INF(PSTR("!connection.config_type"));
     #endif// ENABLE_LOG_LEVEL_INFO
 
     if ((WIFI_RETRY == type) || (WIFI_WAIT == type)) { 
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR("return"));
+      ALOG_INF(PSTR("return"));
     #endif// ENABLE_LOG_LEVEL_INFO
       return; 
     }
@@ -153,20 +156,20 @@ void mWiFi::WifiConfig(uint8_t type)
     }
     else if (WIFI_SERIAL == connection.config_type) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
+      ALOG_INF(S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
     #endif// ENABLE_LOG_LEVEL_INFO
     }
     // #ifdef USE_MODULE_NETWORK_WEBSERVER
     // else if (WIFI_MANAGER == connection.config_type || WIFI_MANAGER_RESET_ONLY == connection.config_type) {
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    //  AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
+    //  ALOG_INF(S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
     // #endif// ENABLE_LOG_LEVEL_INFO
     //  pCONT_web->WifiManagerBegin(WIFI_MANAGER_RESET_ONLY == connection.config_type);
     // }
     // #endif  // USE_MODULE_NETWORK_WEBSERVER
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("else connection.config_type"));
+    ALOG_INF(PSTR("else connection.config_type"));
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -189,12 +192,12 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 
   ALOG_INF(PSTR("mWiFi::WifiBegin %d:%d"), flag, channel);
 
-  pCONT->Tasker_Interface(FUNC_WIFI_STARTING_CONNECTION);
+  pCONT->Tasker_Interface(TASK_WIFI_STARTING_CONNECTION);
 
   const char kWifiPhyMode[] = " BGN";
 
 // #ifdef ARDUINO_ESP8266_RELEASE_2_3_0  // (!strncmp_P(ESP.getSdkVersion(),PSTR("1.5.3"),5))
-//   AddLog(LOG_LEVEL_DEBUG, S_LOG_WIFI, PSTR(D_PATCH_ISSUE_2186));
+//   ALOG_DBG(S_LOG_WIFI, PSTR(D_PATCH_ISSUE_2186));
 //   WiFi.mode(WIFI_OFF);      // See https://github.com/esp8266/Arduino/issues/2186
 // #endif
 
@@ -271,7 +274,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
   
   #ifdef ESP8266
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECTING_TO_AP "%d \"%s\" \"%s\" " D_IN_MODE " 11%c " D_AS " %s"),
+  ALOG_INF(PSTR(D_LOG_WIFI D_CONNECTING_TO_AP "%d \"%s\" \"%s\" " D_IN_MODE " 11%c " D_AS " %s"),
     pCONT_set->Settings.sta_active +1, 
     pCONT_set->SettingsText(SET_STASSID1 + pCONT_set->Settings.sta_active), 
     pCONT_set->SettingsText(SET_STAPWD1 + pCONT_set->Settings.sta_active), 
@@ -314,7 +317,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 void mWiFi::ScanBestAndBeginWifi()
 {
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
+  ALOG_TST(PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
   #endif// ENABLE_LOG_LEVEL_INFO
 
   static int8_t best_network_db;
@@ -322,14 +325,14 @@ void mWiFi::ScanBestAndBeginWifi()
   // Not active
   if (0 == connection.scan_state) { 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(0 == connection.scan_state)"));
+    ALOG_INF(PSTR(D_LOG_WIFI "(0 == connection.scan_state)"));
     #endif// ENABLE_LOG_LEVEL_INFO
     return;
   }
   // Init scan when not connected
   if (1 == connection.scan_state) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(1 == connection.scan_state) Init scan when not connected"));
+    ALOG_INF(PSTR(D_LOG_WIFI "(1 == connection.scan_state) Init scan when not connected"));
     #endif// ENABLE_LOG_LEVEL_INFO
     memset((void*) &connection.bssid, 0, sizeof(connection.bssid));
     best_network_db = -127;
@@ -338,7 +341,7 @@ void mWiFi::ScanBestAndBeginWifi()
   // Init scan when connected
   if (2 == connection.scan_state) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(2 == connection.scan_state) Init scan when connected"));
+    ALOG_INF(PSTR(D_LOG_WIFI "(2 == connection.scan_state) Init scan when connected"));
     #endif// ENABLE_LOG_LEVEL_INFO
     uint8_t* bssid = WiFi.BSSID();                  // Get current bssid
     memcpy((void*) &connection.bssid, (void*) bssid, sizeof(connection.bssid));
@@ -350,8 +353,8 @@ void mWiFi::ScanBestAndBeginWifi()
   
 if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){  
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR("WiFi.scanComplete() RUNNING"));
-  AddLog(LOG_LEVEL_INFO, PSTR("WiFi.IP() %s"),WiFi.localIP().toString().c_str());
+  ALOG_INF(PSTR("WiFi.scanComplete() RUNNING"));
+  ALOG_INF(PSTR("WiFi.IP() %s"),WiFi.localIP().toString().c_str());
     #endif //  ENABLE_LOG_LEVEL_INFO
 }
 
@@ -359,31 +362,31 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
   // Init scan
   if (3 == connection.scan_state) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(3 == connection.scan_state) Init scan"));
+    ALOG_INF(PSTR(D_LOG_WIFI "(3 == connection.scan_state) Init scan"));
     #endif// ENABLE_LOG_LEVEL_INFO
     if (WiFi.scanComplete() != WIFI_SCAN_RUNNING) {
       WiFi.scanNetworks(true);                      // Start wifi scan async
       connection.scan_state++;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR("Network (re)scan started..."));
+      ALOG_INF(PSTR("Network (re)scan started..."));
     #endif// ENABLE_LOG_LEVEL_INFO
       return;
     }
     // else{
-    //   AddLog(LOG_LEVEL_INFO, PSTR("WiFi.scanComplete() %d"),WiFi.scanComplete());
+    //   ALOG_INF(PSTR("WiFi.scanComplete() %d"),WiFi.scanComplete());
     // }
   }
 
 
   int8_t scan_result = WiFi.scanComplete();
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "scan_result=%d"),scan_result);
+  ALOG_INF(PSTR(D_LOG_WIFI "scan_result=%d"),scan_result);
     #endif //  ENABLE_LOG_LEVEL_INFO
 
   // Check scan done
   if (4 == connection.scan_state) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(4 == scan_state) // Check scan done"));
+    ALOG_INF(PSTR(D_LOG_WIFI "(4 == scan_state) // Check scan done"));
     #endif// ENABLE_LOG_LEVEL_INFO
     if (scan_result != WIFI_SCAN_RUNNING) {
       connection.scan_state++;
@@ -392,7 +395,7 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
   // Scan done
   if (5 == connection.scan_state) {
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(5 == scan_state) Scan done"));
+    // ALOG_INF(PSTR(D_LOG_WIFI "(5 == scan_state) Scan done"));
     // #endif// ENABLE_LOG_LEVEL_INFO
     int32_t channel = 0;                            // No scan result
     int8_t ap = 3;                                  // AP default if not found
@@ -430,12 +433,12 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
 
           // DEBUG_LINE_HERE;
           // #ifdef 
-          //   AddLog(LOG_LEVEL_TEST, PSTR("%s"),ssid_scan);
+          //   ALOG_TST(PSTR("%s"),ssid_scan);
 
             known = true;
             if (rssi_scan > best_network_db) {      // Best network
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_TEST, PSTR("rssi_scan > best_network_db"));
+            ALOG_TST(PSTR("rssi_scan > best_network_db"));
     #endif// ENABLE_LOG_LEVEL_INFO
                #ifdef ESP8266
                 if (sec_scan == ENC_TYPE_NONE || pCONT_set->SettingsText(SET_STAPWD1 + j)) {  // Check for passphrase if not open wlan
@@ -454,16 +457,16 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
               }
             }
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_TEST, PSTR("break"));
+            ALOG_TST(PSTR("break"));
     #endif// ENABLE_LOG_LEVEL_INFO
             break;
           }else{
           
-            // AddLog(LOG_LEVEL_TEST, PSTR("ssid_scan[\"%s\"] != pCONT_set->Settings.sta_ssid[%d] \"%s\""),ssid_scan,j,pCONT_set->Settings.sta_ssid[j]);
+            // ALOG_TST(PSTR("ssid_scan[\"%s\"] != pCONT_set->Settings.sta_ssid[%d] \"%s\""),ssid_scan,j,pCONT_set->Settings.sta_ssid[j]);
 
           }
         }
-        // AddLog(LOG_LEVEL_INFO, 
+        // ALOG_INF(
         //   PSTR(D_LOG_WIFI "Network %d, AP%c, SSId %s, Channel %d, BSSId %02X:%02X:%02X:%02X:%02X:%02X, RSSI %d, Encryption %d"),
         //   i, (known) ? (j) ? '2' : '1' : '-', ssid_scan.c_str(), 
         //   chan_scan, bssid_scan[0], bssid_scan[1], bssid_scan[2], bssid_scan[3], bssid_scan[4], bssid_scan[5], 
@@ -483,7 +486,7 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
                     '-')));
           
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, 
+            ALOG_INF(
                         PSTR(DEBUG_INSERT_PAGE_BREAK D_LOG_WIFI "Network %d, AP%c, SSId %s, Channel %d, RSSI %d"), 
                         i, known_c, ssid_scan.c_str(), chan_scan, rssi_scan
                       );
@@ -502,13 +505,13 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
     
       if (last_bssid[i] != connection.bssid[i]) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "last_bssid[i] != connection.bssid[i]"));
+        ALOG_INF(PSTR(D_LOG_WIFI "last_bssid[i] != connection.bssid[i]"));
     #endif// ENABLE_LOG_LEVEL_INFO
         WifiBegin(ap, channel);                     // 0 (AP1), 1 (AP2) or 3 (default AP)
         break;
       }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "last_bssid[i] ================= connection.bssid[i]"));
+        ALOG_INF(PSTR(D_LOG_WIFI "last_bssid[i] ================= connection.bssid[i]"));
     #endif// ENABLE_LOG_LEVEL_INFO
 
       }
@@ -543,7 +546,7 @@ bool mWiFi::WifiHostByName(const char* aHostname, IPAddress& aResult) {
       return true;
     }
   }
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "DNS failed for %s after %i ms"), aHostname, dns_end - dns_start);
+  ALOG_DBG(PSTR(D_LOG_WIFI "DNS failed for %s after %i ms"), aHostname, dns_end - dns_start);
   return false;
 }
 
@@ -571,12 +574,12 @@ void mWiFi::WifiSetState(uint8_t state)
     if(state){ //new state 
     // pinMode(2,OUTPUT);
     // digitalWrite(2,LOW);
-      pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
+      pCONT->Tasker_Interface(TASK_WIFI_CONNECTED);
       loglevel_with_connection_status = LOG_LEVEL_DEBUG_MORE;
     }else{
     // pinMode(2,OUTPUT);
     // digitalWrite(2,HIGH);
-      pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+      pCONT->Tasker_Interface(TASK_WIFI_DISCONNECTED);
       loglevel_with_connection_status = LOG_LEVEL_INFO;
     }
   }
@@ -587,7 +590,7 @@ void mWiFi::WifiSetState(uint8_t state)
   if(state == 0){
     DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s=%d"),"WifiSetState",state);
+    ALOG_INF(PSTR(D_LOG_DEBUG "%s=%d"),"WifiSetState",state);
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -612,7 +615,7 @@ void mWiFi::WifiSetState(uint8_t state)
     pCONT_set->runtime.global_state.network_down = 0;
   }
 
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),"WifiSetState end");
+  // ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WifiSetState end");
     
 }
 
@@ -705,9 +708,9 @@ void mWiFi::WifiCheckIp(void)
     if (connection.status != WL_CONNECTED) {                                        //if it was not previously connected, get router info
       
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_CONNECTED));
+      ALOG_INF(S_LOG_WIFI, PSTR(D_CONNECTED));
     #endif// ENABLE_LOG_LEVEL_INFO
-      // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "Set IP addresses"));
+      // ALOG_INF(PSTR(D_LOG_WIFI "Set IP addresses"));
       pCONT_set->Settings.ip_address[1] = (uint32_t)WiFi.gatewayIP();
       pCONT_set->Settings.ip_address[2] = (uint32_t)WiFi.subnetMask();
       pCONT_set->Settings.ip_address[3] = (uint32_t)WiFi.dnsIP();
@@ -726,7 +729,7 @@ void mWiFi::WifiCheckIp(void)
   { //not connected
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-   // AddLog(LOG_LEVEL_INFO, PSTR("%s" " NOT connected"),__FUNCTION__);//WiFi.status() %s, IP \"%s\" %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str(),WiFi.localIP().toString()=="(IP unset)"?"matched":"nomatch");
+   // ALOG_INF(PSTR("%s" " NOT connected"),__FUNCTION__);//WiFi.status() %s, IP \"%s\" %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str(),WiFi.localIP().toString()=="(IP unset)"?"matched":"nomatch");
     #endif// ENABLE_LOG_LEVEL_INFO
 
     WifiSetState(0);DEBUG_LINE_HERE
@@ -735,7 +738,7 @@ void mWiFi::WifiCheckIp(void)
     switch (connection.status) {
       case WL_CONNECTED:
     #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECT_FAILED_NO_IP_ADDRESS));
+        ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_NO_IP_ADDRESS));
     #endif // ENABLE_LOG_LEVEL_INFO
         connection.status = 0;
         connection.retry = connection.retry_init;        
@@ -743,31 +746,31 @@ void mWiFi::WifiCheckIp(void)
         break;
       case WL_NO_SSID_AVAIL:
         #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECT_FAILED_AP_NOT_REACHED));
+        ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_AP_NOT_REACHED));
         #endif // ENABLE_LOG_LEVEL_INFO
         
         pCONT_set->Settings.wifi_channel = 0;  // Disable stored AP
 
         if (WIFI_WAIT == pCONT_set->Settings.sta_config) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "1%s"),"WIFI_WAIT == pCONT_set->Settings.sta_config");
+          ALOG_INF(PSTR(D_LOG_WIFI "1%s"),"WIFI_WAIT == pCONT_set->Settings.sta_config");
     #endif// ENABLE_LOG_LEVEL_INFO
           connection.retry = connection.retry_init;
         } else {
           if (connection.retry > (connection.retry_init / 2)) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "2%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry>");
+            ALOG_INF(PSTR(D_LOG_WIFI "2%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry>");
     #endif// ENABLE_LOG_LEVEL_INFO
             connection.retry = connection.retry_init / 2;
           }
           else if (connection.retry) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "3%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry else");
+            ALOG_INF(PSTR(D_LOG_WIFI "3%s"),"ELSE WIFI_WAIT == pCONT_set->Settings.sta_config retry else");
     #endif// ENABLE_LOG_LEVEL_INFO
             connection.retry = 0;
           }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "4%s %d %s %d"),"retry else",connection.retry,"connection.retry_init",connection.retry_init);
+            ALOG_INF(PSTR(D_LOG_WIFI "4%s %d %s %d"),"retry else",connection.retry,"connection.retry_init",connection.retry_init);
     #endif // ENABLE_LOG_LEVEL_INFO
           }
         }
@@ -776,7 +779,7 @@ void mWiFi::WifiCheckIp(void)
         break;
       case WL_CONNECT_FAILED:
     #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECT_FAILED_WRONG_PASSWORD));
+        ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_WRONG_PASSWORD));
     #endif// ENABLE_LOG_LEVEL_INFO
         pCONT_set->Settings.wifi_channel = 0;  // Disable stored AP
         if (connection.retry > (connection.retry_init / 2)) {
@@ -788,14 +791,14 @@ void mWiFi::WifiCheckIp(void)
         connection.fConnected = false;
         connection.fReconnect = true;
         break;
-      // case WL_IDLE_STATUS: AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "case WL_IDLE_STATUS"));
+      // case WL_IDLE_STATUS: ALOG_INF(PSTR(D_LOG_WIFI "case WL_IDLE_STATUS"));
       // case WL_DISCONNECTED: ALOG_DBM( PSTR(D_LOG_WIFI "case WL_DISCONNECTED"));
       default:  // WL_IDLE_STATUS and WL_DISCONNECTED
-        //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "default"));
+        //ALOG_INF(PSTR(D_LOG_WIFI "default"));
 
         if (!connection.retry || ((connection.retry_init / 2) == connection.retry)) {
           #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECT_FAILED_AP_TIMEOUT));
+          ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_AP_TIMEOUT));
           #endif// ENABLE_LOG_LEVEL_INFO
           pCONT_set->Settings.wifi_channel = 0;  // Disable stored AP
         } else {
@@ -804,7 +807,7 @@ void mWiFi::WifiCheckIp(void)
             wifi_config_tool = WIFI_CONFIG_NO_SSID; // SHOULD BE WIFI_MANAGER   // Skip empty SSIDs and start Wifi config tool
             connection.retry = 0;
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "WIFI_CONFIG_NO_SSID"));
+            ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "WIFI_CONFIG_NO_SSID"));
     #endif// ENABLE_LOG_LEVEL_INFO
           } 
           else {
@@ -873,7 +876,7 @@ void mWiFi::WifiCheckIp(void)
     {
       
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
+      ALOG_INF(PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
     #endif// ENABLE_LOG_LEVEL_INFO
       WifiConfig(wifi_config_tool);
       connection.counter = 1;
@@ -881,7 +884,7 @@ void mWiFi::WifiCheckIp(void)
     }
   }
 
-  //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),"WifiSetState checkip END");
+  //ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WifiSetState checkip END");
 
 
 }
@@ -895,10 +898,10 @@ void mWiFi::WifiCheck(uint8_t param)
 
   
   #ifdef ENABLE_WIFI_DEVELOPMENT
-  AddLog(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
+  ALOG_DBG(PSTR("F::%s"),__FUNCTION__);
   #endif
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("connection.config_counter=%d"),connection.config_counter);
+  // ALOG_TST(PSTR("connection.config_counter=%d"),connection.config_counter);
 
 
   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"connection.counter",connection.counter,"param",param);
@@ -939,7 +942,7 @@ void mWiFi::WifiCheck(uint8_t param)
     //         }
     //         pCONT_set->Settings.sta_active = 0;
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_JSON_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
+    //         ALOG_INF(PSTR(D_LOG_WIFI D_JSON_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
     // #endif// ENABLE_LOG_LEVEL_INFO
     //       }
 
@@ -949,7 +952,7 @@ void mWiFi::WifiCheck(uint8_t param)
         {
           // pCONT_set->restart_flag = 2;
     #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "WifiCheck " "restart_flag = 2"));
+          ALOG_INF(PSTR(D_LOG_WIFI "WifiCheck " "restart_flag = 2"));
     #endif// ENABLE_LOG_LEVEL_INFO
         }
 
@@ -967,7 +970,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
         if (connection.counter <= 0) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-          // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
+          // ALOG_INF(PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
     #endif// ENABLE_LOG_LEVEL_INFO
           connection.counter = WIFI_CHECK_SEC;
 // return ;
@@ -994,7 +997,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
       //   WifiSetState(1);
         
-      //   pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
+      //   pCONT->Tasker_Interface(TASK_WIFI_CONNECTED);
 
       //   //if (pCONT_set->Settings.flag_network.use_wifi_rescan) {
       //     if (!(pCONT_time->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
@@ -1056,7 +1059,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
       //   WifiSetState(0);
     
-      //   //pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+      //   //pCONT->Tasker_Interface(TASK_WIFI_DISCONNECTED);
 
       // }
     //} //if discovery
@@ -1399,7 +1402,7 @@ void mWiFi::MqttDiscoverServer(void)
     #endif  // MDNS_HOSTNAME
     // SettingsUpdateText(SET_MQTT_HOST, MDNS.hostname(i).c_str());
     // Settings.mqtt_port = MDNS.port(i);
-    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
+    // ALOG_INF(PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
   }
 }
 #endif  // MQTT_HOST_DISCOVERY

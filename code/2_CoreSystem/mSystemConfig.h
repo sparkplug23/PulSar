@@ -63,6 +63,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #define FIRMWARE_BRANCH_NAME_STRING "development"
 
+// #define ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
 
 /**
  * @brief Version names used to set limits on when code can be included
@@ -160,6 +161,9 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 // #define D_COL_TEXT_MODULE_TITLE_CTR "#4bb7e6"
 
 #define ENABLE_USER_CONFIG_OVERRIDE
+
+//  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
 
 /**
  *  Extra Debugging methods

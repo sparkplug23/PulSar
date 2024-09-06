@@ -2588,8 +2588,6 @@ const byte* const gGradientPalettes[] PROGMEM = {
 
 };
 
-// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
-
 
 DEFINE_PGM_CTR(PM_STATIC__PALETTES_NAMES_CTR)
 {

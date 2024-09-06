@@ -10,10 +10,10 @@ int8_t mUARTLogger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -24,10 +24,10 @@ int8_t mUARTLogger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
       EverySecond();
     break;  
     //Rule based on button toggle for sd open and close 
@@ -36,7 +36,7 @@ int8_t mUARTLogger::Tasker(uint8_t function, JsonParserObject obj){
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    // case FUNC_EVENT_BUTTON_PRESSED:
+    // case TASK_EVENT_BUTTON_PRESSED:
     //   RulesEvent_Button_Pressed();
     // break;
     #endif// USE_MODULE_CORE_RULES
@@ -44,26 +44,26 @@ int8_t mUARTLogger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * TRIGGERS SECTION * 
     *******************/
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       CommandSet_SDCard_OpenClose_Toggle();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -102,14 +102,14 @@ void mUARTLogger::Init(void)
     // // Trigger0
     // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     // p_event->module_id = EM_MODULE_SENSORS_BUTTONS_ID;
-    // p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    // p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     // p_event->device_id = 0; // Button0
     // p_event->value.length = 0;
     // p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // // Command0
     // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     // p_event->module_id = EM_MODULE_CONTROLLER_SONOFF_IFAN_ID;
-    // p_event->function_id = FUNC_EVENT_SET_SPEED_ID;
+    // p_event->function_id = TASK_EVENT_SET_SPEED_ID;
     // p_event->device_id = 0; // Button0
     // p_event->value.length = 0;
     // p_event->value.data[p_event->value.length++] = STATE_NUMBER_INCREMENT_ID;  // Increment 
@@ -197,7 +197,7 @@ void mUARTLogger::MQTTHandler_Init(){
   struct handler<mUARTLogger>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -207,7 +207,7 @@ void mUARTLogger::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mUARTLogger::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -217,7 +217,7 @@ void mUARTLogger::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mUARTLogger::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -240,8 +240,8 @@ void mUARTLogger::MQTTHandler_Set_RefreshAll(){
 
 void mUARTLogger::MQTTHandler_Set_DefaultPeriodRate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 

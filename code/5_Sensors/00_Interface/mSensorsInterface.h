@@ -114,6 +114,11 @@ class mSensorsInterface :
         
     void CommandEvent_Motion(uint8_t event_type);
 
+    float ConvertTemp(float c);
+    char TempUnit(void);
+    float ConvertPressure(float p);
+    String PressureUnit(void);
+    
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/

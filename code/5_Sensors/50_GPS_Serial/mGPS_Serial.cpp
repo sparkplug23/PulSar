@@ -279,17 +279,17 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
       break;
-    case FUNC_INIT:
+    case TASK_INIT:
       // Init();
       // delayed INIT
       break;
-    case FUNC_UPTIME_30_SECONDS:
-      ALOG_INF(PSTR("mGPS_Serial::Tasker FUNC_UPTIME_30_SECONDS START"));
+    case TASK_UPTIME_30_SECONDS:
+      ALOG_INF(PSTR("mGPS_Serial::Tasker TASK_UPTIME_30_SECONDS START"));
       Init();
-      ALOG_INF(PSTR("mGPS_Serial::Tasker FUNC_UPTIME_30_SECONDS DONE"));
+      ALOG_INF(PSTR("mGPS_Serial::Tasker TASK_UPTIME_30_SECONDS DONE"));
       break;
   }
 
@@ -299,7 +299,7 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
       // Handle_Connection_And_Configuration();
       // ALOG_INF(PSTR("mGPS_Serial::Tasker"));
 
@@ -402,7 +402,7 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
       } // end valid_timeout_seconds
 
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       if(rt.valid_timeout_seconds==0)
       {
         ALOG_INF(PSTR("GPS Fix Timeout"));
@@ -412,7 +412,7 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
         ALOG_INF(PSTR("GPS Fix Valid: %d"), rt.valid_timeout_seconds);
       }
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       #ifndef DISABLE_SERIAL_LOGGING
       Splash_Latest_Fix(&Serial);
       #endif
@@ -420,23 +420,23 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -511,7 +511,7 @@ void mGPS_Serial::ReadGPSStream()
 //       // BufferWriterI->Clear();
 //       uint16_t bytes_to_read = pCONT_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
 //       // if(strlen(BufferWriterI->GetPtr())==0){
-//       //   AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
+//       //   ALOG_TST(PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
 //       // }
 
 //       bool gps_fix_reading = false;
@@ -521,8 +521,8 @@ void mGPS_Serial::ReadGPSStream()
 //       if(bytes_to_read)
 //       {  
 //         char* pbuffer = BufferWriterI->GetPtr();
-//         //AddLog(LOG_LEVEL_TEST, PSTR("GPS >> [%d]"), bytes_to_read);
-//         // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
+//         //ALOG_TST(PSTR("GPS >> [%d]"), bytes_to_read);
+//         // ALOG_TST(PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
 //         // Read bytes in
 //         for(int ii=0;ii<bytes_to_read;ii++)
 //         {
@@ -1044,7 +1044,7 @@ void mGPS_Serial::Init_UBX_Only2()
   }
 
   uint32_t start_millis = millis();
-  AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
+  ALOG_TST(PSTR("GPS: Setting baud rate started"));
 
   /**
    * Step 1: Ensure baud is set the default for configuration
@@ -1057,7 +1057,7 @@ void mGPS_Serial::Init_UBX_Only2()
     gpsPort.flush();
     // Begin connection
     //unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms
-    AddLog(LOG_LEVEL_TEST, PSTR("Baud Test %d on TX%d, RX%d"), baud_list[i], pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
+    ALOG_TST(PSTR("Baud Test %d on TX%d, RX%d"), baud_list[i], pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
     gpsPort.begin(baud_list[i], SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
     // while(!gpsPort);
     // Send default baud command
@@ -1084,7 +1084,7 @@ void mGPS_Serial::Init_UBX_Only2()
     // {
     //   // Good response, then save good baud and leave loop
     //   found_baud = baud_list[i];
-    //   AddLog(LOG_LEVEL_TEST, PSTR("found_baud = %d %d"), found_baud, baud_list[i]);
+    //   ALOG_TST(PSTR("found_baud = %d %d"), found_baud, baud_list[i]);
 
     //   break;
 
@@ -1093,7 +1093,7 @@ void mGPS_Serial::Init_UBX_Only2()
 
     // }else{
       
-    //   AddLog(LOG_LEVEL_TEST, PSTR("NOT found_baud = %d %d"), found_baud, baud_list[i]);
+    //   ALOG_TST(PSTR("NOT found_baud = %d %d"), found_baud, baud_list[i]);
     // }
       //DEBUG_PORT.println( F("enable POSLLH failed!") );
 
@@ -1139,7 +1139,7 @@ void mGPS_Serial::Init_UBX_Only2()
    * */
   // enableUBX();
   runtime.ubx_messages_confirmed_enabled = enableUBX_RequiredOnlyFor3DTracking();
-  AddLog(LOG_LEVEL_TEST, PSTR("runtime.ubx_messages_confirmed_enabled = %d"),runtime.ubx_messages_confirmed_enabled);
+  ALOG_TST(PSTR("runtime.ubx_messages_confirmed_enabled = %d"),runtime.ubx_messages_confirmed_enabled);
 
   // sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
 
@@ -1175,7 +1175,7 @@ void mGPS_Serial::Init_UBX_Only2()
   // // sendUBX( ubxRate5Hz, sizeof(ubxRate5Hz) );
   // sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
  
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
+  ALOG_TST(PSTR(DEBUG_INSERT_PAGE_BREAK "GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
 
 
 
@@ -1205,13 +1205,13 @@ void mGPS_Serial::Init_UBX_Only_Requires_PowerCycle()
   }
 
   uint32_t start_millis = millis();
-  AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
+  ALOG_TST(PSTR("GPS: Setting baud rate started"));
 
   /**
    * Change from default to max
    * */
   gpsPort.flush();
-  AddLog(LOG_LEVEL_TEST, PSTR("Baud Test %d on TX%d, RX%d"), 9600, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
+  ALOG_TST(PSTR("Baud Test %d on TX%d, RX%d"), 9600, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
   gpsPort.begin(9600, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
   while(gpsPort.available()){
     gpsPort.read(); //clear buffers
@@ -1224,7 +1224,7 @@ void mGPS_Serial::Init_UBX_Only_Requires_PowerCycle()
    * Change seraial baud to higher rate now
    * */
   gpsPort.flush();
-  AddLog(LOG_LEVEL_TEST, PSTR("Baud Test %d on TX%d, RX%d"), 921600, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
+  ALOG_TST(PSTR("Baud Test %d on TX%d, RX%d"), 921600, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
   gpsPort.begin(921600, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
   while(gpsPort.available()){
     gpsPort.read(); //clear buffers
@@ -1249,7 +1249,7 @@ void mGPS_Serial::Init_UBX_Only_Requires_PowerCycle()
    * */
   // enableUBX();
   runtime.ubx_messages_confirmed_enabled = enableUBX_RequiredOnlyFor3DTracking();
-  AddLog(LOG_LEVEL_TEST, PSTR("runtime.ubx_messages_confirmed_enabled = %d"),runtime.ubx_messages_confirmed_enabled);
+  ALOG_TST(PSTR("runtime.ubx_messages_confirmed_enabled = %d"),runtime.ubx_messages_confirmed_enabled);
 
   /**
    * Set the rate
@@ -1258,7 +1258,7 @@ void mGPS_Serial::Init_UBX_Only_Requires_PowerCycle()
   // // sendUBX( ubxRate5Hz, sizeof(ubxRate5Hz) );
   sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
  
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
+  ALOG_TST(PSTR(DEBUG_INSERT_PAGE_BREAK "GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
 
 
 #endif // ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
@@ -1473,7 +1473,7 @@ void mGPS_Serial::EveryLoop_InputMethod_PollingSerial_BytesToBuffer()
   // //if any data found
   // if(buflen)
   // {  
-  //   AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),buflen, buffer);
+  //   ALOG_TST(PSTR("buffer[%d]=\"%s\""),buflen, buffer);
   //   // Read bytes in
   //   for(int ii=0;ii<buflen;ii++)
   //   {
@@ -1547,7 +1547,7 @@ void mGPS_Serial::EveryLoop_InputMethod_PollingSerial_BytesFromBuffer()
   // //if any data found
   // if(gps_receive_buffer.bufused)
   // {  
-  //   // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
+  //   // ALOG_TST(PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
   //   // Read bytes in
   //   for(int ii=0;ii<gps_receive_buffer.bufused;ii++)
   //   {
@@ -1733,13 +1733,13 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
   if(jtok = obj["GPS"].getObject()["Parser"])
   {
     started_successfully = jtok.getInt();
-    AddLog(LOG_LEVEL_INFO, PSTR("started_successfully %d"), started_successfully);
+    ALOG_INF(PSTR("started_successfully %d"), started_successfully);
   }
 
 
   if(jtok = obj["GPS"].getObject()["NMEA"].getObject()["SetRateAll"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("NMEA-SetRateAll"));
+    ALOG_INF(PSTR("NMEA-SetRateAll"));
 
     rate = jtok.getInt();
 
@@ -1752,7 +1752,7 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["GPS"].getObject()["UBX"].getObject()["SetRateAll"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("UBX-SetRateAll"));
+    ALOG_INF(PSTR("UBX-SetRateAll"));
 
     rate = jtok.getInt();
 
@@ -1791,7 +1791,7 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["uGPS"].getObject()["Call"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("uGPS-Call"));
+    ALOG_INF(PSTR("uGPS-Call"));
 
     uint8_t commands = jtok.getInt();
 
@@ -1800,7 +1800,7 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
   }
   if(jtok = obj["uGPS"].getObject()["Test1"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("uGPS-test1"));
+    ALOG_INF(PSTR("uGPS-test1"));
 
     uint8_t commands = jtok.getInt();
 
@@ -1811,7 +1811,7 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["uGPS"].getObject()["Command"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("uGPS-Test1"));
+    ALOG_INF(PSTR("uGPS-Test1"));
 
     uint8_t commands = jtok.getInt();
 
@@ -1833,7 +1833,7 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["GPS"].getObject()["UBX_Enabled"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("uGPS-Test1"));
+    ALOG_INF(PSTR("uGPS-Test1"));
 
     uint8_t commands = jtok.getInt();
     
@@ -1860,7 +1860,7 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["GPS"].getObject()["NMEA_Enabled"])
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("NMEA_Enabled"));
+    ALOG_INF(PSTR("NMEA_Enabled"));
 
     rate = jtok.getInt();
     
@@ -2323,10 +2323,10 @@ void mGPS_Serial::MQTTHandler_Init(){
   struct handler<mGPS_Serial>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -2334,10 +2334,10 @@ void mGPS_Serial::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_debug; //also ifchanged together
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR;
@@ -2345,10 +2345,10 @@ void mGPS_Serial::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_micro; //also ifchanged together
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR;
@@ -2356,10 +2356,10 @@ void mGPS_Serial::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_all; //also ifchanged together
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL_CTR;
@@ -2367,10 +2367,10 @@ void mGPS_Serial::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_gpspacket_minimal_teleperiod; //also ifchanged together
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
@@ -2379,10 +2379,10 @@ void mGPS_Serial::MQTTHandler_Init(){
 
   // All sensor readings I had on pic32
   ptr = &mqtthandler_gpspacket_required;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR;
@@ -2408,9 +2408,9 @@ void mGPS_Serial::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   // }
 }
 

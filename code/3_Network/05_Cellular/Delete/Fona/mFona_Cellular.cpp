@@ -39,10 +39,10 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -53,13 +53,13 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
 
     break;
-    case FUNC_EVERY_FIVE_SECOND:{
+    case TASK_EVERY_FIVE_SECOND:{
 
       ALOG_INF( PSTR("PS:%d"), digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) );
       ALOG_INF( PSTR("RI:%d"), digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)) );
@@ -73,30 +73,30 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
 
     }
     break;
-    case FUNC_EVERY_MINUTE:{
+    case TASK_EVERY_MINUTE:{
        SubTask_CheckConnection();
     }
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
@@ -110,16 +110,16 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
 
 //   if (PinUsed(GPIO_IRSEND) || PinUsed(GPIO_IRRECV)) {
 //     switch (function) {
-//       case FUNC_PRE_INIT:
+//       case TASK_PRE_INIT:
 //         break;
-//       case FUNC_EVERY_50_MSECOND:
+//       case TASK_EVERY_50_MSECOND:
 // #ifdef USE_IR_RECEIVE
 //         if (PinUsed(GPIO_IRRECV)) {
 //           IrReceiveCheck();  // check if there's anything on IR side
 //         }
 // #endif  // USE_IR_RECEIVE
 //         break;
-//       case FUNC_COMMAND:
+//       case TASK_COMMAND:
 //         if (PinUsed(GPIO_IRSEND)) {
 //           result = DecodeCommand(kIrRemoteCommands, IrRemoteCommand);
 //         }
@@ -1067,7 +1067,7 @@ void mFona_Cellular::parse_JSONCommand(JsonParserObject obj)
 
 		// JBI->Start();
 
-		// pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		// pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		// bool ready_to_send = JBI->End();
 
@@ -1082,7 +1082,7 @@ void mFona_Cellular::parse_JSONCommand(JsonParserObject obj)
 
 		// if(ready_to_send)
 		// {			
-    	// AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
+    	// ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
 		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		// }
 
@@ -1280,7 +1280,7 @@ void mFona_Cellular::MQTTHandler_Init()
   struct handler<mFona_Cellular>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
@@ -1290,7 +1290,7 @@ void mFona_Cellular::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mFona_Cellular::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
@@ -1319,9 +1319,9 @@ void mFona_Cellular::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

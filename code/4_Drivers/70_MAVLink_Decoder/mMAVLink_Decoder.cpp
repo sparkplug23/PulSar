@@ -12,10 +12,10 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -26,10 +26,10 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
       Maintain_Connection();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       // ALOG_INF(PSTR("Battery %d%%"), pkt.battery_status.data.battery_remaining);
       
 
@@ -43,20 +43,20 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -1802,7 +1802,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   struct handler<mMAVLink_Decoder>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1813,7 +1813,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_overview_01;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1824,7 +1824,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_overview_02;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1838,7 +1838,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 163,AHRS
   ptr = &mqtthandler_mavlink_packet__ahrs;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1850,7 +1850,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 178,AHRS2
   ptr = &mqtthandler_mavlink_packet__ahrs2;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1862,7 +1862,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 30,ATTITUDE
   ptr = &mqtthandler_mavlink_packet__attitude;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1874,7 +1874,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 183,AUTOPILOT_VERSION_REQUEST
   ptr = &mqtthandler_mavlink_packet__autopilot_version;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1886,7 +1886,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   //147,BATTERY_STATUS
   ptr = &mqtthandler_mavlink_packet__battery_status;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1898,7 +1898,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 193,EKF_STATUS_REPORT
   ptr = &mqtthandler_mavlink_packet__ekf_status_report;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1910,7 +1910,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 162,FENCE_STATUS
   ptr = &mqtthandler_mavlink_packet__fence_status;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1922,7 +1922,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 200,GIMBAL_REPORT
   ptr = &mqtthandler_mavlink_packet__gimbal_report;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1934,7 +1934,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 214,GIMBAL_TORQUE_CMD_REPORT
   ptr = &mqtthandler_mavlink_packet__gimbal_torque_cmd_report;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1946,7 +1946,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 33,GLOBAL_POSITION_INT
   ptr = &mqtthandler_mavlink_packet__global_position_int;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1958,7 +1958,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 215,GOPRO_HEARTBEAT
   ptr = &mqtthandler_mavlink_packet__gopro_heartbeat;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1970,7 +1970,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 24,GPS_RAW_INT
   ptr = &mqtthandler_mavlink_packet__gps_raw_int;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1982,7 +1982,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 0,HEARTBEAT
   ptr = &mqtthandler_mavlink_packet__heartbeat;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1994,7 +1994,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 0,HEARTBEAT
   ptr = &mqtthandler_mavlink_packet__home_position;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2006,7 +2006,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 165,HWSTATUS
   ptr = &mqtthandler_mavlink_packet__hwstatus;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2018,7 +2018,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 165,HWSTATUS
   ptr = &mqtthandler_mavlink_packet__local_position_ned;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2030,7 +2030,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 152,MEMINFO
   ptr = &mqtthandler_mavlink_packet__meminfo;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2042,7 +2042,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 42,MISSION_CURRENT
   ptr = &mqtthandler_mavlink_packet__mission_current;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2054,7 +2054,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 158,MOUNT_STATUS
   ptr = &mqtthandler_mavlink_packet__mount_status;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2066,7 +2066,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 62,NAV_CONTROLLER_OUTPUT
   ptr = &mqtthandler_mavlink_packet__nav_controller_output;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2078,7 +2078,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 22,PARAM_VALUE
   ptr = &mqtthandler_mavlink_packet__param_value;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2090,7 +2090,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 125,POWER_STATUS
   ptr = &mqtthandler_mavlink_packet__power_status;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2102,7 +2102,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 27,RAW_IMU
   ptr = &mqtthandler_mavlink_packet__raw_imu;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2114,7 +2114,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 65,RC_CHANNELS
   ptr = &mqtthandler_mavlink_packet__rc_channels;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2126,7 +2126,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 35,RC_CHANNELS_RAW
   ptr = &mqtthandler_mavlink_packet__rc_channels_raw;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2138,7 +2138,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 34,RC_CHANNELS_SCALED
   ptr = &mqtthandler_mavlink_packet__rc_channels_scaled;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2150,7 +2150,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 66,REQUEST_DATA_STREAM
   ptr = &mqtthandler_mavlink_packet__request_data_stream;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2162,7 +2162,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 116,SCALED_IMU2
   ptr = &mqtthandler_mavlink_packet__scaled_imu2;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2174,7 +2174,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 129,SCALED_IMU3
   ptr = &mqtthandler_mavlink_packet__scaled_imu3;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2186,7 +2186,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 29,SCALED_PRESSURE
   ptr = &mqtthandler_mavlink_packet__scaled_pressure;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2198,7 +2198,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 137,SCALED_PRESSURE2
   ptr = &mqtthandler_mavlink_packet__scaled_pressure2;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2210,7 +2210,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 150,SENSOR_OFFSETS
   ptr = &mqtthandler_mavlink_packet__sensor_offsets;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2222,7 +2222,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 36,SERVO_OUTPUT_RAW
   ptr = &mqtthandler_mavlink_packet__servo_output_raw;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2234,7 +2234,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 253,STATUSTEXT
   ptr = &mqtthandler_mavlink_packet__statustext;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2246,7 +2246,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 60,SYS_STATUS
   ptr = &mqtthandler_mavlink_packet__sys_status;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2258,7 +2258,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 2,SYSTEM_TIME
   ptr = &mqtthandler_mavlink_packet__system_time;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2270,7 +2270,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 111,TIMESYNC
   ptr = &mqtthandler_mavlink_packet__timesync;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2282,7 +2282,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 
   ptr = &mqtthandler_mavlink_packet__terrain_report;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2294,7 +2294,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // 74,VFR_HUD
   ptr = &mqtthandler_mavlink_packet__vfr_hud;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2306,7 +2306,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   
   // 241,VIBRATION
   ptr = &mqtthandler_mavlink_packet__vibration;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2318,7 +2318,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   // debug_receive_stats
   ptr = &mqtthandler_mavlink_packet__debug_receive_stats;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2349,9 +2349,9 @@ void mMAVLink_Decoder::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

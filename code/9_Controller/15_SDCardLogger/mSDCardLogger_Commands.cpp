@@ -75,7 +75,7 @@
 //     sprintf(rule_name, "RelayEnabled%d", ii);
       
 // 		if(jtok = obj[rule_name]){
-// 			AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
+// 			ALOG_INF(PSTR("MATCHED %s"),rule_name);
 // 			SubCommandSet_EnabledTime(jtok.getObject(), ii);
 // 		}
 
@@ -125,7 +125,7 @@ void mSDCardLogger::CommandSet_SDCard_OpenClose_Toggle()
 
   sdcard_status.isopened ^= 1;
 
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_SDCard_OpenClose_Toggle %d"),sdcard_status.isopened);
+  ALOG_TST(PSTR("CommandSet_SDCard_OpenClose_Toggle %d"),sdcard_status.isopened);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;

@@ -80,7 +80,7 @@ void mAnimatorLight::setUpMatrix() {
         DEBUG_PRINT(F("Reading LED gap from "));
         DEBUG_PRINTLN(fileName);
         // read the array into global JSON buffer
-        if (readObjectFromFile(fileName, nullptr, &doc)) {
+        if (pCONT_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
           // the array is similar to ledmap, except it has only 3 values:
           // -1 ... missing pixel (do not increase pixel count)
           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
@@ -141,7 +141,8 @@ void mAnimatorLight::setUpMatrix() {
       Segment::maxHeight = 1;
       resetSegments2();
     }
-    ALOG_INF(PSTR("Segment::maxHeight2 %d\n\r"), Segment::maxHeight);
+    ALOG_INF(PSTR("Segment::maxHeight %d\n\r"), Segment::maxHeight);
+    ALOG_INF(PSTR("Segment::maxWidth %d\n\r"), Segment::maxWidth);
       DEBUG_LINE_HERE;
   }
 // #else
@@ -169,15 +170,19 @@ void
 mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 {
 
-  // ALOG_INF(PSTR("Segment::setPixelColorXY(%d,%d|%d,%d,%d)"), x, y, R(col), G(col), B(col));
-
-  DEBUG_LINE_HERE;
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("Segment::setPixelColorXY(%d,%d|%d,%d,%d)"), x, y, R(col), G(col), B(col));
+  #endif
 
   if (!isActive()) return; // not active
 
   // DEBUG_LINE_HERE;
-  if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) return;  // if pixel would fall out of virtual segment just exit
-
+  if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
+{
+  
+//  ALOG_INF(PSTR("out of segment")); 
+  return;  // if pixel would fall out of virtual segment just exit
+}
 
   // DEBUG_LINE_HERE;
   uint8_t _bri_t = currentBri();
@@ -228,11 +233,12 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 //       // if blending modes, blend with underlying pixel
 //       if (_modeBlend) tmpCol = color_blend(getPixelColorXY(start + xX, startY + yY), col, 0xFFFFU - progress(), true);
 // #endif
-  DEBUG_LINE_HERE;
+      #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+      ALOG_INF(PSTR("--------setPixelColorXY %d, %d, %d, %d, %d -- w%d h%d"), start + xX, startY + yY, R(tmpCol), G(tmpCol), B(tmpCol), width(), height());
+      #endif
 
       pCONT_lAni->setPixelColorXY(start + xX, startY + yY, tmpCol);
 
-  DEBUG_LINE_HERE;
       if (mirror) { //set the corresponding horizontally mirrored pixel
         if (transpose) pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol);
         else           pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);

@@ -26,12 +26,12 @@ return;
       (time_minutes_on<FAILSAFE_MINUTES_ERROR)
     ){
       // snprintf(tmpctr, sizeof(tmpctr), "Warning, %s heating has been on for a long time of %d minutes",GetDeviceNameLongbyIDCtr(device_id),heating_device_relays[device_id].time_minutes_on);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
+      // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
       fMessageToSend = true;
     }else 
     if(time_minutes_on>FAILSAFE_MINUTES_ERROR){
       // snprintf(tmpctr, sizeof(tmpctr), "Error, %s heating has been on for too long. Turning off now.",GetDeviceNameLongbyIDCtr(device_id));
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
+      // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
       fMessageToSend = true;
     }
 

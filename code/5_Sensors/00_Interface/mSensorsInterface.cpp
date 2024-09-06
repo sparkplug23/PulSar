@@ -10,10 +10,10 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -24,10 +24,10 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_SECOND:{
+    case TASK_EVERY_SECOND:{
       // Serial.println(sizeof(sensors_reading_t));
       // Serial.println(pCONT_db18->GetSensorReading());
       // Serial.println(pCONT_dht->GetSensorReading());
@@ -39,7 +39,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       {
         // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
         ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
-        pCONT->Tasker_Interface(FUNC_SENSOR_SHOW_LATEST_LOGGED_ID);
+        pCONT->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
         rt.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
       }
       
@@ -54,7 +54,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //     pmod->GetSensorReading(&val, sensor_id);
       //     if(val.type[0])
       //     {
-      //       AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
+      //       ALOG_TST(PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
       //     }
       //   }
       // }
@@ -65,17 +65,17 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case FUNC_EVENT_MOTION_STARTED_ID:
+    case TASK_EVENT_MOTION_STARTED_ID:
       CommandEvent_Motion(1);
     break;
-    case FUNC_EVENT_MOTION_ENDED_ID:
+    case TASK_EVENT_MOTION_ENDED_ID:
       CommandEvent_Motion(0);
     break; 
     #ifdef ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES    
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       MQTT_Report_Event_Button();
     break;
     #endif
@@ -83,7 +83,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    // case FUNC_EVENT_SET_POWER_ID:
+    // case TASK_EVENT_SET_POWER_ID:
     //   RulesEvent_Set_Power();
     // break;
     #endif// USE_MODULE_CORE_RULES
@@ -91,13 +91,13 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -206,7 +206,7 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 	{
 		JBI->Start();
 
-		pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		bool ready_to_send = JBI->End();
 
@@ -221,7 +221,7 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 
 		if(ready_to_send)
 		{			
-    	AddLog(LOG_LEVEL_TEST, PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
+    	ALOG_TST(PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
 			pCONT_mqtt->brokers[0]->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		}
 
@@ -302,18 +302,22 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
             if(unified_sensor_reporting_invalid_reading_timeout_seconds != 0) // Check active
             {
-              uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - val.timestamp;
-              if(sensor_elapsed_time) // If positive
+                              
+              if(val.timestamp)
               {
-                if(sensor_elapsed_time > unified_sensor_reporting_invalid_reading_timeout_seconds)
+                uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - val.timestamp;
+                if(sensor_elapsed_time) // If positive and NOT val.timestamp set to 0 as skipped
                 {
-                  #ifdef ENABLE_DEVFEATURE_UNIFIED_REPORTING_SKIPPING_INVALID_TIMEOUT_READINGS
-                  ALOG_WRN(PSTR("sensor time invalid %d > %d"), sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
-                  continue; // skip the result in this loop
-                  #else
-                  DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-                  ALOG_WRN(PSTR("Age needs adding to module %s %d %d"), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
-                  #endif
+                  if(sensor_elapsed_time > unified_sensor_reporting_invalid_reading_timeout_seconds)
+                  {
+                    #ifdef ENABLE_DEVFEATURE_UNIFIED_REPORTING_SKIPPING_INVALID_TIMEOUT_READINGS
+                    ALOG_WRN(PSTR("sensor time invalid %d > %d"), sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                    continue; // skip the result in this loop
+                    #else
+                    DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
+                    ALOG_WRN(PSTR("Age needs adding to module %S %s %d %d"), pmod->GetModuleName(), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                    #endif
+                  }
                 }
               }
             }
@@ -1275,6 +1279,37 @@ void mSensorsInterface::HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t
 
 #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
+float mSensorsInterface::ConvertTemp(float c)
+{
+  float result = c;
+  // if (!isnan(c) && Settings.flag_system.temperature_conversion) {
+  //   result = c * 1.8 + 32;  // Fahrenheit
+  // }
+  return result;
+}
+
+
+char mSensorsInterface::TempUnit(void)
+{
+  return (pCONT_set->Settings.flag_system.temperature_conversion) ? 'F' : 'C';
+}
+
+
+float mSensorsInterface::ConvertPressure(float p)
+{
+  // float result = p;
+
+  // if (!isnan(p) && Settings.flag_system.pressure_conversion) {
+  //   result = p * 0.75006375541921;  // mmHg
+  // }
+  // return result;
+}
+
+String mSensorsInterface::PressureUnit(void)
+{
+  // return (Settings.flag_system.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
+}
+
 
 uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool json_appending){
 
@@ -1330,10 +1365,10 @@ void mSensorsInterface::MQTTHandler_Init(){
   struct handler<mSensorsInterface>* ptr;
  
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1341,10 +1376,10 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
@@ -1352,10 +1387,10 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
@@ -1363,10 +1398,10 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_temperature_colours;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
@@ -1375,10 +1410,10 @@ void mSensorsInterface::MQTTHandler_Init(){
 
   //motion events
   ptr = &mqtthandler_motion_event_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR;
@@ -1405,9 +1440,9 @@ void mSensorsInterface::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

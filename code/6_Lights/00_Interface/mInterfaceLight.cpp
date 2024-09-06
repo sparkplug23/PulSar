@@ -9,16 +9,16 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   switch(function){
-    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+    case TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
       Template_Load();
     break;
-    case FUNC_POINTER_INIT:
+    case TASK_POINTER_INIT:
 
     break;
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -29,34 +29,34 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       EverySecond_AutoOff();
     break;
     /************
      * STORAGE SECTION * 
     *******************/    
-    case FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
+    case TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
       Template_Load_DefaultConfig();
     break;
     #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
     #endif
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * TRIGGERS SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
+    case TASK_EVENT_SET_POWER_ID:
       RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
@@ -64,23 +64,23 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
      * WEB SECTION * 
     *******************/   
-    case FUNC_WEB_ADD_HANDLER:    
+    case TASK_WEB_ADD_HANDLER:    
       #ifdef USE_MODULE_NETWORK_WEBSERVER
       // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
       #endif
@@ -108,7 +108,7 @@ void mInterfaceLight::EverySecond_AutoOff()
   if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
     // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
+    ALOG_INF(PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
     #endif       
     
     CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
@@ -119,7 +119,7 @@ void mInterfaceLight::EverySecond_AutoOff()
   if(auto_off_settings.time_decounter_secs>1){ //if =1 then turn off and clear to 0
     auto_off_settings.time_decounter_secs--; //decrease    
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs=%d dec"), auto_off_settings.time_decounter_secs);
+    ALOG_INF(PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs=%d dec"), auto_off_settings.time_decounter_secs);
     #endif
   }
 
@@ -170,7 +170,7 @@ void mInterfaceLight::Template_Load()
 
       // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-      pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+      pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
       ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
       
@@ -209,7 +209,7 @@ void mInterfaceLight::Template_Load()
 
     // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
 
@@ -234,7 +234,7 @@ void mInterfaceLight::Template_Load()
 
     // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif // USE_LIGHTING_TEMPLATE_ANOTHER
@@ -258,8 +258,8 @@ void mInterfaceLight::Init(void)
 {
   
   pCONT_set->Settings.pwm_range = PWM_RANGE;
-  pCONT_set->Settings.light_settings.light_fade = 1;
-  pCONT_set->Settings.light_settings.light_speed = 5*2;
+  // pCONT_set->Settings.light_settings.light_fade = 1;
+  // pCONT_set->Settings.light_settings.light_speed = 5*2;
   pCONT_set->runtime.power = 1;
 
   auto_off_settings.time_decounter_secs = 0;
@@ -306,7 +306,7 @@ void mInterfaceLight::Template_Load_DefaultConfig()
 
   ALOG_DBM( PSTR("LIGHTING_TEMPLATE_DEFAULT" " READ = \"%s\""), data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
 
@@ -597,11 +597,11 @@ uint8_t mInterfaceLight::ledGamma(uint8_t v) {
 // Just apply basic Gamma to each channel
 void mInterfaceLight::calcGammaMultiChannels(uint16_t cur_col_10[5]) {
   // Apply gamma correction for 8 and 10 bits resolutions, if needed
-  if (pCONT_set->Settings.light_settings.light_correction) {
+  // if (pCONT_set->Settings.light_settings.light_correction) {
     for (uint32_t i = 0; i < 5; i++) {
       cur_col_10[i] = ledGamma10_10(cur_col_10[i]);
     }
-  }
+  // }
 }
 
 void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
@@ -659,7 +659,7 @@ void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
 }
 
 bool mInterfaceLight::isChannelGammaCorrected(uint32_t channel) {
-  if (!pCONT_set->Settings.light_settings.light_correction) { return false; }   // Gamma correction not activated
+  // if (!pCONT_set->Settings.light_settings.light_correction) { return false; }   // Gamma correction not activated
   // if (channel >= pCONT_lAni->subtype) { return false; }     // Out of range
 #ifdef ESP8266
 //   if (
@@ -704,14 +704,14 @@ bool mInterfaceLight::CommandGet_LightPowerState()
 void mInterfaceLight::RulesEvent_Set_Power()
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+  ALOG_TST(PSTR("MATCHED RulesEvent_Set_Power"));
 
   uint8_t index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
   uint8_t state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
 
   bool get_state = CommandGet_LightPowerState(); 
 
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandGet_LightPowerState() = %d"), get_state);
+  ALOG_TST(PSTR("CommandGet_LightPowerState() = %d"), get_state);
 
   // get state
   ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());
@@ -1163,7 +1163,7 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
   setBriCT_Global(brt_new);
 
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
+  // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1183,7 +1183,7 @@ void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_
   _briRGB_Global = bri;
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
+  // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1199,7 +1199,7 @@ void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_
   pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true; 
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
+  // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1222,7 +1222,7 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_level, bool json_ap
   
   JBI->Start();
 
-  JBI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
+  // JBI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
 
   // // JBI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
@@ -1396,10 +1396,10 @@ void mInterfaceLight::MQTTHandler_Init()
   struct handler<mInterfaceLight>* ptr;  
 
   ptr = &mqtthandler__settings__teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1407,10 +1407,10 @@ void mInterfaceLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler__state__ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
@@ -1419,7 +1419,7 @@ void mInterfaceLight::MQTTHandler_Init()
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
   ptr = &mqtthandler__debug_module_config__teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1433,7 +1433,7 @@ void mInterfaceLight::MQTTHandler_Init()
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
   ptr = &mqtthandler__debug_bus_config__teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1464,9 +1464,9 @@ void mInterfaceLight::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

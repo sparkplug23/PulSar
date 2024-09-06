@@ -129,10 +129,10 @@ void ILI9488::spi_lcd_mode_init(void) {
 	//bit8 of PERIPHS_IO_MUX should be cleared when SPI clock doesn't equal CPU clock
 
 	WRITE_PERI_REG(PERIPHS_IO_MUX, 0x105); //clear bit9
-		//PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, 2);//configure miso to spi mode
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, 2);//configure mosi to spi mode
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTMS_U, 2);//configure sclk to spi mode
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, 2);//configure cs to spi mode
+		//PIN_TASK_SELECT(PERIPHS_IO_MUX_MTDI_U, 2);//configure miso to spi mode
+	PIN_TASK_SELECT(PERIPHS_IO_MUX_MTCK_U, 2);//configure mosi to spi mode
+	PIN_TASK_SELECT(PERIPHS_IO_MUX_MTMS_U, 2);//configure sclk to spi mode
+	PIN_TASK_SELECT(PERIPHS_IO_MUX_MTDO_U, 2);//configure cs to spi mode
 
 // the current implementation leaves about 1 us between transfers ????
 // due to lack of documentation i could not find the reason

@@ -33,7 +33,7 @@ void mInternalClock::parse_JSONCommand(JsonParserObject obj){
     }      
     SetFanSpeed(speed, false);
     AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+    ALOG_INF(PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
   }
   

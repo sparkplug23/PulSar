@@ -2,10 +2,7 @@
 #ifndef _MSUPPORT_H_
 #define _MSUPPORT_H_
 
-#define D_UNIQUE_MODULE_CORE_SUPPORT_ID ((2*1000)+6)
-
-
-
+#define D_UNIQUE_MODULE_CORE_SUPPORT_ID 2006 // ((2*1000)+6)
 
 /*********************************************************************************************
  * Watchdog related
@@ -177,6 +174,11 @@ bool CheckAndClearFlag(T* flag){
 }
 
 
+template<typename A, typename B, typename C>
+A safeDivideWithDefault(A original_number, B divisor, C default_when_zero) {
+  return (divisor != 0) ? original_number/divisor : default_when_zero;
+}
+
 
 template<typename T>
 T min3(T a, T b, T c) {
@@ -265,7 +267,7 @@ T GetRandomSaturationVariation(T mean, T standard_deviation, T constrained_min =
     result = constrain(result, constrained_min, constrained_max);
   }
 
-  // AddLog(LOG_LEVEL_INFO, PSTR("result=%d"),result);
+  // ALOG_INF(PSTR("result=%d"),result);
 
   return result; 
 
@@ -305,6 +307,24 @@ T ModifyStateNumberIfToggled(T* command_state, U check_state){
 }
 
 
+#include <type_traits>  // For std::is_signed
+template <typename T>
+static uint8_t NumDigits(T x)
+{
+  static_assert(std::is_integral<T>::value, "NumDigits only works with integral types");
+
+  if (std::is_signed<T>::value && x < 0) {
+      x = -x;  // Handle negative values for signed types
+  }
+
+  uint8_t digits = 1;
+  while (x >= 10) {
+      x /= 10;
+      digits++;
+  }
+  return digits;
+}
+
 
 // Return new state
 template <typename T, typename U>
@@ -327,41 +347,7 @@ T ConvertStateNumberIfToggled(T command_state, U check_state){
   return command_state; // return new state
 }
 
-
-
-
 extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack, uint32_t stack_end);
-
-/*********************************************************************************************\
- * Watchdog extension (https://github.com/esp8266/Arduino/issues/1532)
-\*********************************************************************************************/
-
-// // Global functions
-// void AppendJSON_Start();
-
-// template<typename KEY, typename VALUE>
-// void AppendJSON_Value(KEY key, VALUE value);
-
-// class mTaskerManager;
-    
-// template<typename KEY, typename VALUE>
-// void AppendJSON_Value(KEY key, VALUE value)
-// // template<typename VALUE>
-// // void mSupport::AppendJSON_Value(const char* key, VALUE value)
-// {
-
-  
-//   char* buff = data_buffer.payload.ctr;
-//   uint16_t* len = &data_buffer.payload.len;
-
-//   *len = sprintf(&buff[*len],"%s","AppendJSON_Value");
-
-//   // va_list arg;
-//   // va_start(arg, formatP);
-//   // *length += vsnprintf_P(&buffer[*length], DATA_BUFFER_PAYLOAD_MAX_LENGTH, formatP, arg);
-//   // va_end(arg);
-//   // return;
-// }
 
 extern uint32_t ResetReason_g(void);
 
@@ -377,28 +363,13 @@ extern void SafeMode_CellularConnectionAndSendLocation();
 #endif // ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 
 
-    const uint32_t crash_magic = 0x53415400;   // Stack trace magic number (TASx)
-    const uint32_t crash_rtc_offset = 32;      // Offset in RTC memory skipping OTA used block
-    const uint32_t crash_dump_max_len = 31;    // Dump only 31 call addresses to satisfy max JSON length of about 600 characters
-
+const uint32_t crash_magic = 0x53415400;   // Stack trace magic number (TASx)
+const uint32_t crash_rtc_offset = 32;      // Offset in RTC memory skipping OTA used block
+const uint32_t crash_dump_max_len = 31;    // Dump only 31 call addresses to satisfy max JSON length of about 600 characters
 
 #include <Ticker.h>
 
-
-#ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
-enum HARDWARE_STATUS_IMPORTANCE_IDS{
-  // No risk to remain on
-  HARDWARE_STATUS_IMPORTANCE_LOW_ID=0,
-  // RGB leds, not high voltage
-  HARDWARE_STATUS_IMPORTANCE_MEDIUM_ID,
-  // Plugs/sockets, mains running
-  HARDWARE_STATUS_IMPORTANCE_HIGHEST_ID,
-};
-#endif // ENABLE_DEVFEATURE_HARDWARE_STATUS
-
-
 #include "1_TaskerManager/mTaskerInterface.h"
-
 
 class mSupport :
   public mTaskerInterface
@@ -412,19 +383,12 @@ class mSupport :
     static constexpr const char* PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSupport);
-    };
+    uint16_t GetClassSize(){      return sizeof(mSupport);    };
     #endif
 
     void CheckResetConditions();
-    void Handle_OTA_URLS();
-    void Handle_Check_Power_Saving();
 
-
-    // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
     #ifdef USE_ARDUINO_OTA
       /*********************************************************************************************\
        * Allow updating via the Arduino OTA-protocol.
@@ -440,8 +404,6 @@ class mSupport :
       void ArduinoOTAInit(void);
       void ArduinoOtaLoop(void);
     #endif // USE_ARDUINO_OTA
-    // #endif // ENABLE_DEVFEATURE_OTA_METHOD
-
 
 
     /****
@@ -475,231 +437,76 @@ class mSupport :
       }
     };
 
-    // JsonObject& jsonobject_parsing = nullptr;
-
-    float FastPrecisePowf(const float x, const float y);
-
-
-    #ifdef USE_I2C
-    const uint8_t I2C_RETRY_COUNTER = 3;
-    uint32_t i2c_active[4] = { 0 };
-    uint32_t i2c_buffer = 0;
-    TwoWire* wire = nullptr;
-    bool I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size);
-    bool I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg);
-    bool I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg);
-    bool I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg);
-    bool I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg);
-    bool I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg);
-    bool I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg);
-    uint8_t I2cRead8(uint8_t addr, uint8_t reg);
-    uint16_t I2cRead16(uint8_t addr, uint8_t reg);
-    int16_t I2cReadS16(uint8_t addr, uint8_t reg);
-    uint16_t I2cRead16LE(uint8_t addr, uint8_t reg);
-    int16_t I2cReadS16_LE(uint8_t addr, uint8_t reg);
-    int32_t I2cRead24(uint8_t addr, uint8_t reg);
-    bool I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size);
-    bool I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val);
-    bool I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val);
-    int8_t I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
-    int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
-    void I2cScan(char *devs, unsigned int devs_len);
-    bool I2cDevice(uint8_t addr);
-    bool I2cDevice_IsConnected(uint8_t addr) ;
-    void I2cResetActive(uint32_t addr, uint32_t count = 1);
-    void I2cSetActive(uint32_t addr, uint32_t count = 1);
-    void I2cSetActiveFound(uint32_t addr, const char *types);
-    bool I2cActive(uint32_t addr);
-    bool I2cSetDevice(uint32_t addr);
-    bool I2cEnabled(uint32_t i2c_index);
-    void Debug_I2CScan_To_Serial();
-    #endif // USE_I2C
-
-
-    char* GetState_Name_by_ID(uint8_t id, char* buffer, uint8_t buflen);
-
-
-
-
-
-    IPAddress syslog_host_addr;      // Syslog host IP address
-    uint32_t syslog_host_hash = 0;   // Syslog host name hash
-
-    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
-    // uint8_t GetRandomSaturationVariation(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
-
-
-    // uint32_t state_100msecond,state_250msecond;
-
-    Ticker tickerOSWatch;
-
     void parse_JSONCommand(JsonParserObject obj);
 
-    // Randomise array (aka std lib)
-    template<typename DATA, typename LENGTH>
-    void ArrayRandomise(DATA* data, LENGTH length){
+    void AppendDList(char* buffer, const char* to_add);
+    void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
 
-      //duplicate original array
-      // DATA data_original[length];
-      // memcpy(data_original,data,sizeof(DATA)*length);
-
-      //
-  // std::array<int,5> foo {1,2,3,4,5};
-
-   
-  //     std::shuffle(foo.begin(),array.end(),std::default_random_engine(analogRead(0)));
-
-
-
-
-    }
-
+    float CharToFloat(const char *str);
+    char* ReplaceChar(char* p, char find, char replace) ;
+    char* ReplaceCommaWithDot(char* p) ;
     
-    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
-    #define HARDWARE_STATUS_MAX_LENGTH 200
-    struct STATUSHARDWARE{
-      //make function that appends pretty simple message
-      char ctr[HARDWARE_STATUS_MAX_LENGTH];
-      uint8_t len = 0;
-      uint8_t importance = 0; //0 low, 1 med, 2 high
-    }hardwarestatus;
-    void ConstructCtr_HardwareStatus();
-    #endif // ENABLE_DEVFEATURE_HARDWARE_STATUS
-
-
-char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack);
-
-
-bool JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint8_t ischanged = false);
-
-void AppendDList(char* buffer, const char* to_add);
-void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
-int GetDListIDbyNameCtr_P(char* destination, size_t destination_size, const char* needle, const char* haystack);
-int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* needle, const char* haystack);
-
-
-
-    uint32_t tSaved_SlowAllTemplatesOnSerial;
-    void SlowAllTemplatesOnSerial();
-
-
     struct LOOP_PERFORMANCE{
       uint32_t loop_counter=0;
       uint32_t cycles_per_sec=0;
       uint32_t tSaved;
     }activity;
-
-    // A shared temporary/one-use buffer used as conversion helpers
-    #define GLOBAL_BUFFER_LENGTH 100
-    char global_buffer[GLOBAL_BUFFER_LENGTH];
-
-
-    // const uint32_t OSWATCH_RESET_TIME = 30;
-
-    // // static unsigned long oswatch_last_loop_time;
-    // uint32_t tSaved_OSWatchLoop = millis();
-    // uint8_t oswatch_blocked_loop = 0;
-
-    // #ifndef USE_WS2812_DMA  // Collides with Neopixelbus but solves exception
-    // //void OsWatchTicker() ICACHE_RAM_ATTR;
-    // #endif  // USE_WS2812_DMA
-
-    // #ifdef USE_KNX
-    // bool knx_started = false;
-    // #endif  // USE_KNX
-
-    char* p_snprintf(char* buffer, uint16_t buflen, const char* formatP, ...);
     
-
-    // uint8_t fSendTemplatesOnce = true;
-
-    // void OsWatchInit(void);
-    // void OsWatchLoop(void);
+    uint32_t ResetReason(void);
     String GetResetReason(void);
     const char* GetResetReason(char* buffer, uint8_t buflen);
 
-    bool OsWatchBlockedLoop(void);
     size_t strchrspn(const char *str1, int character);
-    char* subStr(char* dest, char* str, const char *delim, int index);
-    float CharToFloat(const char *str);
-    double CharToDouble(const char *str);
-    int TextToInt(char *str);
-    // char* ulltoa(unsigned long long value, char *str, int radix);
-    // char* dtostrfd(double number, unsigned char prec, char *s);
     static char* float2CString(float number, unsigned char prec, char *s);
     
-
-
+    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
     char* RemoveSpace(char* p);
     char* TrimSpace(char *p);
     char* RemoveControlCharacter(char* p);
     char* ReplaceChar(char* p, char find, char replace);
-    char* ReplaceCommaWithDot(char* p);
+    char* ReplaceCommaWithDot(char* p);    
     char* Unescape(char* buffer, uint32_t* size);
-
+    #endif
 
     char* LowerCase(char* dest, const char* source);
     char* UpperCase(char* dest, const char* source);
     char* UpperCase_P(char* dest, const char* source);
     char* Trim(char* p);
-    char* NoAlNumToUnderscore(char* dest, const char* source);
-    void SetShortcut(char* str, uint8_t action);
-    uint8_t Shortcut(const char* str);
+
     bool ValidIpAddress(const char* str);
     bool ParseIPv4(uint32_t* addr, const char* str);
+    
+    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
     bool NewerVersion(char* version_str);
-    // char* GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option);
-    // char* GetPowerDevice(char* dest, uint8_t idx, size_t size);
-    float ConvertTemp(float c);
-    char TempUnit(void);
-    float ConvertPressure(float p);
-    String PressureUnit(void);
-    void SetGlobalValues(float temperature, float humidity);
-    void ResetGlobalValues(void);
+    #endif
+    
+    float ModulusRangef(float f, float a, float b);
     double FastPrecisePow(double a, double b);
-    uint32_t SqrtInt(uint32_t num);
-    uint32_t RoundSqrtInt(uint32_t num);
+    float FastPrecisePowf(const float x, const float y);
+    
+    char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack);
     static char* GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack);
     static char* GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack);
+        
+    static int16_t GetCommandID16_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
+    static int16_t GetCommandID16_MultipleSubMatches_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
+
+    int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
     
-    int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id);
-
-
-// Force a float value between two ranges, and adds or substract the range until we fit
-float ModulusRangef(float f, float a, float b);
-
-static bool CheckCommand_P(const char* needle, const char* haystack);
-static int8_t GetCommandID(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
-static int8_t GetCommandID_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
-static int16_t GetCommandID16_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
-static int16_t GetCommandID16_MultipleSubMatches_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
-
-
-  int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
-    
-
-    int8_t GetStateNumber(const char *state_text);
+    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
     void SetSerialBaudrate(int baudrate);
-    void ClaimSerial(void);
     void SerialSendRaw(char *codes);
     uint32_t GetHash(const char *buffer, size_t size);
+    #endif
+
+    void ClaimSerial(void);
     void ShowSource(int source);
-    
+
+    uint16_t WriteBuffer_P(const char* formatP, ...);
     uint16_t WriteBuffer_P(char* buffer, const char* formatP, ...);
     void WriteBuffer_P(char* buffer, uint16_t* length, const char* formatP, ...);
 
-    
-    static uint16_t changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
-                                          uint16_t ito_min, uint16_t ito_max) ;
-
-
-
-
     void CommandSet_Restart(int8_t command);
-
-
-
-    char* GetVersionColour(char* buffer);
 
     void CrashDump_AddJson();
     void CmndCrash(void);
@@ -708,186 +515,51 @@ static int16_t GetCommandID16_MultipleSubMatches_P(const char* needle, const cha
     void CrashDumpClear(void);
     bool CrashFlag(void);
     void CrashDump(void);
-
-
-
-
-    void ExecuteCommand(char *cmnd, int source);
+    
     int Response_P(const char* format, ...);
     int ResponseAppend_P(const char* format, ...);
 
-    uint16_t WriteBuffer_P(const char* formatP, ...);
-
-    // long TimeDifference(unsigned long prev, unsigned long next);
-    // long TimePassedSince(unsigned long timestamp);
-    // bool TimeReachedTimer(unsigned long timer);
-    // void SetNextTimeInterval(unsigned long& timer, const unsigned long step);
-
-    void GetLog(uint8_t idx, char** entry_pp, size_t* len_p);
-
-    // void OverrideModule();
-
-    void DebugFreeMem(void);
-
-    char* GetOtaUrl(char *otaurl, size_t otaurl_size);
     void PerformEverySecond(void);
 
-
-    void MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len);
-
-
-
-void UpdateStatusBlink();
-
-    // timereached_t testtime2;
-
-
+    char* GetState_Name_by_ID(uint8_t id, char* buffer, uint8_t buflen);
+    int8_t GetStateNumber(const char *state_text);
     char* GetStateText(uint8_t state);
 
+    void SleepDelay(uint32_t mseconds);
 
-void SleepDelay(uint32_t mseconds);
-
-    // Add command to 
-    void MQTTCommand_Add(const char* topic, const char* payload); // Write command into mpkt struct and set as waiting
-    void MQTTCommand_Execute(const char* topic, const char* payload); // Write command into mpkt struct and set as waiting
-
-
-
-    uint32_t ResetReason(void);
-
+    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
     void SetPulseTimer(uint32_t index, uint32_t time);
-
     uint32_t GetPulseTimer(uint32_t index);
+    #endif
 
-    int ResponseJsonEnd(void);
-    int ResponseJsonEndEnd(void);
-
-    static bool SetTopicMatch(const char* toSearch, const char* set_topic_path);
-    static bool SetTopicMatch_P(const char* toSearch, const char* set_topic_path);
     static int mSearchCtrIndexOf(const char* toSearch, const char* toFind);
-    static int mSearchNCtrIndexOf(const char* toSearch, int length,const char* toFind);
-    static int NumDigits(int x);
-
     
-template <typename T>
-static uint8_t NumDigitsT(T x)
-{
-    x = abs(x); //remove any negative numbers
-    return (x < 10 ? 1 :
-        (x < 100 ? 2 :
-        (x < 1000 ? 3 :
-        (x < 10000 ? 4 :
-        (x < 100000 ? 5 :
-        (x < 1000000 ? 6 :
-        (x < 10000000 ? 7 :
-        (x < 100000000 ? 8 :
-        (x < 1000000000 ? 9 :
-        10)))))))));
-}
-
-
-
-
-    static void PrintDebugger(char *in, unsigned char length);
-    static int memsearch(const char* dataset, int datasetLength, const char* target, int targetLen);
     static uint16_t NumCtr2Num(char* numctr, uint8_t numberlength);
     static float roundfloat(float in, uint8_t dec);
     static float mapfloat(float x, float in_min, float in_max, float out_min, float out_max);
-    static int16_t findClosetArrayIndex_float(float* array, uint8_t array_len, float desired);
-    static char* strtolower(char *str);
-//    uint8_t WITHINLIMITS(float minv, float var, float maxv);
+        
+    /**
+     * @brief Timing for main loop
+     **/
+    uint32_t tSavedLoop1Sec = millis();
+    uint32_t tSavedLoop50mSec = millis();
+    uint32_t tSavedLoop100mSec = millis();
+    uint32_t tSavedLoop250mSec = millis();
+    uint32_t loop_runtime_millis = millis();
+    uint32_t loop_start_millis = millis();
+    uint32_t loop_delay_temp = millis();
+    uint32_t loops_per_second = millis();
+    uint32_t this_cycle_ratio = millis();
 
+    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
+    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
+    #endif
 
-uint32_t tSavedLoop1Sec = millis();
-uint32_t tSavedLoop50mSec = millis();
-uint32_t tSavedLoop100mSec = millis();
-uint32_t tSavedLoop250mSec = millis();
-uint32_t loop_runtime_millis;
-uint32_t loop_start_millis = millis();
-uint32_t loop_delay_temp = millis();
-uint32_t loops_per_second = millis();
-uint32_t this_cycle_ratio = millis();
-
-//move into timelib
-    static bool TimeReached(uint32_t* tSaved, uint32_t ElapsedTime);
-    static bool TimeElapsed(uint32_t* tSaved, uint32_t ElapsedTime);
-    static bool TimeReachedNonReset(uint32_t* tSaved, uint32_t ElapsedTime);
-    // static bool TimeReached(TIMEREACHED_SAVED* tSaved, uint32_t ElapsedTime);
-    static bool MillisReached(uint32_t* tTarget);
     static int32_t safeDivideInt(int32_t num, int32_t den);
 
-    //random()
-    //random_skewed(low,high,mean_value)
-    //random_skewed(low,high,mean_value,steps) (0,10,4,2) = numbers 0-10, but only in steps of 2, centered around 4
-
-    //static const char* FloatToCStr(float f);
-    // ConvertFloat2Ctr(char* result, float f, )
-    // dtostrfd
-    
-    static int16_t FindNearestValueIndexUInt8(uint8_t* tosearch, uint8_t tosearch_len, uint8_t tofind);
-    static int32_t FindNearestValueIndexUInt16(uint16_t* tosearch, uint16_t tosearch_len, uint16_t tofind);
-
-const char* GetVersionBranchTypeNameByID(uint8_t id);
-char GetVersionBranchTypeCharNameByID(uint8_t id);
-
-void init_FirmwareVersion();
-
-
-// /**
-//  * @defgroup lwip_version Version
-//  * @ingroup lwip
-//  * @{
-//  */
-
-// /** X.x.x: Major version of the stack */
-// #define LWIP_VERSION_MAJOR      2
-// /** x.X.x: Minor version of the stack */
-// #define LWIP_VERSION_MINOR      1
-// /** x.x.X: Revision of the stack */
-// #define LWIP_VERSION_REVISION   2
-// /** For release candidates, this is set to 1..254
-//   * For official releases, this is set to 255 (LWIP_RC_RELEASE)
-//   * For development versions (Git), this is set to 0 (LWIP_RC_DEVELOPMENT) */
-// #define LWIP_VERSION_RC         LWIP_RC_RELEASE
-
-// /** LWIP_VERSION_RC is set to LWIP_RC_RELEASE for official releases */
-// #define LWIP_RC_RELEASE         255
-// /** LWIP_VERSION_RC is set to LWIP_RC_DEVELOPMENT for Git versions */
-// #define LWIP_RC_DEVELOPMENT     0
-
-// #define LWIP_VERSION_IS_RELEASE     (LWIP_VERSION_RC == LWIP_RC_RELEASE)
-// #define LWIP_VERSION_IS_DEVELOPMENT (LWIP_VERSION_RC == LWIP_RC_DEVELOPMENT)
-// #define LWIP_VERSION_IS_RC          ((LWIP_VERSION_RC != LWIP_RC_RELEASE) && (LWIP_VERSION_RC != LWIP_RC_DEVELOPMENT))
-
-// /* Some helper defines to get a version string */
-// #define LWIP_VERSTR2(x) #x
-// #define LWIP_VERSTR(x) LWIP_VERSTR2(x)
-// #if LWIP_VERSION_IS_RELEASE
-//   #define LWIP_VERSION_STRING_SUFFIX ""
-// #elif LWIP_VERSION_IS_DEVELOPMENT
-//   #define LWIP_VERSION_STRING_SUFFIX "d"
-// #else
-//   #define LWIP_VERSION_STRING_SUFFIX "rc" LWIP_VERSTR(LWIP_VERSION_RC)
-// #endif
-
-// /** Provides the version of the stack */
-// #define LWIP_VERSION   ((LWIP_VERSION_MAJOR) << 24   | (LWIP_VERSION_MINOR) << 16 | \
-//                         (LWIP_VERSION_REVISION) << 8 | (LWIP_VERSION_RC))
-// /** Provides the version of the stack as string */
-// #define LWIP_VERSION_STRING     LWIP_VERSTR(LWIP_VERSION_MAJOR) "." LWIP_VERSTR(LWIP_VERSION_MINOR) "." LWIP_VERSTR(LWIP_VERSION_REVISION) LWIP_VERSION_STRING_SUFFIX
-
-// /**
-//  * @}
-//  */
-
-// /* Modules initialization */
-// void lwip_init(void);
+    char GetVersionBranchTypeCharNameByID(uint8_t id);
+    void init_FirmwareVersion();
 
 };
 
-
-
-
-
-#endif  // _SONOFF_H_
-//#endif
+#endif

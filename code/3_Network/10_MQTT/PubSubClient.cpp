@@ -14,16 +14,12 @@ PubSubClient::PubSubClient() {
     setCallback(NULL);
 }
 
-PubSubClient::PubSubClient(Client& client) {
-      Serial.printf("MQTT::PubSubClient 1\n\r"); Serial.flush();
+PubSubClient::PubSubClient(Client& client) 
+{
     this->_state = MQTT_DISCONNECTED;
-      Serial.printf("MQTT::PubSubClient 2\n\r"); Serial.flush();
     setClient(client);
-      Serial.printf("MQTT::PubSubClient 3\n\r"); Serial.flush();
     this->stream = NULL;
-      Serial.printf("MQTT::PubSubClient 4\n\r"); Serial.flush();
 }
-
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {
     this->_state = MQTT_DISCONNECTED;
     setServer(addr, port);
@@ -646,7 +642,7 @@ uint16_t PubSubClient::writeString(const char* string, uint8_t* buf, uint16_t po
 boolean PubSubClient::connected() {
     if (_client == NULL ) {
         this->_state = MQTT_DISCONNECTED;
-    // Serial.println("PubSubClient::connected( A");
+        // Serial.println("MQTT_DISCONNECTED");
         return false;
     }
     if (_client->connected() == 0) {
@@ -655,11 +651,10 @@ boolean PubSubClient::connected() {
         if (lastStateConnected) {
             this->_state = MQTT_CONNECTION_LOST;
         }
-    // Serial.println("PubSubClient::connected( B");
+    // Serial.println("MQTT_CONNECTION_LOST");
         return false;
     }
-    // Serial.println("PubSubClient::connected( C");
-    // Serial.println(this->_state);
+    // Serial.println("MQTT_CONNECTED");     Serial.println(this->_state);
     return this->_state == MQTT_CONNECTED;
 }
 

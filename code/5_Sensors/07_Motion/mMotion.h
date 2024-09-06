@@ -1,7 +1,7 @@
 #ifndef _MODULE_SENSORS_MOTION_H
 #define _MODULE_SENSORS_MOTION_H
 
-#define D_UNIQUE_MODULE_SENSORS_MOTION_ID   ((5*1000)+07)
+#define D_UNIQUE_MODULE_SENSORS_MOTION_ID   5007 // ((5*1000)+07)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -10,8 +10,6 @@
 #include "2_CoreSystem/07_Time/mTime.h"
 
 #include "5_Sensors/00_Interface/mSensorsInterface.h"
-
-// #include "2_CoreSystem/"
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -28,11 +26,8 @@ class mMotion :
     static constexpr const char* PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_MOTION_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOTION_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mMotion);
-    };
+    uint16_t GetClassSize(){      return sizeof(mMotion);  };
     #endif
 
     struct SETTINGS{

@@ -14,10 +14,10 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -28,10 +28,10 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       EverySecond();
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       SubTask_Every_Minute();
     break;
     /************
@@ -39,10 +39,10 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     *******************/  
     #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
-    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
-    case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__LOAD__MODULE_DATA__ID:
       Load_Module();
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
@@ -50,20 +50,20 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case FUNC_SET_POWER_ON_ID:
+    case TASK_SET_POWER_ON_ID:
       CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
     break;    
-    case FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID:
+    case TASK_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID:
       AppendJSONResponse_Drivers_Unified();
     break;
     /************
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID: 
+    case TASK_EVENT_SET_POWER_ID: 
       RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
@@ -71,16 +71,16 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break; 
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif // USE_MODULE_NETWORK_MQTT
@@ -119,7 +119,7 @@ void mRelays::Pre_Init(void){
     {
       uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
       pinMode(pin_number, OUTPUT);
-      pCONT_set->runtime.devices_present++;
+      rt.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
@@ -127,7 +127,7 @@ void mRelays::Pre_Init(void){
       uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
       pinMode(pin_number, OUTPUT);
       bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
-      pCONT_set->runtime.devices_present++;
+      rt.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
     }
   }
@@ -223,7 +223,7 @@ void mRelays::RulesEvent_Set_Power(){
   // }rule_event_layout;
 
 
-  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+  ALOG_TST(PSTR("MATCHED RulesEvent_Set_Power"));
 
   uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
 
@@ -281,7 +281,7 @@ void mRelays::SubTask_Relay_TimeOn(){
     // Auto time off decounters
     if(rt.relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
+      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(0, relay_id);
@@ -295,7 +295,7 @@ void mRelays::SubTask_Relay_TimeOn(){
       CommandSet_Relay_Power(1, relay_id);
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_decounter.seconds);
+      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_decounter.seconds);
       #endif
 
       mqtthandler_state_ifchanged.flags.SendNow = true; // If active, send every second
@@ -323,7 +323,7 @@ void mRelays::SubTask_Relay_PulseOff(){
     // Auto time off decounters
     if(rt.relay_status[relay_id].timer_off_then_on_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
+      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(1, relay_id); // TURN ON
@@ -337,7 +337,7 @@ void mRelays::SubTask_Relay_PulseOff(){
       CommandSet_Relay_Power(0, relay_id); // TURN OFF
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);
+      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);
       #endif
 
       mqtthandler_state_ifchanged.flags.SendNow = true;
@@ -396,7 +396,7 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
   // show options
   if(device_id_found == -1){
     // for(int ii=0;ii<pCONT_set->GetDeviceNameCount(D_MODULE_DRIVERS_RELAY_ID);ii++){
-    //   AddLog(LOG_LEVEL_INFO, PSTR("GetDeviceIDbyName option #%d"),ii,pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&ii,&class_id));
+    //   ALOG_INF(PSTR("GetDeviceIDbyName option #%d"),ii,pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&ii,&class_id));
     // }
     AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\nsearching=%s"),c);
     AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\name_buffer = %s"),pCONT_set->Settings.device_name_buffer.name_buffer);
@@ -451,7 +451,7 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
     pCONT_set->runtime.latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
   }
 
-  for (uint32_t i = 0; i < pCONT_set->runtime.devices_present; i++) {
+  for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t port = (i << 1) + ((rt.bitpacked.latching_power >> i) &1);
     pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
@@ -466,10 +466,10 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   pCONT_set->runtime.last_source = source;
   DEBUG_LINE;
   
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
+  ALOG_INF(PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
 
   if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {  // All on and stay on
-    pCONT_set->runtime.power = (1 << pCONT_set->runtime.devices_present);// -1;
+    pCONT_set->runtime.power = (1 << rt.devices_present);// -1;
     rpower = pCONT_set->runtime.power;
   }
 
@@ -478,7 +478,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
   //     power_t mask = 1;
   //     uint32_t count = 0;
-  //     for (uint32_t j = 0; j < pCONT_set->runtime.devices_present; j++) {
+  //     for (uint32_t j = 0; j < rt.devices_present; j++) {
   //       if ((pCONT_set->Settings.interlock[i] & mask) && (rpower & mask)) {
   //         count++;
   //       }
@@ -499,11 +499,11 @@ DEBUG_LINE;
 
   // PHASE OUT and replace with something else
   // pCONT_set->XdrvMailbox.index = rpower;
-  // pCONT->Tasker_Interface(FUNC_SET_POWER);               // Signal power state
+  // pCONT->Tasker_Interface(TASK_SET_POWER);               // Signal power state
   // pCONT_set->XdrvMailbox.index = rpower;
   // pCONT_set->XdrvMailbox.payload = source;
 
-  // if (pCONT->Tasker_Interface(FUNC_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
+  // if (pCONT->Tasker_Interface(TASK_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
   //   // Serviced
   // }
   // else if ((MODULE_SONOFF_DUAL == pCONT_set->my_module_type) || (MODULE_CH4 == pCONT_set->my_module_type)) {
@@ -535,7 +535,7 @@ DEBUG_LINE;
 //       char remote_command[100];
 //       sprintf(remote_command,"{\"relay\":0,\"onoff\":2}");//,state_level);
 
-//       AddLog(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
+//       ALOG_INF(PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
 
 //       pCONT_mqtt->publish_device(remote_url,remote_command,false);
 
@@ -550,7 +550,7 @@ DEBUG_LINE;
 
     uint16_t gpio_pin = 0;
 
-    for (uint32_t i = 0; i < pCONT_set->runtime.devices_present; i++) {
+    for (uint32_t i = 0; i < rt.devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {
 
@@ -605,7 +605,7 @@ void mRelays::SetAllPower(uint32_t state, uint32_t source)
     publish_power = false;
   }
   if ((state >= POWER_OFF) && (state <= POWER_TOGGLE)) {
-    power_t all_on = (1 << pCONT_set->runtime.devices_present);// -1;
+    power_t all_on = (1 << rt.devices_present);// -1;
     switch (state) {
     case POWER_OFF:
       pCONT_set->runtime.power = 0;
@@ -644,17 +644,17 @@ void mRelays::SetPowerOnState(void)
         SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         break;
       case POWER_ALL_ON:  // All on
-        pCONT_set->runtime.power = (1 << pCONT_set->runtime.devices_present);// -1;
+        pCONT_set->runtime.power = (1 << rt.devices_present);// -1;
         SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         break;
       case POWER_ALL_SAVED_TOGGLE:
-        pCONT_set->runtime.power = (pCONT_set->Settings.power & ((1 << pCONT_set->runtime.devices_present) )) ^ POWER_MASK;
+        pCONT_set->runtime.power = (pCONT_set->Settings.power & ((1 << rt.devices_present) )) ^ POWER_MASK;
         if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         }
         break;
       case POWER_ALL_SAVED:
-        pCONT_set->runtime.power = pCONT_set->Settings.power & ((1 << pCONT_set->runtime.devices_present) );
+        pCONT_set->runtime.power = pCONT_set->Settings.power & ((1 << rt.devices_present) );
         if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
         }
@@ -662,7 +662,7 @@ void mRelays::SetPowerOnState(void)
       }
 
     } else {
-      pCONT_set->runtime.power = pCONT_set->Settings.power & ((1 << pCONT_set->runtime.devices_present) );
+      pCONT_set->runtime.power = pCONT_set->Settings.power & ((1 << rt.devices_present) );
       if (pCONT_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
         SetDevicePower(pCONT_set->runtime.power, SRC_RESTART);
       }
@@ -701,7 +701,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 //   }
 // #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
 
-  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteComPow(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->runtime.devices_present);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteComPow(device%d,state%d,source%d)=rt.devices_present%d"),device,state,source,rt.devices_present);
 
   bool publish_power = true;
   if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
@@ -711,7 +711,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
   if (
     // (device < 1) || 
-  (device > pCONT_set->runtime.devices_present)) {
+  (device > rt.devices_present)) {
     device = 0;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS DEBUG_INSERT_PAGE_BREAK "device>1\tfall back to single relay"));
   }
@@ -738,7 +738,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     //   interlock_mutex = true;                           // Clear all but masked relay in interlock group if new set requested
     //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
     //     if (module_state.interlock[i] & mask) {             // Find interlock group
-    //       for (uint32_t j = 0; j < devices_present; j++) {
+    //       for (uint32_t j = 0; j < rt.devices_present; j++) {
     //         power_t imask = 1 << j;
     //         if ((module_state.interlock[i] & imask) && (power & imask) && (mask != imask)) {
     //           ExecuteCommandPower(j +1, POWER_OFF, SRC_IGNORE);
@@ -807,7 +807,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
   }
   #endif // ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
 
-//AddLog(LOG_LEVEL_TEST, PSTR("mqtthandler_state_teleperiod.flags.SendNow=%d"),mqtthandler_state_teleperiod.flags.SendNow);
+//ALOG_TST(PSTR("mqtthandler_state_teleperiod.flags.SendNow=%d"),mqtthandler_state_teleperiod.flags.SendNow);
 
 
 }
@@ -891,7 +891,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
     sprintf(rule_name, "RelayEnabled%d", ii);
       
 		if(jtok = obj[rule_name]){
-			AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
+			ALOG_INF(PSTR("MATCHED %s"),rule_name);
 			SubCommandSet_EnabledTime(jtok.getObject(), ii);
 		}
 
@@ -949,7 +949,7 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
   // Only apply changes when state is changed
 void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE), "CommandSet_Relay_Power","num",num,"state",state);  
+  ALOG_INF(PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE), "CommandSet_Relay_Power","num",num,"state",state);  
 
 	// Check state if it needs to toggle result
 
@@ -982,12 +982,12 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
         if(!IsRelayTimeWindowAllowed(num))
         {
           state = 0; // forcing off
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "Relay %d is locked: Outside enabled time window"), num);
+          ALOG_INF(PSTR(D_LOG_RELAYS "Relay %d is locked: Outside enabled time window"), num);
           //   return;
         }
         else
         {
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "Relay %d is permitted: Inside enabled time window"), num);
+          ALOG_INF(PSTR(D_LOG_RELAYS "Relay %d is permitted: Inside enabled time window"), num);
         }
       }
     }
@@ -1298,10 +1298,10 @@ void mRelays::MQTTHandler_Init()
   struct handler<mRelays>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1309,10 +1309,10 @@ void mRelays::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
@@ -1320,10 +1320,10 @@ void mRelays::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
@@ -1331,10 +1331,10 @@ void mRelays::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_scheduled_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;
@@ -1360,9 +1360,9 @@ void mRelays::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

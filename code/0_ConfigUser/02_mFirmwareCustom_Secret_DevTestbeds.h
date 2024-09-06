@@ -493,13 +493,13 @@ Blue (Upstairs Link) ***********************************************************
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -618,13 +618,13 @@ Blue (Upstairs Link) ***********************************************************
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -2533,7 +2533,7 @@ Blue (Upstairs Link) ***********************************************************
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
   #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -2785,7 +2785,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -2800,7 +2800,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"Rule1\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -2815,14 +2815,14 @@ Blue (Upstairs Link) ***********************************************************
     "\"Rule2\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
         "\"Data\":[0,2]" // [state,button_hold]
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":3}}\""
       "}"

@@ -1,7 +1,5 @@
 #include "mTime.h"
 
-// #ifdef USE_MODULE_CORE_TIME
-
 /**
  * @brief: Module Interface
  * */
@@ -14,10 +12,10 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -28,7 +26,7 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:    
+    case TASK_EVERY_SECOND:    
       #ifdef ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
       Serial.println(GetUptime().c_str());
       #endif
@@ -36,32 +34,20 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
       uptime_seconds_nonreset++;
     break;
     /************
-     * STORAGE SECTION * 
-    *******************/  
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-   case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    /************
-     * RULES SECTION * 
-    *******************/
-    /************
      * MQTT SECTION * 
     *******************/
     #ifdef ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break; 
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif // USE_MODULE_NETWORK_MQTT
@@ -81,15 +67,18 @@ uint32_t mTime::UtcTime(void)
   return Rtc.utc_time;
 }
 
+
 uint32_t mTime::LocalTime(void) 
 {
   return Rtc.local_time;
 }
 
+
 uint32_t mTime::Midnight(void) 
 {
   return Rtc.midnight;
 }
+
 
 bool mTime::MidnightNow(void) 
 {
@@ -100,10 +89,12 @@ bool mTime::MidnightNow(void)
   return false;
 }
 
+
 bool mTime::IsDst(void) 
 {
   return (Rtc.time_timezone == pCONT_set->Settings.toffset[1]);
 }
+
 
 String mTime::GetBuildDateAndTime(void) 
 {
@@ -138,6 +129,7 @@ String mTime::GetBuildDateAndTime(void)
   return String(bdt);  // 2017-03-07T11:08:02
 }
 
+
 String mTime::GetSyslogDate(char* mxtime) {
   // Mmm dd hh:mm:ss
   // Jan  3 09:23:45
@@ -150,12 +142,14 @@ String mTime::GetSyslogDate(char* mxtime) {
   return String(dt);
 }
 
+
 String mTime::GetDate(void) {
   // yyyy-mm-ddT
   char dt[12];
   snprintf_P(dt, sizeof(dt), PSTR("%04d-%02d-%02dT"), RtcTime.year, RtcTime.month, RtcTime.day_of_month);
   return String(dt);
 }
+
 
 String mTime::GetMinuteTime(uint32_t minutes) 
 {
@@ -164,12 +158,14 @@ String mTime::GetMinuteTime(uint32_t minutes)
   return String(tm);  // 03:45
 }
 
+
 String mTime::GetTimeZone(void) 
 {
   char tz[7];
   snprintf_P(tz, sizeof(tz), PSTR("%+03d:%02d"), Rtc.time_timezone / 60, abs(Rtc.time_timezone % 60));
   return String(tz);  // -03:45
 }
+
 
 String mTime::GetDuration(uint32_t time) 
 {
@@ -181,6 +177,7 @@ String mTime::GetDuration(uint32_t time)
   return String(dt);  // 128T14:35:44
 }
 
+
 String mTime::GetDT(uint32_t time) 
 {
   // "2017-03-07T11:08:02" - ISO8601:2004
@@ -191,6 +188,7 @@ String mTime::GetDT(uint32_t time)
     tmpTime.year +1970, tmpTime.month, tmpTime.day_of_month, tmpTime.hour, tmpTime.minute, tmpTime.second);
   return String(dt);  // 2017-03-07T11:08:02
 }
+
 
 String mTime::GetTime(uint8_t time_type)
 {
@@ -234,6 +232,7 @@ String mTime::GetTimeStr(uint32_t time, bool include_day_of_week)
 
 }
 
+
 /*
  * timestamps in https://en.wikipedia.org/wiki/ISO_8601 format
  *
@@ -257,9 +256,6 @@ String mTime::GetDateAndTime(uint8_t datetime_type)
     case DT_UTC:
       time = Rtc.utc_time;
       break;
-//    case DT_LOCALNOTZ:  // Is default anyway but allows for not appendig timezone
-//      time = Rtc.local_time;
-//      break;
     case DT_DST:
       time = Rtc.daylight_saving_time;
       break;
@@ -294,6 +290,7 @@ String mTime::GetDateAndTime(uint8_t datetime_type)
   return dt;                // 2017-03-07T11:08:02-07:00 or 2017-03-07T11:08:02.123-07:00
 }
 
+
 uint32_t mTime::UpTime(void) 
 {
   if (Rtc.restart_time) {
@@ -303,15 +300,18 @@ uint32_t mTime::UpTime(void)
   }
 }
 
+
 uint32_t mTime::MinutesUptime(void) 
 {
   return (UpTime() / 60);
 }
 
+
 String mTime::GetUptime(void) 
 {
   return GetDuration(UpTime());
 }
+
 
 uint32_t mTime::MinutesPastMidnight(void) 
 {
@@ -323,10 +323,12 @@ uint32_t mTime::MinutesPastMidnight(void)
   return minutes;
 }
 
+
 uint32_t mTime::RtcMillis(void) 
 {
   return (millis() - Rtc.millis) % 1000;
 }
+
 
 void mTime::BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &tm) 
 {
@@ -393,15 +395,17 @@ void mTime::BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &
   tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
 }
 
+
 void mTime::BreakTime(uint32_t time_input, datetime_t &tm) 
 {
   BreakNanoTime(time_input, 0, tm);
 }
 
+
 uint32_t mTime::MakeTime(datetime_t &tm) 
 {
-// assemble time elements into datetime_t
-// note year argument is offset from 1970
+  // assemble time elements into datetime_t
+  // note year argument is offset from 1970
 
   int i;
   uint32_t seconds;
@@ -429,10 +433,12 @@ uint32_t mTime::MakeTime(datetime_t &tm)
   return seconds;
 }
 
+
 uint32_t mTime::GetUTCTime()
 {
   return Rtc.utc_time;
 }
+
 
 uint32_t mTime::RuleToTime( TimeRule r, int yr) 
 {
@@ -466,6 +472,7 @@ uint32_t mTime::RuleToTime( TimeRule r, int yr)
   return t;
 }
 
+
 void mTime::RtcGetDaylightSavingTimes(uint32_t local_time) 
 {
   datetime_t tmpTime;
@@ -498,11 +505,11 @@ void mTime::RtcGetDaylightSavingTimes(uint32_t local_time)
 
 }
 
+
 uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time) 
 {
   
   // ALOG_INF(PSTR(D_LOG_TIME2 "RtcTimeZoneOffset"));
-  //FORCED TO TEST
   pCONT_set->Settings.toffset[1] = 60;//FORCED TO TEST
   pCONT_set->Settings.toffset[0] = 0;//FORCED TO TEST
 
@@ -541,6 +548,7 @@ uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time)
   return timezone;
 }
 
+
 void mTime::RtcSetTimeOfDay(uint32_t local_time) 
 {
   // Sync Core/RTOS time to be used by file system time stamps
@@ -549,6 +557,7 @@ void mTime::RtcSetTimeOfDay(uint32_t local_time)
   tv.tv_usec = 0;
   settimeofday(&tv, nullptr);
 }
+
 
 void mTime::RtcSecond(void) 
 {
@@ -626,6 +635,7 @@ void mTime::RtcSecond(void)
   mutex = false;
 }
 
+
 void mTime::RtcSync(const char* source) 
 {
 
@@ -633,9 +643,10 @@ void mTime::RtcSync(const char* source)
   RtcSecond();
   ALOG_INF(PSTR("RTC: Synced by %s"), source);
 
-  pCONT->Tasker_Interface(FUNC_TIME_SYNCED);
+  pCONT->Tasker_Interface(TASK_TIME_SYNCED);
   
 }
+
 
 void mTime::RtcSetTime(uint32_t epoch) 
 {
@@ -648,6 +659,7 @@ void mTime::RtcSetTime(uint32_t epoch)
     RtcSync("Time");
   }
 }
+
 
 void mTime::Init(void) 
 {
@@ -686,12 +698,14 @@ inline int32_t mTime::TimeDifference(uint32_t prev, uint32_t next)
   return ((int32_t) (next - prev));
 }
 
+
 int32_t mTime::TimePassedSince(uint32_t timestamp)
 {
   // Compute the number of milliSeconds passed since timestamp given.
   // Note: value can be negative if the timestamp has not yet been reached.
   return TimeDifference(timestamp, millis());
 }
+
 
 bool mTime::TimeReached(uint32_t timer)
 {
@@ -731,6 +745,8 @@ void mTime::WifiPollNtp()
     ALOG_INF(PSTR("NTP: Runtime %d"), ntp_run_time);
 
     if (ntp_run_time < 5) { ntp_run_time = 0; }  // DNS timeout is around 10s
+    
+    ALOG_HGL(PSTR("NTP: ntp_time %d"), ntp_time);
 
     if (ntp_time > START_VALID_TIME) 
     {
@@ -746,6 +762,7 @@ void mTime::WifiPollNtp()
     
   }
 }
+
 
 uint64_t mTime::WifiGetNtp(void) 
 {
@@ -768,6 +785,8 @@ uint64_t mTime::WifiGetNtp(void)
     }
     ntp_server_id++;
   }
+
+  ALOG_HGL(PSTR("ntp_server %s"), ntp_server);
   
   #ifdef USE_MODULE_NETWORK_MQTT
   if (!pCONT_wif->WifiHostByName(ntp_server, time_server_ip)) {
@@ -821,6 +840,7 @@ uint64_t mTime::WifiGetNtp(void)
   udp.write(packet_buffer, NTP_PACKET_SIZE);
   udp.endPacket();
 
+
   uint32_t begin_wait = millis();
   while (!TimeReached(begin_wait + 1000)) {         // Wait up to one second
     uint32_t size        = udp.parsePacket();
@@ -837,23 +857,49 @@ uint64_t mTime::WifiGetNtp(void)
         ntp_server_id++;                            // Next server next time
         return 0;
       }
+  Serial.println("packet_buffer");
+  for(int i=0;i<48;i++){ Serial.print(packet_buffer[i], HEX); Serial.print(' ');}
+  Serial.println("packet_buffer");
 
-      // convert four bytes starting at location 40 to a long integer
-      // TX time is used here.
-      uint32_t secs_since_1900 = (uint32_t)packet_buffer[40] << 24;
-      secs_since_1900 |= (uint32_t)packet_buffer[41] << 16;
-      secs_since_1900 |= (uint32_t)packet_buffer[42] << 8;
-      secs_since_1900 |= (uint32_t)packet_buffer[43];
-      if (0 == secs_since_1900) {                   // No time stamp received
-        ntp_server_id++;                            // Next server next time
-        return 0;
-      }
-      uint32_t tmp_fraction = (uint32_t)packet_buffer[44] << 24;
-      tmp_fraction |= (uint32_t)packet_buffer[45] << 16;
-      tmp_fraction |= (uint32_t)packet_buffer[46] << 8;
-      tmp_fraction |= (uint32_t)packet_buffer[47];
-      uint32_t fraction = (((uint64_t)tmp_fraction) * 1000000000) >> 32;
-      return (((uint64_t)secs_since_1900) - 2208988800UL) * 1000000000 + fraction;
+      // Convert four bytes starting at location 40 to a long integer (seconds since 1900)
+uint32_t secs_since_1900 = ((uint32_t)packet_buffer[40] << 24) |
+                           ((uint32_t)packet_buffer[41] << 16) |
+                           ((uint32_t)packet_buffer[42] << 8) |
+                            (uint32_t)packet_buffer[43];
+
+Serial.print("Seconds since 1900: "); Serial.println(secs_since_1900);
+
+if (secs_since_1900 == 0) {
+    // No time stamp received
+    ntp_server_id++;
+    return 0;
+}
+
+// Convert the next four bytes into the fractional part of the timestamp
+uint32_t tmp_fraction = ((uint32_t)packet_buffer[44] << 24) |
+                        ((uint32_t)packet_buffer[45] << 16) |
+                        ((uint32_t)packet_buffer[46] << 8) |
+                         (uint32_t)packet_buffer[47];
+
+Serial.print("Fractional part (raw): "); Serial.println(tmp_fraction);
+
+// Convert fractional part from 32-bit fixed point (2^-32) to nanoseconds (1e-9)
+uint64_t fraction = (((uint64_t)tmp_fraction) * 1000000000ULL) >> 32;
+
+Serial.print("Fractional part (nanoseconds): "); Serial.println(fraction);
+
+// Subtract the NTP epoch (1900-01-01) to Unix epoch (1970-01-01)
+uint64_t unix_seconds = ((uint64_t)secs_since_1900) - 2208988800ULL;
+
+Serial.print("Unix seconds: "); Serial.println(unix_seconds);
+
+// Combine the seconds and fractional parts to get the final result in nanoseconds
+uint64_t result = (unix_seconds * 1000000000ULL) + fraction;
+
+Serial.print("Final NTP result (nanoseconds): "); Serial.println(result);
+
+
+      return result;
     }
     delay(10);
   }
@@ -874,18 +920,24 @@ uint8_t mTime::hour(uint32_t time)
   BreakTime(time, time_temp);
   return time_temp.hour;
 }
+
+
 uint8_t mTime::minute(uint32_t time)
 {
   datetime_t time_temp;
   BreakTime(time, time_temp);
   return time_temp.minute;
 }
+
+
 uint8_t mTime::second(uint32_t time)
 {
   datetime_t time_temp;
   BreakTime(time, time_temp);
   return time_temp.second;
 }
+
+
 int mTime::hourFormat12(time_t time) 
 { // the hour for the given time in 12 hour format
   // refreshCache(t);
@@ -898,8 +950,6 @@ int mTime::hourFormat12(time_t time)
   else
     return time_temp.hour ;
 }
-
-void mTime::parse_JSONCommand(JsonParserObject obj){}
 
 // Time elapsed function that updates the time when true
 bool mTime::TimeReached(uint32_t* tSaved, uint32_t ElapsedTime){
@@ -955,6 +1005,7 @@ uint32_t mTime::MillisElapsed(uint32_t* tSaved){
   return labs(millis()-*tSaved);
 }
 
+
 /**
  * @brief Get the millis from saved millis count to now
  * */
@@ -975,8 +1026,6 @@ bool mTime::MillisReached(uint32_t* tTarget){
   }
   return false;
 }
-
-
 
 
 #ifdef USE_SUNRISE
@@ -1105,6 +1154,7 @@ char* mTime::GetSunTimeAtHorizon(uint32_t dawn, char* buffer, uint8_t buflen)
   return buffer;
 
 }
+
 
 uint16_t mTime::SunMinutes(uint32_t dawn)
 {
@@ -1269,7 +1319,7 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
     ){
       
     #ifdef ENABLE_LOG_LEVEL_ERROR
-      AddLog(LOG_LEVEL_TEST, PSTR("Invalid time"));
+      ALOG_TST(PSTR("Invalid time"));
     #endif // ENABLE_LOG_LEVEL_INFO
       return time_s;
     }
@@ -1282,7 +1332,7 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
     }
     includes_week = false;
     #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_TEST, PSTR("Parse_Time_TimeShortCtr_To_TimeShort NOT D found"));
+    ALOG_TST(PSTR("Parse_Time_TimeShortCtr_To_TimeShort NOT D found"));
     #endif //  ENABLE_LOG_LEVEL_INFO
   }
 
@@ -1704,139 +1754,5 @@ uint32_t mTime::GetSecondsOfDayFromDateTime(datetime_t* dt_t){
 #endif // ENABLE_PHASEOUT_TIME__LEGACY_CODE
 
 
-#ifdef ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
-
-uint8_t mTime::ConstructJSON_Settings(uint8_t json_method, bool json_appending)
-{
-
-  JBI->Start();
-
-    JBI->Add("test", 123);
-
-  JBI->End();
-
-}
-
-
-uint8_t mTime::ConstructJSON_State(uint8_t json_level, bool json_appending)
-{
-
-  char buffer[100];
-
-  if(json_appending)
-  {
-    JBI->Start();
-  }
-  
-  
-  JBI->Add("LOCAL", GetDateAndTime(DT_LOCAL).c_str());
-  JBI->Add("UTC", GetDateAndTime(DT_UTC).c_str());
-  JBI->Add("LOCALNOTZ", GetDateAndTime(DT_LOCALNOTZ).c_str());
-  JBI->Add("DST", GetDateAndTime(DT_DST).c_str());
-  JBI->Add("STD", GetDateAndTime(DT_STD).c_str());
-  JBI->Add("RESTART", GetDateAndTime(DT_RESTART).c_str());
-  JBI->Add("ENERGY", GetDateAndTime(DT_ENERGY).c_str());
-  JBI->Add("BOOTCOUNT", GetDateAndTime(DT_BOOTCOUNT).c_str());
-  JBI->Add("LOCAL_MILLIS", GetDateAndTime(DT_LOCAL_MILLIS).c_str());
-  JBI->Add("TIMEZONE", GetDateAndTime(DT_TIMEZONE).c_str());
-  JBI->Add("SUNRISE", GetDateAndTime(DT_SUNRISE).c_str());
-  JBI->Add("SUNSET", GetDateAndTime(DT_SUNSET).c_str());
-
-
-
-  JBI->Add(D_JSON_UPTIME, GetUptime().c_str());
-  JBI->Add("Time", GetDateAndTime(DT_LOCAL).c_str());
-  JBI->Add(D_JSON_STARTUPUTC, GetDateAndTime(DT_RESTART).c_str());
-  JBI->Add("BCResetTime", GetDateAndTime(DT_BOOTCOUNT).c_str());
-
-  JBI->Add("Rtc.utc_time", Rtc.utc_time);
-
-  JBI->Add("UtcTime", UtcTime());
-  JBI->Add("LocalTime", LocalTime());
-  JBI->Add("Midnight", Midnight());
-  JBI->Add("MidnightNow", MidnightNow());
-  JBI->Add("IsDst", IsDst());
-
-
-  if(json_appending)
-  {
-    return JBI->End();
-  }
-  return JBI->Length();
-
-}
-
-
-#ifdef USE_MODULE_NETWORK_MQTT
-
-void mTime::MQTTHandler_Init()
-{
-
-  struct handler<mTime>* ptr;
-
-  ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mTime::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
-
-  ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
-  ptr->ConstructJSON_function = &mTime::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
-
-
-} //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mTime::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mTime::MQTTHandler_Set_DefaultPeriodRate()
-{
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mTime::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
-#endif // USE_MODULE_NETWORK_MQTT
-
-#endif // ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
-
-
-// #endif // USE_MODULE_CORE_TIME
 
 

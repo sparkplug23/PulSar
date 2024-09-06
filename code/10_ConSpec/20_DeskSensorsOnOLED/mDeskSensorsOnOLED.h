@@ -24,8 +24,6 @@
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
 
-// later, can I make this cycling through all sensors and show them line by line, and/or, show energy line by line
-
 #include <Arduino.h>
 
 #include "1_TaskerManager/mTaskerInterface.h"

@@ -185,9 +185,9 @@ class mShellyDimmer :
     SHD_DIMMER dimmer;
     uint8_t *buffer = nullptr;          // Serial receive buffer
     int byte_counter = 0;               // Index in serial receive buffer
-#ifdef USE_ENERGY_SENSOR
+// #ifdef USE_ENERGY_SENSOR
     uint32_t last_power_check = 0;      // Time when last power was checked
-#endif // USE_ENERGY_SENSOR
+// #endif // USE_ENERGY_SENSOR
     uint32_t start_time = 0;
     uint16_t req_brightness = 0;
     uint16_t req_fade_rate = 0;

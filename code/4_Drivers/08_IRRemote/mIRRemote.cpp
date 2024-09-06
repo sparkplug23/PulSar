@@ -27,10 +27,10 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -41,33 +41,33 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
 
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     // /************
     //  * MQTT SECTION * 
     // *******************/
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // case FUNC_MQTT_HANDLERS_INIT:
-    // case FUNC_MQTT_HANDLERS_RESET:
+    // case TASK_MQTT_HANDLERS_INIT:
+    // case TASK_MQTT_HANDLERS_RESET:
     //   MQTTHandler_Init();
     // break;
-    // case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    // case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
     //   MQTTHandler_Set_DefaultPeriodRate();
     // break;
-    // case FUNC_MQTT_SENDER:
+    // case TASK_MQTT_SENDER:
     //   MQTTHandler_Sender();
     // break;
-    // case FUNC_MQTT_CONNECTED:
+    // case TASK_MQTT_CONNECTED:
     //   MQTTHandler_Set_RefreshAll();
     // break;
     // #endif //USE_MODULE_NETWORK_MQTT    
@@ -81,16 +81,16 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
 
 //   if (PinUsed(GPIO_IRSEND) || PinUsed(GPIO_IRRECV)) {
 //     switch (function) {
-//       case FUNC_PRE_INIT:
+//       case TASK_PRE_INIT:
 //         break;
-//       case FUNC_EVERY_50_MSECOND:
+//       case TASK_EVERY_50_MSECOND:
 // #ifdef USE_IR_RECEIVE
 //         if (PinUsed(GPIO_IRRECV)) {
 //           IrReceiveCheck();  // check if there's anything on IR side
 //         }
 // #endif  // USE_IR_RECEIVE
 //         break;
-//       case FUNC_COMMAND:
+//       case TASK_COMMAND:
 //         if (PinUsed(GPIO_IRSEND)) {
 //           result = DecodeCommand(kIrRemoteCommands, IrRemoteCommand);
 //         }
@@ -218,7 +218,7 @@ void mIRRemote::IrReceiveInit(void)
   // // IrReceiveUpdateTolerance();
   // irrecv->enableIRIn();                  // Start the receiver
 
-   AddLog(LOG_LEVEL_DEBUG, PSTR("IrReceive initialized"));
+   ALOG_DBG(PSTR("IrReceive initialized"));
 }
 
 // void mIRRemote::IrReceiveCheck(void)
@@ -247,7 +247,7 @@ void mIRRemote::IrReceiveInit(void)
 //       Uint64toHex(results.value, hvalue, 32);  // UNKNOWN is always 32 bits hash
 //     }
 
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_IRR "RawLen %d, Overflow %d, Bits %d, Value 0x%s, Decode %d"),
+//     ALOG_DBG(PSTR(D_LOG_IRR "RawLen %d, Overflow %d, Bits %d, Value 0x%s, Decode %d"),
 //               results.rawlen, results.overflow, results.bits, hvalue, results.decode_type);
 
 //     unsigned long now = millis();
@@ -344,7 +344,7 @@ void mIRRemote::IrReceiveInit(void)
 
 //   // char dvalue[64];
 //   // char hvalue[20];
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("IRS: protocol_text %s, protocol %s, bits %d, data %s (0x%s), repeat %d, protocol_code %d"),
+//   // ALOG_DBG(PSTR("IRS: protocol_text %s, protocol %s, bits %d, data %s (0x%s), repeat %d, protocol_code %d"),
 //   //   protocol_text, protocol, bits, ulltoa(data, dvalue, 10), Uint64toHex(data, hvalue, bits), repeat, protocol_code);
 
 // #ifdef USE_IR_RECEIVE
@@ -876,7 +876,7 @@ void mIRRemote::IrReceiveInit(void)
 // {
 //   stdAc::state_t state;
 
-//   //AddLog(LOG_LEVEL_DEBUG, PSTR("IRHVAC: Received %s"), XdrvMailbox.data);
+//   //ALOG_DBG(PSTR("IRHVAC: Received %s"), XdrvMailbox.data);
 //   JsonParser parser(XdrvMailbox.data);
 //   JsonParserObject root = parser.getRootObject();
 //   if (!root) { return IE_INVALID_JSON; }
@@ -923,7 +923,7 @@ void mIRRemote::IrReceiveInit(void)
 //   if (val = root[PSTR(D_JSON_IRHVAC_SWINGV)]) { state.swingv = IRac::strToSwingV(val.getStr()); }
 //   if (val = root[PSTR(D_JSON_IRHVAC_SWINGH)]) { state.swingh = IRac::strToSwingH(val.getStr()); }
 //   state.degrees = root.getFloat(PSTR(D_JSON_IRHVAC_TEMP), state.degrees);
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("model %d, mode %d, fanspeed %d, swingv %d, swingh %d"),
+//   // ALOG_DBG(PSTR("model %d, mode %d, fanspeed %d, swingv %d, swingh %d"),
 //   //             state.model, state.mode, state.fanspeed, state.swingv, state.swingh);
 
 //   // if and how we should handle the state for IRremote
@@ -1009,7 +1009,7 @@ void mIRRemote::IrReceiveInit(void)
 
 //   char dvalue[32];
 //   char hvalue[32];
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("IRS: protocol %d, bits %d, data 0x%s (%s), repeat %d"),
+//   // ALOG_DBG(PSTR("IRS: protocol %d, bits %d, data 0x%s (%s), repeat %d"),
 //   //   protocol, bits, ulltoa(data, dvalue, 10), Uint64toHex(data, hvalue, bits), repeat);
 
 //   if (!IR_RCV_WHILE_SENDING && (irrecv != nullptr)) { irrecv->disableIRIn(); }
@@ -1094,7 +1094,7 @@ void mIRRemote::IrReceiveInit(void)
 //     }
 //     if (!IR_RCV_WHILE_SENDING && (irrecv != nullptr)) { irrecv->disableIRIn(); }
 //     for (uint32_t r = 0; r <= repeat; r++) {
-//       // AddLog(LOG_LEVEL_DEBUG, PSTR("sendRaw count=%d, space=%d, mark=%d, freq=%d"), count, space, mark, freq);
+//       // ALOG_DBG(PSTR("sendRaw count=%d, space=%d, mark=%d, freq=%d"), count, space, mark, freq);
 //       irsend->sendRaw(raw_array, i, freq);
 //       if (r < repeat) {         // if it's not the last message
 //         irsend->space(40000);   // since we don't know the inter-message gap, place an arbitrary 40ms gap
@@ -1121,7 +1121,7 @@ void mIRRemote::IrReceiveInit(void)
 //     raw_array[i++] = parm[2];                     // Trailing mark
 //     if (!IR_RCV_WHILE_SENDING && (irrecv != nullptr)) { irrecv->disableIRIn(); }
 //     for (uint32_t r = 0; r <= repeat; r++) {
-//       // AddLog(LOG_LEVEL_DEBUG, PSTR("sendRaw %d %d %d %d %d %d"), raw_array[0], raw_array[1], raw_array[2], raw_array[3], raw_array[4], raw_array[5]);
+//       // ALOG_DBG(PSTR("sendRaw %d %d %d %d %d %d"), raw_array[0], raw_array[1], raw_array[2], raw_array[3], raw_array[4], raw_array[5]);
 //       irsend->sendRaw(raw_array, i, freq);
 //       if (r < repeat) {         // if it's not the last message
 //         irsend->space(inter_message);   // since we don't know the inter-message gap, place an arbitrary 40ms gap
@@ -1187,13 +1187,13 @@ void mIRRemote::IrReceiveInit(void)
 //   } else {
 //     count++;
 //   }
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("IrRemoteSendRawStandard: count_1 = %d"), count);
+//   // ALOG_DBG(PSTR("IrRemoteSendRawStandard: count_1 = %d"), count);
 //   arr = (uint16_t*) malloc(count * sizeof(uint16_t));
 //   if (nullptr == arr) { return IE_MEMORY; }
 
 //   count = IrRemoteParseRawCompact(*pp, arr, count);
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("IrRemoteSendRawStandard: count_2 = %d"), count);
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("Arr %d %d %d %d %d %d %d %d"), arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6], arr[7]);
+//   // ALOG_DBG(PSTR("IrRemoteSendRawStandard: count_2 = %d"), count);
+//   // ALOG_DBG(PSTR("Arr %d %d %d %d %d %d %d %d"), arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6], arr[7]);
 //   if (0 == count) { return IE_INVALID_RAWDATA; }
 
 //   if (!IR_RCV_WHILE_SENDING && (irrecv != nullptr)) { irrecv->disableIRIn(); }
@@ -1310,7 +1310,7 @@ void mIRRemote::IrReceiveInit(void)
 
 //   if (PinUsed(GPIO_IRSEND) || PinUsed(GPIO_IRRECV)) {
 //     switch (function) {
-//       case FUNC_PRE_INIT:
+//       case TASK_PRE_INIT:
 //         if (PinUsed(GPIO_IRSEND)) {
 //           IrSendInit();
 //         }
@@ -1318,12 +1318,12 @@ void mIRRemote::IrReceiveInit(void)
 //           IrReceiveInit();
 //         }
 //         break;
-//       case FUNC_EVERY_50_MSECOND:
+//       case TASK_EVERY_50_MSECOND:
 //         if (PinUsed(GPIO_IRRECV)) {
 //           IrReceiveCheck();  // check if there's anything on IR side
 //         }
 //         break;
-//       case FUNC_COMMAND:
+//       case TASK_COMMAND:
 //         if (PinUsed(GPIO_IRSEND)) {
 //           result = DecodeCommand(kIrRemoteCommands, IrRemoteCommand);
 //         }
@@ -1364,7 +1364,7 @@ void mIRRemote::parse_JSONCommand(JsonParserObject obj)
 
 		// JBI->Start();
 
-		// pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		// pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		// bool ready_to_send = JBI->End();
 
@@ -1379,7 +1379,7 @@ void mIRRemote::parse_JSONCommand(JsonParserObject obj)
 
 		// if(ready_to_send)
 		// {			
-    	// AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
+    	// ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
 		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		// }
 
@@ -1479,7 +1479,7 @@ void mIRRemote::MQTTHandler_Init()
   struct handler<mIRRemote>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
@@ -1489,7 +1489,7 @@ void mIRRemote::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mIRRemote::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
@@ -1518,9 +1518,9 @@ void mIRRemote::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

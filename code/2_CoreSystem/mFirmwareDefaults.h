@@ -57,7 +57,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_RULES
 #define USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
 
-// #define USE_MODULE_SENSORS_SOLAR_LUNAR
+// #define USE_MODULE_SENSORS_SUN_TRACKING
 
 // #ifndef DISABLE_NETWORK
 // #define USE_MODULE_NETWORK_MQTT
@@ -105,7 +105,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-#define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023  
+  
 
 /**
  * Going forward, here will support define that simply insert in firmwarecustom
@@ -121,14 +121,14 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -214,13 +214,13 @@ void WifiWpsStatusCallback(wps_cb_status status);
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -252,13 +252,13 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM  
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
-    // #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    // 
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -299,13 +299,13 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM  
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     // /********* Group: Needed to build ************************/
     // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     // /********* Group: Ready for full integration ************************/
     // // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     // /********* Group: Testing ************************/
-    // // #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    // // 
     // #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     // #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     // 
@@ -344,7 +344,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
   
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
   
   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
@@ -369,7 +369,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
@@ -378,7 +378,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
     #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -701,7 +701,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   
 

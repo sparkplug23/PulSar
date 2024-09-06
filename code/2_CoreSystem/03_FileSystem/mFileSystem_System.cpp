@@ -66,7 +66,7 @@ void mFileSystem::JsonFile_Save__Stored_Module()
   JBI->Start();
     JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str());
     JBI->Add(PSTR("millis"), millis());
-    // pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID);
+    // pCONT->Tasker_Interface(TASK_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID);
   JBI->End();
 
   file.print(JBI->GetBufferPtr());
@@ -91,7 +91,7 @@ void mFileSystem::JsonFile_Load__Stored_Module_Or_Default_Template()
  
   if(!JsonFile_Load__Stored_Module() || force_default_template){
     ALOG_INF(PSTR("No config_module.json file found, loading default template from progmem"));
-    pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID);
+    pCONT->Tasker_Interface(TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID);
   }
 
   DEBUG_LINE_HERE;
@@ -115,7 +115,7 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
     return false;
   }
 
-  Serial.printf("Read from file [%d]: \n\r", file.available());
+  Serial.printf("Read from file [%d] \n\r", file.available());
 
   if(!JBI->RequestLock(GetModuleUniqueID())){
     return false;
@@ -131,7 +131,7 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
 
   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
 
@@ -175,7 +175,7 @@ void mFileSystem::JsonFile_Save__Stored_Secure()
   JBI->Start();
     JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
     JBI->Add(PSTR("millis"), millis());
-    pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__Stored_Secure__ID);
+    pCONT->Tasker_Interface(TASK_FILESYSTEM_APPEND_JSON__Stored_Secure__ID);
   JBI->End();
 
   file.print(JBI->GetBufferPtr());
@@ -219,7 +219,7 @@ void mFileSystem::JsonFile_Load__Stored_Secure()
 
   ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
   

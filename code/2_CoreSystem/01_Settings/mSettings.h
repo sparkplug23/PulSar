@@ -22,13 +22,6 @@
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
-enum DATA_BUFFER_FLAG_SOURCE_IDS
-{
-  DATA_BUFFER_FLAG_SOURCE_MQTT=0,
-  DATA_BUFFER_FLAG_SOURCE_WEBUI
-};
-
-
 typedef union {
   uint16_t data;
   struct {
@@ -39,6 +32,13 @@ typedef union {
     uint16_t hour : 5;                     // bits 11 - 15 = 0-23
   };
 } TimeRule;
+
+
+enum DATA_BUFFER_FLAG_SOURCE_IDS
+{
+  DATA_BUFFER_FLAG_SOURCE_MQTT=0,
+  DATA_BUFFER_FLAG_SOURCE_WEBUI
+};
 
 
 typedef union 
@@ -119,6 +119,12 @@ extern struct DATA_BUFFER data_buffer;
   #endif
 #endif
 
+#ifdef ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+// Handle 20k of NVM
+#include <nvs_flash.h>
+#include <nvs.h>
+#endif // ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+
 
 #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 enum SettingsTextIndex { 
@@ -164,13 +170,9 @@ enum SettingsTextIndex {
 #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 
-
-// #ifdef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-//command source will be useful for rules, 
 enum CommandSource { SRC_IGNORE, SRC_MQTT, SRC_RESTART, SRC_BUTTON, SRC_SWITCH, SRC_BACKLOG, SRC_SERIAL, SRC_WEBGUI, SRC_WEBCOMMAND, SRC_WEBCONSOLE, SRC_PULSETIMER,
                      SRC_TIMER, SRC_RULE, SRC_MAXPOWER, SRC_MAXENERGY, SRC_LIGHT, SRC_KNX, SRC_DISPLAY, SRC_WEMO, SRC_HUE, SRC_RETRY, SRC_MAX };
 const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Serial|WebGui|WebCommand|WebConsole|PulseTimer|Timer|Rule|MaxPower|MaxEnergy|Light|Knx|Display|Wemo|Hue|Retry";
-// #endif 
 
 
 enum DATABUILDER_JSON_LEVEL{ //in order of importance
@@ -185,37 +187,19 @@ enum DATABUILDER_JSON_LEVEL{ //in order of importance
   JSON_LEVEL_DEBUG // Share extra info relating to the generation of the json
 };
 
+
 DEFINE_PGM_CTR(PM_JSON_LEVEL_NONE_CTR)        "None";
 DEFINE_PGM_CTR(PM_JSON_LEVEL_IFCHANGED_CTR)   "IfChanged";
+DEFINE_PGM_CTR(PM_JSON_LEVEL_SHORT_CTR)       "Short";
+DEFINE_PGM_CTR(PM_JSON_LEVEL_DETAILED_CTR)    "Detailed";
+DEFINE_PGM_CTR(PM_JSON_LEVEL_ALL_CTR)         "All";
+DEFINE_PGM_CTR(PM_JSON_LEVEL_DEBUG_CTR)       "Debug";
   
-
-// Phase out
-enum SWITCH_SPLIT_TASK_IDS{
-  SPLIT_TASK_NOT_RUNNING_ID=0,
-  SPLIT_TASK_SUCCESS_ID=1,
-  SPLIT_TASK_SEC1_ID,
-  SPLIT_TASK_SEC2_ID,
-  SPLIT_TASK_SEC3_ID,
-  SPLIT_TASK_SEC4_ID,
-  SPLIT_TASK_SEC5_ID,
-  SPLIT_TASK_SEC6_ID,
-  SPLIT_TASK_SEC7_ID,
-  SPLIT_TASK_SEC8_ID,
-  SPLIT_TASK_TIMEOUT_ID,
-  SPLIT_TASK_ERROR_ID,
-  SPLIT_TASK_DONE_ID
-};
 
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
 const uint8_t MAX_TUYA_FUNCTIONS = 16;
 const uint8_t PARAM8_SIZE = 18;            // Number of param bytes (SetOption)
 
-#define CODE_IMAGE 0
-
-//#define USE_DHT                             // Default DHT11 sensor needs no external library
-#define USE_ENERGY_SENSOR                   // Use energy sensors (+14k code)
-#define USE_HLW8012                         // Use energy sensor for Sonoff Pow and WolfBlitz
-#define USE_CSE7766                         // Use energy sensor for Sonoff S31 and Pow R2
 
 /*********************************************************************************************\
  * Power Type
@@ -227,25 +211,6 @@ typedef unsigned long power_t;              // Power (Relay) type
  * Constants
 \*********************************************************************************************/
 
-// Why 28? Because in addition to relays there may be lights and uint32_t bitmap can hold up to 32 devices
-#ifdef ESP8266
-
-#ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
-
-// const uint8_t MAX_RELAYS = 8;               // Max number of relays selectable on GPIO
-// const uint8_t MAX_INTERLOCKS = 4;           // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
-// const uint8_t MAX_SWITCHES = 8;             // Max number of switches selectable on GPIO
-// const uint8_t MAX_KEYS = 8;                 // Max number of keys or buttons selectable on GPIO
-#endif
-#endif  // ESP8266
-#ifdef ESP32
-#ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
-// const uint8_t MAX_RELAYS = 28;              // Max number of relays selectable on GPIO
-// const uint8_t MAX_INTERLOCKS = 14;          // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
-// // const uint8_t MAX_SWITCHES = 28;            // Max number of switches selectable on GPIO
-// const uint8_t MAX_KEYS = 28;                // Max number of keys or buttons selectable on GPIO
-#endif
-#endif  // ESP32
 const uint8_t MAX_RELAYS_SET = 32;          // Max number of relays
 const uint8_t MAX_KEYS_SET = 32;            // Max number of keys
 // Changes to the following MAX_ defines will impact settings layout
@@ -310,9 +275,7 @@ const uint16_t TBUFFER_SIZE_FLOAT = 16; // TBUFFER are (T)emporary Buffers that 
 const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
 const uint32_t SOFT_BAUDRATE = 9600;        // Default software serial baudrate
 const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
-
 const uint8_t MAX_MQTT_CONNECTIONS = 2;
-
 
 // Changes to the following MAX_ defines need to be in line with enum SettingsTextIndex
 const uint8_t MAX_MQTT_PREFIXES = 3;        // Max number of MQTT prefixes (cmnd, stat, tele)
@@ -341,11 +304,8 @@ const uint8_t MAX_SWITCHES_TXT = 28;        // Max number of switches user text
 #endif  // ESP32
 
 
-
-
-
-// const uint32_t START_VALID_TIME = 1451602800;  // Time is synced and after 2016-01-01   // Will need adjusting when NTP code is updated
 const uint32_t START_VALID_UTC_TIME = 1697014158;  // Time is synced and after 2023 October 11, this will need adjusting when NTP code is updated
+
 
 /*********************************************************************************************\
  * Defines
@@ -485,24 +445,18 @@ class mSettings :
     uint8_t *settings_buffer = nullptr;
   #endif // ESP8266
 
-    void JsonAppend_Settings();    
-    void init(void);
-    uint16_t CountCharInCtr(const char* tosearch, char tofind);
-    int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
-    void Function_Template_Load();
-    void SettingsWrite(const void *pSettings, unsigned nSettingsLen);
+  void JsonAppend_Settings();    
+  void init(void);
+  uint16_t CountCharInCtr(const char* tosearch, char tofind);
+  int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
+  void Function_Template_Load();
+  void SettingsWrite(const void *pSettings, unsigned nSettingsLen);
   int16_t GetFunctionIDbyName(const char* c);
-
-  void SettingsLoad_CheckSuccessful();
-
   void SettingsInit();
-
   void SetFlashModeDout(void);
   void SettingsBufferFree(void);
   bool SettingsBufferAlloc(void);
-
   uint32_t SettingsRead(void *data, size_t size);
-  
   void SettingsSaveAll(void);
   uint32_t GetSettingsAddress(void);
   void SettingsSave(uint8_t rotate);
@@ -582,17 +536,8 @@ class mSettings :
     }status;
 
     // Other
-  };
-
-
-
-
-
-
-  // #include "Sub_mSettings_Stored.h"
-  
-
-#define MAX_PWMS 5       
+  };  
+ 
 
 #include "2_CoreSystem/05_HardwarePins/mHardwarePins.h"
 
@@ -669,7 +614,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t use_underscore : 1;           // bit 14 (v6.5.0.12) - SetOption64 - Enable "_" instead of "-" as sensor index separator
     uint32_t fast_power_cycle_disable : 1; // bit 15 (v6.6.0.20) - SetOption65 - Disable fast power cycle detection for device reset
     uint32_t tuya_serial_mqtt_publish : 1; // bit 16 (v6.6.0.21) - SetOption66 - Enable TuyaMcuReceived messages over Mqtt
-    //uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67 - Enable buzzer when available
+    uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67 - Enable buzzer when available
     uint32_t pwm_multi_channels : 1;       // bit 18 (v6.6.0.3)  - SetOption68 - Enable multi-channels PWM instead of Color PWM
     uint32_t ex_tuya_dimmer_min_limit : 1; // bit 19 (v6.6.0.5)  - SetOption69 - Limits Tuya dimmers to minimum of 10% (25) when enabled.
     uint32_t energy_weekend : 1;           // bit 20 (v6.6.0.8)  - CMND_TARIFF
@@ -682,24 +627,12 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t slider_dimmer_stay_on : 1;    // bit 27 (v7.0.0.6)  - SetOption77 - Do not power off if slider moved to far left
     uint32_t compatibility_check : 1;      // bit 28 (v7.1.2.6)  - SetOption78 - Disable OTA compatibility check
     uint32_t counter_reset_on_tele : 1;    // bit 29 (v8.1.0.1)  - SetOption79 - Enable resetting of counters after telemetry was sent
-    // uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80 - Enable shutter support
-    // uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81 - Invert all ports on PCF8574 devices
+    uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80 - Enable shutter support
+    uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81 - Invert all ports on PCF8574 devices
     uint32_t network_wifi : 1;             // bit 13 (v8.3.1.3)  - CMND_WIFI
     uint32_t network_ethernet : 1;         // bit 14 (v8.3.1.3)  - CMND_ETHERNET
-
-
   };
 } SysBitfield_Network;
-
-// Due to the muliple connections required, mqtt connection settings will be moved into its own file as json format
-/**
- * @brief Instead this will be used for "ActiveMQTT" and hence will be loaded from memory. Though will need to be a vector to hold multiple, so 
- * this likely needs totally moved into the module itself (and class header)
- * 
- */
-// struct SettingsMQTT
-// {
-// };
 
 
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
@@ -716,35 +649,26 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 typedef union {
   uint16_t data;
   struct {
-    uint16_t clear_on_reboot : 1;
-    uint16_t reserved : 15;     
-  };
-} SysBitfield_Animations;
-
-
-typedef union {
-  uint16_t data;
-  struct {
     uint16_t spare0 : 1;
     uint16_t reserved : 15;     
   };
 } SysBitfield_Lighting;
 
 
-struct LightSettings{
-  uint8_t light_brightness_as_percentage;
-  uint8_t light_fade;          // 4A1
-  uint8_t light_speed;         // 4A2
-  uint8_t light_scheme;        // 4A3
-  uint8_t light_width;         // 4A4
-  uint16_t light_rotation;     // 39E
-  uint16_t light_pixels;       // 496
-  uint8_t light_correction;    // 49D
-  uint8_t light_dimmer;        // 49E
-  uint16_t light_wakeup;       // 4A6
-  uint8_t type; //phase out now with multipin?
-  uint16_t size;
-};
+// struct LightSettings{
+//   uint8_t light_brightness_as_percentage;
+//   uint8_t light_fade;          // 4A1
+//   uint8_t light_speed;         // 4A2
+//   uint8_t light_scheme;        // 4A3
+//   uint8_t light_width;         // 4A4
+//   uint16_t light_rotation;     // 39E
+//   uint16_t light_pixels;       // 496
+//   uint8_t light_correction;    // 49D
+//   uint8_t light_dimmer;        // 49E
+//   uint16_t light_wakeup;       // 4A6
+//   uint8_t type; //phase out now with multipin?
+//   uint16_t size;
+// };
 
 
 // Buffer that stores names of sensors as delimeter list
@@ -825,7 +749,6 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint8_t data;                           // Allow bit manipulation using SetOption
   struct {                                 // SetOption0 .. SetOption31
-    uint8_t mqtt_retain : 1;               // bit 0              - SetOption0  - Save power state and use after restart
     uint8_t button_restrict : 1;          // bit 1              - SetOption1  - Control button multipress
     uint8_t decimal_precision : 2;        // bit 2,3   4 levels [0,1,2,3]
 
@@ -835,15 +758,6 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 
 
 struct SensorSettings{
-  uint16_t      configperiod_secs;
-  uint16_t      teleperiod_secs;
-  uint16_t      ifchanged_secs;
-  // Percentage of possible values that signify a large enough change has occured worth reporting.
-  // A value of '0' percent means anything at all
-  uint8_t       ifchanged_change_percentage_threshold;
-  uint8_t       teleperiod_json_level;
-  uint8_t       ifchanged_json_level;
-  uint8_t       teleperiod_retain_flag;
   /**
    * Stored as ints for data savings, flat change to int
    * */
@@ -1019,9 +933,9 @@ struct SETTINGS {
   uint8_t       module;                    // 474
   uint8_t       last_module;               // 399
   // Templates
-  Template_Config user_template2;
-  SystemName      system_name;
-  char room_hint[50];
+  Template_Config user_template; 
+  SystemName      system_name;                             // Move into SettingsText
+  char room_hint[50];                                      // Move into SettingsText
   SysBitfield_System   flag_system;                      // 010
   RulesBitfield rules_flag;                 // Rule state flags (16 bits)
   int16_t       save_data;                 // 014
@@ -1036,26 +950,17 @@ struct SETTINGS {
   uint8_t       sleep;                     // 453
   uint8_t       setoption_255[PARAM8_SIZE];
   // Core
-  // char debug[10];
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
-  
   // Network
   uint8_t       sta_config;                // 09F
   uint8_t       sta_active;                // 0A0
-  // char          sta_ssid[3][33];           // 0A1 - Keep together with sta_pwd as being copied as one chunck with reset 5
-  // char          sta_pwd[3][65];            // 0E3 - Keep together with sta_ssid as being copied as one chunck with reset 5
-  // char          hostname[33];              // 165
-  // char          syslog_host[33];           // 186
   uint32_t      ip_address[5];             // 544
   uint8_t       wifi_channel;
   uint8_t       wifi_bssid[6];             // F0A
   SysBitfield_Network  flag_network;                     // 3A0
   // Webserver
   uint8_t       webserver;                 // 1AB
-  // char          web_password[33];          // 4A9
   uint16_t      web_refresh;               // 7CC
-  // MQTT
-  // SettingsMQTT  mqtt; // Moved to mqtt module
   // Time
   int8_t        timezone;                  // 016
   uint8_t       timezone_minutes;          // 66D 
@@ -1064,12 +969,12 @@ struct SETTINGS {
   uint8_t       ina219_mode;               // 531
   SysBitfield_Drivers    flag_drivers;  
   int16_t       toffset[2];                // 30E
-  // char          ntp_server[3][33];         // 4CE
-  char          text_pool[138];            // 017  Size is settings_text_size
+
+  // Previously other char arrays followed this memory space that was reserved as "overflow" fom text pool to be read in another format
+  // From now on, the text pool must be the hardcoded full length
+  char          text_pool[settings_text_size];            // 017  Size is settings_text_size
   // Lighting
   SysBitfield_Lighting    flag_lighting;
-  SysBitfield_Animations  flag_animations;
-  LightSettings           light_settings;
   // Pulse Counter
   uint16_t      pulse_counter_type;        // 5D0
   uint16_t      pulse_counter_debounce;    // 5D2
@@ -1090,7 +995,6 @@ struct SETTINGS {
   uint32_t      monitors;                  // 7A0
   uint16_t      pwm_range;                 // 342
   uint16_t      pwm_frequency;             // 2E6
-  uint16_t      pwm_value[MAX_PWMS];       // 2EC
   uint16_t      rf_duplicate_time;         // 522
   // Power
   unsigned long power;                     // 2E8
@@ -1176,7 +1080,6 @@ struct SETTINGS {
     uint8_t pwm_inverted = 0;                   // PWM inverted flag (1 = inverted)
     uint8_t counter_no_pullup = 0;              // Counter input pullup flag (1 = No pullup)
     uint8_t serial_in_byte;                     // Received byte
-    uint8_t devices_present = 0;                // Max number of devices supported
     uint8_t seriallog_level;                    // Current copy of Settings.seriallog_level
     uint8_t syslog_level;                       // Current copy of Settings.syslog_level
     uint8_t seriallog_level_during_boot;
@@ -1215,10 +1118,19 @@ struct SETTINGS {
   #define RESPONSE_MESSAGE_BUFFER_SIZE 100
   char response_msg[RESPONSE_MESSAGE_BUFFER_SIZE] = {0};
 
-  const char* GetTelePeriodJsonLevelCtr(char* buffer);
-  const char* GetTelePeriodJsonLevelCtr(uint8_t id, char* buffer);
+  const char* Get_Json_Level_Name(uint8_t id);
 
   
+
+  #ifdef ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+  bool NvmExists(const char *sNvsName);
+  bool NvmLoad(const char *sNvsName, const char *sName, void *pSettings, unsigned nSettingsLen);
+  void NvmSave(const char *sNvsName, const char *sName, const void *pSettings, unsigned nSettingsLen);
+  int32_t NvmErase(const char *sNvsName);
+  #endif // ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+
+
+
 
 
   #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER

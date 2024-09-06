@@ -107,7 +107,8 @@ typedef union {
     uint8_t PeriodicEnabled : 1; 
     uint8_t SendNow         : 1;
     uint8_t FrequencyRedunctionLevel  : 2;     // 0= no redunction, maintain level, 1 = reduce after 1 minute, 1= 10 minutes, 2= 60 minutes    
-    uint8_t reserved : 4; 
+    uint8_t retain : 1;
+    uint8_t reserved : 3; 
   };
 }Handler_Flags;
 
@@ -289,8 +290,7 @@ class MQTTConnection
     void MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len);     
     void MqttDisconnected(int state);
     void SetPubSubClient(Client* client);
-    bool MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t module_id, const char* postfix_topic_ctr);
-    bool MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uint16_t unique_id, const char* postfix_topic_ctr);
+    bool MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uint16_t unique_id, const char* postfix_topic_ctr, bool retain_flag = false);
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
     bool publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
     void publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag);
@@ -339,9 +339,30 @@ class mMQTTManager :
     void Save_Module(void);
     #endif // USE_MODULE_CORE_FILESYSTEM
 
+    typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+      uint8_t data;                           // Allow bit manipulation using SetOption
+      struct {                                
+        uint8_t unified_module_interface_reporting__suppress_submodule_configperiod : 1;               // bit 0 - SetOption0  - If unified sensor interface is reporting readings, then optional disable or reduce ifchanged from submodule to reduce mqtt traffic
+        uint8_t unified_module_interface_reporting__suppress_submodule_teleperiod : 1;               // bit 0 - SetOption0  - If unified sensor interface is reporting readings, then optional disable or reduce ifchanged from submodule to reduce mqtt traffic
+        uint8_t unified_module_interface_reporting__suppress_submodule_ifchangedperiod : 1;               // bit 0 - SetOption0  - If unified sensor interface is reporting readings, then optional disable or reduce ifchanged from submodule to reduce mqtt traffic
+        uint8_t reserved : 6;          // bit 1              - SetOption1  - 
+      };
+    } SysBitfield_Options;
+
+
     struct MODULE_STORAGE{ // these will be saved and recovered on boot
 
-
+      uint8_t mqtt_retain : 1;               // bit 0              - SetOption0  - Save power state and use after restart
+      uint16_t      configperiod_secs;
+      uint16_t      teleperiod_secs;
+      uint16_t      ifchanged_secs;
+      // Percentage of possible values that signify a large enough change has occured worth reporting.
+      // A value of '0' percent means anything at all
+      uint8_t       ifchanged_change_percentage_threshold;
+      uint8_t       teleperiod_json_level;
+      uint8_t       ifchanged_json_level;
+      uint8_t       teleperiod_retain_flag;
+      SysBitfield_Options options;
     }dt;
 
     std::vector<MQTTConnection*> brokers;
@@ -350,6 +371,12 @@ class mMQTTManager :
      * SECTION: Internal Functions
      ************************************************************************************************/
 
+    uint16_t GetConfigPeriod(); // main
+    uint16_t GetConfigPeriod_SubModule();
+    uint16_t GetTelePeriod(); // main
+    uint16_t GetTelePeriod_SubModule();
+    uint16_t GetIfChangedPeriod(); // main
+    uint16_t GetIfChangedPeriod_SubModule();
 
     /************************************************************************************************
      * SECTION: Commands
@@ -689,6 +716,13 @@ Serial.flush();
         Serial.println("MQTTHandler_Command::Blocked");
         return;
       }
+
+      #ifdef ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
+      if(handler_ptr->tRateSecs == 0)
+      {
+        handler_ptr->flags.PeriodicEnabled = false; // If tRateSecs is zero, assume periodic has been disabled
+      }
+      #endif
             
       #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
       // Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
@@ -710,6 +744,15 @@ Serial.flush();
 
           #endif
 
+        }else
+        /**
+         * Initually set to 0 at boot [instead of millis()], so should be treated as never sent
+         * Hence, if periodic is enabled, but has not yet been set, it should be triggered to send and therefore "SendNow" is no longer required as a default set flag.
+         **/
+        if(handler_ptr->tSavedLastSent == 0) 
+        {
+          handler_ptr->tSavedLastSent=millis();
+          handler_ptr->flags.SendNow = true;
         }
       }
 
@@ -728,7 +771,7 @@ Serial.flush();
         { 
 
           #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-          Serial.printf("MQTTHandler_Command::SendNow::fSendPayload::postfix_topic\t=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
+          Serial.printf("MQTTHandler_Command::SendNow::fSendPayload::postfix_topic\t=%S %d\n\r",handler_ptr->postfix_topic, unique_id); Serial.flush(); 
           #endif // ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
 
           // Send on each connected broker
@@ -746,7 +789,7 @@ Serial.flush();
 
               uint32_t tSaved_SendTime = millis();
 
-              packet_successfully_sent = con->MQTTHandler_Send_Formatted_UniqueID(handler_ptr->topic_type,unique_id,handler_ptr->postfix_topic); 
+              packet_successfully_sent = con->MQTTHandler_Send_Formatted_UniqueID(handler_ptr->topic_type,unique_id,handler_ptr->postfix_topic, handler_ptr->flags.retain); 
 
               #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
               Serial.printf("^^^^^^^^^^^^^^^^^^^ MQTTHandler_Send_Formatted %dms \n\r", millis()-tSaved_SendTime );

@@ -17,296 +17,264 @@
 GPIOViewer gpio_viewer;
 #endif
 
-const uint16_t mHardwarePins::kList_Selectable_Function_IDs[] PROGMEM = {
-  GPIO2_NONE_ID,           // Not used
-  GPIO2_KEY1_ID,           // Buttons
-  GPIO2_KEY1_NP_ID,
-  GPIO2_KEY1_INV_ID,
-  GPIO2_KEY1_INV_NP_ID,
-  GPIO2_KEY2_ID,
-  GPIO2_KEY2_NP_ID,
-  GPIO2_KEY2_INV_ID,
-  GPIO2_KEY2_INV_NP_ID,
-  GPIO2_KEY3_ID,
-  GPIO2_KEY3_NP_ID,
-  GPIO2_KEY3_INV_ID,
-  GPIO2_KEY3_INV_NP_ID,
-  GPIO2_KEY4_ID,
-  GPIO2_KEY4_NP_ID,
-  GPIO2_KEY4_INV_ID,
-  GPIO2_KEY4_INV_NP_ID,
-  GPIO2_SWT1_ID,           // User connected external switches
-  GPIO2_SWT1_NP_ID,
-  GPIO2_SWT2_ID,
-  GPIO2_SWT2_NP_ID,
-  GPIO2_SWT3_ID,
-  GPIO2_SWT3_NP_ID,
-  GPIO2_SWT4_ID,
-  GPIO2_SWT4_NP_ID,
-  GPIO2_SWT5_ID,
-  GPIO2_SWT5_NP_ID,
-  GPIO2_SWT6_ID,
-  GPIO2_SWT6_NP_ID,
-  GPIO2_SWT7_ID,
-  GPIO2_SWT7_NP_ID,
-  GPIO2_SWT8_ID,
-  GPIO2_SWT8_NP_ID,
-  GPIO2_REL1_ID,           // Relays
-  GPIO2_REL1_INV_ID,
-  GPIO2_REL2_ID,
-  GPIO2_REL2_INV_ID,
-  GPIO2_REL3_ID,
-  GPIO2_REL3_INV_ID,
-  GPIO2_REL4_ID,
-  GPIO2_REL4_INV_ID,
-  GPIO2_REL5_ID,
-  GPIO2_REL5_INV_ID,
-  GPIO2_REL6_ID,
-  GPIO2_REL6_INV_ID,
-  GPIO2_REL7_ID,
-  GPIO2_REL7_INV_ID,
-  GPIO2_REL8_ID,
-  GPIO2_REL8_INV_ID,
-  GPIO2_LED1_ID,           // Leds
-  GPIO2_LED1_INV_ID,
-  GPIO2_LED2_ID,
-  GPIO2_LED2_INV_ID,
-  GPIO2_LED3_ID,
-  GPIO2_LED3_INV_ID,
-  GPIO2_LED4_ID,
-  GPIO2_LED4_INV_ID,
-  GPIO2_PWM1_ID,           // RGB   Red   or C  Cold White
-  GPIO2_PWM1_INV_ID,
-  GPIO2_PWM2_ID,           // RGB   Green or CW Warm White
-  GPIO2_PWM2_INV_ID,
-  GPIO2_PWM3_ID,           // RGB   Blue
-  GPIO2_PWM3_INV_ID,
-  GPIO2_PWM4_ID,           // RGBW  (Cold) White
-  GPIO2_PWM4_INV_ID,
-  GPIO2_PWM5_ID,           // RGBCW Warm White
-  GPIO2_PWM5_INV_ID,
-  GPIO2_CNTR1_ID,          // Counters
-  GPIO2_CNTR1_NP_ID,
-  GPIO2_CNTR2_ID,
-  GPIO2_CNTR2_NP_ID,
-  GPIO2_CNTR3_ID,
-  GPIO2_CNTR3_NP_ID,
-  GPIO2_CNTR4_ID,
-  GPIO2_CNTR4_NP_ID,
-  GPIO2_HWSERIAL0_TX_ID,            // Serial interface
-  GPIO2_HWSERIAL0_RX_ID,            // Serial interface
-  GPIO2_HWSERIAL1_TX_ID,            // Serial interface
-  GPIO2_HWSERIAL1_RX_ID,            // Serial interface
-  GPIO2_HWSERIAL2_TX_ID,            // Serial interface
-  GPIO2_HWSERIAL2_RX_ID,            // Serial interface
-  GPIO2_SWSERIAL0_TX_ID,            // Serial interface
-  GPIO2_SWSERIAL0_RX_ID,            // Serial interface
-#ifdef USE_I2C
-  GPIO2_I2C_SCL_ID,        // I2C SCL
-  GPIO2_I2C_SDA_ID,        // I2C SDA
+const uint16_t mHardwarePins::GPIO_Function_EnabledList_IDs[] PROGMEM = {
+  GPIO_NONE_ID,           // Not used
+  GPIO_KEY1_ID,           // Buttons
+  GPIO_KEY1_NP_ID,
+  GPIO_KEY1_INV_ID,
+  GPIO_KEY1_INV_NP_ID,
+  GPIO_KEY2_ID,
+  GPIO_KEY2_NP_ID,
+  GPIO_KEY2_INV_ID,
+  GPIO_KEY2_INV_NP_ID,
+  GPIO_KEY3_ID,
+  GPIO_KEY3_NP_ID,
+  GPIO_KEY3_INV_ID,
+  GPIO_KEY3_INV_NP_ID,
+  GPIO_KEY4_ID,
+  GPIO_KEY4_NP_ID,
+  GPIO_KEY4_INV_ID,
+  GPIO_KEY4_INV_NP_ID,
+  GPIO_SWT1_ID,           // User connected external switches
+  GPIO_SWT1_NP_ID,
+  GPIO_SWT2_ID,
+  GPIO_SWT2_NP_ID,
+  GPIO_SWT3_ID,
+  GPIO_SWT3_NP_ID,
+  GPIO_SWT4_ID,
+  GPIO_SWT4_NP_ID,
+  GPIO_SWT5_ID,
+  GPIO_SWT5_NP_ID,
+  GPIO_SWT6_ID,
+  GPIO_SWT6_NP_ID,
+  GPIO_SWT7_ID,
+  GPIO_SWT7_NP_ID,
+  GPIO_SWT8_ID,
+  GPIO_SWT8_NP_ID,
+  GPIO_REL1_ID,           // Relays
+  GPIO_REL1_INV_ID,
+  GPIO_REL2_ID,
+  GPIO_REL2_INV_ID,
+  GPIO_REL3_ID,
+  GPIO_REL3_INV_ID,
+  GPIO_REL4_ID,
+  GPIO_REL4_INV_ID,
+  GPIO_REL5_ID,
+  GPIO_REL5_INV_ID,
+  GPIO_REL6_ID,
+  GPIO_REL6_INV_ID,
+  GPIO_REL7_ID,
+  GPIO_REL7_INV_ID,
+  GPIO_REL8_ID,
+  GPIO_REL8_INV_ID,
+  GPIO_LED1_ID,           // Leds
+  GPIO_LED1_INV_ID,
+  GPIO_LED2_ID,
+  GPIO_LED2_INV_ID,
+  GPIO_LED3_ID,
+  GPIO_LED3_INV_ID,
+  GPIO_LED4_ID,
+  GPIO_LED4_INV_ID,
+  GPIO_PWM1_ID,           // RGB   Red   or C  Cold White
+  GPIO_PWM1_INV_ID,
+  GPIO_PWM2_ID,           // RGB   Green or CW Warm White
+  GPIO_PWM2_INV_ID,
+  GPIO_PWM3_ID,           // RGB   Blue
+  GPIO_PWM3_INV_ID,
+  GPIO_PWM4_ID,           // RGBW  (Cold) White
+  GPIO_PWM4_INV_ID,
+  GPIO_PWM5_ID,           // RGBCW Warm White
+  GPIO_PWM5_INV_ID,
+  GPIO_CNTR1_ID,          // Counters
+  GPIO_CNTR1_NP_ID,
+  GPIO_CNTR2_ID,
+  GPIO_CNTR2_NP_ID,
+  GPIO_CNTR3_ID,
+  GPIO_CNTR3_NP_ID,
+  GPIO_CNTR4_ID,
+  GPIO_CNTR4_NP_ID,
+  GPIO_HWSERIAL0_TX_ID,            // Serial interface
+  GPIO_HWSERIAL0_RX_ID,            // Serial interface
+  GPIO_HWSERIAL1_TX_ID,            // Serial interface
+  GPIO_HWSERIAL1_RX_ID,            // Serial interface
+  GPIO_HWSERIAL2_TX_ID,            // Serial interface
+  GPIO_HWSERIAL2_RX_ID,            // Serial interface
+  GPIO_SWSERIAL0_TX_ID,            // Serial interface
+  GPIO_SWSERIAL0_RX_ID,            // Serial interface
+#ifdef USE_MODULE_CORE_I2C
+  GPIO_I2C_SCL_ID,        // I2C SCL
+  GPIO_I2C_SDA_ID,        // I2C SDA
 #endif
 #ifdef USE_SPI
-  GPIO2_SPI_CS_ID,         // SPI Chip Select
-  GPIO2_SPI_DC_ID,         // SPI Data Direction
-  GPIO2_SSPI_MISO_ID,      // Software SPI Master Input Slave Output
-  GPIO2_SSPI_MOSI_ID,      // Software SPI Master Output Slave Input
-  GPIO2_SSPI_SCLK_ID,      // Software SPI Serial Clock
-  GPIO2_SSPI_CS_ID,        // Software SPI Chip Select
-  GPIO2_SSPI_DC_ID,        // Software SPI Data or Command
+  GPIO_SPI_CS_ID,         // SPI Chip Select
+  GPIO_SPI_DC_ID,         // SPI Data Direction
+  GPIO_SSPI_MISO_ID,      // Software SPI Master Input Slave Output
+  GPIO_SSPI_MOSI_ID,      // Software SPI Master Output Slave Input
+  GPIO_SSPI_SCLK_ID,      // Software SPI Serial Clock
+  GPIO_SSPI_CS_ID,        // Software SPI Chip Select
+  GPIO_SSPI_DC_ID,        // Software SPI Data or Command
 #endif
 #ifdef USE_DISPLAY
-  GPIO2_BACKLIGHT_ID,      // Display backlight control
+  GPIO_BACKLIGHT_ID,      // Display backlight control
 #endif
 #ifdef USE_MODULE_DRIVER_BUZZER
-  GPIO2_BUZZER_ID,         // Buzzer
-  GPIO2_BUZZER_INV_ID,     // Inverted buzzer
+  GPIO_BUZZER_ID,         // Buzzer
+  GPIO_BUZZER_INV_ID,     // Inverted buzzer
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
-  GPIO2_DHT11_1OF2_ID,          // DHT11
-  GPIO2_DHT11_2OF2_ID,          // DHT11
-  GPIO2_DHT22_1OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
-  GPIO2_DHT22_2OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
+  GPIO_DHT11_1OF2_ID,          // DHT11
+  GPIO_DHT11_2OF2_ID,          // DHT11
+  GPIO_DHT22_1OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
+  GPIO_DHT22_2OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
 #endif
 //#if defined(USE_DS18B20) || defined(USE_DS18x20) || defined(USE_DS18x20_LEGACY)
-  GPIO2_DSB_1OF2_ID,            // Single wire DS18B20 or DS18S20
-  GPIO2_DSB_2OF2_ID,            // Single wire DS18B20 or DS18S20
+  GPIO_DSB_1OF2_ID,            // Single wire DS18B20 or DS18S20
+  GPIO_DSB_2OF2_ID,            // Single wire DS18B20 or DS18S20
 //#endif
 #ifdef USE_WS2812
-  GPIO2_RGB_DATA_ID,         // WS2812 Led string
-  GPIO2_RGB_CLOCK_ID,         // WS2812 Led string
+  GPIO_RGB_DATA_ID,         // WS2812 Led string
+  GPIO_RGB_CLOCK_ID,         // WS2812 Led string
 #endif
 #ifdef USE_IR_REMOTE
-  GPIO2_IRSEND_ID,         // IR remote
+  GPIO_IRSEND_ID,         // IR remote
 #ifdef USE_IR_RECEIVE
-  GPIO2_IRRECV_ID,         // IR receiver
+  GPIO_IRRECV_ID,         // IR receiver
 #endif
 #endif
 #ifdef USE_RC_SWITCH
-  GPIO2_RFSEND_ID,         // RF transmitter
-  GPIO2_RFRECV_ID,         // RF receiver
+  GPIO_RFSEND_ID,         // RF transmitter
+  GPIO_RFRECV_ID,         // RF receiver
 #endif
 // #ifdef USE_RF_SENSOR
-  GPIO2_RF_433MHZ_RX_ID,      // Rf receiver with sensor decoding
+  GPIO_RF_433MHZ_RX_ID,      // Rf receiver with sensor decoding
 // #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
-  GPIO2_SR04_TRIG_ID,      // SR04 Trigger pin
-  GPIO2_SR04_ECHO_ID,      // SR04 Echo pin
+  GPIO_SR04_TRIG_ID,      // SR04 Trigger pin
+  GPIO_SR04_ECHO_ID,      // SR04 Echo pin
 #endif
 // #if defined(USE_ENERGY_SENSOR) && defined(USE_HLW8012)
-//   GPIO2_NRG_SEL_ID,        // HLW8012/HLJ-01 Sel output (1 = Voltage)
-//   GPIO2_NRG_SEL_INV_ID,    // HLW8012/HLJ-01 Sel output (0 = Voltage)
-//   GPIO2_NRG_CF1_ID,        // HLW8012/HLJ-01 CF1 voltage / current
-//   GPIO2_HLW_CF_ID,         // HLW8012 CF power
-//   GPIO2_HJL_CF_ID,         // HJL-01/BL0937 CF power
+//   GPIO_NRG_SEL_ID,        // HLW8012/HLJ-01 Sel output (1 = Voltage)
+//   GPIO_NRG_SEL_INV_ID,    // HLW8012/HLJ-01 Sel output (0 = Voltage)
+//   GPIO_NRG_CF1_ID,        // HLW8012/HLJ-01 CF1 voltage / current
+//   GPIO_HLW_CF_ID,         // HLW8012 CF power
+//   GPIO_HJL_CF_ID,         // HJL-01/BL0937 CF power
 // #endif
 // #if defined(USE_ENERGY_SENSOR) && defined(USE_I2C) && defined(USE_ADE7953)
-  GPIO2_ADE7953_IRQ_ID,    // ADE7953 IRQ
+  GPIO_ADE7953_IRQ_ID,    // ADE7953 IRQ
 // #endif
 #if defined(USE_ENERGY_SENSOR) && defined(USE_MCP39F501)
-  GPIO2_MCP39F5_TX_ID,     // MCP39F501 Serial interface (Shelly2)
-  GPIO2_MCP39F5_RX_ID,     // MCP39F501 Serial interface (Shelly2)
-  GPIO2_MCP39F5_RST_ID,    // MCP39F501 Reset (Shelly2)
+  GPIO_MCP39F5_TX_ID,     // MCP39F501 Serial interface (Shelly2)
+  GPIO_MCP39F5_RX_ID,     // MCP39F501 Serial interface (Shelly2)
+  GPIO_MCP39F5_RST_ID,    // MCP39F501 Reset (Shelly2)
 #endif
 // #if defined(USE_MODULE_ENERGY_PZEM004T_V3) || defined(USE_PZEM_DC)
-  GPIO2_PZEM0XX_TX_ID,     // PZEM0XX Serial interface
+  GPIO_PZEM0XX_TX_ID,     // PZEM0XX Serial interface
 // #endif
 // #ifdef USE_PZEM004T
-  GPIO2_PZEM004_RX_ID,     // PZEM004T Serial interface
+  GPIO_PZEM004_RX_ID,     // PZEM004T Serial interface
 // #endif
 // #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  GPIO2_PZEM0XX_RX_MODBUS_ID,     // PZEM-014_ID,016 Serial Modbus interface
+  GPIO_PZEM0XX_RX_MODBUS_ID,     // PZEM-014_ID,016 Serial Modbus interface
 // #endif
 // #ifdef USE_PZEM_DC
-  GPIO2_PZEM017_RX_ID,     // PZEM-003_ID,017 Serial Modbus interface
+  GPIO_PZEM017_RX_ID,     // PZEM-003_ID,017 Serial Modbus interface
 // #endif
 #ifdef USE_SDM120
-  GPIO2_SDM120_TX_ID,      // SDM120 Serial interface
-  GPIO2_SDM120_RX_ID,      // SDM120 Serial interface
+  GPIO_SDM120_TX_ID,      // SDM120 Serial interface
+  GPIO_SDM120_RX_ID,      // SDM120 Serial interface
 #endif
 #ifdef USE_SDM630
-  GPIO2_SDM630_TX_ID,      // SDM630 Serial interface
-  GPIO2_SDM630_RX_ID,      // SDM630 Serial interface
+  GPIO_SDM630_TX_ID,      // SDM630 Serial interface
+  GPIO_SDM630_RX_ID,      // SDM630 Serial interface
 #endif
 #ifdef USE_SERIAL_BRIDGE
-  GPIO2_SBR_TX_ID,         // Serial Bridge Serial interface
-  GPIO2_SBR_RX_ID,         // Serial Bridge Serial interface
+  GPIO_SBR_TX_ID,         // Serial Bridge Serial interface
+  GPIO_SBR_RX_ID,         // Serial Bridge Serial interface
 #endif
 #ifdef USE_SENSEAIR
-  GPIO2_SAIR_TX_ID,        // SenseAir Serial interface
-  GPIO2_SAIR_RX_ID,        // SenseAir Serial interface
+  GPIO_SAIR_TX_ID,        // SenseAir Serial interface
+  GPIO_SAIR_RX_ID,        // SenseAir Serial interface
 #endif
 #ifdef USE_NOVA_SDS
-  GPIO2_SDS0X1_TX_ID,      // Nova Fitness SDS011 Serial interface
-  GPIO2_SDS0X1_RX_ID,      // Nova Fitness SDS011 Serial interface
+  GPIO_SDS0X1_TX_ID,      // Nova Fitness SDS011 Serial interface
+  GPIO_SDS0X1_RX_ID,      // Nova Fitness SDS011 Serial interface
 #endif
 #ifdef USE_PMS5003
-  GPIO2_PMS5003_ID,        // Plantower PMS5003 Serial interface
+  GPIO_PMS5003_ID,        // Plantower PMS5003 Serial interface
 #endif
 #ifdef USE_TX20_WIND_SENSOR
-  GPIO2_TX20_TXD_BLACK_ID, // TX20 Transmission Pin
+  GPIO_TX20_TXD_BLACK_ID, // TX20 Transmission Pin
 #endif
 #ifdef USE_MP3_PLAYER
-  GPIO2_MP3_DFR562_ID,     // RB-DFR-562_ID, DFPlayer Mini MP3 Player Serial interface
+  GPIO_MP3_DFR562_ID,     // RB-DFR-562_ID, DFPlayer Mini MP3 Player Serial interface
 #endif
 #ifdef USE_TUYA_DIMMER
-  GPIO2_TUYA_TX_ID,        // Tuya Serial interface
-  GPIO2_TUYA_RX_ID,        // Tuya Serial interface
+  GPIO_TUYA_TX_ID,        // Tuya Serial interface
+  GPIO_TUYA_RX_ID,        // Tuya Serial interface
 #endif
 #ifdef USE_AZ7798
-  GPIO2_AZ_TXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
-  GPIO2_AZ_RXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
+  GPIO_AZ_TXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
+  GPIO_AZ_RXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
 #endif
 #ifdef USE_PN532_HSU
-  GPIO2_PN532_TXD_ID,      // PN532 HSU Tx
-  GPIO2_PN532_RXD_ID,      // PN532 HSU Rx
+  GPIO_PN532_TXD_ID,      // PN532 HSU Tx
+  GPIO_PN532_RXD_ID,      // PN532 HSU Rx
 #endif
 #ifdef USE_MGC3130
-  GPIO2_MGC3130_XFER_ID,
-  GPIO2_MGC3130_RESET_ID,
+  GPIO_MGC3130_XFER_ID,
+  GPIO_MGC3130_RESET_ID,
 #endif
 #ifdef USE_MAX31855
-  GPIO2_MAX31855CS_ID,     // MAX31855 Serial interface
-  GPIO2_MAX31855CLK_ID,    // MAX31855 Serial interface
-  GPIO2_MAX31855DO_ID,     // MAX31855 Serial interface
+  GPIO_MAX31855CS_ID,     // MAX31855 Serial interface
+  GPIO_MAX31855CLK_ID,    // MAX31855 Serial interface
+  GPIO_MAX31855DO_ID,     // MAX31855 Serial interface
 #endif
 #ifdef USE_SM16716
-  GPIO2_SM16716_CLK_ID,    // SM16716 CLOCK
-  GPIO2_SM16716_DAT_ID,    // SM16716 DATA
-  GPIO2_SM16716_SEL_ID,    // SM16716 SELECT
+  GPIO_SM16716_CLK_ID,    // SM16716 CLOCK
+  GPIO_SM16716_DAT_ID,    // SM16716 DATA
+  GPIO_SM16716_SEL_ID,    // SM16716 SELECT
 #endif // USE_SM16716
 #ifdef ROTARY_V1
-  GPIO2_ROT1A_ID,          // Rotary switch1 A Pin
-  GPIO2_ROT1B_ID,          // Rotary switch1 B Pin
-  GPIO2_ROT2A_ID,          // Rotary switch2 A Pin
-  GPIO2_ROT2B_ID,          // Rotary switch2 B Pin
+  GPIO_ROT1A_ID,          // Rotary switch1 A Pin
+  GPIO_ROT1B_ID,          // Rotary switch1 B Pin
+  GPIO_ROT2A_ID,          // Rotary switch2 A Pin
+  GPIO_ROT2B_ID,          // Rotary switch2 B Pin
 #endif
 #ifdef USE_ARILUX_RF
-  GPIO2_ARIRFRCV_ID,       // AliLux RF Receive input
+  GPIO_ARIRFRCV_ID,       // AliLux RF Receive input
 #endif
 #ifdef USE_HRE
-  GPIO2_HRE_CLOCK_ID,
-  GPIO2_HRE_DATA
+  GPIO_HRE_CLOCK_ID,
+  GPIO_HRE_DATA
 #endif
 #ifdef USE_MODULE_SENSORS_DOOR
-  GPIO2_DOOR_OPEN_ID,
+  GPIO_DOOR_OPEN_ID,
 #endif
 #ifdef USE_SENSOR_DOOR_LOCK
-  GPIO2_DOOR_LOCK_ID,
+  GPIO_DOOR_LOCK_ID,
 #endif
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
-   GPIO2_HBRIDGE_L9110_IA_ID,
-   GPIO2_HBRIDGE_L9110_IA_ID,
-   GPIO2_HBRIDGE_L9110_OA_ID,
-   GPIO2_HBRIDGE_L9110_OA_ID,
-   GPIO2_HBRIDGE_ANALOG_SENSE_ID,
+   GPIO_HBRIDGE_L9110_IA_ID,
+   GPIO_HBRIDGE_L9110_IA_ID,
+   GPIO_HBRIDGE_L9110_OA_ID,
+   GPIO_HBRIDGE_L9110_OA_ID,
+   GPIO_HBRIDGE_ANALOG_SENSE_ID,
 #endif
 };
 
 
 
+/********************************************************************************************\
+ * ESP8266 Module Templates
+\********************************************************************************************/
 
+#ifdef ESP8266
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ID list kModuleTemplateList 
 /**
  * @brief This contains indexing for esp8266 THEN esp8285, the index (value) is important for retrieving template from either esp8266 or esp8285 arrays
  * 
  */
-const uint16_t mHardwarePins::kModuleNiceList_IDS[] PROGMEM = {
+const uint16_t mHardwarePins::ModuleList_Enabled_IDs[] PROGMEM = {
   MODULE_WEMOS_ID,  //esp8285
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
     MODULE_SONOFF_BASIC_ID,
@@ -337,13 +305,10 @@ const uint16_t mHardwarePins::kModuleNiceList_IDS[] PROGMEM = {
   #endif
   // MODULE_MAXMODULE_8266 // To allow dynamic array size
 
-  
 };
 
 
-
-const char mHardwarePins::kModules_Name_list_ctr[] PROGMEM
-// DEFINE_PGM_CTR(kModules_Name_list_ctr)
+const char mHardwarePins::ModuleList_Names_DList[] PROGMEM
 {
   D_MODULE_NAME_USERMODULE_CTR "|"
   D_MODULE_NAME_SONOFF_BASIC_CTR  "|"
@@ -355,43 +320,16 @@ const char mHardwarePins::kModules_Name_list_ctr[] PROGMEM
   D_MODULE_NAME_SHELLY_DIMMER2_CTR "|"
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   D_MODULE_NAME_SONOFF_IFAN03_CTR  "|"
-  #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  #endif
   D_MODULE_NAME_SONOFF_4CHPRO_CTR 
 };
 
 
-
-// !!! Update this list in the same order as kModuleNiceList !!!
-const char mHardwarePins::kModuleNames[] PROGMEM =
-  "ESP32-DevKit|"
-#ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
-  D_MODULE_NAME_CAM_AITHINKER_CTR "|"
-#endif  // USE_MODULE_TEMPLATE_CAM_AITHINKER
-// #ifdef USE_ODROID_GO
-//   "Odroid Go|"
-// #endif  // USE_ODROID_GO
-// #ifdef USE_ESP32_SOLO
-// //  "ESP32-Solo|"              // To be defined
-// #endif  // USE_ESP32_SOLO
-// #ifdef USE_WT32_ETH01
-//   "WT32-Eth01|"
-// #endif  // USE_WT32_ETH01
-// #ifdef USE_TTGO_WATCH
-// //  "TTGO Watch|"              // To be defined
-// #endif  // USE_TTGO_WATCH
-// #ifdef USE_M5STACK_CORE2
-//   "M5Stack Core2|"
-// #endif  // USE_M5STACK_CORE2
-  ;
-
-
-#ifdef ESP8266
-
 /*********************************************************************************************\
  * Templates with 12 usable pins (ESP8266)
 \*********************************************************************************************/
-
-const mytmplt8266 mHardwarePins::kModules[MODULE_MAXMODULE_8266] PROGMEM = {
+// !!! Update ModuleTemplate_Names_DList above in the same order as below
+const mytmplt8266 mHardwarePins::ModuleTemplate_GPIO_Map[MODULE_MAXMODULE_8266] PROGMEM = {
   // Generic option always first
   { // D_MODULE_NAME_USERMODULE_CTR
     
@@ -738,75 +676,33 @@ const mytmplt8266 mHardwarePins::kModules[MODULE_MAXMODULE_8266] PROGMEM = {
 
 #define USER_MODULE        255
 
-#define USE_MODULE_TEMPLATE_CAM_AITHINKER
+// #define USE_MODULE_TEMPLATE_CAM_AITHINKER
 
-// Supported hardware modules
-enum SupportedModules {
-  DOIT_DEVKIT,
-  MODULE_CAM_AITHINKER_ID,
-  // WEMOS,
-  // ESP32_CAM_AITHINKER,
-  // ODROID_GO,
-  // ESP32_SOLO,
-  // WT32_ETH01,
-  // TTGO_WATCH,
-  // M5STACK_CORE2,
-  MAXMODULE 
-  };
-
+#define D_MODULE_NAME__ESP32_DEVKIT__CTR "ESP32-DevKit"
+DEFINE_PGM_CTR(PM_MODULE_NAME__ESP32_DEVKIT__CTR)        D_MODULE_NAME__ESP32_DEVKIT__CTR;
 #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
   #define            D_MODULE_NAME_CAM_AITHINKER_CTR          "Webcam AIThinker"
   DEFINE_PGM_CTR(PM_MODULE_NAME_CAM_AITHINKER_CTR)        D_MODULE_NAME_CAM_AITHINKER_CTR;
 #endif // USE_MODULE_TEMPLATE_CAM_AITHINKER
 
 // Default module settings
-const uint16_t mHardwarePins::kModuleNiceList[] PROGMEM = {
-  DOIT_DEVKIT,
-#ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
+const uint16_t mHardwarePins::ModuleList_Enabled_IDs[] PROGMEM = {
+  MODULE_DOIT_DEVKIT,
+  #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
   MODULE_CAM_AITHINKER_ID,
-#endif  // USE_MODULE_TEMPLATE_CAM_AITHINKER
-// #ifdef USE_ODROID_GO
-//   ODROID_GO,
-// #endif  // USE_ODROID_GO
-// #ifdef USE_ESP32_SOLO
-// //  ESP32_SOLO,                // To be defined
-// #endif  // USE_ESP32_SOLO
-// #ifdef USE_WT32_ETH01
-//   WT32_ETH01,
-// #endif  // USE_WT32_ETH01
-// #ifdef USE_TTGO_WATCH
-// //  TTGO_WATCH,                // To be defined
-// #endif  // USE_TTGO_WATCH
-// #ifdef USE_M5STACK_CORE2
-//   M5STACK_CORE2,
-// #endif  // USE_M5STACK_CORE2
+  #endif
 };
 
 // // !!! Update this list in the same order as kModuleNiceList !!!
-// const char mHardwarePins::kModuleNames[] PROGMEM =
-//   "ESP32-DevKit|"
-// #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
-//   D_MODULE_NAME_CAM_AITHINKER_CTR "|"
-// #endif  // USE_MODULE_TEMPLATE_CAM_AITHINKER
-// // #ifdef USE_ODROID_GO
-// //   "Odroid Go|"
-// // #endif  // USE_ODROID_GO
-// // #ifdef USE_ESP32_SOLO
-// // //  "ESP32-Solo|"              // To be defined
-// // #endif  // USE_ESP32_SOLO
-// // #ifdef USE_WT32_ETH01
-// //   "WT32-Eth01|"
-// // #endif  // USE_WT32_ETH01
-// // #ifdef USE_TTGO_WATCH
-// // //  "TTGO Watch|"              // To be defined
-// // #endif  // USE_TTGO_WATCH
-// // #ifdef USE_M5STACK_CORE2
-// //   "M5Stack Core2|"
-// // #endif  // USE_M5STACK_CORE2
-//   ;
+const char mHardwarePins::ModuleList_Names_DList[] PROGMEM =
+  D_MODULE_NAME__ESP32_DEVKIT__CTR "|"
+  #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
+  D_MODULE_NAME_CAM_AITHINKER_CTR "|"
+  #endif 
+  ;
 
 // !!! Update this list in the same order as SupportedModules !!!
-const mytmplt mHardwarePins::kModules[] PROGMEM = {
+const mytmplt mHardwarePins::ModuleTemplate_GPIO_Map[] PROGMEM = {
   {                              // WEMOS - Espressif ESP32-DevKitC - Any ESP32 device like WeMos and NodeMCU hardware (ESP32)
     GPIO_USER_ID,            // 0       (I)O                GPIO0, ADC2_CH1, TOUCH1, RTC_GPIO11, CLK_OUT1, EMAC_TX_CLK
     GPIO_USER_ID,            // 1       IO     TXD0         GPIO1, U0TXD, CLK_OUT3, EMAC_RXD2
@@ -896,153 +792,6 @@ const mytmplt mHardwarePins::kModules[] PROGMEM = {
   },
   #endif  // USE_MODULE_TEMPLATE_CAM_AITHINKER
 
-// #ifdef USE_ODROID_GO
-//   {                              // ODROID_GO - (ESP32)
-//     GPIO_KEY1),            // 0       (I)O                GPIO0, BTN-VOLUME
-//     GPIO_TXD),             // 1       IO     TXD0         GPIO1, TXD0
-//     GPIO_LEDLNK),          // 2       IO                  GPIO2, STATUS LED
-//     GPIO_RXD),             // 3       IO     RXD0         GPIO3, RXD0
-//     GPIO_USER_ID,            // 4       IO                  GPIO4, ADC2_CH0, TOUCH0, RTC_GPIO10, HSPIHD, HS2_DATA1, SD_DATA1, EMAC_TX_ER
-//     GPIO_ILI9341_CS),      // 5       IO                  GPIO5, VSPI_CS0_LCD
-//                                  // 6       IO                  GPIO6, Flash CLK
-//                                  // 7       IO                  GPIO7, Flash D0
-//                                  // 8       IO                  GPIO8, Flash D1
-//     0,                           // 9       IO                  GPIO9, Flash D2, U1RXD
-//     0,                           // 10      IO                  GPIO10, Flash D3, U1TXD
-//                                  // 11      IO                  GPIO11, Flash CMD
-//     GPIO_USER_ID,            // 12      (I)O                GPIO12, ADC2_CH5, TOUCH5, RTC_GPIO15, MTDI, HSPIQ, HS2_DATA2, SD_DATA2, EMAC_TXD3       (If driven High, flash voltage (VDD_SDIO) is 1.8V not default 3.3V. Has internal pull-down, so unconnected = Low = 3.3V. May prevent flashing and/or booting if 3.3V flash is connected and pulled high. See ESP32 datasheet for more details.)
-//     GPIO_KEY1) +1,         // 13      IO                  GPIO13, BTN-MENU
-//     GPIO_PWM1),            // 14      IO                  GPIO14, LCD Backlight
-//     GPIO_USER_ID,            // 15      (I)O                GPIO15, ADC2_CH3, TOUCH3, MTDO, HSPICS0, RTC_GPIO13, HS2_CMD, SD_CMD, EMAC_RXD3         (If driven Low, silences boot messages from normal boot. Has internal pull-up, so unconnected = High = normal output.)
-//     GPIO_USER_ID,            // 16      IO                  GPIO16, HS1_DATA4, U2RXD, EMAC_CLK_OUT
-//     GPIO_USER_ID,            // 17      IO                  GPIO17, HS1_DATA5, U2TXD, EMAC_CLK_OUT_180
-//     GPIO_SPI_CLK),         // 18      IO                  GPIO18, VSPI_CLK
-//     GPIO_SPI_MISO),        // 19      IO                  GPIO19, VSPI_MISO
-//     0,                           // 20
-//     GPIO_ILI9341_DC),      // 21      IO                  GPIO21, SPI_DC_LCD
-//     GPIO_SDCARD_CS),       // 22      IO      LED         GPIO22, VSPI_CS1_TFLASH
-//     GPIO_SPI_MOSI),        // 23      IO                  GPIO23, VSPI_MOSI
-//     0,                           // 24
-//     0,                           // 25      IO                  GPIO25, DAC_1 (PAM8304A)
-//     0,                           // 26      IO                  GPIO26, DAC_2 (PAM8304A)
-//     GPIO_KEY1) +2,         // 27      IO                  GPIO27, BTN-SELECT
-//     0,                           // 28
-//     0,                           // 29
-//     0,                           // 30
-//     0,                           // 31
-//     GPIO_SWT1) +4,         // 32      IO                  GPIO32, BTN-A
-//     GPIO_SWT1) +5,         // 33      IO                  GPIO33, BTN-B
-//     GPIO_ADC_JOY),         // 34      I   NO PULLUP       GPIO34, JOY-X (LEFT-RIGHT)
-//     GPIO_ADC_JOY) +1,      // 35      I   NO PULLUP       GPIO35, JOY-Y (UP-DOWN)
-//     GPIO_ADC_RANGE) +2,    // 36      I   NO PULLUP       GPIO36, SENSOR_VP (BATTERY CARGER)
-//     0,                           // 37          NO PULLUP
-//     0,                           // 38          NO PULLUP
-//     GPIO_KEY1) +3,         // 39      I   NO PULLUP       GPIO39, BTN-START
-//     0                            // Flag
-//   },
-// #endif  // USE_ODROID_GO
-
-// #ifdef USE_ESP32_SOLO
-// //  {                              // ESP32 Solo (ESP32) - To be defined
-// //  },
-// #endif  // USE_ESP32_SOLO
-
-// #ifdef USE_WT32_ETH01
-//   {                              // WT32_ETH01 - (ESP32)
-//     0,                           // 0       (I)O                GPIO0, Ethernet EMAC_REF_CLK
-//     GPIO_USER_ID,            // 1       IO     TXD0         GPIO1, U0TXD, CLK_OUT3, EMAC_RXD2
-//     GPIO_USER_ID,            // 2       IO                  GPIO2, ADC2_CH2, TOUCH2, RTC_GPIO12, HSPIWP, HS2_DATA0, SD_DATA0
-//     GPIO_USER_ID,            // 3       IO     RXD0         GPIO3, U0RXD, CLK_OUT2
-//     GPIO_USER_ID,            // 4       IO                  GPIO4, ADC2_CH0, TOUCH0, RTC_GPIO10, HSPIHD, HS2_DATA1, SD_DATA1, EMAC_TX_ER
-//     GPIO_USER_ID,            // 5       IO                  GPIO5, RXD Led green
-//                                  // 6       IO                  GPIO6, Flash CLK
-//                                  // 7       IO                  GPIO7, Flash D0
-//                                  // 8       IO                  GPIO8, Flash D1
-//     0,                           // 9       IO                  GPIO9, Flash D2, U1RXD
-//     0,                           // 10      IO                  GPIO10, Flash D3, U1TXD
-//                                  // 11      IO                  GPIO11, Flash CMD
-//     GPIO_USER_ID,            // 12      (I)O                GPIO12, ADC2_CH5, TOUCH5, RTC_GPIO15, MTDI, HSPIQ, HS2_DATA2, SD_DATA2, EMAC_TXD3       (If driven High, flash voltage (VDD_SDIO) is 1.8V not default 3.3V. Has internal pull-down, so unconnected = Low = 3.3V. May prevent flashing and/or booting if 3.3V flash is connected and pulled high. See ESP32 datasheet for more details.)
-//     0,                           // 13      IO                  GPIO13, Ethernet EMAC_RX_ER
-//     GPIO_USER_ID,            // 14      IO                  GPIO14, ADC2_CH6, TOUCH6, RTC_GPIO16, MTMS, HSPICLK, HS2_CLK, SD_CLK, EMAC_TXD2
-//     GPIO_USER_ID,            // 15      (I)O                GPIO15, ADC2_CH3, TOUCH3, MTDO, HSPICS0, RTC_GPIO13, HS2_CMD, SD_CMD, EMAC_RXD3         (If driven Low, silences boot messages from normal boot. Has internal pull-up, so unconnected = High = normal output.)
-//     GPIO_OUTPUT_HI),       // 16      IO                  GPIO16, Ethernet OSC_ENA
-//     GPIO_LEDLNK_INV),      // 17      IO                  GPIO17, Network link led (green)
-//     GPIO_ETH_PHY_MDIO),    // 18      IO                  GPIO18, Ethernet MDIO
-//     0,                           // 19      IO                  GPIO19, Ethernet TXD0
-//     0,                           // 20
-//     0,                           // 21      IO                  GPIO21, Ethernet EMAC_TX_EN
-//     0,                           // 22      IO      LED         GPIO22, Ethernet EMAC_TXD1
-//     GPIO_ETH_PHY_MDC),     // 23      IO                  GPIO23, Ethernet MDC
-//     0,                           // 24
-//     0,                           // 25      IO                  GPIO25, Ethernet EMAC_RXD0
-//     0,                           // 26      IO                  GPIO26, Ethernet EMAC_RXD1
-//     0,                           // 27      IO                  GPIO27, Ethernet EMAC_RX_DV
-//     0,                           // 28
-//     0,                           // 29
-//     0,                           // 30
-//     0,                           // 31
-//     GPIO_USER_ID,            // 32      IO                  GPIO32, CFG
-//     GPIO_USER_ID,            // 33      IO                  GPIO33, 485_EN
-//     0,                           // 34      I   NO PULLUP       GPIO34, ADC1_CH6, RTC_GPIO4
-//     GPIO_USER_ID,            // 35      I   NO PULLUP       GPIO35, ADC1_CH7, RTC_GPIO5
-//     GPIO_USER_ID,            // 36      I   NO PULLUP       GPIO36, SENSOR_VP, ADC_H, ADC1_CH0, RTC_GPIO0
-//     0,                           // 37          NO PULLUP
-//     0,                           // 38          NO PULLUP
-//     GPIO_USER_ID,            // 39      I   NO PULLUP       GPIO39, SENSOR_VN, ADC1_CH3, ADC_H, RTC_GPIO3
-//     0                            // Flag
-//   },
-// #endif  // USE_WT32_ETH01
-
-// #ifdef USE_TTGO_WATCH
-// //  {                              // TTGO Watch (ESP32) - To be defined
-// //  },
-// #endif  // USE_TTGO_WATCH
-
-// #ifdef USE_M5STACK_CORE2
-//   {                              // M5STACK CORE2 - (ESP32)
-//     GPIO_USER_ID,            // 0       (I)O                GPIO0, SPKR_LRCK
-//     GPIO_USER_ID,            // 1       IO     TXD0         GPIO1, U0TXD
-//     GPIO_USER_ID,            // 2       IO                  GPIO2, SPKR_DATA
-//     GPIO_USER_ID,            // 3       IO     RXD0         GPIO3, U0RXD
-//     GPIO_SDCARD_CS),       // 4       IO                  GPIO4, SPI_CS_CARD
-//     GPIO_ILI9341_CS),      // 5       IO                  GPIO5, SPI_CS_LCD
-//                                  // 6       IO                  GPIO6, Flash CLK
-//                                  // 7       IO                  GPIO7, Flash D0
-//                                  // 8       IO                  GPIO8, Flash D1
-//     0,                           // 9       IO                  GPIO9, Flash D2, PSRAM_D3
-//     0,                           // 10      IO                  GPIO10, Flash D3, PSRAM_D2
-//                                  // 11      IO                  GPIO11, Flash CMD
-//     0,                           // 12      (I)O                GPIO12, SPKR_CLK
-//     GPIO_USER_ID,            // 13      IO                  GPIO13, ADC2_CH4, TOUCH4, RTC_GPIO14, MTCK, HSPID, HS2_DATA3, SD_DATA3, EMAC_RX_ER
-//     GPIO_USER_ID,            // 14      IO                  GPIO14, ADC2_CH6, TOUCH6, RTC_GPIO16, MTMS, HSPICLK, HS2_CLK, SD_CLK, EMAC_TXD2
-//     GPIO_ILI9341_DC),      // 15      (I)O                GPIO15, SPI_DC_LCD
-//     0,                           // 16      IO                  GPIO16, PSRAM_CS
-//     0,                           // 17      IO                  GPIO17, PSRAM_CLK
-//     GPIO_SPI_CLK),         // 18      IO                  GPIO18, SPI_CLK
-//     GPIO_USER_ID,            // 19      IO                  GPIO19, VSPIQ, U0CTS, EMAC_TXD0
-//     0,                           // 20
-//     0,                           // 21      IO                  GPIO21, I2C_SDA_INTERNAL
-//     0,                           // 22      IO      LED         GPIO22, I2C_SCL_INTERNAL
-//     GPIO_SPI_MOSI),        // 23      IO                  GPIO23, SPI_MOSI
-//     0,                           // 24
-//     GPIO_USER_ID,            // 25      IO                  GPIO25, DAC_1, ADC2_CH8, RTC_GPIO6, EMAC_RXD0
-//     GPIO_USER_ID,            // 26      IO                  GPIO26, DAC_2, ADC2_CH9, RTC_GPIO7, EMAC_RXD1
-//     GPIO_USER_ID,            // 27      IO                  GPIO27, ADC2_CH7, TOUCH7, RTC_GPIO17, EMAC_RX_DV
-//     0,                           // 28
-//     0,                           // 29
-//     0,                           // 30
-//     0,                           // 31
-//     GPIO_I2C_SDA),         // 32      IO                  GPIO32, I2C_SDA
-//     GPIO_I2C_SCL),         // 33      IO                  GPIO33, I2C_SCL
-//     GPIO_USER_ID,            // 34      I   NO PULLUP       GPIO34, ADC1_CH6, RTC_GPIO4
-//     GPIO_USER_ID,            // 35      I   NO PULLUP       GPIO35, ADC1_CH7, RTC_GPIO5
-//     GPIO_USER_ID,            // 36      I   NO PULLUP       GPIO36, SENSOR_VP, ADC_H, ADC1_CH0, RTC_GPIO0
-//     0,                           // 37          NO PULLUP
-//     GPIO_SPI_MISO),        // 38          NO PULLUP       GPIO38, SPI_MISO
-//     0,                           // 39      I   NO PULLUP       GPIO39, INT_TOUCHPAD
-//     0                            // Flag
-//   }
-// #endif  // USE_M5STACK_CORE2
 };
 
 /*********************************************************************************************\
@@ -1059,41 +808,20 @@ const mytmplt mHardwarePins::kModules[] PROGMEM = {
 
 
 
-/**
- * @brief Boot order
- * ** from filesystem
- * ** any hardcoded templates
- * ** none, load as default device
- * 
- */
-void mHardwarePins::Template_Load()
-{
-
-
-    ReadModuleTemplateFromProgmem();
-    // ParseModuleTemplate(); //probably goes elsewhere
-
-
-}
-
 int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
   // DEBUG_PRINTF("works=%d\n\r",works);
   
-  if(function == FUNC_TEMPLATES__LOAD_MODULE){
-    Template_Load();
-  }
-
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       //ModuleSettings_ShowTemplateLog();
       //ModuleSettings_ShowActiveTemplate();
     break;
-    case FUNC_LOOP:{
+    case TASK_LOOP:{
 
       #ifdef ENABLE_DEBUGFEATURE_SET_PINS_MANUAL_STATES
   
@@ -1126,7 +854,7 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
   }
@@ -1193,15 +921,6 @@ void mHardwarePins::Pre_Init(){
   
   #endif // USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
 
-#ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
-  // Must be at the end of your setup
-  // gpio_viewer.setSamplingInterval(25); // You can set the sampling interval in ms, if not set default is 100ms
-  gpio_viewer.begin();
-#endif
-
-
-
-
 }
 
 
@@ -1240,29 +959,29 @@ void mHardwarePins::ModuleSettings_ShowTemplateLog()
   //       "\t%d(%d):%d\n\r" //13
   //     "BASE : %08X (%s)\n\r"
   //   ),
-  //   pCONT_set->Settings.user_template2.full_ctr,
-  //   //pCONT_set->Settings.user_template2.hardware.name,
+  //   pCONT_set->Settings.user_template.full_ctr,
+  //   //pCONT_set->Settings.user_template.hardware.name,
   //   pCONT_set->Settings.system_name.device,
-  //   0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
-  //   1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
-  //   2,2,pCONT_set->Settings.user_template2.hardware.gp.io[2],
-  //   3,3,pCONT_set->Settings.user_template2.hardware.gp.io[3],
-  //   4,4,pCONT_set->Settings.user_template2.hardware.gp.io[4],
-  //   5,5,pCONT_set->Settings.user_template2.hardware.gp.io[5],
-  //   6,9,pCONT_set->Settings.user_template2.hardware.gp.io[6],
-  //   7,10,pCONT_set->Settings.user_template2.hardware.gp.io[7],
-  //   8,12,pCONT_set->Settings.user_template2.hardware.gp.io[8],
-  //   9,13,pCONT_set->Settings.user_template2.hardware.gp.io[9],
-  //   10,14,pCONT_set->Settings.user_template2.hardware.gp.io[10],
-  //   11,15,pCONT_set->Settings.user_template2.hardware.gp.io[11],
-  //   12,16,pCONT_set->Settings.user_template2.hardware.gp.io[12],
-  //   pCONT_set->Settings.user_template2.base,
-  //   GetModuleNameByID(pCONT_set->Settings.user_template2.base, buffer)
+  //   0,0,pCONT_set->Settings.user_template.hardware.gp.io[0],
+  //   1,1,pCONT_set->Settings.user_template.hardware.gp.io[1],
+  //   2,2,pCONT_set->Settings.user_template.hardware.gp.io[2],
+  //   3,3,pCONT_set->Settings.user_template.hardware.gp.io[3],
+  //   4,4,pCONT_set->Settings.user_template.hardware.gp.io[4],
+  //   5,5,pCONT_set->Settings.user_template.hardware.gp.io[5],
+  //   6,9,pCONT_set->Settings.user_template.hardware.gp.io[6],
+  //   7,10,pCONT_set->Settings.user_template.hardware.gp.io[7],
+  //   8,12,pCONT_set->Settings.user_template.hardware.gp.io[8],
+  //   9,13,pCONT_set->Settings.user_template.hardware.gp.io[9],
+  //   10,14,pCONT_set->Settings.user_template.hardware.gp.io[10],
+  //   11,15,pCONT_set->Settings.user_template.hardware.gp.io[11],
+  //   12,16,pCONT_set->Settings.user_template.hardware.gp.io[12],
+  //   pCONT_set->Settings.user_template.base,
+  //   GetModuleNameByID(pCONT_set->Settings.user_template.base, buffer)
   // );
 
   DEBUG_LINE;
   
-    // const char* buffer2 = GetModuleNameByID(pCONT_set->Settings.user_template2.base, buffer);
+    // const char* buffer2 = GetModuleNameByID(pCONT_set->Settings.user_template.base, buffer);
     // AddLog(LOG_LEVEL_INFO,PSTR("user_template2.base=%s"),buffer2);
 
 }
@@ -1301,22 +1020,22 @@ void mHardwarePins::ModuleSettings_ShowActiveTemplate()
   //       "\t%d(%d):%d\n\r"
   //     "Module : %s\n\r"
   //   ),
-  //   //pCONT_set->Settings.user_template2.full_ctr,
-  //   //pCONT_set->Settings.user_template2.hardware.name,
+  //   //pCONT_set->Settings.user_template.full_ctr,
+  //   //pCONT_set->Settings.user_template.hardware.name,
   //   pCONT_set->Settings.system_name.device,
-  //   0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
-  //   1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
-  //   2,2,pCONT_set->Settings.user_template2.hardware.gp.io[2],
-  //   3,3,pCONT_set->Settings.user_template2.hardware.gp.io[3],
-  //   4,4,pCONT_set->Settings.user_template2.hardware.gp.io[4],
-  //   5,5,pCONT_set->Settings.user_template2.hardware.gp.io[5],
-  //   6,9,pCONT_set->Settings.user_template2.hardware.gp.io[6],
-  //   7,10,pCONT_set->Settings.user_template2.hardware.gp.io[7],
-  //   8,12,pCONT_set->Settings.user_template2.hardware.gp.io[8],
-  //   9,13,pCONT_set->Settings.user_template2.hardware.gp.io[9],
-  //   10,14,pCONT_set->Settings.user_template2.hardware.gp.io[10],
-  //   11,15,pCONT_set->Settings.user_template2.hardware.gp.io[11],
-  //   12,16,pCONT_set->Settings.user_template2.hardware.gp.io[12],
+  //   0,0,pCONT_set->Settings.user_template.hardware.gp.io[0],
+  //   1,1,pCONT_set->Settings.user_template.hardware.gp.io[1],
+  //   2,2,pCONT_set->Settings.user_template.hardware.gp.io[2],
+  //   3,3,pCONT_set->Settings.user_template.hardware.gp.io[3],
+  //   4,4,pCONT_set->Settings.user_template.hardware.gp.io[4],
+  //   5,5,pCONT_set->Settings.user_template.hardware.gp.io[5],
+  //   6,9,pCONT_set->Settings.user_template.hardware.gp.io[6],
+  //   7,10,pCONT_set->Settings.user_template.hardware.gp.io[7],
+  //   8,12,pCONT_set->Settings.user_template.hardware.gp.io[8],
+  //   9,13,pCONT_set->Settings.user_template.hardware.gp.io[9],
+  //   10,14,pCONT_set->Settings.user_template.hardware.gp.io[10],
+  //   11,15,pCONT_set->Settings.user_template.hardware.gp.io[11],
+  //   12,16,pCONT_set->Settings.user_template.hardware.gp.io[12],
   //   GetModuleNameByID(pCONT_set->Settings.module, buffer)
   // );
 
@@ -1334,13 +1053,13 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     "BASE: %d"
   //   ),
 #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-// AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+// ALOG_TST(PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io));
 #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   uint8_t real_gpio = 0;
   // DEBUG_PRINTF("\n\r");
   // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template.full_ctr);
-  // DEBUG_PRINTF("Name: %s\n\r", pCONT_set->Settings.user_template2.hardware.name);
-  for(uint8_t gpio=0;gpio<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);gpio++){
+  // DEBUG_PRINTF("Name: %s\n\r", pCONT_set->Settings.user_template.hardware.name);
+  for(uint8_t gpio=0;gpio<ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io);gpio++){
     //get proper gpio number
 
 //change to pin getter
@@ -1362,11 +1081,11 @@ void mHardwarePins::ModuleSettings_FlashSerial()
     // }
 
 #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-    AddLog(LOG_LEVEL_TEST,PSTR("\t%d(%d):%d"),gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
+    AddLog(LOG_LEVEL_TEST,PSTR("\t%d(%d):%d"),gpio,real_gpio,pCONT_set->Settings.user_template.hardware.gp.io[gpio]);
 #endif
   }
-  // DEBUG_PRINTF("FLAGS: %08X\n\r",pCONT_set->Settings.user_template2.flags);
-  // DEBUG_PRINTF("BASE : %08X\n\r",pCONT_set->Settings.user_template2.base);
+  // DEBUG_PRINTF("FLAGS: %08X\n\r",pCONT_set->Settings.user_template.flags);
+  // DEBUG_PRINTF("BASE : %08X\n\r",pCONT_set->Settings.user_template.base);
   // DEBUG_PRINTF("\n\r\n\r"); 
 
 }
@@ -1431,7 +1150,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   {
     sprintf(buffer,"%d\0",gpio_pin_by_index[i]);
     
-      // AddLog(LOG_LEVEL_INFO, PSTR("NOOOOOOOOOmatched pin %d %d %s %s"),pin,i,c,buffer);
+      // ALOG_INF(PSTR("NOOOOOOOOOmatched pin %d %d %s %s"),pin,i,c,buffer);
 
     if(strcmp(c,buffer)==0)
     {
@@ -1517,7 +1236,7 @@ uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think
  */
 int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
 {
-  //  AddLog(LOG_LEVEL_TEST, PSTR("mHardwarePins::Pin(uint32_t gpio, uint32_t index)(%d,%d)"),gpio,index);
+  //  ALOG_TST(PSTR("mHardwarePins::Pin(uint32_t gpio, uint32_t index)(%d,%d)"),gpio,index);
    
 
 
@@ -1548,7 +1267,7 @@ int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
 // Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
 
 // DEBUG_LINE_HERE;
-//       AddLog(LOG_LEVEL_TEST, PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
+//       ALOG_TST(PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
       return gpio_pin_by_index[index_pin]; // real_pin
     }
   }
@@ -1612,21 +1331,20 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) {
 
   // if((internal_pin_index < MAX_USER_PINS) && (internal_pin_index>=0))
   // {
-    if(internal_pin_index != -1) // -1 means unset pin
-    {
-  
-      ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
-  
-      pin_attached_gpio_functions[internal_pin_index] = gpio;
+  if(internal_pin_index != -1) // -1 means unset pin
+  {
 
-      // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
+    ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+
+    pin_attached_gpio_functions[internal_pin_index] = gpio;
+
+    // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
 
 
   }
-  else{
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_ERROR, PSTR("Error SetPin %d %d<%d"),gpio,internal_pin_index,MAX_USER_PINS);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
+  else
+  {
+    ALOG_ERR( PSTR("Error SetPin %d %d<%d"), gpio, internal_pin_index, MAX_USER_PINS);
   }
 }
 
@@ -1654,7 +1372,7 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
   uint8_t real_pin = Pin(gpio_pin, index);
 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
+    ALOG_TST(PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   // if (PinUsed(gpio_pin, index)) {
     digitalWrite(real_pin, state &1);
@@ -1673,7 +1391,7 @@ bool mHardwarePins::DigitalRead(uint32_t gpio_pin, uint32_t index)
   uint8_t real_pin = Pin(gpio_pin, index);
 
   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
+  //   ALOG_TST(PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
   //   #endif // ENABLE_LOG_LEVEL_COMMANDS
   // // if (PinUsed(gpio_pin, index)) {
   //   digitalWrite(real_pin, state &1);
@@ -1724,8 +1442,8 @@ uint8_t mHardwarePins::ModuleNr()
 
 bool mHardwarePins::ValidTemplateModule(uint8_t index)
 {
-  for (uint8_t i = 0; i < sizeof(kModuleNiceList_IDS); i++) {
-    if (index == pgm_read_byte(kModuleNiceList_IDS + i)) {
+  for (uint8_t i = 0; i < sizeof(ModuleList_Enabled_IDs); i++) {
+    if (index == pgm_read_byte(ModuleList_Enabled_IDs + i)) {
       return true;
     }
   }
@@ -1758,11 +1476,11 @@ bool mHardwarePins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
     // }
 }
 
-const char* mHardwarePins::ModuleName(char* buffer, uint8_t buflen)
+const char* mHardwarePins::ModuleName()
 {
-  return AnyModuleName(pCONT_set->Settings.module, buffer, buflen);
+  return AnyModuleName(pCONT_set->Settings.module);
 }
-const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t buflen)
+const char* mHardwarePins::AnyModuleName(uint8_t index)
 {
 
 // ERROR // if(buffer == nullptr){ buffer = pCONT_sup->global_buffer; }
@@ -1774,16 +1492,16 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
 
  
   // if (USER_MODULE == index) {
-  // // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE == index"));
-  //   return PM_SEARCH_NOMATCH;//pCONT_set->Settings.user_template2.hardware.name; //returns pointer
+  // // ALOG_TST(PSTR(D_LOG_HTTP "USER_MODULE == index"));
+  //   return PM_SEARCH_NOMATCH;//pCONT_set->Settings.user_template.hardware.name; //returns pointer
   // } else {
-    // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE != %d index %s"),index,kModules[index].name);
-    // return kModules[index].name;
+    // ALOG_TST(PSTR(D_LOG_HTTP "USER_MODULE != %d index %s"),index,ModuleTemplate_GPIO_Map[index].name);
+    // return ModuleTemplate_GPIO_Map[index].name;
 
     //Change to use function
 
-    return GetModuleNameByID(index, buffer);
-    // return pCONT_sup->GetTextIndexed_P(buffer, buflen, index, kModules_Name_list_ctr);
+    return GetModuleNameByID(index);
+    // return pCONT_sup->GetTextIndexed_P(buffer, buflen, index, ModuleList_Names_DList);
 
     
 
@@ -1797,7 +1515,7 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
 // void GetInternalTemplate(void* ptr, uint32_t module, uint32_t option) {
 //   uint8_t module_template = pgm_read_byte(kModuleTemplateList + module);
 
-// //  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Template %d, Option %d"), module_template, option);
+// //  ALOG_DBG(PSTR("DBG: Template %d, Option %d"), module_template, option);
 
 //   // template8 = GPIO 0,1,2,3,4,5,9,10,12,13,14,15,16,Adc
 //   uint8_t template8[sizeof(mytmplt8285)] = { GPIO_NONE };
@@ -1829,30 +1547,19 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
 //   }
 //   memcpy(ptr, &template16[index], size);
 
-// //  AddLog(LOG_LEVEL_DEBUG, PSTR("FNC: GetInternalTemplate option %d"), option);
+// //  ALOG_DBG(PSTR("FNC: GetInternalTemplate option %d"), option);
 // //  AddLogBufferSize(LOG_LEVEL_DEBUG, (uint8_t *)ptr, size / 2, 2);
 // }
 #endif  // ESP8266
-
-const char* mHardwarePins::AnyModuleName2(uint8_t index)
-{
-  if (USER_MODULE == index) {
-  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE == index"));
-    return PM_SEARCH_NOMATCH;//pCONT_set->Settings.user_template2.hardware.name;
-  } else {
-  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE != index %s"),kModules[index].name);
-    return PM_SEARCH_NOMATCH;//"";//FPSTR(kModules[index].name);
-  }
-}
 
 gpio_flag mHardwarePins::ModuleFlag()
 {
   gpio_flag flag;
 
   if (USER_MODULE == pCONT_set->Settings.module) {
-    flag = pCONT_set->Settings.user_template2.hardware.flag;
+    flag = pCONT_set->Settings.user_template.hardware.flag;
   } else {
-    memcpy_P(&flag, &kModules[pCONT_set->Settings.module].flag, sizeof(gpio_flag));
+    memcpy_P(&flag, &ModuleTemplate_GPIO_Map[pCONT_set->Settings.module].flag, sizeof(gpio_flag));
   }
 
   return flag;
@@ -1860,9 +1567,9 @@ gpio_flag mHardwarePins::ModuleFlag()
 
 void mHardwarePins::ModuleDefault(uint8_t module)
 {
-  if (USER_MODULE == module) { module = MODULE_WEMOS_ID; }  // Generic
-  pCONT_set->Settings.user_template2.base = module;
-  memcpy_P(&pCONT_set->Settings.user_template2.hardware, &kModules[module], sizeof(mytmplt));
+  if (USER_MODULE == module) { module = MODULE_DEFAULT; }  // Generic
+  pCONT_set->Settings.user_template.base = module;
+  memcpy_P(&pCONT_set->Settings.user_template.hardware, &ModuleTemplate_GPIO_Map[module], sizeof(mytmplt));
 
   // if (USER_MODULE == module) { module = WEMOS; }  // Generic
   // Settings.user_template_base = module;
@@ -1872,18 +1579,18 @@ void mHardwarePins::ModuleDefault(uint8_t module)
 // #endif
 
 //   char name[TOPSZ];
-//   SettingsUpdateText(SET_TEMPLATE_NAME, GetTextIndexed(name, sizeof(name), module, kModuleNames));
+//   SettingsUpdateText(SET_TEMPLATE_NAME, GetTextIndexed(name, sizeof(name), module, ModuleTemplate_Names_DList));
 // #ifdef ESP8266
 //   GetInternalTemplate(&Settings.user_template, module, 3);
 // #endif  // ESP8266
 // #ifdef ESP32
-//   memcpy_P(&Settings.user_template, &kModules[module], sizeof(mytmplt));
+//   memcpy_P(&Settings.user_template, &ModuleTemplate_GPIO_Map[module], sizeof(mytmplt));
 // #endif  // ESP32
 }
 
 void mHardwarePins::SetModuleType()
 {
-  pCONT_set->runtime.my_module_type = (USER_MODULE == pCONT_set->Settings.module) ? pCONT_set->Settings.user_template2.base : pCONT_set->Settings.module;
+  pCONT_set->runtime.my_module_type = (USER_MODULE == pCONT_set->Settings.module) ? pCONT_set->Settings.user_template.base : pCONT_set->Settings.module;
 }
 
 /**
@@ -1966,8 +1673,8 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
 void mHardwarePins::TemplateJson()
 {
   // Response_P(PSTR("{\"" D_JSON_NAME "\":\"%s\",\"" D_JSON_GPIO "\":["), pCONT_set->Settings.user_template.name);
-  // for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template2.hardware.gp); i++) {
-  //   ResponseAppend_P(PSTR("%s%d"), (i>0)?",":"", pCONT_set->Settings.user_template2.hardware.gp.io[i]);
+  // for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template.hardware.gp); i++) {
+  //   ResponseAppend_P(PSTR("%s%d"), (i>0)?",":"", pCONT_set->Settings.user_template.hardware.gp.io[i]);
   // }
   // ResponseAppend_P(PSTR("],\"" D_JSON_FLAG "\":%d,\"" D_JSON_BASE "\":%d}"), pCONT_set->Settings.user_template.flag, pCONT_set->Settings.user_template_base +1);
 }
@@ -1979,22 +1686,24 @@ void mHardwarePins::TemplateJson()
 
 int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   if(*c=='\0'){ return -1; }
-  if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC_ID; }
-  if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)==0){    return MODULE_SONOFF_BASIC_EXTERNAL_ID; }
-  else if(strcmp_P(c,PM_MODULE_NAME_H801_CTR)==0){            return MODULE_H801_ID; }
-  else if(strcmp_P(c,PM_MODULE_NAME_MAGICHOME_CTR)==0){       return MODULE_MAGICHOME_ID; }
-  else if(strcmp_P(c,PM_MODULE_NAME_SHELLY1_CTR)==0){         return MODULE_SHELLY1_ID; }
-  else if(strcmp_P(c,PM_MODULE_NAME_SHELLY2P5_CTR)==0){         return MODULE_SHELLY2P5_ID; }
-  else if(strcmp_P(c,PM_MODULE_NAME_SHELLY_DIMMER2_CTR)==0){         return MODULE_SHELLY_DIMMER2_ID; }
-  
-#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-  else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_IFAN03_CTR)==0){         return MODULE_SONOFF_IFAN03_ID; }
-#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
-
-  else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_4CHPRO_CTR)==0){         return MODULE_SONOFF_4CHPRO_ID; }
-
+  #ifdef ESP8266
+    if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC_ID; }
+    if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)==0){    return MODULE_SONOFF_BASIC_EXTERNAL_ID; }
+    else if(strcmp_P(c,PM_MODULE_NAME_H801_CTR)==0){            return MODULE_H801_ID; }
+    else if(strcmp_P(c,PM_MODULE_NAME_MAGICHOME_CTR)==0){       return MODULE_MAGICHOME_ID; }
+    else if(strcmp_P(c,PM_MODULE_NAME_SHELLY1_CTR)==0){         return MODULE_SHELLY1_ID; }
+    else if(strcmp_P(c,PM_MODULE_NAME_SHELLY2P5_CTR)==0){         return MODULE_SHELLY2P5_ID; }
+    else if(strcmp_P(c,PM_MODULE_NAME_SHELLY_DIMMER2_CTR)==0){         return MODULE_SHELLY_DIMMER2_ID; }
+    #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+    else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_IFAN03_CTR)==0){         return MODULE_SONOFF_IFAN03_ID; }
+    #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+    else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_4CHPRO_CTR)==0){         return MODULE_SONOFF_4CHPRO_ID; }
+  #endif
   #ifdef ESP32
-  else if(strcmp_P(c,PM_MODULE_NAME_CAM_AITHINKER_CTR)==0){         return MODULE_CAM_AITHINKER_ID; }
+    else if(strcmp_P(c,PM_MODULE_NAME__ESP32_DEVKIT__CTR)==0){         return MODULE_DOIT_DEVKIT; }
+    #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
+    else if(strcmp_P(c,PM_MODULE_NAME_CAM_AITHINKER_CTR)==0){         return MODULE_CAM_AITHINKER_ID; }
+    #endif    
   #endif
 
   else if(strcmp_P(c,PM_MODULE_NAME_USERMODULE_CTR)==0){      return USER_MODULE; }
@@ -2003,33 +1712,34 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
 
 }
 
-//change to include buffer length limit
-const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
+/*
+Change to return pointer, not a buffer 
+*/
+const char* mHardwarePins::GetModuleNameByID(uint8_t id){
   switch(id){
     default:
     #ifdef ESP8266
-    case MODULE_SONOFF_BASIC_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_CTR)); break;
-    case MODULE_SONOFF_BASIC_EXTERNAL_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)); break;
-    
-#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-    case MODULE_SONOFF_IFAN03_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_IFAN03_CTR, sizeof(PM_MODULE_NAME_SONOFF_IFAN03_CTR)); break;
-#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
-    case MODULE_SONOFF_4CHPRO_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_4CHPRO_CTR, sizeof(PM_MODULE_NAME_SONOFF_4CHPRO_CTR)); break;
-    case MODULE_H801_ID:   memcpy_P(buffer, PM_MODULE_NAME_H801_CTR, sizeof(PM_MODULE_NAME_H801_CTR)); break;
-    case MODULE_MAGICHOME_ID:   memcpy_P(buffer, PM_MODULE_NAME_MAGICHOME_CTR, sizeof(PM_MODULE_NAME_MAGICHOME_CTR)); break;
-    case MODULE_SHELLY1_ID:   memcpy_P(buffer, PM_MODULE_NAME_SHELLY1_CTR, sizeof(PM_MODULE_NAME_SHELLY1_CTR)); break;
-    case MODULE_SHELLY2P5_ID:   memcpy_P(buffer, PM_MODULE_NAME_SHELLY2P5_CTR, sizeof(PM_MODULE_NAME_SHELLY2P5_CTR)); break;
-    case MODULE_SHELLY_DIMMER2_ID:   memcpy_P(buffer, PM_MODULE_NAME_SHELLY_DIMMER2_CTR, sizeof(PM_MODULE_NAME_SHELLY_DIMMER2_CTR)); break;
+      case MODULE_SONOFF_BASIC_ID:               return PM_MODULE_NAME_SONOFF_BASIC_CTR;
+      case MODULE_SONOFF_BASIC_EXTERNAL_ID:      return PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR;
+      #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+      case MODULE_SONOFF_IFAN03_ID:              return PM_MODULE_NAME_SONOFF_IFAN03_CTR;
+      #endif
+      case MODULE_SONOFF_4CHPRO_ID:              return PM_MODULE_NAME_SONOFF_4CHPRO_CTR;
+      case MODULE_H801_ID:                       return PM_MODULE_NAME_H801_CTR;
+      case MODULE_MAGICHOME_ID:                  return PM_MODULE_NAME_MAGICHOME_CTR;
+      case MODULE_SHELLY1_ID:                    return PM_MODULE_NAME_SHELLY1_CTR;
+      case MODULE_SHELLY2P5_ID:                  return PM_MODULE_NAME_SHELLY2P5_CTR;
+      case MODULE_SHELLY_DIMMER2_ID:             return PM_MODULE_NAME_SHELLY_DIMMER2_CTR;
     #endif  // ESP8266
     #ifdef ESP32
-    case MODULE_CAM_AITHINKER_ID:   memcpy_P(buffer, PM_MODULE_NAME_CAM_AITHINKER_CTR, sizeof(PM_MODULE_NAME_CAM_AITHINKER_CTR)); break;
-    #endif // ESP32
-    case USER_MODULE:    memcpy_P(buffer, PM_MODULE_NAME_USERMODULE_CTR, sizeof(PM_MODULE_NAME_USERMODULE_CTR)); break;
+      case MODULE_DOIT_DEVKIT:                   return PM_MODULE_NAME__ESP32_DEVKIT__CTR;
+      #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
+      case MODULE_CAM_AITHINKER_ID:              return PM_MODULE_NAME_CAM_AITHINKER_CTR;
+      #endif    
+    #endif
+    case USER_MODULE:                            return PM_MODULE_NAME_USERMODULE_CTR;
 
   }
-  DEBUG_LINE;
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("%s=GetModuleNameByID"),buffer);
-  return buffer;
 }
 
 
@@ -2108,7 +1818,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_FAN_PWM1_CTR)==0){  return GPIO_FAN_PWM1_ID; }
   #endif
 
-  #ifdef USE_I2C
+  #ifdef USE_MODULE_CORE_I2C
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SCL_CTR)==0){  return GPIO_I2C_SCL_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SDA_CTR)==0){  return GPIO_I2C_SDA_ID; }
   #endif
@@ -2475,7 +2185,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 //   GPIO_CNTR4_NP_ID,
 
 
-#ifdef USE_I2C
+#ifdef USE_MODULE_CORE_I2C
   case GPIO_I2C_SCL_ID: return PM_GPIO_FUNCTION_I2C_SCL_CTR;
   case GPIO_I2C_SDA_ID: return PM_GPIO_FUNCTION_I2C_SDA_CTR;
 #endif

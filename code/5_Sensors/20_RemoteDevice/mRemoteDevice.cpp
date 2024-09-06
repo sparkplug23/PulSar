@@ -27,10 +27,10 @@
 int8_t mRemoteDevice::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -38,16 +38,16 @@ int8_t mRemoteDevice::Tasker(uint8_t function, JsonParserObject obj){
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
     break;
 
 
 
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
 
       #ifdef REMOTE_SENSOR_1_MQTT_TOPIC
-        AddLog(LOG_LEVEL_TEST, PSTR( "Subscribe to" "\"%s\""),REMOTE_SENSOR_1_MQTT_TOPIC);
+        ALOG_TST(PSTR( "Subscribe to" "\"%s\""),REMOTE_SENSOR_1_MQTT_TOPIC);
         pCONT_mqtt->pubsub->subscribe(REMOTE_SENSOR_1_MQTT_TOPIC);//(PSTR("group_all/#"));
       #endif
 
@@ -55,20 +55,20 @@ int8_t mRemoteDevice::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -133,7 +133,7 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     ALOG_DBM( PSTR("Remote Read %d" ), (int)value->data_f[0]);
     //  
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
 
     D_MQTT_COMMAND_HANDLED_COUNT_INC;
@@ -256,30 +256,30 @@ void mRemoteDevice::MQTTHandler_Init(){
   struct handler<mRemoteDevice>* ptr;
   
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mRemoteDevice::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 60;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mRemoteDevice::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs;
+  ptr->tRateSecs = 60;//pCONT_mqtt->dt.ifchanged_secs;
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -305,9 +305,9 @@ void mRemoteDevice::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

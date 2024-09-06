@@ -143,7 +143,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 // // {
 // //   // if ((source > 0) && (source < SRC_MAX)) {
 // //   //   char stemp1[20];
-// //   //   AddLog(LOG_LEVEL_DEBUG, PSTR("SRC: %s from %s"), 
+// //   //   ALOG_DBG(PSTR("SRC: %s from %s"), 
 // //   //   pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
 // //   // }
 // // }
@@ -151,7 +151,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 // // void mWebServer::ExecuteWebCommand(char* svalue, int source)
 // // {
 // //   ShowWebSource(source);
-// //   //AddLog(LOG_LEVEL_DEBUG, PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
+// //   //ALOG_DBG(PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
 // //   ExecuteCommand(svalue, SRC_IGNORE);
 // // }
 
@@ -200,17 +200,17 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 //       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "authorization");    
 
 //       // Must add handlers BEFORE begin
-//       pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
+//       pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
 //     }
 //     reset_web_log_flag = false;
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "StartWebserver starting..."));
+//     ALOG_INF(PSTR(D_LOG_HTTP "StartWebserver starting..."));
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //     server->begin();
 //   }
 //   if(webserver_state != type){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
+//     ALOG_INF(PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
     
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //     // pCONT_set->rules_flag.http_init = 1;
@@ -346,7 +346,7 @@ void mWebServer::WebPage_Root_AddHandlers(){
 //       data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 //       data_buffer.flags.source_id = DATA_BUFFER_FLAG_SOURCE_WEBUI;
 
-//       pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);     
+//       pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);     
         
 //       request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{\"status\":\"success\"}");
 
@@ -568,7 +568,7 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
 //     server->reset(); // asyncedit
 //     webserver_state = HTTP_OFF;
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
+//     ALOG_INF(PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //   //}
 // }
@@ -582,12 +582,12 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
 //   if (!pCONT_set->global_state.wifi_down) {
 //     WiFi.mode(WIFI_AP_STA);
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT_AND_STATION));
+//     ALOG_INF(PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT_AND_STATION));
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //   } else {
 //     WiFi.mode(WIFI_AP);
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT));
+//     ALOG_INF(PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT));
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //   }
 
@@ -765,7 +765,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // {
 //   // //if (!HttpCheckPriviledgedAccess(false)) { return; }
 
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_COMMAND));
+//   // ALOG_DBG(PSTR(D_LOG_HTTP D_COMMAND));
 
 //   // uint8_t valid = 1;
 //   // if (pCONT_set->Settings.web_password[0] != 0) {
@@ -845,7 +845,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // {
 //   // Possible hostHeader: connectivitycheck.gstatic.com or 192.168.4.1
 //   if ((WifiIsInManagerMode())){//} && !pCONT_sup->ValidIpAddress(request->hostHeader().c_str())) {
-//     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
+//     // ALOG_DBG(PSTR(D_LOG_HTTP D_REDIRECTED));
 //     // request->sendHeader(F("Location"), String("http://") + request->client().localIP().toString(), true);
 
 
@@ -937,7 +937,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //     }
 // //     url += command;                           // url = |http://192.168.178.86/cm?cmnd=POWER1 ON|
 
-// // //AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Uri |%s|"), url.c_str());
+// // //ALOG_DBG(PSTR("DBG: Uri |%s|"), url.c_str());
 
 // // #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
 // //     HTTPClient http;
@@ -1116,7 +1116,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //   token = strtok(NULL, "");
 // // // //  snprintf_P(svalue, sizeof(svalue), (token == NULL) ? "" : token);  // Fails with command FullTopic home/%prefix%/%topic% as it processes %p of %prefix%
 // // //   strlcpy(svalue, (token == NULL) ? "" : token, sizeof(svalue));       // Fixed 5.8.0b
-// // //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
+// // //   ALOG_INF(PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
 
 // // //   //MqttDataHandler(stopic, (uint8_t*)svalue, strlen(svalue));
 // // //   ParseAndExecuteWebCommands(stopic, (uint8_t*)svalue, strlen(svalue));
@@ -1169,7 +1169,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 // // //   //if (topicBuf[0] != '/') { ShowSource(SRC_MQTT); } //?
 
-// // //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
+// // //   ALOG_INF(PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
  
 // // //   // Check classname exists
 // // //   if(strstr(topicBuf,"::")){
@@ -1219,17 +1219,17 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 // // //   webcommand.fWaiting = true;
   
-// // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
+// // //   ALOG_DBG(PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
 // // //     D_COMMAND " %s, " D_DATA " %s"),
 // // //    grpflg, index, type, dataBuf);
 
 
-// // //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
-// // //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
-// // //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
-// // //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
+// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
+// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
+// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
+// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
   
-// // //   pCONT->Tasker_Interface(FUNC_WEB_COMMAND);
+// // //   pCONT->Tasker_Interface(TASK_WEB_COMMAND);
 
 // // } // END function
 
@@ -1247,7 +1247,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
   switch(function)
   {
-    case FUNC_INIT:
+    case TASK_INIT:
      
      server = new AsyncWebServer(80);
       
@@ -1256,7 +1256,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       // init();
 
 
@@ -1326,10 +1326,10 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 //     server.begin();
 
     break;
-  //   case FUNC_LOOP:
+  //   case TASK_LOOP:
   //     PollDnsWebserver();
   //   break; 
-  case FUNC_WIFI_CONNECTED:
+  case TASK_WIFI_CONNECTED:
 
 
     #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
@@ -1363,21 +1363,21 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 
   break;
-  //   case FUNC_EVERY_SECOND:
+  //   case TASK_EVERY_SECOND:
 
   //   break;
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
-  //   case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+  //   case TASK_WEB_APPEND_RUNTIME_ROOT_URLS:
   //       JBI->Add("/module_draw.json",-1); 
   //       // JBI->Add("/web_top_bar.json",1000); 
   //       JBI->Add("/root_status_any.json",1100);
   //   break;
-  //   case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:
+  //   case TASK_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:
   //     //set value to force sending all below
   //   //no break
-  //   case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+  //   case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
 
   //   break;
@@ -1690,8 +1690,8 @@ void mWebServer::initServer()
 //   #endif
 
 
-  // pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);/
-  pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
+  // pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);/
+  pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
 
 
 
@@ -1704,7 +1704,7 @@ void mWebServer::webHandleReboot(AsyncWebServerRequest* request)
 
   // CAUTION: This is an async file, and may cause unknown behavior so needs testing
 
-  pCONT->Tasker_Interface(FUNC_RESTART_STABLE);
+  pCONT->Tasker_Interface(TASK_RESTART_STABLE);
   
   request->redirect("/"); // redirect to root, to avoid webui forever requested a reboot
 

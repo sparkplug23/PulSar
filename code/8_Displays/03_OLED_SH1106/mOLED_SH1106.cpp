@@ -29,13 +29,13 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
-    case FUNC_DISPLAY_INIT_DRIVER:
+    case TASK_DISPLAY_INIT_DRIVER:
       InitDriver();
     break;
   }
@@ -47,29 +47,29 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       EverySecond();
     break;
-    case FUNC_DISPLAY_REFRESH_SHOW_ID:
+    case TASK_DISPLAY_REFRESH_SHOW_ID:
       RefreshDisplay();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -82,7 +82,7 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
 
 void mOLED_SH1106::Pre_Init(void)
 {
-  if (pCONT_sup->I2cEnabled(XI2C_04))
+  if (pCONT_i2c->I2cEnabled(XI2C_04))
   { 
     settings.fEnableSensor = true;
   }
@@ -145,23 +145,23 @@ void mOLED_SH1106::InitDriver(void)
 
   if (!pCONT_set->Settings.display.model)
   {
-    if (pCONT_sup->I2cSetDevice(OLED_ADDRESS1))
+    if (pCONT_i2c->I2cSetDevice(OLED_ADDRESS1))
     {
       pCONT_set->Settings.display.address[0] = OLED_ADDRESS1;
       pCONT_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
     }
-    else if (pCONT_sup->I2cSetDevice(OLED_ADDRESS2))
+    else if (pCONT_i2c->I2cSetDevice(OLED_ADDRESS2))
     {
       pCONT_set->Settings.display.address[0] = OLED_ADDRESS2;
       pCONT_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
     }
   }
 
-  AddLog(LOG_LEVEL_INFO, PSTR("DSP: SD1306 address[0] %d"),pCONT_set->Settings.display.address[0]);
+  ALOG_INF(PSTR("DSP: SD1306 address[0] %d"),pCONT_set->Settings.display.address[0]);
   
   if(pCONT_set->Settings.display.model == D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID)
   {
-    pCONT_sup->I2cSetActiveFound(pCONT_set->Settings.display.address[0], "SH1106");
+    pCONT_i2c->I2cSetActiveFound(pCONT_set->Settings.display.address[0], "SH1106");
 
     if(
       (pCONT_set->Settings.display.width != 64) && 
@@ -179,7 +179,7 @@ void mOLED_SH1106::InitDriver(void)
       pCONT_set->Settings.display.height = 64;
     }
 
-    oled1106 = new Adafruit_SH1106(pCONT_set->Settings.display.width, pCONT_set->Settings.display.height, pCONT_sup->wire);
+    oled1106 = new Adafruit_SH1106(pCONT_set->Settings.display.width, pCONT_set->Settings.display.height, pCONT_i2c->wire);
     oled1106->begin(SH1106_SWITCHCAPVCC, pCONT_set->Settings.display.address[0], pCONT_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
     pCONT_iDisp->renderer = oled1106;
     pCONT_iDisp->renderer->DisplayInit(pCONT_iDisp->DISPLAY_INIT_MODE, pCONT_set->Settings.display.size, pCONT_set->Settings.display.rotate, pCONT_set->Settings.display.font);
@@ -194,7 +194,7 @@ void mOLED_SH1106::InitDriver(void)
     pCONT_iDisp->renderer->DisplayOnff(true);
     #endif
 
-    AddLog(LOG_LEVEL_INFO, PSTR("DSP: SD1306"));
+    ALOG_INF(PSTR("DSP: SD1306"));
   }
 
 }
@@ -237,7 +237,7 @@ void mOLED_SH1106::ShowScrollingLog(void)
       // This is only done here, as the copied rows will have it done at this line when first commited to the screen_buffer
       pCONT_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(last_row); 
 
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "[%s]"), pCONT_iDisp->screen_buffer.ptr[last_row]);
+      ALOG_DBG(PSTR(D_LOG_DEBUG "[%s]"), pCONT_iDisp->screen_buffer.ptr[last_row]);
 
       // Print last row
       pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[last_row]);

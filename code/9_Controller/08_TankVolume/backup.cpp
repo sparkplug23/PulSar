@@ -237,7 +237,7 @@
 
 // //   // Check if instruction is for me
 // //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
-// //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+// //       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
 // //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 // //   }else{
 // //     return; // not meant for here
@@ -265,7 +265,7 @@
 // //   // if(!obj["command"].isNull()){ 
 // //   //   const char* command = obj["command"];
 // //   //   if(strstr(command,"system_send_all")){ 
-// //   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
+// //   //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
 // //   //     MQTTHandler_Set_RefreshAll();
 // //   //     isserviced++;
 // //   //   }
@@ -295,10 +295,10 @@
 //   /************
 //    * INIT SECTION * 
 //   *******************/
-//   if(function == FUNC_PRE_INIT){
+//   if(function == TASK_PRE_INIT){
 //     //Pre_Init();
 //   }else
-//   if(function == FUNC_INIT){
+//   if(function == TASK_INIT){
 //     init();
 //   }
 
@@ -306,7 +306,7 @@
 //     /************
 //      * PERIODIC SECTION * 
 //     *******************/
-//     case FUNC_LOOP: 
+//     case TASK_LOOP: 
 
 //       #ifdef USE_MODULE_SENSORS_DS18X
 //       if(pCONT_ult->ultrasonic.isvalid&&fUpdateCalculations){ fUpdateCalculations = false;
@@ -338,33 +338,33 @@
 //       // }
 
 //     break;
-//     case FUNC_EVERY_SECOND:
+//     case TASK_EVERY_SECOND:
     
 //     break;
 
-//     case FUNC_SENSOR_UPDATED: // called when ultrasonic is updated -- when a sensor feeds a system status, set flags only, non blocking
+//     case TASK_SENSOR_UPDATED: // called when ultrasonic is updated -- when a sensor feeds a system status, set flags only, non blocking
 //       fUpdateCalculations = true; // Only flags, loop will still handle the change
 //     break;
 
 
-//     case FUNC_JSON_COMMAND_ID:
+//     case TASK_JSON_COMMAND_ID:
 //       parse_JSONCommand(obj);
 //     break;  
 
 //     /************
 //      * MQTT SECTION * 
 //     *******************/
-//     case FUNC_MQTT_HANDLERS_INIT:
-//     case FUNC_MQTT_HANDLERS_RESET:
+//     case TASK_MQTT_HANDLERS_INIT:
+//     case TASK_MQTT_HANDLERS_RESET:
 //       MQTTHandler_Init(); // Reset to the initial parameters
 //     break;
-//     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+//     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
 //     break;
-//     case FUNC_MQTT_SENDER:
+//     case TASK_MQTT_SENDER:
 //       MQTTHandler_Sender(); //optional pass parameter
 //     break;
-//     case FUNC_MQTT_CONNECTED:
+//     case TASK_MQTT_CONNECTED:
 //       MQTTHandler_Set_RefreshAll();
 //     break;
 //   }
@@ -379,7 +379,7 @@
 
 //   // switch(function){
 
-//   //   // case FUNC_WEB_SHOW_PARAMETERS:{
+//   //   // case TASK_WEB_SHOW_PARAMETERS:{
       
 //   //   //   uint8_t fsize = 16;
 //   //   //   char name_ctr[20];
@@ -402,29 +402,29 @@
 //   //   //   );
 
 //   //   // }break;
-//   //   case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+//   //   case TASK_WEB_ADD_ROOT_TABLE_ROWS:
 //   //     // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //   //     //   BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
 //   //     //   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_oil","?");   
 //   //     // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   //   break; 
-//   //   // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+//   //   // case TASK_WEB_APPEND_RUNTIME_ROOT_URLS:
 //   //   //   // JsonBuilder_Add("/fetch/tab_oil_specific.json",1000);
 //   //   // break;
 
-//   //   case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+//   //   case TASK_WEB_APPEND_RUNTIME_ROOT_URLS:
 //   //     // JBI->Add("/draw/palette_selector.json",-500);
 //   //   break;
-//   //   case FUNC_WEB_ADD_HANDLER:
+//   //   case TASK_WEB_ADD_HANDLER:
 //   //     WebPage_Root_AddHandlers();
 //   //   break;
-//   //   case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+//   //   case TASK_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
 //   //     WebAppend_Root_Draw_Table();
 //   //   break; 
-//   //   case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+//   //   case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 //   //     WebAppend_Root_Status_Table();
 //   //   break;
-//   //   case FUNC_WEB_APPEND_ROOT_BUTTONS:
+//   //   case TASK_WEB_APPEND_ROOT_BUTTONS:
 //   //     // WebAppend_Root_ControlUI();
 //   //   break;
 //   //   // Generated in "InterfaceLighting" and populated in hardware classes
@@ -770,7 +770,7 @@
 //     // StaticJsonDocument<400> doc;
 //     // JsonObject root = doc.to<JsonObject>();
 
-//     // // root["json_teleperiod_level", pCONT_set->GetTelePeriodJsonLevelCtr();
+//     // // root["json_teleperiod_level", pCONT_set->Get_Json_Level_Name();
 
 //     // data_buffer.payload.len = measureJson(root)+1;
 //     // serializeJson(doc,data_buffer.payload.ctr);
@@ -836,7 +836,7 @@
 // void mTankVolumeUltrasonic::MQTTHandler_Init(){
 
 //   ptr = &mqtthandler_settings_teleperiod;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
@@ -846,7 +846,7 @@
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Settings;
   
 //   ptr = &mqtthandler_litres_ifchanged;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
@@ -856,7 +856,7 @@
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
   
 //   ptr = &mqtthandler_litres_teleperiod;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60*60; 
@@ -866,7 +866,7 @@
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
 
 //   ptr = &mqtthandler_furnace_ifchanged;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
@@ -876,7 +876,7 @@
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
   
 //   ptr = &mqtthandler_furnace_teleperiod;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60*60; 
@@ -901,9 +901,9 @@
 
 // void mTankVolumeUltrasonic::MQTTHandler_Set_DefaultPeriodRate(){
 
-//   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_litres_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_furnace_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+//   mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//   mqtthandler_litres_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//   mqtthandler_furnace_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 // } //end "MQTTHandler_Set_DefaultPeriodRate"
 

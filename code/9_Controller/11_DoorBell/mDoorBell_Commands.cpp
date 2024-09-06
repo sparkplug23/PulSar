@@ -8,7 +8,7 @@
 void mDoorBell::parse_JSONCommand(JsonParserObject obj)
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
+  ALOG_TST(PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
   char buffer[50];
@@ -54,7 +54,7 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
     
     RingDoorBellSet(jtok.getInt(), default_freq);
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -75,7 +75,7 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
     
     RingDoorBellSet(1, 500);
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 

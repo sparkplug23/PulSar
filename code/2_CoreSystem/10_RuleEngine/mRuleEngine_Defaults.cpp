@@ -30,13 +30,13 @@ void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-    event_trig.function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     event_trig.device_id = 0; // Button0
     event_trig.value.length = 0;
     event_trig.value.data[event_trig.value.length++] = 1;  // Pressed 
     // Command0
     event_comm.module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    event_comm.function_id = FUNC_EVENT_SET_POWER_ID;
+    event_comm.function_id = TASK_EVENT_SET_POWER_ID;
     event_comm.device_id = 0; // Button0
     event_comm.value.length = 0;
     event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_TOGGLE_ID; // POWER_TOGGLE;  // STATE_NUMBER_INCREMENT_ID
@@ -45,13 +45,13 @@ void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-    event_trig.function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     event_trig.device_id = 1; // Button0
     event_trig.value.length = 0;
     event_trig.value.data[event_trig.value.length++] = 1;  // Pressed 
     // Command0
     event_comm.module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    event_comm.function_id = FUNC_EVENT_SET_POWER_ID;
+    event_comm.function_id = TASK_EVENT_SET_POWER_ID;
     event_comm.device_id = 1; // Button0
     event_comm.value.length = 0;
     event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_TOGGLE_ID;  // Increment 
@@ -60,13 +60,13 @@ void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-    event_trig.function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     event_trig.device_id = 2; // Button0
     event_trig.value.length = 0;
     event_trig.value.data[event_trig.value.length++] = 1;  // Pressed 
     // Command0
     event_comm.module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    event_comm.function_id = FUNC_EVENT_SET_POWER_ID;
+    event_comm.function_id = TASK_EVENT_SET_POWER_ID;
     event_comm.device_id = 2; // Button0
     event_comm.value.length = 0;
     event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_TOGGLE_ID;  // Increment 
@@ -75,13 +75,13 @@ void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-    event_trig.function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     event_trig.device_id = 3; // Button0
     event_trig.value.length = 0;
     event_trig.value.data[event_trig.value.length++] = 1;  // Pressed 
     // Command0
     event_comm.module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    event_comm.function_id = FUNC_EVENT_SET_POWER_ID;
+    event_comm.function_id = TASK_EVENT_SET_POWER_ID;
     event_comm.device_id = 3; // Button0
     event_comm.value.length = 0;
     event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_TOGGLE_ID;  // Increment 
@@ -120,13 +120,13 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-    event_trig.function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     event_trig.device_id = 0; // Button0
     event_trig.value.length = 0;
     event_trig.value.data[event_trig.value.length++] = 1;  // Pressed 
     // Command0
     event_comm.module_id = D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID;
-    event_comm.function_id = FUNC_EVENT_SET_SPEED_ID;
+    event_comm.function_id = TASK_EVENT_SET_SPEED_ID;
     event_comm.device_id = 0; // Button0
     event_comm.value.length = 0;
     event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_INCREMENT_ID; // Increment and wrap fan speeds
@@ -142,7 +142,7 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 // {
 
 //     #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Sonoff_iFan03"));
+//     ALOG_DBG(PSTR("DefaultRule_Sonoff_iFan03"));
 
 //     #endif // ENABLE_LOG_LEVEL_INFO
 
@@ -155,14 +155,14 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 //     // // Trigger0
 //     // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
 //     // p_event->module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-//     // p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+//     // p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
 //     // p_event->device_id = 0; // Button0
 //     // p_event->value.length = 0;
 //     // p_event->value.data[p_event->value.length++] = 1;  // Pressed 
 //     // // Command0
 //     // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
 //     // p_event->module_id = D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID;
-//     // p_event->function_id = FUNC_EVENT_SET_SPEED_ID;
+//     // p_event->function_id = TASK_EVENT_SET_SPEED_ID;
 //     // p_event->device_id = 0; 
 //     // p_event->value.length = 0;
 //     // p_event->value.data[p_event->value.length++] = STATE_NUMBER_INCREMENT_ID;  // Increment 
@@ -184,7 +184,7 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Shelly_Dimmer2"));
+    ALOG_DBG(PSTR("DefaultRule_Shelly_Dimmer2"));
 
     #endif // ENABLE_LOG_LEVEL_INFO
 
@@ -206,14 +206,14 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
     // Trigger0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // Command0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
@@ -223,14 +223,14 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
     // Trigger1
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     p_event->device_id = 1; 
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // Command1
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 1;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
@@ -243,14 +243,14 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
     // Trigger0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // Command0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
@@ -260,14 +260,14 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
     // Trigger1
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     p_event->device_id = 1; 
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // Command1
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 1;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
@@ -289,7 +289,7 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
 void mRuleEngine::DefaultRule_Shelly_2p5(){
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Shelly_2p5"));
+    ALOG_DBG(PSTR("DefaultRule_Shelly_2p5"));
 
     #endif //  ENABLE_LOG_LEVEL_INFO
     mEvent::EVENT_PART* p_event = nullptr;
@@ -302,14 +302,14 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     pCONT_rules->rules[pCONT_rules->rules_active_index].flag_enabled = true;   
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggled 
     // Command0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
@@ -319,14 +319,14 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     pCONT_rules->rules[pCONT_rules->rules_active_index].flag_enabled = true; 
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     p_event->device_id = 1; 
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // Command1
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 1;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
@@ -336,14 +336,14 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     // pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true; 
     // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     // p_event->module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-    // p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    // p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     // p_event->device_id = 1; 
     // p_event->value.length = 0;
     // p_event->value.data[p_event->value.length++] = 1;  // Pressed 
     // // Command2
     // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     // p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    // p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    // p_event->function_id = TASK_EVENT_SET_POWER_ID;
     // p_event->device_id = 1;
     // p_event->value.length = 0;
     // p_event->value.data[p_event->value.length++] = 2;  // Toggle

@@ -695,7 +695,7 @@
 // {
 //   if (!HttpCheckPriviledgedAccess()) { return; }
 
-//   AddLog(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_CONFIGURE_TIMER);
+//   ALOG_DBG(S_LOG_HTTP, S_CONFIGURE_TIMER);
 
 //   if (WebServer->hasParam("save")) {
 //     TimerSaveSettings();
@@ -763,27 +763,27 @@
 //   bool result = false;
 
 //   switch (function) {
-//     case FUNC_PRE_INIT:
+//     case TASK_PRE_INIT:
 //       TimerSetRandomWindows();
 //       break;
 // #ifdef USE_MODULE_NETWORK_WEBSERVER
 // #ifdef USE_TIMERS_WEB
-//     case FUNC_WEB_ADD_BUTTON:
+//     case TASK_WEB_ADD_BUTTON:
 // #ifdef USE_RULES
 //       WSBufferAppend_P(HTTP_BTN_MENU_TIMER);
 // #else
 //       if (devices_present) { WSBufferAppend_P(HTTP_BTN_MENU_TIMER); }
 // #endif  // USE_RULES
 //       break;
-//     case FUNC_WEB_ADD_HANDLER:
+//     case TASK_WEB_ADD_HANDLER:
 //       WebServer->on("/" WEB_HANDLE_TIMER, HandleTimerConfiguration);
 //       break;
 // #endif  // USE_TIMERS_WEB
 // #endif  // USE_MODULE_NETWORK_WEBSERVER
-//     case FUNC_EVERY_SECOND://Serial.println("Xdrv09 - FUNC_EVERY_SECOND");
+//     case TASK_EVERY_SECOND://Serial.println("Xdrv09 - TASK_EVERY_SECOND");
 //       TimerEverySecond();
 //       break;
-//     case FUNC_COMMAND:
+//     case TASK_COMMAND:
 //       result = TimerCommand();
 //       break;
 //   }

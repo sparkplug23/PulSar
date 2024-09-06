@@ -2714,7 +2714,7 @@ void serializePalettes(JsonObject root, int page);
 
 void serializeModeNames(JsonArray arr, bool flag_get_first_name_only = true);
 
-bool requestJSONBufferLock(uint8_t module);
+bool requestJSONBufferLock(uint16_t module);
 void releaseJSONBufferLock();
 
     #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
@@ -2752,7 +2752,7 @@ bool isIp(String str);
 #define JSON_PATH_EFFECTS    8
 
 // global ArduinoJson buffer
-volatile uint8_t jsonBufferLock = 0;
+volatile uint16_t jsonBufferLock = 0;
 
 bool doReboot = false;
 

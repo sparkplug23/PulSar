@@ -250,7 +250,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
   if (Wc.up) {
     esp_camera_deinit();
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Deinit"));
+    ALOG_DBG(PSTR("CAM: Deinit"));
     //return Wc.up;
   }
   Wc.up = 0;
@@ -283,7 +283,7 @@ uint32_t WcSetup(int32_t fsiz) {
   //   config.pin_pwdn = Pin(GPIO_WEBCAM_PWDN);       // PWDN_GPIO_NUM;
   //   config.pin_reset = Pin(GPIO_WEBCAM_RESET);    // RESET_GPIO_NUM;
 
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: User template"));
+  //   ALOG_DBG(PSTR("CAM: User template"));
   // } else {
     // defaults to AI THINKER
     config.pin_d0 = Y2_GPIO_NUM;
@@ -302,7 +302,7 @@ uint32_t WcSetup(int32_t fsiz) {
     config.pin_sscb_scl = SIOC_GPIO_NUM;
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Default template"));
+    ALOG_DBG(PSTR("CAM: Default template"));
   // }
 
   //ESP.getPsramSize()
@@ -317,15 +317,15 @@ uint32_t WcSetup(int32_t fsiz) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM found"));
+    ALOG_DBG(PSTR("CAM: PSRAM found"));
   } else {
     config.frame_size = FRAMESIZE_VGA;
     config.jpeg_quality = 12;
     config.fb_count = 1;
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM not found"));
+    ALOG_DBG(PSTR("CAM: PSRAM not found"));
   }
 
-//  AddLog(LOG_LEVEL_INFO, PSTR("CAM: heap check 1: %d"),ESP_getFreeHeap());
+//  ALOG_INF(PSTR("CAM: heap check 1: %d"),ESP_getFreeHeap());
 
   // stupid workaround camera diver eats up static ram should prefer PSRAM
   // so we steal static ram to force driver to alloc PSRAM
@@ -336,11 +336,11 @@ uint32_t WcSetup(int32_t fsiz) {
   if (x) { free(x); }
 
   if (err != ESP_OK) {
-    AddLog(LOG_LEVEL_INFO, PSTR("CAM: Init failed with error 0x%x"), err);
+    ALOG_INF(PSTR("CAM: Init failed with error 0x%x"), err);
     return 0;
   }
 
-//  AddLog(LOG_LEVEL_INFO, PSTR("CAM: heap check 2: %d"),ESP_getFreeHeap());
+//  ALOG_INF(PSTR("CAM: heap check 2: %d"),ESP_getFreeHeap());
 
   sensor_t * wc_s = esp_camera_sensor_get();
 
@@ -355,7 +355,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
   camera_fb_t *wc_fb = esp_camera_fb_get();
   if (!wc_fb) {
-    AddLog(LOG_LEVEL_INFO, PSTR("CAM: Init failed to get the frame on time"));
+    ALOG_INF(PSTR("CAM: Init failed to get the frame on time"));
     return 0;
   }
   Wc.width = wc_fb->width;
@@ -366,7 +366,7 @@ uint32_t WcSetup(int32_t fsiz) {
   fd_init();
 #endif
 
-  AddLog(LOG_LEVEL_INFO, PSTR("CAM: Initialized"));
+  ALOG_INF(PSTR("CAM: Initialized"));
 
   Wc.up = 1;
   if (psram) { Wc.up = 2; }
@@ -589,7 +589,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
 //     image_matrix = dl_matrix3du_alloc(1, fb->width, fb->height, 3);
 //     if (!image_matrix) {
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: dl_matrix3du_alloc failed"));
+//       ALOG_DBG(PSTR("CAM: dl_matrix3du_alloc failed"));
 //       esp_camera_fb_return(fb);
 //       return ESP_FAIL;
 //     }
@@ -603,7 +603,7 @@ uint32_t WcSetup(int32_t fsiz) {
 //     esp_camera_fb_return(fb);
 //     if (!s){
 //       dl_matrix3du_free(image_matrix);
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: to rgb888 failed"));
+//       ALOG_DBG(PSTR("CAM: to rgb888 failed"));
 //       return ESP_FAIL;
 //     }
 
@@ -670,7 +670,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
 //   wc_fb = esp_camera_fb_get();
 //   if (!wc_fb) {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Can't get frame"));
+//     ALOG_DBG(PSTR("CAM: Can't get frame"));
 //     return 0;
 //   }
 //   if (!bnum) {
@@ -701,7 +701,7 @@ uint32_t WcSetup(int32_t fsiz) {
 //     memcpy(Wc.picstore[bnum].buff, _jpg_buf, _jpg_buf_len);
 //     Wc.picstore[bnum].len = _jpg_buf_len;
 //   } else {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Can't allocate picstore"));
+//     ALOG_DBG(PSTR("CAM: Can't allocate picstore"));
 //     Wc.picstore[bnum].len = 0;
 //   }
 //   if (wc_fb) { esp_camera_fb_return(wc_fb); }
@@ -745,7 +745,7 @@ uint32_t WcSetup(int32_t fsiz) {
 //   } else {
 //     bnum--;
 //     if (!Wc.picstore[bnum].len) {
-//       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: No image #: %d"), bnum);
+//       ALOG_DBG(PSTR("CAM: No image #: %d"), bnum);
 //       return;
 //     }
 //     client.write((char *)Wc.picstore[bnum].buff, Wc.picstore[bnum].len);
@@ -769,7 +769,7 @@ uint32_t WcSetup(int32_t fsiz) {
 //   camera_fb_t *wc_fb;
 //   wc_fb = esp_camera_fb_get();  // Acquire frame
 //   if (!wc_fb) {
-//     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Frame buffer could not be acquired"));
+//     ALOG_DBG(PSTR("CAM: Frame buffer could not be acquired"));
 //     return;
 //   }
 
@@ -800,12 +800,12 @@ uint32_t WcSetup(int32_t fsiz) {
 // }
 
 void mCameraOV2640::HandleWebcamMjpeg(void) {
-  AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Handle camserver"));
+  ALOG_DBG(PSTR("CAM: Handle camserver"));
  if (!Wc.stream_active) {
 // always restart stream
     Wc.stream_active = 1;
     Wc.client = Wc.CamServer->client();
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Create client"));
+    ALOG_DBG(PSTR("CAM: Create client"));
  }
 }
 
@@ -819,13 +819,13 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
   bool jpeg_converted = false;
 
   if (!Wc.client.connected()) {
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Client fail"));
+    ALOG_DBG(PSTR("CAM: Client fail"));
     Wc.stream_active = 0;
   }
   if (1 == Wc.stream_active) {
     Wc.client.flush();
     Wc.client.setTimeout(3);
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Start stream"));
+    ALOG_DBG(PSTR("CAM: Start stream"));
     // Wc.client.print("HTTP/1.1 200 OK\r\n"
     //   "Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n"
     //   "\r\n");
@@ -834,7 +834,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
   if (2 == Wc.stream_active) {
     wc_fb = esp_camera_fb_get();
     if (!wc_fb) {
-      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Frame fail"));
+      ALOG_DBG(PSTR("CAM: Frame fail"));
       Wc.stream_active = 0;
     }
   }
@@ -842,7 +842,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
     if (wc_fb->format != PIXFORMAT_JPEG) {
       jpeg_converted = frame2jpg(wc_fb, 80, &_jpg_buf, &_jpg_buf_len);
       if (!jpeg_converted){
-        AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: JPEG compression failed"));
+        ALOG_DBG(PSTR("CAM: JPEG compression failed"));
         _jpg_buf_len = wc_fb->len;
         _jpg_buf = wc_fb->buf;
       }
@@ -859,7 +859,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
     if (tlen!=_jpg_buf_len) {
       esp_camera_fb_return(wc_fb);
       Wc.stream_active=0;
-      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Send fail"));
+      ALOG_DBG(PSTR("CAM: Send fail"));
     }*/
     // Wc.client.print("\r\n--" BOUNDARY "\r\n");
 
@@ -876,10 +876,10 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
 
     if (jpeg_converted) { free(_jpg_buf); }
     esp_camera_fb_return(wc_fb);
-    //AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: send frame"));
+    //ALOG_DBG(PSTR("CAM: send frame"));
   }
   if (0 == Wc.stream_active) {
-    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
+    ALOG_DBG(PSTR("CAM: Stream exit"));
     Wc.client.flush();
     Wc.client.stop();
   }
@@ -890,13 +890,13 @@ void mCameraOV2640::HandleWebcamRoot(void)
   //CamServer->redirect("http://" + String(ip) + ":81/cam.mjpeg");
   Wc.CamServer->sendHeader("Location", WiFi.localIP().toString() + ":81/cam.mjpeg");
   Wc.CamServer->send(302, "", "");
-  AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Root called"));
+  ALOG_DBG(PSTR("CAM: Root called"));
 }
 
 // /*********************************************************************************************/
 
 uint32_t mCameraOV2640::WcSetStreamserver(uint32_t flag) {
-AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::WcSetStreamserver"));
+ALOG_TST(PSTR("mCameraOV2640::WcSetStreamserver"));
 
 
 if (pCONT_set->global_state.network_down) { return 0; }
@@ -911,7 +911,7 @@ if (pCONT_set->global_state.network_down) { return 0; }
       // Wc.CamServer->on("/cam.jpg", HandleWebcamMjpeg);
       // Wc.CamServer->on("/stream", HandleWebcamMjpeg);
       Wc.CamServer->on("/stream", [this](){HandleWebcamMjpeg();});
-      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream init"));
+      ALOG_DBG(PSTR("CAM: Stream init"));
       Wc.CamServer->begin();
     }
   } else {
@@ -919,7 +919,7 @@ if (pCONT_set->global_state.network_down) { return 0; }
       Wc.CamServer->stop();
       delete Wc.CamServer;
       Wc.CamServer = NULL;
-      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
+      ALOG_DBG(PSTR("CAM: Stream exit"));
     }
   }
   return 0;
@@ -936,7 +936,7 @@ void mCameraOV2640::WcStreamControl() {
 void mCameraOV2640::EveryLoop(void) {
   if (Wc.CamServer) {
     
-AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
+ALOG_TST(PSTR("if (Wc.CamServer) "));
     Wc.CamServer->handleClient();
     if (Wc.stream_active) { HandleWebcamMjpegTask(); }
   }
@@ -951,7 +951,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
         Wc.rtspp = new WiFiServer(8554);
         Wc.rtspp->begin();
         Wc.rtsp_start = 1;
-        AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP init"));
+        ALOG_INF(PSTR("CAM: RTSP init"));
         Wc.rtsp_lastframe_time = millis();
       }
 
@@ -964,7 +964,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
         if ((now-Wc.rtsp_lastframe_time) > RTSP_FRAME_TIME) {
             Wc.rtsp_session->broadcastCurrentFrame(now);
             Wc.rtsp_lastframe_time = now;
-          //  AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP session frame"));
+          //  ALOG_INF(PSTR("CAM: RTSP session frame"));
         }
 
         if (Wc.rtsp_session->m_stopped) {
@@ -972,7 +972,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
             delete Wc.rtsp_streamer;
             Wc.rtsp_session = NULL;
             Wc.rtsp_streamer = NULL;
-            AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP stopped"));
+            ALOG_INF(PSTR("CAM: RTSP stopped"));
         }
       }
       else {
@@ -980,7 +980,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
         if (Wc.rtsp_client) {
             Wc.rtsp_streamer = new OV2640Streamer(&Wc.rtsp_client, Wc.cam);        // our streamer for UDP/TCP based RTP transport
             Wc.rtsp_session = new CRtspSession(&Wc.rtsp_client, Wc.rtsp_streamer); // our threads RTSP session and state
-            AddLog(LOG_LEVEL_INFO, PSTR("CAM: RTSP stream created"));
+            ALOG_INF(PSTR("CAM: RTSP stream created"));
         }
       }
     }
@@ -1039,7 +1039,7 @@ void mCameraOV2640::Pre_Init(){
   // }
 // }
 
-AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::Pre_Init"));
+ALOG_TST(PSTR("mCameraOV2640::Pre_Init"));
 
 }
 
@@ -1098,10 +1098,10 @@ uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_level, bool json_appendi
 void mCameraOV2640::MQTTHandler_Init(){
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_HOUR;//pCONT_set->pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = SEC_IN_HOUR;//pCONT_set->pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1109,20 +1109,20 @@ void mCameraOV2640::MQTTHandler_Init(){
 
   
   ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_State;
 
 //   ptr = &mqtthandler_sensdebug_teleperiod;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_set->pCONT_set->Settings.sensors.ifchanged_secs; 
+//   ptr->tRateSecs = pCONT_set->pCONT_mqtt->dt.ifchanged_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
@@ -1143,10 +1143,10 @@ void mCameraOV2640::MQTTHandler_Set_RefreshAll(){
 
 void mCameraOV2640::MQTTHandler_Set_DefaultPeriodRate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->pCONT_mqtt->dt.teleperiod_secs;
+  // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->pCONT_mqtt->dt.teleperiod_secs;
+//   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->pCONT_mqtt->dt.teleperiod_secs;
   
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 
@@ -1759,10 +1759,10 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     init();
   }
 
@@ -1773,7 +1773,7 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
 
       if(settings.caminit)
@@ -1781,41 +1781,41 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
         server.handleClient();
       }
     break;
-    case FUNC_EVERY_SECOND:  
+    case TASK_EVERY_SECOND:  
       // Poll();    
       // WcStreamControl();
       // WcSetStreamserver(1);
-      AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
+      ALOG_TST(PSTR("caminit = %d"),  settings.caminit);
       // setup_cam();
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       if(!settings.caminit && (pCONT_time->uptime_seconds_nonreset>60)){
         setup_cam();
       }
     break;
-    case FUNC_WIFI_CONNECTED:
+    case TASK_WIFI_CONNECTED:
       setup_cam();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       // parse_JSONCommand(obj);
     break;
-    // case FUNC_SET_DEVICE_POWER:
+    // case TASK_SET_DEVICE_POWER:
     //   SetPower();
     // break;
     /************
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
+    case TASK_EVENT_SET_POWER_ID:
       // RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
 
     
-//     case FUNC_WEB_ADD_HANDLER:
+//     case TASK_WEB_ADD_HANDLER:
 //       WcPicSetup();
 //       break;
 
@@ -1824,23 +1824,23 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 
   }
   
-//     // case FUNC_COMMAND:
+//     // case TASK_COMMAND:
 //     //   result = DecodeCommand(kWCCommands, WCCommand);
 //     //   break;
 

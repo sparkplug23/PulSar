@@ -35,10 +35,10 @@ int8_t mImmersionTankColour::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     init();
   }
 
@@ -48,28 +48,28 @@ int8_t mImmersionTankColour::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:  
+    case TASK_EVERY_SECOND:  
       EverySecond();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       Event_Handle_Light_Toggle_Button(); // one press = toggle, multipress is 15 minute increment of on time, hold = stay on
     break;
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
   }
@@ -214,7 +214,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
   // int test_temp[sensor_count];
 
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("val=%d %d %d %d %d %d"),
+  // ALOG_TST(PSTR("val=%d %d %d %d %d %d"),
   //   (int)pCONT_db18->sensor[0].reading.val,
   //   (int)pCONT_db18->sensor[1].reading.val,
   //   (int)pCONT_db18->sensor[2].reading.val,
@@ -222,7 +222,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
   //   (int)pCONT_db18->sensor[4].reading.val,
   //   (int)pCONT_db18->sensor[5].reading.val);
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("add=%d %d %d %d %d %d"),
+  // ALOG_TST(PSTR("add=%d %d %d %d %d %d"),
   //   pCONT_db18->sensor[0].address[7],
   //   pCONT_db18->sensor[1].address[7],
   //   pCONT_db18->sensor[2].address[7],
@@ -235,7 +235,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
     // pCONT_db18->sensor[ii].reading.val = 20+(5*ii);
     
     int8_t device_id = -1;
-    uint16_t unique_module_id = pCONT_db18->GetModuleUniqueID();// ->GetModuleUniqueIDbyVectorIndex(E M_MODULE_SENSORS_DB18S20_ID);
+    uint16_t unique_module_id = pCONT_db18->GetModuleUniqueID();
 
 
     //temp solution
@@ -263,7 +263,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
     // }
     int8_t true_struct_id = pCONT_db18->FindStructIndexByAddressID(device_id_found);
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("device_id_found true_struct_id %d %d"),device_id_found,true_struct_id);
+    // ALOG_TST(PSTR("device_id_found true_struct_id %d %d"),device_id_found,true_struct_id);
 
     if(true_struct_id != -1){
       
@@ -352,7 +352,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
 
   // pCONT_lAni->CommandSet_TransitionOrderID( pCONT_lAni->TRANSITION_ORDER_INORDER_ID);
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("index=%d"),index);
+  // ALOG_TST(PSTR("index=%d"),index);
 
   // AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_RELAY_CONTROLS is disabled"));
   
@@ -489,7 +489,7 @@ void mImmersionTankColour::parse_JSONCommand(JsonParserObject obj)
 void mImmersionTankColour::MQTTHandler_Init(){
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -499,7 +499,7 @@ void mImmersionTankColour::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mImmersionTankColour::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -509,7 +509,7 @@ void mImmersionTankColour::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mImmersionTankColour::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; // water never changes fast 
@@ -537,9 +537,9 @@ void mImmersionTankColour::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

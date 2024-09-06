@@ -61,9 +61,9 @@
 
 // Belfast
 #undef LATITUDE
-#define LATITUDE               54.50449         // [Latitude] Your location to be used with sunrise and sunset   WHITEHALL CORNER HERE
+#define LATITUDE               54.504470         // [Latitude] Your location to be used with sunrise and sunset   WHITEHALL CORNER HERE
 #undef LONGTITUDE
-#define LONGITUDE              -6.30298          // [Longitude] Your location to be used with sunrise and sunset
+#define LONGITUDE              -6.302844          // [Longitude] Your location to be used with sunrise and sunset
 #undef ALTITUDE_ABOVE_SEALEVEL
 #define ALTITUDE_ABOVE_SEALEVEL              26 //metres          // [Longitude] Your location to be used with sunrise and sunset
 

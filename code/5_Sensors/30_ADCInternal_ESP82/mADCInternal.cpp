@@ -125,10 +125,10 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
 {
 
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -139,10 +139,10 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;   
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
     {
       // Update_Channel1_ADC_Readings();
       int reading = adc1_get_raw(ADC1_CHANNEL_7);
@@ -154,20 +154,20 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
     //  parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       // MQTTHandler_Set_DefaultPeriodRate();
       break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -254,17 +254,17 @@ void mADCInternal::Init(void){
       // case 32:
       //   adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11 );
       //   adc1_config_width(ADC_WIDTH_BIT_12);
-      //   AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_4 set"));
+      //   ALOG_TST(PSTR("ADC1_CHANNEL_4 set"));
       // break;
       case 34:
         adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
         adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_6 set"));
+        ALOG_TST(PSTR("ADC1_CHANNEL_6 set"));
       break;
       case 35:
         adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
         adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_7 set"));
+        ALOG_TST(PSTR("ADC1_CHANNEL_7 set"));
       break;
     }
 
@@ -281,12 +281,12 @@ void mADCInternal::EveryLoop(){
     external_interrupt.flag_pin_active = false;
     // Serial.println("external_interrupt.flag_pin_active");
     // Update_Channel1_ADC_Readings();
-    // AddLog(LOG_LEVEL_TEST, PSTR("adc_levels = \t%d\t%d %d"), readings[0].adc_level, readings[1].adc_level, isr_capture.active_buffer_to_write_to_index);
+    // ALOG_TST(PSTR("adc_levels = \t%d\t%d %d"), readings[0].adc_level, readings[1].adc_level, isr_capture.active_buffer_to_write_to_index);
   } 
 
 #endif // ESP32
   // if(isr_capture.active_buffer_to_write_to_index!=0){
-  // AddLog(LOG_LEVEL_TEST, PSTR("isr_capture.active_buffer_to_write_to_index=%d"),isr_capture.active_buffer_to_write_to_index);
+  // ALOG_TST(PSTR("isr_capture.active_buffer_to_write_to_index=%d"),isr_capture.active_buffer_to_write_to_index);
   // }
 
 }
@@ -308,7 +308,7 @@ void mADCInternal::Update_Channel1_ADC_Readings()
     }
     // average the collected samples
     readings[i].adc_level = (std::accumulate(samples.begin(), samples.end(), 0) / samples.size());
-    // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].adc_level = %d"),i,readings[i].adc_level);
+    // ALOG_TST(PSTR("readings[%d].adc_level = %d"),i,readings[i].adc_level);
 
     readings[i].samples_between_resets++;
 
@@ -316,7 +316,7 @@ void mADCInternal::Update_Channel1_ADC_Readings()
     if(readings[i].stored_values.index < STORED_VALUE_ADC_MAX){
       readings[i].stored_values.adc[readings[i].stored_values.index++] = readings[i].adc_level;
     }else{
-      // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].stored_values.index = %d OVERFLOW"),i,readings[i].stored_values.index);
+      // ALOG_TST(PSTR("readings[%d].stored_values.index = %d OVERFLOW"),i,readings[i].stored_values.index);
       // readings[i].stored_values.index = 0;
     }
 
@@ -325,7 +325,7 @@ void mADCInternal::Update_Channel1_ADC_Readings()
     readings[0].adc_level = adc1_get_raw(ADC1_CHANNEL_6);
     ets_delay_us(1);
     readings[1].adc_level = adc1_get_raw(ADC1_CHANNEL_7);
-    AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"), readings[0].adc_level, readings[1].adc_level);
+    ALOG_TST(PSTR("adc_level = \t%d\t%d"), readings[0].adc_level, readings[1].adc_level);
   #endif
 
 #endif // ESP32
@@ -361,7 +361,7 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level, bool json_appendi
     // adc1_config_channel_atten(ADC1_CHANNEL_6,ADC_ATTEN_DB_0);
     // adc1_config_channel_atten(ADC1_CHANNEL_7,ADC_ATTEN_DB_0);
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("adc = [%d,%d,%d,%d,%d,%d,%d,%d]"),
+    // ALOG_TST(PSTR("adc = [%d,%d,%d,%d,%d,%d,%d,%d]"),
     //   adc1_get_raw(ADC1_CHANNEL_0),
     //   adc1_get_raw(ADC1_CHANNEL_1),
     //   adc1_get_raw(ADC1_CHANNEL_2),
@@ -435,10 +435,10 @@ void mADCInternal::MQTTHandler_Init(){
   struct handler<mADCInternal>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -446,10 +446,10 @@ void mADCInternal::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 60;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -457,10 +457,10 @@ void mADCInternal::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -486,9 +486,9 @@ void mADCInternal::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -516,7 +516,7 @@ void mADCInternal::MQTTHandler_Sender()
 
 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
+    // ALOG_TST(PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
 
 
     // adc1_config_width(ADC_WIDTH_BIT_12);
@@ -546,7 +546,7 @@ void mADCInternal::MQTTHandler_Sender()
     // adc1_config_channel_atten(ADC1_CHANNEL_6,ADC_ATTEN_DB_0);
     // adc1_config_channel_atten(ADC1_CHANNEL_7,ADC_ATTEN_DB_0);
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("adc = [%d,%d,%d,%d,%d,%d,%d,%d]"),
+    // ALOG_TST(PSTR("adc = [%d,%d,%d,%d,%d,%d,%d,%d]"),
     //   adc1_get_raw(ADC1_CHANNEL_0),
     //   adc1_get_raw(ADC1_CHANNEL_1),
     //   adc1_get_raw(ADC1_CHANNEL_2),
@@ -624,7 +624,7 @@ void mADCInternal::MQTTHandler_Sender()
 
 //   // Run even when sensor is disabled (Will set fEnableSensor)
 //   switch(function){
-//     case FUNC_PRE_INIT:
+//     case TASK_PRE_INIT:
 //       // Pre_Init();
 //     break;
 //   }
@@ -637,40 +637,40 @@ void mADCInternal::MQTTHandler_Sender()
 //     /************
 //      * INIT SECTION * 
 //     *******************/
-//     case FUNC_INIT:
+//     case TASK_INIT:
 //       // Init();
 //     break;
 //     /************
 //      * PERIODIC SECTION * 
 //     *******************/
-//     case FUNC_LOOP:
-//     // Serial.println("FUNC_LOOP");
+//     case TASK_LOOP:
+//     // Serial.println("TASK_LOOP");
 //       // EveryLoop();
 //     break;   
-//     case FUNC_EVERY_SECOND:
-//       // AddLog(LOG_LEVEL_TEST, PSTR("mSensorsAnalog"));
+//     case TASK_EVERY_SECOND:
+//       // ALOG_TST(PSTR("mSensorsAnalog"));
 //     break;  
 //     /************
 //      * COMMANDS SECTION * 
 //     *******************/
-//     // case FUNC_JSON_COMMAND_ID:
+//     // case TASK_JSON_COMMAND_ID:
 //     //   parse_JSONCommand(obj);
 //     // break;
-//     // case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
+//     // case TASK_TEMPLATE_DEVICE_EXECUTE_LOAD:
 //     //   // parsesub_JSONCommands();
 //     // break;  
 //     /************
 //      * MQTT SECTION * 
 //     *******************/
 //     #ifdef USE_MODULE_NETWORK_MQTT
-//     case FUNC_MQTT_HANDLERS_INIT:
-//     case FUNC_MQTT_HANDLERS_RESET:
+//     case TASK_MQTT_HANDLERS_INIT:
+//     case TASK_MQTT_HANDLERS_RESET:
 //       MQTTHandler_Init();
 //     break;
-//     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+//     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Set_DefaultPeriodRate();
 //     break;
-//     case FUNC_MQTT_SENDER:
+//     case TASK_MQTT_SENDER:
 //       MQTTHandler_Sender();
 //     break;
 //     #endif //USE_MODULE_NETWORK_MQTT
@@ -686,7 +686,7 @@ void mADCInternal::MQTTHandler_Sender()
   
 // //   // Check if instruction is for me
 // //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
-// //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
+// //       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
 // //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 // //   }else{
 // //     return; // not meant for here
@@ -694,7 +694,7 @@ void mADCInternal::MQTTHandler_Sender()
 
 // //   // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::parse_JSONCommand()");
 
-// //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
+// //   ALOG_DBG(PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
 
 // //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 // //   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
@@ -777,7 +777,7 @@ void mADCInternal::MQTTHandler_Sender()
 //   struct handler<mSensorsAnalog>* ptr;
 
 //   ptr = &mqtthandler_settings_teleperiod;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = SEC_IN_HOUR; 
@@ -787,7 +787,7 @@ void mADCInternal::MQTTHandler_Sender()
 //   ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Settings;
 
 //   ptr = &mqtthandler_sensor_ifchanged;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
@@ -818,9 +818,9 @@ void mADCInternal::MQTTHandler_Sender()
 // {
 //   for(auto& handle:mqtthandler_list){
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+//       handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+//       handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
 //   }
 // }
 

@@ -9,10 +9,10 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       // Init();
     break;
   }
@@ -23,23 +23,23 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       ButtonLoop();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
 
 // pinMode(16, INPUT_PULLDOWN_16);
-//     AddLog(LOG_LEVEL_TEST, PSTR("mButtons::Tasker %d"),digitalRead(16));
+//     ALOG_TST(PSTR("mButtons::Tasker %d"),digitalRead(16));
 
     break;
-    // case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-    //  // AddLog(LOG_LEVEL_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
+    // case TASK_EVENT_INPUT_STATE_CHANGED_ID:
+    //  // ALOG_TST(PSTR("mButtons::TASK_EVENT_INPUT_STATE_CHANGED_ID"));
 
     // break;
     /************
      * EVENTS SECTION * 
     *******************/
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       // CommandSet_SDCard_OpenClose_Toggle();
    
     
@@ -61,16 +61,16 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -114,7 +114,7 @@ uint8_t mButtons::GetHardwareSpecificPullMethod(uint8_t real_pin)
 void mButtons::Pre_Init(void)
 {
   
-  AddLog(LOG_LEVEL_INFO, PSTR("Pre_Init"));
+  ALOG_INF(PSTR("Pre_Init"));
 
   // Check all possible pin options
   settings.buttons_found = 0;    
@@ -198,11 +198,11 @@ void mButtons::Pre_Init(void)
   // for (uint8_t i = 0; i < MAX_KEYS; i++) {
   //   if (pCONT_pins->PinUsed(GPIO_KEY1_ID,i)) {
   //     buttons_found++;
-  //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
+  //     ALOG_INF(PSTR("buttons_found=%d"),buttons_found-1);
   //     pinMode(pCONT_pins->GetPin(GPIO_KEY1_ID,i), 
   //       bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
         
-  //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
+  //     ALOG_INF(PSTR("buttons_found pullup=%d %d"),buttons_found-1,
   //     bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
   //     );
   //   }
@@ -258,7 +258,7 @@ void mButtons::Pre_Init(void)
 
 //  uint8_t maxdev = (pCONT_set->devices_present > MAX_KEYS) ? MAX_KEYS : pCONT_set->devices_present;
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("maxdev=%d"),maxdev);
+//   // ALOG_TST(PSTR("maxdev=%d"),maxdev);
 
 // //delay(1000);
 
@@ -278,9 +278,9 @@ void mButtons::Pre_Init(void)
 //       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
 //     }
 
-//     // AddLog(LOG_LEVEL_TEST, PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].last_state);
+//     // ALOG_TST(PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].last_state);
 
-//           // AddLog(LOG_LEVEL_TEST, PSTR("state=%d:%d"),
+//           // ALOG_TST(PSTR("state=%d:%d"),
 //           // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
 //           // // button_index,
           
@@ -294,7 +294,7 @@ void mButtons::Pre_Init(void)
 
 //       buttons[button_index].isactive = state;
       
-//       // if (pCONT->Tasker_Interface(FUNC_BUTTON_PRESSED)) {
+//       // if (pCONT->Tasker_Interface(TASK_BUTTON_PRESSED)) {
 //       //   // Serviced internally    //causes state not to work right now, tasker is returning true always
 //       // }
 //       // else 
@@ -304,7 +304,7 @@ void mButtons::Pre_Init(void)
 //       if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].last_state)) {
 //         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
         
-//           // AddLog(LOG_LEVEL_TEST, PSTR("state=%d:%d"),
+//           // ALOG_TST(PSTR("state=%d:%d"),
 //           // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
 //           // // button_index,
           
@@ -314,7 +314,7 @@ void mButtons::Pre_Init(void)
 //           // );
 
 
-//         // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
+//         // ALOG_DBG(PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
 //         //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
             
 //         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), 
@@ -338,15 +338,15 @@ void mButtons::Pre_Init(void)
 //         // #ifdef USE_MODULE_CORE_RULES
 //         // pCONT_rules->NewEvent(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID,button_index,state);
 //         // #endif
-//         // pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
+//         // pCONT->Tasker_Interface(TASK_EVENT_INPUT_STATE_CHANGED_ID);
 
 
-//    pCONT_rules->NewEventRun(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, button_index, state); // Event has occured, save and check it            
+//    pCONT_rules->NewEventRun(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, button_index, state); // Event has occured, save and check it            
           
 //           //}
 //         // } else {
 //         //   buttons[button_index].multipress = (multiwindow[button_index]) ? buttons[button_index].multipress +1 : 1;
-//         //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, buttons[button_index].multipress);
+//         //   ALOG_DBG(PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, buttons[button_index].multipress);
 //         //   multiwindow[button_index] = loops_per_second / 2;  // 0.5 second multi press window
 //         // }
 //         // blinks = 201;
@@ -483,7 +483,7 @@ void mButtons::ButtonHandler(void) {
 // //           Button.touch_hits[id] = 0;
 // //         }
 // //         if (bitRead(TOUCH_BUTTON.calibration, id+1)) {
-// //           AddLog(LOG_LEVEL_INFO, PSTR("PLOT: %u, %u, %u,"), id+1, _value, Button.touch_hits[id]);  // Button number (1..4), value, continuous hits under threshold
+// //           ALOG_INF(PSTR("PLOT: %u, %u, %u,"), id+1, _value, Button.touch_hits[id]);  // Button number (1..4), value, continuous hits under threshold
 // //         }
 // //       } else
 // // #endif  // not ESP32C3
@@ -533,12 +533,12 @@ void mButtons::ButtonHandler(void) {
         {           
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), id, state, state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active" );          
           // <length of data>,<state>,<type ie single/multi/hold><count>  
-          pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_PRESS_ID); // 1 press event
+          pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_PRESS_ID); // 1 press event
         }
         else
         {
           buttons[id].press_counter = (buttons[id].window_timer) ? buttons[id].press_counter +1 : 1;
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), id +1, buttons[id].press_counter);
+          ALOG_INF(PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), id +1, buttons[id].press_counter);
           buttons[id].window_timer = loops_per_second / 2;  // 0.5 second multi press window
           // No immediate action here -- awaiting for multiple presses            
         }
@@ -567,7 +567,7 @@ void mButtons::ButtonHandler(void) {
           if (buttons[id].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button held for factor times longer
             // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_SETOPTION "13 0"));  // Disable single press only             // ExecuteCommand(scmnd, SRC_BUTTON); 
           // <length of data>,<state>,<type ie single/multi/hold><count>  
-            pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // ERROR - Not sure what this section will do, long press no multi?
+            pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // ERROR - Not sure what this section will do, long press no multi?
           }
         } 
         else 
@@ -583,7 +583,7 @@ void mButtons::ButtonHandler(void) {
           
             // 3 = button pressed state, presses of button, type is long press?
             // <length of data>,<state>,<type ie single/multi/hold><count>  
-            pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID); 
+            pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID); 
           }
           // Long pressed not yet reached 
           else {
@@ -600,7 +600,7 @@ void mButtons::ButtonHandler(void) {
                 // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_RESET " 1"));
                 // ExecuteCommand(scmnd, SRC_BUTTON);                
                 ALOG_INF(PSTR(D_LOG_BUTTONS D_CMND_RESET " 1"));                
-                pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // Resetting command
+                pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // Resetting command
                 #endif // ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
               }
             }
@@ -628,7 +628,7 @@ void mButtons::ButtonHandler(void) {
             // <length of data>,<state>,<type ie single/multi/hold><count>  
             // Single or Multiple Events 
 
-            pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, buttons[id].press_counter == 1 ? INPUT_TYPE_SINGLE_PRESS_ID : INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
+            pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, buttons[id].press_counter == 1 ? INPUT_TYPE_SINGLE_PRESS_ID : INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
 
             buttons[id].press_counter = 0;
           }
@@ -761,7 +761,7 @@ void mButtons::MQTTHandler_Init(){
   struct handler<mButtons>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
@@ -771,7 +771,7 @@ void mButtons::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mButtons::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
@@ -781,7 +781,7 @@ void mButtons::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -809,9 +809,9 @@ void mButtons::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

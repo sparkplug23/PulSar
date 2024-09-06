@@ -6,6 +6,7 @@
 #include "2_CoreSystem/mBaseConfig.h"
 
 #include "1_TaskerManager/mTaskerManager.h"
+
 /**
  * @brief RTC Reboot/Fastboot data is made with global functions, so it is safe from TaskManager pointers and be processed immediately in setup()
  **/
@@ -33,7 +34,6 @@ extern bool     RtcFastboot_Valid(void);
  * @brief 
  **/
 #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-
 typedef struct {
   uint16_t      valid;                     // 290  (RTC memory offset 100)
   uint8_t       oswatch_blocked_loop;      // 292
@@ -67,8 +67,6 @@ extern void RtcSettingsSave(void);
 extern bool RtcSettingsLoad(uint32_t update);
 extern bool RtcSettingsValid(void);
 #endif // ENABLE_DEVFEATURE_RTC_SETTINGS
-
-
 
 
 #endif  // _RTC_SETTINGS_H_

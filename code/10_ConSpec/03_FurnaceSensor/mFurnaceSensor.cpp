@@ -20,10 +20,10 @@ int8_t mFurnaceSensor::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -34,32 +34,32 @@ int8_t mFurnaceSensor::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_HOUR:
+    case TASK_EVERY_HOUR:
     // MeasureADCWithRelay();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -122,17 +122,17 @@ void mFurnaceSensor::Init(void)
   //     case 32:
   //       adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11 );
   //       adc1_config_width(ADC_WIDTH_BIT_12);
-  //       AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_4 set"));
+  //       ALOG_TST(PSTR("ADC1_CHANNEL_4 set"));
   //     break;
   //     case 34:
   //       adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
   //       adc1_config_width(ADC_WIDTH_BIT_12);
-  //       AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_6 set"));
+  //       ALOG_TST(PSTR("ADC1_CHANNEL_6 set"));
   //     break;
   //     case 35:
   //       adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
   //       adc1_config_width(ADC_WIDTH_BIT_12);
-  //       AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_7 set"));
+  //       ALOG_TST(PSTR("ADC1_CHANNEL_7 set"));
   //     break;
   //   }
 
@@ -214,7 +214,7 @@ void mFurnaceSensor::EveryLoop()
 //   // // first index
 //   // if(adc_now > 4095)
 //   // {
-//   //   // AddLog(LOG_LEVEL_TEST, PSTR("adc_now >  adc_now %d"), adc_now);
+//   //   // ALOG_TST(PSTR("adc_now >  adc_now %d"), adc_now);
 //   //   // cant be
 //   //   adc_values.litres = 0;
 //   // }
@@ -222,7 +222,7 @@ void mFurnaceSensor::EveryLoop()
 //   // if(IsWithinLimits((uint16_t)1000, adc_now, (uint16_t)4095)) // within mapped range
 //   // {
 
-//   //   // AddLog(LOG_LEVEL_TEST, PSTR("WithinLimits adc_now %d"), adc_now);
+//   //   // ALOG_TST(PSTR("WithinLimits adc_now %d"), adc_now);
 //   //   if(adc_upper_boundary_index < ARRAY_SIZE(adc_raw_calibration_pairs_readings_adc)-1)
 //   //   {
 //   //     adc_values.litres = mapvalue(
@@ -237,7 +237,7 @@ void mFurnaceSensor::EveryLoop()
 //   // }
 //   // else // lower off scale ie "full"
 //   // {      
-//   //   // AddLog(LOG_LEVEL_TEST, PSTR("ELSE adc_now %d"), adc_now);
+//   //   // ALOG_TST(PSTR("ELSE adc_now %d"), adc_now);
 
 //   //   adc_values.litres = mapvalue(
 //   //       adc_now,
@@ -330,7 +330,7 @@ void mFurnaceSensor::MQTTHandler_Init()
   struct handler<mFurnaceSensor>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
@@ -340,7 +340,7 @@ void mFurnaceSensor::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mFurnaceSensor::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -350,7 +350,7 @@ void mFurnaceSensor::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mFurnaceSensor::ConstructJSON_State;
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -379,9 +379,9 @@ void mFurnaceSensor::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   // }
 }
 

@@ -20,10 +20,10 @@
 //     /************
 //      * INIT SECTION * 
 //     *******************/
-//     case FUNC_PRE_INIT:
+//     case TASK_PRE_INIT:
 //       Pre_Init();
 //     break;
-//     case FUNC_INIT:
+//     case TASK_INIT:
 //       Init();
 //     break;
 //   }
@@ -34,16 +34,16 @@
 //     /************
 //      * PERIODIC SECTION * 
 //     *******************/
-//     case FUNC_LOOP: 
+//     case TASK_LOOP: 
 //       EveryLoop();
 //     break;  
-//     case FUNC_EVERY_SECOND: 
+//     case TASK_EVERY_SECOND: 
 //       EverySecond();
 //     break;
 //     /************
 //      * TRIGGERS SECTION * 
 //     *******************/
-//     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+//     case TASK_EVENT_INPUT_STATE_CHANGED_ID:
 //       #ifdef USE_MODULE_DRIVERS_SDCARD
 //       pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
 //       #endif
@@ -54,14 +54,14 @@
 //      * MQTT SECTION * 
 //     *******************/
 //     #ifdef USE_MODULE_NETWORK_MQTT
-//     case FUNC_MQTT_HANDLERS_INIT:
-//     case FUNC_MQTT_HANDLERS_RESET:
+//     case TASK_MQTT_HANDLERS_INIT:
+//     case TASK_MQTT_HANDLERS_RESET:
 //       MQTTHandler_Init();
 //     break;
-//     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+//     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Set_DefaultPeriodRate();
 //     break;
-//     case FUNC_MQTT_SENDER:
+//     case TASK_MQTT_SENDER:
 //       MQTTHandler_Sender();
 //     break;
 //     #endif //USE_MODULE_NETWORK_MQTT
@@ -150,17 +150,17 @@
 //       case 32:
 //         adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11 );
 //         adc1_config_width(ADC_WIDTH_BIT_12);
-//         AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_4 set"));
+//         ALOG_TST(PSTR("ADC1_CHANNEL_4 set"));
 //       break;
 //       case 34:
 //         adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
 //         adc1_config_width(ADC_WIDTH_BIT_12);
-//         AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_6 set"));
+//         ALOG_TST(PSTR("ADC1_CHANNEL_6 set"));
 //       break;
 //       case 35:
 //         adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
 //         adc1_config_width(ADC_WIDTH_BIT_12);
-//         AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_7 set"));
+//         ALOG_TST(PSTR("ADC1_CHANNEL_7 set"));
 //       break;
 //     }
 
@@ -207,7 +207,7 @@
 // void mSerialCalibrationMeasurmentLogger::EverySecond()
 // {
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("frame = %d\t%d\t%d\t%d"), 
+//   // ALOG_TST(PSTR("frame = %d\t%d\t%d\t%d"), 
 //   // simple_uart2_receive_frame_for_calibration[0],simple_uart2_receive_frame_for_calibration[1],simple_uart2_receive_frame_for_calibration[2],simple_uart2_receive_frame_for_calibration[3]);
 
 //   SubTask_UpdateOLED();
@@ -218,7 +218,7 @@
 
 
 //   // ConstructJSON_SDCard_Calibration_Frame();
-//   //   AddLog(LOG_LEVEL_TEST, PSTR("SuperFrame=\"%s\""), JBI->GetBufferPtr());
+//   //   ALOG_TST(PSTR("SuperFrame=\"%s\""), JBI->GetBufferPtr());
  
 
 // }

@@ -17,16 +17,16 @@
 
 int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 
-    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT ));
+    // ALOG_INF(PSTR(D_LOG_APPLICATION D_BOOT_COUNT ));
 
   int8_t function_result = 0;
   
   // some functions must run regardless
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
     //   Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       // DefaultRuleForModule();
     break;
   }
@@ -38,51 +38,51 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     // /************
     //  * INIT SECTION * 
     // *******************/
-    // case FUNC_INIT:
+    // case TASK_INIT:
     //   init();
     // break;
     // /************
     //  * SETTINGS SECTION * 
     // *******************/
-    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+    // case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE: 
     //   // Settings_Load();
     // break;
-    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+    // case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE: 
     //   // Settings_Save();
     // break;
-    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+    // case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
     //   // Settings_Default();
     //   // pCONT_set->SettingsSave(2);
     // break;
     // /************
     //  * PERIODIC SECTION * 
     // *******************/
-    // case FUNC_LOOP: 
+    // case TASK_LOOP: 
     //   EveryLoop();
     // break;  
-    case FUNC_EVERY_SECOND:
-      // AddLog(LOG_LEVEL_TEST, PSTR("DefaultRuleForModule"));   
+    case TASK_EVERY_SECOND:
+      // ALOG_TST(PSTR("DefaultRuleForModule"));   
       // // DefaultRuleForModule();
       // MQTTHandler_Set_RefreshAll();
 
-      // if(){ pCONT->Tasker_Interface(FUNC_RULES_LOAD_FROM_PROGMEM_ID) };
+      // if(){ pCONT->Tasker_Interface(TASK_RULES_LOAD_FROM_PROGMEM_ID) };
       if(pCONT_time->uptime_seconds_nonreset == D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND){ RulesLoad_From_Progmem(); }
 
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     // /************
     //  * WEBPAGE SECTION * 
     // *******************/
     // #ifdef USE_MODULE_NETWORK_WEBSERVER
-    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    // case TASK_WEB_ADD_ROOT_TABLE_ROWS:
     //   WebAppend_Root_Status_Table_Draw();
     //   break;
-    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    // case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
     //   WebAppend_Root_Status_Table_Data();
     //   break;
     // #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -90,13 +90,13 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
       break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -114,7 +114,9 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 void mRuleEngine::RulesLoad_From_Progmem()
 {
 
-  ALOG_INF(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
+  ALOG_HGL(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
+
+  DEBUG_DELAY(5000);
 
   DefaultRuleForModule();
   
@@ -128,7 +130,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   ALOG_INF( PSTR("RULES_TEMPLATE Load = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
   
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
   // pCONT_set->runtime.boot_status.rules_template_parse_success = 1;
@@ -148,7 +150,7 @@ void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 {
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("1"
+    ALOG_INF(PSTR("1"
       "\n\rIndex:\t %d\n\r"
       "Trigger>>\n\r"
       "\tmodule:\t%d\n\r"
@@ -190,7 +192,7 @@ void mRuleEngine::ShowRuleEvent_AddLog(uint8_t show_type)
 {
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(""
+  ALOG_INF(PSTR(""
       "\n\r\n\r"
       "Event>>\n\r"
       "\tmodule:\t%d\n\r"
@@ -326,7 +328,7 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
 
   // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
+  // ALOG_TST(PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
   // #endif // ENABLE_LOG_LEVEL_INFO
 
   //maybe need to return rule(s) handled then leave taasker_interface
@@ -385,21 +387,22 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
             ); 
             data_buffer.payload.length_used += strlen(data_buffer.payload.ctr);
 
-            ALOG_INF( PSTR("FUNC_JSON_COMMAND_ID mrules=%s"), data_buffer.payload.ctr );
+            ALOG_INF( PSTR("TASK_JSON_COMMAND_ID mrules=%s"), data_buffer.payload.ctr );
     
-            pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+            pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
           }
           else // Execute normal state/value method if no jsoncommand was used
           {
             
             pCONT->Tasker_Interface(
-              rules[rule_index].command.function_id, // function the previous trigger is linked to
-              rules[rule_index].command.module_id //target module
+              rules[rule_index].command.function_id
+              // , // function the previous trigger is linked to
+              // rules[rule_index].command.module_id //target module
             );
 
             // #ifdef ENABLE_LOG_LEVEL_ERROR
-            //         AddLog(LOG_LEVEL_TEST, PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
+            //         ALOG_TST(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
             //       rules[rule_index].command.function_id, // function the previous trigger is linked to
             //       rules[rule_index].command.module_id, //target module
             //       true  // runnig a rule, so don't call this loop back into this function
@@ -429,31 +432,30 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
 void mRuleEngine::DefaultRuleForModule(){
 
-// #ifndef USE_RULES_TEMPLATE // if no rules defined, then check for preset defaults by hardware type
 rules_active_index = 0;
 
-#ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
-  if(pCONT_set->Settings.module == MODULE_SONOFF_4CHPRO_ID){
-    DefaultRule_Sonoff_4CHPRO();
-  }else
-#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
-#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-  if(pCONT_set->Settings.module == MODULE_SONOFF_IFAN03_ID){
-    DefaultRule_Sonoff_iFan03();
-  }else
-#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
-#ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
-  if(pCONT_set->Settings.module == MODULE_SHELLY_DIMMER2_ID){
-    DefaultRule_Shelly_Dimmer2();
-  }else
-#endif // USE_MODULE_TEMPLATE_SHELLY_DIMMER2
-#ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
-  if(pCONT_set->Settings.module == MODULE_SHELLY2P5_ID){
-    DefaultRule_Shelly_2p5();
-  }
-#endif // USE_MODULE_TEMPLATE_SHELLY_2P5
-
-// #endif // USE_RULES_TEMPLATE // if no rules defined, then check for preset defaults by hardware type
+#ifdef ESP8266
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+    if(pCONT_set->Settings.module == MODULE_SONOFF_4CHPRO_ID){
+      DefaultRule_Sonoff_4CHPRO();
+    }else
+  #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+    if(pCONT_set->Settings.module == MODULE_SONOFF_IFAN03_ID){
+      DefaultRule_Sonoff_iFan03();
+    }else
+  #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+    if(pCONT_set->Settings.module == MODULE_SHELLY_DIMMER2_ID){
+      DefaultRule_Shelly_Dimmer2();
+    }else
+  #endif // USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+  #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
+    if(pCONT_set->Settings.module == MODULE_SHELLY2P5_ID){
+      DefaultRule_Shelly_2p5();
+    }
+  #endif // USE_MODULE_TEMPLATE_SHELLY_2P5
+#endif
 
 }
 
@@ -500,16 +502,16 @@ bool mRuleEngine::AppendEventToRules(mEvent::EVENT_PART* trigger_new, mEvent::EV
 void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* event){
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR("parsesub_Rule_Part"));
+  ALOG_TST(PSTR("parsesub_Rule_Part"));
     #endif //  ENABLE_LOG_LEVEL_INFO
 
   JsonParserToken jtok;
   // JsonParserObject jobj2 = &jobj;
 
     // if(jtok = jobj["Module"]){
-    //   AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jobj[rule_name] 123"));    
+    //   ALOG_INF(PSTR("JTOK FOUND jobj[rule_name] 123"));    
     // } 
-    int16_t matched_id = 0;
+    uint16_t matched_id = 0;
 
     // Reset value length to 0
     event->value.length = 0;
@@ -517,7 +519,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
     if(jtok = jobj["Module"]){
       if(jtok.isStr()){
-        if((matched_id=pCONT->GetModule_UniqueID_byName(jtok.getStr()))>=0){
+        // if((matched_id=pCONT->GetModule_UniqueID_byName(jtok.getStr()))>=0){
+        if((matched_id=pCONT->GetModuleID(jtok.getStr()))>0){
           event->module_id = matched_id;
           data_buffer.isserviced++;
         }
@@ -527,8 +530,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         data_buffer.isserviced++;
       }
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -546,8 +549,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         data_buffer.isserviced++;
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -566,8 +569,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         data_buffer.isserviced++;
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -592,8 +595,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -616,8 +619,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -625,7 +628,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
     if(jtok = jobj["JsonCommands"]){
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
     #endif //  ENABLE_LOG_LEVEL_INFO
 
 
@@ -653,8 +656,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
           // Rules can therefore only be created once at starttime for now          
 
           #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
-          AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
+          ALOG_INF(PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
+          ALOG_INF(PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
           #endif // ENABLE_LOG_LEVEL_INFO
 
           // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
@@ -674,7 +677,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 {
 
-  // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK D_LOG_RULES "mRuleEngine::parse_JSONCommand"));
+// return;
+
 
   JsonParserToken jtok = 0; 
   JsonParserToken jtok_sub = 0; 
@@ -686,38 +690,35 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
   for(int rule_index=0;rule_index<MAX_RULE_VARS;rule_index++)
   {
     sprintf(rule_name, "Rule%d", rule_index);
+    
     if(jtok = obj[rule_name])
     {
       
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR("MATCHED Rule%d"),rule_index);
-    #endif // ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        ALOG_HGL(PSTR("MATCHED Rule%d"),rule_index);
+        // DEBUG_DELAY(1000);
+      #endif // ENABLE_LOG_LEVEL_INFO
 
       mEvent::EVENT_PART* p_event = nullptr;
 
       jobj = obj[rule_name].getObject()["Trigger"];
       if(!jobj.isNull()){
         parsesub_Rule_Part(jobj, &pCONT_rules->rules[rule_index].trigger);
-
-        // tmp fix, just set but later needs made dynamic
-
         // Activate rule
         rules[rule_index].flag_configured = true;
         rules[rule_index].flag_enabled = true;
-
-
       }
 
       jobj = obj[rule_name].getObject()["Command"];
       if(!jobj.isNull()){
-        parsesub_Rule_Part(jobj, &pCONT_rules->rules[rule_index].command);
-        
+        parsesub_Rule_Part(jobj, &pCONT_rules->rules[rule_index].command);        
       }
+
+      mqtthandler_settings_teleperiod.flags.SendNow = true;
 
     }
 
   }  
-
 
 
   if(jtok = obj["AddRule"])
@@ -796,19 +797,19 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 
     //   if(jtok.isStr()){
     //     if((tmp_id=pCONT->GetModuleIDbyFriendlyName(jtok.getStr()))>=0){
-    //       AddLog(LOG_LEVEL_INFO, PSTR("22JTOK FOUND Trigger Module tmp_id = %d"),tmp_id);
+    //       ALOG_INF(PSTR("22JTOK FOUND Trigger Module tmp_id = %d"),tmp_id);
     //       p_event->module_id = tmp_id;
     //       data_buffer.isserviced++;
     //     }
     //   }else
     //   if(jtok.isNum()){
-    //     AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module"));
+    //     ALOG_INF(PSTR("JTOK FOUND Trigger Module"));
     //     // get pointer to rule via rule_index
     //     // CommandSet_Rule_Module_ID(jtok.getInt(), );
     //     data_buffer.isserviced++;
     //   }
     //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    //   // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     // }//end trigger
@@ -847,14 +848,14 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
     pCONT_rules->rules[pCONT_rules->rules_active_index].flag_configured = true;   
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = STATE_NUMBER_TOGGLE_ID;  // Toggled 
     // Command0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
     p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->function_id = TASK_EVENT_SET_POWER_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
     p_event->value.data[p_event->value.length++] = STATE_NUMBER_FOLLOW_ID;  // Toggle
@@ -881,14 +882,14 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
   //   pCONT_rules->rules[pCONT_rules->rules_active_index].flag_configured = true;   
   //   p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
   //   p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-  //   p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+  //   p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
   //   p_event->device_id = 0;
   //   p_event->value.length = 0;
   //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_ON_ID;  // Toggled 
   //   // Command0
   //   p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
   //   p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-  //   p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+  //   p_event->function_id = TASK_EVENT_SET_POWER_ID;
   //   p_event->device_id = 0;
   //   p_event->value.length = 0;
   //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_ON_ID;  // Toggle
@@ -901,14 +902,14 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
   //   pCONT_rules->rules[pCONT_rules->rules_active_index].flag_configured = true;   
   //   p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
   //   p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-  //   p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+  //   p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
   //   p_event->device_id = 0;
   //   p_event->value.length = 0;
   //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_OFF_ID;  // Toggled 
   //   // Command1
   //   p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
   //   p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-  //   p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+  //   p_event->function_id = TASK_EVENT_SET_POWER_ID;
   //   p_event->device_id = 0;
   //   p_event->value.length = 0;
   //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_OFF_ID;  // Toggle
@@ -1107,20 +1108,20 @@ void mRuleEngine::MQTTHandler_Init()
   struct handler<mRuleEngine>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
@@ -1146,9 +1147,9 @@ void mRuleEngine::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

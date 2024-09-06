@@ -28,10 +28,10 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -44,14 +44,14 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_50_MSECOND:
+    case TASK_EVERY_50_MSECOND:
       ReceiveCheck();
     break;
-    case FUNC_UPDATE_OTA_BEFORE_ON_START:
+    case TASK_UPDATE_OTA_BEFORE_ON_START:
       ALOG_INF(PSTR("disableReceive"));
       mySwitch->disableReceive();
     break;
-    case FUNC_EVERY_SECOND:{
+    case TASK_EVERY_SECOND:{
       
       // AddLog(LOG_LEVEL_INFO,PSTR("pCONT_set->Settings.rf_protocol_mask=%d"), pCONT_set->Settings.rf_protocol_mask);
 
@@ -59,23 +59,23 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+    case TASK_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init(); //make a TASK_MQTT_INIT and group mqtt togather
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif  
@@ -130,7 +130,7 @@ void mRCSwitch::ReceiveCheck(void)
     int protocol = mySwitch->getReceivedProtocol();
     int delay = mySwitch->getReceivedDelay();
 
-    AddLog(LOG_LEVEL_DEBUG, PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
+    ALOG_DBG(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
 
     uint32_t now = millis();
     if ((now - rx_pkt.received_time_millis > pCONT_set->Settings.rf_duplicate_time) && (data > 0))
@@ -166,7 +166,7 @@ void mRCSwitch::ReceiveCheck(void)
       //   stemp, bits, protocol, delay);
       // MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_JSON_RFRECEIVED));
 
-        AddLog(LOG_LEVEL_TEST, PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
+        ALOG_TST(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
       
     }
     mySwitch->resetAvailable();
@@ -181,7 +181,7 @@ void mRCSwitch::ReceiveCheck(void)
 // void CmndRfProtocol(void) {
 //   if (!PinUsed(GPIO_RFRECV)) { return; }
 
-// //  AddLog(LOG_LEVEL_INFO, PSTR("RFR:CmndRfRxProtocol:: index:%d usridx:%d data_len:%d data:\"%s\""),XdrvMailbox.index, XdrvMailbox.usridx, XdrvMailbox.data_len,XdrvMailbox.data);
+// //  ALOG_INF(PSTR("RFR:CmndRfRxProtocol:: index:%d usridx:%d data_len:%d data:\"%s\""),XdrvMailbox.index, XdrvMailbox.usridx, XdrvMailbox.data_len,XdrvMailbox.data);
 
 //   uint64_t thisdat;
 //   if (1 == XdrvMailbox.usridx) {
@@ -211,7 +211,7 @@ void mRCSwitch::ReceiveCheck(void)
 //     }
 //   }
 //   mySwitch->setReceiveProtocolMask(pCONT_set->Settings.rf_protocol_mask);
-// //  AddLog(LOG_LEVEL_INFO, PSTR("RFR: CmndRfProtocol:: Start responce"));
+// //  ALOG_INF(PSTR("RFR: CmndRfProtocol:: Start responce"));
 //   Response_P(PSTR("{\"" D_CMND_RFPROTOCOL "\":\""));
 //   bool gotone = false;
 //   thisdat = 1;
@@ -328,7 +328,7 @@ void mRCSwitch::parse_JSONCommand(JsonParserObject obj)
 
 		// JBI->Start();
 
-		// pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		// pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		// bool ready_to_send = JBI->End();
 
@@ -343,7 +343,7 @@ void mRCSwitch::parse_JSONCommand(JsonParserObject obj)
 
 		// if(ready_to_send)
 		// {			
-    	AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
+    	ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
 		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		// }
 
@@ -405,7 +405,7 @@ void mRCSwitch::MQTTHandler_Init()
   struct handler<mRCSwitch>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
@@ -415,7 +415,7 @@ void mRCSwitch::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mRCSwitch::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
@@ -444,9 +444,9 @@ void mRCSwitch::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

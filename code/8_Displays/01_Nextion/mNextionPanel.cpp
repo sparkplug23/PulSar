@@ -30,10 +30,10 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();  
       break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -44,13 +44,13 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
     
       if(!update_in_progress)
         EveryLoop();
 
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       if(!update_in_progress)
       {
         EverySecond_ActivityCheck();
@@ -64,13 +64,13 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
         }
       }
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       // EverySecond_SendScreenInfo();
     break;
-    case FUNC_EVERY_HOUR:
+    case TASK_EVERY_HOUR:
       // Command_SetPage(settings.page);   //temp fix
     break;
-    case FUNC_RESTART_STABLE:      
+    case TASK_RESTART_STABLE:      
       nextionSendCmd("page message");
       nextionSetAttr("message.main.txt", "\"System Rebooting...\"");
       nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_GREEN_STR);
@@ -79,18 +79,18 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * Network SECTION * 
     *******************/
-    case FUNC_WIFI_STARTING_CONNECTION:      
+    case TASK_WIFI_STARTING_CONNECTION:      
       nextionSendCmd("page message");
       nextionSetAttr("message.main.txt", "\"WiFi Connecting...\"");
       nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
     break;
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
       WebPage_AddHandlers();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
     
       if(!update_in_progress && !pCONT_sup->arduino_ota_triggered)
         parse_JSONCommand(obj);
@@ -100,22 +100,22 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       mqttConnected();
       Show_ConnectionWorking();
     break;
-    case FUNC_MQTT_DISCONNECTED:
+    case TASK_MQTT_DISCONNECTED:
       mqttDisconnected();
       Show_ConnectionNotWorking();
     break;
-    case FUNC_MQTT_SUBSCRIBE:
+    case TASK_MQTT_SUBSCRIBE:
       MQTTSubscribe();
     break;
     #endif
@@ -364,7 +364,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["commands"]){
       JsonParserArray array = jtok;
       for(auto val : array) {
-          AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+          ALOG_INF(PSTR("F::%s %s"),__FUNCTION__,val.getStr());
           nextionSendCmd(val.getStr());
           data_buffer.isserviced++;
       }
@@ -404,7 +404,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
     if(jtok = obj["Display"].getObject()["Println"]){
         // JsonParserArray array = jtok;
         // for(auto val : array) {
-        //     // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+        //     // ALOG_INF(PSTR("F::%s %s"),__FUNCTION__,val.getStr());
         //     nextionSendCmd(val.getStr());
         // }
         display->println(jtok.getStr());
@@ -645,16 +645,6 @@ void mNextionPanel::CommandSet_Baud(uint32_t baud)
 void mNextionPanel::MQTTSubscribe()
 {
 
-  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
-  pCONT_mqtt->Subscribe("openhab_broadcast/nextion/#", 0);
-  #endif // ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
-  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1
-  pCONT_mqtt->Subscribe(ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1, 0);
-  #endif
-  #ifdef ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2
-  pCONT_mqtt->Subscribe(ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2, 0);
-  #endif
-
 
 }
 
@@ -769,7 +759,7 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
 
   snprintf(conversion_buffer, sizeof(conversion_buffer), "%s", c_str);
 
-  // AddLog(LOG_LEVEL_INFO, PSTR("before %s"),conversion_buffer);
+  // ALOG_INF(PSTR("before %s"),conversion_buffer);
 
   uint8_t command_length = strlen(conversion_buffer);  // use this later to check if "matched index + key + 3 data hue bytes" = "length" for vailidity check
 
@@ -782,7 +772,7 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
 
   if((pos_start_of_token=strstr(conversion_buffer, "co=h"))!=nullptr) //pco and bco, returns pointer to substring
   {              
-    // AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),pos_start_of_token);
+    // ALOG_INF(PSTR("MATCHED %s"),pos_start_of_token);
     pos_start_of_response_field = pos_start_of_token+3; // Only 3, since "h" is not part of the output command
 
     hue_input = pCONT_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
@@ -798,7 +788,7 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
     uint16_t Rgb565 = (((red & 0xf8)<<8) + ((green & 0xfc)<<3)+(blue>>3));
 
 
-    // AddLog(LOG_LEVEL_INFO, PSTR("Rgb565 = %d"), Rgb565);
+    // ALOG_INF(PSTR("Rgb565 = %d"), Rgb565);
 
 
     sprintf(pos_start_of_response_field, "%d\0", Rgb565);
@@ -807,13 +797,13 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
   else
   if((pos_start_of_token=strstr(conversion_buffer, "co=#"))!=nullptr) //pco and bco, returns pointer to substring, "#" (capital) for byte packed rgb
   {               
-    // AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),pos_start_of_token);
+    // ALOG_INF(PSTR("MATCHED %s"),pos_start_of_token);
     pos_start_of_response_field = pos_start_of_token+3; // Only 3, since "h" is not part of the output command
 
     // hue_input = pCONT_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
 
     
-    // AddLog(LOG_LEVEL_INFO, PSTR("pos_start_of_response_field = %s"), pos_start_of_response_field);
+    // ALOG_INF(PSTR("pos_start_of_response_field = %s"), pos_start_of_response_field);
 
     uint32_t colour32bit = 0;
     if(pos_start_of_response_field[0]=='#'){ colour32bit = (long) strtol( &pos_start_of_response_field[1], NULL, 16);
@@ -836,14 +826,14 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
     uint16_t Rgb565 = (((red & 0xf8)<<8) + ((green & 0xfc)<<3)+(blue>>3));
 
 // 
-    // AddLog(LOG_LEVEL_INFO, PSTR("Rgb565 = %d"), Rgb565);
+    // ALOG_INF(PSTR("Rgb565 = %d"), Rgb565);
 
 
     sprintf(pos_start_of_response_field, "%d\0", Rgb565);
 
   }
   else{
-    // AddLog(LOG_LEVEL_INFO, PSTR("NO match"));
+    // ALOG_INF(PSTR("NO match"));
 
   }
 
@@ -2242,7 +2232,7 @@ void mNextionPanel::MQTTHandler_Init(){
   struct handler<mNextionPanel>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2253,7 +2243,7 @@ void mNextionPanel::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -2264,7 +2254,7 @@ void mNextionPanel::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -2293,9 +2283,9 @@ void mNextionPanel::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   // }
 }
 

@@ -88,7 +88,7 @@ Fix multiple repos "git push -f origin master"
     Can I can probe and get the exact crash log ready as a copy and paste http response, that would be awesome
     
 #Idea 022
-    - ADD FUNC_SENSOR_SEARCH that will search for new sensors and re-enable module if found
+    - ADD TASK_SENSOR_SEARCH that will search for new sensors and re-enable module if found
 
 #Ides 023
     - Add lighting demonstration that cycles across every pattern/animation, for <user_defined> seconds each, with options to simply "end" (returning to previous resting mode) or
@@ -469,7 +469,7 @@ Add sunelevation palette that is actually left on overnight, and is black when i
 
 #FI-130
     Add new system (with vectors) that does delayed commands.
-    For example, the typical "pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED)". This would need to called within the connection function leading to possible recursive calls.
+    For example, the typical "pCONT->Tasker_Interface(TASK_WIFI_CONNECTED)". This would need to called within the connection function leading to possible recursive calls.
     Instead, have this command added to a vector that holds them all, and calls any at the end of the loop after connections are finished.
     If it is done with a vectorised struct, then other parameters such as delays can be used to added wait times.
 

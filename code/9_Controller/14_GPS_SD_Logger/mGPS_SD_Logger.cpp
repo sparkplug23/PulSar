@@ -23,10 +23,10 @@ int8_t mGPS_SD_Logger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -37,19 +37,19 @@ int8_t mGPS_SD_Logger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
       EverySecond();
     break;
-    case FUNC_EVERY_100_MSECOND:
+    case TASK_EVERY_100_MSECOND:
       // SubTask_UpdateOLED_Detailed_GPS();
     break;
     /************
      * TRIGGERS SECTION * 
     *******************/
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       #ifdef USE_MODULE_DRIVERS_SDCARD
       pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
       #endif
@@ -58,20 +58,20 @@ int8_t mGPS_SD_Logger::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -119,7 +119,7 @@ void mGPS_SD_Logger::SubTask_Generate_GPS_Json_SDCard_Stream()
   #ifdef USE_MODULE_DRIVERS_SDCARD
     pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
   #else
-    // AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
+    // ALOG_TST(PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
   #endif //USE_MODULE_DRIVERS_SDCARD
 
   /**

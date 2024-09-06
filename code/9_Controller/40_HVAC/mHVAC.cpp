@@ -46,10 +46,10 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -60,10 +60,10 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * FUNCTION HANDLER SECTION * 
     *******************/
-    case FUNC_FUNCTION_LAMBDA_INIT:
+    case TASK_FUNCTION_LAMBDA_INIT:
       FunctionHandler_Init();
     break;
-    case FUNC_FUNCTION_LAMBDA_LOOP:
+    case TASK_FUNCTION_LAMBDA_LOOP:
       FunctionHandler_Loop();  // Maybe rename into "Scheduler"
     break;
     /************
@@ -71,10 +71,10 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     *******************/  
     #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
-    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
-    case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__LOAD__MODULE_DATA__ID:
       // Load_Module();
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
@@ -82,22 +82,25 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_EVERY_100_MSECOND:
+      // ALOG_WRN(PSTR("100MS"));
+    break;
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
   }  
@@ -349,7 +352,7 @@ void mHVAC::FunctionHandler_Update_Sensors()
       sensors_reading_t reading; 
       mTaskerInterface* pMod = nullptr; 
 
-      if((pMod = pCONT->GetModuleObjectbyUniqueID(rt.zone[zone_id].sensor.module_id)) != nullptr)
+      if((pMod = pCONT->GetModule(rt.zone[zone_id].sensor.module_id)) != nullptr)
       {
         
         pMod->GetSensorReading(&reading, rt.zone[zone_id].sensor.index);
@@ -530,7 +533,7 @@ void mHVAC::SetZoneActive(uint8_t zone_id, uint8_t state)
     default:
     case ZONE_MODE_HEAT_8BITS:{
 
-      // AddLog(LOG_LEVEL_INFO, PSTR("rt.zone[%d].output.index[0]=%d"),zone_id, rt.zone[zone_id].output.index[0]);
+      // ALOG_INF(PSTR("rt.zone[%d].output.index[0]=%d"),zone_id, rt.zone[zone_id].output.index[0]);
 
       // Check if mode is permitted
       // if(rt.zone[zone_id].bitpacked_modes_enabled,)
@@ -780,7 +783,7 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 //   // // if(data_buffer.payload.json_pairs>0){
 //   //   data_buffer.payload.len = measureJson(obj)+1;
 //   //   serializeJson(doc,data_buffer.payload.ctr);
-//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
+//   //   ALOG_DBG(PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
 //   // // }
 
 //   return 0;// data_buffer.payload.len>3?1:0;
@@ -806,7 +809,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     if(jtok.isStr()){
       if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(), GetModuleUniqueID()))>=0)
       { // D_JSON_DEVICE
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+        ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
       }else{
         AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
       }
@@ -814,10 +817,10 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     if(jtok.isNum()){
       device_id = jtok.getInt();
     }
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
   }
 
-// ALOG_DBM(PSTR("TESTPOINT"));
+ALOG_INF(PSTR("TESTPOINT"));
 // return;
 
   /**
@@ -828,7 +831,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
     // #endif
   }
 
@@ -836,7 +839,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTimer_AddTimeOn(device_id, jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_ADD_TIME_ON)), jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_ADD_TIME_ON)), jtok.getInt());
     // #endif
   }
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
@@ -849,7 +852,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_Desired_Temperature(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), jtok.getInt());
     // #endif
   }
 
@@ -857,7 +860,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -866,7 +869,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     rt.zone[device_id].program_temp_method.StartDesiredTemperature(jtok.getFloat());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -875,7 +878,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     rt.zone[device_id].program_temp_method.SetTimer_Running_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -884,7 +887,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     rt.zone[device_id].program_temp_method.SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -894,7 +897,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_Schedule_Mode(device_id,mode); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_K(D_JSON_SCHEDULE D_JSON_MODE)), jtok.getStr());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_K(D_JSON_SCHEDULE D_JSON_MODE)), jtok.getStr());
     // #endif
   }
 
@@ -902,7 +905,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_TimeRunning_Limit(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
     // #endif
   }
   
@@ -920,7 +923,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
       ALOG_HGL( PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "SetSensor device_name_ctr1 = %s"),arr.getStr()); 
 
       int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr(),GetModuleUniqueID());
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);
+      ALOG_DBG(PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);
 
       if(device_id_found>=0)
       {      
@@ -936,7 +939,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
           rt.zone[index].sensor.module_id = pCONT_set->Settings.device_name_buffer.class_id[device_id_found];
           rt.zone[index].sensor.index = pCONT_set->Settings.device_name_buffer.device_id[device_id_found];
         }
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "module_id,index = %d,%d"),rt.zone[index].sensor.module_id,rt.zone[index].sensor.index);
+        ALOG_DBG(PSTR(D_LOG_RELAYS "module_id,index = %d,%d"),rt.zone[index].sensor.module_id,rt.zone[index].sensor.index);
 
         index++;
       }
@@ -971,7 +974,7 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint16_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
+    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -990,7 +993,7 @@ void mHVAC::CommandSet_ProgramTimer_AddTimeOn(uint8_t zone_id, uint16_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
+    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1011,7 +1014,7 @@ uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
   // // isanychanged_timers = true;
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
+  //   ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1046,7 +1049,7 @@ void mHVAC::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_id, u
 
   //   program_temps[device_id].time_running.limit = value;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
+  //   ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
   // #endif
   //   // fForceHeatingTempsUpdate = true;
   //   data_buffer.isserviced++;
@@ -1061,7 +1064,7 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   // program_temps[device_id].schedule.mode_sch = value;
   // // fForceHeatingTempsUpdate = true;
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("mode_sch=%d"),program_temps[device_id].schedule.mode_sch);
+  // ALOG_TST(PSTR("mode_sch=%d"),program_temps[device_id].schedule.mode_sch);
   
   // if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID)
   // {
@@ -1074,13 +1077,13 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   //   SetHeater(device_id,0);
   // }
   
-  // AddLog(LOG_LEVEL_TEST, PSTR("mode_sch=%d %d %d %d"),
+  // ALOG_TST(PSTR("mode_sch=%d %d %d %d"),
   // device_id,
   // program_temps[device_id].time_running.on,
   // program_temps[device_id].time_maintaining.on,
   // program_temps[device_id].schedule.mode_sch);
 
-  //   //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   //ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)value);
@@ -1103,7 +1106,7 @@ void ProgramTemperature::EverySecond(void)
 {
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR("ProgramTemperature::EverySecond"));
+    ALOG_DBG(PSTR("ProgramTemperature::EverySecond"));
   #endif
 
   /**
@@ -1136,11 +1139,11 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
      * @note TimeMaintain includes/overlaps the "on" period
      * */
     if(time_running.on < time_running.limit){     //stay on
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_running = on [%d] < limit [%d]"),time_running.on,time_running.limit);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_running = on [%d] < limit [%d]"),time_running.on,time_running.limit);
       isrunning_heating = true;
     }
     else{       
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time On Exceeded - Turn Zone OFF"));
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time On Exceeded - Turn Zone OFF"));
       time_running.on = -1; //deactviate
       time_maintaining.on = -1; // Turn maintaining period on
       isrunning_heating = false;
@@ -1152,7 +1155,7 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
      * @note Currently, maintain in the home heating assumes the cycling is handled by a physical real world thermostat
      * */
     if(temperature.current >= temperature.desired){   
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] > Set [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] > Set [%d]"),(int)temperature.current,(int)temperature.desired);
 
       /**
        * If maintain was not counting yet, turn it on for first temp crossing above threshold
@@ -1164,19 +1167,19 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
 
       // Check if temp should be maintained above desired point
       if((time_maintaining.on>=0)&&(time_maintaining.on < time_maintaining.limit)){
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_maintaining = on [%d] < limit [%d]"),time_maintaining.on,time_maintaining.limit);
+        ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_maintaining = on [%d] < limit [%d]"),time_maintaining.on,time_maintaining.limit);
         isrunning_heating = true;
       }
       // Turn off
       else{
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceededon%d [%d] < limit [%d]"),time_maintaining.on, time_maintaining.on,time_maintaining.limit);
+        ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceededon%d [%d] < limit [%d]"),time_maintaining.on, time_maintaining.on,time_maintaining.limit);
         time_running.on = -2;
         time_maintaining.on = -1;
         isrunning_heating = false;
       }
     }
     else{ 
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] < Set [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured = Current [%d] < Set [%d]"),(int)temperature.current,(int)temperature.desired);
     }
 
   }// time_on is not running
@@ -1201,7 +1204,7 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
      *  Time checks - If limit is hit, stop, or else continue maintaining on
      * */
     if(time_running.on > time_running.limit){   
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),time_running.on,time_running.limit);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),time_running.on,time_running.limit);
       time_running.on = -2; //deactviate
       time_maintaining.limit = -1;
       isrunning_cooling = false;
@@ -1214,8 +1217,8 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
      * Temp checks (Has the current values reached the desired)
      * */
     if(temperature.current <= temperature.desired){    // Also need to add a "fudge" value
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] > Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Exceeded Set Point"));
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] > Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Exceeded Set Point"));
 
       // Check if temp should be maintained above desired point
       if((time_maintaining.on>=0)&&(time_maintaining.on < time_maintaining.limit)){
@@ -1223,14 +1226,14 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
       }
       // Turn off
       else{
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceeded"));
+        ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Time Maintaining Exceeded"));
         time_running.on = -2;
         time_maintaining.limit = -1;
         isrunning_cooling = false;
       }
     }
     else{ 
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] < Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
+      ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "Measured Temp [%d] < Set Temp [%d]"),(int)temperature.current,(int)temperature.desired);
     }
 
   }// time_on is not running
@@ -1522,7 +1525,7 @@ void mHVAC::MQTTHandler_Init(){
   struct handler<mHVAC>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_HOUR; 
@@ -1533,7 +1536,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_program_timers_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -1544,7 +1547,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_program_timers_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1555,7 +1558,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_program_temps_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1566,7 +1569,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_program_temps_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1577,7 +1580,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_program_overview_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1588,7 +1591,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_program_overview_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1599,7 +1602,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_relays_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -1610,7 +1613,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_relays_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1621,7 +1624,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_zone_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -1632,7 +1635,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_zone_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -1643,7 +1646,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_zone_roc1m;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 60; 
@@ -1654,7 +1657,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   
   ptr = &mqtthandler_sensor_zone_roc10m;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 60*10; 
@@ -1683,9 +1686,9 @@ void mHVAC::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

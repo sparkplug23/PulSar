@@ -343,9 +343,9 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
 
       stored_file = SD.open(writer_settings.file_name, FILE_APPEND);
       if(!stored_file){
-        AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "stored_file \"%s\" did not open"),writer_settings.file_name);
+        ALOG_TST(PSTR(DEBUG_INSERT_PAGE_BREAK "stored_file \"%s\" did not open"),writer_settings.file_name);
       }else{
-	      AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" Opened!"),writer_settings.file_name);
+	      ALOG_TST(PSTR("stored_file \"%s\" Opened!"),writer_settings.file_name);
       	writer_settings.status = FILE_STATUS_OPENED_ID;
 				sdcard_status.bytes_written_to_file = 0;
 			}
@@ -363,7 +363,7 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
     break;
     case FILE_STATUS_CLOSING_ID:
         
-      AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" Closed!"),writer_settings.file_name);
+      ALOG_TST(PSTR("stored_file \"%s\" Closed!"),writer_settings.file_name);
 
       stored_file.close();
 
@@ -472,10 +472,10 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     
     // #ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
     //   init_SDCARD_is_Serial_Debug_Only();
@@ -502,7 +502,7 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 
   }
   else
-  if(function == FUNC_EVERY_SECOND){
+  if(function == TASK_EVERY_SECOND){
     if(sdcard_status.init_error_on_boot)
     {
       init();
@@ -516,12 +516,12 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
     {
 
     }
     break;
-    case FUNC_EVERY_50_MSECOND:
+    case TASK_EVERY_50_MSECOND:
 
       EveryLoop_Handle_Appending_File_Method();
 
@@ -535,7 +535,7 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
       #endif // ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
           
     break;
-    case FUNC_EVERY_SECOND:  
+    case TASK_EVERY_SECOND:  
     {
 
       // If not init, retry init, but ignore press to start
@@ -549,23 +549,23 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -596,7 +596,7 @@ void mSDCard::EveryLoop_Handle_Appending_File_Method()
       }
     }
 
-    AddLog(LOG_LEVEL_TEST, PSTR("sdcard_status.isopened CHANGED =%d"), sdcard_status.isopened);
+    ALOG_TST(PSTR("sdcard_status.isopened CHANGED =%d"), sdcard_status.isopened);
     sdcard_status.isopened_previous_state = sdcard_status.isopened;
     // If opened, close
     if(sdcard_status.isopened)
@@ -641,7 +641,7 @@ void mSDCard::init(void)
    * */
   if(sd_hardware_type == 1)
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("(clock, miso, mosi, chip_select)=(%d,%d,%d,%d)"), clock, miso, mosi, chip_select);
+    ALOG_INF(PSTR("(clock, miso, mosi, chip_select)=(%d,%d,%d,%d)"), clock, miso, mosi, chip_select);
     spiSD.begin(clock, miso, mosi, chip_select); //SCK,MISO,MOSI,SS //HSPI1
   }else{
     return;
@@ -744,14 +744,14 @@ void mSDCard::Handle_Write_Ringbuffer_Stream_To_SDCard()
   //   // BufferWriterI->Clear();
   //   uint16_t bytes_read = GetRingBufferDataAndClear(0, stream_out_buffer, byte_read_limit, '\n', false);
   //   // if(strlen(BufferWriterI->GetPtr())==0){
-  //   //   AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
+  //   //   ALOG_TST(PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
   //   // }
 
   //   //if any data found
   //   if(bytes_read)
   //   {  
   //     // char* pbuffer = BufferWriterI->GetPtr();
-  //     //AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),bytes_read, stream_out_buffer);
+  //     //ALOG_TST(PSTR("buffer[%d]=\"%s\""),bytes_read, stream_out_buffer);
   //     pCONT_sdcard->SubTask_Append_To_Open_File(stream_out_buffer, bytes_read);      
   //   }
 
@@ -878,7 +878,7 @@ void mSDCard::MQTTHandler_Init(){
   struct handler<mSDCard>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -888,7 +888,7 @@ void mSDCard::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Settings;
 
   ptr = &mqtthandler_file_writer;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -898,7 +898,7 @@ void mSDCard::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSDCard::ConstructJSON_FileWriter;
 
   ptr = &mqtthandler_debug_write_times;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -926,9 +926,9 @@ void mSDCard::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -992,7 +992,7 @@ void mSDCard::parse_JSONCommand(JsonParserObject obj){
     //   data_buffer.isserviced++;
     // }
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -1051,7 +1051,7 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
   if(state == 2) //toggle
   {
     sdcard_status.isopened ^= 1; 
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.isopened == 2, %d"),sdcard_status.isopened);
+    ALOG_TST(PSTR("CommandSet_LoggingState sdcard_status.isopened == 2, %d"),sdcard_status.isopened);
 
     /**
      * temp fix, when opening, try set the internal time from gps time once
@@ -1075,7 +1075,7 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
   }else
   {
     sdcard_status.isopened = state;
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.isopened = state,  %d"),sdcard_status.isopened);
+    ALOG_TST(PSTR("CommandSet_LoggingState sdcard_status.isopened = state,  %d"),sdcard_status.isopened);
 
   }
 
@@ -1204,7 +1204,7 @@ void mSDCard::SDCardSpeedDebug()
 
 void mSDCard::SDCardBulkSpeedTest(uint8_t test_number, uint32_t bytes_to_write)
 {
-  AddLog(LOG_LEVEL_TEST, PSTR("SDCardBulkSpeedTest %d %d Starting in 5 seconds"),test_number,bytes_to_write);
+  ALOG_TST(PSTR("SDCardBulkSpeedTest %d %d Starting in 5 seconds"),test_number,bytes_to_write);
   // delay(5000);
 
   uint32_t time_start = millis();
@@ -1214,9 +1214,9 @@ void mSDCard::SDCardBulkSpeedTest(uint8_t test_number, uint32_t bytes_to_write)
   sprintf(writer_settings.file_name, "/%s%d.txt", "TestWriter",test_number);
   File file = SD.open(writer_settings.file_name, FILE_APPEND);
   if(!file){
-    AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" did not open"),writer_settings.file_name);
+    ALOG_TST(PSTR("file \"%s\" did not open"),writer_settings.file_name);
   }
-  AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" Opened!"),writer_settings.file_name);
+  ALOG_TST(PSTR("file \"%s\" Opened!"),writer_settings.file_name);
 
   // write all bytes (numbers 0 to 9 single digits only)
   uint8_t bytes_for_card = 0;
@@ -1237,7 +1237,7 @@ void mSDCard::SDCardBulkSpeedTest(uint8_t test_number, uint32_t bytes_to_write)
 
   uint32_t time_duration = millis() - time_start;
   debug_write_times.complete_write_duration = time_duration;
-  AddLog(LOG_LEVEL_TEST, PSTR("file_name \"%s\" bytes: %d, time: %d ms"),writer_settings.file_name, bytes_to_write, time_duration);
+  ALOG_TST(PSTR("file_name \"%s\" bytes: %d, time: %d ms"),writer_settings.file_name, bytes_to_write, time_duration);
 
 }
 

@@ -10,10 +10,10 @@ int8_t mUserMod_01::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     Init();
   }
 
@@ -24,29 +24,29 @@ int8_t mUserMod_01::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:    
+    case TASK_EVERY_SECOND:    
 
     break;
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
-    // case FUNC_MQTT_HANDLERS_INIT:
-    // case FUNC_MQTT_HANDLERS_RESET:
+    // case TASK_MQTT_HANDLERS_INIT:
+    // case TASK_MQTT_HANDLERS_RESET:
     //   MQTTHandler_Init();
     // break;
-    // case FUNC_MQTT_SENDER:
+    // case TASK_MQTT_SENDER:
     //   MQTTHandler_Sender(); //optional pass parameter
     // break;
-    // case FUNC_MQTT_CONNECTED:
+    // case TASK_MQTT_CONNECTED:
     //   MQTTHandler_Set_RefreshAll();
     // break;
   }
@@ -140,7 +140,7 @@ void mUserMod_01::EveryLoop_EmulatePic32Measurement()
     // Write analog out
     analogWrite(22, pic32.adc_value);
     analogWrite(2, pic32.adc_high-pic32.adc_value); //inverse
-    // AddLog(LOG_LEVEL_TEST, PSTR("pic32.adc_value=%d"),pic32.adc_value);
+    // ALOG_TST(PSTR("pic32.adc_value=%d"),pic32.adc_value);
     digitalWrite(4, HIGH); //ending adc slot
   }
 
@@ -214,7 +214,7 @@ Store the SF inside the pic32 in RAM, then send after its full, maybe I need two
     snprintf(buffer + strlen(buffer), sizeof(buffer), "]}");
 
     // digitalWrite(5, HIGH);
-    AddLog(LOG_LEVEL_TEST, PSTR("buffer=\"%s\""), buffer);
+    ALOG_TST(PSTR("buffer=\"%s\""), buffer);
     Serial2.println(buffer);
     // digitalWrite(5, LOW);
 
@@ -346,7 +346,7 @@ void mUserMod_01::MQTTHandler_Init(){
   struct handler<mUserMod_01>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -356,7 +356,7 @@ void mUserMod_01::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mUserMod_01::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
@@ -366,7 +366,7 @@ void mUserMod_01::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mUserMod_01::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -394,9 +394,9 @@ void mUserMod_01::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

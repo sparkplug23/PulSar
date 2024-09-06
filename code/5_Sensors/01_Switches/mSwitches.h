@@ -1,7 +1,7 @@
 #ifndef _MSWITCHES_H_
 #define _MSWITCHES_H_
 
-#define D_UNIQUE_MODULE_SENSORS_SWITCHES_ID  ((5*1000)+01) 
+#define D_UNIQUE_MODULE_SENSORS_SWITCHES_ID  5001 // ((5*1000)+01) 
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -129,6 +129,7 @@ class mSwitches :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       if(index > MAX_SWITCHES-1) {value->sensor_type.push_back(0); return ;}
+      value->timestamp = 0; // Switches are constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
       value->sensor_type.push_back(SENSOR_TYPE_STATE_ACTIVE_ID);
       value->data_f.push_back(IsSwitchActive(index));
       value->sensor_id = index;

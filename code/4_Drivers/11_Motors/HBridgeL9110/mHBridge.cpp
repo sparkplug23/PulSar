@@ -72,20 +72,20 @@ void mHBridge::init(void){
 int8_t mHBridge::Tasker(uint8_t function, JsonParserObject obj){ 
 
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IA %d"),pin_A_IA);
       AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB %d"),pin_A_IB);
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       //SubTasker_ADC_Measure();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       //SubTasker_MQTTSender();
     break;
   }
@@ -180,7 +180,7 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
   
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motor")>=0){
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
+//     ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return 0; // not meant for here

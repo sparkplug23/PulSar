@@ -1,11 +1,7 @@
-#ifndef MTIME_H
-#define MTIME_H 0.21
+#ifndef MODULE_CORE_TIME_H
+#define MODULE_CORE_TIME_H
   
-// #include "1_TaskerManager/mTaskerManager.h" // including this causes issue using "datetime" type elsewhere
-
-#define D_UNIQUE_MODULE_CORE_TIME_ID  ((2*1000)+7)
-
-// #ifdef USE_MODULE_CORE_TIME
+#define D_UNIQUE_MODULE_CORE_TIME_ID  2007 // ((2*1000)+7)
 
 #include <Arduino.h>
 #include <Ticker.h>
@@ -14,7 +10,7 @@ enum WeekInMonthOptions {Last, First, Second, Third, Fourth};
 enum DayOfTheWeekOptions {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
 enum MonthNamesOptions {Jan=1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
 enum HemisphereOptions {North, South};
-enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_LOCALNOTZ, DT_DST, DT_STD, DT_RESTART, DT_ENERGY, DT_BOOTCOUNT, DT_LOCAL_MILLIS, DT_TIMEZONE, DT_SUNRISE, DT_SUNSET, DT_LOCAL_TIME };
+enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_DST, DT_STD, DT_RESTART, DT_ENERGY, DT_BOOTCOUNT, DT_LOCAL_MILLIS, DT_TIMEZONE, DT_SUNRISE, DT_SUNSET, DT_LOCAL_TIME };
 
 typedef struct datetime{
   uint32_t nanos;
@@ -82,6 +78,7 @@ typedef struct TIMEREACHED_HANDLER{
 #define SEC_IN_HOUR  3600
 #define SEC_IN_MIN   60
 
+
 enum TIME_UNITS_IDS{
   TIME_UNIT_SECONDS_ID = 0,
   TIME_UNIT_MILLISECONDS_ID
@@ -103,10 +100,9 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-#include "5_Sensors/22_SolarLunar/mSolarLunar.h"
 #include "3_Network/10_MQTT/mMQTT.h"
 
-static const uint8_t kDaysInMonth[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
+static const uint8_t kDaysInMonth[]    PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
 static const char kMonthNamesEnglish[] PROGMEM = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
 class mTime :
@@ -116,14 +112,13 @@ class mTime :
   private:
   public:
   
-  /************************************************************************************************
+    /************************************************************************************************
      * SECTION: Construct Class Base
      ************************************************************************************************/
     mTime(){};
     void   Init(void);
     void   Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void   parse_JSONCommand(JsonParserObject obj);
     
     static constexpr const char* PM_MODULE_CORE_TIME_CTR = D_MODULE_CORE_TIME_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
@@ -135,7 +130,7 @@ class mTime :
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
-      uint8_t mode = 0;//ModuleStatus::Initialising; // Disabled,Initialise,Running
+      uint8_t mode = 0;    // Disabled,Initialise,Running
     }module_state;
 
     /************************************************************************************************
@@ -147,14 +142,6 @@ class mTime :
 
     }
     dt;
-
-
-    struct DATA_RUNTIME
-    {
-
-    } 
-    rt;
-
 
     /*********************************************************************************************\
      * Sources: Time by Michael Margolis and Paul Stoffregen (https://github.com/PaulStoffregen/Time)
@@ -253,29 +240,6 @@ class mTime :
       char* GetSunTimeAtHorizon(uint32_t dawn, char* buffer, uint8_t buflen);
       uint16_t SunMinutes(uint32_t dawn);
     #endif //  USE_SUNRISE
-
-    #ifdef ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
-    /************************************************************************************************
-     * SECTION: Construct Messages
-     ************************************************************************************************/
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_State(uint8_t json_method = 0, bool json_appending = true);
-
-    /************************************************************************************************
-     * SECITON: MQTT
-     ************************************************************************************************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
-    void MQTTHandler_Sender();
-
-    std::vector<struct handler<mTime>*> mqtthandler_list;
-    struct handler<mTime> mqtthandler_settings_teleperiod;
-    struct handler<mTime> mqtthandler_state_teleperiod;
-    #endif // USE_MODULE_NETWORK_MQTT
-
-    #endif // ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
 
     /************************************************************************************************
      * SECTION: Legacy code

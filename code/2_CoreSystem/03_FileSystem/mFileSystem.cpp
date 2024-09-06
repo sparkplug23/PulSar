@@ -14,14 +14,7 @@
  * 
  * Step 1: build now and be able to view files on the SD card in the webui editor
  * 
- * 
- * 
- * 
- * 
-****
- * 
  * Three types of files, stored as (.byte, .json, .txt)
- * 
  * 
  * sys_ = system files
  * drv_
@@ -36,14 +29,6 @@
  * When possible, all data from a module should be held within a "DATA"/"data" struct, and this will be called to save as ".byte" and when requested, "restore state at boot"
  * "If data cant fit in a struct because of its format, then save and load as .json". Anything in json will be passed through the command parser.
  * ".txt" files are for "logs" and "debugging". 
- * 
- * 
- * 
- * 
- * 
-
-
-
  */
 
 #include "mFileSystem.h"
@@ -88,7 +73,7 @@ volatile size_t knownLargestSpace = MAX_SPACE;
 
 File f; // don't export to other cpp files
 
-//wrapper to find out how long closing takes
+// wrapper to find out how long closing takes
 void mFileSystem::closeFile() {
   #ifdef WLED_DEBUG_FS2
     Serial.println("Close -> ");
@@ -99,8 +84,9 @@ void mFileSystem::closeFile() {
   doCloseFile = false;
 }
 
-//find() that reads and buffers data from file stream in 256-byte blocks.
-//Significantly faster, f.find(key) can take SECONDS for multi-kB files
+
+// find() that reads and buffers data from file stream in 256-byte blocks.
+// Significantly faster, f.find(key) can take SECONDS for multi-kB files
 bool mFileSystem::bufferedFind(const char *target, bool fromStart)
 {
   #ifdef WLED_DEBUG_FS2
@@ -137,7 +123,8 @@ bool mFileSystem::bufferedFind(const char *target, bool fromStart)
   return false;
 }
 
-//find empty spots in file stream in 256-byte blocks.
+
+// find empty spots in file stream in 256-byte blocks.
 bool mFileSystem::bufferedFindSpace(size_t targetLen, bool fromStart) 
 {
 
@@ -187,7 +174,8 @@ bool mFileSystem::bufferedFindSpace(size_t targetLen, bool fromStart)
   return false;
 }
 
-//find the closing bracket corresponding to the opening bracket at the file pos when calling this function
+
+// find the closing bracket corresponding to the opening bracket at the file pos when calling this function
 bool mFileSystem::bufferedFindObjectEnd() 
 {
   #ifdef WLED_DEBUG_FS2
@@ -220,7 +208,8 @@ bool mFileSystem::bufferedFindObjectEnd()
   return false;
 }
 
-//fills n bytes from current file pos with ' ' characters
+
+// fills n bytes from current file pos with ' ' characters
 void mFileSystem::writeSpace(size_t l)
 {
   byte buf[FS_BUFSIZE];
@@ -234,6 +223,7 @@ void mFileSystem::writeSpace(size_t l)
 
   if (knownLargestSpace < l) knownLargestSpace = l;
 }
+
 
 bool mFileSystem::appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen)
 {
@@ -314,6 +304,7 @@ bool mFileSystem::appendObjectToFile(const char* key, JsonDocument* content, uin
   return true;
 }
 
+
 bool mFileSystem::writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content)
 {
   char objKey[10];
@@ -322,59 +313,23 @@ bool mFileSystem::writeObjectToFileUsingId(const char* file, uint16_t id, JsonDo
   return writeObjectToFile(file, objKey, content);
 }
 
+
 bool mFileSystem::writeObjectToFile(const char* file, const char* key, JsonDocument* content)
 {
-  DEBUG_LINE_HERE;
-
-
-  uint32_t s = 0; //timing
-
-  DEBUG_LINE_HERE;
-
-  // if(*content == nullptr)
-  // {
-  // DEBUG_LINE_HERE;
-  //   Serial.println("Content is null");
-  // DEBUG_LINE_HERE;
-  //   return false;
-  // }
-
-  DEBUG_LINE_HERE;
+  uint32_t s = 0; // timing
 
   #ifdef WLED_DEBUG_FS2
     Serial.printf("Write to %s with key %s >>>\n\r", file, (key==nullptr)?"nullptr":key);
-  DEBUG_LINE_HERE;
     serializeJson(*content, Serial); 
     Serial.println();
-  DEBUG_LINE_HERE;
     s = millis();
-
-
-
-  // // #ifdef WLED_DEBUG
-  //   DEBUG_PRINTLN(F("Serialized preset"));
-  //   serializeJson(doc,Serial);
-  //   DEBUG_PRINTLN();
-  // // #endif
-
-
   #endif
 
-
-
-
-  DEBUG_LINE_HERE;
-
   size_t pos = 0;
-  DEBUG_LINE_HERE;
   f = FILE_SYSTEM.open(file, "r+");
-  DEBUG_LINE_HERE;
   if (!f && !FILE_SYSTEM.exists(file)) f = FILE_SYSTEM.open(file, "w+");
-  DEBUG_LINE_HERE;
   if (!f) {
-  DEBUG_LINE_HERE;
     Serial.println("Failed to open!");
-  DEBUG_LINE_HERE;
     return false;
   }
 
@@ -427,12 +382,14 @@ bool mFileSystem::writeObjectToFile(const char* file, const char* key, JsonDocum
   return true;
 }
 
+
 bool mFileSystem::readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest)
 {
   char objKey[10];
   sprintf(objKey, "\"%d\":", id);
   return readObjectFromFile(file, objKey, dest);
 }
+
 
 //if the key is a nullptr, deserialize entire object
 bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocument* dest)
@@ -460,6 +417,7 @@ bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocu
   return true;
 }
 
+
 void mFileSystem::updateFSInfo() 
 {
   #ifdef ARDUINO_ARCH_ESP32
@@ -478,7 +436,8 @@ void mFileSystem::updateFSInfo()
 }
 
 
-    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+
 
 //Un-comment any file types you need
 String mFileSystem::getContentType(AsyncWebServerRequest* request, String filename)
@@ -522,7 +481,6 @@ bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 
-
 int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
 {
 
@@ -530,17 +488,12 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
-    #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-    case FUNC_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM:
-      Templates__SaveHardcodedTemplateToFilesystem();
-    break;
-    #endif
   }
 
   if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -549,24 +502,24 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:  
+    case TASK_EVERY_SECOND:  
     break;
-     case FUNC_LOOP:
+     case TASK_LOOP:
     //   UfsExecuteCommandFileLoop();
     break;
-    case FUNC_EVERY_FIVE_SECOND:    
+    case TASK_EVERY_FIVE_SECOND:    
       #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
       SystemTask__Execute_Module_Data_Save();
       #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
       #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
       SystemTask__Execute_Module_Data_Save();
       #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
       // #endif     
     break;  
-    case FUNC_EVERY_FIVE_MINUTE:
+    case TASK_EVERY_FIVE_MINUTE:
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
       JsonFile_Save__Stored_Module();
       JsonFile_Save__Stored_Secure();
@@ -576,42 +529,42 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 
-    // case FUNC_MQTT_INIT:
+    // case TASK_MQTT_INIT:
     //   if (!TasmotaGlobal.no_autoexec) {
     //     UfsExecuteCommandFile(TASM_FILE_AUTOEXEC);
     //   }
     //   break;
-    // case FUNC_COMMAND:
+    // case TASK_COMMAND:
     //   result = DecodeCommand(kUFSCommands, kUFSCommand);
     //   break;
     #ifdef USE_WEBSERVER
-    case FUNC_WEB_ADD_MANAGEMENT_BUTTON:
+    case TASK_WEB_ADD_MANAGEMENT_BUTTON:
       if (ufs_type) {
       WSContentSend_PD(UFS_WEB_DIR, PSTR(D_MANAGE_FILE_SYSTEM));
       }
       break;
-      case FUNC_WEB_ADD_HANDLER:
+      case TASK_WEB_ADD_HANDLER:
       //      Webserver->on(F("/ufsd"), UfsDirectory);
       //      Webserver->on(F("/ufsu"), HTTP_GET, UfsDirectory);
       //      Webserver->on(F("/ufsu"), HTTP_POST,[](){Webserver->sendHeader(F("Location"),F("/ufsu"));Webserver->send(303);}, HandleUploadLoop);
@@ -621,85 +574,10 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
       break;
     #endif // USE_WEBSERVER
 
-
-
-    }
-  
+    }  
 
 } // END Tasker
 
-
-#ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-void mFileSystem::Templates__SaveHardcodedTemplateToFilesystem()
-{
-  ALOG_HGL(PSTR("Templates__SaveHardcodedTemplateToFilesystem"));
-
-  File file; 
-  char file_path[50] = {0};
-
-  #ifdef USE_MODULE_TEMPLATE
-    snprintf(file_path,sizeof(file_path),"/tmplt_module.json");
- 
-    // Open file for writing, if it does not exist, create it
-    // Seek is placed at the start of the file, contents will be overwriten
-    file = FILE_SYSTEM.open(file_path, "w+");
-    
-    if(file) 
-    {
-      ALOG_ERR(PSTR("Writing \"%s\""), file_path);
-      file.print(MODULE_TEMPLATE);
-      file.close();    
-    }
-
-  #endif // USE_MODULE_TEMPLATE
-  #ifdef USE_FUNCTION_TEMPLATE
-    snprintf(file_path,sizeof(file_path),"/tmplt_function.json");
- 
-    // Open file for writing, if it does not exist, create it
-    // Seek is placed at the start of the file, contents will be overwriten
-    file = FILE_SYSTEM.open(file_path, "w+");
-    
-    if(file) 
-    {
-      ALOG_ERR(PSTR("Writing \"%s\""), file_path);
-      file.print(FUNCTION_TEMPLATE);
-      file.close();    
-    }
-
-  #endif // USE_FUNCTION_TEMPLATE
-  #ifdef USE_LIGHTING_TEMPLATE
-    snprintf(file_path,sizeof(file_path),"/tmplt_lighting.json");
- 
-    // Open file for writing, if it does not exist, create it
-    // Seek is placed at the start of the file, contents will be overwriten
-    file = FILE_SYSTEM.open(file_path, "w+");
-    
-    if(file) 
-    {
-      ALOG_ERR(PSTR("Writing \"%s\""), file_path);
-      file.print(LIGHTING_TEMPLATE);
-      file.close();    
-    }
-
-  #endif // USE_LIGHTING_TEMPLATE
-  #ifdef USE_RULES_TEMPLATE
-    snprintf(file_path,sizeof(file_path),"/tmplt_rules.json");
- 
-    // Open file for writing, if it does not exist, create it
-    // Seek is placed at the start of the file, contents will be overwriten
-    file = FILE_SYSTEM.open(file_path, "w+");
-    
-    if(file) 
-    {
-      ALOG_ERR(PSTR("Writing \"%s\""), file_path);
-      file.print(RULES_TEMPLATE);
-      file.close();    
-    }
-
-  #endif // USE_RULES_TEMPLATE
-
-}
-#endif // ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
 
 void mFileSystem::SystemTask__Execute_Module_Data_Save()
@@ -707,7 +585,7 @@ void mFileSystem::SystemTask__Execute_Module_Data_Save()
 
   ALOG_INF(PSTR("SystemTask__Execute_Module_Data_Save"));
 
-  pCONT->Tasker_Interface(FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID);
+  pCONT->Tasker_Interface(TASK_FILESYSTEM__SAVE__MODULE_DATA__ID);
 
 }
 
@@ -747,7 +625,8 @@ void mFileSystem::FileWrite_Test()
   f.print(JBI->GetBufferPtr());
   
   f.close();
-    ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+  
+  ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
 
 
 }
@@ -812,7 +691,7 @@ void mFileSystem::init(void)
 void mFileSystem::UfsInit(void) 
 {
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "mFileSystem::UfsInit"));
+  ALOG_INF(PSTR(D_LOG_FILESYSTEM "mFileSystem::UfsInit"));
   
   // #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
   bool fsinit = false;
@@ -841,7 +720,7 @@ void mFileSystem::UfsInit(void)
   UfsData.run_file_pos = -1;
   UfsInitOnce();
   if (ufs_type) {
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "FlashFS mounted with %d kB free"), UfsInfo(1, 0));
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "FlashFS mounted with %d kB free"), UfsInfo(1, 0));
   }
 
   // #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE
@@ -851,7 +730,7 @@ void mFileSystem::UfsInit(void)
 
 // // Init flash file system
 void mFileSystem::UfsInitOnce(void) {
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "mFileSystem::UfsInitOnce"));
+  ALOG_INF(PSTR(D_LOG_FILESYSTEM "mFileSystem::UfsInitOnce"));
   ufs_type = 0;
   ffsp = 0;
   ufs_dir = 0;
@@ -859,17 +738,14 @@ void mFileSystem::UfsInitOnce(void) {
 #ifdef ESP8266
   ffsp = &LittleFS;
   if (!LittleFS.begin()) {
-  	AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "!LittleFS.begin()"));
+  	ALOG_INF(PSTR(D_LOG_FILESYSTEM "!LittleFS.begin()"));
     ffsp = nullptr;
-    delay(5000);
     return;
   }
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM  "LittleFS.begin()"));
-  delay(5000);
+  ALOG_INF(PSTR(D_LOG_FILESYSTEM  "LittleFS.begin()"));
 #endif  // ESP8266
 
 #ifdef ESP32
-#ifdef ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   // try lfs first
   ffsp = &FILE_SYSTEM;
  if (!FILE_SYSTEM.begin(true, "") && !FILE_SYSTEM.begin(true, "", 5, "fs_1")) {         // force empty mount point to make it the fallback FS
@@ -885,7 +761,6 @@ void mFileSystem::UfsInitOnce(void) {
     dfsp = ffsp;
     return;
   }
-#endif // ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
 #endif // ESP32
   ffs_type = UFS_TLFS;
   ufs_type = ffs_type;
@@ -962,15 +837,103 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 }
 
 
+/*********************************************************************************************\
+ * Tfs low level functions
+\*********************************************************************************************/
 
-bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len) 
+bool mFileSystem::TfsFileExists(const char *fname)
 {
-  DEBUG_LINE_HERE;
+  if (!ffs_type) { return false; }
+
+  bool yes = ffsp->exists(fname);
+  if (!yes) {
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
+  }
+  return yes;
+}
+
+
+size_t mFileSystem::TfsFileSize(const char *fname)
+{
+  if (!ffs_type) { return 0; }
+
+  File file = ffsp->open(fname, "r");
+  if (!file) { return 0; }
+  size_t flen = file.size();
+  file.close();
+  return flen;
+}
+
+
+bool mFileSystem::TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len) 
+{
+  
+  if (!ffs_type) { return false; }
+  
+#ifdef USE_WEBCAM
+  WcInterrupt(0);  // Stop stream if active to fix TG1WDT_SYS_RESET
+#endif
+  bool result = false;
+  
+  File file = ffsp->open(fname, "w");
+  
+  if (!file) {
+    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Save failed"));
+  } else {
+    // This will timeout on ESP32-webcam
+    // But now solved with WcInterrupt(0) in support_esp.ino
+  DEBUG_LINE_HERE
+    file.write(buf, len);
+  DEBUG_LINE_HERE
+  /*
+    // This will still timeout on ESP32-webcam when wcresolution 10
+    uint32_t count = len / 512;
+    uint32_t chunk = len / count;
+    for (uint32_t i = 0; i < count; i++) {
+      file.write(buf + (i * chunk), chunk);
+      // do actually wait a little to allow ESP32 tasks to tick
+      // fixes task timeout in ESP32Solo1 style unicore code and webcam.
+      delay(10);
+      OsWatchLoop();
+    }
+    uint32_t left = len % count;
+    if (left) {
+      file.write(buf + (count * chunk), left);
+    }
+  */
+    file.close();
+  DEBUG_LINE_HERE
+    result = true;
+  }
+#ifdef USE_WEBCAM
+  WcInterrupt(1);
+#endif
+  DEBUG_LINE_HERE
+  return result;
+}
+
+bool mFileSystem::TfsInitFile(const char *fname, uint32_t len, uint8_t init_value) {
+  if (!ffs_type) { return false; }
+
+  File file = ffsp->open(fname, "w");
+  if (!file) {
+    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Erase failed"));
+    return false;
+  }
+
+  for (uint32_t i = 0; i < len; i++) {
+    file.write(&init_value, 1);
+  }
+  file.close();
+  return true;
+}
+
+bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len) {
   if (!ffs_type) { return false; }
 
   File file = ffsp->open(fname, "r");
   if (!file) {
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "File '%s' not found"), fname +1);  // Skip leading slash
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
     return false;
   }
 
@@ -978,48 +941,34 @@ bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len)
   if (len > flen) { len = flen; }           // Adjust requested length to smaller file length
   file.read(buf, len);
   file.close();
-  DEBUG_LINE_HERE;
   return true;
 }
 
+String mFileSystem::TfsLoadString(const char *fname) {
+  // Use a reasonable amount of stack space considering 4k/8k available on ESP8266/ESP32 and manageable string length
+  char buf[2048] = { 0 };                   // Prepare empty string of max 2047 characters on stack
+  TfsLoadFile(fname, (uint8_t*)buf, 2047);  // Leave last position as end of string ('\0')
+  return String(buf);                       // Received string or empty on error
+}
 
-bool mFileSystem::TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len) 
-{
-  
-
-DEBUG_LINE_HERE;
+bool mFileSystem::TfsDeleteFile(const char *fname) {
   if (!ffs_type) { return false; }
-  
-  #ifdef USE_WEBCAM
-    WcInterrupt(0);  // Stop stream if active to fix TG1WDT_SYS_RESET
-  #endif
-  
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "ffsp %s"), fname);
 
-
-DEBUG_LINE_HERE;
-  File file = ffsp->open(fname, "w");
-  
-
-DEBUG_LINE_HERE;
-  if (!file) 
-  {
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "Save failed"));
+  if (!ffsp->remove(fname)) {
+    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Delete failed"));
     return false;
-  } 
-
-DEBUG_LINE_HERE;
-    
-  // This will timeout on ESP32-webcam, but now solved with WcInterrupt(0) in support_esp.ino
-  file.write(buf, len);     
-  file.close();
-  
-  #ifdef USE_WEBCAM
-    WcInterrupt(1);
-  #endif
-  
+  }
   return true;
+}
 
+bool mFileSystem::TfsRenameFile(const char *fname1, const char *fname2) {
+  if (!ffs_type) { return false; }
+
+  if (!ffsp->rename(fname1, fname2)) {
+    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Rename failed"));
+    return false;
+  }
+  return true;
 }
 
 
@@ -1047,17 +996,17 @@ uint8_t mFileSystem::ConstructJSON_Settings(uint8_t json_level, bool json_append
 
 }
 
+#ifdef USE_MODULE_NETWORK_MQTT
 
-  #ifdef USE_MODULE_NETWORK_MQTT
 void mFileSystem::MQTTHandler_Init(){
 
   struct handler<mFileSystem>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1084,9 +1033,9 @@ void mFileSystem::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -1099,7 +1048,8 @@ void mFileSystem::MQTTHandler_Sender()
     pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
-  #endif // USE_MODULE_NETWORK_MQTT
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 
@@ -1120,6 +1070,7 @@ void mFileSystem::parse_JSONCommand(JsonParserObject obj)
     
   }
   
+
   if(jtok = obj["Debug"].getObject()["TriggerJSONLoad"]){
 
     // CommandSet_SerialPrint_FileNames(jtok.getStr());
@@ -1129,12 +1080,14 @@ void mFileSystem::parse_JSONCommand(JsonParserObject obj)
     
   }
 
+
   if(jtok = obj["ListDir"]){
 
     // CommandSet_SerialPrint_FileNames(jtok.getStr());
     listDir(FILE_SYSTEM, "/", 0);
     
   }
+
 
   if(jtok = obj["ReadFile"]){
 
@@ -1147,57 +1100,60 @@ void mFileSystem::parse_JSONCommand(JsonParserObject obj)
 
 
 void mFileSystem::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-    Serial.printf("Listing directory: %s\n", dirname);
+  
+  Serial.printf("Listing directory: %s\n", dirname);
 
-#ifdef ESP32
-    File root = fs.open(dirname);
-    if(!root){
-        Serial.println("Failed to open directory");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println("Not a directory");
-        return;
-    }
+  #ifdef ESP32
+  File root = fs.open(dirname);
+  if(!root){
+      Serial.println("Failed to open directory");
+      return;
+  }
+  if(!root.isDirectory()){
+      Serial.println("Not a directory");
+      return;
+  }
 
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
-            }
-        } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
-        }
-        file = root.openNextFile();
-    }
+  File file = root.openNextFile();
+  while(file){
+      if(file.isDirectory()){
+          Serial.print("  DIR : ");
+          Serial.println(file.name());
+          if(levels){
+              listDir(fs, file.name(), levels -1);
+          }
+      } else {
+          Serial.print("  FILE: ");
+          Serial.print(file.name());
+          Serial.print("  SIZE: ");
+          Serial.println(file.size());
+      }
+      file = root.openNextFile();
+  }
+  #endif 
 
-    #endif 
 }
 
 
-void mFileSystem::readFile(fs::FS &fs, const char * path){
-    Serial.printf("Reading file: %s\n\r", path);
+void mFileSystem::readFile(fs::FS &fs, const char * path)
+{
+    
+  Serial.printf("Reading file: %s\n\r", path);
 
-#ifdef ESP32
-    File file = fs.open(path);
-    if(!file){
-        Serial.println("Failed to open file for reading");
-        return;
-    }
+  #ifdef ESP32
+  File file = fs.open(path);
+  if(!file){
+      Serial.println("Failed to open file for reading");
+      return;
+  }
 
-    Serial.print("Read from file: \n\r");
-    while(file.available()){
-        Serial.write(file.read());
-    }
-    #endif
+  Serial.print("Read from file: \n\r");
+  while(file.available()){
+      Serial.write(file.read());
+  }
+  Serial.println();
+  #endif
 
-    Serial.println();
 }
 
 
@@ -1205,43 +1161,9 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 
   readFile(FILE_SYSTEM, filename);
 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
+  ALOG_COM(PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
 
 } 
-
-
-// void (* const kUFSCommand[])(void) PROGMEM = {
-//   &UFSInfo, &UFSType, &UFSSize, &UFSFree, &UFSDelete, &UFSRename, &UFSRun
-// #ifdef UFILESYS_STATIC_SERVING
-//   ,&UFSServe
-// #endif  
-//   };
-
-// // return true if SDC
-// bool isSDC(void) {
-// #ifndef SDC_HIDE_INVISIBLES
-//   return false;
-// #else
-//   if (((uint32_t)ufsp != (uint32_t)ffsp) && ((uint32_t)ffsp == (uint32_t)dfsp)) return false;
-//   if (((uint32_t)ufsp == (uint32_t)ffsp) && (ufs_type != UFS_TSDC)) return false;
-//   return true;
-// #endif
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif // USE_MODULE_CORE_FILESYSTEM

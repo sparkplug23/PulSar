@@ -14,10 +14,10 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
   }
@@ -28,34 +28,34 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
 
       // if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
       // {
-      //   AddLog(LOG_LEVEL_TEST, PSTR("DoorLockPin=%d"), digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+      //   ALOG_TST(PSTR("DoorLockPin=%d"), digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
       // }
 
     break;
-    case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
+    case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
       ShowSensor_AddLog();
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
@@ -63,10 +63,10 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
      * WEBPAGE SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    case TASK_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Status_Table_Draw();
       break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
       break;
     #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -132,17 +132,17 @@ void mDoorSensor::EveryLoop(){
    **/
   if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
 
-    AddLog(LOG_LEVEL_TEST, PSTR("IsDoorOpen()"));
+    ALOG_TST(PSTR("IsDoorOpen()"));
 
     door_detect.state = IsDoorOpen();
     door_detect.tDetectTimeforDebounce = millis();
     if(door_detect.state){ 
       door_detect.isactive = true;
       door_detect.detected_time = pCONT_time->GetTimeShortNow();
-      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_STARTED_ID, 0, door_detect.isactive);
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_STARTED_ID, 0, door_detect.isactive);
     }else{ 
       door_detect.isactive = false;
-      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_ENDED_ID, 0, door_detect.isactive);
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_ENDED_ID, 0, door_detect.isactive);
     }
     door_detect.ischanged = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -155,17 +155,17 @@ void mDoorSensor::EveryLoop(){
    **/
   if((IsLock_Locked()!=lock_detect.state)&&mTime::TimeReachedNonReset(&lock_detect.tDetectTimeforDebounce,100)){
 
-    AddLog(LOG_LEVEL_TEST, PSTR("IsLock_Locked()"));
+    ALOG_TST(PSTR("IsLock_Locked()"));
 
     lock_detect.state = IsLock_Locked();
     lock_detect.tDetectTimeforDebounce = millis();
     if(lock_detect.state){ 
       lock_detect.isactive = true;
       lock_detect.detected_time = pCONT_time->GetTimeShortNow();
-      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_STARTED_ID, 1, lock_detect.isactive);
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_STARTED_ID, 1, lock_detect.isactive);
     }else{ 
       lock_detect.isactive = false;
-      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_ENDED_ID, 1, lock_detect.isactive);
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_ENDED_ID, 1, lock_detect.isactive);
     }
     lock_detect.ischanged = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -576,7 +576,7 @@ void Ds18x20Init(void) {
       }
     }
   }
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), DS18X20Data.sensors);
+  ALOG_DBG(PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), DS18X20Data.sensors);
 }
 
 void Ds18x20Convert(void) {
@@ -655,7 +655,7 @@ bool Ds18x20Read(uint8_t sensor) {
       return true;
     }
   }
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB D_SENSOR_CRC_ERROR));
+  ALOG_DBG(PSTR(D_LOG_DSB D_SENSOR_CRC_ERROR));
   return false;
 }
 
@@ -763,17 +763,17 @@ bool Xsns05(uint8_t function) {
 
   if (PinUsed(GPIO_DSB)) {
     switch (function) {
-      case FUNC_INIT:
+      case TASK_INIT:
         Ds18x20Init();
         break;
-      case FUNC_EVERY_SECOND:
+      case TASK_EVERY_SECOND:
         Ds18x20EverySecond();
         break;
-      case FUNC_JSON_APPEND:
+      case TASK_JSON_APPEND:
         Ds18x20Show(1);
         break;
 #ifdef USE_WEBSERVER
-      case FUNC_WEB_SENSOR:
+      case TASK_WEB_SENSOR:
         Ds18x20Show(0);
         break;
 #endif  // USE_WEBSERVER

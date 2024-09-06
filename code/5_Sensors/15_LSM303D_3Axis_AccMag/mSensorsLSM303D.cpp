@@ -24,10 +24,10 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
 {
   
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -38,26 +38,26 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;   
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
     //  parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
       break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -80,9 +80,9 @@ void mSensorsLSM303D::Pre_Init()
   /**
    * Arm sensor (with gyro): Keep +-2 range on mag
    * */
-  sensor[0].lsm303d = new LSM303(pCONT_sup->wire, I2C_ADDRESS_LSM303D_ARM);
+  sensor[0].lsm303d = new LSM303(pCONT_i2c->wire, I2C_ADDRESS_LSM303D_ARM);
   sensor[0].lsm303d->init(LSM303::device_D, LSM303::sa0_high); //pulled high is defualt address
-  AddLog(LOG_LEVEL_INFO, PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_ARM, 0);
+  ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_ARM, 0);
   sensor[0].lsm303d->enableDefault();
   // 0x20 = 0b00100000
   // MFS = 01 (+/- 4 gauss full scale)
@@ -94,9 +94,9 @@ void mSensorsLSM303D::Pre_Init()
   /**
    * Leg sensor (withOUT gyro): Extended range of +-4
    * */
-  sensor[1].lsm303d = new LSM303(pCONT_sup->wire, I2C_ADDRESS_LSM303D_LEG);
+  sensor[1].lsm303d = new LSM303(pCONT_i2c->wire, I2C_ADDRESS_LSM303D_LEG);
   sensor[1].lsm303d->init(LSM303::device_D, LSM303::sa0_low); //pulled high is defualt address
-  AddLog(LOG_LEVEL_INFO, PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_LEG, 0);
+  ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_LEG, 0);
   sensor[1].lsm303d->enableDefault();
   // 0x20 = 0b00100000
   // MFS = 01 (+/- 4 gauss full scale)
@@ -133,12 +133,12 @@ void mSensorsLSM303D::Pre_Init()
     
 //       if(pCONT_sup->I2cDevice(addresses[i]))
 //       {
-//         sensor[settings.fSensorCount].lsm303d = new LSM303(pCONT_sup->wire, addresses[i]);
+//         sensor[settings.fSensorCount].lsm303d = new LSM303(pCONT_i2c->wire, addresses[i]);
 //         // if(sensor[settings.fSensorCount].lsm303d->init_addressed(addresses[i]))  // should not be needed if the address is correctly within wire
 //         // if(sensor[settings.fSensorCount].lsm303d->init())  // should not be needed if the address is correctly within wire
 //         if(sensor[settings.fSensorCount].lsm303d->init(LSM303::device_D, i?LSM303::sa0_low:LSM303::sa0_high))  // should not be needed if the address is correctly within wire
 //         {
-//           AddLog(LOG_LEVEL_INFO, PSTR("LSM303D %02x sensor detected %d"), addresses[i], i);
+//           ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), addresses[i], i);
 //           sensor[settings.fSensorCount].lsm303d->enableDefault();
 
 
@@ -684,30 +684,30 @@ void mSensorsLSM303D::MQTTHandler_Init(){
   struct handler<mSensorsLSM303D>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsLSM303D::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsLSM303D::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = 1;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -734,9 +734,9 @@ void mSensorsLSM303D::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     // if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-    //   handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+    //   handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

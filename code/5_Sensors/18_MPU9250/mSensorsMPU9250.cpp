@@ -23,10 +23,10 @@
 int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -37,17 +37,17 @@ int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;   
 
-    case FUNC_EVERY_50_MSECOND:
+    case TASK_EVERY_50_MSECOND:
 
 
 
     break;
 
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
 
     
   // Serial.println(averaging->Mean());
@@ -56,20 +56,20 @@ int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
     //  parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
       break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -104,7 +104,7 @@ void mSensorsMPU9250::Pre_Init(){
 
     // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
 
-    myIMU = new ICM20948_WE(pCONT_sup->wire, I2C_ADDRESS_MPU9250);
+    myIMU = new ICM20948_WE(pCONT_i2c->wire, I2C_ADDRESS_MPU9250);
     
     if (!myIMU->init()) {
       Serial.println("ICM20948 does not respond");
@@ -147,8 +147,8 @@ void mSensorsMPU9250::Pre_Init(){
 
 
     // sensor[settings.fSensorCount].bme = new Adafruit_BME280();
-    // if (sensor[settings.fSensorCount].bme->begin(0x77, pCONT_sup->wire)) {
-    //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
+    // if (sensor[settings.fSensorCount].bme->begin(0x77, pCONT_i2c->wire)) {
+    //   ALOG_INF(PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
     //   settings.fSensorCount++;
     // }else{
     //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
@@ -209,13 +209,13 @@ uint32_t tSaved = millis();
 
 // if((magValue.x == 0) || (magValue.y == 0) || (magValue.z == 0))
 // {
-// AddLog(LOG_LEVEL_INFO, PSTR("Sensor read time: %d \t %d \t %d"), millis()-tSaved, millis(), mag.average.x->index);
+// ALOG_INF(PSTR("Sensor read time: %d \t %d \t %d"), millis()-tSaved, millis(), mag.average.x->index);
 
 // }else{
 
 
 
-  // AddLog(LOG_LEVEL_INFO, PSTR("Sensor read time: %d \t %d \t %d"), millis()-tSaved, millis(), mag.average.x->index);
+  // ALOG_INF(PSTR("Sensor read time: %d \t %d \t %d"), millis()-tSaved, millis(), mag.average.x->index);
 
   // Serial.println("Magnetometer Data in µTesla: ");
   // Serial.print(magValue.x);
@@ -233,7 +233,7 @@ uint32_t tSaved = millis();
     // if(mag.average.x->index==0)
     // {
 
-  // AddLog(LOG_LEVEL_INFO, PSTR("tResetPeriod: %d"), mag.average.x->tResetPeriod);
+  // ALOG_INF(PSTR("tResetPeriod: %d"), mag.average.x->tResetPeriod);
   //     //only print when it restarts
   // Serial.print(millis());
   // Serial.print("   ");
@@ -300,7 +300,7 @@ uint32_t tSaved = millis();
 //         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
 //         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
 
-//         AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
+//         ALOG_DBG(     PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
 //         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
 //         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
 //         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
@@ -406,30 +406,30 @@ void mSensorsMPU9250::MQTTHandler_Init(){
   struct handler<mSensorsMPU9250>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsMPU9250::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsMPU9250::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = 1;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -456,9 +456,9 @@ void mSensorsMPU9250::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

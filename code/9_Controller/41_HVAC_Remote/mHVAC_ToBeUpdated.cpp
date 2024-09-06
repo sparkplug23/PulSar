@@ -231,7 +231,7 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 //   // // if(data_buffer.payload.json_pairs>0){
 //   //   data_buffer.payload.len = measureJson(obj)+1;
 //   //   serializeJson(doc,data_buffer.payload.ctr);
-//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
+//   //   ALOG_DBG(PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
 //   // // }
 
 //   return 0;// data_buffer.payload.len>3?1:0;

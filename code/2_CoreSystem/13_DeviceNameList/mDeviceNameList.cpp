@@ -97,93 +97,93 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_mod
 
 // }
 
-const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found){
+// const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found){
 
-// DEBUG_LINE_HERE;
+// // DEBUG_LINE_HERE;
 
-      ALOG_INF( PSTR("\t\t\t\t\n\r PHASEOUT direct use, PROBABLY WRONG ------------------------------------- DeviceNameList::GetDeviceNameWithEnumNumber buffer_size %d"),buffer_size);
-  //convert enum number to unqiue#pragma region 
+//       ALOG_INF( PSTR("\t\t\t\t\n\r PHASEOUT direct use, PROBABLY WRONG ------------------------------------- DeviceNameList::GetDeviceNameWithEnumNumber buffer_size %d"),buffer_size);
+//   //convert enum number to unqiue#pragma region 
 
-  module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
+//   module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
 
-// DEBUG_LINE_HERE;
-  int8_t found_index = -1;
-  // Check if class & id match
-  for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++){
+// // DEBUG_LINE_HERE;
+//   int8_t found_index = -1;
+//   // Check if class & id match
+//   for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++){
     
-// DEBUG_LINE_HERE;
-    // if((number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
+// // DEBUG_LINE_HERE;
+//     // if((number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
     
-    if((    
-      number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
-      found_index = i;
+//     if((    
+//       number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
+//       found_index = i;
       
-// DEBUG_LINE_HERE;
-      // ALOG_INF( PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"),i);
+// // DEBUG_LINE_HERE;
+//       // ALOG_INF( PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"),i);
       
-      break;
-    }
-  }
-// DEBUG_LINE_HERE;
-  //future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
+//       break;
+//     }
+//   }
+// // DEBUG_LINE_HERE;
+//   //future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
 
-  if(found_index == -1)
-  {
-// DEBUG_LINE_HERE;
-    if(flag_respond_nomatch_if_not_found)
-    {
-      memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
-      #endif // ENABLE_LOG_LEVEL_INFO
+//   if(found_index == -1)
+//   {
+// // DEBUG_LINE_HERE;
+//     if(flag_respond_nomatch_if_not_found)
+//     {
+//       memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+//       #ifdef ENABLE_LOG_LEVEL_INFO
+//       ALOG_TST(PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+//       #endif // ENABLE_LOG_LEVEL_INFO
     
 
-    }
-    else
-    {  
+//     }
+//     else
+//     {  
 
-// DEBUG_LINE_HERE;
-// I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
+// // DEBUG_LINE_HERE;
+// // I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
 
-      snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName_WithUniqueID(module_id), device_id);
+//       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(module_id), device_id);
 
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
-      #endif // ENABLE_LOG_LEVEL_INFO
-    }
-    return buffer;
-  }
+//       #ifdef ENABLE_LOG_LEVEL_INFO
+//       ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+//       #endif // ENABLE_LOG_LEVEL_INFO
+//     }
+//     return buffer;
+//   }
 
-// DEBUG_LINE_HERE;
-  char* name_buffer2 = name_buffer.ptr;
+// // DEBUG_LINE_HERE;
+//   char* name_buffer2 = name_buffer.ptr;
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
-  #endif // ENABLE_LOG_LEVEL_INFO
+//   #ifdef ENABLE_LOG_LEVEL_INFO
+//   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
+//   #endif // ENABLE_LOG_LEVEL_INFO
 
-// DEBUG_LINE_HERE;
-  // gets first index from the array, where we start at the position the desired name is the next name
-  pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
+// // DEBUG_LINE_HERE;
+//   // gets first index from the array, where we start at the position the desired name is the next name
+//   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
 
-// DEBUG_LINE_HERE;
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
-  #endif // ENABLE_LOG_LEVEL_INFO
+// // DEBUG_LINE_HERE;
+//   #ifdef ENABLE_LOG_LEVEL_INFO
+//   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
+//   #endif // ENABLE_LOG_LEVEL_INFO
   
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber &name_buffer[index]=%s"),&name_buffer[index]);
+//   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber &name_buffer[index]=%s"),&name_buffer[index]);
 
-// DEBUG_LINE_HERE;
-  if(buffer == nullptr){
-    memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_ERROR, PSTR("F::%s ERROR >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
-    #endif // ENABLE_LOG_LEVEL_INFO
-  }
+// // DEBUG_LINE_HERE;
+//   if(buffer == nullptr){
+//     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//     AddLog(LOG_LEVEL_ERROR, PSTR("F::%s ERROR >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+//     #endif // ENABLE_LOG_LEVEL_INFO
+//   }
 
-// DEBUG_LINE_HERE;
-  return buffer;
+// // DEBUG_LINE_HERE;
+//   return buffer;
   
-}
+// }
 
 
 const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found)
@@ -235,8 +235,8 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
     {
       memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
       #ifdef ENABLE_LOG_LEVEL_INFO
-      // AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
-      AddLog(LOG_LEVEL_TEST, PSTR("F::GetDeviceName >> %s"), PM_SEARCH_NOMATCH);
+      // ALOG_TST(PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+      ALOG_TST(PSTR("F::GetDeviceName >> %s"), PM_SEARCH_NOMATCH);
       #endif // ENABLE_LOG_LEVEL_INFO
     
 
@@ -252,9 +252,9 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
  * 
  */
 
-      // snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName_WithUniqueID(unique_module_id), device_id);
+      // snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(unique_module_id), device_id);
 
-      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName_WithUniqueID(unique_module_id), random(1000));//device_id);
+      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));//device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
       // ALOG_INF( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
@@ -298,24 +298,24 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
   
 }
 
-bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* sensor_name, int16_t* out_module_id, int8_t* out_sensor_id) {
-   ALOG_INF(PSTR("GetModuleAndSensorIDsByName(%s, %s)"), module_name, sensor_name);
+bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* sensor_name, uint16_t* out_module_id, uint8_t* out_sensor_id) {
+  //  ALOG_INF(PSTR("GetModuleAndSensorIDsByName(%s, %s)"), module_name, sensor_name);
 
     int8_t found_index = -1;
     char buffer[64];  // Adjust the size according to your needs
 
-    DEBUG_LINE_HERE
-        ALOG_INF(PSTR("name_buffer.ptr %s"), name_buffer.ptr);
-        ALOG_INF(PSTR("DLI->GetLengthIndexUsed() %d"), DLI->GetLengthIndexUsed());
+    // DEBUG_LINE_HERE
+        // ALOG_INF(PSTR("name_buffer.ptr %s"), name_buffer.ptr);
+        // ALOG_INF(PSTR("DLI->GetLengthIndexUsed() %d"), DLI->GetLengthIndexUsed());
 
     // Iterate over the buffer to find the matching module name and sensor name
     for (int i = 0; i < DLI->GetLengthIndexUsed(); i++) {
-        const char* current_module_name = pCONT->GetModuleName_WithUniqueID(number_buffer.unique_group_ids[i]);
+        const char* current_module_name = pCONT->GetModuleName(number_buffer.unique_group_ids[i]);
         const char* current_sensor_name = pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), i, name_buffer.ptr);
 
-        ALOG_INF(PSTR("GetModuleAndSensorIDs %s %s"), current_module_name, current_sensor_name);
+        // ALOG_INF(PSTR("GetModuleAndSensorIDs %s %s"), current_module_name, current_sensor_name);
 
-    DEBUG_LINE_HERE
+    // DEBUG_LINE_HERE
         if (current_module_name && current_sensor_name) {
             if (strcmp(current_module_name, module_name) == 0 && strcmp(current_sensor_name, sensor_name) == 0) {
                 found_index = i;
@@ -324,12 +324,12 @@ bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* 
         }
     }
 
-    DEBUG_LINE_HERE
+    // DEBUG_LINE_HERE
     if (found_index != -1) {
         // Match found, return the IDs
         *out_module_id = number_buffer.unique_group_ids[found_index];
         *out_sensor_id = number_buffer.index_ids[found_index];
-        ALOG_INF(PSTR("Match found: Module ID = %d, Sensor ID = %d"), *out_module_id, *out_sensor_id);
+        ALOG_DBM(PSTR("Match found: Module ID = %d, Sensor ID = %d"), *out_module_id, *out_sensor_id);
         return true;
     } else {
         // No match found
@@ -338,7 +338,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* 
     }
 }
 
-bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* sensor_name, int16_t* out_module_id, int8_t* out_sensor_id) {
+bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* sensor_name, uint16_t* out_module_id, uint8_t* out_sensor_id) {
     ALOG_DBM(PSTR("GetModuleAndSensorIDs(%d, %s)"), module_id, sensor_name);
 
     int8_t found_index = -1;
@@ -412,7 +412,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* senso
 //     {
 //       memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
 //       #ifdef ENABLE_LOG_LEVEL_INFO
-//       AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+//       ALOG_TST(PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
 //       #endif // ENABLE_LOG_LEVEL_INFO
     
 

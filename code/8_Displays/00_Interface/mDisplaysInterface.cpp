@@ -20,10 +20,10 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -34,36 +34,36 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
      * OTHER SECTION * 
     *******************/
-    case FUNC_SET_POWER:
+    case TASK_SET_POWER:
       // DisplaySetPower();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       #ifdef USE_GRAPH
         DisplayCheckGraph();
       #endif
@@ -84,7 +84,7 @@ void mDisplaysInterface::Pre_Init(void)
 {
   module_state.mode = ModuleStatus::Initialising;
   
-  pCONT->Tasker_Interface(FUNC_DISPLAY_INIT_DRIVER);
+  pCONT->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 
   #ifdef USE_MULTI_DISPLAY
     Set_display(0);
@@ -116,18 +116,18 @@ void mDisplaysInterface::Pre_Init(void)
     for (uint8_t count = 0; count < NUM_GRAPHS; count++) { graph[count] = 0; }
   #endif
 
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Display model %d"), pCONT_set->Settings.display.model);
+  ALOG_DBG(PSTR(D_LOG_DEBUG "Display model %d"), pCONT_set->Settings.display.model);
 
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_UTC_TIME_ID;
 
   if (pCONT_set->Settings.display.model) {
-    pCONT_set->runtime.devices_present++;
-    if (!pCONT_pins->PinUsed(GPIO_BACKLIGHT_ID)) {
-      if (pCONT_set->runtime.light_type && (4 == pCONT_set->Settings.display.model)) {
-        pCONT_set->runtime.devices_present--;  // Assume PWM channel is used for backlight
-      }
-    }
-    disp_device = pCONT_set->runtime.devices_present;
+    // pCONT_set->runtime.devices_present++;
+    // if (!pCONT_pins->PinUsed(GPIO_BACKLIGHT_ID)) {
+    //   if (pCONT_set->runtime.light_type && (4 == pCONT_set->Settings.display.model)) {
+    //     pCONT_set->runtime.devices_present--;  // Assume PWM channel is used for backlight
+    //   }
+    // }
+    disp_device = 1;//pCONT_set->runtime.devices_present;
 
 
     #ifdef ENABLE_FEATURE_DISPLAY_LOG_BUFFER
@@ -157,7 +157,7 @@ void mDisplaysInterface::Init(uint8_t mode) // this is not my normal init, move 
   }
   else {
     dsp_init = mode;
-    pCONT->Tasker_Interface(FUNC_DISPLAY_INIT);
+    pCONT->Tasker_Interface(TASK_DISPLAY_INIT);
   }
 }
 
@@ -177,7 +177,7 @@ void mDisplaysInterface::EveryLoop()
 
 void mDisplaysInterface::Clear(void)
 {
-  pCONT->Tasker_Interface(FUNC_DISPLAY_CLEAR);
+  pCONT->Tasker_Interface(TASK_DISPLAY_CLEAR);
 }
 
 void mDisplaysInterface::DrawStringAt(uint16_t x, uint16_t y, char *str, uint16_t color, uint8_t flag)
@@ -187,7 +187,7 @@ void mDisplaysInterface::DrawStringAt(uint16_t x, uint16_t y, char *str, uint16_
   dsp_str = str;
   dsp_color = color;
   dsp_flag = flag;
-  pCONT->Tasker_Interface(FUNC_DISPLAY_DRAW_STRING);
+  pCONT->Tasker_Interface(TASK_DISPLAY_DRAW_STRING);
 }
 
 void mDisplaysInterface::DisplayOnOff(uint8_t on)
@@ -331,11 +331,11 @@ void mDisplaysInterface::SetPower(void)
 {
   disp_power = 1;//bitRead(XdrvMailbox.index, disp_device -1);
 
-  //AddLog(LOG_LEVEL_DEBUG, PSTR("DSP: Power %d"), disp_power);
+  //ALOG_DBG(PSTR("DSP: Power %d"), disp_power);
 
   if (pCONT_set->Settings.display.model) {
     if (!renderer) {
-      pCONT->Tasker_Interface(FUNC_DISPLAY_POWER);
+      pCONT->Tasker_Interface(TASK_DISPLAY_POWER);
     } else {
       renderer->DisplayOnff(disp_power);
     }
@@ -345,7 +345,7 @@ void mDisplaysInterface::SetPower(void)
 
 
 // void DisplayReInitDriver(void) {
-//   pCONT->Tasker_Interface(FUNC_DISPLAY_INIT_DRIVER);
+//   pCONT->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 // #ifdef USE_MULTI_DISPLAY
 //   Set_display(0);
 // #endif // USE_MULTI_DISPLAY
@@ -360,7 +360,7 @@ void mDisplaysInterface::SetPower(void)
  * */
 void mDisplaysInterface::SetCursor(uint8_t x, uint8_t y)
 {
-  AddLog(LOG_LEVEL_TEST, PSTR("SetCursor(%d,%d)"),x,y);
+  ALOG_TST(PSTR("SetCursor(%d,%d)"),x,y);
   pCONT_iDisp->renderer->setCursor(x,y);
 }
 
@@ -370,7 +370,7 @@ void mDisplaysInterface::SetCursor(uint8_t x, uint8_t y)
  * */
 void mDisplaysInterface::SetTextSize(uint8_t font_size)
 {
-  AddLog(LOG_LEVEL_TEST, PSTR("SetFontSize(%d)"),font_size);
+  ALOG_TST(PSTR("SetFontSize(%d)"),font_size);
   pCONT_iDisp->renderer->setTextSize(font_size);
 }
 
@@ -380,7 +380,7 @@ void mDisplaysInterface::SetTextSize(uint8_t font_size)
  * */
 void mDisplaysInterface::SetDisplayMode(uint8_t mode)
 {
-  AddLog(LOG_LEVEL_TEST, PSTR("SetDisplayMode(%d)"),mode);
+  ALOG_TST(PSTR("SetDisplayMode(%d)"),mode);
   pCONT_set->Settings.display.mode = mode;
 }
 
@@ -557,12 +557,12 @@ char* mDisplaysInterface::LogBuffer_GetRowPointer(char temp_code)
 {
   char* result = nullptr;
   if (log_buffer.cols) {
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("log_buffer.cols=%d"),log_buffer.cols);
+    // ALOG_DBG(PSTR("log_buffer.cols=%d"),log_buffer.cols);
     // If currently shown line, is not the latest line, we must update the screen 
     if (log_buffer.index != log_buffer.ptr_index) {
-    AddLog(LOG_LEVEL_DEBUG, PSTR("log_buffer.index=%d %d"),log_buffer.index,log_buffer.ptr_index);
+    ALOG_DBG(PSTR("log_buffer.index=%d %d"),log_buffer.index,log_buffer.ptr_index);
       result = log_buffer.ptr[log_buffer.ptr_index];
-    AddLog(LOG_LEVEL_DEBUG, PSTR("result=%s"),result);
+    ALOG_DBG(PSTR("result=%s"),result);
       log_buffer.ptr_index++;
 
       // if reached maximum rows, wrap around
@@ -667,7 +667,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     //     data_buffer.isserviced++;
     //   }
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
     }
 
@@ -707,7 +707,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
     
 //     if(!obj["brightness"].isNull()){ 
-//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
+//       ALOG_INF(PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
 //       uint8_t brightness = obj["brightness"];
 //       //nextionSetAttr("dim", String(brightness));
 //       //sprintf(command_ctr,"dims=%d",brightness);
@@ -735,7 +735,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     LogBuffer_Add((char*)jtok.getStr());
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     #endif
   }
 
@@ -751,7 +751,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       LogBuffer_AddRow((char*)jtok.getStr(), row_number);
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
     #endif
   }
 
@@ -772,7 +772,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       }
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
     #endif
   }
 
@@ -794,7 +794,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     CommandSet_DisplayText_Advanced_JSON(obj);
 
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DrawText" ));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    ALOG_DBG(PSTR(D_LOG_LIGHT "DrawText" ));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     // #endif // ENABLE_LOG_LEVEL_DEBUG
 
 
@@ -847,7 +847,7 @@ void mDisplaysInterface::DisplayText(const char* buffer)
   char *dp = linebuf;
   char *cp = (char*)buffer;
 
-  AddLog(LOG_LEVEL_TEST, PSTR("DisplayText %s"),cp);
+  ALOG_TST(PSTR("DisplayText %s"),cp);
 
   memset(linebuf, ' ', sizeof(linebuf));
   linebuf[sizeof(linebuf)-1] = 0;
@@ -1000,7 +1000,7 @@ void mDisplaysInterface::DisplayText(const char* buffer)
 //                   ep++;
 //                   File fp;
 //                   if (ffsp) {
-//                     AddLog(LOG_LEVEL_INFO, PSTR("DSP: File: %s"),cp);
+//                     ALOG_INF(PSTR("DSP: File: %s"),cp);
 //                     fp = ffsp->open(cp, "r");
 //                     if (fp > 0) {
 //                       uint32_t size = fp.size();
@@ -1011,7 +1011,7 @@ void mDisplaysInterface::DisplayText(const char* buffer)
 //                         Get_display(temp);
 //                         renderer = Init_uDisplay(fdesc, -1);
 //                         Set_display(temp);
-//                         AddLog(LOG_LEVEL_INFO, PSTR("DSP: File descriptor loaded %x"),renderer);
+//                         ALOG_INF(PSTR("DSP: File descriptor loaded %x"),renderer);
 //                       }
 //                     }
 //                   }
@@ -1568,10 +1568,10 @@ void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
   LogBuffer_Add((char*)c);
 
   // Change to flag method later, so this function will not be called for every command
-  pCONT->Tasker_Interface(FUNC_DISPLAY_REFRESH_SHOW_ID);
+  pCONT->Tasker_Interface(TASK_DISPLAY_REFRESH_SHOW_ID);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   #endif
 }
 
@@ -1582,7 +1582,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 {  
   LogBuffer_Clear(); 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   #endif
 }
 
@@ -1595,7 +1595,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //   SetDisplayMode(EM_DISPLAY_MODE_LOG_STATIC_ID);
 //   LogBuffer_Add((char*)c);
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+//   ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
 //   #endif
 // }
 
@@ -1616,7 +1616,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < DISPLAY_MAX_DRIVERS)) {
 //     uint32_t last_display_model = pCONT_set->Settings.display.model;
 //     pCONT_set->Settings.display.model = XdrvMailbox.payload;
-//     if (pCONT->Tasker_Interface(FUNC_DISPLAY_MODEL)) {
+//     if (pCONT->Tasker_Interface(TASK_DISPLAY_MODEL)) {
 //       pCONT_set->runtime_var.restart_flag = 2;  // Restart to re-init interface and add/Remove MQTT subscribe
 //     } else {
 //       pCONT_set->Settings.display.model = last_display_model;
@@ -1695,7 +1695,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //     if (renderer) {
 //       renderer->dim(pCONT_set->Settings.display.dimmer);
 //     } else {
-//       pCONT->Tasker_Interface(FUNC_DISPLAY_DIM);
+//       pCONT->Tasker_Interface(TASK_DISPLAY_DIM);
 //     }
 //   }
 //   ResponseCmndNumber(changeUIntScale(pCONT_set->Settings.display.dimmer, 0, 15, 0, 100));
@@ -1796,7 +1796,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 // void CmndDisplayBlinkrate(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 3)) {
 //     if (!renderer) {
-//       pCONT->Tasker_Interface(FUNC_DISPLAY_BLINKRATE);
+//       pCONT->Tasker_Interface(TASK_DISPLAY_BLINKRATE);
 //     }
 //   }
 //   ResponseCmndNumber(XdrvMailbox.payload);
@@ -1820,7 +1820,7 @@ void mDisplaysInterface::CmndDisplayText(const char* buffer) {
 //     DisplayText();
 // #else
 //     if(pCONT_set->Settings.display.model == 15) {
-//       pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXT);
+//       pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
 //     } else if (!pCONT_set->Settings.display.mode) {
 #ifdef ENABLE_DISPLAY_MODE_USER_TEXT_SERIALISED
       DisplayText(buffer);
@@ -1869,7 +1869,7 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
   {
     JsonParserObject obj1 = object;
 
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "obj1=%d" ), obj1.size());
+    ALOG_DBG(PSTR(D_LOG_LIGHT "obj1=%d" ), obj1.size());
     
     /**
      * @note Change fontsize
@@ -1907,7 +1907,7 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 
 
 // }else{
-//  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "!o2.isArray(" ));
+//  ALOG_DBG(PSTR(D_LOG_LIGHT "!o2.isArray(" ));
 
 // }
 
@@ -1926,41 +1926,41 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 
 // void CmndDisplayClear(void) {
 //   if (!renderer)
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_CLEAR);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_CLEAR);
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayNumber(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_NUMBER);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_NUMBER);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayFloat(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_FLOAT);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_FLOAT);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayNumberNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_NUMBERNC);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_NUMBERNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayFloatNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_FLOATNC);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_FLOATNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayRaw(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_RAW);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_RAW);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
@@ -1968,42 +1968,42 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 // void CmndDisplayLevel(void) {
 //   bool result = false;
 //   if (!renderer) {
-//     result = pCONT->Tasker_Interface(FUNC_DISPLAY_LEVEL);
+//     result = pCONT->Tasker_Interface(TASK_DISPLAY_LEVEL);
 //   }
 //   if(result) ResponseCmndNumber(XdrvMailbox.payload);
 // }
 
 // void CmndDisplaySevensegText(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXT);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayTextNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXTNC);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXTNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplaySevensegTextNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXTNC);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXTNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayScrollDelay(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_SCROLLDELAY);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_SCROLLDELAY);
 //   }
 //   ResponseCmndNumber(XdrvMailbox.payload);
 // }
 
 // void CmndDisplayClock(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(FUNC_DISPLAY_CLOCK);
+//     pCONT->Tasker_Interface(TASK_DISPLAY_CLOCK);
 //   }
 //   ResponseCmndNumber(XdrvMailbox.payload);
 // }
@@ -2011,7 +2011,7 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 // void CmndDisplayScrollText(void) {
 //   bool result = false;
 //   if (!renderer) {
-//     result = pCONT->Tasker_Interface(FUNC_DISPLAY_SCROLLTEXT);
+//     result = pCONT->Tasker_Interface(TASK_DISPLAY_SCROLLTEXT);
 //   }
 //   if(result) ResponseCmndChar(XdrvMailbox.data);
 // }
@@ -2064,7 +2064,7 @@ void mDisplaysInterface::MQTTHandler_Init()
   struct handler<mDisplaysInterface>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -2074,7 +2074,7 @@ void mDisplaysInterface::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -2084,7 +2084,7 @@ void mDisplaysInterface::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -2113,9 +2113,9 @@ void mDisplaysInterface::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

@@ -218,7 +218,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -227,7 +227,7 @@
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   
@@ -248,7 +248,7 @@
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_PWM
   
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  // 
   // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
 
   // #define MAX_NUM_SEGMENTS 5
@@ -265,7 +265,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -305,7 +305,7 @@
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -340,7 +340,7 @@
 
   // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 
-  // //#define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // //#define USE_MODULE_SENSORS_SUN_TRACKING
 
   // #define USE_MODULE_TEMPLATE
   // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -388,7 +388,7 @@
   //   "\"Rule0\":{" //switch example
   //     "\"Trigger\":{"
   //       "\"Module\":\"Buttons\","    //sensor
-  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+  //       "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
   //       "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
   //       "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
   //     "},"
@@ -470,7 +470,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -479,7 +479,7 @@
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
@@ -555,14 +555,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -810,14 +810,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -1102,14 +1102,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -1867,14 +1867,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -3387,14 +3387,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -4332,7 +4332,7 @@
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_ANIMATOR
   // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  //  // Not ready to remove
   // #define STRIP_SIZE_MAX 4
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   // #define USE_SK6812_METHOD_DEFAULT
@@ -4343,7 +4343,7 @@
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_ANIMATOR
   // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   
   //   #define STRIP_SIZE_MAX 5
   //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   //   #define USE_SK6812_METHOD_DEFAULT
@@ -4352,7 +4352,7 @@
   //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
   //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
   //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+  //   
   //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
 
@@ -4828,14 +4828,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -5069,14 +5069,14 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -5483,12 +5483,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -6025,7 +6025,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // cant be removed or does not compile, phase out, should always be included
+   // cant be removed or does not compile, phase out, should always be included
 
   // I need to make a define difference between "h801" effects, and addressable effects, since there is overlapping effects
 
@@ -6312,7 +6312,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM
   
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
 
   #define MAX_NUM_SEGMENTS 5
@@ -6325,7 +6325,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -6360,7 +6360,7 @@
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -6393,7 +6393,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
 
   #define ENABLE_DEVFEATURE_SOLAR_PALETTES
@@ -6404,7 +6404,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -6439,7 +6439,7 @@
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -6485,7 +6485,7 @@
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_PWM
   
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  // 
   // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
 
   #define MAX_NUM_SEGMENTS 5
@@ -6498,7 +6498,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -6535,7 +6535,7 @@
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -6580,12 +6580,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -6889,12 +6889,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -7431,12 +7431,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -7982,12 +7982,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -8528,12 +8528,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -9070,12 +9070,12 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  
   
   
   
@@ -9198,13 +9198,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -9213,13 +9213,13 @@
     // "\"Rule1\":{"
     //   "\"Trigger\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
     //     "\"DeviceName\":1,"
     //     "\"State\":\"On\""
     //   "},"
     //   "\"Command\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
     //     "\"DeviceName\":1,"
     //     "\"State\":\"Follow\""
     //   "}"
@@ -9327,13 +9327,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -9342,13 +9342,13 @@
     // "\"Rule1\":{"
     //   "\"Trigger\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
     //     "\"DeviceName\":1,"
     //     "\"State\":\"On\""
     //   "},"
     //   "\"Command\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
     //     "\"DeviceName\":1,"
     //     "\"State\":\"Follow\""
     //   "}"
@@ -9411,13 +9411,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -9426,13 +9426,13 @@
     // "\"Rule1\":{"
     //   "\"Trigger\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
     //     "\"DeviceName\":1,"
     //     "\"State\":\"On\""
     //   "},"
     //   "\"Command\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
     //     "\"DeviceName\":1,"
     //     "\"State\":\"Follow\""
     //   "}"
@@ -9515,13 +9515,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":2" // Started
       "}"
@@ -9529,13 +9529,13 @@
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":2" // Started
       "}"
@@ -9543,13 +9543,13 @@
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":2,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":2,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":2" // Started
       "}"
@@ -10492,13 +10492,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -10507,13 +10507,13 @@
     // "\"Rule1\":{"
     //   "\"Trigger\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
     //     "\"DeviceName\":0,"
     //     "\"State\":\"On\""
     //   "},"
     //   "\"Command\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
     //     "\"DeviceName\":1," 
     //     "\"State\":\"Follow\""
     //   "}"
@@ -10608,13 +10608,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -10623,13 +10623,13 @@
     // "\"Rule1\":{"
     //   "\"Trigger\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
     //     "\"DeviceName\":0,"
     //     "\"State\":\"On\""
     //   "},"
     //   "\"Command\":{"
     //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
     //     "\"DeviceName\":1," 
     //     "\"State\":\"Follow\""
     //   "}"
@@ -10659,7 +10659,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -10668,7 +10668,7 @@
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
     // #define ENABLE_DEVFEATURE_TRANSITION_MODE_LEVEL_OPTIONS
     // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
@@ -10785,14 +10785,14 @@
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_ANIMATOR
   // #define USE_MODULE_LIGHTS_PWM  
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   
   //   /********* Group: Needed to build ************************/
   //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
   //   /********* Group: Ready for full integration ************************/
   //   // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   //   /********* Group: Testing ************************/
   //   #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-  //   #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+  //   
   //   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
   //   #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
   //   
@@ -10834,7 +10834,7 @@
   // #define USE_BUILD_TYPE_LIGHTING
   // #define USE_MODULE_LIGHTS_ANIMATOR
   // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  // 
   //   #define ENABLE_DEVFEATURE_SOLAR_PALETTES
   //   #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
   //   #define DEBUG_TARGET_ANIMATOR_SEGMENTS
@@ -10900,7 +10900,7 @@
     "\"Rule0\":{" //switch example
       "\"Trigger\":{"
         "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
@@ -10935,7 +10935,7 @@
 
   // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 
-  // //#define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // //#define USE_MODULE_SENSORS_SUN_TRACKING
 
   // #define USE_MODULE_TEMPLATE
   // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -10983,7 +10983,7 @@
   //   "\"Rule0\":{" //switch example
   //     "\"Trigger\":{"
   //       "\"Module\":\"Buttons\","    //sensor
-  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+  //       "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
   //       "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
   //       "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
   //     "},"
@@ -11053,7 +11053,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+     // Not ready to remove
     #define STRIP_SIZE_MAX 256+50
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     #define MAX_NUM_SEGMENTS 25
@@ -11065,7 +11065,7 @@
     // #define USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
     // #define ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES //to be joint later
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    
 
 
     // #define ENABLE_DEVFEATURE_TRANSITION_MODE_LEVEL_OPTIONS
@@ -11564,14 +11564,14 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -11661,14 +11661,14 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     
@@ -11757,13 +11757,13 @@
     // #define USE_MODULE_LIGHTS_INTERFACE
     // #define USE_MODULE_LIGHTS_ANIMATOR
     // #define USE_MODULE_LIGHTS_ADDRESSABLE
-    // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // 
     // // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
     // // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
     // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
     // // enable some wled conerted aniamtions
-    // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // 
     // #define DEBUG_WLED_EFFECT_FUNCTIONS
     // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -11773,7 +11773,7 @@
 
     // #define  ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 
-    // #define ENABLE_CRGBPALETTES_IN_PROGMEM
+    // 
 
     // #define STRIP_SIZE_MAX 100
     
@@ -11781,13 +11781,13 @@
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
     #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
     // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
     // enable some wled conerted aniamtions
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     #define DEBUG_WLED_EFFECT_FUNCTIONS
     #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -11800,7 +11800,7 @@
     // to merge h801 rgbcct animation into the new method
     #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 
-    #define ENABLE_CRGBPALETTES_IN_PROGMEM
+    
 
     #define STRIP_SIZE_MAX 1300
   
@@ -12311,13 +12311,13 @@
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
     #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
     // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
     // enable some wled conerted aniamtions
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     #define DEBUG_WLED_EFFECT_FUNCTIONS
     #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -12330,11 +12330,11 @@
     // to merge h801 rgbcct animation into the new method
     #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 
-    #define ENABLE_CRGBPALETTES_IN_PROGMEM
+    
 
     #define STRIP_SIZE_MAX 1300
 
-    #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+    
   
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
 
@@ -13665,13 +13665,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":0"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":1}}\""
       "}"
@@ -13679,13 +13679,13 @@
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
       "}"
@@ -13796,13 +13796,13 @@
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":0"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOnSecs\\\":60}}\""
       "}"
@@ -13810,13 +13810,13 @@
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"PowerState\\\":0}\""
       "}"
@@ -14559,7 +14559,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -14616,7 +14616,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    * 
    * */
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -14671,7 +14671,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_PWM
   
   
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -15322,14 +15322,14 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     

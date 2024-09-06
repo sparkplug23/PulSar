@@ -15,7 +15,7 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
   
   // some functions must run regardless
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
   }
@@ -27,29 +27,29 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
     /************
      * SETTINGS SECTION * 
     *******************/
-    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+    case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE: 
       // Settings_Load();
     break;
-    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+    case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE: 
       // Settings_Save();
     break;
-    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+    case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
       // Settings_Default();
       // pCONT_set->SettingsSave(2);
     break;
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       ALOG_DBG( PSTR("Read"));   
 
       
@@ -63,17 +63,17 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       // parse_JSONCommand(obj);
     break; 
     /************
      * WEBPAGE SECTION * 
     *******************/
     // #ifdef USE_MODULE_NETWORK_WEBSERVER
-    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    // case TASK_WEB_ADD_ROOT_TABLE_ROWS:
     //   WebAppend_Root_Status_Table_Draw();
     //   break;
-    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    // case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
     //   WebAppend_Root_Status_Table_Data();
     //   break;
     // #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -81,13 +81,13 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
       break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -125,7 +125,7 @@ void mEnergyINA219::Pre_Init(){
 
 
  //0x40, 0x41 0x44 or 0x45
-  if(pCONT_sup->I2cDevice(0x40) || pCONT_sup->I2cDevice(0x41) || pCONT_sup->I2cDevice(0x44) || pCONT_sup->I2cDevice(0x45)){
+  if(pCONT_i2c->I2cDevice(0x40) || pCONT_i2c->I2cDevice(0x41) || pCONT_i2c->I2cDevice(0x44) || pCONT_i2c->I2cDevice(0x45)){
 
     // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
   
@@ -153,7 +153,7 @@ pCONT_set->Settings.ina219_mode = 0;
 
 
     // sensor[settings.fSensorCount].bme = new Adafruit_BME280();
-    // if (sensor[settings.fSensorCount].bme->begin(pCONT_sup->wire)) {
+    // if (sensor[settings.fSensorCount].bme->begin(pCONT_i2c->wire)) {
     //   settings.fSensorCount++;
     // }else{
     //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
@@ -299,10 +299,10 @@ void mEnergyINA219::MQTTHandler_Init(){
   struct handler<mEnergyINA219>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -310,10 +310,10 @@ void mEnergyINA219::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -321,10 +321,10 @@ void mEnergyINA219::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = 1;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -350,9 +350,9 @@ void mEnergyINA219::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   // }
 }
 
@@ -376,7 +376,7 @@ void mEnergyINA219::MQTTHandler_Sender()
 float mEnergyINA219::GetShuntVoltage_mV(uint16_t addr)
 {
   // raw shunt voltage (16-bit signed integer, so +-32767)
-  int16_t value = pCONT_sup->I2cReadS16(addr, INA219_REG_SHUNTVOLTAGE);
+  int16_t value = pCONT_i2c->I2cReadS16(addr, INA219_REG_SHUNTVOLTAGE);
   // //DEBUG_SENSOR_LOG("GetShuntVoltage_mV: ShReg = 0x%04X",value);
   // // convert to shunt voltage in mV (so +-327mV) (LSB=10µV=0.01mV)
   return value * 0.01;
@@ -388,7 +388,7 @@ float mEnergyINA219::GetBusVoltage_mV(uint16_t addr){
 float mEnergyINA219::GetBusVoltage_V(uint16_t addr)
 {
   // Shift 3 to the right to drop CNVR and OVF as unsigned
-  uint16_t value = pCONT_sup->I2cRead16(addr, INA219_REG_BUSVOLTAGE) >> 3;
+  uint16_t value = pCONT_i2c->I2cRead16(addr, INA219_REG_BUSVOLTAGE) >> 3;
   //ALOG_DBG( PSTR("GetBusVoltage_V: BusReg = 0x%04X"),value);
   // and multiply by LSB raw bus voltage to return bus voltage in volts (LSB=4mV=0.004V)
   return value * 0.004;
@@ -407,10 +407,10 @@ float mEnergyINA219::GetCurrent_mA(uint16_t addr)
   ina219_currentDivider_mA = 10; // Current LSB = 100uA per bit (1000/100 = 10)
   ina219_powerMultiplier_mW = 2; // Power LSB = 1mW per bit (2/1)
  
- pCONT_sup->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
+ pCONT_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
   // Now we can safely read the CURRENT register!
   // raw current value (16-bit signed integer, so +-32767)
-  float value = pCONT_sup->I2cReadS16(addr, INA219_REG_CURRENT);
+  float value = pCONT_i2c->I2cReadS16(addr, INA219_REG_CURRENT);
   value /= ina219_currentDivider_mA;
   // current value in mA, taking into account the config settings and current LSB
   return value;
@@ -427,10 +427,10 @@ float mEnergyINA219::GetPower_mW(uint16_t addr)
   ina219_currentDivider_mA = 10; // Current LSB = 100uA per bit (1000/100 = 10)
   ina219_powerMultiplier_mW = 2; // Power LSB = 1mW per bit (2/1)
  
- pCONT_sup->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
+ pCONT_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
   // Now we can safely read the CURRENT register!
   // raw current value (16-bit signed integer, so +-32767)
-  float value = pCONT_sup->I2cReadS16(addr, INA219_REG_POWER);
+  float value = pCONT_i2c->I2cReadS16(addr, INA219_REG_POWER);
   value *= ina219_powerMultiplier_mW;
   // current value in mA, taking into account the config settings and current LSB
   return value;
@@ -501,7 +501,7 @@ bool mEnergyINA219::SetCalibration(uint8_t mode, uint16_t addr)
          | INA219_CONFIG_SADCRES_12BIT_16S_8510US   // use averaging to improve accuracy
          | INA219_CONFIG_MODE_SANDBVOLT_CONTINUOUS;
   // Set Config register to take into account the settings above
-  return pCONT_sup->I2cWrite16(addr, INA219_REG_CONFIG, config);
+  return pCONT_i2c->I2cWrite16(addr, INA219_REG_CONFIG, config);
 }
 /*!
  *  @brief  Configures to INA219 to be able to measure up to 32V and 2A

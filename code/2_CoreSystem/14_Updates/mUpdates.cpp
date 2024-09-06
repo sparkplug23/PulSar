@@ -49,10 +49,10 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     init();
   }
 
@@ -63,56 +63,56 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:  
+    case TASK_EVERY_SECOND:  
     
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 
-     case FUNC_LOOP:
+     case TASK_LOOP:
     //   UfsExecuteCommandFileLoop();
       break;
 #ifdef USE_SDCARD
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       UfsCheckSDCardInit();
       break;
 #endif // USE_SDCARD
-    // case FUNC_MQTT_INIT:
+    // case TASK_MQTT_INIT:
     //   if (!TasmotaGlobal.no_autoexec) {
     //     UfsExecuteCommandFile(TASM_FILE_AUTOEXEC);
     //   }
     //   break;
-    // case FUNC_COMMAND:
+    // case TASK_COMMAND:
     //   result = DecodeCommand(kUFSCommands, kUFSCommand);
     //   break;
 #ifdef USE_WEBSERVER
-    case FUNC_WEB_ADD_MANAGEMENT_BUTTON:
+    case TASK_WEB_ADD_MANAGEMENT_BUTTON:
       if (ufs_type) {
         WSContentSend_PD(UFS_WEB_DIR, PSTR(D_MANAGE_FILE_SYSTEM));
       }
       break;
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
 //      Webserver->on(F("/ufsd"), UfsDirectory);
 //      Webserver->on(F("/ufsu"), HTTP_GET, UfsDirectory);
 //      Webserver->on(F("/ufsu"), HTTP_POST,[](){Webserver->sendHeader(F("Location"),F("/ufsu"));Webserver->send(303);}, HandleUploadLoop);
@@ -122,7 +122,7 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
       break;
 #endif // USE_WEBSERVER
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
     #endif // USE_MODULE_NETWORK_WEBSERVER
@@ -251,10 +251,10 @@ void mUpdates::MQTTHandler_Init(){
   struct handler<mUpdates>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -281,9 +281,9 @@ void mUpdates::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

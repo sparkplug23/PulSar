@@ -34,7 +34,7 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 
 
 //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-bool mAnimatorLight::requestJSONBufferLock(uint8_t module)
+bool mAnimatorLight::requestJSONBufferLock(uint16_t module)
 {
   unsigned long now = millis();
 
@@ -2680,7 +2680,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     serveLiveLeds(request);
     return;
   }
-  else if (url.indexOf("pal") > 0) {
+  else if (url.indexOf("pal") > 0) { // "/json/palettes"
 
     JBI->Start();
       JBI->Array_Start();

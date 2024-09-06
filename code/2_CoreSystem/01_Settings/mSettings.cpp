@@ -3,93 +3,29 @@
 
 struct DATA_BUFFER data_buffer;
 
-// Settings will contain all jsoncommands for "CoreSystem"
-
-//overload fix when only one parameter is called
-int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t param1){  
-//   JsonObjectConst dummy; return Tasker(function, dummy);
-// }
-// template<typename T>
-// int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj), T param1){ 
-
-  // DEBUG_PRINT_FUNCTION_NAME_TEST;
-  switch(function){
-    case FUNC_INIT:
+int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
+{
+  
+  switch(function)
+  {
     
+    case TASK_EVERY_SECOND:
 
+          
     break;
-    case FUNC_LOOP:
-
-      // if(mTime::TimeReached(&tSavedSavingTest,10000)){
-      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
-      //   // SettingsSave(1);
-      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
-      //   // SettingsLoad();
-      //   //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1before"));
-      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT);
-      //   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1after"));
-
-      // }
-
-    break;
-    case FUNC_EVERY_SECOND:{
-
-    // Function_Template_Load();
- 
-    // TestSettingsLoad();
-
-    /**
-     * Decounter until saving.
-     * This is used when I want to force save data after an update has happened, but want the storage event to be delayed so it doesn't slow the event (eg relay set, mqtt response)
-     * */
-    // if(runtime.settings_save_decounter_seconds_delayed_save)
-    // {
-    //   runtime.settings_save_decounter_seconds_delayed_save--;
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog(LOG_LEVEL_TEST, PSTR("settings_save_decounter_seconds_delayed_save = %d"), runtime.settings_save_decounter_seconds_delayed_save);
-    // #endif // ENABLE_LOG_LEVEL_INFO
-    //   if(runtime.settings_save_decounter_seconds_delayed_save==0)
-    //   {
-    //     pCONT_set->SettingsSaveAll();
-    //   }
-    // }
-
-/**
- * @brief I will implement this, but its another receovery option not related the RTC Fastboot
- * 
- */
-  // if (POWER_CYCLE_TIME == TasmotaGlobal.uptime) {
-  //   UpdateQuickPowerCycle(false);
-  // }
-
-    
-  // AddLog(LOG_LEVEL_DEBUG,PSTR( "TaskerTest SUCCESS!!"));
-
-
-  // AddLog(LOG_LEVEL_DEBUG,PSTR( "GetNameBuffer_Length=%d"),DeviceNameListI->GetNameBuffer_Length());
-
-
-
-// SystemSettings_DefaultBody_Network();
-
-       // AddLog(LOG_LEVEL_TEST,PSTR("sizeof(SETTINGS)=%d %%"),map(sizeof(SETTINGS),0,4095,0,100));
-
-
-       
-     } break;
-    case FUNC_EVERY_FIVE_SECOND:{
+    case TASK_EVERY_FIVE_SECOND:{
 
       #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
         #ifdef ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
+
         pCONT_set->SettingsSaveAll();
+
         #endif
       #endif
 
-
     }break;
 
-    case FUNC_EVERY_MINUTE:
-
+    case TASK_EVERY_MINUTE:
       
       #ifdef USE_MODULE_CORE_FILESYSTEM
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
@@ -110,11 +46,9 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
         }
       #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
       #endif // USE_MODULE_CORE_FILESYSTEM
-
-
       
     break;
-    case FUNC_EVERY_HOUR:
+    case TASK_EVERY_HOUR:
 
       #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
         #ifdef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
@@ -126,100 +60,45 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
       #endif // ifdef ENABLE_LOG_LEVEL_INFO
       #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
 
-
-
-
     break;   
-
-
-
-    case FUNC_ON_BOOT_SUCCESSFUL:
+    case TASK_ON_BOOT_SUCCESSFUL:
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
 
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
-      #endif// ENABLE_LOG_LEVEL_INFO
-
-          
-      // #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
-      //   #ifdef DEBUG_SERIAL_TESTING
-      //     Settings.seriallog_level = LOG_LEVEL_COMMANDS;
-      //   #else
-      //     Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
-      //   #endif
-      //   Settings.weblog_level = LOG_LEVEL_INFO;
-      //   //Settings.telnetlog_level = LOG_LEVEL_INFO;
-      //   Settings.seriallog_level = LOG_LEVEL_DEBUG;
-      //   #ifdef ENABLE_LOG_FILTERING_TEST_ONLY
-      //     enable_serial_logging_filtering = true;
-      //     Settings.seriallog_level = LOG_LEVEL_TEST;
-      //   #endif
-      //   //enable_web_logging_filtering = true;
-      //   //Settings.flog_time_short = true;
-      //   #ifdef DEBUG_FOR_FAULT
-      //     Settings.seriallog_level = LOG_LEVEL_ALL;
-      //   #endif
-      // #endif
-
-      
-      // I think this is in time module, check it (the bootcount is I think, not sure about boot_loop_time, this should be moved into settings)
-
-
-      // Save stable start
-      // Dont use a bootloop time, instead have other "stable qualifiers", probably from a function I can call that can be diffferent by device ie (if mqtt, then require it..... if network, then require it...... )
-        // if (BOOT_LOOP_TIME == pCONT_time-> uptime_seconds_nonreset) {
-
-          #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-          RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
-          #endif
+      ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
+  
+      #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+      RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
+      #endif
 
       #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
       flag_rtc_reboot_reset_on_success = true;
       ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
       #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 
-
-          //Settings->last_module = Settings->module;
-
       #ifdef USE_DEEPSLEEP
           if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
             // SetOption76  - (Deepsleep) Enable incrementing bootcount (1) when deepsleep is enabled
       #endif
             // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
-            // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
+            // ALOG_DBG(PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
       #ifdef USE_DEEPSLEEP
           }
       #endif
 
-        // }
-
-
-
-
-
-
     break;
-    // case FUNC_EVERY_FIVE_MINUTE:
-
-    //   ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
-
-    // break;
-    
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID:
+    case TASK_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID:
       JsonAppend_Settings();
     break;
-
     /************
      * xx SECTION * 
     *******************/
-
-    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+    case TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
       Function_Template_Load();
     break;
   }
@@ -242,11 +121,9 @@ void mSettings::Function_Template_Load(){
   memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  //ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
-  #endif // ENABLE_LOG_LEVEL_INFO
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+  
+  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   runtime.template_loading.status.function = TemplateSource::HEADER_TEMPLATE;
 
@@ -254,26 +131,17 @@ void mSettings::Function_Template_Load(){
   
 }
 
-int16_t mSettings::GetFunctionIDbyName(const char* c){
-
-  if(*c=='\0'){
-    return -1;
-  }
-  if(strcasecmp_P(c,PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)==0){ return FUNC_EVENT_INPUT_STATE_CHANGED_ID; }
-
-  if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_STARTED_CTR)==0){ return FUNC_EVENT_MOTION_STARTED_ID; }
-
-  if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_STARTED_CTR)==0){ return FUNC_EVENT_MOTION_STARTED_ID; }
-  if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_ENDED_CTR)==0){ return FUNC_EVENT_MOTION_ENDED_ID; }
-
-
-  if(strcasecmp_P(c,PM_FUNC_EVENT_SET_POWER_CTR)==0){ return FUNC_EVENT_SET_POWER_ID; }
-
-  if(strcasecmp_P(c,PM_FUNC_EVENT_SET_SPEED_CTR)==0){ return FUNC_EVENT_SET_SPEED_ID; }
-
-
+int16_t mSettings::GetFunctionIDbyName(const char* c)
+{
+  if(strcasecmp_P(c,PM_TASK_EVENT_INPUT_STATE_CHANGED_CTR)==0){ return TASK_EVENT_INPUT_STATE_CHANGED_ID; }
+  if(strcasecmp_P(c,PM_TASK_EVENT_MOTION_STARTED_CTR)==0){ return TASK_EVENT_MOTION_STARTED_ID; }
+  if(strcasecmp_P(c,PM_TASK_EVENT_MOTION_STARTED_CTR)==0){ return TASK_EVENT_MOTION_STARTED_ID; }
+  if(strcasecmp_P(c,PM_TASK_EVENT_MOTION_ENDED_CTR)==0){ return TASK_EVENT_MOTION_ENDED_ID; }
+  if(strcasecmp_P(c,PM_TASK_EVENT_SET_POWER_CTR)==0){ return TASK_EVENT_SET_POWER_ID; }
+  if(strcasecmp_P(c,PM_TASK_EVENT_SET_SPEED_CTR)==0){ return TASK_EVENT_SET_SPEED_ID; }
   return -1;
 }
+
 
 void mSettings::JsonAppend_Settings()
 {
@@ -288,25 +156,6 @@ void mSettings::JsonAppend_Settings()
 }
 
 
-/**
- * @brief 
- * 
- 
- TOGGLE
- FOLLOW
- FOLLOW_INV
-
-  
- * 
- * 
- */
-
-
-
-
-
-
-
 uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
   uint16_t count = 0;
   for(uint16_t i=0;i<strlen(tosearch);i++){
@@ -315,25 +164,28 @@ uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
   return count;
 }
 
-//into logging
-const char* mSettings::GetTelePeriodJsonLevelCtr(char* buffer){
-  return GetTelePeriodJsonLevelCtr(pCONT_set->Settings.sensors.teleperiod_json_level, buffer);
+
+const char* mSettings::Get_Json_Level_Name(uint8_t id) 
+{
+    switch(id){
+        case JSON_LEVEL_NONE:      
+            return PM_JSON_LEVEL_NONE_CTR;
+        case JSON_LEVEL_IFCHANGED: 
+            return PM_JSON_LEVEL_IFCHANGED_CTR;
+        case JSON_LEVEL_SHORT:     
+            return PM_JSON_LEVEL_SHORT_CTR;
+        case JSON_LEVEL_DETAILED:  
+            return PM_JSON_LEVEL_DETAILED_CTR;
+        case JSON_LEVEL_ALL:       
+            return PM_JSON_LEVEL_ALL_CTR;
+        case JSON_LEVEL_DEBUG:     
+            return PM_JSON_LEVEL_DEBUG_CTR;
+        default:
+            return PM_JSON_LEVEL_NONE_CTR; // Default to "None" if an unknown id is passed
+    }
 }
-const char* mSettings::GetTelePeriodJsonLevelCtr(uint8_t id, char* buffer){
-  switch(id){
-    default:
-    case JSON_LEVEL_NONE:      memcpy_P(buffer, PM_JSON_LEVEL_NONE_CTR, sizeof(PM_JSON_LEVEL_NONE_CTR)); break;
-    case JSON_LEVEL_IFCHANGED: memcpy_P(buffer, PM_JSON_LEVEL_IFCHANGED_CTR, sizeof(PM_JSON_LEVEL_IFCHANGED_CTR)); break;
-    // case JSON_LEVEL_SHORT:     return "SHORT";
-    // case JSON_LEVEL_DETAILED:  return "DETAILED";
-    // case JSON_LEVEL_ALL:       return "ALL";
-  }
-  return buffer;
-}
 
 
-
-/********************************************************************************************/
 /*
  * Based on cores/esp8266/Updater.cpp
  */
@@ -358,10 +210,6 @@ void mSettings::SetFlashModeDout(void)
   
     #endif // ESP8266
 }
-
-
-
-
 
 
 #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
@@ -395,7 +243,10 @@ bool mSettings::SettingsUpdateFinished(void) {
 bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me) 
 {
 
-  ALOG_INF(PSTR("SettingsUpdateText %d %s"),index,replace_me);
+  ALOG_DBM(PSTR("SettingsUpdateText %d %s"),index,replace_me);
+
+  Serial.println();
+  for(int i=0;i<138;i++){ Serial.print(Settings.text_pool[i]); } Serial.println();
 
   if (index >= SET_MAX) {
     return false;  // Setting not supported - internal error
@@ -428,13 +279,14 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   uint32_t current_len = end_pos - start_pos;
   int diff = replace_len - current_len;
 
- AddLog(LOG_LEVEL_INFO, PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
+ ALOG_INF(PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
    start_pos, end_pos, char_len, current_len, replace_len, diff);
 
   DEBUG_LINE_HERE
   int too_long = (char_len + diff) - settings_text_size;
+    ALOG_INF(PSTR(D_LOG_CONFIG "Text test by %d char(s)"), too_long);
   if (too_long > 0) {
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
+    ALOG_INF(PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
     return false;  // Replace text too long
   }
 
@@ -460,8 +312,8 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
     settings_text_mutex = false;
   }
 
-#ifdef DEBUG_FUNC_SETTINGSUPDATETEXT
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d, Id %02d = \"%s\""), GetSettingsTextLen(), settings_text_size, settings_text_busy_count, index_save, replace);
+#ifdef DEBUG_TASK_SETTINGSUPDATETEXT
+  ALOG_DBG(PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d, Id %02d = \"%s\""), GetSettingsTextLen(), settings_text_size, settings_text_busy_count, index_save, replace);
   Serial.println("test_pool");
   for(int i=0;i<100;i++)
   {
@@ -469,12 +321,13 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   }
   Serial.println();
 #else
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d"), GetSettingsTextLen(), settings_text_size, settings_text_busy_count);
+  ALOG_INF(PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d"), GetSettingsTextLen(), settings_text_size, settings_text_busy_count);
 #endif
 
 
   return true;
 }
+
 
 char* mSettings::SettingsText(uint32_t index) {
   char* position = Settings.text_pool;
@@ -494,4 +347,145 @@ char* mSettings::SettingsText(uint32_t index) {
   return position;
 }
 
+
 #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
+
+
+
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+
+void mSettings::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+  if(jtok = obj[PM_JSON_SYSTEM_RESTART]){
+    // if(jtok.isStr()){
+    //   if((tmp_id=GetPixelHardwareTypeIDbyName(jtok.getStr()))>=0){
+    //     CommandSet_PixelHardwareTypeID(tmp_id);
+    //     data_buffer.isserviced++;
+    //   }
+    // }else
+    if(jtok.isNum()){
+      CommandSet_SystemRestartID(jtok.getInt());
+      data_buffer.isserviced++;
+    }
+  }
+
+
+  /**
+   * Debug options
+   * */
+  if(jtok = obj["SettingSave"])
+  {
+    SettingsSaveAll();
+  }
+  if(jtok = obj["SettingLoad"])
+  {
+    SettingsLoad();
+  }
+
+
+  if(jtok = obj[PM_JSON_DEVICENAME])
+  { 
+
+    char module_friendlyname_buffer[30];
+    uint16_t module_id = 0;
+
+    // Search across all module names
+    for(auto& module : pCONT->pModule){
+
+      sprintf_P(module_friendlyname_buffer,"%S", module->GetModuleName());
+
+      ALOG_DBM( PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+  
+      if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer])
+      { 
+        ALOG_DBM( PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+
+        JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
+      
+        if(arr){  
+          //Get devices already present
+          uint8_t device_count = DLI->GetDeviceNameCount( module->GetModuleUniqueID()  );
+          
+          for(uint8_t id =0;id<arr.size();id++){
+            jtok = arr[id];
+            const char* device_name_ctr = jtok.getStr();
+            DLI->AddDeviceName(device_name_ctr,module->GetModuleUniqueID(),device_count++);
+            ALOG_DBM( PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
+            ALOG_DBM( PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+          } //if array
+        }//if array
+      }
+    } //for
+
+  }
+  
+
+  if(jtok = obj["BootCount"])
+  {
+    Settings.bootcount = jtok.getInt();
+    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("BootCount %d"),Settings.bootcount);
+  }
+
+}
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** CommandSet_SystemRestartID *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mSettings::CommandSet_SystemRestartID(uint8_t value){
+
+  /**
+   * 0 = invalid
+   * 1 = soft restart
+   * 2 = save reboot, save settings, then restart
+   * 3 = reboot into captive portal mode
+   * 4 = reboot and wait for 1 minute for OTA capture
+   * 5 = force crash with hardware WDT
+   * 6 = reboot and reset to default setting (not wifi)
+   * 7 (requires second command) = forced reset and all settings including wifi
+   * 3+ is disabling things for stability ie fastboot or erasing settings to default
+   * 
+   * 
+   * */
+  
+  #ifdef USE_MODULE_NETWORK_WIFI   
+  if(value == 1)
+  {
+    pCONT_wif->EspRestart();
+  }
+  else
+  if(value == 2)
+  {
+
+    ALOG_DBM(PSTR("REBOOT TEST" DEBUG_INSERT_PAGE_BREAK));
+    ALOG_DBM(PSTR("Current bootcount is %d"), Settings.bootcount);
+
+    pCONT_set->TestSettings_ShowLocal_Header();
+    pCONT_set->TestSettingsLoad();
+
+    ALOG_DBM(PSTR("Modying bootcount to %d"), Settings.bootcount++);
+    
+    pCONT_set->SettingsSaveAll();
+
+    ALOG_DBM(PSTR("Settings should be saved now to %d"), Settings.bootcount);
+
+    pCONT_set->TestSettings_ShowLocal_Header();
+    pCONT_set->TestSettingsLoad();
+
+    pCONT_wif->EspRestart();
+
+  }  
+  #endif // ifdef USE_MODULE_NETWORK_WIFI
+  
+}
+

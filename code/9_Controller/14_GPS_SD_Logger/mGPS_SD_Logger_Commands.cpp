@@ -21,7 +21,7 @@ void mGPS_SD_Logger::CommandSet_SDCard_OpenClose_Toggle()
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("mGPS_SD_Logger CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
+  ALOG_TST(PSTR("mGPS_SD_Logger CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
@@ -40,12 +40,12 @@ void mGPS_SD_Logger::CommandSet_LoggingState(uint8_t state)
   if(state == 2) //toggle
   {
     logger_status.enable ^= 1; 
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
+    ALOG_TST(PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
 
   }else
   {
     logger_status.enable = state;
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
+    ALOG_TST(PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
 
   }
 
@@ -58,7 +58,7 @@ void mGPS_SD_Logger::CommandSet_LoggingState(uint8_t state)
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState %d"),logger_status.enable);
+  ALOG_TST(PSTR("CommandSet_LoggingState %d"),logger_status.enable);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;

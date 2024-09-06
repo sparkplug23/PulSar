@@ -1,9 +1,176 @@
-#include "mSupport.h"
+#include "mI2C.h"
+
+#ifdef USE_MODULE_CORE_I2C
+
+int8_t mI2C::Tasker(uint8_t function, JsonParserObject obj)
+{
+
+  /************
+   * INIT SECTION * 
+  *******************/
+  switch(function){
+    case TASK_PRE_INIT:
+      Pre_Init();
+    break;
+  }
+
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  // switch(function){
+  //   /************
+  //    * PERIODIC SECTION * 
+  //   *******************/
+  //   case TASK_EVERY_SECOND:  
+  //   break;
+  //    case TASK_LOOP:
+  //   //   UfsExecuteCommandFileLoop();
+  //   break;
+  //   case TASK_EVERY_FIVE_SECOND:    
+  //     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+  //     SystemTask__Execute_Module_Data_Save();
+  //     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+  //   break;
+  //   case TASK_EVERY_MINUTE:
+  //     // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
+  //     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+  //     SystemTask__Execute_Module_Data_Save();
+  //     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
+  //     // #endif     
+  //   break;  
+  //   case TASK_EVERY_FIVE_MINUTE:
+  //     #ifdef ENABLE_SYSTEM_SETTINGS_IN_I2C
+  //     JsonFile_Save__Stored_Module();
+  //     JsonFile_Save__Stored_Secure();
+  //     #endif // ENABLE_SYSTEM_SETTINGS_IN_I2C
+       
+  //   break;
+  //   /************
+  //    * COMMANDS SECTION * 
+  //   *******************/
+  //   case TASK_JSON_COMMAND_ID:
+  //     parse_JSONCommand(obj);
+  //   break;
+  //   /************
+  //    * MQTT SECTION * 
+  //   *******************/
+  //   #ifdef USE_MODULE_NETWORK_MQTT
+  //   case TASK_MQTT_HANDLERS_INIT:
+  //     MQTTHandler_Init();
+  //   break;
+  //   case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+  //     MQTTHandler_Set_DefaultPeriodRate();
+  //   break;
+  //   case TASK_MQTT_SENDER:
+  //     MQTTHandler_Sender();
+  //   break;
+  //   case TASK_MQTT_CONNECTED:
+  //     MQTTHandler_Set_RefreshAll();
+  //   break;
+  //   #endif //USE_MODULE_NETWORK_MQTT
+
+  //   // case TASK_MQTT_INIT:
+  //   //   if (!TasmotaGlobal.no_autoexec) {
+  //   //     UfsExecuteCommandFile(TASM_FILE_AUTOEXEC);
+  //   //   }
+  //   //   break;
+  //   // case TASK_COMMAND:
+  //   //   result = DecodeCommand(kUFSCommands, kUFSCommand);
+  //   //   break;
+  //   #ifdef USE_WEBSERVER
+  //   case TASK_WEB_ADD_MANAGEMENT_BUTTON:
+  //     if (ufs_type) {
+  //     WSContentSend_PD(UFS_WEB_DIR, PSTR(D_MANAGE_FILE_SYSTEM));
+  //     }
+  //     break;
+  //     case TASK_WEB_ADD_HANDLER:
+  //     //      Webserver->on(F("/ufsd"), UfsDirectory);
+  //     //      Webserver->on(F("/ufsu"), HTTP_GET, UfsDirectory);
+  //     //      Webserver->on(F("/ufsu"), HTTP_POST,[](){Webserver->sendHeader(F("Location"),F("/ufsu"));Webserver->send(303);}, HandleUploadLoop);
+  //     Webserver->on("/ufsd", UfsDirectory);
+  //     Webserver->on("/ufsu", HTTP_GET, UfsDirectory);
+  //     Webserver->on("/ufsu", HTTP_POST,[](){Webserver->sendHeader(F("Location"),F("/ufsu"));Webserver->send(303);}, HandleUploadLoop);
+  //     break;
+  //   #endif // USE_WEBSERVER
+
+  //   }  
+
+} // END Tasker
 
 
-#ifdef USE_I2C
 
-bool mSupport::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
+void mI2C::Pre_Init()
+{
+  
+
+/**
+ * @brief Configure I2C
+ * 
+ * 
+ * This section should change "I2CBegin()" so esp8266/esp32 cna be handled with compat header
+ * 
+ */
+
+  pCONT_set->runtime.i2c_enabled = ( pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID));
+  if (pCONT_set->runtime.i2c_enabled)
+  { 
+    if(wire == nullptr)
+    {
+      #ifdef ESP8266
+      wire = new TwoWire();
+      wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)); // no return to check status
+      #else
+      wire = new TwoWire(0);
+      ALOG_DBM( PSTR("Trying to start i2c 2-wire"));
+      #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+      if(wire->begin(pCONT_pins->GetPin(GPIO_I2C_SDA_ID), pCONT_pins->GetPin(GPIO_I2C_SCL_ID)))//, 100000))
+      #else
+      if(wire->begin(pCONT_pins->GetPin(GPIO_I2C_SDA_ID), pCONT_pins->GetPin(GPIO_I2C_SCL_ID), 100000))
+      #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+      {
+        ALOG_DBM( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),pCONT_pins->GetPin(GPIO_I2C_SDA_ID),pCONT_pins->GetPin(GPIO_I2C_SCL_ID));
+      }
+      else
+      {
+        ALOG_DBM( PSTR("NOT STARTED to start i2c 2-wire"));
+      }
+      #endif
+    }   
+
+  } // i2c_enabled
+  
+}
+
+
+
+
+void mI2C::Debug_I2CScan_To_Serial()
+{
+ 
+  if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+  {
+
+    #ifdef ESP32
+    JBI->Add("I2C_BusSpeed", wire->getClock());
+    #endif
+
+    char mqtt_data[300];
+    I2cScan(mqtt_data, sizeof(mqtt_data));
+    // Serial.println(mqtt_data);
+
+    //need to escape option to function above
+    // JBI->Add("I2C_Scan",          mqtt_data);
+
+    BufferWriterI->Start();
+    BufferWriterI->Append("\"I2C_Scan\":");
+    BufferWriterI->Append(mqtt_data);
+
+    ALOG_INF( PSTR("buffer=%s"), BufferWriterI->GetBufferPtr() );
+
+  }
+
+}
+
+bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
 {
   uint8_t x = I2C_RETRY_COUNTER;
 
@@ -24,28 +191,28 @@ bool mSupport::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
   return (x);
 }
 
-bool mSupport::I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
+bool mI2C::I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
 {
   bool status = I2cValidRead(addr, reg, 1);
   *data = (uint8_t)i2c_buffer;
   return status;
 }
 
-bool mSupport::I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg)
+bool mI2C::I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg)
 {
   bool status = I2cValidRead(addr, reg, 2);
   *data = (uint16_t)i2c_buffer;
   return status;
 }
 
-bool mSupport::I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg)
+bool mI2C::I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg)
 {
   bool status = I2cValidRead(addr, reg, 2);
   *data = (int16_t)i2c_buffer;
   return status;
 }
 
-bool mSupport::I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg)
+bool mI2C::I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg)
 {
   uint16_t ldata;
   bool status = I2cValidRead16(&ldata, addr, reg);
@@ -53,7 +220,7 @@ bool mSupport::I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg)
   return status;
 }
 
-bool mSupport::I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg)
+bool mI2C::I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg)
 {
   uint16_t ldata;
   bool status = I2cValidRead16LE(&ldata, addr, reg);
@@ -61,44 +228,44 @@ bool mSupport::I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg)
   return status;
 }
 
-bool mSupport::I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg)
+bool mI2C::I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg)
 {
   bool status = I2cValidRead(addr, reg, 3);
   *data = i2c_buffer;
   return status;
 }
 
-uint8_t mSupport::I2cRead8(uint8_t addr, uint8_t reg)
+uint8_t mI2C::I2cRead8(uint8_t addr, uint8_t reg)
 {
   I2cValidRead(addr, reg, 1);
   return (uint8_t)i2c_buffer;
 }
 
-uint16_t mSupport::I2cRead16(uint8_t addr, uint8_t reg)
+uint16_t mI2C::I2cRead16(uint8_t addr, uint8_t reg)
 {
   I2cValidRead(addr, reg, 2);
   return (uint16_t)i2c_buffer;
 }
 
-int16_t mSupport::I2cReadS16(uint8_t addr, uint8_t reg)
+int16_t mI2C::I2cReadS16(uint8_t addr, uint8_t reg)
 {
   I2cValidRead(addr, reg, 2);
   return (int16_t)i2c_buffer;
 }
 
-uint16_t mSupport::I2cRead16LE(uint8_t addr, uint8_t reg)
+uint16_t mI2C::I2cRead16LE(uint8_t addr, uint8_t reg)
 {
   I2cValidRead(addr, reg, 2);
   uint16_t temp = (uint16_t)i2c_buffer;
   return (temp >> 8) | (temp << 8);
 }
 
-int16_t mSupport::I2cReadS16_LE(uint8_t addr, uint8_t reg)
+int16_t mI2C::I2cReadS16_LE(uint8_t addr, uint8_t reg)
 {
   return (int16_t)I2cRead16LE(addr, reg);
 }
 
-int32_t mSupport::I2cRead24(uint8_t addr, uint8_t reg)
+int32_t mI2C::I2cRead24(uint8_t addr, uint8_t reg)
 {
   I2cValidRead(addr, reg, 3);
   return i2c_buffer;
@@ -106,7 +273,7 @@ int32_t mSupport::I2cRead24(uint8_t addr, uint8_t reg)
 
 
 
-bool mSupport::I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size)
+bool mI2C::I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size)
 {
   uint8_t x = I2C_RETRY_COUNTER;
 
@@ -122,17 +289,17 @@ bool mSupport::I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size)
   return (x);
 }
 
-bool mSupport::I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val)
+bool mI2C::I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val)
 {
    return I2cWrite(addr, reg, val, 1);
 }
 
-bool mSupport::I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val)
+bool mI2C::I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val)
 {
    return I2cWrite(addr, reg, val, 2);
 }
 
-int8_t mSupport::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+int8_t mI2C::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
 {
   wire->beginTransmission((uint8_t)addr);
   wire->write((uint8_t)reg);
@@ -147,7 +314,7 @@ int8_t mSupport::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uin
   return 0;
 }
 
-int8_t mSupport::I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+int8_t mI2C::I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
 {
   wire->beginTransmission((uint8_t)addr);
   wire->write((uint8_t)reg);
@@ -159,7 +326,7 @@ int8_t mSupport::I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, ui
   return 0;
 }
 
-void mSupport::I2cScan(char *devs, unsigned int devs_len)
+void mI2C::I2cScan(char *devs, unsigned int devs_len)
 {
   // Return error codes defined in twi.h and core_esp8266_si2c.c
   // I2C_OK                      0
@@ -210,7 +377,7 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
 }
 
 //old function that seems to be changed
-bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
+bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
 {
 
   if(!wire){ return false; } // Not started
@@ -218,7 +385,7 @@ bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired 
   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
 
   for (uint8_t address = 1; address <= 127; address++) {
-      // AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x|%x)=for"),address,addr);
+      // ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) 
     {
@@ -236,7 +403,7 @@ bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired 
   return false;
 }
 
-bool mSupport::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
+bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
 {
 
   ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
@@ -259,7 +426,7 @@ bool mSupport::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just 
 }
 
 
-void mSupport::I2cResetActive(uint32_t addr, uint32_t count)
+void mI2C::I2cResetActive(uint32_t addr, uint32_t count)
 {
   addr &= 0x7F;         // Max I2C address is 127
   count &= 0x7F;        // Max 4 x 32 bits available
@@ -268,11 +435,11 @@ void mSupport::I2cResetActive(uint32_t addr, uint32_t count)
     addr++;
   }
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3]);
+  ALOG_DBG(PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3]);
     #endif // ENABLE_LOG_LEVEL_INFO
 }
 
-void mSupport::I2cSetActive(uint32_t addr, uint32_t count)
+void mI2C::I2cSetActive(uint32_t addr, uint32_t count)
 {
   addr &= 0x7F;         // Max I2C address is 127
   count &= 0x7F;        // Max 4 x 32 bits available
@@ -283,15 +450,15 @@ void mSupport::I2cSetActive(uint32_t addr, uint32_t count)
   ALOG_DBG( PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3] );
 }
 
-void mSupport::I2cSetActiveFound(uint32_t addr, const char *types)
+void mI2C::I2cSetActiveFound(uint32_t addr, const char *types)
 {
   I2cSetActive(addr);
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, S_LOG_I2C_FOUND_AT, types, addr);
+  ALOG_INF(S_LOG_I2C_FOUND_AT, types, addr);
   #endif // ENABLE_LOG_LEVEL_INFO
 }
 
-bool mSupport::I2cActive(uint32_t addr)
+bool mI2C::I2cActive(uint32_t addr)
 {
   addr &= 0x7F;         // Max I2C address is 127
   if (i2c_active[addr / 32] & (1 << (addr % 32))) {
@@ -300,7 +467,7 @@ bool mSupport::I2cActive(uint32_t addr)
   return false;
 }
 
-bool mSupport::I2cSetDevice(uint32_t addr)
+bool mI2C::I2cSetDevice(uint32_t addr)
 {
 
   ALOG_INF(PSTR("I2cSetDevice(%02X)"),addr);
@@ -308,7 +475,7 @@ bool mSupport::I2cSetDevice(uint32_t addr)
   addr &= 0x7F;         // Max I2C address is 127
   if (I2cActive(addr)) {
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR("I2cSetDevice already active"));
+    ALOG_INF(PSTR("I2cSetDevice already active"));
     // #endif // ENABLE_LOG_LEVEL_INFO
     return false;       // If already active report as not present;
   }
@@ -326,7 +493,7 @@ bool mSupport::I2cSetDevice(uint32_t addr)
 
 }
 
-bool mSupport::I2cEnabled(uint32_t i2c_index)
+bool mI2C::I2cEnabled(uint32_t i2c_index)
 {
 
 // Serial.println("I2cEnabled"); Serial.flush();
@@ -347,4 +514,4 @@ return true; // force all working for now until i2cdrivers are configured
 }
 
 
-#endif  // USE_I2C
+#endif // USE_MODULE_CORE_I2C

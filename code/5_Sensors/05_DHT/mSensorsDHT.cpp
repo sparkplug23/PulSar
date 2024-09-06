@@ -23,10 +23,10 @@
 int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -34,23 +34,23 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
-    case FUNC_LOOP:
+    case TASK_LOOP:
       EveryLoop();
     break;
-    case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
+    case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
       ShowSensor_AddLog();
     break;
     /************
      * WEBPAGE SECTION * 
     *******************/
     // #ifdef USE_MODULE_NETWORK_WEBSERVER
-    // case FUNC_WEB_ADD_HANDLER:
+    // case TASK_WEB_ADD_HANDLER:
     //   WebPage_Root_AddHandlers();
     // break;
-    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    // case TASK_WEB_ADD_ROOT_TABLE_ROWS:
     //   WebAppend_Root_Status_Table_Draw();
     // break;
-    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    // case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
     //   WebAppend_Root_Status_Table_Data();
     // break;
     // #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -58,13 +58,13 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -350,7 +350,7 @@ void mSensorsDHT::MQTTHandler_Init()
   struct handler<mSensorsDHT>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
@@ -360,7 +360,7 @@ void mSensorsDHT::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
@@ -370,7 +370,7 @@ void mSensorsDHT::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10; 
@@ -398,9 +398,9 @@ void mSensorsDHT::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

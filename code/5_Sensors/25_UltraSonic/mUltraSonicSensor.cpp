@@ -50,12 +50,12 @@ int mUltraSonicSensor::GetDurationReading(void)
 
   // Return early
   if((abs(millis()-ultrasonic.tUltraSonicSensorReadLast)<blockingtime)){ // if not valid try again right away
-   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime %d"),blockingtime);
+   ALOG_INF(PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime %d"),blockingtime);
     return ultrasonic.duration;
   }
   #endif //   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
-  // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::GetDurationReading"));
+  // ALOG_DBG(PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::GetDurationReading"));
 
   float duration=0;
 
@@ -86,15 +86,15 @@ int mUltraSonicSensor::GetDurationReading(void)
   // Serial.print("Distance: ");
   // Serial.println(distance);
 
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d, \tDistance=%d, maxDistanceDurationMicroSec=%d"),(int)duration, distance, (int)maxDistanceDurationMicroSec);
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d, \tDistance=%d"),(int)duration, distance);
+  // ALOG_INF(PSTR(D_LOG_ULTRASONIC "duration=%d, \tDistance=%d, maxDistanceDurationMicroSec=%d"),(int)duration, distance, (int)maxDistanceDurationMicroSec);
+  ALOG_INF(PSTR(D_LOG_ULTRASONIC "duration=%d, \tDistance=%d"),(int)duration, distance);
 
 
   ultrasonic.duration_raw = duration;
 
   // CHANGE TO USE INTERRUPT BASED METHOD, IE trigger (turn on interrupt) and have it compare start millis and triggered millis (is pulse nano or millis?)
 
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d %dnew"),(int)duration, (int)(duration/58));
+  // ALOG_INF(PSTR(D_LOG_ULTRASONIC "duration=%d %dnew"),(int)duration, (int)(duration/58));
 
   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
   //if outside possible range
@@ -102,7 +102,7 @@ int mUltraSonicSensor::GetDurationReading(void)
     
     //pCONT->mso->MessagePrintln("[ULTRA] SAMPLING");
     
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
+    ALOG_INF(PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
 
     // float lower = (float)ultrasonic.duration*(1-(ultrasonic.threshold.narrowpercent/100.0));//0.9;
     // float upper = (float)ultrasonic.duration*(1+(ultrasonic.threshold.narrowpercent/100.0));
@@ -184,9 +184,9 @@ int mUltraSonicSensor::GetDurationReading(void)
   }else{ // ==0 no response
 
   
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "OUTSIDE DURATION %d"),duration);
+  ALOG_INF(PSTR(D_LOG_ULTRASONIC "OUTSIDE DURATION %d"),duration);
   
-    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "[ULTRA] Outside viable range"));
+    //ALOG_INF(PSTR(D_LOG_ULTRASONIC "[ULTRA] Outside viable range"));
     //pCONT->mso->MessagePrintln("[ULTRA] Outside viable range");
     ultrasonic.isvalid = false;
     ultrasonic.ischanged = false;
@@ -316,7 +316,7 @@ float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(int duration)
   float speedofsound_inmillimetres_permicroseconds = (speedofsound_inmetres)/1000;
 
   float newtest = (duration/2)*0.034;
-  AddLog(LOG_LEVEL_TEST, PSTR("newtest=%d"),(int)newtest);
+  ALOG_TST(PSTR("newtest=%d"),(int)newtest);
 
   //Serial.print("[ULTRA] speedofsound_inmillimetres_permicroseconds>> "); Serial.println(speedofsound_inmillimetres_permicroseconds);
   //float sos = GetSpeedOfSoundInMetres();
@@ -339,7 +339,7 @@ float mUltraSonicSensor::GetDistanceCMReadingAdjustedForTemp(void)
 void mUltraSonicSensor::SubTask_UltraSonicAverage()
 {
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("mUltraSonicSensor::SubTask_UltraSonicAverage"));
+  // ALOG_TST(PSTR("mUltraSonicSensor::SubTask_UltraSonicAverage"));
 
   // 1 SECOND
   if(abs(millis()-averaged.instant.captured.tSaved)>1000){averaged.instant.captured.tSaved=millis();
@@ -516,10 +516,10 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
 {
 
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -530,14 +530,14 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
             
       if(mTime::TimeReachedNonReset(&ultrasonic.tReadLast,1000)){//ultrasonic.settings.measure_rate_ms)){
         GetDurationReading(); 
 
         // float newdist = (5000*0.034)/2;
         
-        // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms %dmetres %d"),
+        // ALOG_TST(PSTR(D_LOG_ULTRASONIC "duration = %d %dms %dmetres %d"),
         //   ultrasonic.duration,
         //   ultrasonic.settings.measure_rate_ms,
         //   (int)newdist,
@@ -552,25 +552,25 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
 
       if(ultrasonic.isvalid){
         SubTask_UltraSonicAverage();
-        pCONT->Tasker_Interface(FUNC_SENSOR_UPDATED); // Tell other dependent modules we have changed
+        pCONT->Tasker_Interface(TASK_SENSOR_UPDATED); // Tell other dependent modules we have changed
       }
 
      // SubTask_DetectMotion();
          
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
     
     break;
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break; 
-    case FUNC_MQTT_SENDER:  
+    case TASK_MQTT_SENDER:  
       MQTTHandler_Sender();
     break;
 
@@ -578,10 +578,10 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
      * WEBPAGE SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    case TASK_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Status_Table_Draw();
     break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
     break;
     #endif //USE_MODULE_NETWORK_WEBSERVER
@@ -636,17 +636,17 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
     if(mTime::TimeReached(&object_detected_static.tSavedCheck,10000)){
       float distancecm = GetDistanceCMReading();
       
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "distancecm=%d"),(int)distancecm);
+        ALOG_INF(PSTR(D_LOG_PIR "distancecm=%d"),(int)distancecm);
       // in limits
       // if(WITHINLIMITS(object_detected_static.trigger_cm_min,
       //                 distancecm,
       //                 object_detected_static.trigger_cm_max)){
       if(distancecm<250){
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"within");
+        ALOG_INF(PSTR(D_LOG_PIR "object_detected_static \"%s\""),"within");
         object_detected_static.ispresent = true;
         AddMOTIONEventStatusSum(true);
       }else{
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"outside");
+        ALOG_INF(PSTR(D_LOG_PIR "object_detected_static \"%s\""),"outside");
         object_detected_static.ispresent = false;
         AddMOTIONEventStatusSum(false);
       }
@@ -656,7 +656,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
       // }
       
       if(motion_detect.state!=object_detected_static.ispresent){
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF motion_detect"));
+        ALOG_INF(PSTR(D_LOG_PIR "IF motion_detect"));
 
         pCONT_mqtt->publish_device("status/motion/event",object_detected_static.ispresent?"Present":"Not Present",false);
         
@@ -682,10 +682,10 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
 
 
 
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "motion_detect"));
+        ALOG_DBG(PSTR(D_LOG_PIR "motion_detect"));
         motion_detect.ischanged = true;
       }else{
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "ELSE motion_detect"));
+        ALOG_INF(PSTR(D_LOG_PIR "ELSE motion_detect"));
 
       }
 
@@ -701,7 +701,7 @@ void mUltraSonicSensor::parse_JSONCommand(){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ultrasonic")>=0){
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
+      ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
     return; // not meant for here
@@ -719,7 +719,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_Settings(uint8_t json_level){
 
   JBI->Start();  
 
-    // // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
+    // // root["json_teleperiod_level"] = pCONT_set->Get_Json_Level_Name();
 
   return JBI->End();
 
@@ -794,7 +794,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
   // DynamicJsonDocument doc(200);
   // JsonObject root = doc.to<JsonObject>();
 
-  // // root["json_teleperiod_level"] = "test";//pCONT_set->GetTelePeriodJsonLevelCtr();
+  // // root["json_teleperiod_level"] = "test";//pCONT_set->Get_Json_Level_Name();
 
   // data_buffer.payload.len = measureJson(root)+1;
   // serializeJson(doc,data_buffer.payload.ctr);
@@ -810,50 +810,50 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
 void mUltraSonicSensor::MQTTHandler_Init(){
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_Sensors;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 10;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = 10;//pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_Sensors;
   
   ptr = &mqtthandler_averaged_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
   ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_SensorsAveraged;
   
   ptr = &mqtthandler_averaged_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
@@ -873,8 +873,8 @@ void mUltraSonicSensor::MQTTHandler_Set_RefreshAll(){
 
 void mUltraSonicSensor::MQTTHandler_Set_DefaultPeriodRate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 

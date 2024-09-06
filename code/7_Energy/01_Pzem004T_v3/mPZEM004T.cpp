@@ -17,9 +17,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   https://github.com/mandulaj/PZEM-004T-v30/blob/master/src/PZEM004Tv30.cpp
-
-
-
 */
 #include "mPZEM004T.h"
 
@@ -34,10 +31,10 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -48,17 +45,17 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       if(rt.waiting_address_response)                  rt.waiting_address_response--;
       if(rt.enable_search_for_devices_seconds_delayed) rt.enable_search_for_devices_seconds_delayed--;
 
       if(rt.enable_search_for_devices_seconds_delayed==1) DeviceSearch();
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       if(data_v.size()) // Only if there are devices
         EveryLoop();
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
 
       if(rt.expected_device_count) // Only if set
       {
@@ -73,20 +70,20 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break; 
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif
@@ -198,7 +195,6 @@ void mEnergyPZEM004T::EveryLoop()
       request_reading.millis = millis();
       request_reading.run = false; // make sure to clear this too
       ALOG_DBG(PSTR(D_LOG_PZEM "All sensors read %d(%d)"), rt.rate_measure_ms, millis());
-      mqtthandler_state_ifchanged.flags.SendNow = true; // Send all data when all sensors have been read
     }
   }
   
@@ -294,7 +290,7 @@ void mEnergyPZEM004T::DeviceSearch(uint8_t address_limit)
       { 
         uint8_t error = modbus->ReceiveBuffer(modbus_buffer, 10);
         found_address = modbus_buffer[2]; // addres byte
-        AddLog(LOG_LEVEL_INFO, PSTR("MODBUS Address = %d FOUND %d"), address_search, found_address);
+        ALOG_INF(PSTR("MODBUS Address = %d FOUND %d"), address_search, found_address);
         flag_timeout = false;
         /**
          * @brief Only add if valid voltage is detected
@@ -312,7 +308,7 @@ void mEnergyPZEM004T::DeviceSearch(uint8_t address_limit)
 
     if(flag_timeout)
     {
-      AddLog(LOG_LEVEL_INFO, PSTR("MODBUS Address %d: No Response"), address_search);
+      ALOG_INF(PSTR("MODBUS Address %d: No Response"), address_search);
     }
   }
 
@@ -419,10 +415,10 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   struct handler<mEnergyPZEM004T>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -430,10 +426,10 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -441,10 +437,10 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod_SubModule();
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -470,9 +466,9 @@ void mEnergyPZEM004T::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule();
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->GetIfChangedPeriod_SubModule();
   }
 }
 

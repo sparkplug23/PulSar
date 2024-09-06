@@ -11,10 +11,10 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -23,10 +23,10 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
       EveryLoop();
     break;  
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
     {
   
     }
@@ -34,11 +34,11 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     #ifdef ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES    
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       MQTT_Report_Event_Button();
       break;
     #endif
@@ -46,7 +46,7 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    // case FUNC_EVENT_SET_POWER_ID:
+    // case TASK_EVENT_SET_POWER_ID:
     //   RulesEvent_Set_Power();
     // break;
     #endif// USE_MODULE_CORE_RULES
@@ -54,13 +54,13 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       // MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -147,7 +147,7 @@ void mDriverInterface::parse_JSONCommand(JsonParserObject obj)
 	{
 		JBI->Start();
 
-		pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		bool ready_to_send = JBI->End();
 
@@ -162,7 +162,7 @@ void mDriverInterface::parse_JSONCommand(JsonParserObject obj)
 
 		if(ready_to_send)
 		{			
-    	AddLog(LOG_LEVEL_TEST, PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
+    	ALOG_TST(PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
 			pCONT_mqtt->brokers[0]->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		}
 
@@ -227,7 +227,7 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
    * 
    */
   // #ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-  pCONT->Tasker_Interface(FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID);
+  pCONT->Tasker_Interface(TASK_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID);
   // #endif 
 
 
@@ -329,20 +329,20 @@ void mDriverInterface::MQTTHandler_Init(){
   struct handler<mDriverInterface>* ptr;
  
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDriverInterface::ConstructJSON_Settings;
 
   ptr = &mqtthandler_driver_status_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DRIVERS_UNIFIED__CTR;
@@ -368,9 +368,9 @@ void mDriverInterface::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

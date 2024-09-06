@@ -13,10 +13,10 @@ void mMoistureSensor::init(void){
 void mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
-    case FUNC_LOOP:
+    case TASK_LOOP:
 
       // LED_BLUE_SET(!PIR_DETECTED());
 
@@ -29,7 +29,7 @@ void mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
       //   }else{
       //     pir_detect.isactive = false;
       //   }
-      //   //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),ONOFF_CTR(pir_detect));
+      //   //ALOG_DBG(PSTR(D_LOG_PIR "pir_detect \"%s\""),ONOFF_CTR(pir_detect));
 
       //   pir_detect.ischanged = true;
       // }
@@ -39,7 +39,7 @@ void mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
       //clear struct
 
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       SubTasker_MQTTSender();
     break;
   }

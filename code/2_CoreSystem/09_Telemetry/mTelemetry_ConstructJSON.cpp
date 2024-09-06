@@ -53,15 +53,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     //   JBI->Add(PM_JSON_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
     // JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS // Generate status message from all modules for human readable message
-    // 2023, keep this, its for others to read, a simple ~100 char max message to say "Stable/Working/Boot Loops/Unstable/Sensor Error etc"
-    memset(&hardwarestatus,0,sizeof(hardwarestatus));
-    pCONT->Tasker_Interface(FUNC_STATUS_MESSAGE_APPEND);
-    JBI->Object_Start(PM_JSON_STATUS);
-      JBI->Add(PM_JSON_MESSAGE,         hardwarestatus.ctr); //this can be turned into a subadd method
-      JBI->Add(PM_JSON_LEVEL,           hardwarestatus.importance);
-    JBI->Object_End();
-    #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
+    
     // JBI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
     // ALOG_INF(PSTR("JBI=\"%s\""),JBI->GetPtr());
   return JBI->End();
@@ -76,7 +68,7 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
 
   JBI->Start();
     JBI->Add(PM_JSON_MODULENAME,     pCONT_set->Settings.system_name.friendly);
-    JBI->Add(PM_JSON_FRIENDLYNAME,   pCONT_pins->ModuleName(buffer, sizeof(buffer))); 
+    JBI->Add_P(PM_JSON_FRIENDLYNAME,   pCONT_pins->ModuleName()); 
     JBI->Add(PM_JSON_ROOMHINT, pCONT_set->Settings.room_hint);
 
     JBI->Add(PM_JSON_POWER,          pCONT_set->runtime.power); 
@@ -262,8 +254,8 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
     // JBI->Add("RetrySecs", pCONT_mqtt->dt.connection[0].retry);
 
     JBI->Object_Start(PM_JSON_REFRESH_RATES);
-      JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_set->Settings.sensors.ifchanged_secs);
-      JBI->Add(PM_JSON_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_set->Settings.sensors.teleperiod_secs);
+      JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_mqtt->dt.ifchanged_secs);
+      JBI->Add(PM_JSON_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_mqtt->dt.teleperiod_secs);
     JBI->Object_End();
     
     JBI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
@@ -402,11 +394,11 @@ uint8_t mTelemetry::ConstructJSON_Debug_Devices(uint8_t json_level, bool json_ap
     {
 
       #ifdef ESP32
-      JBI->Add("I2C_BusSpeed", pCONT_sup->wire->getClock());
+      JBI->Add("I2C_BusSpeed", pCONT_i2c->wire->getClock());
       #endif
 
       char mqtt_data[300];
-      pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+      pCONT_i2c->I2cScan(mqtt_data, sizeof(mqtt_data));
       // Serial.println(mqtt_data);
 
       //need to escape option to function above
@@ -506,7 +498,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     // JBI->Object_Start(PM_JSON_GPIO);
     // for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
     //   if(pCONT_pins->PinUsed(i)){ // skip pins not configured
-    //     sprintf_P(buffer, PSTR("FUNC_%d"), i);
+    //     sprintf_P(buffer, PSTR("TASK_%d"), i);
     //     JBI->Add(buffer, pCONT_pins->GetPin(i));
     //   }
     // }
@@ -515,7 +507,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++){ 
       if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i])){ // skip pins not configured
 
-      // AddLog(LOG_LEVEL_TEST, PSTR("buffer=%s %d %d %d"),
+      // ALOG_TST(PSTR("buffer=%s %d %d %d"),
       // pCONT_pins->GetGPIOFunctionNamebyID_P(pCONT_pins->pin_attached_gpio_functions[i]),
       // pCONT_pins->pin_attached_gpio_functions[i],
       // pCONT_pins->GetPin(i),
@@ -547,8 +539,8 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     JBI->Array_End();
 
     JBI->Array_Start("user_template_io");
-    for(int i=0; i<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);i++)
-      JBI->Add(pCONT_set->Settings.user_template2.hardware.gp.io[i]);
+    for(int i=0; i<ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io);i++)
+      JBI->Add(pCONT_set->Settings.user_template.hardware.gp.io[i]);
     JBI->Array_End();
 
     JBI->Array_Start("getpin");
@@ -585,7 +577,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_a
       JBI->Add("Rules",              pCONT_set->runtime.template_loading.status.rules);
     JBI->Object_End();
 
-    JBI->Add(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer)));
+    JBI->Add_P(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module));
     JBI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
     JBI->Add("MyModuleType",pCONT_set->runtime.my_module_type);
     myio cmodule;
@@ -603,41 +595,40 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool
 
   JBI->Start();
   
-  #ifdef DEBUG_EXECUTION_TIME
-    char buffer[50];
-    JBI->Object_Start(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[ii], buffer));
-      JBI->Array_AddArray("average", pCONT->module_settings.execution_time_average_ms, sizeof(pCONT->module_settings.execution_time_average_ms));
-      JBI->Array_AddArray("max",     pCONT->module_settings.execution_time_max_ms,     sizeof(pCONT->module_settings.execution_time_max_ms));
-    JBI->Object_End();
-  #endif
+  // #ifdef DEBUG_EXECUTION_TIME
+  //   char buffer[50];
+  //   JBI->Object_Start(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[ii], buffer));
+  //     JBI->Array_AddArray("average", pCONT->module_settings.execution_time_average_ms, sizeof(pCONT->module_settings.execution_time_average_ms));
+  //     JBI->Array_AddArray("max",     pCONT->module_settings.execution_time_max_ms,     sizeof(pCONT->module_settings.execution_time_max_ms));
+  //   JBI->Object_End();
+  // #endif
 
-  JBI->Object_Start("ModuleSize");
+  // JBI->Object_Start("ModuleSize");
 
   
-  // for(uint8_t i=0;i<pCONT->module_settings.count;i++){
-  //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
-  //   // if(pCONT->GetClassSizeByID(i)>10000){
-  //   //   JBI->Add("bad",i);
-  //   // }
+  // // for(uint8_t i=0;i<pCONT->module_settings.count;i++){
+  // //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
+  // //   // if(pCONT->GetClassSizeByID(i)>10000){
+  // //   //   JBI->Add("bad",i);
+  // //   // }
+  // // }
+
+  // /**
+  //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
+  //  * I could also run a "append" id but check its not in it already (easier with vector?)
+  //  * 
+  //  */
+  // char buffer[100] = {0};
+
+  // JBI->Array_Start("ModuleIDs");
+  // for(auto& mod: pCONT->pModule)
+  // {
+  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), mod->GetModuleUniqueID(), mod->GetModuleName()  );
+  //   JBI->Add(buffer);
   // }
+  // JBI->Array_End();
 
-  /**
-   * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
-   * I could also run a "append" id but check its not in it already (easier with vector?)
-   * 
-   */
-  char buffer[100];
-
-  JBI->Array_Start("ModuleIDs");
-  for(int ii=0;ii<pCONT->GetClassCount();ii++)
-  {
-    snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleName()  );
-
-    JBI->Add(buffer);
-  }
-  JBI->Array_End();
-
-  JBI->Object_End();
+  // JBI->Object_End();
 
 
   return JBI->End();
@@ -662,23 +653,23 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
   JBI->Object_End();
 
 
-  JBI->Object_Start("Animations");
-  //   JBI->Array_AddArray("controller", 
-  //   &pCONT_set->Settings.animation_settings.xmas_controller_params, 
-  //   sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
+  // JBI->Object_Start("Animations");
+  // //   JBI->Array_AddArray("controller", 
+  // //   &pCONT_set->Settings.animation_settings.xmas_controller_params, 
+  // //   sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
+  // // JBI->Object_End();
+  // // JBI->Object_Start("Animations1");
+  //   // JBI->Array_Start("controller"); 
+  //   // &pCONT_set->Settings.animation_settings.xmas_controller_params, 
+  //   // sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
+
+  //   // for(int i=0;i<10;i++)
+  //   // {
+  //   //   JBI->Add(pCONT_set->Settings.animation_settings.xmas_controller_params[i]);
+  //   // }
+
+  //   // JBI->Array_End();
   // JBI->Object_End();
-  // JBI->Object_Start("Animations1");
-    // JBI->Array_Start("controller"); 
-    // &pCONT_set->Settings.animation_settings.xmas_controller_params, 
-    // sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
-
-    // for(int i=0;i<10;i++)
-    // {
-    //   JBI->Add(pCONT_set->Settings.animation_settings.xmas_controller_params[i]);
-    // }
-
-    // JBI->Array_End();
-  JBI->Object_End();
 
   /**
    * Read stored values into temp struct, not use local variables
@@ -704,12 +695,12 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
 
 
 
-    // JBI->Add("ALTITUDE_ABOVE_SEALEVEL",       (float)ALTITUDE_ABOVE_SEALEVEL);
-    JBI->Add("altitude",     pCONT_set->Settings.sensors.altitude);
-    // JBI->Add("LATITUDE",                      (float)LATITUDE);
-    JBI->Add("latitude",     pCONT_set->Settings.sensors.latitude);
-    // JBI->Add("LONGITUDE",       (float)LONGITUDE);
-    JBI->Add("longitude",                     pCONT_set->Settings.sensors.longitude);
+    // // JBI->Add("ALTITUDE_ABOVE_SEALEVEL",       (float)ALTITUDE_ABOVE_SEALEVEL);
+    // JBI->Add("altitude",     pCONT_set->Settings.sensors.altitude);
+    // // JBI->Add("LATITUDE",                      (float)LATITUDE);
+    // JBI->Add("latitude",     pCONT_set->Settings.sensors.latitude);
+    // // JBI->Add("LONGITUDE",       (float)LONGITUDE);
+    // JBI->Add("longitude",                     pCONT_set->Settings.sensors.longitude);
 
   return JBI->End();
 }
@@ -735,20 +726,20 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
 
   char buffer2[100];
   
-  for(int ii=0;ii<pCONT->GetClassCount();ii++)
-  {
-    JBI->Level_Start_P(pCONT->pModule[ii]->GetModuleFriendlyName());
+  // for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  // {
+  //   JBI->Level_Start_P(pCONT->pModule[ii]->GetModuleName());
 
-      JBI->Add("max_time", pCONT->debug_module_time[ii].max_time);
-      JBI->Add("avg_time", pCONT->debug_module_time[ii].avg_time);
-      JBI->Add("max_function_id", pCONT->debug_module_time[ii].max_function_id);
+  //     JBI->Add("max_time", pCONT->debug_module_time[ii].max_time);
+  //     JBI->Add("avg_time", pCONT->debug_module_time[ii].avg_time);
+  //     JBI->Add("max_function_id", pCONT->debug_module_time[ii].max_function_id);
 
-    JBI->Object_End();
-
-
+  //   JBI->Object_End();
 
 
-  }
+
+
+  // }
 
 
 

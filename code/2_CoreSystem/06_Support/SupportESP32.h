@@ -3,6 +3,12 @@
 #define _SupportESP32_H_
 
 #ifdef ESP32
+/*********************************************************************************************\
+ * ESP32, ESP32-S2, ESP32-S3, ESP32-C2, ESP32-C3, ESP32-C6 and ESP32-H2 Support
+\*********************************************************************************************/
+
+//                                                   11b 11g 11n  11n  11ax
+// const static char kWifiPhyMode[] PROGMEM = "low rate|11b|11g|HT20|HT40|HE20"; // Wi-Fi Modes
 
 #include "stdint.h"
 #include <Arduino.h>
@@ -10,7 +16,7 @@
 // #include "bootloader_flash.h"
 #include "soc/soc.h"
 #include "soc/spi_reg.h"
-// ESP32_ARCH contains the name of the architecture (used by autoconf)
+/// ESP32_ARCH contains the name of the architecture (used by autoconf)
 #if CONFIG_IDF_TARGET_ESP32
   #ifdef CORE32SOLO1
     #define ESP32_ARCH            "esp32solo1"
@@ -21,8 +27,14 @@
   #define ESP32_ARCH              "esp32s2"
 #elif CONFIG_IDF_TARGET_ESP32S3
   #define ESP32_ARCH              "esp32s3"
+#elif CONFIG_IDF_TARGET_ESP32C2
+  #define ESP32_ARCH              "esp32c2"
 #elif CONFIG_IDF_TARGET_ESP32C3
   #define ESP32_ARCH              "esp32c3"
+#elif CONFIG_IDF_TARGET_ESP32C6
+  #define ESP32_ARCH              "esp32c6"
+#elif CONFIG_IDF_TARGET_ESP32H2
+  #define ESP32_ARCH              "esp32h2"
 #else
   #define ESP32_ARCH              ""
 #endif
@@ -31,6 +43,25 @@
 
 #include <nvs.h>
 
+// See libraries\ESP32\examples\ResetReason.ino
+// #include "esp_chip_info.h"
+// #if CONFIG_IDF_TARGET_ESP32      // ESP32/PICO-D4
+//   #include "esp32/rom/rtc.h"
+// #elif CONFIG_IDF_TARGET_ESP32S2  // ESP32-S2
+//   #include "esp32s2/rom/rtc.h"
+// #elif CONFIG_IDF_TARGET_ESP32S3  // ESP32-S3
+//   #include "esp32s3/rom/rtc.h"
+// #elif CONFIG_IDF_TARGET_ESP32C2  // ESP32-C2
+//   #include "esp32c2/rom/rtc.h"
+// #elif CONFIG_IDF_TARGET_ESP32C3  // ESP32-C3
+//   #include "esp32c3/rom/rtc.h"
+// #elif CONFIG_IDF_TARGET_ESP32C6  // ESP32-C6
+//   #include "esp32c6/rom/rtc.h"
+// #elif CONFIG_IDF_TARGET_ESP32H2  // ESP32-H2
+//   #include "esp32h2/rom/rtc.h"
+// #else
+//   #error Target CONFIG_IDF_TARGET is not supported
+// #endif
 // See libraries\ESP32\examples\ResetReason.ino
 #if ESP_IDF_VERSION_MAJOR > 3      // IDF 4+
   #if CONFIG_IDF_TARGET_ESP32      // ESP32/PICO-D4
@@ -48,6 +79,10 @@
   #include "rom/rtc.h"
 #endif
 
+// Set the Stacksize for Arduino core. Default is 8192, some builds may need a bigger one
+// size_t getArduinoLoopTaskStackSize(void) {
+//   return SET_ESP32_STACK_SIZE;
+// }
 
 //
 // Flash memory mapping
@@ -88,6 +123,14 @@ extern "C" {
 
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
+
+
+#include <esp_phy_init.h>
+
+// Handle 20k of NVM
+
+#include <nvs.h>
+
 
 class SupportESP32{
   public:

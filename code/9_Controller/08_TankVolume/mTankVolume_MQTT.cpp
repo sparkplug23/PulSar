@@ -9,7 +9,7 @@ void mTankVolume::MQTTHandler_Init(){
   struct handler<mTankVolume>* ptr;
  
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -19,7 +19,7 @@ void mTankVolume::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Settings;
   
   ptr = &mqtthandler_litres_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -29,7 +29,7 @@ void mTankVolume::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Litres;
   
   ptr = &mqtthandler_litres_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 120; 
@@ -39,7 +39,7 @@ void mTankVolume::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Litres;
 
   ptr = &mqtthandler_furnace_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -49,7 +49,7 @@ void mTankVolume::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Furnace;
   
   ptr = &mqtthandler_furnace_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60*60; 
@@ -77,9 +77,9 @@ void mTankVolume::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

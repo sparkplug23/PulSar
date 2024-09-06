@@ -24,7 +24,7 @@ uint16_t mSerialUART::GetReceiveBuffer2(char* output_buf, uint16_t output_len, c
 
       //Check received item
       if (item != NULL) {
-        // AddLog(LOG_LEVEL_TEST, PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
         //Print item
         // for(int i = 0; i < item_size; i++) {
         //   Serial.printf("%c", item[i]);          
@@ -32,24 +32,24 @@ uint16_t mSerialUART::GetReceiveBuffer2(char* output_buf, uint16_t output_len, c
 
         bytes_to_read = item_size > output_len ? output_len : item_size;
 
-        // AddLog(LOG_LEVEL_TEST, PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
+        // ALOG_TST(PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
         // Read from buffer
         // snprintf(output_buf, output_len)
         memcpy(output_buf,item,bytes_to_read*sizeof(char));
 
-        AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),output_buf);
+        ALOG_TST(PSTR("output_buf=%s"),output_buf);
 
 
 // if(flag_clear_buffer_after_read)
 // {
         //Return Item
         vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
-        // AddLog(LOG_LEVEL_TEST, PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
 // }
       } 
       // else {
       //   //Failed to receive item EMPTY
-      //   // AddLog(LOG_LEVEL_TEST, PSTR("Failed to receive item"));
+      //   // ALOG_TST(PSTR("Failed to receive item"));
       // }
 
   return bytes_to_read;
@@ -72,7 +72,7 @@ uint16_t mSerialUART::GetReceiveBufferPartial2(char* output_buf, uint16_t output
 
       //Check received item
       if (item != NULL) {
-        // AddLog(LOG_LEVEL_TEST, PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
         //Print item
         // for(int i = 0; i < item_size; i++) {
         //   Serial.printf("%c", item[i]);          
@@ -80,24 +80,24 @@ uint16_t mSerialUART::GetReceiveBufferPartial2(char* output_buf, uint16_t output
 
         bytes_to_read = item_size > output_len ? output_len : item_size;
 
-        // AddLog(LOG_LEVEL_TEST, PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
+        // ALOG_TST(PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
         // Read from buffer
         // snprintf(output_buf, output_len)
         memcpy(output_buf,item,bytes_to_read*sizeof(char));
 
-        AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),output_buf);
+        ALOG_TST(PSTR("output_buf=%s"),output_buf);
 
 
 // if(flag_clear_buffer_after_read)
 // {
         //Return Item
         vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
-        // AddLog(LOG_LEVEL_TEST, PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
 // }
       } 
       // else {
       //   //Failed to receive item EMPTY
-      //   // AddLog(LOG_LEVEL_TEST, PSTR("Failed to receive item"));
+      //   // ALOG_TST(PSTR("Failed to receive item"));
       // }
 
   return bytes_to_read;
@@ -123,7 +123,7 @@ uint16_t mSerialUART::GetReceiveBuffer1(char* output_buf, uint16_t output_len, c
 
       //Check received item
       if (item != NULL) {
-        // AddLog(LOG_LEVEL_TEST, PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
         //Print item
         // for(int i = 0; i < item_size; i++) {
         //   Serial.printf("%c", item[i]);          
@@ -131,24 +131,24 @@ uint16_t mSerialUART::GetReceiveBuffer1(char* output_buf, uint16_t output_len, c
 
         bytes_to_read = item_size > output_len ? output_len : item_size;
 
-        // AddLog(LOG_LEVEL_TEST, PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
+        // ALOG_TST(PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
         // Read from buffer
         // snprintf(output_buf, output_len)
         memcpy(output_buf,item,bytes_to_read*sizeof(char));
 
-        AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),output_buf);
+        ALOG_TST(PSTR("output_buf=%s"),output_buf);
 
 
 // if(flag_clear_buffer_after_read)
 // {
         //Return Item
         vRingbufferReturnItem(pCONT_uart->settings.uart1.ringbuffer_handle, (void *)item); // Free memory
-        // AddLog(LOG_LEVEL_TEST, PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
 // }
       } 
       // else {
       //   //Failed to receive item EMPTY
-      //   // AddLog(LOG_LEVEL_TEST, PSTR("Failed to receive item"));
+      //   // ALOG_TST(PSTR("Failed to receive item"));
       // }
 
   return bytes_to_read;

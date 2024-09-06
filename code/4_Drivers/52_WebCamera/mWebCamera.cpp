@@ -1502,10 +1502,10 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -1518,17 +1518,17 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_50_MSECOND:
+    case TASK_EVERY_50_MSECOND:
     
     break;
-    case FUNC_EVERY_FIVE_SECOND:{
+    case TASK_EVERY_FIVE_SECOND:{
       
       AddLog(LOG_LEVEL_INFO,PSTR("flag_stream_started=%d"), flag_stream_started);
 
 
 
     }break;
-    case FUNC_WIFI_CONNECTED:
+    case TASK_WIFI_CONNECTED:
 
       WiFi.setSleep(false);
 
@@ -1545,23 +1545,23 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+    case TASK_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init(); //make a TASK_MQTT_INIT and group mqtt togather
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif  

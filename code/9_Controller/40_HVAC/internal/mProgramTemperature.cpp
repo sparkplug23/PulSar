@@ -26,12 +26,12 @@
   //   // If negative error, we must heat
   //   if(GetErrorTemperature()<0)
   //   {
-  //     AddLog(LOG_LEVEL_INFO, PSTR("We must heat"));
+  //     ALOG_INF(PSTR("We must heat"));
   //   }
 
   //   if(GetErrorTemperature()>0)
   //   {
-  //     AddLog(LOG_LEVEL_INFO, PSTR("We must cool"));
+  //     ALOG_INF(PSTR("We must cool"));
   //   }
 
 
@@ -67,7 +67,7 @@
 
   //   //   //   schedule.untilontime = pCONT_time->GetDifferenceInDateTimes(&pCONT_time->RtcTime,&schedule.ontime);
 
-  //   //   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
+  //   //   //   ALOG_DBG(PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
 
   //   //   //   // uint8_t hours, minutes, seconds;
   //   //   //   // pCONT_time->DateTimeWeek2HHMMSS(&schedule.untilontime,&hours,&minutes,&seconds);

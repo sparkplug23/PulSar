@@ -66,7 +66,7 @@ void mShellyDimmer::Pre_Init(){
 
       ResetToAppMode();
       bool got_version = SendVersion();
-      AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Shelly Dimmer Co-processor Version v%u.%u"), dimmer.version_major, dimmer.version_minor);
+      ALOG_INF(PSTR(SHD_LOGNAME "Shelly Dimmer Co-processor Version v%u.%u"), dimmer.version_major, dimmer.version_minor);
       GetSettings();
       SaveSettings();
 
@@ -83,10 +83,10 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
+  if(function == TASK_PRE_INIT){
     Pre_Init();
   }else
-  if(function == FUNC_INIT){
+  if(function == TASK_INIT){
     init();
   }
 
@@ -97,7 +97,7 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
   
   
 
@@ -106,7 +106,7 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
 
 
     break;
-    case FUNC_EVERY_50_MSECOND:
+    case TASK_EVERY_50_MSECOND:
 
     if(transition.fader != nullptr)
     {
@@ -126,24 +126,24 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
     }
 
     break;
-    case FUNC_EVERY_SECOND:  
+    case TASK_EVERY_SECOND:  
       Poll();    
       SubTask_Power_Time_To_Remain_On_Seconds();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case FUNC_SET_DEVICE_POWER:
+    case TASK_SET_DEVICE_POWER:
       SetPower();
     break;
     /************
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
+    case TASK_EVENT_SET_POWER_ID:
       RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
@@ -151,16 +151,16 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -185,14 +185,14 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
   // Auto time off decounters
   if(timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "timer_decounter.seconds==1 and disable"));
+    ALOG_INF(PSTR(D_LOG_NEO "timer_decounter.seconds==1 and disable"));
     #endif       
 
     uint16_t new_brightness = 0;
     // req_brightness = map(brightness100, 0,100, 0,1000);
     // SetBrightnessReq();
 
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "START DIM DOWN timer_decounter.seconds==1 and disable"));
+    ALOG_INF(PSTR(D_LOG_NEO "START DIM DOWN timer_decounter.seconds==1 and disable"));
 
 
     
@@ -220,7 +220,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
     // SetBrightnessReq();
     
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
+    ALOG_INF(PSTR(D_LOG_NEO "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
     #endif
 
     mqtthandler_state_teleperiod.flags.SendNow = true;
@@ -237,13 +237,13 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
 
 void mShellyDimmer::RulesEvent_Set_Power(){
   
-  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+  // ALOG_TST(PSTR("MATCHED RulesEvent_Set_Power"));
 
   uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
   uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
   uint8_t brightness_on_value = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[1];
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power %d %d %d"),relay_index, relay_state, brightness_on_value);
+  // ALOG_TST(PSTR("MATCHED RulesEvent_Set_Power %d %d %d"),relay_index, relay_state, brightness_on_value);
 
 
   if(relay_state==2){
@@ -253,7 +253,7 @@ void mShellyDimmer::RulesEvent_Set_Power(){
       req_brightness = map(brightness_on_value,0,100,0,1000);
     }
   }
-  // AddLog(LOG_LEVEL_TEST, PSTR("BBBBBBBBBBBBBMATCHED RulesEvent_Set_Power %d %d %d %d"),relay_index, relay_state, brightness_on_value, req_brightness);
+  // ALOG_TST(PSTR("BBBBBBBBBBBBBMATCHED RulesEvent_Set_Power %d %d %d %d"),relay_index, relay_state, brightness_on_value, req_brightness);
 
 
 
@@ -511,7 +511,7 @@ bool mShellyDimmer::SyncState()
 void mShellyDimmer::DebugState()
 {
 #ifdef SHELLY_DIMMER_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "MCU v%d.%d, Brightness:%d(%d%%), Power:%d, Fade:%d"),
+        ALOG_DBG(PSTR(SHD_LOGNAME "MCU v%d.%d, Brightness:%d(%d%%), Power:%d, Fade:%d"),
                             dimmer.version_major, dimmer.version_minor,
                             dimmer.brightness,
                             map(dimmer.brightness, 0, 1000, 0, 100),
@@ -592,7 +592,7 @@ bool mShellyDimmer::PacketProcess(void)
 //                 {
 //                     float kWhused = (float)Energy.active_power[0] * (Rtc.utc_time - last_power_check) / 36;
 // #ifdef SHELLY_DIMMER_DEBUG
-//                     AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Adding %i mWh to todays usage from %lu to %lu"), (int)(kWhused * 10), last_power_check, Rtc.utc_time);
+//                     ALOG_DBG(PSTR(SHD_LOGNAME "Adding %i mWh to todays usage from %lu to %lu"), (int)(kWhused * 10), last_power_check, Rtc.utc_time);
 // #endif  // USE_ENERGY_SENSOR
 //                     Energy.kWhtoday += kWhused;
 //                     EnergyUpdateToday();
@@ -634,7 +634,7 @@ bool mShellyDimmer::PacketProcess(void)
 void mShellyDimmer::ResetToAppMode()
 {
 #ifdef SHELLY_DIMMER_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Request co-processor reset in app mode"));
+    ALOG_DBG(PSTR(SHD_LOGNAME "Request co-processor reset in app mode"));
 #endif  // SHELLY_DIMMER_DEBUG
 
   pinMode(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), OUTPUT);
@@ -667,7 +667,7 @@ void mShellyDimmer::Poll(void)
 bool mShellyDimmer::SendVersion(void)
 {
   #ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Sending version command"));
+  ALOG_INF(PSTR(SHD_LOGNAME "Sending version command"));
   #endif  // SHELLY_DIMMER_DEBUG
   return SendCmd(SHD_VERSION_CMD, 0, 0);
 }
@@ -683,7 +683,7 @@ void mShellyDimmer::GetSettings(void)
 //     if (strstr(SettingsText(SET_SHD_PARAM), ",") != nullptr)
 //     {
 // #ifdef SHELLY_DIMMER_DEBUG
-//         AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Loading params: %s"), SettingsText(SET_SHD_PARAM));
+//         ALOG_INF(PSTR(SHD_LOGNAME "Loading params: %s"), SettingsText(SET_SHD_PARAM));
 // #endif  // SHELLY_DIMMER_DEBUG
 //         // req_brightness      = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 1));
 //         leading_edge        = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 2));
@@ -730,7 +730,7 @@ bool mShellyDimmer::SerialInput(void)
     {
       // wrong data
 #ifdef SHELLY_DIMMER_DEBUG
-      AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Byte %i of received data frame is invalid. Rx Packet:"), byte_counter);
+      ALOG_DBG(PSTR(SHD_LOGNAME "Byte %i of received data frame is invalid. Rx Packet:"), byte_counter);
       byte_counter++;
       // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
 #endif  // SHELLY_DIMMER_DEBUG
@@ -782,7 +782,7 @@ int mShellyDimmer::check_byte()
         if (chksm != chksm_calc)
         {
 #ifdef SHELLY_DIMMER_DEBUG
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Checksum: %x calculated: %x"), chksm, chksm_calc);
+            ALOG_DBG(PSTR(SHD_LOGNAME "Checksum: %x calculated: %x"), chksm, chksm_calc);
 #endif  // SHELLY_DIMMER_DEBUG
             return 0;
         }
@@ -807,7 +807,7 @@ int mShellyDimmer::check_byte()
 void ShdResetToDFUMode()
 {
 #ifdef SHELLY_DIMMER_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Request co-processor reset in dfu mode"));
+    ALOG_DBG(PSTR(SHD_LOGNAME "Request co-processor reset in dfu mode"));
 #endif  // SHELLY_DIMMER_DEBUG
 
     pinMode(Pin(GPIO_SHELLY_DIMMER_RST_INV), OUTPUT);
@@ -829,7 +829,7 @@ void ShdResetToDFUMode()
 bool ShdUpdateFirmware(uint8_t* data, uint32_t size)
 {
 #ifdef SHELLY_DIMMER_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Update firmware"));
+    ALOG_DBG(PSTR(SHD_LOGNAME "Update firmware"));
 #endif  // SHELLY_DIMMER_DEBUG
 
     bool ret = true;
@@ -844,7 +844,7 @@ bool ShdUpdateFirmware(uint8_t* data, uint32_t size)
         stm32_err_t s_err;
 
 #ifdef SHELLY_DIMMER_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "STM32 erase memory"));
+        ALOG_DBG(PSTR(SHD_LOGNAME "STM32 erase memory"));
 #endif  // SHELLY_DIMMER_DEBUG
 
         stm32_erase_memory(stm, 0, STM32_MASS_ERASE);
@@ -886,7 +886,7 @@ bool ShdPresent(void) {
 
 uint32_t ShdFlash(uint8_t* data, size_t size) {
 #ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Updating firmware v%u.%u with %u bytes"), dimmer.version_major, dimmer.version_minor, size);
+  ALOG_INF(PSTR(SHD_LOGNAME "Updating firmware v%u.%u with %u bytes"), dimmer.version_major, dimmer.version_minor, size);
 #endif  // SHELLY_DIMMER_DEBUG
 
   ShdSerial.end();
@@ -1030,7 +1030,7 @@ bool mShellyDimmer::SetChannels(void)
 bool mShellyDimmer::SetPower(void)
 {
   #ifdef SHELLY_DIMMER_DEBUG
-  // AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Set Power, Power 0x%02x"), XdrvMailbox.index);
+  // ALOG_INF(PSTR(SHD_LOGNAME "Set Power, Power 0x%02x"), XdrvMailbox.index);
   #endif  // SHELLY_DIMMER_DEBUG
 
   req_on = 1;//(bool)XdrvMailbox.index;
@@ -1051,9 +1051,9 @@ void mShellyDimmer::CmndShdLeadingEdge(uint8_t edge_type)
         // pCN Settings.shd_leading_edge = edge_type;
 #ifdef SHELLY_DIMMER_DEBUG
         if (leading_edge == 1)
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to trailing edge"));
+            ALOG_DBG(PSTR(SHD_LOGNAME "Set to trailing edge"));
         else
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to leading edge"));
+            ALOG_DBG(PSTR(SHD_LOGNAME "Set to leading edge"));
 #endif  // SHELLY_DIMMER_DEBUG
         SendSettings();
     }
@@ -1078,7 +1078,7 @@ void CmndShdWarmupBrightness(void)
         warmup_brightness = XdrvMailbox.payload * 10;
         Settings.shd_warmup_brightness = XdrvMailbox.payload;
 #ifdef SHELLY_DIMMER_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set warmup brightness to %d%%"), XdrvMailbox.payload);
+        ALOG_DBG(PSTR(SHD_LOGNAME "Set warmup brightness to %d%%"), XdrvMailbox.payload);
 #endif  // SHELLY_DIMMER_DEBUG
         ShdSendSettings();
     }
@@ -1093,7 +1093,7 @@ void CmndShdWarmupTime(void)
         warmup_time = XdrvMailbox.payload;
         Settings.shd_warmup_time = XdrvMailbox.payload;
 #ifdef SHELLY_DIMMER_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set warmup time to %dms"), XdrvMailbox.payload);
+        ALOG_DBG(PSTR(SHD_LOGNAME "Set warmup time to %dms"), XdrvMailbox.payload);
 #endif  // SHELLY_DIMMER_DEBUG
         ShdSendSettings();
     }
@@ -1137,10 +1137,10 @@ void mShellyDimmer::MQTTHandler_Init(){
   struct handler<mShellyDimmer>* ptr;
     
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_HOUR;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = SEC_IN_HOUR;//pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1148,20 +1148,20 @@ void mShellyDimmer::MQTTHandler_Init(){
 
   
   ptr = &mqtthandler_state_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_State;
 
 //   ptr = &mqtthandler_sensdebug_teleperiod;
-//   ptr->tSavedLastSent = millis();
+//   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+//   ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
@@ -1186,9 +1186,9 @@ void mShellyDimmer::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

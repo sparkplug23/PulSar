@@ -14,10 +14,10 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -25,7 +25,7 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
-    // case FUNC_EVERY_SECOND:{
+    // case TASK_EVERY_SECOND:{
 
     //   // char buffer[100] = {0};
 
@@ -39,18 +39,18 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID:
+    case TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID:
       Rules_Add_Rule();
     break;
-    case FUNC_EVENT_MOTION_STARTED_ID:
-    case FUNC_EVENT_MOTION_ENDED_ID:
+    case TASK_EVENT_MOTION_STARTED_ID:
+    case TASK_EVENT_MOTION_ENDED_ID:
       RulesEvent_Motion_Change(); //not called here?
     break;
     #endif// USE_MODULE_CORE_RULES
@@ -58,13 +58,13 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -159,17 +159,17 @@ void mMotion::RulesEvent_Motion_Change()
 
 //     if(command_state_in == SWITCHMODE_FOLLOW_ID)
 //     {
-//       AddLog(LOG_LEVEL_TEST, PSTR("SWITCHMODE_FOLLOW_ID"));
+//       ALOG_TST(PSTR("SWITCHMODE_FOLLOW_ID"));
 //     }
 // else{
-//       AddLog(LOG_LEVEL_TEST, PSTR("ELSE SWITCHMODE_FOLLOW_ID"));
+//       ALOG_TST(PSTR("ELSE SWITCHMODE_FOLLOW_ID"));
 
 // }
 
-// AddLog(LOG_LEVEL_TEST, PSTR("trigger_state=%d"),trigger_state);
-// AddLog(LOG_LEVEL_TEST, PSTR("command_state_in=%d"),command_state_in);
-// AddLog(LOG_LEVEL_TEST, PSTR("newevent_command_state_in=%d"),newevent_command_state_in);
-// AddLog(LOG_LEVEL_TEST, PSTR("command_state_out=%d"), command_state_out);
+// ALOG_TST(PSTR("trigger_state=%d"),trigger_state);
+// ALOG_TST(PSTR("command_state_in=%d"),command_state_in);
+// ALOG_TST(PSTR("newevent_command_state_in=%d"),newevent_command_state_in);
+// ALOG_TST(PSTR("command_state_out=%d"), command_state_out);
 
 // ALOG_INF( PSTR("\t\t\t\t\t current_module_id=%d"), current_module_id );
 
@@ -195,11 +195,11 @@ switch(command_state_in)
 }
 
 
-// AddLog(LOG_LEVEL_TEST, PSTR("Bommand_state_out=%d"), command_state_out);
+// ALOG_TST(PSTR("Bommand_state_out=%d"), command_state_out);
 
 char buffer[100];
 
-// AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, command_state_out, pCONT_sup->GetState_Name_by_ID(command_state_out, buffer, sizeof(buffer)));
+// ALOG_TST(PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, command_state_out, pCONT_sup->GetState_Name_by_ID(command_state_out, buffer, sizeof(buffer)));
 
 
     // sensor_id<settings.sensors_active;sensor_id++)
@@ -231,7 +231,7 @@ char buffer[100];
         // #ifdef USE_MODULE_CORE_RULES
         // pCONT_rules->New_Event(E M_MODULE_SENSORS_MOTION_ID, sensor_id);
         // #endif
-        // pCONT->Tasker_Interface(FUNC_EVENT_MOTION_STARTED_ID);
+        // pCONT->Tasker_Interface(TASK_EVENT_MOTION_STARTED_ID);
 
       }
       else
@@ -243,7 +243,7 @@ char buffer[100];
         // #ifdef USE_MODULE_CORE_RULES
         // pCONT_rules->New_Event(E M_MODULE_SENSORS_MOTION_ID, sensor_id);
         // #endif
-        // pCONT->Tasker_Interface(FUNC_EVENT_MOTION_ENDED_ID);
+        // pCONT->Tasker_Interface(TASK_EVENT_MOTION_ENDED_ID);
 
       }
 
@@ -257,7 +257,7 @@ char buffer[100];
   //   }
   // }
 
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
+  ALOG_TST(PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
 
 }
 
@@ -382,7 +382,7 @@ void mMotion::MQTTHandler_Init(){
   struct handler<mMotion>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -392,7 +392,7 @@ void mMotion::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mMotion::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
@@ -420,9 +420,9 @@ void mMotion::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

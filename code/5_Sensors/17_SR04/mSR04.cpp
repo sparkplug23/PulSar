@@ -11,10 +11,10 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();  // should "pre_init" ne chanegd to pin/gpio/hardware pin ??
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -25,33 +25,33 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       EverySecond();
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
       EveryMinute();
     break;
-    case FUNC_UPTIME_1_MINUTES:
+    case TASK_UPTIME_1_MINUTES:
       readings.average_EMA.alpha = 2.0f / (200.0f-1.0f); // 60 samples, slower
       Config_Filters();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -101,7 +101,7 @@ void mSR04::Init(void)
     ModeDetect();
   }
 
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_SR04 "ModeDetect Complete"));
+  ALOG_TST(PSTR(D_LOG_SR04 "ModeDetect Complete"));
 
   #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
   // Default weight values
@@ -128,7 +128,7 @@ uint8_t mSR04::ModeDetect(void)
   sr04_type = 1; // default
   if (!pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID))
   {
-    AddLog(LOG_LEVEL_TEST, PSTR("Sr04: TModeDetect::Error"));
+    ALOG_TST(PSTR("Sr04: TModeDetect::Error"));
     return sr04_type; 
   }
 
@@ -157,7 +157,7 @@ uint8_t mSR04::ModeDetect(void)
   if (sr04_type < 2) {
     delete sonar_serial;
     sonar_serial = nullptr;
-    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_SR04 "Release TasmotaSerial"));
+    ALOG_TST(PSTR(D_LOG_SR04 "Release TasmotaSerial"));
     if (-1 == sr04_trig_pin) {
       sr04_trig_pin = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
     }
@@ -279,7 +279,7 @@ void mSR04::MeasureSensor()
   readings.average_DEMA.distance_cm = readings.average_DEMA.filter->AddValue(readings.raw.distance_cm);
   #endif
 
-  AddLog(LOG_LEVEL_TEST, PSTR("GetDistanceFromPing %d (cm)"), (int)readings.raw.distance_cm);
+  ALOG_TST(PSTR("GetDistanceFromPing %d (cm)"), (int)readings.raw.distance_cm);
 
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
 
@@ -361,7 +361,7 @@ float mSR04::GetDistanceFromPing(uint32_t ping_value)
 void mSR04::SubTask_UpdateAmbientTemperature()
 {
 
-  AddLog(LOG_LEVEL_INFO, PSTR("SubTask_UpdateAmbientTemperature"));
+  ALOG_INF(PSTR("SubTask_UpdateAmbientTemperature"));
 
   /**
    * @brief I need a way to make this runtime safe
@@ -371,7 +371,7 @@ void mSR04::SubTask_UpdateAmbientTemperature()
   uint8_t  device_id = 0; //ambient tank should be 0
 
   sensors_reading_t reading;
-  pCONT->GetModuleObjectbyUniqueID(pCONT_db18->GetModuleUniqueID())->GetSensorReading(&reading, device_id);
+  pCONT->GetModule(pCONT_db18->GetModuleUniqueID())->GetSensorReading(&reading, device_id);
   temperature = reading.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
 
   Serial.printf("temperature=%f\n\r", temperature);

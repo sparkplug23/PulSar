@@ -11,7 +11,7 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -22,15 +22,15 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
   /************
    * PERIODIC SECTION * 
   *******************/
-    case FUNC_LOOP:
+    case TASK_LOOP:
       MM_EveryLoop();
       CallMQTTSenders();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
     // ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
       Load_New_Subscriptions_From_Function_Template();
     break;
-    case FUNC_NETWORK_CONNECTION_ESTABLISHED:
+    case TASK_NETWORK_CONNECTION_ESTABLISHED:
 
       /**
        * @brief If status is down, and awaiting connection, immediate try reconnect
@@ -42,17 +42,22 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
           ALOG_HGL(PSTR(D_LOG_PUBSUB "retry_counter IMMEDIATE = %d"),brokers[0]->retry_counter);
 
     break;
-    case FUNC_EVERY_50_MSECOND:
+    case TASK_EVERY_50_MSECOND:
+DEBUG_LINE_HERE_MILLIS
+
+DEBUG_LINE_HERE_MILLIS
       MM_Every50mSecond();
+DEBUG_LINE_HERE_MILLIS
 
       // if(brokers.size())   
       //   if(brokers[0]->retry_counter)
       //     Serial.printf(D_LOG_PUBSUB "retry_counter = %d\n\r", brokers[0]->retry_counter);
 
     break;
-    case FUNC_EVERY_SECOND:      {
+    case TASK_EVERY_SECOND:      {
       
-  // ALOG_INF(PSTR("M4host_address: %s"), dt.connection[0].host_address);
+      if(brokers.size())
+        ALOG_INF(PSTR("M4host_address: %s"), brokers[0]->host_address);
 
   
   strlcpy(test, "tesT MESSAGE FROM INIT", sizeof(test));
@@ -84,20 +89,20 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
 
     }
     break;
-    case FUNC_EVERY_HOUR:
+    case TASK_EVERY_HOUR:
       if(brokers.size())
       // if(brokers_active)   
       {
         brokers[0]->Send_LWT_Online(); // this does work, but how about wrapping the LWT into the normal status messages? Just the LWT offline would be its own.
       }
     break;
-    case FUNC_UPTIME_10_MINUTES:
+    case TASK_UPTIME_10_MINUTES:
       flag_uptime_reached_reduce_frequency = true;
     break;     
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
@@ -105,13 +110,13 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     *******************/  
     #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
-    case FUNC_FILESYSTEM__RESET__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__RESET__MODULE_DATA__ID:
       Default_Module();
     break;
-    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
-    case FUNC_FILESYSTEM__LOAD__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__LOAD__MODULE_DATA__ID:
       // Load_Module();
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
@@ -119,7 +124,7 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_SUBSCRIBE:
+    case TASK_MQTT_SUBSCRIBE:
       MQTTSubscribe();
     break;
   } // END switch
@@ -137,6 +142,24 @@ void mMQTTManager::Default_Module()
   // memset((uint8_t*)&dt, 0, sizeof(dt));
 
   // MODULE_STORAGE::CONNECTION* con = &dt.connection[0];
+
+  
+  dt.ifchanged_secs = SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS; // ifchanged etc timing should be moved into mqtt substruct
+  dt.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
+  dt.teleperiod_secs = 120;
+  dt.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
+  dt.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
+  dt.configperiod_secs = SEC_IN_HOUR;
+
+  #ifdef ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
+  dt.options.unified_module_interface_reporting__suppress_submodule_configperiod = 1;
+  dt.options.unified_module_interface_reporting__suppress_submodule_teleperiod = 1;
+  dt.options.unified_module_interface_reporting__suppress_submodule_ifchangedperiod = 1;
+  #else
+  dt.options.unified_module_interface_reporting__suppress_submodule_configperiod = 0;
+  dt.options.unified_module_interface_reporting__suppress_submodule_teleperiod = 0;
+  dt.options.unified_module_interface_reporting__suppress_submodule_ifchangedperiod = 0;
+  #endif
 
 
   strlcpy(test, "TEST MESSAGE FROM INIT", sizeof(test));
@@ -219,22 +242,6 @@ void mMQTTManager::Save_Module()
 void mMQTTManager::Load_Module(bool erase)
 {
   ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
   // pCONT_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
@@ -291,6 +298,47 @@ void mMQTTManager::MQTTSubscribe()
 
 }
 
+/**
+ * @brief 
+ * New methods to get the periods indirectly, so other logic can modify them
+ * SubModule: When interface is set to periority, the submodule values will be supressed
+ */
+uint16_t mMQTTManager::GetConfigPeriod()
+{
+  return dt.configperiod_secs;
+}
+uint16_t mMQTTManager::GetConfigPeriod_SubModule()
+{
+  if(dt.options.unified_module_interface_reporting__suppress_submodule_configperiod)
+    return 3600; // disable submodule config
+  else
+    return dt.configperiod_secs;
+}
+uint16_t mMQTTManager::GetTelePeriod()
+{
+  return dt.teleperiod_secs;
+}
+uint16_t mMQTTManager::GetTelePeriod_SubModule()
+{
+  if(dt.options.unified_module_interface_reporting__suppress_submodule_teleperiod)
+    return 3600; // reduced to once an hour
+  else
+    return dt.teleperiod_secs;  
+}
+uint16_t mMQTTManager::GetIfChangedPeriod()
+{
+  return dt.ifchanged_secs;
+}
+uint16_t mMQTTManager::GetIfChangedPeriod_SubModule()
+{
+  if(dt.options.unified_module_interface_reporting__suppress_submodule_ifchangedperiod)
+    return 0; // disable submodule ifchanged
+  else
+    return dt.ifchanged_secs;  
+}
+
+
+
 
 void mMQTTManager::Load_New_Subscriptions_From_Function_Template()
 {
@@ -317,7 +365,7 @@ void mMQTTManager::Load_New_Subscriptions_From_Function_Template()
       for(auto v : arrobj) 
       {
         const char* new_topic = v.getStr();
-        ALOG_INF(PSTR("New Subscribe = \"%s\""), new_topic);
+        ALOG_DBM(PSTR("New Subscribe = \"%s\""), new_topic);
         
 
       }
@@ -383,9 +431,30 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
   {    
-    pCONT->Tasker_Interface(FUNC_MQTT_STATUS_REFRESH_SEND_ALL);
+    pCONT->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
   }
 
+
+  JsonParserToken jtok_sub = 0; 
+  if(jtok = obj["MQTTUpdateSeconds"])
+  {
+    if(jtok_sub = jtok.getObject()["IfChanged"])
+    {
+      dt.ifchanged_secs = jtok_sub.getInt();
+      ALOG_TST(PSTR("MQTTUpdateSeconds IfChanged %d"), dt.ifchanged_secs);
+    }
+    if(jtok_sub = jtok.getObject()["TelePeriod"])
+    {
+      dt.teleperiod_secs = jtok_sub.getInt();
+      ALOG_TST(PSTR("MQTTUpdateSeconds TelePeriod %d"), dt.teleperiod_secs);
+    }
+    if(jtok_sub = jtok.getObject()["ConfigPeriod"])
+    {
+      dt.configperiod_secs = jtok_sub.getInt();
+      ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
+    }
+    pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+  }
 
 }//end function
 
@@ -406,7 +475,7 @@ void mMQTTManager::CallMQTTSenders()
   {
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
-      pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
+      pCONT->Tasker_Interface(TASK_MQTT_SENDER);
     }
   }
 

@@ -25,10 +25,8 @@
 
 #ifdef USE_MODULE_SENSORS_BME
 
-#ifdef ENABLE_DEVFEATURE_BME680
 #include <bme68x.h>
 // #include "bme68x_defs.h"
-#endif
 
 #include <Wire.h>
 
@@ -88,6 +86,9 @@ class mBME :
 {
   
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mBME(){};
     void Pre_Init(void);
     void Init(void);
@@ -100,25 +101,26 @@ class mBME :
     uint16_t GetClassSize(){      return sizeof(mBME);    };
     #endif
 
-    struct SETTINGS{
-      uint8_t fEnableSensor= false;
-      uint8_t fSensorCount= 0; 
-      uint8_t sModuleStatus =0;
-      uint16_t measure_rate_ms = 1000;
-    }settings;
-    
-    uint32_t tSavedMeasureClimate;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    void SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion);
-    
-    uint8_t fWithinLimit;
-    unsigned long tWithinLimit;
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
 
-    #define REQUIRE_COMPLETE true
-    #define DONTREQUIRE_COMPLETE false
+    struct MODULE_RUNTIME{ // these will be saved and recovered on boot
 
-    #define MAX_SENSORS 2
-    void EveryLoop();
+    }rt;
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+            
+    static constexpr const char* kBmpTypes = "BMP180|BMP280|BME280|BME680";
+
     void ShowSensor_AddLog();
         
     typedef struct {
@@ -261,12 +263,10 @@ class mBME :
     void Bme280Read(uint8_t bmp_idx);
 
     /*********************************************************************************************\
-     * BMP280 and BME280
+     * BMP680
      *
-     * Programmer : BMP280/BME280 Datasheet and Adafruit with changes by Theo Arends
+     * Programmer : BMP260 Datasheet and Adafruit with changes by Theo Arends
     \*********************************************************************************************/
-
-    #ifdef ENABLE_DEVFEATURE_BME680
 
     struct bme68x_dev *bme_dev = nullptr;
     struct bme68x_conf *bme_conf = nullptr;
@@ -276,17 +276,15 @@ class mBME :
     bool Bme680Init(uint8_t bmp_idx);
     void Bme680Read(uint8_t bmp_idx);
 
-    #endif // ENABLE_DEVFEATURE_BME680
-
 
     #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
-      return settings.fSensorCount;
+      return bmp_count;
     }
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index > settings.fSensorCount-1) {value->sensor_type.push_back(0); return ;}  
+      if(index > bmp_count-1) {value->sensor_type.push_back(0); return ;}  
       
       value->timestamp = bmp_sensors[index].utc_measured_timestamp;
 
@@ -303,7 +301,6 @@ class mBME :
           value->sensor_type.push_back(SENSOR_TYPE_PRESSURE_ID);
           value->data_f.push_back(bmp_sensors[index].pressure);          
         break;
-        #ifdef ENABLE_DEVFEATURE_BME680
         case BME680_CHIPID:        
           value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
           value->data_f.push_back(bmp_sensors[index].temperature);
@@ -314,32 +311,40 @@ class mBME :
           value->sensor_type.push_back(SENSOR_TYPE_GAS_RESISTANCE_ID);
           value->data_f.push_back(bmp_sensors[index].bmp_gas_resistance);   
         break;
-        #endif // ENABLE_DEVFEATURE_BME680
       }
       value->sensor_id = index;
     };
     #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-        
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
-    #ifdef USE_MODULE_NETWORK_MQTT
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
 
+    #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender();
     
+    std::vector<struct handler<mBME>*> mqtthandler_list;
     struct handler<mBME> mqtthandler_settings_teleperiod;
     struct handler<mBME> mqtthandler_sensor_ifchanged;
-    struct handler<mBME> mqtthandler_sensor_teleperiod;
- 
-    std::vector<struct handler<mBME>*> mqtthandler_list;
-    
+    struct handler<mBME> mqtthandler_sensor_teleperiod;    
     #endif // USE_MODULE_NETWORK_MQTT
-
+ 
 };
 
 
 #endif // USE_MODULE_SENSORS_BME
-#endif //header gaurd
+#endif //header guard

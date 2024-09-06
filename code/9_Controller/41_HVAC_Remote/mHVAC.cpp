@@ -42,10 +42,10 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       init();
     break;
   }
@@ -56,37 +56,37 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       Every_Second();
     break;
     /************
      * FUNCTION HANDLER SECTION * 
     *******************/
-    case FUNC_FUNCTION_LAMBDA_INIT:
+    case TASK_FUNCTION_LAMBDA_INIT:
       FunctionHandler_Init();
     break;
-    case FUNC_FUNCTION_LAMBDA_LOOP:
+    case TASK_FUNCTION_LAMBDA_LOOP:
       FunctionHandler_Loop();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
   }
@@ -291,7 +291,7 @@ void mHVAC::SetZoneActive(uint8_t zone_id, uint8_t state)
     default:
     case ZONE_MODE_HEAT_8BITS:{
 
-      // AddLog(LOG_LEVEL_INFO, PSTR("zone[%d].output.index[0]=%d"),zone_id, zone[zone_id].output.index[0]);
+      // ALOG_INF(PSTR("zone[%d].output.index[0]=%d"),zone_id, zone[zone_id].output.index[0]);
 
       // Check if mode is permitted
       // if(zone[zone_id].bitpacked_modes_enabled,)

@@ -9,23 +9,17 @@
  * 
  * @note RTC Settings are loaded before primary settings from flash are loaded.
  *       Only used for data that is needed quickly during startup
- *       - Should I move fastboot offset here?
  **/
 #include "mRtcSettings.h"
 
 #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-// typedef struct {
-//   uint16_t      valid;                     // 280  (RTC memory offset 100 - sizeof(RTCRBT))
-//   uint8_t       fast_reboot_count;         // 282
-//   uint8_t       free_003[1];               // 283
-// } TRtcFastboot;
 TRtcFastboot RtcFastboot;
 #ifdef ESP32
 RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
 #endif  // ESP32
 
 uint32_t rtc_fastboot_crc = 0;
-const uint16_t RTC_MEM_VALID = 0xABCD; // Value does not matter
+const uint16_t RTC_MEM_VALID = 0xA55A; // Value does not matter
 
 uint32_t RtcFastboot_CRC()
 {
@@ -84,19 +78,12 @@ void RtcFastboot_Load(void)
   Serial.println("RtcRebootLoad START");
   #endif
 
-#ifdef ESP8266
-  ESP.rtcUserMemoryRead(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));  // 0x280
-#endif  // ESP8266
-#ifdef ESP32
-  #ifdef DEBUG_FASTBOOT
-  Serial.printf("RtcReboot.fast_reboot_countA=%d\n\r", RtcFastboot.fast_reboot_count);
-  #endif // DEBUG_FASTBOOT
-  RtcFastboot = RtcDataFastboot; // Set the pointer so the struct points to the data saved
-  #ifdef DEBUG_FASTBOOT
-  Serial.printf("RtcReboot.fast_reboot_countB=%d\n\r", RtcFastboot.fast_reboot_count);
-  #endif // DEBUG_FASTBOOT
-#endif  // ESP32
-
+  #ifdef ESP8266
+    ESP.rtcUserMemoryRead(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));  // 0x280
+  #endif  // ESP8266
+  #ifdef ESP32
+    RtcFastboot = RtcDataFastboot; // Set the pointer so the struct points to the data saved
+  #endif  // ESP32
 
   if (RtcFastboot.valid != RTC_MEM_VALID) 
   {
@@ -107,7 +94,6 @@ void RtcFastboot_Load(void)
   
     memset(&RtcFastboot, 0, sizeof(RtcFastboot));
     RtcFastboot.valid = RTC_MEM_VALID;
-    
     
     RtcFastboot_Save();
     
@@ -137,7 +123,7 @@ bool RtcFastboot_Valid(void)
 
 #else
 
-const uint16_t RTC_MEM_VALID = 0xABCD; // Value does not matter
+const uint16_t RTC_MEM_VALID = 0xA55A; // Value does not matter
 
 
 #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -159,7 +145,8 @@ RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
 
 uint32_t rtc_settings_crc = 0;
 
-uint32_t GetRtcSettingsCrc(void) {
+uint32_t GetRtcSettingsCrc(void) 
+{
   uint32_t crc = 0;
   uint8_t *bytes = (uint8_t*)&RtcSettings;
 
@@ -172,10 +159,11 @@ uint32_t GetRtcSettingsCrc(void) {
 /**
  * @brief Not threadsafe, only called after device has been succesfully started
  **/
-void RtcSettingsSave(void) {
+void RtcSettingsSave(void) 
+{
 
   // Check at least the first module has been initialised (change to function later, to check variable)  
-  if(pCONT->pModule[0]==nullptr){ return; }
+  if(!pCONT->pModule.size()){ return; }
   
   RtcSettings.baudrate = pCONT_set->Settings.baudrate * 300;
   if (pCONT_time->GetUTCTime() > START_VALID_UTC_TIME) {  // 2016-01-01
@@ -212,6 +200,7 @@ void RtcSettingsSave(void) {
     rtc_settings_crc = GetRtcSettingsCrc();
   }
 }
+
 
 bool RtcSettingsLoad(uint32_t update) {
 #ifdef ESP8266

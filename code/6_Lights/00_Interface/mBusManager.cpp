@@ -737,11 +737,19 @@ void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, RgbcctColor c, int16_t cc
   // DEBUG_LINE_HERE;
   // ALOG_INF(PSTR("numBusses = %d"),numBusses);
   // c.debug_print("BusManager::setPixelColor");
+  
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("BusManagersetPixelColor %d, %d, %d, %d"), pix, c.R, c.G, c.B);
+  #endif
+
   for (uint8_t i = 0; i < numBusses; i++) 
   {
     Bus* b = busses[i];
     uint16_t bstart = b->getStart();
-    if (pix < bstart || pix >= bstart + b->getLength()) continue;
+    if (pix < bstart || pix >= bstart + b->getLength()){
+      // ALOG_INF(PSTR("breaking here %d %d %d"), pix, bstart, b->getLength());
+      continue;
+    }
     // ALOG_INF(PSTR("busses %d pix %d"), i, pix);
     busses[i]->setPixelColor(pix - bstart, c);
   }

@@ -37,6 +37,7 @@
 // #define DEVICE_DOLPHIN__FLIGHT__LED_CONTROL_MAVLINK
 // #define DEVICE_TESTBED__ULTRASONIC
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__70__ESP32_PARALLEL_4CH_TRIPLE_CONNECTOR_TESTER
+// #define DEVICE_LIGHTING__LIGHTING_EFFECTS__MATRIX_SEGMENT_TESTER
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -63,7 +64,7 @@
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   //   #define USE_MODULE_SENSORS_INTERFACE
   //   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -274,7 +275,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
     #define MQTT_PORT     1883
     
-  #define SETTINGS_HOLDER 1240
+  #define SETTINGS_HOLDER 1241
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
   #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
   #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
@@ -282,7 +283,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
-  #define ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
 
   #define ESP32
 
@@ -298,19 +298,25 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRASNMITTED
+  // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
   // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
   // #define ENABLE_DEBUG_LINE_HERE_MILLIS
+
+  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 200
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
 
-  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
-  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-    #define ENABLE_DEBUG_FUNCTION_NAMES
 
   // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
   // #define ENABLE_DEVFEATURE_PINS__GPIO_UI_VIEWER
@@ -318,23 +324,24 @@ May need to add two power connections too, so its not just the cat5e wire to let
   /***********************************
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
-
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
   
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
   #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
   #define ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
   #define ENABLE_TEMPLATE_SECTION__ENERGY
   #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
   #define ENABLE_TEMPLATE_SECTION__ENERGY__INA219
+  #define ENABLE_TEMPLATE_SECTION__DISPLAY_NEXTION
+  #define ENABLE_TEMPLATE_SECTION__CONTROLLER__HVAC
 
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
   #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
 
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
@@ -343,15 +350,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
   */
   // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
 
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
   /***********************************
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-
-  
-
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
@@ -366,15 +372,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
-
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define ENABLE_DEVFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -419,11 +424,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #define ENABLE_DEVFEATURE_BME680
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-    #define USE_MODULE_SENSORS_SOLAR_LUNAR     
+    #define USE_MODULE_SENSORS_SUN_TRACKING     
+      #define ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_EVENTS
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
     #define USE_MODULE_SENSORS_BH1750
   #endif
+
+  #define ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
     
   /***********************************
    * SECTION: Display Configs
@@ -432,68 +440,69 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define SHOW_SPLASH
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #ifdef USE_MODULE_DISPLAYS_NEXTION
-      #define NEXTION_DEFAULT_PAGE_NUMBER 6  
-        #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-        // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
-        #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
-        #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-        // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS                    
-        #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
-        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
-        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-        #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
-        #define USE_MODULE_NETWORK_WEBSERVER
-        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
-          #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
-          // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
-          // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1  "openhab_broadcast/nextion/group/hvac_home"
-          // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2  "openhab_broadcast/nextion/group/hvac_desk_power"
-      
-        DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
-        R"=====(
-        {
-          "PageNames": [
-            "boot_flash",
-            "boot",
-            "message",
-            "multiline",
-            "logger",
-            "heating",
-            "hvacdesk",
-            "main"
-          ],
-          "DefaultPageName":"hvacdesk",
-          "DefaultBaud":115200,
-          "TargetBaud":115200,
-          "ObjectNameID": {
-            "hdIconHAI": 2,
-            "hdTimeHAI": 6,
-            "hdBoostHAI": 11,
-            "hdAutoHAI": 16,
-            "powHAI": 21,
-            "hdIconFLR": 3,
-            "hdTimeFLR": 7,
-            "hdBoostFLR": 12,
-            "hdAutoFLR": 17,
-            "powFLR": 22,
-            "hdIconFAN": 4,
-            "hdTimeFAN": 8,
-            "hdBoostFAN": 13,
-            "hdAutoFAN": 18,
-            "powFAN": 23,
-            "hdIconOIL": 5,
-            "hdTimeOIL": 9,
-            "hdBoostOIL": 14,
-            "hdAutoOIL": 19,
-            "powOIL": 24
-          }
-        }
-        )=====";
+  #ifdef ENABLE_TEMPLATE_SECTION__DISPLAY_NEXTION
+    #define USE_MODULE_DISPLAYS_NEXTION
+    #define NEXTION_DEFAULT_PAGE_NUMBER 6  
+      #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+      // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+      #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+      #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+      // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS                    
+      #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+      #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+      #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+      #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+      #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+      #define USE_MODULE_NETWORK_WEBSERVER
+      #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+        #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
+        
+      DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
+      R"=====(
+      {
+        "PageNames": [
+          "boot_flash",
+          "boot",
+          "message",
+          "multiline",
+          "logger",
+          "heating",
+          "hvacdesk",
+          "main"
+        ],
+        "DefaultPageName":"hvacdesk",
+        "DefaultBaud":115200,
+        "TargetBaud":115200,
+        "ObjectNameID": {
+          "hdIconHAI": 2,
+          "hdTimeHAI": 6,
+          "hdBoostHAI": 11,
+          "hdAutoHAI": 16,
+          "powHAI": 21,
+          "hdIconFLR": 3,
+          "hdTimeFLR": 7,
+          "hdBoostFLR": 12,
+          "hdAutoFLR": 17,
+          "powFLR": 22,
+          "hdIconFAN": 4,
+          "hdTimeFAN": 8,
+          "hdBoostFAN": 13,
+          "hdAutoFAN": 18,
+          "powFAN": 23,
+          "hdIconOIL": 5,
+          "hdTimeOIL": 9,
+          "hdBoostOIL": 14,
+          "hdAutoOIL": 19,
+          "powOIL": 24
+        },
+        "MQTTSubscribe":[
+          "openhab_broadcast/nextion/group/hvac_home",
+          "openhab_broadcast/nextion/group/hvac_desk_power"
+        ]
+      }
+      )=====";
 
-    #endif // USE_MODULE_DISPLAYS_NEXTION
+  #endif // USE_MODULE_DISPLAYS_NEXTION
   /***********************************
    * SECTION: Driver Configs
   ************************************/  
@@ -511,45 +520,15 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
-    // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
-    // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-    // #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-    // #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-    // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__PIXEL_SET_ELSEWHERE
-
-    // #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
 
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
 
-    #define USE_MODULE_NETWORK_WEBSERVER
-    #define ENABLE_WEBSERVER_LIGHTING_WEBUI
-
-
-    // #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
-    
-
-    
-    
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
     
-
-
-
-
-  // #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
-
-  
-  #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-  
-
-  #define USE_LIGHTING_TEMPLATE
-
-  
+    
     // 13, 18, 19, 22, 23, 25, 26, 27       USED
     // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
     // 21 = on PCB (4 pixels)
@@ -578,7 +557,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "ColourOrder":"GRBC",
           "BusType":"SK6812_RGBW",
           "Start":148,
-          "Length":144
+          "Length":44
         }
       ],
       "Segment0": {
@@ -598,13 +577,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "Speed":127,
           "Intensity":255,
           "Decimate":0,
-          "Grouping":1
-        },
-        "Transition": {
-          "TimeMs": 200,
+          "Grouping":1,
           "RateMs": 1000
         },
-        "BrightnessRGB": 100,
+        "BrightnessRGB": 20,
         "BrightnessCCT": 0
       },
       "Segment1": {
@@ -624,21 +600,19 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "Speed":127,
           "Intensity":255,
           "Decimate":0,
-          "Grouping":1
-        },
-        "Transition": {
-          "TimeMs": 200,
+          "Grouping":1,
           "RateMs": 1000
         },
         "BrightnessRGB": 100,
         "BrightnessCCT": 0
       },
       "Segment2": {
+        "Name":"Leg",
         "PixelRange": [
           148,
-          292
+          184
         ],
-        "ColourPalette":"Christmas RGPBO",
+        "ColourPalette":"Rainbow 16",
         "PaletteMappingValues":[10,15,20],
         "SegColour0": {
           "Hue": 0,
@@ -650,10 +624,31 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "Speed":127,
           "Intensity":255,
           "Decimate":0,
-          "Grouping":1
+          "Grouping":1,
+          "RateMs": 1000
         },
-        "Transition": {
-          "TimeMs": 200,
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 0
+      },
+      "Segment3": {
+        "Name":"Floor",
+        "PixelRange": [
+          184,
+          192
+        ],
+        "ColourPalette":"Warm White",
+        "PaletteMappingValues":[10,15,20],
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":100,
+          "BrightnessRGB":5
+        },
+        "Effects": {
+          "Function":"Static Palette",
+          "Speed":127,
+          "Intensity":255,
+          "Decimate":0,
+          "Grouping":1,
           "RateMs": 1000
         },
         "BrightnessRGB": 100,
@@ -692,6 +687,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Controller Configs
   ************************************/  
 
+  #ifdef ENABLE_TEMPLATE_SECTION__CONTROLLER__HVAC
+
   #define USE_MODULE_CONTROLLER_HVAC
      #define HEATING_DEVICE_MAX 4
      #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
@@ -704,6 +701,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #endif // USE_LIGHTING_TEMPLATE
   //  #define USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
    #define USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
+
+  #endif // ENABLE_TEMPLATE_SECTION__CONTROLLER__HVAC
 
    // add new controller custom that instead shows the other sensors as PZEM is on nextion
    /**
@@ -855,7 +854,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "Desk" "\""
       "],"  
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
@@ -932,11 +931,11 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "}"
       "]"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""
-    "],"
+    "]"
   "}";
 
 
@@ -1024,7 +1023,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
@@ -1049,7 +1048,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -1093,7 +1092,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //     #define ENABLE_DEVFEATURE_BME680
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-  //   #define USE_MODULE_SENSORS_SOLAR_LUNAR     
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING     
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
   //   #define USE_MODULE_SENSORS_BH1750
@@ -1463,7 +1462,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "Desk" "\""
       "],"  
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
@@ -1632,7 +1631,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
@@ -1657,7 +1656,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -1705,7 +1704,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //     #define ENABLE_DEVFEATURE_BME680
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-  //   #define USE_MODULE_SENSORS_SOLAR_LUNAR     
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING     
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
   //   #define USE_MODULE_SENSORS_BH1750
@@ -1851,7 +1850,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   
 
@@ -2705,7 +2704,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "Desk" "\""
       "],"  
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
@@ -2884,7 +2883,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   
 
@@ -2911,7 +2910,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -2953,7 +2952,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #define ENABLE_DEVFEATURE_BME680
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-    #define USE_MODULE_SENSORS_SOLAR_LUNAR     
+    #define USE_MODULE_SENSORS_SUN_TRACKING     
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
     #define USE_MODULE_SENSORS_BH1750
@@ -3347,7 +3346,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "Desk" "\""
       "],"  
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
@@ -3578,7 +3577,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   // // #define USE_MODULE_DRIVERS_LEDS
 
@@ -3835,7 +3834,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //       "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
   //       "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
   //     "]," 
-  //     "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+  //     "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
   //       "\"" "Bedroom" "\""
   //     "],"  
   //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
@@ -3920,13 +3919,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
@@ -4533,7 +4532,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   
 
@@ -4560,7 +4559,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************
@@ -4810,7 +4809,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_CTR "\":["
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "Desk" "\""
       "],"  
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
@@ -4930,7 +4929,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   
 
@@ -4955,7 +4954,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************
@@ -5142,7 +5141,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
+  
 
   
 
@@ -5167,7 +5166,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SUN_TRACKING
 
   #define USE_MODULE_CORE_FILESYSTEM
 
@@ -6393,6 +6392,450 @@ May need to add two power connections too, so its not just the cat5e wire to let
   
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L2__ESP32_I2S_PARALLEL_4CH
 
+
+
+
+
+
+#ifdef DEVICE_LIGHTING__LIGHTING_EFFECTS__MATRIX_SEGMENT_TESTER
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+//   
+
+  
+
+//   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+//   // #define USE_MODULE_CORE_FILESYSTEM
+//   //   #define WLED_ENABLE_FS_EDITOR
+//   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+//   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+//   // Settings saving and loading
+//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+//   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+//   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+//   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+//   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+//   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+//   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+//   #define USE_MODULE_SENSORS_SUN_TRACKING
+
+
+//   /***********************************
+//    * SECTION: Network Configs
+//   ************************************/    
+
+//   /***********************************
+//    * SECTION: Sensor Configs
+//   ************************************/  
+
+//   /***********************************
+//    * SECTION: Display Configs
+//   ************************************/  
+
+//   /***********************************
+//    * SECTION: Driver Configs
+//   ************************************/  
+
+//   /***********************************
+//    * SECTION: Lighting Configs
+//   ************************************/  
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  
+  // #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
+  // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+  //   #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
+  //   #define WLED_DEBUG
+  //   #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  //   #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+  //   #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 8 // Height
+  //   #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 32 // Width
+  //   #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+  //   #define ENABLE_DEVFEATURE_LIGHT__MATRIX_SEGMENT_TESTER// give up, just override
+  //   // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
+  // #endif 
+
+//   #define ENABLE_DEVFEATURE_LIGHT__SWITCH_TO_JOINT_NAME_AND_DATA_PROGMEM
+
+
+//   #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
+
+
+
+//   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
+//   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+//   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+//   #define ENABLE_DEVFEATURE_LIGHTS__EFFECT_ROTATE_PREV_WITH_INTENSITY  
+//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
+//   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
+
+//   #define USE_MODULE_NETWORK_WEBSERVER
+//   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
+  
+
+  // 13, 18, 19, 22, 23, 25, 26, 27       USED
+  // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
+  // 21 = on PCB (4 pixels)
+  // 32 = external
+
+/**
+ * @brief 
+ * 
+ * segments needs to be updated to handle matrix allocation
+ * 
+ * lets keep 8x32 as 2d matrix, and use it to show time of day, where the background is "elevation turned into skycolour ie cyan, orange, sunset, dark blue, black" as new effect
+ * 
+ */
+
+// #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS
+// #define USE_DEBUG_PRINT
+// #define USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
+
+#define MAX_NUM_SEGMENTS 16
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":32,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [0,16],
+      "ColourPalette":"Rainbow 16",
+      "Effects": {
+        "Function":"Static Palette",
+        "RateMs": 1000
+      }
+    },
+    "Segment1": {
+      "PixelRange": [16,32],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static Palette",
+        "Reverse":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment2": {
+      "PixelRange": [32,48],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Sweep Random",
+        "Speed":229,
+        "RateMs": 25
+      }
+    },
+    "Segment3": {
+      "PixelRange": [48,64],
+      "ColourPalette":"RGPBO",
+      "Effects": {
+        "Function":"Fireworks 1D",
+        "Speed":229,
+        "Intensity":127,
+        "Reverse":1,
+        "RateMs": 25
+      }
+    },
+    "Segment4": {
+      "PixelRange": [64,80],
+      "ColourPalette":"RGPBO",
+      "SegColour1": {
+          "Hue": 0,
+          "Sat":0,
+          "BrightnessRGB":5
+        },
+      "Effects": {
+        "Function":"Theater",
+        "Speed":229,
+        "Intensity":127,
+        "RateMs": 25
+      }
+    },
+    "Segment5": {
+      "PixelRange": [80,96],
+      "ColourPalette":"RGPBO",
+      "Effects": {
+        "Function":"Dissolve Random",
+        "Speed":229,
+        "Intensity":127,
+        "Reverse":1,
+        "RateMs": 25
+      }
+    },
+    "Segment6": {
+      "PixelRange": [96,112],
+      "ColourPalette":"RGPBO",
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":229,
+        "Intensity":127,
+        "RateMs": 100
+      }
+    },
+    "Segment7": {
+      "PixelRange": [112,128],
+      "ColourPalette":"Blue and White",
+      "Effects": {
+        "Function":"Static Palette",
+        "Speed":229,
+        "Intensity":127,
+        "Reverse":1,
+        "RateMs": 100
+      }
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  #define USE_LIGHTING_TEMPLATE_ANOTHER
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE_ANOTHER) 
+  R"=====(
+  {
+    "Segment8": {
+      "PixelRange": [128,144],
+      "ColourPalette":"Hot 16",
+      "Effects": {
+        "Function":"Sine",
+        "Speed":229,
+        "Intensity":127,
+        "RateMs": 100
+      },
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":0
+      }
+    },
+    "Segment9": {
+      "PixelRange": [144,160],
+      "ColourPalette":"Rainbow 16",
+      "Effects": {
+        "Function":"Meteor Smooth",
+        "Speed":229,
+        "Intensity":127,
+        "Reverse":1,
+        "RateMs": 100
+      }
+    },
+    "Segment10": {
+      "PixelRange": [160,176],
+      "ColourPalette":"Turbo 16",
+      "Effects": {
+        "Function":"Bouncing Balls",
+        "Speed":127,
+        "Intensity":127,
+        "RateMs": 100
+      }
+    },
+    "Segment11": {
+      "PixelRange": [176,192],
+      "ColourPalette":"Sunset",
+      "Effects": {
+        "Function":"Hour Progress",
+        "Speed":229,
+        "Intensity":127,
+        "Reverse":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment12": {
+      "PixelRange": [192,208],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Twinkle Palette Two on One",
+        "Speed":255,
+        "Intensity":30,
+        "RateMs": 25,
+        "Param0":0
+      },
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":3
+      }
+    },
+    "Segment13": {
+      "PixelRange": [208,224],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Stepping Palette",
+        "Speed":229,
+        "Intensity":127,
+        "Reverse":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment14": {
+      "PixelRange": [224,240],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Wipe Random",
+        "Speed":229,
+        "Intensity":127,
+        "RateMs": 100
+      }
+    },
+    "Segment15": {
+      "PixelRange": [240,256],
+      "ColourPalette":"Random 01",
+      "Effects": {
+        "Function":"Spanned Palette",
+        "Speed":229,
+        "Intensity":20,
+        "Reverse":1,
+        "RateMs": 1000
+      }
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+
+  
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":32,
+  //       "ColourOrder":"GRB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":256
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       256
+  //     ],
+  //     "ColourPalette":"RGPBY",
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":1,
+  //       "Intensity":127,
+  //       "Decimate":0,
+  //       "Grouping":1,
+  //       "Spacing":14,
+  //       "Offset":0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 10
+  //   },
+  //   "Segment1": {
+  //     "PixelRange": [
+  //       0,
+  //       256
+  //     ],
+  //     "ColourPalette":"RGPBY",
+  //     "Effects": {
+  //       "Function":"Static Palette",
+  //       "Speed":1,
+  //       "Intensity":127,
+  //       "Decimate":0,
+  //       "Grouping":1,
+  //       "Spacing":16,
+  //       "Offset":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 10
+  // }
+  // )=====";
+
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
 
 
 

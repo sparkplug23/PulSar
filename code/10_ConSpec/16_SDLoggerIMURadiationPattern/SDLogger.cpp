@@ -12,10 +12,10 @@ int8_t mSDLoggerIMURadiationPattern::Tasker(uint8_t function, JsonParserObject o
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -26,22 +26,22 @@ int8_t mSDLoggerIMURadiationPattern::Tasker(uint8_t function, JsonParserObject o
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: {
+    case TASK_LOOP: {
       EveryLoop();
 
       // uint16_t adc_level_1 = adc1_get_raw(ADC1_CHANNEL_6);
       // // ets_delay_us(1);
       // uint16_t adc_level_2 = adc1_get_raw(ADC1_CHANNEL_7);
-      // AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"), adc_level_1, adc_level_2);
+      // ALOG_TST(PSTR("adc_level = \t%d\t%d"), adc_level_1, adc_level_2);
 
     }break;  
-    case FUNC_EVERY_SECOND: 
+    case TASK_EVERY_SECOND: 
       EverySecond();
     break;
     /************
      * TRIGGERS SECTION * 
     *******************/
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       #ifdef USE_MODULE_DRIVERS_SDCARD
       pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
       #endif
@@ -50,20 +50,20 @@ int8_t mSDLoggerIMURadiationPattern::Tasker(uint8_t function, JsonParserObject o
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -162,17 +162,17 @@ void mSDLoggerIMURadiationPattern::Init(void)
       case 32:
         adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11 );
         adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_4 set"));
+        ALOG_TST(PSTR("ADC1_CHANNEL_4 set"));
       break;
       case 34:
         adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
         adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_6 set"));
+        ALOG_TST(PSTR("ADC1_CHANNEL_6 set"));
       break;
       case 35:
         adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
         adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_7 set"));
+        ALOG_TST(PSTR("ADC1_CHANNEL_7 set"));
       break;
     }
 
@@ -202,9 +202,9 @@ void mSDLoggerIMURadiationPattern::EveryLoop()
       #ifdef ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
       }
       #endif
-      // AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream >> [%d] \"%s\""), JBI->GetLength(), JBI->GetPtr());
+      // ALOG_TST(PSTR("SDCardStream >> [%d] \"%s\""), JBI->GetLength(), JBI->GetPtr());
     #else
-      AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream >> [%d] \"%s\""), JBI->GetLength(), JBI->GetPtr());
+      ALOG_TST(PSTR("SDCardStream >> [%d] \"%s\""), JBI->GetLength(), JBI->GetPtr());
     #endif //USE_MODULE_DRIVERS_SDCARD
 
   }
@@ -455,7 +455,7 @@ void mSDLoggerIMURadiationPattern::MQTTHandler_Init(){
   struct handler<mSDLoggerIMURadiationPattern>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -465,7 +465,7 @@ void mSDLoggerIMURadiationPattern::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSDLoggerIMURadiationPattern::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -475,7 +475,7 @@ void mSDLoggerIMURadiationPattern::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSDLoggerIMURadiationPattern::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -485,7 +485,7 @@ void mSDLoggerIMURadiationPattern::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSDLoggerIMURadiationPattern::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sdcard_superframe;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -513,9 +513,9 @@ void mSDLoggerIMURadiationPattern::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     // if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      // handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      // handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -613,7 +613,7 @@ void mSDLoggerIMURadiationPattern::parse_JSONCommand(JsonParserObject obj)
 //     sprintf(rule_name, "RelayEnabled%d", ii);
       
 // 		if(jtok = obj[rule_name]){
-// 			AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
+// 			ALOG_INF(PSTR("MATCHED %s"),rule_name);
 // 			SubCommandSet_EnabledTime(jtok.getObject(), ii);
 // 		}
 
@@ -671,7 +671,7 @@ void mSDLoggerIMURadiationPattern::CommandSet_SDCard_OpenClose_Toggle()
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("mSDLoggerIMURadiationPattern CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
+  ALOG_TST(PSTR("mSDLoggerIMURadiationPattern CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
@@ -690,12 +690,12 @@ void mSDLoggerIMURadiationPattern::CommandSet_LoggingState(uint8_t state)
   if(state == 2) //toggle
   {
     logger_status.enable ^= 1; 
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
+    ALOG_TST(PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
 
   }else
   {
     logger_status.enable = state;
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
+    ALOG_TST(PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
 
   }
 
@@ -708,7 +708,7 @@ void mSDLoggerIMURadiationPattern::CommandSet_LoggingState(uint8_t state)
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState %d"),logger_status.enable);
+  ALOG_TST(PSTR("CommandSet_LoggingState %d"),logger_status.enable);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;

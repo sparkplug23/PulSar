@@ -9,10 +9,10 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
    * INIT SECTION * 
   *******************/
   switch(function){
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();  
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -23,27 +23,40 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       EverySecond_AutoOff(); 
+
+
+      #ifdef USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
+      DEBUG_PRINT(F("Matrix ledmap:"));
+      for (unsigned i=0; i<customMappingSize; i++) {
+        if (!(i%mAnimatorLight::Segment::maxWidth)) DEBUG_PRINTLN();
+        DEBUG_PRINTF("%4d,", customMappingTable[i]);
+      }
+      DEBUG_PRINTLN();
+      #endif // USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
+
+
+
     break;
-    case FUNC_LOOP:     
+    case TASK_LOOP:     
       EveryLoop();  
     break;        
-    case FUNC_BOOT_MESSAGE:
+    case TASK_BOOT_MESSAGE:
       BootMessage();
     break;
     /************
      * STORAGE SECTION * 
     *******************/  
     #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-    case FUNC_FILESYSTEM__SAVE__MODULE_DATA__ID:
+    case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
     #endif
     /************
      * TRIGGERS SECTION * 
     *******************/
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
       CommandSet_Physical_UserInput_Buttons();
       #endif
@@ -52,23 +65,23 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/   
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
      * WIFI SECTION * 
     *******************/   
-    case FUNC_WIFI_CONNECTED:
+    case TASK_WIFI_CONNECTED:
       #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
       Test_Config();
       #endif
@@ -77,7 +90,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * WEBUI SECTION * 
     *******************/   
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_HANDLER:
+    case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
     #endif // USE_MODULE_NETWORK_WEBSERVER
@@ -211,9 +224,17 @@ void mAnimatorLight::EveryLoop()
     // if (i1 < mAnimatorLight::Segment::maxWidth) seg.start = i1;
     // seg.stop = i2 > mAnimatorLight::Segment::maxWidth ? mAnimatorLight::Segment::maxWidth : i2;
     // if (startY < mAnimatorLight::Segment::maxHeight) seg.startY = startY;
+
+    #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP
+    SEGMENT.startY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y;
+    SEGMENT.stopY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y;
+    SEGMENT.stop = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP;
+    #else
     SEGMENT.startY = 0;
     SEGMENT.stopY = 16;
     SEGMENT.stop = 16;
+    #endif
+
 
     // ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
     // delay(1000);
@@ -248,16 +269,60 @@ void mAnimatorLight::EveryLoop()
 			// var topLeftY = py*ppL + space; //top margin
 
 
+        #if defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32by8_PANEL)
+
+
         Panel p;
         p.bottomStart = 0; //, pnl["b"]);
         p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);`
+        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
         p.serpentine = true; //,  pnl["s"]);
         p.xOffset = 0;//,     pnl["x"]);
         p.yOffset = 0;//,     pnl["y"]);
-        p.height = 16;//,      pnl["h"]);
-        p.width = 16;//,       pnl["w"]);
+        p.height = 8;//,      pnl["h"]);
+        p.width = 32;//,       pnl["w"]);
         panel.push_back(p);
+
+
+        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_SEGMENT_TESTER)
+
+
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 8;//,      pnl["h"]);
+        p.width = 32;//,       pnl["w"]);
+        panel.push_back(p);
+
+
+        #else
+        // default when not overriding
+
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL
+        p.vertical = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL;//,    pnl["v"]);`
+        #else
+        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+        #endif
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = SEGMENT.stopY;//,      pnl["h"]);
+        p.width = SEGMENT.stop;//,       pnl["w"]);
+        panel.push_back(p);
+
+
+
+        #endif
+
+
+
       //   if (++s >= WLED_MAX_PANELS || s >= strip.panels) break; // max panels reached
       // }
     // } else {
@@ -283,6 +348,7 @@ void mAnimatorLight::EveryLoop()
   }
   yield();
   #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  
   
   // if (doSerializeConfig) serializeConfig();
 
@@ -378,7 +444,7 @@ void mAnimatorLight::BootMessage()
 {
   #ifndef ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR("BOOT: " "LightCount=%d"), settings.light_size_count);
+  // ALOG_INF(PSTR("BOOT: " "LightCount=%d"), settings.light_size_count);
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
   #endif // ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
 
@@ -426,11 +492,6 @@ void mAnimatorLight::Init(void)
   loadLedmap = 0; // To enable it to load once
   #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
 
-  // Allow runtime changes of animation size
-  // settings.light_size_count = STRIP_SIZE_MAX; 
-  pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
-
-
   paletteFade=0;
   paletteBlend = 0;
   milliampsPerLed = 5;
@@ -470,8 +531,6 @@ void mAnimatorLight::Init(void)
   BusConfig_ManualLoad_16Pin();
   #endif // ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
   
-  pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
-
   Init_Pins();
 
   LoadEffects();
@@ -1280,8 +1339,8 @@ void mAnimatorLight::SubTask_Segments_Effects()
     // SEGMENT_I(seg_i).effect_id = EFFECTS_FUNCTION__MATRIX__2D_DNA__ID;
 
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,SEGMENT_I(seg_i).isActive());
-      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].start,_segments[_segment_index_primary].stop);
+      // ALOG_DBG(PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,SEGMENT_I(seg_i).isActive());
+      // ALOG_DBG(PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].start,_segments[_segment_index_primary].stop);
     // #endif
 
     // reset the segment runtime data if needed, called before isActive to ensure deleted segment's buffers are cleared
@@ -1467,7 +1526,7 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
     updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress); 
   // DEBUG_PIN2_SET(1); 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
+    // ALOG_TST(PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
 
   // DEBUG_PIN3_SET(0);
     SEGMENT.SetPixelColor(pixel, updatedColor, BRIGHTNESS_ALREADY_SET);
@@ -1498,8 +1557,8 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
   
   ALOG_DBM( PSTR("SEGMENT.colour_type__used_in_effect_generate=%d, seg%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type__used_in_effect_generate, getCurrSegmentId(), updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
-  // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
+  // ALOG_TST(PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
+  // ALOG_TST(PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
     
   for (uint16_t pixel = 0; 
                 pixel < SEGLEN; 
@@ -1528,8 +1587,8 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSeg
   
   // ALOG_INF( PSTR("SEGMENT.colour_type__used_in_effect_generate=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type__used_in_effect_generate,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
-  // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
+  // ALOG_TST(PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
+  // ALOG_TST(PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
     
   for (uint16_t pixel = 0; 
                 pixel < SEGLEN; 
@@ -1595,7 +1654,7 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   // note right now it is storing the full rgbcct value
   uint16_t pixel_start_i = 0;
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
+  // ALOG_TST(PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
   switch(pixel_type)
   {
     case ColourType::COLOUR_TYPE__RGB__ID:
@@ -1643,10 +1702,10 @@ void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   }
 
   // uint16_t pixel_start_i =pixel_index*sizeof(TransitionColourPairs);
-  //   // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen); 
+  //   // ALOG_TST(PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen); 
   // // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
 
-  // // AddLog(LOG_LEVEL_TEST, PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
+  // // ALOG_TST(PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
   // //   pixel_index,
   // //   colour_pair->DesiredColour.R,
   // //   colour_pair->DesiredColour.G,
@@ -1935,7 +1994,7 @@ void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint1
   byte* start_of_pixel_pair = nullptr;
 
   #ifdef ENABLE_DEVFEATURE_PIXEL_MATRIX
-  AddLog(LOG_LEVEL_TEST, PSTR("[%d] \t pixel_start_i/buflen=%d\t%d"),pixel_index, pixel_start_i,buflen);
+  ALOG_TST(PSTR("[%d] \t pixel_start_i/buflen=%d\t%d"),pixel_index, pixel_start_i,buflen);
   #endif 
 
   /**
@@ -1994,7 +2053,7 @@ void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint1
   }
 
   // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
-  // AddLog(LOG_LEVEL_TEST, PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
+  // ALOG_TST(PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
   //   pixel_index,
   //   colour_pair->DesiredColour.R,
   //   colour_pair->DesiredColour.G,
@@ -2037,7 +2096,7 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
   if(buffer == nullptr)
   {
     #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_TEST, PSTR("buffer == nullptr"));
+    ALOG_TST(PSTR("buffer == nullptr"));
     #endif // ENABLE_LOG_LEVEL_INFO
     return false;
   } 
@@ -2047,7 +2106,7 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
   uint16_t pixel_start_i =pixel_index*sizeof(TransitionColourPairs);
 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
+    // ALOG_TST(PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
 
   if(pixel_start_i + 10 <= buflen)
   {
@@ -2065,12 +2124,12 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
   }else{
     
     #ifdef ENABLE_LOG_LEVEL_WARNING
-    AddLog(LOG_LEVEL_TEST, PSTR("NOT enough memory"));
+    ALOG_TST(PSTR("NOT enough memory"));
     #endif // ENABLE_LOG_LEVEL_INFO
   }
   
   // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
-  // AddLog(LOG_LEVEL_TEST, PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
+  // ALOG_TST(PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
   //   pixel_index,
   //   colour_pair->DesiredColour.R,
   //   colour_pair->DesiredColour.G,
@@ -2113,8 +2172,8 @@ uint16_t pixel_start_i = 0;
 
 //   uint16_t pixel_pair_index_location_in_buffer = pixel_index*sizeof(TransitionColourPairs);
 
-// // AddLog(LOG_LEVEL_TEST, PSTR("GetTransitionColourBuffer=%d \t%d"),pixel_index, pixel_pair_index_location_in_buffer );
-// AddLog(LOG_LEVEL_TEST, PSTR("pixel_type=%d"),pixel_type );
+// // ALOG_TST(PSTR("GetTransitionColourBuffer=%d \t%d"),pixel_index, pixel_pair_index_location_in_buffer );
+// ALOG_TST(PSTR("pixel_type=%d"),pixel_type );
 
     byte* c = nullptr;
 //   byte* start_of_pair = &buffer[pixel_pair_index_location_in_buffer];
@@ -2144,13 +2203,13 @@ uint16_t pixel_start_i = 0;
     break;
   }
 
-// AddLog(LOG_LEVEL_TEST, PSTR("colour->StartingColour=%d,%d,%d,%d,%d"),colour->StartingColour.R,colour->StartingColour.G,colour->StartingColour.B,colour->StartingColour.WC,colour->StartingColour.WW);
-// AddLog(LOG_LEVEL_TEST, PSTR("colour->DesiredColour=%d,%d,%d,%d,%d"),colour->DesiredColour.R,colour->DesiredColour.G,colour->DesiredColour.B,colour->DesiredColour.WC,colour->DesiredColour.WW);
+// ALOG_TST(PSTR("colour->StartingColour=%d,%d,%d,%d,%d"),colour->StartingColour.R,colour->StartingColour.G,colour->StartingColour.B,colour->StartingColour.WC,colour->StartingColour.WW);
+// ALOG_TST(PSTR("colour->DesiredColour=%d,%d,%d,%d,%d"),colour->DesiredColour.R,colour->DesiredColour.G,colour->DesiredColour.B,colour->DesiredColour.WC,colour->DesiredColour.WW);
 
       
   // AddLog_Array(LOG_LEVEL_TEST, PSTR("Abuffer"), &start_of_pair[pixel_pair_index_location_in_buffer    ] , 10);
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("GET DesiredColour[%d] = %d,%d,%d,%d,%d"), 
+  // ALOG_TST(PSTR("GET DesiredColour[%d] = %d,%d,%d,%d,%d"), 
   //   pixel_index,
   //   colour->DesiredColour.R,
   //   colour->DesiredColour.G,
@@ -2227,7 +2286,7 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
 { 
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::StartAnimationAsBlendFromStartingColorToDesiredColor"));
+  //ALOG_DBG(PSTR(D_LOG_NEO "f::StartAnimationAsBlendFromStartingColorToDesiredColor"));
   #endif
 
   // pCONT_iLight->runtime.animation_changed_millis = millis();
@@ -2324,7 +2383,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
     char* dataPtr = strchr(lineBuffer,'@');
     if (dataPtr) *dataPtr = 0; // replace name dividor with null termination. Escape "name@data"
 
-    if(strcmp(f,lineBuffer)==0)//  mSupport::CheckCommand_P(f, lineBuffer))
+    if(strcmp(f,lineBuffer)==0)
     {   
       ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"),f,i);
       return i; 
@@ -2549,7 +2608,7 @@ void mAnimatorLight::Segment::deallocateData()
 void mAnimatorLight::Segment::resetIfRequired() {
   if (reset) {
     
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIXEL "resetIfRequired AuxOptions Segment = %d,%d,%d,%d"),
+  // ALOG_INF(PSTR(D_LOG_PIXEL "resetIfRequired AuxOptions Segment = %d,%d,%d,%d"),
   //   aux0,
   //   aux1,
   //   aux2,
@@ -3686,10 +3745,15 @@ void mAnimatorLight::finalizeInit(void)
 // void IRAM_ATTR mAnimatorLight::BUS_setPixelColor(int i, uint32_t col)
 void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
 {
-  // 
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
+  #endif 
   if (i >= _length) return;
   if (i < customMappingSize) i = customMappingTable[i];
   RgbcctColor c = RgbcctColor( R(col),G(col),B(col),W(col),W(col) );
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
+  #endif
   pCONT_iLight->bus_manager->setPixelColor(i, c);
 }
 
@@ -4457,15 +4521,59 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, uint3
 void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, bool flag_brightness_already_applied)
 {
 
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("SetPixelColor %d"), indexPixel);
+  #endif
+
   int vStrip = indexPixel>>16; // hack to allow running on virtual strips (2D segment columns/rows)
   indexPixel &= 0xFFFF;
   if (indexPixel >= virtualLength() || indexPixel<0) return;  // if pixel would fall out of segment just exit
 
+  /**
+   * @brief 
+   * 2023 method had the original WLED effects request brightness applied at the end, however, this is adding function call complexity
+   * 2024 version will now assume brightness must always be applied (and keeps WLED effects closer to original), and my own methods must report "brightness_ALREADY_applied" and thus the brightness will not be applied twice
+   *
+   * DEFAULT: brightness is applied
+   **/
+  if(flag_brightness_already_applied == false)
+  {
 
-  uint32_t col = color_internal.getU32();
+    // if(indexPixel==0) ALOG_INF(PSTR("Applying brightness here"));
+    
+    /**
+     * @brief Apply "GLOBAL" brightness to the colour
+     * 
+     */
+    uint8_t brightness = pCONT_iLight->getBriRGB_Global();
+
+    /**
+     * @brief Apply "SEGMENT" brightness to the colour ALSO (rescale global brightness value, this is similar to WLED opacity)
+     * 
+     */
+    if(_brightness_rgb!=255)
+    {
+      brightness = scale8(brightness, _brightness_rgb);
+    }
+
+    color_internal.R  = scale8(color_internal.R,  brightness);
+    color_internal.G  = scale8(color_internal.G,  brightness);
+    color_internal.B  = scale8(color_internal.B,  brightness);
+    color_internal.W1 = scale8(color_internal.W1, brightness);
+    color_internal.W2 = scale8(color_internal.W2, brightness);
+    
+  }
+  else
+  {    
+    // if(indexPixel==0) ALOG_INF(PSTR("NOOOOOOOOOOOOOOOT Applying brightness here"));
+  }
 
 
+
+  // ALOG_INF(PSTR("is2D() %d"), is2D());
+  // ALOG_INF(PSTR("map1D2D %d"), map1D2D);
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  uint32_t col = color_internal.getU32();
     if (is2D()) {
       uint16_t vH = virtualHeight();  // segment height in logical pixels
       uint16_t vW = virtualWidth();
@@ -4515,44 +4623,6 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
 
   // if(indexPixel==0) ALOG_INF(PSTR("flag_brightness_already_applied %d"), flag_brightness_already_applied);
 
-  /**
-   * @brief 
-   * 2023 method had the original WLED effects request brightness applied at the end, however, this is adding function call complexity
-   * 2024 version will now assume brightness must always be applied (and keeps WLED effects closer to original), and my own methods must report "brightness_ALREADY_applied" and thus the brightness will not be applied twice
-   *
-   * DEFAULT: brightness is applied
-   **/
-  if(flag_brightness_already_applied == false)
-  {
-
-    // if(indexPixel==0) ALOG_INF(PSTR("Applying brightness here"));
-    
-    /**
-     * @brief Apply "GLOBAL" brightness to the colour
-     * 
-     */
-    uint8_t brightness = pCONT_iLight->getBriRGB_Global();
-
-    /**
-     * @brief Apply "SEGMENT" brightness to the colour ALSO (rescale global brightness value, this is similar to WLED opacity)
-     * 
-     */
-    if(_brightness_rgb!=255)
-    {
-      brightness = scale8(brightness, _brightness_rgb);
-    }
-
-    color_internal.R  = scale8(color_internal.R,  brightness);
-    color_internal.G  = scale8(color_internal.G,  brightness);
-    color_internal.B  = scale8(color_internal.B,  brightness);
-    color_internal.W1 = scale8(color_internal.W1, brightness);
-    color_internal.W2 = scale8(color_internal.W2, brightness);
-    
-  }
-  else
-  {    
-    // if(indexPixel==0) ALOG_INF(PSTR("NOOOOOOOOOOOOOOOT Applying brightness here"));
-  }
 
   /**
    * @brief Apply Pixel hardware colour mapping from internal to hardware order
@@ -4637,7 +4707,7 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
       #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
     }
   
-    ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
+    // ALOG_INF(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
 
   }
 
@@ -4668,23 +4738,23 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment::GetPixelColor(uint16_t indexPixel
       {
         uint32_t c = getPixelColorXY(indexPixel % vW, indexPixel / vW);
         // ALOG_INF(PSTR("c=%d"), c);
-        RgbcctColor c2 = RgbcctColor::GetRgbcctFromU32Colour(c);
+        RgbcctColor c2 = RgbcctColor(c);
         // ALOG_INF(PSTR("c2=%d,%d,%d,%d,%d"), c2.R, c2.G, c2.B, c2.W1, c2.W2);
-        return RgbcctColor::GetRgbcctFromU32Colour( getPixelColorXY(indexPixel % vW, indexPixel / vW) );
+        return RgbcctColor( getPixelColorXY(indexPixel % vW, indexPixel / vW) );
         break;
       }
       case M12_pBar:
-        if (vStrip>0) return RgbcctColor::GetRgbcctFromU32Colour(getPixelColorXY(vStrip - 1, vH - indexPixel -1));
-        else          return RgbcctColor::GetRgbcctFromU32Colour(getPixelColorXY(0, vH - indexPixel -1));
+        if (vStrip>0) return RgbcctColor(getPixelColorXY(vStrip - 1, vH - indexPixel -1));
+        else          return RgbcctColor(getPixelColorXY(0, vH - indexPixel -1));
         break;
       case M12_pArc:
       case M12_pCorner:
         // use longest dimension
-        return vW>vH ? RgbcctColor::GetRgbcctFromU32Colour(getPixelColorXY(indexPixel, 0)) : RgbcctColor::GetRgbcctFromU32Colour(getPixelColorXY(0, indexPixel));
+        return vW>vH ? RgbcctColor(getPixelColorXY(indexPixel, 0)) : RgbcctColor(getPixelColorXY(0, indexPixel));
         break;
     }
     ALOG_ERR(PSTR("No map1D2D set"));
-    return 0;
+    return RgbcctColor((uint32_t)0);
   }
 #endif
 
@@ -4709,7 +4779,7 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment::GetPixelColor(uint16_t indexPixel
   RgbcctColor colour_hardware = pCONT_iLight->bus_manager->getPixelColor(physical_indexPixel);
   // RgbcctColor colour_hardware = pCONT_lAni->getPixelColor(physical_indexPixel);//   pCONT_iLight->bus_manager->getPixelColor(physical_indexPixel);
   
-  ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
+  // ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
 
   return colour_hardware;
 
@@ -5202,6 +5272,8 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
     {
       JBI->Add("Start", SEGMENT_I(seg_i).start);
       JBI->Add("Stop",  SEGMENT_I(seg_i).stop);
+      JBI->Add("StartY", SEGMENT_I(seg_i).startY);
+      JBI->Add("StopY",  SEGMENT_I(seg_i).stopY);
       JBI->Add("EffectMicros",   SEGMENT_I(seg_i).performance.effect_build_ns);
 
     }
@@ -5484,7 +5556,10 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
   JBI->Add("BrightnessRGB_Master", pCONT_iLight->getBriRGB_Global());
   JBI->Add("BrightnessCCT_Master", pCONT_iLight->getBriCCT_Global());
 
-  for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
+  uint8_t seg_count = getSegmentsNum();
+  seg_count = seg_count < 3 ? seg_count : 3; //limit memory overrun, or else later instead of reducing the seg count, reduce the data shared in another topic as overview
+
+  for(uint8_t seg_i =0; seg_i < seg_count; seg_i++)
   {
 
     JBI->Object_Start_F("Segment%d", seg_i);
@@ -5498,6 +5573,8 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
       JBI->Array_Start("PixelRange");
         JBI->Add(SEGMENT_I(seg_i).start);
         JBI->Add(SEGMENT_I(seg_i).stop);
+        JBI->Add(SEGMENT_I(seg_i).startY);
+        JBI->Add(SEGMENT_I(seg_i).stopY);
       JBI->Array_End();
       JBI->Add("Offset",    SEGMENT_I(seg_i).offset);
       JBI->Add("Speed",     SEGMENT_I(seg_i).speed);
@@ -5652,10 +5729,10 @@ void mAnimatorLight::MQTTHandler_Init()
   struct handler<mAnimatorLight>* ptr;
   
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -5663,10 +5740,10 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_segments_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
@@ -5674,10 +5751,10 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_playlists_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
@@ -5686,10 +5763,10 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   ptr = &mqtthandler_matrix_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MATRIX_CTR;
@@ -5699,10 +5776,10 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_FEATURE_LIGHTING__SEQUENCER
   ptr = &mqtthandler_automation_sequencer;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEQUENCER;
@@ -5712,10 +5789,10 @@ void mAnimatorLight::MQTTHandler_Init()
   
   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   ptr = &mqtthandler_mode_ambilight_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR;
@@ -5725,10 +5802,10 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   ptr = &mqtthandler_manual_setpixel;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
@@ -5738,10 +5815,10 @@ void mAnimatorLight::MQTTHandler_Init()
     
   // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   // ptr = &mqtthandler_automation_presets;
-  // ptr->tSavedLastSent = millis();
+  // ptr->tSavedLastSent = 0;
   // ptr->flags.PeriodicEnabled = true;
   // ptr->flags.SendNow = true;
-  // ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  // ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
   // ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   // ptr->json_level = JSON_LEVEL_DETAILED;
   // ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
@@ -5751,10 +5828,10 @@ void mAnimatorLight::MQTTHandler_Init()
     
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
   ptr = &mqtthandler_manual_setpixel;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
@@ -5764,10 +5841,10 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
   ptr = &mqtthandler_debug_palette;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
@@ -5780,7 +5857,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->tRateSecs              = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level             = JSON_LEVEL_DETAILED;
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR;
@@ -5790,10 +5867,10 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   ptr = &mqtthandler_debug_animations_progress;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR;
@@ -5833,9 +5910,9 @@ void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

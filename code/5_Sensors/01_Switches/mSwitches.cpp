@@ -7,16 +7,26 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
 {
 
   switch(function){
-    case FUNC_INIT:
+    /************
+     * INIT SECTION * 
+    *******************/
+    case TASK_INIT:
       SwitchInit();
     break;
-    case FUNC_LOOP: 
+  }
+
+  switch(function){
+    case TASK_LOOP: 
       SwitchLoop();
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
 
       AddLog(LOG_LEVEL_INFO,PSTR("swt=%s"),IsSwitchActive(0)?"On":"Off");
       // AddLog(LOG_LEVEL_INFO,PSTR("swt=%d"), digitalRead(5) );
+
+
+      AddLog(LOG_LEVEL_INFO,PSTR("mode %d %d\n\r\n\r"),pCONT_set->Settings.switchmode[0], 0);
+      
 
        
         // Serial.printf("PinUsed[29]\t\tpin=%d\n\r",pCONT_pins->GetPin(29));
@@ -40,16 +50,16 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    case FUNC_MQTT_CONNECTED:
+    case TASK_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -123,7 +133,7 @@ void mSwitches::SwitchInit(void)
       switches[settings.switches_found].switch_virtual = digitalRead(switches[settings.switches_found].pin);  
       
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_TEST, PSTR("Switch %d %d %d"), pin_id, settings.switches_found, switches[settings.switches_found].pin);
+        ALOG_TST(PSTR("Switch %d %d %d"), pin_id, settings.switches_found, switches[settings.switches_found].pin);
       #endif // ENABLE_LOG_LEVEL_INFO
       
       if(settings.switches_found++ >= MAX_SWITCHES){ break; }
@@ -294,13 +304,19 @@ const char* mSettings::SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_
  * Switch handler
 \*********************************************************************************************/
 
-void mSwitches::SwitchHandler(uint8_t mode)
+void mSwitches::SwitchHandler(uint8_t mode) //mode needs removed
 {
   if (pCONT_time->uptime_seconds_nonreset < 4) { return; }  
+DEBUG_LINE_HERE
 
   uint8_t state = SWITCH_NOT_PRESSED_ID;
   uint8_t switchflag;
-  uint16_t loops_per_second = 1000 / pCONT_set->Settings.switch_debounce;
+  // DEBUG_LINE_HERE
+  // Serial.printf("Settings.switch_debounce %d\n\r", pCONT_set->Settings.switch_debounce);
+  // Serial.flush();
+  uint16_t loops_per_second = safeDivideWithDefault(1000, pCONT_set->Settings.switch_debounce, 20);
+  // Serial.printf("loops_per_second %d\n\r", loops_per_second);
+  // DEBUG_LINE_HERE
   uint8_t active_state = LOW;
 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
@@ -337,13 +353,13 @@ void mSwitches::SwitchHandler(uint8_t mode)
       {
         switches[i].ischanged = true;
 
-        ALOG_DBM( PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
+        ALOG_INF( PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
                   i, 
                   state,
                   state==active_state?"ACTIVE":"Not Active"
         );
       
-        ALOG_DBM( PSTR("state%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),state,i,switches[i].lastwallswitch);
+        ALOG_INF( PSTR("state%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),state,i,switches[i].lastwallswitch);
         
         switchflag = 3;
         switch (pCONT_set->Settings.switchmode[i]) {
@@ -401,16 +417,16 @@ void mSwitches::SwitchHandler(uint8_t mode)
             #ifdef USE_MODULE_CORE_RULES
               // Active high means start of motion always, so check for inversion
               uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
-              
+              DEBUG_LINE_HERE
               ALOG_INF( PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
     
               pCONT_rules->NewEventRun_NumArg(
                 D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
-                FUNC_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
+                TASK_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
                 i, // SWitch index
                 1, // Embedded data length
                 new_state); // Event has occured, save and check it            
-
+DEBUG_LINE_HERE
             #endif
             
           #endif // ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
@@ -565,7 +581,7 @@ void mSwitches::MQTTHandler_Init(){
   struct handler<mSwitches>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -575,7 +591,7 @@ void mSwitches::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -585,7 +601,7 @@ void mSwitches::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
@@ -613,9 +629,9 @@ void mSwitches::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
   }
 }
 

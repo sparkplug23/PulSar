@@ -9,20 +9,20 @@ extern "C" {
 #endif
 
 // Used for timed on or off events
-int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
-    case FUNC_INIT:
+    case TASK_INIT:
       WifiConnect();
     break;
-    case FUNC_LOOP: 
+    case TASK_LOOP: 
     
       #if defined(USE_NETWORK_MDNS) && defined(ESP8266)
         MdnsUpdate();
       #endif // USE_NETWORK_MDNS
     
     break;
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
 
       // AddLog(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
       //  Serial.println(WiFi.localIP());
@@ -36,17 +36,17 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
         pCONT_set->wifi_state_flag = ETHERNET_RESTART;
       }
             
-      //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ETHERNET "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
+      //ALOG_DBG(PSTR(D_LOG_ETHERNET "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
     break;
-    case FUNC_EVERY_MINUTE:
+    case TASK_EVERY_MINUTE:
     
 
     break;
-    case FUNC_EVERY_FIVE_MINUTE:
+    case TASK_EVERY_FIVE_MINUTE:
       ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
     break;
-    case FUNC_ETHERNET_CONNECTED:
+    case TASK_ETHERNET_CONNECTED:
 
       DEBUG_LINE_HERE;
     
@@ -68,12 +68,12 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-void mWiFi::parse_JSONCommand(JsonParserObject obj){};
+void mEthernet::parse_JSONCommand(JsonParserObject obj){};
    
 
 
 
-void mWiFi::init(void){
+void mEthernet::init(void){
   
 //  AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::init");
 
@@ -171,7 +171,7 @@ void EthernetEvent(arduino_event_t *event);
 void EthernetEvent(arduino_event_t *event) {
   switch (event->event_id) {
     case ARDUINO_EVENT_ETH_START:
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ETH D_ATTEMPTING_CONNECTION));
+      ALOG_DBG(PSTR(D_LOG_ETH D_ATTEMPTING_CONNECTION));
       ETH.setHostname(eth_hostname);
       break;
 
@@ -179,16 +179,16 @@ void EthernetEvent(arduino_event_t *event) {
 #ifdef USE_IPV6
       ETH.enableIpV6();   // enable Link-Local 
 #endif // USE_IPV6
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ETH D_CONNECTED " at %dMbps%s, Mac %s, Hostname %s"),
+      ALOG_INF(PSTR(D_LOG_ETH D_CONNECTED " at %dMbps%s, Mac %s, Hostname %s"),
         ETH.linkSpeed(), (ETH.fullDuplex()) ? " Full Duplex" : "",
         ETH.macAddress().c_str(), eth_hostname
         );
         
-      // AddLog(LOG_LEVEL_DEBUG, D_LOG_ETH "ETH.enableIpV6() -> %i", ETH.enableIpV6());
+      // ALOG_DBG(D_LOG_ETH "ETH.enableIpV6() -> %i", ETH.enableIpV6());
       break;
       
     case ARDUINO_EVENT_ETH_GOT_IP:
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ETH "Mac %s, IPAddress %_I, Hostname %s"),
+      // ALOG_DBG(PSTR(D_LOG_ETH "Mac %s, IPAddress %_I, Hostname %s"),
       //   ETH.macAddress().c_str(), (uint32_t)ETH.localIP(), eth_hostname);
       Settings->eth_ipv4_address[1] = (uint32_t)ETH.gatewayIP();
       Settings->eth_ipv4_address[2] = (uint32_t)ETH.subnetMask();
@@ -198,7 +198,7 @@ void EthernetEvent(arduino_event_t *event) {
       }
       TasmotaGlobal.rules_flag.eth_connected = 1;
       TasmotaGlobal.global_state.eth_down = 0;
-      AddLog(LOG_LEVEL_DEBUG, PSTR("ETH: IPv4 %_I, mask %_I, gateway %_I"),
+      ALOG_DBG(PSTR("ETH: IPv4 %_I, mask %_I, gateway %_I"),
               event->event_info.got_ip.ip_info.ip.addr,
               event->event_info.got_ip.ip_info.netmask.addr,
               event->event_info.got_ip.ip_info.gw.addr);
@@ -211,7 +211,7 @@ void EthernetEvent(arduino_event_t *event) {
       ip_addr_t ip_addr6;
       ip_addr_copy_from_ip6(ip_addr6, event->event_info.got_ip6.ip6_info.ip);
       IPAddress addr(ip_addr6);
-      AddLog(LOG_LEVEL_DEBUG, PSTR("%s: IPv6 %s %s"),
+      ALOG_DBG(PSTR("%s: IPv6 %s %s"),
              event->event_id == ARDUINO_EVENT_ETH_GOT_IP6 ? "ETH" : "WIF",
              addr.isLocal() ? PSTR("Local") : PSTR("Global"), addr.toString().c_str());
       if (!addr.isLocal()) {    // declare network up on IPv6
@@ -224,13 +224,13 @@ void EthernetEvent(arduino_event_t *event) {
 #endif // USE_IPV6
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ETH "Disconnected"));
+      ALOG_INF(PSTR(D_LOG_ETH "Disconnected"));
       TasmotaGlobal.rules_flag.eth_disconnected = 1;
       TasmotaGlobal.global_state.eth_down = 1;
       break;
 
     case ARDUINO_EVENT_ETH_STOP:
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ETH "Stopped"));
+      ALOG_DBG(PSTR(D_LOG_ETH "Stopped"));
       TasmotaGlobal.global_state.eth_down = 1;
       break;
 
@@ -251,7 +251,7 @@ void EthernetSetIp(void) {
 void EthernetInit(void) {
   if (!Settings->flag4.network_ethernet) { return; }
   if (!PinUsed(GPIO_ETH_PHY_MDC) && !PinUsed(GPIO_ETH_PHY_MDIO)) {
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ETH "No ETH MDC and/or ETH MDIO GPIO defined"));
+    ALOG_DBG(PSTR(D_LOG_ETH "No ETH MDC and/or ETH MDIO GPIO defined"));
     return;
   }
 
@@ -298,7 +298,7 @@ void EthernetInit(void) {
 //  delay(1);
 //#endif // CONFIG_IDF_TARGET_ESP32
   if (!ETH.begin(Settings->eth_address, eth_power, eth_mdc, eth_mdio, (eth_phy_type_t)Settings->eth_type, (eth_clock_mode_t)Settings->eth_clk_mode)) {
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ETH "Bad PHY type or init error"));
+    ALOG_DBG(PSTR(D_LOG_ETH "Bad PHY type or init error"));
     return;
   };
 
@@ -453,13 +453,13 @@ bool Xdrv82(uint32_t function) {
   bool result = false;
 
   switch (function) {
-    case FUNC_EVERY_SECOND:
+    case TASK_EVERY_SECOND:
       EthernetConfigChange();
       break;
-    case FUNC_COMMAND:
+    case TASK_COMMAND:
       result = DecodeCommand(kEthernetCommands, EthernetCommand);
       break;
-    case FUNC_INIT:
+    case TASK_INIT:
       EthernetInit();
       break;
   }

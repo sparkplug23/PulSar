@@ -22,7 +22,6 @@ class mRelays :
     void Init(void);
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void   parse_JSONCommand(JsonParserObject obj);
 
     static constexpr const char* PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RELAY_CTR; }
@@ -80,6 +79,8 @@ class mRelays :
         power_t latching_power = 0;                 // Power state at latching start
         power_t rel_inverted = 0;                   // Relay inverted flag (1 = (0 = On, 1 = Off))
       }bitpacked;
+
+      uint8_t devices_present = 0;
 
       struct RELAY_STATUS
       {        
@@ -157,6 +158,8 @@ class mRelays :
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
+    
+    void   parse_JSONCommand(JsonParserObject obj);
     void CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id = 0);
     uint16_t CommandGet_SecondsToRemainOn(uint8_t relay_id = 0);
     uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);

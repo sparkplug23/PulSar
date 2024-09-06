@@ -35,10 +35,10 @@ int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
     break;
   }
@@ -49,7 +49,7 @@ int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:{
+    case TASK_EVERY_SECOND:{
       EverySecond();
     }
     break;
@@ -57,13 +57,13 @@ int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -106,13 +106,13 @@ void mEnergyADE7953::Write(uint16_t reg, uint32_t val)
 {
   int size = RegSize(reg);
   if (size) {
-    pCONT_sup->wire->beginTransmission(ADE7953_ADDR);
-    pCONT_sup->wire->write((reg >> 8) & 0xFF);
-    pCONT_sup->wire->write(reg & 0xFF);
+    pCONT_i2c->wire->beginTransmission(ADE7953_ADDR);
+    pCONT_i2c->wire->write((reg >> 8) & 0xFF);
+    pCONT_i2c->wire->write(reg & 0xFF);
     while (size--) {
-      pCONT_sup->wire->write((val >> (8 * size)) & 0xFF);  // Write data, MSB first
+      pCONT_i2c->wire->write((val >> (8 * size)) & 0xFF);  // Write data, MSB first
     }
-    pCONT_sup->wire->endTransmission();
+    pCONT_i2c->wire->endTransmission();
     delayMicroseconds(5);    // Bus-free time minimum 4.7us
   }
 }
@@ -123,14 +123,14 @@ int32_t mEnergyADE7953::Read(uint16_t reg)
 
   int size = RegSize(reg);
   if (size) {
-    pCONT_sup->wire->beginTransmission(ADE7953_ADDR);
-    pCONT_sup->wire->write((reg >> 8) & 0xFF);
-    pCONT_sup->wire->write(reg & 0xFF);
-    pCONT_sup->wire->endTransmission(0);
-    pCONT_sup->wire->requestFrom(ADE7953_ADDR, size);
-    if (size <= pCONT_sup->wire->available()) {
+    pCONT_i2c->wire->beginTransmission(ADE7953_ADDR);
+    pCONT_i2c->wire->write((reg >> 8) & 0xFF);
+    pCONT_i2c->wire->write(reg & 0xFF);
+    pCONT_i2c->wire->endTransmission(0);
+    pCONT_i2c->wire->requestFrom(ADE7953_ADDR, size);
+    if (size <= pCONT_i2c->wire->available()) {
       for (uint32_t i = 0; i < size; i++) {
-        response = response << 8 | pCONT_sup->wire->read();   // receive DATA (MSB first)
+        response = response << 8 | pCONT_i2c->wire->read();   // receive DATA (MSB first)
       }
     }
   }
@@ -306,7 +306,7 @@ void mEnergyADE7953::MQTTHandler_Init(){
   struct handler<mEnergyADE7953>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC2HOUR; 
@@ -316,7 +316,7 @@ void mEnergyADE7953::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyADE7953::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC2HOUR; 
@@ -326,7 +326,7 @@ void mEnergyADE7953::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyADE7953::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -349,8 +349,8 @@ void mEnergyADE7953::MQTTHandler_Set_RefreshAll(){
 
 void mEnergyADE7953::MQTTHandler_Set_DefaultPeriodRate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 

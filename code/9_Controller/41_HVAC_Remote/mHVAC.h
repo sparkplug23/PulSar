@@ -150,7 +150,7 @@ class mHVAC :
         /**
          * @brief This is the sensor module id (ie dht, db18s20, bme) so it knows which class to ask for temp readings 
          * */
-        int16_t module_id = -1; // -1 not set
+        uint16_t module_id = 0; 
         /**
          * @brief The index within the module I am using. This will need to be found using the unique name
          * */

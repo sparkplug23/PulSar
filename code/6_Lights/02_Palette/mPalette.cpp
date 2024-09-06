@@ -1109,7 +1109,7 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
       ALOG_ERR(PSTR("Bad Palette ID"));
     case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:{
 
-      #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING
       float azimuth = pCONT_solar->solar_position.azimuth;
       #else
       float azimuth = 0;
@@ -1135,7 +1135,7 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
     case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
     {
       
-      #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING
       float elevation = pCONT_solar->GetElevation();
       #else
       float elevation = 0;
@@ -1221,7 +1221,7 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
 
 
       
-      #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING
       float elevation = pCONT_solar->GetElevation();
       #else
       float elevation = 0;
@@ -2133,7 +2133,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
   Serial.println(encoding.index_gradient);
   #endif // ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
   
-//       DEBUG_LINE_HERE2;
+//       
 
 // if(return_encoded_value != nullptr)
 // {
@@ -2165,7 +2165,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
 
     if(palette_buffer == nullptr){ ALOG_ERR(PSTR("palette_buffer is null")); return RgbcctColor(); }
 
-      // DEBUG_LINE_HERE2;
+      // 
     if(encoding.index_gradient)
     {
       // ALOG_INF(PSTR("index_relativeB=%d"),index_relative);
@@ -2176,7 +2176,7 @@ RgbcctColor mPalette::Get_Encoded_Colour_ReadBuffer_Fast(
       // Set the index to move beyond the indexing information
       index_relative++;
     }
-      // DEBUG_LINE_HERE2;
+      // 
   
     
     return RgbcctColor(
@@ -2260,7 +2260,7 @@ mPalette::Get_Encoded_Palette_Colour(
    * the effect is visually correct. So no "FORCE it" should happen.
    * 
    */
-      DEBUG_LINE_HERE2;
+      
 
   RgbcctColor colour;
   // if(palette_adjusted_id>static_palettes.size())
@@ -2304,11 +2304,11 @@ mPalette::Get_Encoded_Palette_Colour(
 
   // ALOG_INF(PSTR("flags %d %d %d"), is_forced_to_get_discrete, is_not_gradient, is_basic_sequence_palette_with_increasing_indexing);
 
-      DEBUG_LINE_HERE2;
+      
   
   if(is_basic_sequence_palette_with_increasing_indexing) // forced, or originally normal discrete
   {
-      DEBUG_LINE_HERE2;
+      
     // 0-SEGLEN would need to become iterative of the palette    0-100    what if 0-100*pixels  so 0-500, then modulo by 100
     // o,1,2,3,4, 0,1,2,3,4, 0,1,2,3,4
     // but because of 255 range, these values should be scaled into 255
@@ -2359,7 +2359,7 @@ mPalette::Get_Encoded_Palette_Colour(
   {
 
     
-      // DEBUG_LINE_HERE2;
+      // 
     /**
      * @brief Convert incoming indes (0-SEGLEN) back into 255 range (0-255)
      * If it is mine, no matter what, convert into 255 range
@@ -2441,7 +2441,7 @@ mPalette::Get_Encoded_Palette_Colour(
     // ALOG_INF(PSTR("pixel_position (adjusted) %d(%d)"), _pixel_position, pixel_position_adjust);
 
 
-      // DEBUG_LINE_HERE2;
+      // 
   
     // Search for lower boundary
     uint8_t desired_pixel_scaled = pixel_position_adjust;
@@ -2538,7 +2538,7 @@ mPalette::Get_Encoded_Palette_Colour(
     // Serial.print("gradient_palettes"); for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,",gradient_palettes[v]); } Serial.println();
     // ALOG_INF(PSTR("v>>>>>>>> [%d|%d]  %d|%d p%d"), _pixel_position, desired_pixel_scaled, lower_boundary_v, upper_boundary_v, (int)(progress*100));
 
-      // DEBUG_LINE_HERE2;
+      // 
   
     // RgbcctColor lower_colour = Get_StaticPalette_Encoded_Colour_ReadBuffer(palette_adjusted_id, palette_buffer, lower_boundary_i); 
     // RgbcctColor upper_colour = Get_StaticPalette_Encoded_Colour_ReadBuffer(palette_adjusted_id, palette_buffer, upper_boundary_i);
@@ -2591,7 +2591,7 @@ mPalette::Get_Encoded_Palette_Colour(
   } // if(ptr->encoding.index_gradient || flag_force_gradient) 
 
   
-      // DEBUG_LINE_HERE2;
+      // 
   
   /******************************************************************************************************************************************************
    * *******************************************************************************************************************************************************************************
@@ -2605,7 +2605,7 @@ mPalette::Get_Encoded_Palette_Colour(
       
   if(flag_spanned_segment)
   {
-      DEBUG_LINE_HERE2;
+      
     if(pCONT_lAni->_virtualSegmentLength==1)
     {
       pixel_position_adjust = 0;
@@ -2614,7 +2614,7 @@ mPalette::Get_Encoded_Palette_Colour(
     }
   }
 
-      // DEBUG_LINE_HERE2;
+      // 
   
   // PALETTE_DATA *ptr = &static_palettes[palette_adjusted_id];
   // uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_adjusted_id);  
@@ -2623,7 +2623,7 @@ mPalette::Get_Encoded_Palette_Colour(
 
   // ALOG_INF(PSTR("pixel_position|palette_index %d->%d  %d %d"), pixel_position_adjust, palette_index, pixels_in_map, palette_index % 5);
   
-      DEBUG_LINE_HERE2;
+      
 
 
   colour = Get_Encoded_Colour_ReadBuffer_Fast(
@@ -2633,7 +2633,7 @@ mPalette::Get_Encoded_Palette_Colour(
     encoding,
     encoded_colour_width
   );
-      DEBUG_LINE_HERE2;
+      
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
     if(encoded_value != nullptr)

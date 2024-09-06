@@ -11,7 +11,7 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * INIT SECTION * 
     *******************/
-    case FUNC_PRE_INIT:
+    case TASK_PRE_INIT:
       Pre_Init();
       
       // leave as default for testing
@@ -22,7 +22,7 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
       analogAttach(23 ,0);
 
     break;
-    case FUNC_INIT:
+    case TASK_INIT:
       Init();
       analogWrite(23, 0);
     break;
@@ -34,11 +34,11 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_100_MSECOND:
+    case TASK_EVERY_100_MSECOND:
       BuzzerEvery100mSec();
     break;
-    case FUNC_EVERY_SECOND:
-      // AddLog(LOG_LEVEL_TEST, PSTR("pinMode %d"),Buzzer.pin);
+    case TASK_EVERY_SECOND:
+      // ALOG_TST(PSTR("pinMode %d"),Buzzer.pin);
       // digitalWrite(Buzzer.pin, !digitalRead(Buzzer.pin));
 
       // ALOG_INF(PSTR("PinUsed = %d"), pCONT_pins->PinUsed(GPIO_BUZZER_ID));
@@ -48,20 +48,20 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
+    case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
+    case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
-    case FUNC_MQTT_SENDER:
+    case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
@@ -308,7 +308,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
 
 
   if(jtok = obj["BuzzerMode"].getObject()["FreqMode"]){
-    AddLog(LOG_LEVEL_TEST, PSTR("FreqMode=%d"),jtok.getInt());
+    ALOG_TST(PSTR("FreqMode=%d"),jtok.getInt());
     pCONT_set->Settings.flag_drivers.buzzer_freq_mode = jtok.getInt();
 
   }
@@ -321,7 +321,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
   uint8_t beeps = 0;
 
   if(jtok = obj["beeps"]){
-    AddLog(LOG_LEVEL_TEST, PSTR("bbeeps=%d"),jtok.getInt());
+    ALOG_TST(PSTR("bbeeps=%d"),jtok.getInt());
     BuzzerBeep(jtok.getInt());
     // pinMode(Buzzer.pin, jtok.getInt());
 
@@ -364,7 +364,7 @@ void mBuzzer::MQTTHandler_Init(){
   struct handler<mBuzzer>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -374,7 +374,7 @@ void mBuzzer::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -384,7 +384,7 @@ void mBuzzer::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
+  ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
@@ -407,8 +407,8 @@ void mBuzzer::MQTTHandler_Set_RefreshAll(){
 
 void mBuzzer::MQTTHandler_Set_DefaultPeriodRate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Set_DefaultPeriodRate"
 

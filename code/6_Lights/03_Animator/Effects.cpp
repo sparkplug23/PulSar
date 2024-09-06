@@ -144,7 +144,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
 
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
-  ALOG_ERR( PSTR("GetPixelColor(0) = %d,%d,%d,%d,%d"), SEGMENT.GetPixelColor(0).R,SEGMENT.GetPixelColor(0).G,SEGMENT.GetPixelColor(0).B,SEGMENT.GetPixelColor(0).CW,SEGMENT.GetPixelColor(0).WW);
+  // ALOG_ERR( PSTR("GetPixelColor(0) = %d,%d,%d,%d,%d"), SEGMENT.GetPixelColor(0).R,SEGMENT.GetPixelColor(0).G,SEGMENT.GetPixelColor(0).B,SEGMENT.GetPixelColor(0).CW,SEGMENT.GetPixelColor(0).WW);
 
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
@@ -1513,12 +1513,16 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
 
   *indexes_counter_p ^= 1;
 
-  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "counter = %d/%d/%d"), counter,index_1,index_2);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "counter = %d/%d/%d"), counter,index_1,index_2);
 
   RgbcctColor colour;
 
-  for(uint16_t index=SEGMENT.start;
-                index<=SEGMENT.stop;
+  // ALOG_INF(PSTR("SEGMENT %d,%d"), SEGMENT.start, SEGMENT.stop);
+
+  // indexing from start to stop does not work when segment is not the first (seg0)
+
+  for(uint16_t index=0;
+                index<=SEGMENT.length();
                 index++
   ){
 
@@ -1536,12 +1540,13 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
         
   } 
 
+  // ALOG_INF(PSTR("step %d,%d,%d"), colour.R, colour.G, colour.B);
+
 //messy
   if(++*indexes_active_p>pixels_in_map-1){
     *indexes_active_p=0;
   }
-  
-  
+
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   
   SetSegment_AnimFunctionCallback(  SEGIDX, 
@@ -1580,7 +1585,7 @@ void mAnimatorLight::EffectAnim__TimeBased__HourProgress()
   RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = RgbcctColor();
+    colour = RgbcctColor(0,0,0);
     colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type__used_in_effect_generate, colour);
   }
@@ -1827,7 +1832,7 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 {
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  //ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
@@ -1880,7 +1885,7 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
     colour = SEGMENT.GetPaletteColour(desired_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, desired_pixel);
 
     #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
-    AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
+    ALOG_TST(PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
     #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
     colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
@@ -1969,12 +1974,6 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
   RgbcctColor overdraw_colour = RgbcctColor();
 
 
-
-
-
-
-
-
   // colour = RgbcctColor(255,255,255);
   uint16_t random_pixel = 0;
   
@@ -1983,6 +1982,9 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
                                       0,255, 
                                       0,SEGMENT.length()
                                     );
+
+  uint16_t palette_to_draw_ontop = SEGMENT.params_user[0];
+  uint16_t palette_over_length = GetNumberOfColoursInPalette(palette_to_draw_ontop);
 
   for(uint16_t pixel = 0; 
                 pixel < pixels_to_update; 
@@ -1997,14 +1999,24 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 
     random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
 
-    overdraw_colour = GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.params_internal.aux0, pixel);
+    overdraw_colour = GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel);
+
+    /**
+     * @brief If palette is one of the segment colours, then use its built in brightness as the palette over brightness
+     **/
+    if(palette_to_draw_ontop < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)
+    {
+      overdraw_colour = overdraw_colour.WithBrightness(); // Use already set SegColour 
+    }else{
+      overdraw_colour = overdraw_colour.WithBrightness(SEGMENT.params_user[1]); // Param1 is brightness control of Palette2
+    }
 
     // overdraw_colour.debug_print("overdraw_colour");
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type__used_in_effect_generate, overdraw_colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(SEGMENT.palette_id), colour.R );
     #endif
 
   }
@@ -2585,12 +2597,12 @@ void mAnimatorLight::EffectAnim__SunPositions_Elevation_Palette_Progress_Step()
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  //ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize))
   {
     #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    ALOG_TST(PSTR("Not Enough Memory"));
     #endif // ENABLE_LOG_LEVEL_INFO
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
@@ -2630,12 +2642,12 @@ void mAnimatorLight::EffectAnim__SunPositions_Elevation_Palette_Progress_LinearB
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  //ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize))
   {
     #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    ALOG_TST(PSTR("Not Enough Memory"));
     #endif // ENABLE_LOG_LEVEL_INFO
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
@@ -2693,7 +2705,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //    * Solar data to use, defined here for testing or simulations
 //    * */
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -2846,11 +2858,11 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   RgbcctColor c_blended = RgbcctColor::LinearBlend(c_lower, c_upper, progress_between_colours);
 
 //   RgbcctColor c = c_lower; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//   // ALOG_INF(PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 //   c = c_blended; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
+//   // ALOG_INF(PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
 //   c = c_upper; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//   // ALOG_INF(PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 
 //   /**
 //    * Load new colour into animation
@@ -2861,7 +2873,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 // //set desired colour
 //   // SEGMENT.active_rgbcct_colour_p->  = c_blended;
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!SEGMENT.rgbcct_controller->getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
@@ -2928,7 +2940,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -2958,7 +2970,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 //   SEGMENT.flags.fForceUpdate = true;
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!SEGMENT.rgbcct_controller->getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
@@ -3208,16 +3220,16 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
     
   // SEGMENT.colour_type__used_in_effect_generate = RgbcctColor::ColourType::LIGHT_TYPE__RGBW__ID;
   
-  AddLog(LOG_LEVEL_TEST, PSTR("02    SEGMENT.colour_type__used_in_effect_generate = %d"), SEGMENT.colour_type__used_in_effect_generate);
+  ALOG_TST(PSTR("02    SEGMENT.colour_type__used_in_effect_generate = %d"), SEGMENT.colour_type__used_in_effect_generate);
 
     
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize))
   {
-    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    ALOG_TST(PSTR("Not Enough Memory"));
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
 
@@ -3299,17 +3311,17 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ManualNumber_01()
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize))
   {
-    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    ALOG_TST(PSTR("Not Enough Memory"));
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
     
   
-  AddLog(LOG_LEVEL_TEST, PSTR("Numbers_Basic    _segments[].colour_type__used_in_effect_generate = %d"), SEGMENT.colour_type__used_in_effect_generate);
-  AddLog(LOG_LEVEL_TEST, PSTR("lcd_display_show_number = %d"), lcd_display_show_number);
+  ALOG_TST(PSTR("Numbers_Basic    _segments[].colour_type__used_in_effect_generate = %d"), SEGMENT.colour_type__used_in_effect_generate);
+  ALOG_TST(PSTR("lcd_display_show_number = %d"), lcd_display_show_number);
   /**
    * @brief Reset all new colours so only new sections of clock are lit
    **/
@@ -3347,19 +3359,19 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ManualString_01()
   
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize))
   {
-    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    ALOG_TST(PSTR("Not Enough Memory"));
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
   
   // So colour region does not need to change each loop to prevent colour crushing
   // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
-  AddLog(LOG_LEVEL_TEST, PSTR("Numbers_Basic    _segments[].colour_type__used_in_effect_generate = %d"), SEGMENT.colour_type__used_in_effect_generate);
-  AddLog(LOG_LEVEL_TEST, PSTR("lcd_display_show_number = %d"), lcd_display_show_number);
+  ALOG_TST(PSTR("Numbers_Basic    _segments[].colour_type__used_in_effect_generate = %d"), SEGMENT.colour_type__used_in_effect_generate);
+  ALOG_TST(PSTR("lcd_display_show_number = %d"), lcd_display_show_number);
 
   /**
    * @brief Reset all new colours so only new sections of clock are lit
@@ -3973,10 +3985,10 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //         this->ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
 //       }
 //     );
-//   //   AddLog(LOG_LEVEL_INFO, PSTR("ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01 FIRST RUN"));
+//   //   ALOG_INF(PSTR("ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01 FIRST RUN"));
 //   //   delay(5000);
 //   // }else{
-//   //   AddLog(LOG_LEVEL_INFO, PSTR("NOT SETTING"));
+//   //   ALOG_INF(PSTR("NOT SETTING"));
 
 //   }
 //   #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -3993,7 +4005,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //    * */
  
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -4146,11 +4158,11 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //   RgbcctColor c_blended = RgbcctColor::LinearBlend(c_lower, c_upper, progress_between_colours);
 
 //   RgbcctColor c = c_lower; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//   // ALOG_INF(PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 //   c = c_blended; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
+//   // ALOG_INF(PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
 //   c = c_upper; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//   // ALOG_INF(PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 
 //   /**
 //    * Load new colour into animation
@@ -4168,7 +4180,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //    * */
 
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!SEGMENT.rgbcct_controller->getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
@@ -4282,7 +4294,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // } effect_config;
 
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -4343,7 +4355,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //     SEGMENT.rgbcct_controller->setRGB(0,0,blue);
 
-//     // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
+//     // ALOG_INF(PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
 
 
@@ -4602,14 +4614,14 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 // pCONT_iLight->animation.palette_id = 10;
 
-//  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
+//  // ALOG_TST(PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
@@ -4619,12 +4631,12 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //     );
 //   }
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   animation_colours_rgbcct.StartingColor = SEGMENT.GetPixelColor();
 //   // GetPixelColourHardwareInterface();
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
+//   // ALOG_TST(PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
     
 
 //   // // Call the animator to blend from previous to new
@@ -4697,7 +4709,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //    * Solar data to use, defined here for testing or simulations
 //    * */
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -4748,7 +4760,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //     // AddLog(LOG_LEVEL_TEST,PSTR("sun_elevation=%d, blue=%d"), (int)sun_elevation, blue);
 
-//     // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
+//     // ALOG_INF(PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
 //     // uint8_t brightness_255 = map(sun_elevation,-50,-5,255,0);
 
@@ -4786,7 +4798,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //     // AddLog(LOG_LEVEL_TEST,PSTR("sun_elevation=%d, blue=%d"), (int)sun_elevation, blue);
 
-//     // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
+//     // ALOG_INF(PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
 //     // uint8_t brightness_255 = map(sun_elevation,-50,-5,255,0);
 
@@ -4821,7 +4833,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //     // AddLog(LOG_LEVEL_TEST,PSTR("sun_elevation=%d, blue=%d"), (int)sun_elevation, blue);
 
-//     // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
+//     // ALOG_INF(PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
 //     // uint8_t brightness_255 = map(sun_elevation,-50,-5,255,0);
 
@@ -4839,7 +4851,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //   //   pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
 
-//   //   // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
+//   //   // ALOG_INF(PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
 
 
@@ -4946,14 +4958,14 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //   pCONT_iLight->animation.palette_id = 10;
 
-//  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
+//  // ALOG_TST(PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
@@ -4963,12 +4975,12 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //     );
 //   }
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   animation_colours_rgbcct.StartingColor = SEGMENT.GetPixelColor();
 //   // GetPixelColourHardwareInterface();
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
+//   // ALOG_TST(PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
     
 
 //   // // Call the animator to blend from previous to new
@@ -5032,7 +5044,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //   pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
-//  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
+//  // ALOG_TST(PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
@@ -5044,7 +5056,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //    * Solar data to use, defined here for testing or simulations
 //    * */
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -5109,16 +5121,16 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //   //   mPaletteI->GetColourFromPalette(palette_p, i, &indexing);
 //   //   palette_indexes[i] = indexing - 90;
 //   //   sun_error[i] = (float)sun_elevation - palette_indexes[i];
-//   //   AddLog(LOG_LEVEL_INFO, PSTR("sun_error[%d] = %d %d \t %d"),i, indexing,  (int)sun_error[i], palette_indexes[i]);
+//   //   ALOG_INF(PSTR("sun_error[%d] = %d %d \t %d"),i, indexing,  (int)sun_error[i], palette_indexes[i]);
 //   //   // Also record zero-crossing point
 //   //   if((indexing-90) == 0)
 //   //   {
 //   //     zero_crossing_index = i;
-//   //     AddLog(LOG_LEVEL_INFO, PSTR("zero_crossing_index = %d FOUND"), zero_crossing_index);
+//   //     ALOG_INF(PSTR("zero_crossing_index = %d FOUND"), zero_crossing_index);
 //   //   }
 //   // }
 
-//   //     AddLog(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "zero_crossing_index = %d FOUND"), zero_crossing_index);
+//   //     ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "zero_crossing_index = %d FOUND"), zero_crossing_index);
 //   /**
 //    * Ascending method for finding right region between points
 //    * Check all, but once sun_elev is greater, then thats the current region
@@ -5197,7 +5209,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //   if(sun_elevation>=0)
 // //   {
 
-// //     AddLog(LOG_LEVEL_INFO, PSTR("Checking POSITIVE elevation\n\r"));
+// //     ALOG_INF(PSTR("Checking POSITIVE elevation\n\r"));
 
 // //     uint8_t smallest_error_index = 0;
 // //     float smallest_elev_error = fabs(sun_error[zero_crossing_index]);
@@ -5208,7 +5220,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //         smallest_error_index = i;
 // //         smallest_elev_error = fabs(sun_error[i]);
 // //       }
-// //       // AddLog(LOG_LEVEL_INFO, PSTR("sun_error[%d] = %d\t smallest_elev[%d]=%d"),
+// //       // ALOG_INF(PSTR("sun_error[%d] = %d\t smallest_elev[%d]=%d"),
 // //       //     i, (int)sun_error[i], smallest_error_index, (int)smallest_elev_error );
 // //     }
 
@@ -5218,7 +5230,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //      * */
 // //     if(sun_error[smallest_error_index] == 0) // EXACT ERROR
 // //     {
-// //       AddLog(LOG_LEVEL_INFO, PSTR("sun_error EXACT"));
+// //       ALOG_INF(PSTR("sun_error EXACT"));
 // //       // next index depends on direction
 // //       if (sun_is_ascending){
 // //         index.previous = smallest_error_index; // equals this exact index
@@ -5232,9 +5244,9 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //       Serial.printf("prev=%d, next=%d, progress=%d\n\r", index.previous, index.next, progress_between_colours);
 // //     }else{                                    // CLOSE ERROR
 // //       // depends on direction
-// //       AddLog(LOG_LEVEL_INFO, PSTR("sun_error CLOSE"));
+// //       ALOG_INF(PSTR("sun_error CLOSE"));
 // //       if (sun_is_ascending){ // sun going up, means next will be bigger in elevation, in palette index, means index larger (since palette starts with negatives)
-// //         AddLog(LOG_LEVEL_INFO, PSTR("sun_error[smallest_error_index] != 0 sun_is_ascending"));
+// //         ALOG_INF(PSTR("sun_error[smallest_error_index] != 0 sun_is_ascending"));
         
 // //         sun_elevation = 50;
 // //         // smallest_error_index=11;
@@ -5338,7 +5350,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //   else // sun_elevation<0
 // //   {
 
-// //     AddLog(LOG_LEVEL_INFO, PSTR("Checking NEGATIVE elevation"));
+// //     ALOG_INF(PSTR("Checking NEGATIVE elevation"));
     
 // //     uint8_t smallest_error_index = 0;
 // //     float smallest_elev_error = fabs(sun_error[0]);
@@ -5349,7 +5361,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //         smallest_error_index = i;
 // //         smallest_elev_error = fabs(sun_error[i]);
 // //       }
-// //       AddLog(LOG_LEVEL_INFO, PSTR("sun_error[%d] = %d smallest_elev_error%d smallest_error_index%d"),i, (int)sun_error[i], (int)smallest_elev_error, smallest_error_index);
+// //       ALOG_INF(PSTR("sun_error[%d] = %d smallest_elev_error%d smallest_error_index%d"),i, (int)sun_error[i], (int)smallest_elev_error, smallest_error_index);
 // //     }
 
 // //     /**
@@ -5358,7 +5370,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //      * */
 // //     if(sun_error[smallest_error_index] == 0)
 // //     {
-// //       AddLog(LOG_LEVEL_INFO, PSTR("sun_error[smallest_error_index] == 0"));
+// //       ALOG_INF(PSTR("sun_error[smallest_error_index] == 0"));
 // //       // next index depends on direction
 // //       if (sun_is_ascending){
 // //         index.previous = smallest_error_index; // equals this exact index
@@ -5371,9 +5383,9 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //       }
 // //     }else{
 // //       // depends on direction
-// //       AddLog(LOG_LEVEL_INFO, PSTR("sun_error[smallest_error_index] != 0"));
+// //       ALOG_INF(PSTR("sun_error[smallest_error_index] != 0"));
 // //       if (sun_is_ascending){ // sun going up, means next will be bigger in elevation, in palette index, means index larger (since palette starts with negatives)
-// //       AddLog(LOG_LEVEL_INFO, PSTR("sun_error[smallest_error_index] != 0 sun_is_ascending"));
+// //       ALOG_INF(PSTR("sun_error[smallest_error_index] != 0 sun_is_ascending"));
 // //         index.previous = smallest_error_index; // equals this exact index
 // //         index.next = smallest_error_index + 1;
 // //         progress_between_colours = ((float)palette_indexes[index.next]/(float)palette_indexes[index.previous]);
@@ -5404,11 +5416,11 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //     RgbcctColor c_blended = RgbcctColor::LinearBlend(c_prev,c_next,progress_between_colours);
 
 //     RgbcctColor c = c_prev; 
-//     AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//     ALOG_INF(PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 //     c = c_blended; 
-//     AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
+//     ALOG_INF(PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
 //     c = c_next; 
-//     AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//     ALOG_INF(PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 
 //     /**
 //      * Load new colour into animation
@@ -5422,7 +5434,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 // //   {
 // //     RgbcctColor c = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID), desired_index, &indexing);
 // //     adjusted_index = indexing - 90;
-// //     AddLog(LOG_LEVEL_INFO, PSTR("rgbcct[%d]=\t%d\t%d\t%d,%d,%d,%d,%d"),desired_index,indexing,adjusted_index,c.R,c.G,c.B,c.WW,c.WC);
+// //     ALOG_INF(PSTR("rgbcct[%d]=\t%d\t%d\t%d,%d,%d,%d,%d"),desired_index,indexing,adjusted_index,c.R,c.G,c.B,c.WW,c.WC);
 // //   }
 
 //   // delay(100);
@@ -5432,7 +5444,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //   animation_colours_rgbcct.DesiredColour  = c_blended;//mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
@@ -5491,7 +5503,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //    * Solar data to use, defined here for testing or simulations
 //    * */
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -5642,11 +5654,11 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //   RgbcctColor c_blended = RgbcctColor::LinearBlend(c_lower, c_upper, progress_between_colours);
 
 //   RgbcctColor c = c_lower; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//   // ALOG_INF(PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 //   c = c_blended; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
+//   // ALOG_INF(PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
 //   c = c_upper; 
-//   // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+//   // ALOG_INF(PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
 
 //   /**
 //    * Load new colour into animation
@@ -5656,7 +5668,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 //   animation_colours_rgbcct.DesiredColour  = c_blended;
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
@@ -5852,7 +5864,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 
 // float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 //   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
 //   #else
@@ -5881,7 +5893,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 //   pCONT_iLight->animation.flags.fForceUpdate = true;
 
-//   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
@@ -6386,7 +6398,7 @@ static const char PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE[] PROGMEM = "Sweep Palet
 //   if (SEGMENT.palette_id == 0 && mcol < 3) return SEGCOLOR_U32(mcol); //WS2812FX default
 //   uint8_t paletteIndex = i;
 //   if (mapping) paletteIndex = (i*255)/(_virtualSegmentLength -1);  // This scales out segment_index to SEGLEN as 0 to 255
-//   // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
+//   // ALOG_TST(PSTR("paletteIndex=%d"),paletteIndex);
 //   if (!wrap) paletteIndex = scale8(paletteIndex, 240); //cut off blend at palette "end"
 //   CRGB fastled_col;
 //   fastled_col = ColorFromPalette_WithLoad( SEGMENT.palette_container->CRGB16Palette16_Palette.data, paletteIndex, pbri, (paletteBlend == 3)? NOBLEND:LINEARBLEND);
@@ -11213,7 +11225,7 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
 
 // CRGB colour;
 //  = ColorFromPalette_WithLoad( Test_p, paletteIndex, pbri, NOBLEND);
-// AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+// ALOG_TST(PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
 
 
 
@@ -11223,11 +11235,11 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
 
   // uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  // //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  // //ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   // if (!SEGMENT.allocateData(dataSize))
   // {
-  //   AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+  //   ALOG_TST(PSTR("Not Enough Memory"));
   //   SEGMENT.effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
   // }
   
@@ -11344,7 +11356,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
 
 // CRGB colour;
 //  = ColorFromPalette_WithLoad( Test_p, paletteIndex, pbri, NOBLEND);
-// AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+// ALOG_TST(PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
 
 
 // DEBUG_LINE_HERE;
@@ -11358,11 +11370,11 @@ pCONT_iLight->ShowInterface();
 
   // uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
-  // //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  // //ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   // if (!SEGMENT.allocateData(dataSize))
   // {
-  //   AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+  //   ALOG_TST(PSTR("Not Enough Memory"));
   //   SEGMENT.effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
   // }
   
@@ -12105,7 +12117,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 //   // Add mode to allow orientations, for when screens rotate so they respect top/bottom
 
 //   // if(abs(millis()-ambilightsettings.tSavedUpdate)>ambilightsettings.ratemsSavedUpdate){ambilightsettings.tSavedUpdate=millis();
-//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "ambilight"));
+//   //   ALOG_DBG(PSTR(D_LOG_NEO "ambilight"));
 //   // }
 
   
@@ -12123,7 +12135,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 //     case AMBILIGHT_SIDES_ID: // IE DELL of dual tone from the past
 //       // not even splits, setting split point (ie bottom edge only 0%, 25% way up sides, half way 50%)
 //       if(abs(millis()-ambilightsettings.tSavedUpdate)>ambilightsettings.ratemsSavedUpdate){ambilightsettings.tSavedUpdate=millis();
-//         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "ambilight"));
+//         ALOG_DBG(PSTR(D_LOG_NEO "ambilight"));
 //         Ambilight_Sides();
 //         StartAnimationAsBlendFromStartingColorToDesiredColor();
 //       }
@@ -12140,7 +12152,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 
 // void mAnimatorLight::Ambilight_Sides(){
 //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::Ambilight_Sides()"));
+//   ALOG_DBG(PSTR(D_LOG_NEO "f::Ambilight_Sides()"));
 //   #endif
 
 
@@ -12350,7 +12362,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
 // // //       scene.name_id = tmp_id;
 // // //       pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
-// // //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
+// // //       ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
 // // //       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
 // // //       data_buffer.isserviced++;
 // // //     }else{
@@ -12368,25 +12380,25 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
   
 // // //   if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
 // // //     uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
-// // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HUE_N2F(hue);
-// // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     data_buffer.isserviced++;
 // // //   }
 // // //   if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
 // // //     uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
-// // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
-// // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
 // // //     data_buffer.isserviced++;
 // // //   }
 // // //   if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
 // // //     uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
-// // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-// // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
 // // //     data_buffer.isserviced++;
 // // //   }
@@ -12395,25 +12407,25 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 
 // // //   if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
 // // //     uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
-// // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HUE_N2F(hue);
-// // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     data_buffer.isserviced++;
 // // //   }
 // // //   if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
 // // //     uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
-// // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
-// // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
 // // //     data_buffer.isserviced++;
 // // //   }
 // // //   if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
 // // //     uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
-// // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-// // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
 // // //     data_buffer.isserviced++;
 // // //   }
@@ -12432,7 +12444,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //     rgb.B = colour32bit & 0xFF; //RGB
 // // //     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 // // //     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-// // //     // // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
+// // //     // // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
 // // //     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
 // // //     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 // // //   }
@@ -12441,16 +12453,16 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[D_JSON_TIME].isNull()){ //default to secs
 // // //     pCONT_iLight->animation.time_ms.val = obj["time"];
 // // //     pCONT_iLight->animation.time_ms.val *= 1000;
-// // //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
+// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
 // // //   }else
 // // //   if(!obj[D_JSON_TIME].isNull()){
 // // //     pCONT_iLight->animation.time_ms.val = obj["time_secs"];
 // // //     pCONT_iLight->animation.time_ms.val *= 1000;
-// // //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
+// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
 // // //   }else
 // // //   if(!obj[D_JSON_TIME_MS].isNull()){
 // // //     pCONT_iLight->animation.time_ms.val = obj["time_ms"];
-// // //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
+// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
 // // //   }
 
   
@@ -12934,7 +12946,7 @@ void mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
 
   for (uint16_t i = 0; i < SEGLEN; i++) {
     SEGMENT.SetPixelColor(i, 
-      (drawingLit) ? RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE)) : SEGCOLOR_U32(1)
+      (drawingLit) ? SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE).getU32() : SEGCOLOR_U32(1)
     );
     cnt++;
     if (cnt >= ((drawingLit) ? lit : unlit)) {
@@ -18550,7 +18562,7 @@ void mAnimatorLight::EffectAnim__2D__ScrollingText()
     // pCONT_time->GetDateAndTime(DT_DST).c_str();
 
     // sprintf_P(text, PSTR("%s %d, %d %d:%02d%s"), monthShortStr(month(localTime)), pCONT_time->RtcTime.days, pCONT_time->RtcTime.year, AmPmHour, pCONT_time->RtcTime.minute, sec);
-    // sprintf_P(text, PSTR("Test Message"));
+    sprintf_P(text, PSTR("Test Message"));
   } else {
     if      (!strncmp_P(text,PSTR("#DATE"),5)) sprintf_P(text, zero?PSTR("%02d.%02d.%04d"):PSTR("%d.%d.%d"),   pCONT_time->RtcTime.days,   pCONT_time->RtcTime.month,  pCONT_time->RtcTime.year);
     else if (!strncmp_P(text,PSTR("#DDMM"),5)) sprintf_P(text, zero?PSTR("%02d.%02d")     :PSTR("%d.%d"),      pCONT_time->RtcTime.days,   pCONT_time->RtcTime.month);
@@ -18597,7 +18609,7 @@ void mAnimatorLight::EffectAnim__2D__ScrollingText()
   for (int i = 0; i < numberOfLetters; i++) {
     int xoffset = int(cols) - int(SEGMENT.params_internal.aux0) + rotLW*i;
     if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-    uint32_t col1 = RgbcctColor::GetU32Colour( SEGMENT.GetPaletteColour(SEGMENT.params_internal.aux1, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF) ); //SEGMENT.color_from_palette(SEGMENT.params_internal.aux1, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t col1 = SEGMENT.GetPaletteColour(SEGMENT.params_internal.aux1, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF).getU32(); //SEGMENT.color_from_palette(SEGMENT.params_internal.aux1, false, PALETTE_SOLID_WRAP, 0);
     uint32_t col2 = BLACK;
     if (SEGMENT.check1 && SEGMENT.palette_id == 0) {
       col1 = SEGCOLOR_U32(0); //SEGCOLOR_U32(0);
@@ -18692,17 +18704,34 @@ void mAnimatorLight::LoadEffects()
             Effect_DevStage::Release);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,  PM_EFFECT_CONFIG__SPANNED_PALETTE, Effect_DevStage::Beta);
+  addEffect(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            
+            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,  
+            PM_EFFECT_CONFIG__SPANNED_PALETTE, 
+            Effect_DevStage::Beta);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECT_CONFIG__SLOW_GLOW, Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     
+            &mAnimatorLight::EffectAnim__Slow_Glow,                       
+            PM_EFFECT_CONFIG__SLOW_GLOW, 
+            Effect_DevStage::Release);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect(EFFECTS_FUNCTION__CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECT_CONFIG__CANDLE_SINGLE, Effect_DevStage::Alpha);  
-  addEffect(EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECT_CONFIG__CANDLE_MULTIPLE, Effect_DevStage::Alpha);
-  #endif 
+  addEffect(EFFECTS_FUNCTION__CANDLE_SINGLE__ID,            
+            &mAnimatorLight::EffectAnim__Candle_Single,                   
+            PM_EFFECT_CONFIG__CANDLE_SINGLE, 
+            Effect_DevStage::Alpha);  
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect(EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,          
+            &mAnimatorLight::EffectAnim__Candle_Multiple,                 
+            PM_EFFECT_CONFIG__CANDLE_MULTIPLE, 
+            Effect_DevStage::Alpha);
+  #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES, Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     
+            &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          
+            PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES, 
+            Effect_DevStage::Dev);
   #endif  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,   PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION);

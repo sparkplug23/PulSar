@@ -166,6 +166,25 @@ class mEnergyINA219 :
       uint8_t sModuleStatus =0;// MODULE_STATUS_NOTSET;
       uint16_t measure_rate_ms = 1000;
     }settings;
+
+    
+// Phase out
+enum SWITCH_SPLIT_TASK_IDS{
+  SPLIT_TASK_NOT_RUNNING_ID=0,
+  SPLIT_TASK_SUCCESS_ID=1,
+  SPLIT_TASK_SEC1_ID,
+  SPLIT_TASK_SEC2_ID,
+  SPLIT_TASK_SEC3_ID,
+  SPLIT_TASK_SEC4_ID,
+  SPLIT_TASK_SEC5_ID,
+  SPLIT_TASK_SEC6_ID,
+  SPLIT_TASK_SEC7_ID,
+  SPLIT_TASK_SEC8_ID,
+  SPLIT_TASK_TIMEOUT_ID,
+  SPLIT_TASK_ERROR_ID,
+  SPLIT_TASK_DONE_ID
+};
+
     
     void AddToHardwareMessage();
 

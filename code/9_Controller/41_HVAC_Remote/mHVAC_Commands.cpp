@@ -33,7 +33,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj[D_JSON_HVAC_DEVICE]){ 
     if(jtok.isStr()){
       if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(),GetModuleUniqueID()))>=0){ // D_JSON_DEVICE
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+        ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
       }else{
         AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
       }
@@ -41,7 +41,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     if(jtok.isNum()){
       device_id = jtok.getInt();
     }
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
   }
 
 // ALOG_DBM(PSTR("TESTPOINT"));
@@ -68,7 +68,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
     // #endif
   }
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
@@ -81,7 +81,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_Desired_Temperature(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), jtok.getInt());
     // #endif
   }
 
@@ -89,7 +89,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -98,7 +98,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     zone[device_id].program_temp_method->StartDesiredTemperature(jtok.getFloat());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -107,7 +107,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     zone[device_id].program_temp_method->SetTimer_Running_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -116,7 +116,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     zone[device_id].program_temp_method->SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
     // #endif
   }
 
@@ -126,7 +126,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_Schedule_Mode(device_id,mode); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_K(D_JSON_SCHEDULE D_JSON_MODE)), jtok.getStr());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_K(D_JSON_SCHEDULE D_JSON_MODE)), jtok.getStr());
     // #endif
   }
 
@@ -134,7 +134,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     CommandSet_ProgramTemperature_TimeRunning_Limit(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
     // #endif
   }
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
@@ -149,10 +149,10 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     for(auto& arr:array)
     {
 
-      AddLog(LOG_LEVEL_DEBUG, PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
+      ALOG_DBG(PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
 
       int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr(),GetModuleUniqueID());
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);
+      ALOG_DBG(PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);
 
       if(device_id_found>=0)
       {      
@@ -168,7 +168,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
           zone[index].sensor.module_id = pCONT_set->Settings.device_name_buffer.class_id[device_id_found];
           zone[index].sensor.index = pCONT_set->Settings.device_name_buffer.device_id[device_id_found];
         }
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "module_id,index = %d,%d"),zone[index].sensor.module_id,zone[index].sensor.index);
+        ALOG_DBG(PSTR(D_LOG_RELAYS "module_id,index = %d,%d"),zone[index].sensor.module_id,zone[index].sensor.index);
 
         index++;
       }
@@ -203,7 +203,7 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
