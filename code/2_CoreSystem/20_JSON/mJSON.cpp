@@ -56,6 +56,46 @@ uint16_t JsonBuilder::GetBufferSize(){
 }
 
 
+#ifdef ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION
+
+// Specialization for float types
+template <>
+void JsonBuilder::Add_P<float>(const char* key, float value) {
+    if (writer.buffer == nullptr || writer.buffer_size == 0)
+        return;
+
+    if ((writer.length > 1) &&
+        (writer.buffer[writer.length - 1] != '{') &&
+        (writer.buffer[writer.length - 1] != '[')) {
+        writer.length += snprintf(&writer.buffer[writer.length], writer.buffer_size, ",");
+    }
+
+    // Handle float precision and conversion to string
+    char fvalue[20];  // Buffer to store the float as a string
+    dtostrf(value, 5, 3, fvalue);  // Convert float to string with precision 5.3
+    writer.length += snprintf(&writer.buffer[writer.length], writer.buffer_size, "\"%s\":%s", key, fvalue);
+}
+
+// Specialization for float types
+template <>
+void JsonBuilder::Add<float>(const char* key, float value) {
+    if (writer.buffer == nullptr || writer.buffer_size == 0)
+        return;
+
+    if ((writer.length > 1) &&
+        (writer.buffer[writer.length - 1] != '{') &&
+        (writer.buffer[writer.length - 1] != '[')) {
+        writer.length += snprintf(&writer.buffer[writer.length], writer.buffer_size, ",");
+    }
+
+    // Handle float precision and conversion to string
+    char fvalue[20];  // Buffer to store the float as a string
+    dtostrf(value, 5, 3, fvalue);  // Convert float to string with precision 5.3
+    writer.length += snprintf(&writer.buffer[writer.length], writer.buffer_size, "\"%s\":%s", key, fvalue);
+}
+#endif // ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION
+
+
 void JsonBuilder::Write(const char* buff)
 {
   if(writer.buffer == nullptr) { return; }  

@@ -1,21 +1,30 @@
 #ifndef MODULE_SENSORS_SUN_TRACKING_H
 #define MODULE_SENSORS_SUN_TRACKING_H
 
-#define D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID ((5*1000)+22)
+#define D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID 5022 // ((5*1000)+22)
+
+/**
+ * Three levels of sun tracking for memory efficiency
+ * 
+ * USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+ * USE_MODULE_SENSORS_SUN_TRACKING__SUNRISE_SUNSET
+ * USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+ * 
+ */
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 #include "3_Network/10_MQTT/mMQTT.h"
 
-#include <cmath> 
-/* fmod example */
 #include <stdio.h>      /* printf */
 #include <math.h>       /* fmod */
   
-#ifndef M_PI
-#define M_PI (3.14159265358979323846264338327950288)
-#endif /* M_PI */
+#include <cmath>
+#include <ctime>
+#include <chrono>
+#include <iostream>
+#include <iomanip>
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -23,17 +32,15 @@ class mSunTracking :
   public mTaskerInterface
 {
   
-  private:
-  /* data */
   public:
-    mSunTracking(/* args */){};
-
-  
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+    mSunTracking(){};
     void Init(void);
-    void Pre_Init();
-    
-    int8_t Tasker(uint8_t function, JsonParserObject obj);
-    
+    void Pre_Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+
     static constexpr const char* PM_MODULE_SENSORS_SUN_TRACKING_CTR = D_MODULE_SENSORS_SUN_TRACKING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SUN_TRACKING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID; }
@@ -41,125 +48,191 @@ class mSunTracking :
     uint16_t GetClassSize(){      return sizeof(mSunTracking);    };
     #endif
 
-    
-    struct SETTINGS{
-      uint8_t  fEnableSensor = false;
-      // uint8_t  nSensorsFound = 0; // count of sensors found    n:number found, c:case number for switches
-      // uint16_t rate_measure_ms = 1000;
-      // uint8_t  group_count = 0;
-    }settings;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    void parse_JSONCommand(JsonParserObject obj);
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY) || defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)
+    struct SolarDayTimes {
+        time_t dawn;
+        time_t sunrise;
+        time_t solar_noon;
+        time_t sunset;
+        time_t dusk;
+        double daylight_duration;  // In seconds
+    };
+    #endif
+    
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    struct SunPosition {
+      time_t time; // Time of the position
+      double azimuth;
+      double elevation;      
+    };
+    #endif
+
+    struct SolarEventTimes 
+    {
+      bool is_daytime;
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+      bool is_sun_rising; 
+      bool daylight_savings_active;
+      #endif
+
+      #if defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY) || defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)
+      SolarDayTimes today;
+      #endif
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+      SolarDayTimes tomorrow;
+      #endif 
+      
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+      SunPosition position;
+      double max_elevation;  // Maximum elevation of the sun for the day
+      double min_elevation;  // Minimum elevation of the sun for the day (typically at dawn or dusk)
+      #endif 
+
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+      double solar_time_based_on_longitude;
+      double shadow_length;
+      double day_length;
+      double zenith;
+      double irradiance;
+      double air_mass;
+      double declination_angle;
+      float incidence_angle;
+      #endif
+
+      uint32_t tUpdated_millis = 0;
+      bool isvalid = false;
+    }calc;
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
 
     void Update_Solar_Tracking_Data();
 
-    
-struct SolarTimes {
-    double dawn;
-    double sunrise;
-    double solar_noon;
-    double sunset;
-    double dusk;
-    double daylight_duration;  // in seconds
-    bool is_sun_rising;
-    bool daylight_savings_active;
-};
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    double j2ts(double j);
+    double ts2j(double ts);
+    double calculateM(double J_);
+    double calculateC(double M_radians);
+    double calculateL(double M_degrees, double C_degrees);
+    double calculateJtransit(double J_, double M_radians, double Lambda_radians);
+    double calculateDeclination(double Lambda_radians);
+    double calculateHourAngle(double latitude, double delta, double elevation = 0.0, double twilight_angle = -0.833);
+    SolarDayTimes CalculateSolarEventTimes_Day(double latitude, double longitude, time_t utc_time, double height_above_sealevel, bool daylight_savings_active) ;
+        
+    // Converts a time_t value to a trimmed String
+    String TimeToString(time_t t) {
+        String timeStr = String(ctime(&t));  // Convert to a String
+        timeStr.trim();  // Remove any trailing newline or spaces
+        return timeStr;
+    }
 
-
-SolarTimes CalculateSolarTimes6(double latitude, double longitude, time_t utc_time, double height_above_sealevel = 0.0, bool daylight_savings_active = false);
-
-SolarTimes CalculateSolarTimes5b(double latitude, double longitude, time_t utc_time, double height_above_sealevel, bool daylight_savings_active);
-  
-    SolarTimes times;
-
-
-String Get_DawnTime() const {
-        time_t t = times.dawn;
+    String Get_DawnTime() const {
+        time_t t = calc.today.dawn;
         String timeStr = String(ctime(&t));
         timeStr.trim();  // Remove any trailing newline or spaces
         return timeStr;
     }
 
     String Get_SunriseTime() const {
-        time_t t = times.sunrise;
+        time_t t = calc.today.sunrise;
         String timeStr = String(ctime(&t));
         timeStr.trim();  // Remove any trailing newline or spaces
         return timeStr;
     }
 
     String Get_SolarNoonTime() const {
-        time_t t = times.solar_noon;
+        time_t t = calc.today.solar_noon;
         String timeStr = String(ctime(&t));
         timeStr.trim();  // Remove any trailing newline or spaces
         return timeStr;
     }
 
     String Get_SunsetTime() const {
-        time_t t = times.sunset;
+        time_t t = calc.today.sunset;
         String timeStr = String(ctime(&t));
         timeStr.trim();  // Remove any trailing newline or spaces
         return timeStr;
     }
 
     String Get_DuskTime() const {
-        time_t t = times.dusk;
+        time_t t = calc.today.dusk;
         String timeStr = String(ctime(&t));
         timeStr.trim();  // Remove any trailing newline or spaces
         return timeStr;
     }
 
     uint32_t Get_DaylightDuration() const {
-        return times.daylight_duration; // in seconds
+        return calc.today.daylight_duration; // in seconds
     }
+    
+    bool IsSunRising(time_t utc_time);
+    bool IsDaytime(time_t utc_time);
 
-    bool IsSunRising() const {
-        return times.is_sun_rising;
-    }
-
-    // Method to update the SolarTimes struct with calculated values
-    void UpdateSolarTimes(const SolarTimes& newTimes) {
-        times = newTimes;
-    }
-
-    // SolarTimes CalculateSolarTimes(double latitude, double longitude, time_t utc_time) ;
-        
+    #endif // USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
 
     
-		/**
-		 * @brief 
-		 * 
-		 */
-		enum SOLAR_POSITION_DESCRIPTION{
-			SOLAR_POSITION_DAYTIME_RISING_ID, // before noon
-			SOLAR_POSITION_DAYTIME_FALLING_ID, //after noon but still daylight
-			SOLAR_POSITION_DAYTIME_SUNSET_ID,
-			SOLAR_POSITION_DAYTIME_DUSK_ID, // sun below horizon, but still brightness (E< -5), ie, no orange left, deepening blue
-			SOLAR_POSITION_DAYTIME_NIGHT_ID,
-			SOLAR_POSITION_DAYTIME_DAWN_ID, // E>-10 and E<-5, ie, no "orange" in the sky but its a lighter blue
-			SOLAR_POSITION_DAYTIME_SUNRISE_ID, // E>-5 and E<5
-			SOLAR_POSITION_DAYTIME_LENGTH_ID
-		};
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+    double CalculateSolarZenith();
+    double CalculateSolarTime(double longitude, time_t utc_time);
+    double CalculateAirMass();
+    double CalculateSolarIrradiance();
+    double CalculateDeclinationAngle(int day_of_year);
+    double CalculateSolarIncidenceAngle(double surface_tilt, double surface_azimuth);
+    double CalculateDayLength(double latitude, int day_of_year);
+    float CalculateShadowLength();
+    #endif
+        
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    time_t GetNext_Dawn(time_t utc_time, const SolarDayTimes& today, const SolarDayTimes& tomorrow);
+    time_t GetNext_Sunrise(time_t utc_time, const SolarDayTimes& today, const SolarDayTimes& tomorrow);
+    time_t GetNext_SolarNoon(time_t utc_time, const SolarDayTimes& today, const SolarDayTimes& tomorrow);
+    time_t GetNext_Sunset(time_t utc_time, const SolarDayTimes& today, const SolarDayTimes& tomorrow);
+    time_t GetNext_Dusk(time_t utc_time, const SolarDayTimes& today, const SolarDayTimes& tomorrow);
+    double Get_Daylight_Duration(const SolarDayTimes& today);
+    double Get_Daylight_Duration_Difference(const SolarDayTimes& today, const SolarDayTimes& tomorrow);
+    #endif // USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    double julian_day(time_t utc_time_point);
+    SunPosition CalculateSolarAzEl(time_t utc_time, double latitude, double longitude, double altitude) ;
+    void CalculateMaxMinElevationForDay(time_t utc_time, double latitude, double longitude, double altitude);
+    #endif
 
-    struct solar_position_t
-    {
-      double azimuth = 0;
-      double elevation = 0;
-      double elevation_min = -29;
-      double elevation_max = 40;
-      struct DIRECTION_OF_CHANGE{
-        uint8_t is_ascending = true;
-      }direction;
-      uint32_t tUpdated_millis = 0;
-      bool isvalid = false;
+    #ifdef ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
+    void CalculateSunPositionOverDay(std::vector<SunPosition>& sun_positions, double Lat, double Lon, time_t start_time, double Alt = 0.0, int interval_minutes = 60);
+    void ApproximateSunPositionOverDay(std::vector<SunPosition>& sun_positions, double Lat, double Lon, time_t start_time, double Alt, int interval_minutes);
+    #endif
 
-    }solar_position;
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+    void PrintSunPositions(const char* label, SunPosition* sun_positions, int count);
+    #endif
 
+    String CTimeFormat(time_t t) const {
+        String timeStr = String(ctime(&t));
+        timeStr.trim();  // Remove any trailing newline or spaces
+        return timeStr;
+    }
+
+    #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
     struct DEBUG
     {
       bool enabled = false;
       double azimuth = 0;
       double elevation = 0;
+      float elevation_adjusted_for_debugging = 0;
     }debug;
+    #endif // ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
 
     double GetAzimuth()
     {
@@ -167,9 +240,9 @@ String Get_DawnTime() const {
         if(debug.enabled)
           return debug.azimuth;
         else
-          return solar_position.azimuth;
+          return calc.azimuth;
       #else
-        return solar_position.azimuth;
+        return calc.position.azimuth;
       #endif
     }
 
@@ -179,26 +252,15 @@ String Get_DawnTime() const {
         if(debug.enabled)
           return debug.elevation;
         else
-          return solar_position.elevation;
+          return calc.elevation;
       #else
-        return solar_position.elevation;
+        return calc.position.elevation;
       #endif
     }
 
-
-
-
-    solar_position_t solar_position_testing;
-
-    float elevation_adjusted_for_debugging = 0;
-
-
-    void SolarAzEl(time_t utc_time_point, double Lat, double Lon, double Alt, double* Az, double* El);
-    void SolarAzEl2(time_t utc_time_point, double Lat, double Lon, double Alt, double* Az, double* El);
-
-void SolarAzElWithMaxMin(time_t utc_time_point, double Lat, double Lon, double Alt, double* Az, double* El, double* maxEl, double* minEl) ;
-    double julian_day(time_t utc_time_point);
-
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
 
     uint8_t GetSensorCount(void) override
     {
@@ -208,32 +270,44 @@ void SolarAzElWithMaxMin(time_t utc_time_point, double Lat, double Lon, double A
     {
       value->timestamp = 0; // Constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
       value->sensor_type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
-      value->data_f.push_back(solar_position.azimuth);
+      value->data_f.push_back((float)GetAzimuth());
       value->sensor_type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
-      value->data_f.push_back(solar_position.elevation);
+      value->data_f.push_back((float)GetElevation());
       value->sensor_id = index;
     };
     
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
 
-  
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
+    
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender();
     
+    std::vector<struct handler<mSunTracking>*> mqtthandler_list;    
     struct handler<mSunTracking> mqtthandler_settings_teleperiod;
     struct handler<mSunTracking> mqtthandler_sensor_ifchanged;
     struct handler<mSunTracking> mqtthandler_sensor_teleperiod;
-
-    // No specialised payload therefore use system default instead of enum
-    
-
-    std::vector<struct handler<mSunTracking>*> mqtthandler_list;    
     #endif // USE_MODULE_NETWORK_MQTT 
+
+  private: 
+
+    const double SOLAR_CONSTANT = 1361.0; // W/m^2
 
 
 };

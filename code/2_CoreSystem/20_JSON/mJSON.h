@@ -21,6 +21,7 @@
 #include "internal/is_signed_number_type.hpp"
 #include "internal/is_unsigned_number_type.hpp"
 #include "internal/is_float_type.hpp"
+#include "internal/is_double_type.hpp"
 
 #include "2_CoreSystem/06_Support/mSupport.h"
 #include "2_CoreSystem/01_Settings/mSettings.h"
@@ -230,6 +231,13 @@ class JsonBuilder{
         // dtostrfd2(f,3,fvalue);
         dtostrf(f, 5, 2, fvalue);
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",fvalue);
+      }else
+      if(is_double_type<T>::value){ // Maybe phase out?
+        double f = 0;           
+        memcpy(&f,&value,sizeof(value)); // causing crashing "stack smashing"
+        char fvalue[40] = {0};         
+        dtostrf(f, 5, 2, fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",fvalue);
       }
       // #endif // USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
 
@@ -306,23 +314,22 @@ class JsonBuilder{
       }else
       if(is_char_type<T>::value){   
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
-      }else
+      }
+      // float type handled as template specialization that must be declared outside header
+      #ifndef ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION
+      else
       if (is_float_type<T>::value){ 
         float f = 0;     memcpy(&f,&value,sizeof(f));
         char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+      }else
+      if (is_double_type<T>::value){ 
+        double f = 0;     memcpy(&f,&value,sizeof(double));
+        char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
       }
-
-
-        /**
-         * @brief debug size
-         **/
-        // if(writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
-        // {
-          // DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
-        // }
-
-      }
+      #endif
+    }
 
 
 
@@ -332,52 +339,55 @@ class JsonBuilder{
 //P1 is key in prgm, p2 is value in pgm
 
 
-// #ifdef TEMPLATE_JSON
-    template <typename T>
-    void Add_P(const char* key, T value){
-  if((writer.buffer == nullptr)||(writer.buffer_size == 0))
-    return;
-  
-  if(
-    (writer.length>1)&&
-    (writer.buffer[writer.length-1]!='{')&&
-    (writer.buffer[writer.length-1]!='[')      
-  ){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
 
-  #ifdef DEBUG_JSON_BUILDER
-  char buffer_id[50];
-  uint8_t id = getIdentifierID4(value);
-  GetIndentifierNameByID(id, buffer_id);
-  DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
-  #endif
-  
-  if(is_unsigned_number_type<T>::value){ 
-    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%lu",key,value);
-  }else
-  if(is_signed_number_type<T>::value){ 
-    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%d",key,value);
-  }else
-  if(is_string_type<T>::value){ 
-    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":\"%s\"",key,value);
-  }else
-  if(is_char_type<T>::value){   
-    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":'%c'",key,value);
-  }else
-  if(is_float_type<T>::value){ 
-    float f = 0;     memcpy(&f,&value,sizeof(f));
-    char fvalue[20]; dtostrfd2(f,3,fvalue);
-    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
 
-    // float f = static_cast<float>(value);
-    // char fvalue[20]; dtostrfd2(f,3,fvalue);
-    // writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+  // Generic Add function for non-float types
+  template <typename T>
+  void Add_P(const char* key, T value){
+    if((writer.buffer == nullptr)||(writer.buffer_size == 0))
+      return;
+    
+    if(
+      (writer.length>1)&&
+      (writer.buffer[writer.length-1]!='{')&&
+      (writer.buffer[writer.length-1]!='[')      
+    ){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
+
+    #ifdef DEBUG_JSON_BUILDER
+    char buffer_id[50];
+    uint8_t id = getIdentifierID4(value);
+    GetIndentifierNameByID(id, buffer_id);
+    DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
+    #endif
+    
+    if(is_unsigned_number_type<T>::value){ 
+      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%lu",key,value);
+    }else
+    if(is_signed_number_type<T>::value){ 
+      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%d",key,value);
+    }else
+    if(is_string_type<T>::value){ 
+      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":\"%s\"",key,value);
+    }else
+    if(is_char_type<T>::value){   
+      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":'%c'",key,value);
+    }
+    // float type handled as template specialization that must be declared outside header
+    #ifndef ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION
+    else
+    if (is_float_type<T>::value){ 
+      float f = 0;     memcpy(&f,&value,sizeof(f));
+      char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
+      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+    }else
+    if (is_double_type<T>::value){ 
+      double f = 0;     memcpy(&f,&value,sizeof(double));
+      char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
+      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+    }
+    #endif
+
   }
-
-  // DEBUG_PRINTF("TEST TIME = %s\n\r",writer.buffer[0]);
-  
-          // DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
-
-}
 
 
 
@@ -403,6 +413,15 @@ class JsonBuilder{
       if(is_char_type<T>::value){   
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"'%c'",value_arr[index]);
       }
+      #ifndef ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION
+      else
+      if (is_float_type<T>::value){ 
+        float f = 0;     memcpy(&f,&value_arr[index],sizeof(f));
+        char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",value_arr,fvalue);
+      }
+      #endif
+
 
 
     //   else

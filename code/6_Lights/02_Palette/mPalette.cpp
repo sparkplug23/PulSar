@@ -1110,7 +1110,7 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
     case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:{
 
       #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-      float azimuth = pCONT_solar->solar_position.azimuth;
+      float azimuth = pCONT_solar->GetAzimuth();
       #else
       float azimuth = 0;
       #endif

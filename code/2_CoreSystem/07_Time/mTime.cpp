@@ -95,6 +95,58 @@ bool mTime::IsDst(void)
   return (Rtc.time_timezone == pCONT_set->Settings.toffset[1]);
 }
 
+// // mktime works only with local time
+// time_t mTime::GetStartOfDayUTC(time_t utc_time) {
+//     // Convert to a tm structure in UTC
+//     struct tm* time_info = gmtime(&utc_time);
+
+//     // Reset the hour, minute, and second to zero (midnight)
+//     time_info->tm_hour = 0;
+//     time_info->tm_min = 0;
+//     time_info->tm_sec = 0;
+
+//     // Convert back to time_t (UTC time)
+//     return mktime(time_info);
+// }
+#include <ctime>
+
+time_t my_timegm(struct tm* time_info) {
+    // Save the current timezone settings
+    time_t local_time;
+
+    // Save the current timezone settings
+    char* tz = getenv("TZ");
+    setenv("TZ", "UTC", 1);
+    tzset();
+
+    // Convert the tm structure to time_t (UTC)
+    local_time = mktime(time_info);
+
+    // Restore the original timezone settings
+    if (tz) {
+        setenv("TZ", tz, 1);
+    } else {
+        unsetenv("TZ");
+    }
+    tzset();
+
+    return local_time;
+}
+
+
+time_t mTime::GetStartOfDayUTC(time_t utc_time) {
+    // Convert to a tm structure in UTC
+    struct tm* time_info = gmtime(&utc_time);
+
+    // Reset the hour, minute, and second to zero (midnight UTC)
+    time_info->tm_hour = 0;
+    time_info->tm_min = 0;
+    time_info->tm_sec = 0;
+
+    // Use timegm() to convert back to UTC time_t
+    return my_timegm(time_info);  // Use timegm() instead of mktime()
+}
+
 
 String mTime::GetBuildDateAndTime(void) 
 {
@@ -231,6 +283,18 @@ String mTime::GetTimeStr(uint32_t time, bool include_day_of_week)
   return String(dt);  // 11:08:02
 
 }
+
+// might be same as above, possible phase out
+String mTime::formatTimeUntil(double time_until_seconds) {
+    int hours = static_cast<int>(time_until_seconds) / 3600;
+    int minutes = (static_cast<int>(time_until_seconds) % 3600) / 60;
+    int seconds = static_cast<int>(time_until_seconds) % 60;
+
+    char buffer[9]; // HH:MM:SS is 8 characters + null terminator
+    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", hours, minutes, seconds);
+    return String(buffer);
+}
+
 
 
 /*
