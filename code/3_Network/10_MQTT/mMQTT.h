@@ -527,13 +527,36 @@ Serial.flush();
      * Future idea:
      * Issue: Unknown how to also send length or array, so for(auto&) type loops probably wont work
      * */
-    template<typename T>
-    void MQTTHandler_Flags_SendNow(std::vector<struct handler<T>*> mqtthandler_list)
-    {     
-      for(auto& handle:mqtthandler_list){
-        handle->flags.SendNow = true;
-      }
+    // template<typename T>
+    // void MQTTHandler_Flags_SendNow(std::vector<struct handler<T>*> mqtthandler_list)
+    // {     
+    //   for(auto& handle:mqtthandler_list){
+    //     handle->flags.SendNow = true;
+    //   }
+    // }
+
+    // Centralized template function
+    template <typename HandlerType>
+    void MQTTHandler_RefreshAll(std::vector<struct handler<HandlerType>*>& handler_list) {
+        for (auto& handle : handler_list) {
+            handle->flags.SendNow = true;
+        }
     }
+
+    // Centralized template function
+    template <typename HandlerType>
+    void MQTTHandler_Rate(std::vector<struct handler<HandlerType>*>& handler_list) {
+        for (auto& handle : handler_list) {
+            if (handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+                handle->tRateSecs = GetTelePeriod_SubModule();
+            else if (handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+                handle->tRateSecs = GetIfChangedPeriod_SubModule();
+        }
+    }
+
+
+
+
 
     // /**
     //  * @brief Function will take the struct storing the mqtt handler options, and check the variables, sending if required
@@ -680,6 +703,12 @@ Serial.flush();
     // };
 
 
+    template<typename T>
+    void MQTTHandler_Sender(std::vector<struct handler<T>*>& handler_list, T& class_ptr) {
+        for (auto& handle : handler_list) {
+            MQTTHandler_Command_UniqueID(class_ptr, class_ptr.GetModuleUniqueID(), handle);
+        }
+    }
 
     
     /**

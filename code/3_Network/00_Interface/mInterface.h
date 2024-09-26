@@ -74,15 +74,15 @@ class mInterfaceNetwork :
     #ifdef USE_MODULE_NETWORK_MQTT
   
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mInterfaceNetwork>  mqtthandler_settings_teleperiod;
+    struct handler<mInterfaceNetwork>  mqtthandler_settings;
     struct handler<mInterfaceNetwork>  mqtthandler_state_ifchanged;
 
     struct handler<mInterfaceNetwork>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_ifchanged
     };
 

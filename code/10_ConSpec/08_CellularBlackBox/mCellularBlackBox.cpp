@@ -63,11 +63,11 @@ int8_t mCellularBlackBox::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break; 
     case TASK_MQTT_CONNECTED:
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif  
   }
@@ -245,7 +245,7 @@ void mCellularBlackBox::MQTTHandler_Init()
 
   struct handler<mCellularBlackBox>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
@@ -271,7 +271,7 @@ void mCellularBlackBox::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mCellularBlackBox::MQTTHandler_Set_RefreshAll()
+void mCellularBlackBox::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -281,7 +281,7 @@ void mCellularBlackBox::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mCellularBlackBox::MQTTHandler_Set_DefaultPeriodRate()
+void mCellularBlackBox::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

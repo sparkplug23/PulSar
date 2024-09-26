@@ -133,7 +133,7 @@ int8_t mFan::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
   }
   
@@ -168,7 +168,7 @@ uint8_t mFan::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
 void mFan::MQTTHandler_Init(){
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -203,7 +203,7 @@ void mFan::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mFan::MQTTHandler_Set_RefreshAll()
+void mFan::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -213,7 +213,7 @@ void mFan::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mFan::MQTTHandler_Set_DefaultPeriodRate()
+void mFan::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -56,11 +56,12 @@ DEBUG_LINE_HERE_MILLIS
     break;
     case TASK_EVERY_SECOND:      {
       
-      if(brokers.size())
-        ALOG_INF(PSTR("M4host_address: %s"), brokers[0]->host_address);
+      // if(brokers.size())
+      //   ALOG_INF(PSTR("M4host_address: %s"), brokers[0]->host_address);
 
   
-  strlcpy(test, "tesT MESSAGE FROM INIT", sizeof(test));
+      strlcpy(test, "tesT MESSAGE FROM INIT", sizeof(test));
+
       MM_EverySecond();  
 
 //   ALOG_INF(PSTR("M5host_address: %s"), dt.connection[0].host_address);

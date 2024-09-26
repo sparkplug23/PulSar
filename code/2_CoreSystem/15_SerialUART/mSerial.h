@@ -148,12 +148,12 @@ class mSerial :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mSerial>*> mqtthandler_list;
-    struct handler<mSerial> mqtthandler_settings_teleperiod;
+    struct handler<mSerial> mqtthandler_settings;
     struct handler<mSerial> mqtthandler_uartinfo_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 

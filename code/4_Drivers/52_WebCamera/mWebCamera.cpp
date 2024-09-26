@@ -1559,10 +1559,10 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
+      MQTTHandler_Rate(); // Load teleperiod setting into local handlers
     break; 
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif  
   }

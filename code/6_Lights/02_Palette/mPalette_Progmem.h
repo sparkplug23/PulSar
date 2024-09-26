@@ -534,6 +534,7 @@ DEF_PGM_UINT8(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_07__DATA)
   RGB_YELLOW
   RGB_PURPLE
   RGB_RED
+  RGB_CYAN
 };
 
 
@@ -752,7 +753,7 @@ DEF_PGM_UINT8(PM_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__DATA)
 
 
 #ifndef D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__NAME_CTR
-#define D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__NAME_CTR                 "RGB0/Christmas RGBO"   
+#define D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__NAME_CTR                 "RGBO/Christmas RGBO"   
 #endif    
 #define D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)     
 DEF_PGM_UINT8(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__DATA)
@@ -1590,6 +1591,51 @@ DEF_PGM_UINT8(PM_PALETTE_SUNSET_BEACH__DATA)
   140, 0x59, 0x95, 0xB7, 175, 175,
   255, 255, 255,   255, 255, 255,
 };
+
+
+#ifndef D_PALETTE_DYNAMIC__SOLAR_SKY_01__NAME_CTR
+#define D_PALETTE_DYNAMIC__SOLAR_SKY_01__NAME_CTR        "Solar Sky 01"   
+#endif
+#define        D_PALETTE_DYNAMIC__SOLAR_SKY_01__ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
+DEF_PGM_UINT8(PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA)
+{ //GRAD, R,G,B,WW,CW
+
+  // Night to Red Transition (~-45 to -25)
+  0,   0,   0,   30, 0, 0,  // Night blue  [ -45 ]
+  25,  0,   0,   20, 0, 0,  // Red fading into blue  [ -35 ]
+  
+  // Dark Reds (~-25 to -5)
+  105, 0,   0,   10,  0, 0,  // Dark red  [ -9 ]
+  110, 5,  0,   0,  0, 0,  // Very dark red  [ -7 ]
+  120, 10,  0,   0,  0, 0,  // Medium dark red  [ -5 ]
+  124, 40, 0,   0,  0, 0,  // Darker red ---- sunset  [ -3 ]
+  
+  // Red to Orange (~-5 to 0)
+  127, 255, 51,  51, 0, 0,  // Red-orange  [ 0 ]
+
+  // Orange to Pale Orange (~0 to 10)
+  140, 255, 102, 0,   0, 0,  // Bright orange  [ +5 ]
+  160, 255, 153, 102, 0, 0,  // Orange  [ +10 ]
+  180, 255, 204, 153, 0, 0,  // Pale orange  [ +15 ]
+
+  // Blue Sky (~15 to 45)
+  200, 0,   140, 255, 0, 0,  // Slightly lighter blue  [ +25 ]
+  235, 0,   128, 255, 0, 0,  // Pure sky blue  [ +35 ]
+  255, 135, 206, 250, 0, 0,  // Light sky blue at the very top, i.e. sun on top  [ +45 ]
+  
+  // 0,   255, 0,   0,   0, 0,   // Red
+  // 25,  255, 127, 0,   0, 0,   // Orange
+  // 51,  255, 255, 0,   0, 0,   // Yellow
+  // 76,  127, 255, 0,   0, 0,   // Yellow-Green
+  // 102, 0,   255, 0,   0, 0,   // Green
+  // 127, 0,   255, 127, 0, 0,   // Cyan-Green
+  // 153, 0,   255, 255, 0, 0,   // Cyan
+  // 178, 0,   127, 255, 0, 0,   // Blue-Cyan
+  // 204, 0,   0,   255, 0, 0,   // Blue
+  // 229, 127, 0,   255, 0, 0,   // Purple
+  // 255, 255, 0,   255, 0, 0    // Magenta
+};
+
 
 
 /**
@@ -2650,6 +2696,7 @@ DEFINE_PGM_CTR(PM_STATIC__PALETTES_NAMES_CTR)
   D_PALETTE_FLOWER_SWEATPEA_NAME_CTR "|"
   D_PALETTE_PINK_PURPLE_NAME_CTR "|"
   D_PALETTE_PURPLE_PINK_NAME_CTR "|"
+  D_PALETTE_DYNAMIC__SOLAR_SKY_01__NAME_CTR "|"
 };
 
 
@@ -2669,7 +2716,7 @@ DEFINE_PGM_CTR(PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR)
 
 DEFINE_PGM_CTR(PM_DYNAMIC_PALETTES_NAMES_CTR)
 {
-  "Dynamic SunAZ CCT|Dynamic SunEL CCT|Dynamic SunEL PreSec|Dynamic Time Secs PreSec"
+  "SunAZ CCT|SunEL CCT|SunEL PreSec|Time Secs PreSec|Solar Sky"
 };
 
 

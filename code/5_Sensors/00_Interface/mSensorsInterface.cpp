@@ -95,7 +95,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -1313,8 +1313,48 @@ String mSensorsInterface::PressureUnit(void)
 
 uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool json_appending){
 
+  char buffer[100];
+
   JBI->Start();
+
+  /**
+   * @brief Motion Event : PIR module
+   **/
+  if(pCONT_rules->event_triggered.module_id == pCONT_motion->GetModuleUniqueID())
+  {
+    uint16_t device_id   = pCONT_rules->event_triggered.device_id;
+    uint16_t state_id = pCONT_rules->event_triggered.value.data[0];  
+
+    JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( pCONT_motion->GetModuleUniqueID(), device_id, buffer, sizeof(buffer))); 
+    JBI->Add("Time", pCONT_time->GetTimeStr(pCONT_time->Rtc.local_time).c_str());
+    JBI->Add("UTCTime", pCONT_time->Rtc.local_time);
+    JBI->Add(D_JSON_EVENT, state_id ? "detected": "over");
+    JBI->Add("Sensor", pCONT_motion->GetModuleName());
+
+  }
+
+  return JBI->End();
+    
+}
+
+
+
     // JBI->Add("motion", 0);
+
+    /*****
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 2024
+     * Keeping this may be a unified way that motion of any type is reported under interface, PIR, ultrasonics etc
+     * "Motion" module should perhaps be renamed PIR
+     * 
+     * 
+     * 
+     */
 
     
   //   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
@@ -1348,9 +1388,163 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool j
 
 
 
-  return JBI->End();
-    
-}
+
+
+// /**
+//  * @brief MOTION Events, will replace all motion type events.
+//  * The motion (PIR), ultrasonic change to trigger motion, will be controlled via the rule engine
+//  * Thus, any state change (or later mqtt topic input or url etc) can be treated internally as a motion change, no longer a pin state
+//  * 
+//  * This should remain an option, so other sensors via rule can trigger a motion event (e.g. ultrasonics)
+//  * Basic GPIO change (eg PIR) will be decoupled from sensors to remove complexity of this simple type
+//  * 
+//  * @note Information about trigger, will be contained within the stored event
+//  * @param DeviceName gives the index to the stored location index from sensor list
+//  * @param State gives the ON/Started (1) or OFF/Ended (0)
+//  * */
+// void mMotion::RulesEvent_Motion_Change()
+// {
+
+//   ALOG_INF(PSTR("RulesEvent_Motion_Change"));
+
+
+//   // for(
+// /**
+//  * Rhis "rules" should be changed, unless rules are to be on all the time
+//  * */
+
+
+//     uint8_t sensor_id = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+
+//     /**
+//      * If command state is follow (now value 2), then use trigger.data[0] as destination.data[0]
+//      * */
+//     uint8_t trigger_state = pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[0];
+//     uint8_t command_state_in = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+//     uint8_t newevent_command_state_in = pCONT_rules->event_triggered.value.data[0];
+//     uint8_t command_state_out = 0;
+
+//     uint8_t current_module_id = pCONT_rules->event_triggered.module_id;
+
+// // enum SwitchModeOptions_IDS {
+// //   TOGGLE, 
+// //   FOLLOW, 
+// //   FOLLOW_INV, 
+// //   PUSHBUTTON, 
+// //   PUSHBUTTON_INV, 
+// //   PUSHBUTTONHOLD, 
+// //   PUSHBUTTONHOLD_INV, 
+// //   PUSHBUTTON_TOGGLE, 
+// //   MAX_SWITCH_OPTION
+// // };
+
+// // pCONT_rules->ShowRuleAddLogByIndex();
+// // pCONT_rules->ShowRuleEvent_AddLog();
+
+// //     if(command_state_in == SWITCHMODE_FOLLOW_ID)
+// //     {
+// //       ALOG_TST(PSTR("SWITCHMODE_FOLLOW_ID"));
+// //     }
+// // else{
+// //       ALOG_TST(PSTR("ELSE SWITCHMODE_FOLLOW_ID"));
+
+// // }
+
+// // ALOG_TST(PSTR("trigger_state=%d"),trigger_state);
+// // ALOG_TST(PSTR("command_state_in=%d"),command_state_in);
+// // ALOG_TST(PSTR("newevent_command_state_in=%d"),newevent_command_state_in);
+// // ALOG_TST(PSTR("command_state_out=%d"), command_state_out);
+
+// // ALOG_INF( PSTR("\t\t\t\t\t current_module_id=%d"), current_module_id );
+
+
+// switch(command_state_in)
+// {
+//   default: //force off
+//     command_state_out = 0;
+//     break;
+//   case STATE_NUMBER_FOLLOW_ID: 
+//     command_state_out = newevent_command_state_in;
+//     ALOG_INF( PSTR("STATE_NUMBER_FOLLOW_ID command_state_out = %d"), command_state_out );
+//     break;
+//   case STATE_NUMBER_FOLLOW_INV_ID: 
+//     command_state_out = newevent_command_state_in?0:1;
+//     break;
+//   case STATE_NUMBER_OFF_ID: 
+//     command_state_out = 0;
+//     break;
+//   case STATE_NUMBER_ON_ID: 
+//     command_state_out = 1;
+//     break;
+// }
+
+
+// // ALOG_TST(PSTR("Bommand_state_out=%d"), command_state_out);
+
+// char buffer[100];
+
+// // ALOG_TST(PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, command_state_out, pCONT_sup->GetState_Name_by_ID(command_state_out, buffer, sizeof(buffer)));
+
+
+//     // sensor_id<settings.sensors_active;sensor_id++)
+//   // {
+
+//   //   if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state)
+//   //   {
+
+// // 1 ie HIGH will ALWAYS mean active, the inversion should be handled on the trigger/switch side
+
+//       pir_detect[sensor_id].state = command_state_out;//pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];//PIR_Detected(sensor_id);
+      
+      
+//       AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d %d %d %d %d"),
+//       pir_detect[sensor_id].state, trigger_state, command_state_in, command_state_out, newevent_command_state_in);
+
+
+//       if(pir_detect[sensor_id].state)
+//       {
+//         pir_detect[sensor_id].tDetectTime = millis(); 
+//         pir_detect[sensor_id].detected_time = pCONT_time->LocalTime();
+//         pir_detect[sensor_id].isactive = true;
+
+//         // #ifdef ENABLE_LOG_LEVEL_DEBUG
+//         // AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
+//         // #endif
+//         // AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].detected_time=%d"),pir_detect[sensor_id].detected_time);
+        
+//         // #ifdef USE_MODULE_CORE_RULES
+//         // pCONT_rules->New_Event(E M_MODULE_SENSORS_MOTION_ID, sensor_id);
+//         // #endif
+//         // pCONT->Tasker_Interface(TASK_EVENT_MOTION_STARTED_ID);
+
+//       }
+//       else
+//       {
+//         pir_detect[sensor_id].tEndedTime = millis();
+//         pir_detect[sensor_id].detected_time = pCONT_time->LocalTime();
+//         pir_detect[sensor_id].isactive = false;
+
+//         // #ifdef USE_MODULE_CORE_RULES
+//         // pCONT_rules->New_Event(E M_MODULE_SENSORS_MOTION_ID, sensor_id);
+//         // #endif
+//         // pCONT->Tasker_Interface(TASK_EVENT_MOTION_ENDED_ID);
+
+//       }
+
+// /**
+//  * @brief Remember what triggered this so the device name can be retrieved in sender
+//  **/
+//       pir_detect[sensor_id].device_name.unique_module_id = pCONT_rules->event_triggered.module_id;
+//       pir_detect[sensor_id].device_name.device_id = pCONT_rules->event_triggered.device_id;
+//       pir_detect[sensor_id].ischanged = true;
+//       mqtthandler_sensor_ifchanged.flags.SendNow = true;
+//   //   }
+//   // }
+
+//   ALOG_TST(PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
+
+// }
+
 
   
 /******************************************************************************************************************
@@ -1364,7 +1558,7 @@ void mSensorsInterface::MQTTHandler_Init(){
 
   struct handler<mSensorsInterface>* ptr;
  
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -1426,7 +1620,7 @@ void mSensorsInterface::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mSensorsInterface::MQTTHandler_Set_RefreshAll()
+void mSensorsInterface::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -1436,7 +1630,7 @@ void mSensorsInterface::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mSensorsInterface::MQTTHandler_Set_DefaultPeriodRate()
+void mSensorsInterface::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -58,7 +58,7 @@ void mMoistureSensor::SubTasker_MQTTSender(){
 
 }
 
-//#ifdef USE_MODULE_SENSORS_MOTION // Motion Sensing -- NEEDS MOVED INTO ITS OWN FUNCTION
+//#ifdef USE_MODULE_SENSORS_PIR // Motion Sensing -- NEEDS MOVED INTO ITS OWN FUNCTION
 void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
 
   D_DATA_BUFFER_CLEAR();

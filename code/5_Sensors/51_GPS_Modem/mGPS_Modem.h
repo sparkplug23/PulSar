@@ -65,11 +65,11 @@ class mGPS_Modem :
       
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mGPS_Modem> mqtthandler_settings_teleperiod;
+    struct handler<mGPS_Modem> mqtthandler_settings;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mGPS_Modem> mqtthandler_sensor_ifchanged;
     struct handler<mGPS_Modem> mqtthandler_sensor_teleperiod;

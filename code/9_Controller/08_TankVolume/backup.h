@@ -420,14 +420,14 @@
 //   //#ifdef USE_CORE_MQTT 
 
 //     void MQTTHandler_Init();
-//     void MQTTHandler_Set_RefreshAll();
-//     void MQTTHandler_Set_DefaultPeriodRate();
+//     void MQTTHandler_RefreshAll();
+//     void MQTTHandler_Rate();
     
 //     struct handler<mTankVolumeUltrasonic>* ptr;
 //     void MQTTHandler_Sender();
 
 //     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-//     struct handler<mTankVolumeUltrasonic> mqtthandler_settings_teleperiod;
+//     struct handler<mTankVolumeUltrasonic> mqtthandler_settings;
     
 //     // Extra module only handlers
 //     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry

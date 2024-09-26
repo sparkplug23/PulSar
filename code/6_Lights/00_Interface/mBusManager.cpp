@@ -393,7 +393,7 @@ void BusPwm::show()
   uint16_t w2 = mapvalue(output_colour.W2, 0, 255, 0, 1023);
   
   #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  output_colour.debug_print_states("output_colour");
+  output_colour.debug_print("output_colour");
   #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
   uint16_t colour10bit[5] = {0};
@@ -437,7 +437,7 @@ void BusPwm::show()
     pwm_value = bitRead(pCONT_set->runtime.pwm_inverted, ii) ? pCONT_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-    ALOG_DBM(PSTR("BusPwm[%d]::pwm_value[%d] %d"), pCONT_lAni->getCurrSegmentId(), ii, pwm_value);
+    ALOG_INF(PSTR("BusPwm[%d]::pwm_value[%d] %d"), pCONT_lAni->getCurrSegmentId(), ii, pwm_value);
     #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
     #ifdef ESP8266

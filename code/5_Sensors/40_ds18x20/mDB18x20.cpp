@@ -50,13 +50,13 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
     /************

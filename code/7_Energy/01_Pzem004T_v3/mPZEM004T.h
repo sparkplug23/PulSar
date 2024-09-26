@@ -87,7 +87,6 @@ class mEnergyPZEM004T :
     struct DATA_RUNTIME
     {
       uint8_t devices_present = 0;
-      // uint8_t active_sensor = 0;
       uint16_t rate_measure_ms = 1000;
       uint8_t device_current = 0;
       uint8_t waiting_address_response = 0;
@@ -101,9 +100,53 @@ class mEnergyPZEM004T :
      * SECTION: Internal Functions
      ************************************************************************************************/
 
+    void EveryLoop();    
+        
+    #ifndef MAX_PZEM004T_DEVICES
+      #define MAX_PZEM004T_DEVICES 12
+    #endif
+
+    #ifndef DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH
+      #define DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH MAX_PZEM004T_DEVICES
+    #endif
+    
+    void DeviceSearch(uint8_t address_limit = DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH); // address 248 is reserved for broadcast
+    void AddDeviceIfNotExists(uint8_t address_to_save);    
+    void SetIDWithAddress(uint8_t address_id, uint8_t address_to_save);
+
+    enum TRANSCEIVE_MODE_IDS{
+      TRANSCEIVE_RESPONSE_TIMEOUT_ID=-2,
+      TRANSCEIVE_RESPONSE_ERROR_ID=-1,
+      TRANSCEIVE_IDLE_ID=0,
+      TRANSCEIVE_REQUEST_READING_ID,
+      TRANSCEIVE_AWAITING_RESPONSE_ID,
+      TRANSCEIVE_RESPONSE_SUCCESS_ID,
+      TRANSCEIVE_AWAITING_LENGTH_ID,
+    };
+    TRANSCEIVE_MODE_IDS transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
+
+    TasmotaModbus *modbus;
+    timereached_t measure_time;
+    uint32_t timeout = millis();
+    uint32_t tSaved_backoff = millis();
+    
+    typedef struct DeviceData_t{
+      float voltage;
+      float current;
+      float active_power;
+      float frequency;
+      float power_factor;
+      float import_active;  
+      uint8_t address = 0;
+      uint32_t measured_time = 0;
+    };
+
+    std::vector<DeviceData_t> data_v;
+
+    void ParseModbusBuffer(uint8_t* buffer, mEnergyPZEM004T::DeviceData_t* data);
 
     /************************************************************************************************
-     * SECTION: Override Functions
+     * SECTION: Unified Reporting
      ************************************************************************************************/
 
     #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -139,80 +182,15 @@ class mEnergyPZEM004T :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mEnergyPZEM004T>*> mqtthandler_list;
-    struct handler<mEnergyPZEM004T> mqtthandler_settings_teleperiod;
+    struct handler<mEnergyPZEM004T> mqtthandler_settings;
     struct handler<mEnergyPZEM004T> mqtthandler_state_ifchanged;
     struct handler<mEnergyPZEM004T> mqtthandler_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
-
-
-
-    struct SETTINGS{
-      // uint8_t fEnableSensor = false;
-      uint16_t rate_measure_ms = 1000;
-      // uint8_t active_sensor = 0; //move
-      // uint8_t devices_present = 0;
-    }settings;
-
-    void EveryLoop();    
-        
-    #ifndef MAX_PZEM004T_DEVICES
-      #define MAX_PZEM004T_DEVICES 12
-    #endif
-
-    #ifndef DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH
-      #define DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH 10
-    #endif
-
-    
-    void DeviceSearch(uint8_t address_limit = DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH); // address 248 is reserved for broadcast
-    void AddDeviceIfNotExists(uint8_t address_to_save);
-
-
-
-
-
-    
-    void SetIDWithAddress(uint8_t address_id, uint8_t address_to_save);
-
-
-    enum TRANSCEIVE_MODE_IDS{
-      TRANSCEIVE_RESPONSE_TIMEOUT_ID=-2,
-      TRANSCEIVE_RESPONSE_ERROR_ID=-1,
-      TRANSCEIVE_IDLE_ID=0,
-      TRANSCEIVE_REQUEST_READING_ID,
-      TRANSCEIVE_AWAITING_RESPONSE_ID,
-      TRANSCEIVE_RESPONSE_SUCCESS_ID,
-      TRANSCEIVE_AWAITING_LENGTH_ID,
-    };
-    TRANSCEIVE_MODE_IDS transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
-
-    TasmotaModbus *modbus;
-    timereached_t measure_time;
-    uint32_t timeout = millis();
-    uint32_t tSaved_backoff = millis();
-    
-    typedef struct DeviceData_t{
-      float voltage;
-      float current;
-      float active_power;
-      float frequency;
-      float power_factor;
-      float import_active;  
-      uint8_t address = 0;
-      uint32_t measured_time = 0;
-    };
-
-    std::vector<DeviceData_t> data_v;
-
-    void ParseModbusBuffer(uint8_t* buffer, mEnergyPZEM004T::DeviceData_t* data);
-
-       
-
 
 };
 

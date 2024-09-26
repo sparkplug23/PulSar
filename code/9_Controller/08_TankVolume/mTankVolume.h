@@ -445,14 +445,14 @@ float GetOilHeightCMReadingAdjustedFromTemp(int duration);
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     struct handler<mTankVolume>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mTankVolume> mqtthandler_settings_teleperiod;
+    struct handler<mTankVolume> mqtthandler_settings;
     
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -472,7 +472,7 @@ float GetOilHeightCMReadingAdjustedFromTemp(int duration);
   //#endif
 
     struct handler<mTankVolume>* mqtthandler_list[5] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_litres_ifchanged,
       &mqtthandler_litres_teleperiod,
       &mqtthandler_furnace_ifchanged,

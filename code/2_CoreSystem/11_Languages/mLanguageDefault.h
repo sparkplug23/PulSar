@@ -107,7 +107,7 @@
 #define D_MODULE_SENSORS_INA219_CTR               "ina219"
 #define D_MODULE_SENSORS_ULTRASONIC_CTR           "ultrasonic"
 #define D_MODULE_SENSORS_DOOR_CTR                 "doorsensor"
-#define D_MODULE_SENSORS_MOTION_CTR               "motion"
+#define D_MODULE_SENSORS_PIR_CTR                  "motion" // to be renamed pir, but only after openhab responds to inteface motion events instead
 #define D_MODULE_SENSORS_LSM303D_CTR              "lsm303d"
 #define D_MODULE_SENSORS_L3G_CTR                  "l3g"
 #define D_MODULE_SENSORS_MPU9250_CTR              "mpu9250"
@@ -850,15 +850,10 @@
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"
 #define D_GPIO_FUNCTION_PIR_2_CTR         "PIR 2"
 #define D_GPIO_FUNCTION_PIR_3_CTR         "PIR 3"
-#define D_GPIO_FUNCTION_PIR_1_NP_CTR         "PIR 1 NP"
-#define D_GPIO_FUNCTION_PIR_2_NP_CTR         "PIR 2 NP"
-#define D_GPIO_FUNCTION_PIR_3_NP_CTR         "PIR 3 NP"
 #define D_GPIO_FUNCTION_PIR_1_INV_CTR     "PIR 1 Inv"
 #define D_GPIO_FUNCTION_PIR_2_INV_CTR     "PIR 2 Inv"
 #define D_GPIO_FUNCTION_PIR_3_INV_CTR     "PIR 3 Inv"
-#define D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "PIR 1 NP Inv"
-#define D_GPIO_FUNCTION_PIR_2_NP_INV_CTR     "PIR 2 NP Inv"
-#define D_GPIO_FUNCTION_PIR_3_NP_INV_CTR     "PIR 3 NP Inv"
+
 #define D_GPIO_FUNCTION_DHT11_CTR         "DHT11"
 #define D_GPIO_FUNCTION_DHT11_1_CTR         "DHT11_1"
 #define D_GPIO_FUNCTION_DHT11_2_CTR         "DHT11_2"
@@ -1256,6 +1251,7 @@
   #define D_LOG_RFR "RFR: "          // RF Received
   #define D_LOG_SERIAL "SER: "       // Serial
   #define D_LOG_SHT1 "SHT: "         // SHT1x sensor
+  #define D_LOG_SUN_TRACKING "SUN: "
   #define D_LOG_UPLOAD "UPL: "       // Upload
   #define D_LOG_UPNP "UPP: "         // UPnP
   #define D_LOG_WIFI "WIF: "         // Wifi
@@ -1562,7 +1558,7 @@
 #define D_JSON_YESTERDAY "Yesterday"
 #define D_JSON_ZERO_POINT_CALIBRATION "Zero Point Calibration"
 #define D_JSON_ALTITUDE "Altitude"
-#define D_JSON_AGE "age"
+#define D_JSON_AGE "Age"
 #define D_JSON_ANY "Any"
 #define D_JSON_ACTIVE_POWER "ActivePower"
 #define D_JSON_CCT_PERCENTAGE "CCT_TempPercentage"

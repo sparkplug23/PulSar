@@ -105,7 +105,7 @@ class mMoonTracking :
 
     double GetAzimuth()
     {
-      #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
         if(debug.enabled)
           return debug.azimuth;
         else
@@ -117,7 +117,7 @@ class mMoonTracking :
 
     double GetElevation()
     {
-      #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
         if(debug.enabled)
           return debug.elevation;
         else
@@ -162,10 +162,10 @@ class mMoonTracking :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mMoonTracking> mqtthandler_settings_teleperiod;
+    struct handler<mMoonTracking> mqtthandler_settings;
     struct handler<mMoonTracking> mqtthandler_sensor_ifchanged;
     struct handler<mMoonTracking> mqtthandler_sensor_teleperiod;
 

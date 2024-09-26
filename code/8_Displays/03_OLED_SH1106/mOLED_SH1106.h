@@ -69,14 +69,14 @@ class mOLED_SH1106 :
     #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mOLED_SH1106> mqtthandler_settings_teleperiod;
+    struct handler<mOLED_SH1106> mqtthandler_settings;
  
     struct handler<mOLED_SH1106>* mqtthandler_list[1] = {
-      &mqtthandler_settings_teleperiod
+      &mqtthandler_settings
     };
 
     // No specialised payload therefore use system default instead of enum

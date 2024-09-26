@@ -78,11 +78,11 @@ class mBattery_Modem :
       
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mBattery_Modem> mqtthandler_settings_teleperiod;
+    struct handler<mBattery_Modem> mqtthandler_settings;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mBattery_Modem> mqtthandler_sensor_ifchanged;
     struct handler<mBattery_Modem> mqtthandler_sensor_teleperiod;
@@ -93,7 +93,7 @@ class mBattery_Modem :
     //with extra handlers example
     
     struct handler<mBattery_Modem>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

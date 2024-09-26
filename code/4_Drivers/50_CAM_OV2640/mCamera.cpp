@@ -1097,7 +1097,7 @@ uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_level, bool json_appendi
 
 void mCameraOV2640::MQTTHandler_Init(){
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -1131,9 +1131,9 @@ void mCameraOV2640::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mCameraOV2640::MQTTHandler_Set_RefreshAll(){
+void mCameraOV2640::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
   // mqtthandler_animation_teleperiod.flags.SendNow = true;
   // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
 //   mqtthandler_scene_teleperiod.flags.SendNow = true;
@@ -1141,14 +1141,14 @@ void mCameraOV2640::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mCameraOV2640::MQTTHandler_Set_DefaultPeriodRate(){
+void mCameraOV2640::MQTTHandler_Rate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->pCONT_mqtt->dt.teleperiod_secs;
   // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->pCONT_mqtt->dt.teleperiod_secs;
 //   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->pCONT_mqtt->dt.teleperiod_secs;
   
-} //end "MQTTHandler_Set_DefaultPeriodRate"
+} //end "MQTTHandler_Rate"
 
 
 void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
@@ -1159,7 +1159,7 @@ void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   };
   
   struct handler<mCameraOV2640>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod
+    &mqtthandler_settings
     //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 
@@ -1828,13 +1828,13 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 

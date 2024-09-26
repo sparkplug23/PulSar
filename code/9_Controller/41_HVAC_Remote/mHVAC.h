@@ -349,8 +349,8 @@ class mHVAC :
   #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
     
@@ -371,7 +371,7 @@ class mHVAC :
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    struct handler<mHVAC> mqtthandler_settings_teleperiod;
+    struct handler<mHVAC> mqtthandler_settings;
     struct handler<mHVAC> mqtthandler_program_timers_ifchanged;
     struct handler<mHVAC> mqtthandler_program_timers_teleperiod;
     struct handler<mHVAC> mqtthandler_program_temps_ifchanged;
@@ -386,7 +386,7 @@ class mHVAC :
     struct handler<mHVAC> mqtthandler_relays_teleperiod;
   
   struct handler<mHVAC>* mqtthandler_list[13] = {
-    &mqtthandler_settings_teleperiod,
+    &mqtthandler_settings,
     &mqtthandler_program_timers_ifchanged,
     &mqtthandler_program_timers_teleperiod,
     &mqtthandler_program_temps_ifchanged,

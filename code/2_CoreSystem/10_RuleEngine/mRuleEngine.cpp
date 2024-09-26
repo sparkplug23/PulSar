@@ -63,7 +63,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_EVERY_SECOND:
       // ALOG_TST(PSTR("DefaultRuleForModule"));   
       // // DefaultRuleForModule();
-      // MQTTHandler_Set_RefreshAll();
+      // MQTTHandler_RefreshAll();
 
       // if(){ pCONT->Tasker_Interface(TASK_RULES_LOAD_FROM_PROGMEM_ID) };
       if(pCONT_time->uptime_seconds_nonreset == D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND){ RulesLoad_From_Progmem(); }
@@ -94,7 +94,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
       break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
       break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -114,9 +114,9 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 void mRuleEngine::RulesLoad_From_Progmem()
 {
 
-  ALOG_HGL(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
+  ALOG_DBG(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
 
-  DEBUG_DELAY(5000);
+  // DEBUG_DELAY(5000);
 
   DefaultRuleForModule();
   
@@ -714,7 +714,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
         parsesub_Rule_Part(jobj, &pCONT_rules->rules[rule_index].command);        
       }
 
-      mqtthandler_settings_teleperiod.flags.SendNow = true;
+      mqtthandler_settings.flags.SendNow = true;
 
     }
 
@@ -1107,7 +1107,7 @@ void mRuleEngine::MQTTHandler_Init()
 
   struct handler<mRuleEngine>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
@@ -1133,7 +1133,7 @@ void mRuleEngine::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mRuleEngine::MQTTHandler_Set_RefreshAll()
+void mRuleEngine::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -1143,7 +1143,7 @@ void mRuleEngine::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mRuleEngine::MQTTHandler_Set_DefaultPeriodRate()
+void mRuleEngine::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

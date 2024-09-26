@@ -34,6 +34,8 @@
 #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 3
 #endif
 
+#define VALUE_IS_PROGMEM true // visual way to see what the bool is
+
 // #define DEBUG_JSON_BUILDER
 
 enum IDENTIFIER_IDS{
@@ -343,7 +345,7 @@ class JsonBuilder{
 
   // Generic Add function for non-float types
   template <typename T>
-  void Add_P(const char* key, T value){
+  void Add_P(const char* key, T value, bool is_string_value_progmem = false){
     if((writer.buffer == nullptr)||(writer.buffer_size == 0))
       return;
     
@@ -367,7 +369,11 @@ class JsonBuilder{
       writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%d",key,value);
     }else
     if(is_string_type<T>::value){ 
-      writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":\"%s\"",key,value);
+      if(is_string_value_progmem)
+        writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":\"%S\"",key,value);
+      else
+        writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":\"%s\"",key,value);
+
     }else
     if(is_char_type<T>::value){   
       writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":'%c'",key,value);
@@ -388,7 +394,6 @@ class JsonBuilder{
     #endif
 
   }
-
 
 
   template <typename T, typename U>

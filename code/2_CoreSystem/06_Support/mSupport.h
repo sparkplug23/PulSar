@@ -505,6 +505,8 @@ class mSupport :
     uint16_t WriteBuffer_P(const char* formatP, ...);
     uint16_t WriteBuffer_P(char* buffer, const char* formatP, ...);
     void WriteBuffer_P(char* buffer, uint16_t* length, const char* formatP, ...);
+    static void appendToBuffer(char* buffer, size_t bufferSize, const char* format, ...);
+    static void removeTrailingComma(char* buffer);
 
     void CommandSet_Restart(int8_t command);
 

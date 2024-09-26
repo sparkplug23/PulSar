@@ -94,7 +94,7 @@
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -186,7 +186,7 @@
         "BrightnessRGB": 100,
         "BrightnessCCT": 100,
         "CCT_TempPercentage":90,
-        "ColourType":4
+        "ColourType":5
       },
       "Effects": {
         "Function":1
@@ -893,7 +893,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":100,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -917,7 +917,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":100,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -2093,7 +2093,7 @@
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -2153,7 +2153,7 @@
     #define ENABLE_DEVFEATURE_BME680
       
   // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
   // #define USE_MODULE_SENSORS_BUTTONS
   //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
   //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
@@ -2226,7 +2226,7 @@
       "\"18\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
       "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
       "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
@@ -2567,7 +2567,7 @@
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG

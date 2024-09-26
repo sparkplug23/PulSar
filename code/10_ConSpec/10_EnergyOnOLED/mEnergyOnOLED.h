@@ -76,12 +76,12 @@ class mEnergyOLED :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mEnergyOLED>*> mqtthandler_list;
-    struct handler<mEnergyOLED> mqtthandler_settings_teleperiod;
+    struct handler<mEnergyOLED> mqtthandler_settings;
     struct handler<mEnergyOLED> mqtthandler_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 

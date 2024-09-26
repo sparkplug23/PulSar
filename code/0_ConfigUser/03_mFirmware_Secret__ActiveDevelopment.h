@@ -38,6 +38,8 @@
 // #define DEVICE_TESTBED__ULTRASONIC
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__70__ESP32_PARALLEL_4CH_TRIPLE_CONNECTOR_TESTER
 // #define DEVICE_LIGHTING__LIGHTING_EFFECTS__MATRIX_SEGMENT_TESTER
+// #define DEVICE_ACTIVE_DEVELOPMENT__DOOR_LIGHTING__OFFICE
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -277,12 +279,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
     
   #define SETTINGS_HOLDER 1241
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-  #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
-  #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
 
   #define ESP32
 
@@ -309,6 +309,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_LINE_HERE2
   // #define ENABLE_DEBUG_LINE_HERE_MILLIS
 
+  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+
   // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 200
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
@@ -316,6 +318,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
 
   // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  #define ENABLE_FEATURE_SYSTEM__BOOT_SPLASH__DISPLAY_BLOCK_TO_SHOW_END_OF_INIT
+
+  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 
 
   // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
@@ -329,29 +335,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
   #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  #define ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define ENABLE_TEMPLATE_SECTION__LIGHTING
   #define ENABLE_TEMPLATE_SECTION__ENERGY
   #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
   #define ENABLE_TEMPLATE_SECTION__ENERGY__INA219
   #define ENABLE_TEMPLATE_SECTION__DISPLAY_NEXTION
   #define ENABLE_TEMPLATE_SECTION__CONTROLLER__HVAC
-
-  /***********************************
-   * SECTION: Storage Configs
-  ************************************/  
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-
-  /**
-   * For debugging and short term I may want to store everything as JSON, so I can view the data?
-   * Longer term, a mixture of JSON/Binary for space.
-   * Options should just be ifdef to switch between methods. 
-  */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
   /***********************************
    * SECTION: System Configs
@@ -366,7 +356,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -394,6 +384,24 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
   // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
+
+  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+  // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_MINUTE
+
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
 
   /***********************************
@@ -423,10 +431,12 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
     #define USE_MODULE_SENSORS_SUN_TRACKING     
       #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+        #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
       #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
       #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
       #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
         // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
       // #define ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
 
       // #define USE_MODULE_SENSORS_SUN_TRACKING__DETAILED_MQTT_INFO_UNIX
@@ -435,6 +445,11 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
     #define USE_MODULE_SENSORS_BH1750
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define USE_MODULE_SENSORS_PIR
+    #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  // #define USE_MODULE_SENSORS_SWITCHES
   #endif
 
   #define ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
@@ -520,7 +535,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/  
 
-  #ifdef ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+  // #define ENABLE_DEVFEATURE_LIGHT__HEATMAP_PALETTES
+
+  #ifdef ENABLE_TEMPLATE_SECTION__LIGHTING
 
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
@@ -571,7 +588,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           0,
           144
         ],
-        "ColourPalette":"IceCream Floats",
+        "ColourPalette":"Live Solar Sky",
         "PaletteMappingValues":[10,15,20],
         "SegColour0": {
           "Hue": 0,
@@ -586,7 +603,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           "Grouping":1,
           "RateMs": 1000
         },
-        "BrightnessRGB": 20,
+        "BrightnessRGB": 100,
         "BrightnessCCT": 0
       },
       "Segment1": {
@@ -642,7 +659,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
           184,
           192
         ],
-        "ColourPalette":"Warm White",
+        "ColourPalette":"Live SunEL CCT",
         "PaletteMappingValues":[10,15,20],
         "SegColour0": {
           "Hue": 0,
@@ -667,7 +684,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
     
 
-  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING
 
   /***********************************
    * SECTION: Energy Configs
@@ -766,10 +783,15 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
+      // 15 - PIR
+      // 2
       // 
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -827,6 +849,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_1_NAME
   #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_2_NAME
   #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_3_NAME
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Desk"
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -838,6 +862,12 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "\"DeviceCount\":4"    
     "},"
     "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\","
         "\"" D_DEVICE_HEATER_1_NAME "\","
@@ -1040,7 +1070,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -1295,7 +1325,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
     }
     )=====";
 
-  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING
 
   /***********************************
    * SECTION: Energy Configs
@@ -1648,7 +1678,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -1869,7 +1899,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -2537,7 +2567,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #endif // ENABLE_TEMPLATE_LIGHTING__FLIGHT_TYPE_1
 
-  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING__DUAL_OUTPUT
+  #endif // ENABLE_TEMPLATE_SECTION__LIGHTING
 
   /***********************************
    * SECTION: Energy Configs
@@ -2902,7 +2932,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -2976,7 +3006,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define USE_MODULE_SENSORS_BH1750
     #define USE_MODULE_SENSORS_SWITCHES
     #define USE_MODULE_SENSORS_BUTTONS
-    #define USE_MODULE_SENSORS_MOTION
+    #define USE_MODULE_SENSORS_PIR
     #define USE_MODULE_SENSORS_LDR_BASIC
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
@@ -3220,7 +3250,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
       "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
@@ -3495,7 +3525,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // // // #define USE_MODULE_SENSORS_INTERFACE
   // // // #define USE_MODULE_SENSORS_BME
-  // // // #define USE_MODULE_SENSORS_MOTION
+  // // // #define USE_MODULE_SENSORS_PIR
 
   // // // #define USE_MODULE_DISPLAYS_INTERFACE
   // // #define USE_MODULE_DISPLAYS_NEXTION
@@ -3601,7 +3631,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define USE_MODULE_SENSORS_BH1750
   //   #define USE_MODULE_SENSORS_SWITCHES
   //   #define USE_MODULE_SENSORS_BUTTONS
-  //   #define USE_MODULE_SENSORS_MOTION
+  //   #define USE_MODULE_SENSORS_PIR
   //   #define USE_MODULE_SENSORS_LDR_BASIC
 
   // #ifdef USE_MODULE_SENSORS_LDR_BASIC
@@ -3730,7 +3760,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //     "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
   //     "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
   //     #endif
-  //     #ifdef USE_MODULE_SENSORS_MOTION
+  //     #ifdef USE_MODULE_SENSORS_PIR
   //     "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
   //     #endif
   //     #ifdef USE_MODULE_DISPLAYS_NEXTION
@@ -4551,7 +4581,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -4946,7 +4976,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -5158,7 +5188,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -5385,7 +5415,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -5534,7 +5564,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
     // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
     #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
@@ -5675,7 +5705,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -5802,7 +5832,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -5957,7 +5987,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -6076,7 +6106,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -6166,7 +6196,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 // #define ENABLE_DEBUG_LINE_HERE
 
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
   #define USE_MODULE_CORE_FILESYSTEM
@@ -6236,7 +6266,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -6459,7 +6489,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 //   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
 //   // Settings saving and loading
-//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
 //   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
 //   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
 //   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -6761,7 +6791,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "RateMs": 1000
       }
     },
-    "BrightnessRGB": 10,
+    "BrightnessRGB": 7,
     "BrightnessCCT": 0
   }
   )=====";
@@ -6844,5 +6874,309 @@ May need to add two power connections too, so its not just the cat5e wire to let
 #endif
 
 
+
+
+/**
+ * @brief 
+ * To test the ensuite code
+ */
+#ifdef DEVICE_ACTIVE_DEVELOPMENT__DOOR_LIGHTING__OFFICE
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+
+  #define LOG_BUFFER_SIZE 2000
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+    
+
+  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  // #define USE_MODULE_CORE_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+ #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+ 
+    
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":143
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        143
+      ],
+      "ColourPalette":"Snowy 01",
+      "Effects": {
+        "Function":"Spanned Palette",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  
+
+#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__01__ESP32_1CH
+
+
+
+/**
+ * @brief 
+ * To test the ensuite code
+ */
+#ifdef DEVICE_ACTIVE_DEVELOPMENT__HALLWAY_FLOWERS
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+
+  #define LOG_BUFFER_SIZE 2000
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+    
+
+  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  // #define USE_MODULE_CORE_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+ #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+ 
+    
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
+    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":27,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        100
+      ],
+      "ColourPalette":"Colourful Greenless",
+      "Effects": {
+        "Function":"Static Palette Aged",
+        "Speed":127,
+        "Intensity":47,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  
+
+#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__01__ESP32_1CH
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_ACTIVEDEVELOPMENT_H

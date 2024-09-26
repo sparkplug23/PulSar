@@ -34,14 +34,14 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
@@ -345,7 +345,7 @@ void mTelemetry::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mTelemetry::MQTTHandler_Set_RefreshAll()
+void mTelemetry::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -355,7 +355,7 @@ void mTelemetry::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mTelemetry::MQTTHandler_Set_DefaultPeriodRate()
+void mTelemetry::MQTTHandler_Rate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

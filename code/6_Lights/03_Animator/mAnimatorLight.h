@@ -24,7 +24,7 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
 #ifdef ESP32
-#define PIXEL_RANGE_LIMIT 3000
+#define PIXEL_RANGE_LIMIT 3200
 #else
 #define PIXEL_RANGE_LIMIT 1000
 #endif 
@@ -117,11 +117,11 @@
 #define SEGMENT_ON   (uint8_t)0x04
 #define REVERSE      (uint8_t)0x02
 #define SELECTED     (uint8_t)0x01
-#define IS_TRANSITIONAL ((SEGMENT_I(_segment_index_primary).options & TRANSITIONAL) == TRANSITIONAL)
-#define IS_MIRROR       ((SEGMENT_I(_segment_index_primary).options & MIRROR      ) == MIRROR      )
-#define IS_SEGMENT_ON   ((SEGMENT_I(_segment_index_primary).options & SEGMENT_ON  ) == SEGMENT_ON  )
-#define IS_REVERSE      ((SEGMENT_I(_segment_index_primary).options & REVERSE     ) == REVERSE     )
-#define IS_SELECTED     ((SEGMENT_I(_segment_index_primary).options & SELECTED    ) == SELECTED    )
+#define IS_TRANSITIONAL ((SEGMENT_I(segment_current_index).options & TRANSITIONAL) == TRANSITIONAL)
+#define IS_MIRROR       ((SEGMENT_I(segment_current_index).options & MIRROR      ) == MIRROR      )
+#define IS_SEGMENT_ON   ((SEGMENT_I(segment_current_index).options & SEGMENT_ON  ) == SEGMENT_ON  )
+#define IS_REVERSE      ((SEGMENT_I(segment_current_index).options & REVERSE     ) == REVERSE     )
+#define IS_SELECTED     ((SEGMENT_I(segment_current_index).options & SELECTED    ) == SELECTED    )
 
 // #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
 #define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
@@ -132,7 +132,10 @@
 #else
 // #define MAX_SEGMENT_DATA 8192
 // Really this value should be split across all segments, since I may want one very large (2000+) pixel or many smaller segments but multiples of them.
-#define MAX_SEGMENT_DATA 19000 //6*MAX_PIXELS = 
+
+// #ifndef MAX_SEGMENT_DATA
+// #define MAX_SEGMENT_DATA 19000 //6*MAX_PIXELS = 
+// #endif 
 #endif
 
 // #define ANIMATOR_UNSET() (seg.anim_function_callback == nullptr)
@@ -190,6 +193,7 @@
 #define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].WithBrightness()
 
 #define SEGMENT          segments[getCurrSegmentId()]
+#define pSEGMENT         pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()]
 #define SEGMENT_I(X)     segments[X] // can this be changed later to "getSegment(X)" and hence protect against out of bounds
 #define pSEGMENT_I(X)    pCONT_lAni->segments[X]
 #define SEGLEN           _virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
@@ -255,6 +259,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SEQUENCER)   "sequencer";
 #endif
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)         "debug/palette";
+#endif
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_CUSTOM_MAPPING_TABLE__CTR)        "debug/mapping_table";
 #endif
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug/segments";
@@ -568,7 +575,7 @@ class mAnimatorLight :
 
     typedef struct PlaylistEntry 
     {
-      uint8_t preset; //ID of the preset to apply
+      uint8_t preset; //ID of the preset to apply, since they can be any order
       uint16_t dur;   //Duration of the entry (in tenths of seconds)
       uint16_t tr;    //Duration of the transition TO this entry (in tenths of seconds)
     } ple;
@@ -579,21 +586,23 @@ class mAnimatorLight :
     byte           playlistOptions = 0;       //bit 0: shuffle playlist after each iteration. bits 1-7 TBD
 
     PlaylistEntry *playlistEntries = nullptr;
-    byte           playlistLen;               //number of playlist entries
+    byte           playlistLen = 0;               //number of playlist entries
     int8_t         playlistIndex = -1;
     uint16_t       playlistEntryDur = 0;      //duration of the current entry in tenths of seconds
+    
+    int16_t currentPlaylist = -1;
+
+    uint32_t tSaved_playlist_debug = 0;
 
 
     void shufflePlaylist();
     void unloadPlaylist();
     int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
     void handlePlaylist();
-    void serializePlaylist(JsonObject sObj);
-    
-    int16_t currentPlaylist = -1;
-    
+    void serializePlaylist(JsonObject sObj);    
 
     #endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+
 
     #ifdef ENABLE_DEVFEATURE_LIGHTING__SETTINGS
     //set.cpp
@@ -973,6 +982,9 @@ class mAnimatorLight :
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
     void EffectAnim__2D__ScrollingText();
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+    void EffectAnim__2D__DigitalClock();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
     void EffectAnim__2D__DNA();
@@ -1681,6 +1693,9 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+    EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
     EFFECTS_FUNCTION__2D__DNA__ID,
     #endif
     /****************************************************************************************************************************************************************************
@@ -1860,15 +1875,15 @@ class mAnimatorLight :
   };
   enum ColourType{ 
       // COLOUR_TYPE__NONE__ID=0, 
-      COLOUR_TYPE__SINGLE__ID, // likely never used for me, remove
-      COLOUR_TYPE__COLDWARM__ID,  //CCT Only
-      COLOUR_TYPE__RGB__ID, //3   
-      COLOUR_TYPE__RGBW__ID, //4
-      COLOUR_TYPE__RGBCCT__ID, // 5 
+      COLOUR_TYPE__SINGLE__ID=1, // likely never used for me, remove
+      COLOUR_TYPE__COLDWARM__ID=2,  //CCT Only
+      COLOUR_TYPE__RGB__ID=3, //3   
+      COLOUR_TYPE__RGBW__ID=4, //4
+      COLOUR_TYPE__RGBCCT__ID=5 // 5 
       
       // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
-      COLOUR_TYPE__RGBWC__ID, //remove
-      COLOUR_TYPE__RGBCW__ID //remove
+      // COLOUR_TYPE__RGBWC__ID, //remove
+      // COLOUR_TYPE__RGBCW__ID //remove
   };
 
   // TransitionColourPairs* 
@@ -2180,7 +2195,8 @@ class mAnimatorLight :
       bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
       bool     flag_crgb_exact_colour = false,
-      uint8_t* encoded_index = nullptr
+      uint8_t* encoded_index = nullptr,
+      bool flag_request_is_for_full_visual_output = false
     );
 
     CRGB ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
@@ -2328,7 +2344,7 @@ class mAnimatorLight :
   
   uint32_t _lastShow;
   
-  uint8_t _segment_index_primary;
+  uint8_t segment_current_index;
   uint8_t _mainSegment;
 
   void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
@@ -2415,7 +2431,7 @@ class mAnimatorLight :
     inline uint8_t getBrightness(void) { return _brightness; }
     inline uint8_t getMaxSegments(void) { return MAX_NUM_SEGMENTS; }  // returns maximum number of supported segments (fixed value)
     inline uint8_t getSegmentsNum(void) { return segments.size(); }  // returns currently present segments
-    inline uint8_t getCurrSegmentId(void) { return _segment_index_primary; }
+    inline uint8_t getCurrSegmentId(void) { return segment_current_index; }
     inline uint8_t getMainSegmentId(void) { return _mainSegment; }
     inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
     inline uint8_t getTargetFps() { return _targetFps; }
@@ -2435,6 +2451,9 @@ class mAnimatorLight :
     uint32_t timebase;
     uint32_t currentColor(uint32_t colorNew, uint8_t tNr);
     uint32_t getPixelColor(uint16_t);
+
+    void setPixelColor_Rgbcct(int i, RgbcctColor col);
+    RgbcctColor getPixelColor_Rgbcct(uint16_t i);
 
     inline uint32_t getLastShow(void) { return _lastShow; }
     inline uint32_t segColor(uint8_t i) { return _colors_t_PHASE_OUT[i]; }
@@ -2508,9 +2527,9 @@ class mAnimatorLight :
     void setUpMatrix();
 
     // outsmart the compiler :) by correctly overloading
-    inline void setPixelColorXY(int x, int y, uint32_t c)   { setPixelColor(y * Segment::maxWidth + x, c); }
-      inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); }
-      inline void setPixelColorXY(int x, int y, CRGB c)       { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+    inline void setPixelColorXY(int x, int y, uint32_t c){       setPixelColor(y * Segment::maxWidth + x, c); }
+    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); }
+    inline void setPixelColorXY(int x, int y, CRGB c)       { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
 
     inline uint32_t getPixelColorXY(uint16_t x, uint16_t y) { return getPixelColor(isMatrix ? y * Segment::maxWidth + x : x);}
 
@@ -3254,6 +3273,9 @@ bool useMainSegmentOnly _INIT(false);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0, bool json_appending = true);
     #endif
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    uint8_t ConstructJSON_Debug__CustomMappingTable(uint8_t json_level = 0, bool json_appending = true);
+    #endif
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
     uint8_t ConstructJSON_Debug_Palette_Vector(uint8_t json_level = 0, bool json_appending = true);
     #endif
@@ -3269,8 +3291,8 @@ bool useMainSegmentOnly _INIT(false);
     
     #ifdef USE_MODULE_NETWORK_MQTT
       void MQTTHandler_Init();
-      void MQTTHandler_Set_RefreshAll();
-      void MQTTHandler_Set_DefaultPeriodRate();  
+      void MQTTHandler_RefreshAll();
+      void MQTTHandler_Rate();  
       void MQTTHandler_Sender();
       #ifdef USE_MODULE_NETWORK_WEBSERVER
       void MQTTHandler_AddWebURL_PayloadRequests();
@@ -3278,7 +3300,7 @@ bool useMainSegmentOnly _INIT(false);
       
       std::vector<struct handler<mAnimatorLight>*> mqtthandler_list;
     
-      struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;    
+      struct handler<mAnimatorLight> mqtthandler_settings;    
       struct handler<mAnimatorLight> mqtthandler_segments_teleperiod;  
       struct handler<mAnimatorLight> mqtthandler_playlists_teleperiod;
       /**
@@ -3310,6 +3332,9 @@ bool useMainSegmentOnly _INIT(false);
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
       struct handler<mAnimatorLight> mqtthandler_debug_segments;
+      #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+      struct handler<mAnimatorLight> mqtthandler_debug__custom_mapping_table;
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
       struct handler<mAnimatorLight> mqtthandler_debug_palette_vector;

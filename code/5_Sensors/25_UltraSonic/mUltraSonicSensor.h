@@ -247,13 +247,13 @@ class mUltraSonicSensor :
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
     struct handler<mUltraSonicSensor>* ptr = nullptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mUltraSonicSensor> mqtthandler_settings_teleperiod;
+    struct handler<mUltraSonicSensor> mqtthandler_settings;
     // const char* postfix_topic_sensors = "sensors";
     struct handler<mUltraSonicSensor> mqtthandler_sensor_ifchanged;
     struct handler<mUltraSonicSensor> mqtthandler_sensor_teleperiod;

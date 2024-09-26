@@ -59,10 +59,10 @@ int8_t mRelayStateLEDStrip::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
+      MQTTHandler_Rate(); // Load teleperiod setting into local handlers
     break; 
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif // USE_MODULE_NETWORK_MQTT
   } // end switch
@@ -262,7 +262,7 @@ void mRelayStateLEDStrip::MQTTHandler_Init()
 
   struct handler<mRelayStateLEDStrip>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
@@ -300,7 +300,7 @@ void mRelayStateLEDStrip::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mRelayStateLEDStrip::MQTTHandler_Set_RefreshAll()
+void mRelayStateLEDStrip::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -310,7 +310,7 @@ void mRelayStateLEDStrip::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mRelayStateLEDStrip::MQTTHandler_Set_DefaultPeriodRate()
+void mRelayStateLEDStrip::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

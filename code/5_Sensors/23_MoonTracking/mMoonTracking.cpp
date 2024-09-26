@@ -614,7 +614,7 @@ int8_t mMoonTracking::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -1084,7 +1084,7 @@ void mMoonTracking::parse_JSONCommand(JsonParserObject obj)
   }
 
 
-	#ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+	#ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
   if(jtok = obj["DebugSolar"].getObject()["Enabled"])
   {
     debug.enabled = jtok.getBool();
@@ -1099,7 +1099,7 @@ void mMoonTracking::parse_JSONCommand(JsonParserObject obj)
   {
     debug.azimuth = jtok.getFloat();
   }
-	#endif // ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+	#endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
   
   
 
@@ -1157,7 +1157,7 @@ void mMoonTracking::MQTTHandler_Init()
 
   struct handler<mMoonTracking>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -1195,7 +1195,7 @@ void mMoonTracking::MQTTHandler_Init()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mMoonTracking::MQTTHandler_Set_DefaultPeriodRate()
+void mMoonTracking::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

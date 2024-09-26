@@ -119,13 +119,13 @@ void WebAppend_Root_Status_Table_Data();
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
     struct handler<mDoorSensor>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mDoorSensor> mqtthandler_settings_teleperiod;
+    struct handler<mDoorSensor> mqtthandler_settings;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mDoorSensor> mqtthandler_sensor_ifchanged;
     struct handler<mDoorSensor> mqtthandler_sensor_teleperiod;
@@ -135,7 +135,7 @@ void WebAppend_Root_Status_Table_Data();
 
     
   struct handler<mDoorSensor>* mqtthandler_list[3] = {
-    &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
+    &mqtthandler_settings, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
   };
     
   //#endif

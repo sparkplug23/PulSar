@@ -211,16 +211,16 @@ void CalculateOrientation(int16_t a_x, int16_t a_y, int16_t a_z, int16_t m_x, in
     #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mSensorsLSM303D> mqtthandler_settings_teleperiod;
+    struct handler<mSensorsLSM303D> mqtthandler_settings;
     struct handler<mSensorsLSM303D> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsLSM303D> mqtthandler_sensor_teleperiod;
  
     struct handler<mSensorsLSM303D>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

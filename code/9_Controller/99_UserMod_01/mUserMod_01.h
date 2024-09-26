@@ -104,18 +104,18 @@ class mUserMod_01 :
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mUserMod_01> mqtthandler_settings_teleperiod;
+    struct handler<mUserMod_01> mqtthandler_settings;
     struct handler<mUserMod_01> mqtthandler_sensor_ifchanged;
     struct handler<mUserMod_01> mqtthandler_sensor_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
     struct handler<mUserMod_01>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

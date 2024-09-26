@@ -77,7 +77,7 @@
 //       MQTTHandler_Sender();
 //     break;
 //     case TASK_MQTT_CONNECTED:
-//       MQTTHandler_Set_RefreshAll();
+//       MQTTHandler_RefreshAll();
 //     break;
 //   }
   
@@ -455,7 +455,7 @@
 
 //   struct handler<mSonoffIFan>* ptr;
 
-//   ptr = &mqtthandler_settings_teleperiod;
+//   ptr = &mqtthandler_settings;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
@@ -490,7 +490,7 @@
 // /**
 //  * @brief Set flag for all mqtthandlers to send
 //  * */
-// void mSonoffIFan::MQTTHandler_Set_RefreshAll()
+// void mSonoffIFan::MQTTHandler_RefreshAll()
 // {
 //   for(auto& handle:mqtthandler_list){
 //     handle->flags.SendNow = true;
@@ -500,7 +500,7 @@
 // /**
 //  * @brief Update 'tRateSecs' with shared teleperiod
 //  * */
-// void mSonoffIFan::MQTTHandler_Set_DefaultPeriodRate()
+// void mSonoffIFan::MQTTHandler_Rate()
 // {
 //   for(auto& handle:mqtthandler_list){
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

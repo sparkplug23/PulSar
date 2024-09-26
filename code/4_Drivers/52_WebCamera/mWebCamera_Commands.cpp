@@ -13,7 +13,7 @@ void mWebCamera::parse_JSONCommand(JsonParserObject obj)
 
 		if(jtok.isNum())
 		{
-			mqtthandler_settings_teleperiod.flags.SendNow = true;
+			mqtthandler_settings.flags.SendNow = true;
 		}
 
 		// JBI->Start();

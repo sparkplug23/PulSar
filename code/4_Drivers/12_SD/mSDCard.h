@@ -283,19 +283,19 @@ void WebAppend_Root_Status_Table();
   #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mSDCard> mqtthandler_settings_teleperiod;
+    struct handler<mSDCard> mqtthandler_settings;
     struct handler<mSDCard> mqtthandler_file_writer;
     struct handler<mSDCard> mqtthandler_debug_write_times;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
     struct handler<mSDCard>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_file_writer,
       &mqtthandler_debug_write_times
     };

@@ -1239,7 +1239,7 @@ Bathroom
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -1313,7 +1313,7 @@ Bathroom
     
   #define SETTINGS_HOLDER 1240
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
   #define USE_MODULE_CORE_FILESYSTEM
@@ -1409,7 +1409,7 @@ Bathroom
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -1456,7 +1456,7 @@ Bathroom
   
   #define USE_MODULE_SENSORS_INTERFACE
     #define USE_MODULE_SENSORS_SWITCHES
-    #define USE_MODULE_SENSORS_MOTION
+    #define USE_MODULE_SENSORS_PIR
 
   /***********************************
    * SECTION: Display Configs
@@ -1559,7 +1559,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_CTR "\":["
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
@@ -1583,7 +1583,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_PIR_CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -1791,7 +1791,7 @@ Bathroom
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BH1750
 
   #define USE_MODULE_TEMPLATE
@@ -1804,7 +1804,7 @@ Bathroom
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"25\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
@@ -2050,7 +2050,7 @@ Bathroom
     
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_DOOR
     
   #define USE_MODULE_TEMPLATE
@@ -2063,7 +2063,7 @@ Bathroom
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
@@ -2139,78 +2139,101 @@ Bathroom
  */
 #ifdef DEVICE_CONSUMERUNIT
   #define DEVICENAME_CTR          "consumerunit"
-  #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
+  #define DEVICENAME_FRIENDLY_CTR "Consumer Unit #2"
   #define DEVICENAME_ROOMHINT_CTR "Downstairs Toilet"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
     
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/  
+
+ 
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+  #define ENABLE_TEMPLATE_SECTION__ENERGY
+  #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+
+ 
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
   #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
 
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
-
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-    #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
-
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_PZEM004T_V3
-    #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
   #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+    #define USE_MODULE_SENSORS_INTERFACE
+      #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define USE_MODULE_SENSORS_BME
+  #endif
+
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_PIR
+    #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+ 
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+ 
+  /***********************************
    * SECTION: Lighting Configs
-  ************************************/    
+  ************************************/  
+        
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
-
+  #ifdef ENABLE_TEMPLATE_SECTION__ENERGY
+    #define USE_MODULE_ENERGY_INTERFACE
+  #endif
   
-#define USE_LIGHTING_TEMPLATE
-DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-R"=====(
-{
-  "BusConfig":[
-    {
-      "Pin":4,
-      "ColourOrder":"GRBW",
-      "BusType":"SK6812_RGBW",
-      "Start":0,
-      "Length":60
-    }
-  ],
-  "Segment0": {
-    "PixelRange": [
-      0,
-      60
-    ],
-    "ColourPalette":"Colourful Default",
-    "SegColour0": {
-      "Hue": 0,
-      "Sat":100,
-      "BrightnessRGB":100
-    },
-    "Effects": {
-      "Function": 1,
-      "Speed":1,
-      "Intensity":255,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
-  },
-  "BrightnessRGB": 100,
-  "BrightnessCCT": 0
-}
-)=====";
+  #ifdef ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+    #define USE_MODULE_ENERGY_PZEM004T_V3
+      #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+    #define MAX_ENERGY_SENSORS 12
+    #define MAX_PZEM004T_DEVICES 12
+    #define ENABLE_DEVFEATURE_PZEM004T__AUTOSEARCH
+  #endif
 
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
 
+  /***********************************
+   * SECTION: MQTT Template Test Loading
+  ************************************/  
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2224,7 +2247,7 @@ R"=====(
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" 
@@ -2233,6 +2256,78 @@ R"=====(
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
+
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+    
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":53
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        48
+      ],
+      "ColourPalette":"Colourful Default",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "Segment1": {
+      "PixelRange": [
+        48,
+        53
+      ],
+      "ColourPalette":"Colourful Default",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  /***********************************
+   * SECTION: TEMPLATE: Names
+  ************************************/    
+
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Downstairs Toilet"
   #define D_DEVICE_SENSOR_CLIMATE "Downstairs Toilet"
@@ -2250,38 +2345,37 @@ R"=====(
   #define D_DEVICE_SENSOR_PZEM004T_11_ADDRESS "12"
 
 
-  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Mains"
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "MainFeed"
   #define D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "Cooker"
   #define D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "Immersion"
-  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "Washing Machine"
+  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "WashingMachine"
   #define D_SENSOR_PZEM004T_4_FRIENDLY_NAME_CTR "Dishwasher"
-  #define D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR "Pump Shower"
+  #define D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR "PumpShower"
   #define D_SENSOR_PZEM004T_6_FRIENDLY_NAME_CTR "Heating"
-  #define D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR "Tumble Dryer"
+  #define D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR "TumbleDryer"
   #define D_SENSOR_PZEM004T_8_FRIENDLY_NAME_CTR "Garage"
-  #define D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR "Bathroom Shower"
-  #define D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR "Main Sockets"
-  #define D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "Kitchen Sockets"
+  #define D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR "BathroomShower"
+  #define D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR "MainSockets"
+  #define D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "KitchenSockets"
   
-  
-  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   "Mains"
-  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   "Cooker"
-  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   "Immersion"
-  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   "Washing Machine"
-  #define D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR   "Dishwasher"
-  #define D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR   "Pump Shower"
-  #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR   "Heating"
-  #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR   "Tumble Dryer"
-  #define D_DRIVER_ENERGY_8_FRIENDLY_NAME_CTR   "Garage"
-  #define D_DRIVER_ENERGY_9_FRIENDLY_NAME_CTR   "Bathroom Shower"
-  #define D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR  "Main Sockets"
-  #define D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR  "Kitchen Sockets"
-  
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_4_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_6_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_8_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_8_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_9_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR  D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR
+  #define D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR  D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR
+
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
@@ -2476,7 +2570,7 @@ R"=====(
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2488,7 +2582,7 @@ R"=====(
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR      "\","
       #endif
       "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
@@ -2611,7 +2705,7 @@ R"=====(
   #define USE_MODULE_SENSORS_BME
     
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
 
   #define USE_MODULE_SENSORS_DHT
@@ -2629,7 +2723,7 @@ R"=====(
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"   
       // 3P - Top Right
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"23\":\""  D_GPIO_FUNCTION_SWT1_CTR     "\","
       #endif
       // RJ45 Connector   
@@ -3105,7 +3199,7 @@ R"=====(
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BUTTONS
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
@@ -3265,7 +3359,7 @@ R"=====(
   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
   // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -3294,7 +3388,7 @@ R"=====(
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
 
   /***********************************
    * SECTION: Display Configs
@@ -3647,7 +3741,7 @@ R"=====(
       "\"2\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"15\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"4\":\""  D_GPIO_FUNCTION_SWT1_CTR "\""
       #endif
     "},"
@@ -3944,7 +4038,7 @@ R"=====(
   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
-  // #define USE_MODULE_SENSORS_MOTION // add this       == motion added with esp32 upgrade
+  // #define USE_MODULE_SENSORS_PIR // add this       == motion added with esp32 upgrade
   
   #define USE_MODULE_CONTROLLER_FURNACE_SENSOR
  
@@ -3958,7 +4052,7 @@ R"=====(
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
-      // #ifdef USE_MODULE_SENSORS_MOTION
+      // #ifdef USE_MODULE_SENSORS_PIR
       // "\"5\":\""  D_GPIO_FUNCTION_SWT3_CTR "\","
       // #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
@@ -4092,7 +4186,7 @@ R"=====(
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BUTTONS
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
@@ -4668,7 +4762,7 @@ R"=====(
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BH1750
   
   #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2 // both rooms
@@ -4696,7 +4790,7 @@ R"=====(
       "\"14\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"33\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
@@ -4870,7 +4964,7 @@ R"=====(
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
@@ -4996,7 +5090,7 @@ R"=====(
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BH1750
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -5048,7 +5142,7 @@ R"=====(
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\","
       #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  
@@ -5354,7 +5448,7 @@ R"=====(
   #define USE_MODULE_SENSORS_BME
       
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BUTTONS
   //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
   //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
@@ -5457,7 +5551,7 @@ R"=====(
       "\"18\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
       "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
       "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
@@ -5892,7 +5986,7 @@ R"=====(
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   // #define USE_MODULE_SENSORS_DOOR
 
   #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2 // both rooms
@@ -5911,7 +6005,7 @@ R"=====(
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR

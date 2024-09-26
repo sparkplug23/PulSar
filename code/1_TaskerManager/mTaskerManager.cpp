@@ -363,8 +363,8 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_BH1750
   addTasker(new mBH1750());
   #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-  addTasker(new mMotion());
+  #ifdef USE_MODULE_SENSORS_PIR
+  addTasker(new mPIR());
   #endif
   #ifdef USE_MODULE_SENSORS_DOOR
   addTasker(new mDoorSensor());

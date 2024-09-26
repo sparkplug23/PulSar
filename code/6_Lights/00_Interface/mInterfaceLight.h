@@ -287,8 +287,8 @@ class mInterfaceLight :
 
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
     struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;

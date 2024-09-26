@@ -70,7 +70,7 @@ int8_t mImmersionTankColour::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
   }
   
@@ -488,7 +488,7 @@ void mImmersionTankColour::parse_JSONCommand(JsonParserObject obj)
 
 void mImmersionTankColour::MQTTHandler_Init(){
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -523,7 +523,7 @@ void mImmersionTankColour::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mImmersionTankColour::MQTTHandler_Set_RefreshAll()
+void mImmersionTankColour::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -533,7 +533,7 @@ void mImmersionTankColour::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mImmersionTankColour::MQTTHandler_Set_DefaultPeriodRate()
+void mImmersionTankColour::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

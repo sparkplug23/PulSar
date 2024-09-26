@@ -37,7 +37,7 @@ void mSR04::parse_JSONCommand(JsonParserObject obj)
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
     readings.average_DEMA.filter->SetAlpha(a1,a2);
     #endif
-    mqtthandler_settings_teleperiod.flags.SendNow = true;
+    mqtthandler_settings.flags.SendNow = true;
   }
 
   if(jtok = obj["SR04"].getObject()["ConversionMethod"])
@@ -45,7 +45,7 @@ void mSR04::parse_JSONCommand(JsonParserObject obj)
     readings.conversion_settings.flag_distance_conversion_method = jtok.getInt();
     ALOG_TST(PSTR("ConversionMethod %d"),readings.conversion_settings.flag_distance_conversion_method);
     
-    mqtthandler_settings_teleperiod.flags.SendNow = true;
+    mqtthandler_settings.flags.SendNow = true;
   }
 
 

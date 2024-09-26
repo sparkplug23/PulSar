@@ -95,7 +95,6 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   // }
 
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
-  char level_buffer[10];
 
   bool isconnected = false;
   #ifdef USE_MODULE_NETWORK_WIFI
@@ -109,11 +108,11 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
       // register uint32_t *sp asm("a1"); 
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
-      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %s %s\r\n"), 
+      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"), 
         ESP.getFreeHeap(), // 4 * (sp - g_pcont->stack), 
         isconnected ? 'Y' : 'N',
         pCONT_time->GetUptime(),
-        pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),
+        pCONT_log->GetLogLevelNamebyID(loglevel),
         pCONT_log->log_data
       );
       
@@ -129,7 +128,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
 
 
-      SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
+      SERIAL_DEBUG.printf(PSTR("%s%S %s\r\n"), mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
 
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT END<<\n\r\n\r"); }
       #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
@@ -159,7 +158,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   {    
     if(pCONT_log->Telnet)
     {
-      pCONT_log->Telnet.printf( "%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
+      pCONT_log->Telnet.printf( "%s%S %s\r\n", mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
     }
   }
 
@@ -182,12 +181,44 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   //       memmove(web_log, it, WEB_LOG_SIZE -(it-web_log));  // Move buffer forward to remove oldest log line
   //     }
   //     // creates line formatted with \1 meaning EOL
-  //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%s %s\1"), web_log, web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
+  //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%S %s\1"), web_log, web_log_index++, mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), log_data);
   //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
   //   }
   // }
   #endif  // USE_MODULE_NETWORK_WEBSERVER
+
+  
+  // LOG : MQTT Broadcast Alerts
+  /**
+   * @brief New method that assuming enabled, will broadcast the error message so a central location can view any ongoing system messages
+   * It will keep the device_name prefix, so the device can be identified.
+   * It should get elevated previledges outside of device_name/status/ so it can be viewed as its own issue. Perhaps just logging.
+   * device_name/logging/message/LOG_LEVEL  so LOG_LEVEL can be identified
+   * device_name/logging/alert/LOG_LEVEL    alerts are reserved for special messages, and depending on the openhab may be broadcast as notifications on my phone
+   * 
+   * 
+   * 
+   */
+  if (loglevel <= pCONT_set->Settings.logging.mqtt_level) 
+  {    
+    char topic[100];
+    snprintf_P(topic, sizeof(topic), "logging/message/%S", pCONT_log->GetLogLevelNamebyID(loglevel));
+
+    // Calculate the length of the timestamp, including the space
+    size_t mxtime_length = strlen(mxtime);
+    // Calculate the length of the current log data
+    size_t log_data_length = strlen(pCONT_log->log_data);
+    // Ensure there's enough space in log_data to perform the shift
+    if (mxtime_length + log_data_length < sizeof(pCONT_log->log_data)) {
+      // Shift the current log data to the right to make space for the timestamp
+      memmove(pCONT_log->log_data + mxtime_length, pCONT_log->log_data, log_data_length + 1); // +1 to move the null terminator as well
+      // Copy the timestamp to the beginning of log_data
+      memcpy(pCONT_log->log_data, mxtime, mxtime_length);
+    }
+
+    pCONT_mqtt->Publish(topic, pCONT_log->log_data);
+  }
   
 }
 
@@ -265,9 +296,9 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
   // LOG : SERIAL
   if (loglevel <= pCONT_set->Settings.logging.serial_level) {
-    SERIAL_DEBUG.printf("%s%s %s\r\n", 
+    SERIAL_DEBUG.printf("%s%S %s\r\n", 
     mxtime,
-    pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),  
+    pCONT_log->GetLogLevelNamebyID(loglevel),  
     pCONT_log->log_data);
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // SERIAL_DEBUG.flush();
@@ -280,7 +311,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   //       pCONT_log->client = pCONT_log->server->available();
   //     }
   //     if(pCONT_log->client.connected()) {
-  //       pCONT_log->client.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
+  //       pCONT_log->client.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
   //     }
   //   }
   // }
@@ -292,7 +323,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
     
   pCONT_log->Telnet.println("uptime: ");
     //   if(pCONT_log->client.connected()) {
-    //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
+    //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
     //   }
     // }
     }
@@ -315,8 +346,8 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
     }
 
     // creates line formatted with \1 meaning EOL
-    snprintf_P(pCONT_log->web_log, sizeof(pCONT_log->web_log), PSTR("%s%c%s%s %s\1"), pCONT_log->web_log, 
-    pCONT_log->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
+    snprintf_P(pCONT_log->web_log, sizeof(pCONT_log->web_log), PSTR("%s%c%s%S %s\1"), pCONT_log->web_log, 
+    pCONT_log->web_log_index++, mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
     if (!pCONT_log->web_log_index) pCONT_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
   
   // SERIAL_DEBUG.printf("WEBLOG");
@@ -355,7 +386,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 //   if (loglevel <= pCONT_set->Settings.logging.serial_level) {
 //     SERIAL_DEBUG.printf("%s%s %s\r\n", 
 //       mxtime,
-//       pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  
+//       pCONT_log->GetLogLevelNamebyID(loglevel, level_buffer),  
 //       log_data
 //     );
 //   }
@@ -593,69 +624,45 @@ void mLogging::StartTelnetServer()
 //LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE, LOG_LEVEL_DEBUG_LOWLEVEL, LOG_LEVEL_ALL};
 
 
-const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer, uint8_t buflen){
-  if(buffer == nullptr){ return PM_SEARCH_NOMATCH;}
-  switch(id){
-    default: 
-    case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)); break;
-    case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
-    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
-    case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
-    case LOG_LEVEL_HIGHLIGHT:           memcpy_P(buffer, PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR, sizeof(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)); break;
-    case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
-    case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_SHORT_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)); break;
-    case LOG_LEVEL_ALL:            memcpy_P(buffer, PM_LOG_LEVEL_ALL_SHORT_CTR, sizeof(PM_LOG_LEVEL_ALL_SHORT_CTR)); break;
-  }
-  return buffer;        
-}
-const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer, uint8_t buflen){ //"Name" assumes Long friendy name
-  if(buffer == nullptr){ return 0;}
-  switch(id){ 
+const char* mLogging::GetLogLevelNamebyID(uint8_t id) {
+  switch(id) {
     default:
-    case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)); break;
-    case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
-    case LOG_LEVEL_WARNING:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
-    case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
-    case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
-    case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_SHORT_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)); break;
-    case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)); break;
-    case LOG_LEVEL_ALL:            memcpy_P(buffer, PM_LOG_LEVEL_ALL_SHORT_CTR, sizeof(PM_LOG_LEVEL_ALL_SHORT_CTR)); break;
-  }
-  return buffer;        
-}
-int8_t mLogging::SetLogLevelIDbyName(const char* c){
-  if(*c=='\0'){
-    return LOG_LEVEL_DEBUG; //default
-  }
-  if(strcasecmp_P(c,PSTR("NONE"))==0){
-    return LOG_LEVEL_NONE;
-  }else if(strcasecmp_P(c,PSTR("ERROR"))==0){
-    return LOG_LEVEL_ERROR;
-  }else if(strcasecmp_P(c,PSTR("TEST"))==0){
-    return LOG_LEVEL_TEST;
-  }else if(strcasecmp_P(c,PSTR("INFO"))==0){
-    return LOG_LEVEL_INFO;
-  }else if(strcasecmp_P(c,PSTR("DEBUGMORE"))==0){
-    return LOG_LEVEL_DEBUG_MORE;
-  }else if(strcasecmp_P(c,PSTR("Commands"))==0){
-    return LOG_LEVEL_COMMANDS;
-  }else if(strcasecmp_P(c,PSTR("DEBUGLOWLEVEL"))==0){
-    return LOG_LEVEL_DEBUG_LOWLEVEL;
-  }else if(strcasecmp_P(c,PSTR("DEBUG"))==0){
-    return LOG_LEVEL_DEBUG;
-  }else if(strcasecmp_P(c,PSTR("ALL"))==0){
-    return LOG_LEVEL_ALL;
-  }else{
-    return LOG_LEVEL_DEBUG;
+    case LOG_LEVEL_NONE:           return PM_LOG_LEVEL_NONE_CTR;
+    case LOG_LEVEL_DEBUG_TRACE:    return PM_LOG_LEVEL_DEBUG_TRACE_CTR;
+    case LOG_LEVEL_ERROR:          return PM_LOG_LEVEL_ERROR_CTR;
+    case LOG_LEVEL_WARNING:        return PM_LOG_LEVEL_WARN_CTR;
+    case LOG_LEVEL_TEST:           return PM_LOG_LEVEL_TEST_CTR;
+    case LOG_LEVEL_HIGHLIGHT:      return PM_LOG_LEVEL_HIGHLIGHT_CTR;
+    case LOG_LEVEL_IMPORTANT:      return PM_LOG_LEVEL_IMPORTANT_CTR;
+    case LOG_LEVEL_INFO:           return PM_LOG_LEVEL_INFO_CTR;
+    case LOG_LEVEL_COMMANDS:       return PM_LOG_LEVEL_COMMANDS_CTR;
+    case LOG_LEVEL_DEBUG:          return PM_LOG_LEVEL_DEBUG_CTR;
+    case LOG_LEVEL_DEBUG_MORE:     return PM_LOG_LEVEL_DEBUG_MORE_CTR;
+    case LOG_LEVEL_DEBUG_LOWLEVEL: return PM_LOG_LEVEL_DEBUG_LOWLEVEL_CTR;
+    case LOG_LEVEL_ALL:            return PM_LOG_LEVEL_ALL_CTR;
   }
 }
+
+uint8_t mLogging::GetLogLevelIDbyName(const char* name) {
+  if (name == nullptr) return LOG_LEVEL_NONE;  // Handle null input
+
+  if (strcmp_P(name, PM_LOG_LEVEL_NONE_CTR) == 0)            return LOG_LEVEL_NONE;
+  if (strcmp_P(name, PM_LOG_LEVEL_DEBUG_TRACE_CTR) == 0)     return LOG_LEVEL_DEBUG_TRACE;
+  if (strcmp_P(name, PM_LOG_LEVEL_ERROR_CTR) == 0)           return LOG_LEVEL_ERROR;
+  if (strcmp_P(name, PM_LOG_LEVEL_WARN_CTR) == 0)            return LOG_LEVEL_WARNING;
+  if (strcmp_P(name, PM_LOG_LEVEL_TEST_CTR) == 0)            return LOG_LEVEL_TEST;
+  if (strcmp_P(name, PM_LOG_LEVEL_HIGHLIGHT_CTR) == 0)       return LOG_LEVEL_HIGHLIGHT;
+  if (strcmp_P(name, PM_LOG_LEVEL_IMPORTANT_CTR) == 0)       return LOG_LEVEL_IMPORTANT;
+  if (strcmp_P(name, PM_LOG_LEVEL_INFO_CTR) == 0)            return LOG_LEVEL_INFO;
+  if (strcmp_P(name, PM_LOG_LEVEL_COMMANDS_CTR) == 0)        return LOG_LEVEL_COMMANDS;
+  if (strcmp_P(name, PM_LOG_LEVEL_DEBUG_CTR) == 0)           return LOG_LEVEL_DEBUG;
+  if (strcmp_P(name, PM_LOG_LEVEL_DEBUG_MORE_CTR) == 0)      return LOG_LEVEL_DEBUG_MORE;
+  if (strcmp_P(name, PM_LOG_LEVEL_DEBUG_LOWLEVEL_CTR) == 0)  return LOG_LEVEL_DEBUG_LOWLEVEL;
+  if (strcmp_P(name, PM_LOG_LEVEL_ALL_CTR) == 0)             return LOG_LEVEL_ALL;
+
+  return LOG_LEVEL_NONE;  // Default return for no match
+}
+
 
 
 int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)

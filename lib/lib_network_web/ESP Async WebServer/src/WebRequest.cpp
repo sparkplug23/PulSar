@@ -782,7 +782,7 @@ void AsyncWebServerRequest::addInterestingHeader(const String& name){
     _interestingHeaders.add(name);
 }
 
-
+#define DEBUG_ASYNC
 /**
  * 
  *  Sending function, which handles transmission of data (now using pointer method for body)

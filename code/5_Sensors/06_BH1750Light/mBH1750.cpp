@@ -31,7 +31,6 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
   
   int8_t function_result = 0;
   
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
@@ -42,16 +41,19 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_INIT:
       Init();
     break;
+    case TASK_BOOT_MESSAGE:
+      BootMessage();
+    break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
     case TASK_EVERY_SECOND:
-      SubTask_ReadSensor();
+      ReadSensor();
     break;
     /************
      * COMMANDS SECTION * 
@@ -66,11 +68,14 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -82,82 +87,114 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
 
 void mBH1750::Pre_Init(void)
 {
-  
-  if (pCONT_i2c->I2cEnabled(XI2C_11)) 
-  {
-    ALOG_INF( PSTR(D_LOG_BH1750 "I2cEnabled(XI2C_11)") );
-  }
-
+  module_state.mode = ModuleStatus::Initialising;
+  module_state.devices = 0;
 }
 
 
 void mBH1750::Init(void)
 {
   
-  settings.fEnableSensor = false;
+  module_state.devices = 0;
 
-  for (uint32_t i = 0; i < sizeof(Bh1750.addresses); i++) 
+  for (uint32_t i = 0; i < sizeof(addresses); i++) 
   {
 
-    if (pCONT_i2c->I2cActive(Bh1750.addresses[i])) { continue; }
+    if (pCONT_i2c->I2cActive(addresses[i])) { continue; }
 
-    device_data[settings.sensor_count].address = Bh1750.addresses[i];
+    device_data[module_state.devices].address = addresses[i];
 
-    if (Set_MeasurementTimeRegister(settings.sensor_count)) 
+    if (Set_MeasurementTimeRegister(module_state.devices, device_data[module_state.devices].mtreg)) 
     {
-      settings.sensor_count++;
-      settings.fEnableSensor = true;
+      module_state.devices++;
     }
 
   }
 
-  ALOG_INF( PSTR(D_LOG_BH1750 "Count: %d"), settings.sensor_count );
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
+  }
 
 }
 
 
-uint8_t mBH1750::Get_Resolution(uint32_t sensor_index) 
+void mBH1750::BootMessage()
 {
-
-  uint8_t settings_resolution = 0;
-
-  switch(sensor_index)
+  #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+  char buffer[100];
+  if(module_state.devices)
   {
-    default:
-    case 0: settings_resolution = pCONT_set->Settings.SensorBits1.bh1750_1_resolution; break;
-    case 1: settings_resolution = pCONT_set->Settings.SensorBits1.bh1750_2_resolution; break;
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "#%d ", module_state.devices);  
+    char buffer2[50];
+    for(uint8_t sensor_id = 0; sensor_id<module_state.devices; sensor_id++)
+    {      
+      mSupport::appendToBuffer(buffer, sizeof(buffer), "%d:\"%s\", ", sensor_id, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer2, sizeof(buffer2)));    
+    }
+  }
+  else{
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
+  }
+  mSupport::removeTrailingComma(buffer);
+  ALOG_IMP(PSTR(D_LOG_BH1750 "%s"), buffer);
+  #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+}
+
+uint8_t mBH1750::Get_Resolution_Mode(uint8_t sensor_id) 
+{
+  return device_data[sensor_id].resolution_mode;
+}
+
+// Get the command byte for the given resolution mode
+uint8_t mBH1750::Get_Resolution_RegisterValue(uint8_t mode) 
+{
+  return resolution_register_value[mode];
+}
+
+
+bool mBH1750::Set_Resolution_Mode(uint8_t sensor_id, uint8_t resolution_mode) 
+{
+  if (resolution_mode >= 3) {
+    return false; // Invalid resolution mode
   }
   
-  return settings_resolution;
-
-}
-
-
-bool mBH1750::Set_Resolution(uint32_t sensor_index) {
-  pCONT_i2c->wire->beginTransmission(device_data[sensor_index].address);
-  pCONT_i2c->wire->write(Bh1750.resolution[Get_Resolution(sensor_index)]);
+  // Save the resolution mode to the device configuration
+  device_data[sensor_id].resolution_mode = resolution_mode;
+  
+  // Get the corresponding command byte for the given resolution mode
+  uint8_t command = Get_Resolution_RegisterValue(resolution_mode);
+  
+  // Transmit the command byte to the sensor
+  pCONT_i2c->wire->beginTransmission(device_data[sensor_id].address);
+  pCONT_i2c->wire->write(command);
   return (!pCONT_i2c->wire->endTransmission());
 }
 
 
-bool mBH1750::Set_MeasurementTimeRegister(uint32_t sensor_index)
+bool mBH1750::Set_MeasurementTimeRegister(uint8_t sensor_id, uint8_t mtreg)
 {
+  // Save the measurement time register value
+  device_data[sensor_id].mtreg = mtreg;
 
-  pCONT_i2c->wire->beginTransmission(device_data[sensor_index].address);
-  uint8_t data = BH1750_MEASUREMENT_TIME_HIGH | ((device_data[sensor_index].mtreg >> 5) & 0x07);
-  pCONT_i2c->wire->write(data);
-  if (pCONT_i2c->wire->endTransmission()) { return false; }
-  pCONT_i2c->wire->beginTransmission(device_data[sensor_index].address);
-  data = BH1750_MEASUREMENT_TIME_LOW | (device_data[sensor_index].mtreg & 0x1F);
-  pCONT_i2c->wire->write(data);
+  // Transmit high bits of mtreg
+  pCONT_i2c->wire->beginTransmission(device_data[sensor_id].address);
+  uint8_t data_high = BH1750_MEASUREMENT_TIME_HIGH | ((device_data[sensor_id].mtreg >> 5) & 0x07);
+  pCONT_i2c->wire->write(data_high);
   if (pCONT_i2c->wire->endTransmission()) { return false; }
 
-  return Set_Resolution(sensor_index);
+  // Transmit low bits of mtreg
+  pCONT_i2c->wire->beginTransmission(device_data[sensor_id].address);
+  uint8_t data_low = BH1750_MEASUREMENT_TIME_LOW | (device_data[sensor_id].mtreg & 0x1F);
+  pCONT_i2c->wire->write(data_low);
+  if (pCONT_i2c->wire->endTransmission()) { return false; }
+
+  // Reapply the resolution mode after setting the measurement time
+  return Set_Resolution_Mode(sensor_id, device_data[sensor_id].resolution_mode);
 
 }
 
 
-bool mBH1750::Get_SensorReading(uint32_t sensor_index) 
+bool mBH1750::Get_SensorReading(uint8_t sensor_index) 
 {
 
   if (device_data[sensor_index].valid) { device_data[sensor_index].valid--; }
@@ -170,13 +207,13 @@ bool mBH1750::Get_SensorReading(uint32_t sensor_index)
   float level = (pCONT_i2c->wire->read() << 8) | pCONT_i2c->wire->read();
   float illuminance = level;
   illuminance /= (1.2 * (69 / (float)device_data[sensor_index].mtreg));
-  if (1 == Get_Resolution(sensor_index)) {
+  if (1 == Get_Resolution_Mode(sensor_index)) {
     illuminance /= 2;
   }
   device_data[sensor_index].level = level;
   device_data[sensor_index].illuminance = illuminance;
 
-  ALOG_DBM( PSTR(D_LOG_BH1750 "level=%d"), device_data[sensor_index].level);
+  ALOG_DBM( PSTR(D_LOG_BH1750 "level=%d, lum=%d"), level, illuminance);
 
   device_data[sensor_index].valid = SENSOR_MAX_MISS;
 
@@ -187,10 +224,10 @@ bool mBH1750::Get_SensorReading(uint32_t sensor_index)
 
 /********************************************************************************************/
 
-void mBH1750::SubTask_ReadSensor(void) 
+void mBH1750::ReadSensor(void) 
 {
 
-  for (uint32_t i = 0; i < settings.sensor_count; i++) 
+  for (uint32_t i = 0; i < module_state.devices; i++) 
   {
     if (!Get_SensorReading(i)) 
     {
@@ -202,37 +239,10 @@ void mBH1750::SubTask_ReadSensor(void)
 
 
 
-uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
-{
 
-  JBI->Start();
-  JBI->Add(D_JSON_COUNT, settings.sensor_count);    
-  for (uint32_t ii = 0; ii < settings.sensor_count; ii++)
-  {
-    JBI->Add(D_JSON_ADDRESS, device_data[ii].address);
-  }
-  return JBI->End();
-
-}
-
-
-uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-    
-  for (uint32_t sensor_index = 0; sensor_index < settings.sensor_count; sensor_index++) {
-    if (device_data[sensor_index].valid) {
-      JBI->Add(D_JSON_ILLUMINANCE, device_data[sensor_index].illuminance);
-      JBI->Add(D_JSON_LEVEL, device_data[sensor_index].level);
-    }
-  }
-
-  return JBI->End();
-    
-}
-
-
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
 
 /*********************************************************************************************\
  * BH1750 - Ambient Light Intensity
@@ -246,59 +256,69 @@ uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 \*********************************************************************************************/
 void mBH1750::parse_JSONCommand(JsonParserObject obj)
 {
-
-  // ALOG_DBM( PSTR(D_LOG_BH1750 "parse_JSONCommand") );
   
   char buffer[50];
   JsonParserToken jtok = 0; 
 
+  if(jtok = obj[GetModuleName()])
+  {
+    JsonParserObject jobj = jtok.getObject();
+    JsonParserToken jtok_sub = 0;
 
-/*********************************************************************************************\
- * Commands
-\*********************************************************************************************/
+    uint8_t sensor_index = 0;
+    if(jtok_sub = jobj[PM_JSON_INDEX])
+    {
+      sensor_index = jtok_sub.getInt();
+    }
 
-// void CmndBh1750Resolution(void) {
-//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= settings.sensor_count)) {
-//     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 2)) {
-//       if (1 == XdrvMailbox.index) {
-//         Settings.SensorBits1.bh1750_1_resolution = XdrvMailbox.payload;
-//       } else {
-//         Settings.SensorBits1.bh1750_2_resolution = XdrvMailbox.payload;
-//       }
-//       Set_Resolution(XdrvMailbox.index -1);
-//     }
-//     ResponseCmndIdxNumber(Get_Resolution(XdrvMailbox.index -1));
-//   }
-// }
+    if(jtok_sub = jobj[PM_JSON_RESOLUTION])
+    {
+      Set_Resolution_Mode(sensor_index, jtok_sub.getInt());
+    }
 
-  // if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Assume range 0-100
-  //   CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-
-// void CmndBh1750MTime(void) {
-//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= settings.sensor_count)) {
-//     if ((XdrvMailbox.payload > 30) && (XdrvMailbox.payload < 255)) {
-//       device_data[XdrvMailbox.index -1].mtreg = XdrvMailbox.payload;
-//       Set_MeasurementTimeRegister(XdrvMailbox.index -1);
-//     }
-//     ResponseCmndIdxNumber(device_data[XdrvMailbox.index -1].mtreg);
-//   }
-// }
+    if(jtok_sub = jobj[PM_JSON_TIME])
+    {
+      Set_MeasurementTimeRegister(sensor_index, jtok_sub.getInt());
+    }
+  }
 
 }
-
-/******************************************************************************************************************
- * Commands
-*******************************************************************************************************************/
 
   
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/
+
+
+uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
+{
+
+  JBI->Start();
+  JBI->Add(D_JSON_COUNT, module_state.devices);    
+  for (uint32_t ii = 0; ii < module_state.devices; ii++)
+  {
+    JBI->Add(D_JSON_ADDRESS, device_data[ii].address);
+  }
+  return JBI->End();
+
+}
+
+
+uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
+{
+
+  JBI->Start();
+    
+  for (uint32_t sensor_index = 0; sensor_index < module_state.devices; sensor_index++) {
+    if (device_data[sensor_index].valid) {
+      JBI->Add(D_JSON_ILLUMINANCE, device_data[sensor_index].illuminance);
+      JBI->Add(D_JSON_LEVEL, device_data[sensor_index].level);
+    }
+  }
+
+  return JBI->End();
+    
+}
 
   
 /******************************************************************************************************************
@@ -312,79 +332,42 @@ void mBH1750::MQTTHandler_Init()
 
   struct handler<mBH1750>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_MIN; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_MIN; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 10; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mBH1750::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mBH1750::MQTTHandler_Set_DefaultPeriodRate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mBH1750::MQTTHandler_Sender()
-{    
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
   
 #endif // USE_MODULE_NETWORK_MQTT
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-
-
-
 
 
 #endif

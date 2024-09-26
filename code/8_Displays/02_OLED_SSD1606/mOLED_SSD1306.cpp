@@ -64,7 +64,7 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -291,7 +291,7 @@ void mOLED_SSD1306::MQTTHandler_Init(){
 
   struct handler<mOLED_SSD1306>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -305,18 +305,18 @@ void mOLED_SSD1306::MQTTHandler_Init(){
 
 
 // Can these be replaced by mqtt shared function that gets the mqtt from the module
-void mOLED_SSD1306::MQTTHandler_Set_RefreshAll(){
+void mOLED_SSD1306::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
 
-void mOLED_SSD1306::MQTTHandler_Set_DefaultPeriodRate(){
+void mOLED_SSD1306::MQTTHandler_Rate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
-} //end "MQTTHandler_Set_DefaultPeriodRate"
+} //end "MQTTHandler_Rate"
 
 
 void mOLED_SSD1306::MQTTHandler_Sender(uint8_t mqtt_handler_id){

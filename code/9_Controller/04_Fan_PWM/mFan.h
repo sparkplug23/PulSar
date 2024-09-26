@@ -100,14 +100,14 @@ void WebAppend_Root_Status_Table();
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     struct handler<mFan>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mFan> mqtthandler_settings_teleperiod;
+    struct handler<mFan> mqtthandler_settings;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
     struct handler<mFan> mqtthandler_sensor_ifchanged;
@@ -116,7 +116,7 @@ void WebAppend_Root_Status_Table();
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
   struct handler<mFan>* mqtthandler_list[3] = {
-    &mqtthandler_settings_teleperiod,
+    &mqtthandler_settings,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };

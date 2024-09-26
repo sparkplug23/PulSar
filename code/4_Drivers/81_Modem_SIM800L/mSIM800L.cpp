@@ -210,13 +210,13 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -2472,7 +2472,7 @@ void mSIM800L::MQTTHandler_Init()
 
   struct handler<mSIM800L>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
@@ -2500,7 +2500,7 @@ void mSIM800L::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mSIM800L::MQTTHandler_Set_RefreshAll()
+void mSIM800L::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -2510,7 +2510,7 @@ void mSIM800L::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mSIM800L::MQTTHandler_Set_DefaultPeriodRate()
+void mSIM800L::MQTTHandler_Rate()
 {
   // While developing, set these by the Init() function to make independent
 

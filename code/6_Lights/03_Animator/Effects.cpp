@@ -39,12 +39,12 @@
 //       - Defining SEGCOL(<i>) can override a specific palette using these values (e.g. Color Gradient)
 
 	/** Between @ And first ; is the slider values
-	 * Slider 0: Effect Speed
-	 * Slider 1: Effect Intensity
+	 * Slider 0: Speed
+	 * Slider 1: Intensity
 	 * Slider 2: Custom 1
 	 * Slider 3: Custom 2
 	 * Slider 4: Custom 3
-	 * Slider 5: Effect Time Period (ie Cycle Time, previously rate_ms)
+	 * Slider 5: Time Period (ie Cycle Time, previously rate_ms)
 	 * Slider 6: Grouping 
 	 * Checkbox 0: Option 1
 	 * Checkbox 1: Option 2 = layered icon, for layering effects
@@ -97,11 +97,15 @@ static const char PM_EFFECT_CONFIG__##[] PROGMEM =
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::EffectAnim__Solid_Colour()
 {
-
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2) ){ DEBUG_LINE_HERE; return; } // Pixel_Width * Two_Channels
 
   RgbcctColor desired_colour = SEGMENT.GetPaletteColour();
   desired_colour = RgbcctColor::ApplyBrightnesstoRgbcctColour( desired_colour, SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
+
+  if(SEGMENT.colour_type__used_in_effect_generate == ColourType::COLOUR_TYPE__RGBW__ID)
+  {
+    desired_colour.W1 = desired_colour.W2 = max(desired_colour.W1, desired_colour.W2); // to ensure we ignore the CCT_TempPercentage
+  }
 
   RgbcctColor starting_colour = SEGMENT.GetPixelColor(0);
   
@@ -131,9 +135,9 @@ static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = "Solid Colour@;!,!,
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::EffectAnim__Static_Palette()
 {
-  
+
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
-    
+
   RgbcctColor colour = RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
@@ -184,6 +188,20 @@ void mAnimatorLight::EffectAnim__Static_Palette_Vintage()
       colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
       colour.Variance(SEGMENT.intensity);
       colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+      
+      // // Retrieve the random dimmer value
+      // uint8_t dimmer_random = SEGMENT.params_user[0];
+
+      // // Loop through the color array (index 0 to 4)
+      // for (uint8_t i = 0; i < 5; i++) {
+      //     // Ensure we only reduce the value, by generating a random number within the range
+      //     // The new value will be within [0, color[i] - dimmer_random], but constrained to not go below 0
+      //     if (colour[i] > dimmer_random) {
+      //         uint8_t reduction = random(0, dimmer_random + 1);  // Random number between 0 and dimmer_random
+      //         colour[i] = constrain(colour[i] - reduction, 0, 255);  // Apply the reduction and ensure it's valid
+      //     }
+      // }
+
       SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type__used_in_effect_generate, colour);
     }
 
@@ -195,7 +213,7 @@ void mAnimatorLight::EffectAnim__Static_Palette_Vintage()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-static const char PM_EFFECT_CONFIG__STATIC_PALETTE_VINTAGE[] PROGMEM = "Static Palette Aged@,Colour Variance;!,!,!,!,!;etp=1000,ix=15";
+static const char PM_EFFECT_CONFIG__STATIC_PALETTE_VINTAGE[] PROGMEM = "Static Palette Aged@,Colour Variance,Dim Random;!,!,!,!,!;etp=1000,ix=15";//,v0=0"; // param0 used for brightness dimmer variation is off by default, no change
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -18627,6 +18645,132 @@ static const char PM_EFFECT_CONFIG__2D__SCROLLING_TEXT__INDEXING[] PROGMEM = "Sc
 #endif //  ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
 
 
+////////////////////////////
+//     2D DigitalClock text  //
+////////////////////////////
+#ifdef  ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+void mAnimatorLight::EffectAnim__2D__DigitalClock()
+{
+
+  ALOG_INF(PSTR("EffectAnim__2D__DigitalClock"));
+
+  if (!isMatrix) return EffectAnim__Solid_Colour(); // not a 2D set-up
+
+  const uint16_t cols = SEGMENT.virtualWidth();
+  const uint16_t rows = SEGMENT.virtualHeight();
+
+  int letterWidth, rotLW;
+  int letterHeight, rotLH;
+  switch (map(SEGMENT.custom2, 0, 255, 1, 5)) {
+    default:
+    case 1: letterWidth = 4; letterHeight =  6; break;
+    case 2: letterWidth = 5; letterHeight =  8; break;
+    case 3: letterWidth = 6; letterHeight =  8; break;
+    case 4: letterWidth = 7; letterHeight =  9; break;
+    case 5: letterWidth = 5; letterHeight = 12; break;
+  }
+  // DEBUG_LINE_HERE;
+  // letters are rotated
+  if (((SEGMENT.custom3+1)>>3) % 2) {
+    rotLH = letterWidth;
+    rotLW = letterHeight;
+  } else {
+    rotLW = letterWidth;
+    rotLH = letterHeight;
+  }
+  // DEBUG_LINE_HERE;
+
+  char text[WLED_MAX_SEGNAME_LEN+1] = {'\0'};
+  if (SEGMENT.name) for (size_t i=0,j=0; i<strlen(SEGMENT.name); i++) if (SEGMENT.name[i]>31 && SEGMENT.name[i]<128) text[j++] = SEGMENT.name[i];
+  const bool zero = strchr(text, '0') != nullptr;
+
+  // DEBUG_LINE_HERE;
+  char sec[5];
+  int  AmPmHour = pCONT_time->RtcTime.hour;// hour(localTime);
+  bool isitAM = true;
+  if (useAMPM) {
+    if (AmPmHour > 11) { AmPmHour -= 12; isitAM = false; }
+    if (AmPmHour == 0) { AmPmHour  = 12; }
+    sprintf_P(sec, PSTR(" %2s"), (isitAM ? "AM" : "PM"));
+  } else {
+    sprintf_P(sec, PSTR(":%02d"), pCONT_time->RtcTime.second);//(localTime));
+  }
+  
+  sprintf_P(text, PSTR("#HHMM"));
+
+  // DEBUG_LINE_HERE;
+  if (!strlen(text)) { // fallback if empty segment name: display date and time
+    
+    // pCONT_time->GetDateAndTime(DT_DST).c_str();
+
+    // sprintf_P(text, PSTR("%s %d, %d %d:%02d%s"), monthShortStr(month(localTime)), pCONT_time->RtcTime.days, pCONT_time->RtcTime.year, AmPmHour, pCONT_time->RtcTime.minute, sec);
+    sprintf_P(text, PSTR("Test Message"));
+  } else {
+    if      (!strncmp_P(text,PSTR("#DATE"),5)) sprintf_P(text, zero?PSTR("%02d.%02d.%04d"):PSTR("%d.%d.%d"),   pCONT_time->RtcTime.days,   pCONT_time->RtcTime.month,  pCONT_time->RtcTime.year);
+    else if (!strncmp_P(text,PSTR("#DDMM"),5)) sprintf_P(text, zero?PSTR("%02d.%02d")     :PSTR("%d.%d"),      pCONT_time->RtcTime.days,   pCONT_time->RtcTime.month);
+    else if (!strncmp_P(text,PSTR("#MMDD"),5)) sprintf_P(text, zero?PSTR("%02d/%02d")     :PSTR("%d/%d"),      pCONT_time->RtcTime.month, pCONT_time->RtcTime.days);
+    else if (!strncmp_P(text,PSTR("#TIME"),5)) sprintf_P(text, zero?PSTR("%02d:%02d%s")   :PSTR("%2d:%02d%s"), AmPmHour,         pCONT_time->RtcTime.minute, sec);
+    else if (!strncmp_P(text,PSTR("#HHMM"),5)) sprintf_P(text, zero?PSTR("%02d:%02d")     :PSTR("%d:%02d"),    AmPmHour,         pCONT_time->RtcTime.minute);
+    else if (!strncmp_P(text,PSTR("#HH"),3))   sprintf_P(text, zero?PSTR("%02d")          :PSTR("%d"),         AmPmHour);
+    else if (!strncmp_P(text,PSTR("#MM"),3))   sprintf_P(text, zero?PSTR("%02d")          :PSTR("%d"),         pCONT_time->RtcTime.minute);
+  }
+
+  // DEBUG_LINE_HERE;
+  const int  numberOfLetters = strlen(text);
+  const unsigned long now = millis(); // reduce millis() calls
+  int width = (numberOfLetters * rotLW);
+  int yoffset = map(SEGMENT.intensity, 0, 255, -rows/2, rows/2) + (rows-rotLH)/2;
+  if (width <= cols) {
+    // scroll vertically (e.g. ^^ Way out ^^) if it fits
+    int speed = map(SEGMENT.speed, 0, 255, 5000, 1000);
+    int frac = now % speed + 1;
+    if (SEGMENT.intensity == 255) {
+      yoffset = (2 * frac * rows)/speed - rows;
+    } else if (SEGMENT.intensity == 0) {
+      yoffset = rows - (2 * frac * rows)/speed;
+    }
+  }
+
+  SEGMENT.params_internal.aux0  = (cols + width)/2; // Center the text or set to any fixed offset
+
+  bool solidPerChar                 = !SEGMENT.check1;
+  bool horizontalGradient           = !SEGMENT.check2;
+  bool backgroundGradientHorizontal = !SEGMENT.check3;
+
+  // if (!SEGMENT.check2) 
+  SEGMENT.fade_out(255 - (SEGMENT.custom1>>4));  // trail
+
+  for (int i = 0; i < numberOfLetters; i++) {
+    int xoffset = int(cols) - int(SEGMENT.params_internal.aux0) + rotLW * i;
+    if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
+    // Use the new function with the desired flags (solidPerChar and horizontalGradient)
+    SEGMENT.drawCharacter_UsingGradientPalletes(text[i], xoffset, yoffset, letterWidth, letterHeight, map(SEGMENT.custom3, 0, 31, -2, 2), solidPerChar, horizontalGradient, backgroundGradientHorizontal);
+  }
+
+  SEGMENT.cycle_time__rate_ms = FRAMETIME_MS;
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+
+}
+static const char PM_EFFECT_CONFIG__2D__DIGITAL_CLOCK__INDEXING[] PROGMEM = 
+"Digital Text Clock@Bkg Brightness,Y Offset,Bkg Palette,Font size,Rotate,,,Gradient,Font Grad Hor,Bkg Hor;!,!,!,!,!;!;2;ix=128,c1=0,mi=0,rY=0,mY=0,o1=0,o2=1,o3=1";
+//       Name      @ Sliders Speed,   Inten,       Cus1,     Cus2,  Cus3,,,    Opt1,         Opt2,   Opt3;5SegCol  ; ; ;default commands   
+/** 
+ * Effect Name (From Start to @)
+ * Name@
+ * Between @ And first ; is the slider values
+ * Slider 0: Speed     = With scroll here, it should be background brightness
+ * Slider 1: Intensity = Y Offset
+ * Slider 2: Custom 1  = Background Palette ID
+ * Slider 3: Custom 2  = Font Size
+ * Slider 4: Custom 3  = Rotate Font
+ * Slider 5: Time Period (ie Cycle Time, previously rate_ms)
+ * Slider 6: Grouping (unused)
+ * Checkbox 0: Option 1 = Use Gradient for Font (true) or each character is solid (false)
+ * Checkbox 1: Option 2 = Font Gradient Horizontal
+ * Checkbox 2: Option 3 = Background Gradient Horizontal **/
+#endif //  ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+
+
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -18686,6 +18830,7 @@ static const char PM_EFFECT_CONFIG__2D__DNA__INDEXING[] PROGMEM = "DNA@Scroll sp
  * 
  * (1) Wipe Random from the top, that fills pixel by pixel until it reaches an end stop on the bottom. This end may jump in single pixels, or in multiples (ie grouping=200). The effect would be banded falling tetris blocks and when the banding is complete, restart
  *     - Using a background colour, either black or white for the "unfilled" part will give nice effects
+ * (2) A vertical strip shows the sky as horizon to top. Hence, instead of the moving gradient, 16 key points on it will be set and change depending on the time of day to reflect the darkening sunset.
  * 
  */
 void mAnimatorLight::LoadEffects()
@@ -19114,6 +19259,9 @@ void mAnimatorLight::LoadEffects()
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
   addEffect(EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,   &mAnimatorLight::EffectAnim__2D__ScrollingText, PM_EFFECT_CONFIG__2D__SCROLLING_TEXT__INDEXING);  
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
+  addEffect(EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,   &mAnimatorLight::EffectAnim__2D__DigitalClock, PM_EFFECT_CONFIG__2D__DIGITAL_CLOCK__INDEXING);  
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D
   addEffect(EFFECTS_FUNCTION__2D__DNA__ID,   &mAnimatorLight::EffectAnim__2D__DNA, PM_EFFECT_CONFIG__2D__DNA__INDEXING);  

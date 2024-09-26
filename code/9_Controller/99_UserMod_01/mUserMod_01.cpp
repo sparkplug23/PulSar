@@ -47,7 +47,7 @@ int8_t mUserMod_01::Tasker(uint8_t function, JsonParserObject obj){
     //   MQTTHandler_Sender(); //optional pass parameter
     // break;
     // case TASK_MQTT_CONNECTED:
-    //   MQTTHandler_Set_RefreshAll();
+    //   MQTTHandler_RefreshAll();
     // break;
   }
   
@@ -345,7 +345,7 @@ void mUserMod_01::MQTTHandler_Init(){
 
   struct handler<mUserMod_01>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -380,7 +380,7 @@ void mUserMod_01::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mUserMod_01::MQTTHandler_Set_RefreshAll()
+void mUserMod_01::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -390,7 +390,7 @@ void mUserMod_01::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mUserMod_01::MQTTHandler_Set_DefaultPeriodRate()
+void mUserMod_01::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -13,6 +13,7 @@ typedef struct event_motion_s{
   uint8_t  state     = false;
   uint8_t  isactive  = false;
   uint8_t  ischanged = false;
+  bool isActiveLow = true;
   uint32_t tDetectTime;
   uint32_t tEndedTime;
   uint32_t detected_time;
@@ -141,12 +142,12 @@ class mSensorsInterface :
       
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mSensorsInterface>*> mqtthandler_list;
-    struct handler<mSensorsInterface> mqtthandler_settings_teleperiod;
+    struct handler<mSensorsInterface> mqtthandler_settings;
     struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
     struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;

@@ -68,17 +68,17 @@ class mDriverInterface :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mDriverInterface> mqtthandler_settings_teleperiod;
+    struct handler<mDriverInterface> mqtthandler_settings;
     // void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mDriverInterface> mqtthandler_driver_status_teleperiod;
     // void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     struct handler<mDriverInterface>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_driver_status_teleperiod
     };
     #endif // USE_MODULE_NETWORK_MQTT

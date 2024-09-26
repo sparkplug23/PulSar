@@ -69,12 +69,12 @@ class mJsonTemplate :
     
     // #ifdef USE_MODULE_NETWORK_MQTT
     // void MQTTHandler_Init();
-    // void MQTTHandler_Set_RefreshAll();
-    // void MQTTHandler_Set_DefaultPeriodRate();    
+    // void MQTTHandler_RefreshAll();
+    // void MQTTHandler_Rate();    
     // void MQTTHandler_Sender();
 
     // std::vector<struct handler<mJsonTemplate>*> mqtthandler_list;    
-    // struct handler<mJsonTemplate> mqtthandler_settings_teleperiod;    
+    // struct handler<mJsonTemplate> mqtthandler_settings;    
     // struct handler<mJsonTemplate> mqtthandler_sensor_ifchanged;
     // struct handler<mJsonTemplate> mqtthandler_sensor_teleperiod;    
     // #endif // USE_MODULE_NETWORK_MQTT

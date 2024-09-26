@@ -2,6 +2,24 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+/**
+ * @brief Ideas
+ * 
+ * segment should be controllable by name, and only when matched. So instead of "Segment0":{} we should be able to do "SegName":{"Name":"something", the rest} and pass the {} like we already do
+ * Though, this would work since each name needs to be different. Maybe "Seg_Name" and the name part gets pulled out from _ to EOL?
+ * 
+ * Another idea is being able to set a "HeatmapPalette"
+ * 
+ * "HeatmapPalette":{
+ *    "Data":[float array],
+ *    "Gradient":[0 to 255 inflection points],
+ *    "PaletteID":"Jet" // so Jet will be default, otherwise it takes a full gradient palette and maps it by loading as CRGB16Palette
+ * }
+ * 
+ * Doing this vs generating the colours in openhab would make it more flexible for the same data to easily be used on different devices by just changing the Gradient.
+ * Should this also be part effect?
+ * 
+ */
 void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 {
 
@@ -171,13 +189,15 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
+    /**
+    EFFECT_SUBTYPE removed, replaced by colourtype
+    **/
     if(jtok = jobj[PM_JSON_EFFECT_COLOUR_TYPE])
     {
       CommandSet_Effect_ColourTypeID(jtok.getInt(), segment_index);
       data_buffer.isserviced++;
     }
-
-
+    
     if(jtok = jobj[PM_JSON_INTENSITY])
     { 
       CommandSet_Effect_Intensity(jtok.getInt(), segment_index);
@@ -281,6 +301,46 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       }
     }    
 
+    if (jtok = jobj["Custom1"]) 
+    {
+      SEGMENT_I(segment_index).custom1 = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "Custom1 %d"), SEGMENT_I(segment_index).custom1 );
+      data_buffer.isserviced++;
+    }
+    if (jtok = jobj["Custom2"]) 
+    {
+      SEGMENT_I(segment_index).custom2 = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "Custom2 %d"), SEGMENT_I(segment_index).custom2 );
+      data_buffer.isserviced++;
+    }
+    if (jtok = jobj["Custom3"]) 
+    {
+      SEGMENT_I(segment_index).custom3 = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "Custom3 %d"), SEGMENT_I(segment_index).custom3 );
+      data_buffer.isserviced++;
+    }
+
+    if (jtok = jobj["Check1"]) 
+    {
+      SEGMENT_I(segment_index).check1 = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "Check1 %d"), SEGMENT_I(segment_index).check1 );
+      data_buffer.isserviced++;
+    }
+    if (jtok = jobj["Check2"]) 
+    {
+      SEGMENT_I(segment_index).check2 = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "Check2 %d"), SEGMENT_I(segment_index).check2 );
+      data_buffer.isserviced++;
+    }
+    if (jtok = jobj["Check3"]) 
+    {
+      SEGMENT_I(segment_index).check3 = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "Check3 %d"), SEGMENT_I(segment_index).check3 );
+      data_buffer.isserviced++;
+    }
+
+
+
   } // PM_JSON_EFFECTS
 
 
@@ -365,6 +425,151 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       }
     }
   }
+
+  #ifdef ENABLE_DEVFEATURE_LIGHT__HEATMAP_PALETTES
+/**
+ * @brief Construct a new if object
+ * {
+  "HeatmapPalettes": {
+    "Data": [1,2,3,4],
+    "Gradient": [0,100,200,255],
+    "Max":4,
+    "Min":1,
+    "Palette":"Jet 16"
+  }
+}
+ * 
+ */
+  if (jtok = obj["HeatmapPalettes"]) {
+      JsonParserToken jtok_sub = 0;
+      
+      // Read float array (data points)
+      std::vector<float> heatmap_floats;
+      if (jtok_sub = jtok.getObject()["Data"]) {
+          if (jtok_sub.isArray()) {
+              JsonParserArray arrobj = jtok_sub;
+              for (int i = 0; i < arrobj.size(); ++i) {
+                  heatmap_floats.push_back(arrobj[i].getFloat());
+              }
+              ALOG_INF(PSTR("Heatmap data length %d"), heatmap_floats.size());
+          }
+      }
+      
+      // Read Gradient mapping (array of 0-255)
+      // std::vector<uint8_t> gradient_map;
+      // if (jtok_sub = jtok.getObject()["Gradient"]) {
+      //     if (jtok_sub.isArray()) {
+      //         JsonParserArray arrobj = jtok_sub;
+      //         for (int i = 0; i < arrobj.size(); ++i) {
+      //             gradient_map.push_back(arrobj[i].getInt());
+      //         }
+      //         ALOG_INF(PSTR("Gradient length %d"), gradient_map.size());
+      //     }
+      // }
+
+      uint8_t gradient_index = mSupport::mapfloat()
+      
+      // Read Max and Min values for the heatmap
+      float max_value = 1.0f, min_value = 0.0f;
+      if (jtok_sub = jtok.getObject()["Max"]) {
+          max_value = jtok_sub.getFloat();
+      }
+      if (jtok_sub = jtok.getObject()["Min"]) {
+          min_value = jtok_sub.getFloat();
+      }
+      
+      // Read Palette to copy from
+      uint8_t palette_index = 0;
+      if(jtok_sub = jtok.getObject()["Palette"])
+      {
+        if(jtok_sub.isStr())
+        {
+          if((tmp_id=GetPaletteIDbyName((char*)jtok_sub.getStr()))>=0)
+          {
+            palette_index = tmp_id;
+          }
+        }else
+        if(jtok_sub.isNum()){
+          palette_index = jtok_sub.getInt();
+        }
+        
+        ALOG_INF(PSTR("Using Palette Index %d"), palette_index);
+        data_buffer.isserviced++;
+      }
+
+      /**
+       * @brief Since we are going to copy from an existing palette, we want to get the encoding, and then get the data.
+       * Since encoding is not always used, the way forward might be to :
+       * ** load palette
+       * ** access what was loaded, copy/modify into CustomPalette
+       * ** reload and set palette as the custom option
+       */
+      mPalette::PALETTE_ENCODING_DATA encoding =  mPaletteI->findPaletteEncoding(palette_index);
+      if(encoding.encoded_as_crgb_palette_16)
+      {
+        ALOG_INF(PSTR("Encoded as CRGB16Palette"));
+      }
+      if( // Switch to bit masking
+        (encoding.red_enabled)||
+        (encoding.green_enabled)||
+        (encoding.blue_enabled)||
+        (encoding.white_cold_enabled)||
+        (encoding.white_warm_enabled)
+      ){
+        ALOG_INF(PSTR("Encoded as RGBWW"));
+      }
+      if(encoding.index_gradient)
+      {
+        ALOG_INF(PSTR("Encoded with gradient that I need to think of"));
+      }
+      Serial.println(encoding.data, BIN);
+
+
+      // if()
+
+      // // Get the encoding for the heatmap palette
+      // mPalette::PALETTE_ENCODING_DATA encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX};
+      // if (jtok_sub = jtok.getObject()["Encoding"]) {
+      //     if (jtok_sub.isStr()) {
+      //         if (strcmp(jtok_sub.getStr(),"RGB")==0) {
+      //             encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX};
+      //         } else if (strcmp(jtok_sub.getStr(),"gRGB")==0) {
+      //             encoding = {PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT};
+      //         }
+      //     } else {
+      //         uint16_t enc = jtok_sub.getInt();
+      //         encoding = {enc};
+      //     }
+      //     ALOG_DBG(PSTR("Encoding %d"), encoding);
+      // }
+
+      // // Process the heatmap data points and assign colors
+      // std::vector<uint8_t> final_palette_data;
+
+      // for (size_t i = 0; i < heatmap_floats.size(); ++i) {
+      //     float normalized_value = (heatmap_floats[i] - min_value) / (max_value - min_value);
+      //     uint8_t gradient_index = gradient_map[i]; // This assumes a matching 1-to-1 relation of float to gradient
+
+      //     // If gradient_index is a float between 0-1, scale it to 0-255
+      //     gradient_index = uint8_t(normalized_value * 255);
+
+      //     // Get the corresponding color from the palette
+      //     uint32_t color = GetPaletteColour(palette_index, gradient_index, encoding);
+          
+      //     // Add the color to the final palette data (assuming RGB, 3 bytes per color)
+      //     final_palette_data.push_back((color >> 16) & 0xFF); // Red
+      //     final_palette_data.push_back((color >> 8) & 0xFF);  // Green
+      //     final_palette_data.push_back(color & 0xFF);         // Blue
+      // }
+
+      // // Command to set the heatmap palette using the computed final_palette_data
+      // CommandSet_HeatmapPalette(palette_index, encoding.data, final_palette_data);
+  }
+
+
+
+
+  #endif // ENABLE_DEVFEATURE_LIGHT__HEATMAP_PALETTES
   
 
   #if FIRMWARE_VERSION_MIN(1,1)
@@ -1014,7 +1219,7 @@ void mAnimatorLight::CommandSet_PaletteID(uint16_t value, uint8_t segment_index)
 {
   char buffer[50];
   SEGMENT_I(segment_index).palette_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
-  _segment_index_primary = segment_index;
+  segment_current_index = segment_index;
   SEGMENT.LoadPalette(segments[segment_index].palette_id);
 }
 

@@ -40,6 +40,7 @@ class mSunTracking :
     void Init(void);
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void BootMessage();
 
     static constexpr const char* PM_MODULE_SENSORS_SUN_TRACKING_CTR = D_MODULE_SENSORS_SUN_TRACKING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SUN_TRACKING_CTR; }
@@ -224,37 +225,62 @@ class mSunTracking :
         return timeStr;
     }
 
-    #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
     struct DEBUG
     {
       bool enabled = false;
       double azimuth = 0;
       double elevation = 0;
-      float elevation_adjusted_for_debugging = 0;
+      double max_elevation = 0;  // Maximum elevation of the sun for the day
+      double min_elevation = 0;  // Minimum elevation of the sun for the day (typically at dawn or dusk)
     }debug;
-    #endif // ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+    #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
 
-    double GetAzimuth()
+    double Get_Azimuth()
     {
-      #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
         if(debug.enabled)
           return debug.azimuth;
         else
-          return calc.azimuth;
+          return calc.position.azimuth;
       #else
         return calc.position.azimuth;
       #endif
     }
 
-    double GetElevation()
+    double Get_Elevation()
     {
-      #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
         if(debug.enabled)
           return debug.elevation;
         else
-          return calc.elevation;
+          return calc.position.elevation;
       #else
         return calc.position.elevation;
+      #endif
+    }
+
+    double Get_Elevation_Max()
+    {
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+        if(debug.enabled)
+          return debug.max_elevation;
+        else
+          return calc.max_elevation;
+      #else
+        return calc.max_elevation;
+      #endif
+    }
+
+    double Get_Elevation_Min()
+    {
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+        if(debug.enabled)
+          return debug.min_elevation;
+        else
+          return calc.min_elevation;
+      #else
+        return calc.pmin_elevation;
       #endif
     }
 
@@ -270,9 +296,9 @@ class mSunTracking :
     {
       value->timestamp = 0; // Constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
       value->sensor_type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
-      value->data_f.push_back((float)GetAzimuth());
+      value->data_f.push_back((float)Get_Azimuth());
       value->sensor_type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
-      value->data_f.push_back((float)GetElevation());
+      value->data_f.push_back((float)Get_Elevation());
       value->sensor_id = index;
     };
     
@@ -296,11 +322,11 @@ class mSunTracking :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
     std::vector<struct handler<mSunTracking>*> mqtthandler_list;    
-    struct handler<mSunTracking> mqtthandler_settings_teleperiod;
+    struct handler<mSunTracking> mqtthandler_settings;
     struct handler<mSunTracking> mqtthandler_sensor_ifchanged;
     struct handler<mSunTracking> mqtthandler_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT 

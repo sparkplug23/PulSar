@@ -68,13 +68,13 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
@@ -1119,6 +1119,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state)
     pSEGMENT_I(0).single_animation_override.time_ms =  pSEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
     ALOG_INF(PSTR("Setting override for off %d"), pSEGMENT_I(0).single_animation_override.time_ms);
     pSEGMENT_I(0).flags.fForceUpdate = true;
+    pSEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
     CommandSet_Brt_255(0);    
   }
   else
@@ -1158,6 +1159,8 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
   if(!pCONT_lAni->segments.size()){ return; }
 
   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+  
+  pCONT_lAni->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
   setBriRGB_Global(brt_new);
   // probably needs to check if they are linked here, or internally
   setBriCT_Global(brt_new);
@@ -1179,6 +1182,9 @@ void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_
 
   // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessRGB255(bri);
  pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true;
+ 
+ pCONT_lAni->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
+  
 
   _briRGB_Global = bri;
   setBriRGB_Global(bri);
@@ -1197,6 +1203,8 @@ void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_
 {
   if(!pCONT_lAni->segments.size()){ return; }
   pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true; 
+  pCONT_lAni->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
+  
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
@@ -1450,7 +1458,7 @@ void mInterfaceLight::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mInterfaceLight::MQTTHandler_Set_RefreshAll()
+void mInterfaceLight::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -1460,7 +1468,7 @@ void mInterfaceLight::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mInterfaceLight::MQTTHandler_Set_DefaultPeriodRate()
+void mInterfaceLight::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

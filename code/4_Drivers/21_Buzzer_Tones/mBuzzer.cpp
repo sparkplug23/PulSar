@@ -59,7 +59,7 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -328,7 +328,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
   }
 
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
 
 }
 
@@ -363,7 +363,7 @@ void mBuzzer::MQTTHandler_Init(){
 
   struct handler<mBuzzer>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -396,21 +396,21 @@ void mBuzzer::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mBuzzer::MQTTHandler_Set_RefreshAll(){
+void mBuzzer::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
 
-void mBuzzer::MQTTHandler_Set_DefaultPeriodRate(){
+void mBuzzer::MQTTHandler_Rate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
-} //end "MQTTHandler_Set_DefaultPeriodRate"
+} //end "MQTTHandler_Rate"
 
 
 void mBuzzer::MQTTHandler_Sender(uint8_t mqtt_handler_id){
@@ -422,7 +422,7 @@ void mBuzzer::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   };
   
   struct handler<mBuzzer>* list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
+    &mqtthandler_settings,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };

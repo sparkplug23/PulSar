@@ -150,18 +150,18 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mMAVLink_Telemetry_WiFi> mqtthandler_settings_teleperiod;
+    struct handler<mMAVLink_Telemetry_WiFi> mqtthandler_settings;
     struct handler<mMAVLink_Telemetry_WiFi> mqtthandler_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
       
 
     struct handler<mMAVLink_Telemetry_WiFi>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_ifchanged
     };
 

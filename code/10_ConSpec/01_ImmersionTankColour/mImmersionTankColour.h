@@ -82,21 +82,21 @@ class mImmersionTankColour :
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     struct handler<mImmersionTankColour>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mImmersionTankColour> mqtthandler_settings_teleperiod;
+    struct handler<mImmersionTankColour> mqtthandler_settings;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
     struct handler<mImmersionTankColour> mqtthandler_sensor_ifchanged;
     struct handler<mImmersionTankColour> mqtthandler_sensor_teleperiod;
     
   struct handler<mImmersionTankColour>* mqtthandler_list[3] = {
-    &mqtthandler_settings_teleperiod,
+    &mqtthandler_settings,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };

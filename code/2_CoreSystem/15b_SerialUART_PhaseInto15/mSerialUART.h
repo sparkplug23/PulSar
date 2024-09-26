@@ -225,19 +225,19 @@
   
 //     #ifdef USE_MODULE_NETWORK_MQTT
 //     void MQTTHandler_Init();
-//     void MQTTHandler_Set_RefreshAll();
-//     void MQTTHandler_Set_DefaultPeriodRate();
+//     void MQTTHandler_RefreshAll();
+//     void MQTTHandler_Rate();
     
 //     void MQTTHandler_Sender();
 
-//     struct handler<mSerialUART> mqtthandler_settings_teleperiod;
+//     struct handler<mSerialUART> mqtthandler_settings;
 //     struct handler<mSerialUART> mqtthandler_uartinfo_teleperiod;
 
 //     /**
 //      * @brief List (Array) of handler structs
 //      * */
 //     struct handler<mSerialUART>* mqtthandler_list[2] = {
-//       &mqtthandler_settings_teleperiod,
+//       &mqtthandler_settings,
 //       &mqtthandler_uartinfo_teleperiod
 //     };
     

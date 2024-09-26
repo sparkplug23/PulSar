@@ -9,7 +9,7 @@ void mOLED_SH1106::MQTTHandler_Init()
 
   struct handler<mOLED_SH1106>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; 
@@ -25,7 +25,7 @@ void mOLED_SH1106::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mOLED_SH1106::MQTTHandler_Set_RefreshAll()
+void mOLED_SH1106::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -35,7 +35,7 @@ void mOLED_SH1106::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mOLED_SH1106::MQTTHandler_Set_DefaultPeriodRate()
+void mOLED_SH1106::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

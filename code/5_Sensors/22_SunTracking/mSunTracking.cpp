@@ -17,6 +17,9 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_INIT:
       Init();
     break;
+    case TASK_BOOT_MESSAGE:
+      BootMessage();
+    break;
   }
   
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -27,11 +30,12 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_EVERY_SECOND:{
 
-		Update_Solar_Tracking_Data();
 
     }break;
     case TASK_EVERY_FIVE_SECOND:{
 
+
+		Update_Solar_Tracking_Data();
 
 
         #ifdef ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
@@ -94,11 +98,14 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -125,6 +132,26 @@ void mSunTracking::Init()
 }
 
 
+void mSunTracking::BootMessage()
+{
+    char buffer[100];
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+        mSupport::appendToBuffer(buffer, sizeof(buffer), "Angles, ");    
+    #endif
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+        mSupport::appendToBuffer(buffer, sizeof(buffer), "Advanced, Times");
+    #else
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+            mSupport::appendToBuffer(buffer, sizeof(buffer), "Today, ");
+        #endif
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+            mSupport::appendToBuffer(buffer, sizeof(buffer), "Tomorrow, ");
+        #endif
+    #endif
+    mSupport::removeTrailingComma(buffer);
+    ALOG_IMP(PSTR(D_LOG_SUN_TRACKING "%s"), buffer);
+}
+
 void mSunTracking::Update_Solar_Tracking_Data()
 {
 
@@ -141,10 +168,10 @@ void mSunTracking::Update_Solar_Tracking_Data()
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
     // Now you have both today's and tomorrow's solar event times stored in structs
-    calc.position = CalculateSolarAzEl(utc_time, latitude, longitude, ALTITUDE_ABOVE_SEALEVEL);
+    calc.position = CalculateSolarAzEl(utc_time, latitude, longitude, altitude);
     calc.is_daytime = calc.position.elevation > 0 ? true : false;
     if(calc.max_elevation == 0){ // Not set, run here once
-        CalculateMaxMinElevationForDay(LATITUDE, LONGITUDE, utc_time, ALTITUDE_ABOVE_SEALEVEL); //will only need to run once a day
+        CalculateMaxMinElevationForDay(latitude, longitude, utc_time, altitude); //will only need to run once a day
     }
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
 
@@ -154,7 +181,7 @@ void mSunTracking::Update_Solar_Tracking_Data()
     // ALOG_HGL(PSTR("TODAY"));
     // Get the start of today (midnight UTC)
     time_t start_of_today_utc = pCONT_time->GetStartOfDayUTC(utc_time);
-    calc.today = CalculateSolarEventTimes_Day(latitude, longitude, start_of_today_utc, ALTITUDE_ABOVE_SEALEVEL, pCONT_time->IsDst());
+    calc.today = CalculateSolarEventTimes_Day(latitude, longitude, start_of_today_utc, altitude, pCONT_time->IsDst());
     // Update is_sun_rising based on the current time
     calc.is_sun_rising = IsSunRising(utc_time);
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
@@ -168,13 +195,12 @@ void mSunTracking::Update_Solar_Tracking_Data()
     calc.solar_time_based_on_longitude = CalculateSolarTime(longitude, utc_time);
     calc.declination_angle = CalculateDeclinationAngle( pCONT_time->RtcTime.day_of_year );
     calc.incidence_angle = CalculateSolarIncidenceAngle(0,0);
-    calc.day_length = CalculateDayLength(LATITUDE, pCONT_time->RtcTime.day_of_year);  
-
+    calc.day_length = CalculateDayLength(latitude, pCONT_time->RtcTime.day_of_year);  
     // Get tomorrow's solar event times (utc_time + 86400 seconds for 24 hours)
     // ALOG_HGL(PSTR("TOMORROW"));
     // Get the start of tomorrow by adding 24 hours (86400 seconds)
     time_t start_of_tomorrow_utc = start_of_today_utc + 86400;
-    calc.tomorrow = CalculateSolarEventTimes_Day(latitude, longitude, start_of_tomorrow_utc, ALTITUDE_ABOVE_SEALEVEL, pCONT_time->IsDst());
+    // calc.tomorrow = CalculateSolarEventTimes_Day(latitude, longitude, start_of_tomorrow_utc, altitude, pCONT_time->IsDst());
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
 
     calc.isvalid = true;
@@ -243,7 +269,7 @@ double mSunTracking::CalculateSolarZenith() {
     std::cout << "Calculating Solar Zenith...\n";
     #endif
 
-    double zenith = 90.0 - GetElevation();  // Zenith angle in degrees
+    double zenith = 90.0 - Get_Elevation();  // Zenith angle in degrees
     
     #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "Zenith angle: " << zenith << " degrees\n";
@@ -257,7 +283,7 @@ double mSunTracking::CalculateSolarIrradiance() {
     std::cout << "Calculating Solar Irradiance...\n";
     #endif
 
-    if (GetElevation() <= 0) {
+    if (Get_Elevation() <= 0) {
         #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
         std::cout << "Sun below horizon, irradiance = 0 W/m²\n";
         #endif
@@ -387,32 +413,42 @@ double mSunTracking::ts2j(double ts) {
 
 double mSunTracking::calculateM(double J_) {
     double M_degrees = fmod(357.5291 + 0.98560028 * J_, 360.0);
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "Solar Mean Anomaly (M_degrees): " << M_degrees << " degrees\n";
+    #endif
     return M_degrees;
 }
 
 double mSunTracking::calculateC(double M_radians) {
     double C_degrees = 1.9148 * sin(M_radians) + 0.02 * sin(2 * M_radians) + 0.0003 * sin(3 * M_radians);
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "Equation of Center (C_degrees): " << C_degrees << " degrees\n";
+    #endif
     return C_degrees;
 }
 
 double mSunTracking::calculateL(double M_degrees, double C_degrees) {
     double L_degrees = fmod(M_degrees + C_degrees + 180.0 + 102.9372, 360.0);
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "Ecliptic Longitude (L_degrees): " << L_degrees << " degrees\n";
+    #endif
     return L_degrees;
 }
 
 double mSunTracking::calculateJtransit(double J_, double M_radians, double Lambda_radians) {
     double J_transit = 2451545.0 + J_ + 0.0053 * sin(M_radians) - 0.0069 * sin(2 * Lambda_radians);
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "Solar Transit Time (J_transit): " << J_transit << " Julian days\n";
+    #endif
     return J_transit;
 }
 
 double mSunTracking::calculateDeclination(double Lambda_radians) {
     double sin_d = sin(Lambda_radians) * sin(23.4397 * DEG_TO_RAD_CONST);
     double delta = asin(sin_d) * RAD_TO_DEG_CONST;
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "Solar Declination (delta): " << delta << " degrees\n";
+    #endif
     return delta;
 }
 
@@ -563,11 +599,13 @@ mSunTracking::SolarDayTimes mSunTracking::CalculateSolarEventTimes_Day(double la
     time_t ts_today_sunset = static_cast<time_t>(result.sunset);
     time_t ts_today_dusk = static_cast<time_t>(result.dusk);
 
+    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
     std::cout << "----- Today's Solar Event Times (with DST) -----\n";
     std::cout << "Dawn: " << ts_today_dawn << " (" << std::ctime(&ts_today_dawn) << ")\n";
     std::cout << "Sunrise: " << ts_today_sunrise << " (" << std::ctime(&ts_today_sunrise) << ")\n";
     std::cout << "Sunset: " << ts_today_sunset << " (" << std::ctime(&ts_today_sunset) << ")\n";
     std::cout << "Dusk: " << ts_today_dusk << " (" << std::ctime(&ts_today_dusk) << ")\n";
+    #endif
 
     return result;
 }
@@ -898,43 +936,30 @@ void mSunTracking::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
   
-  /***
-   * As order of importance, others that rely on previous commands must come after
-   * */
-//   if(jtok = obj["SolarElevation"]){
-//     solar_position_testing.elevation = (double)jtok.getFloat();
-
-// 	Serial.printf("solar_position_testing.elevation=%f\n\r",solar_position_testing.elevation);
-
-// 	// ALOG_INF(PSTR("SolarElevation=%d %d"),(int)solar_position_testing.elevation,jtok.getInt() );
-// 	// delay(3000);
-//   }
-
-  #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
-  if(jtok = obj["SolarElevationAdjusted"]){
-    elevation_adjusted_for_debugging = (double)jtok.getFloat();
-
-	Serial.printf("elevation_adjusted_for_debugging=%f\n\r",elevation_adjusted_for_debugging);
-
-	// ALOG_INF(PSTR("SolarElevation=%d %d"),(int)solar_position_testing.elevation,jtok.getInt() );
-	// delay(3000);
-  }
-
-  if(jtok = obj["DebugSolar"].getObject()["Enabled"])
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  if(jtok = obj["SunAngles"].getObject()["Enabled"])
   {
     debug.enabled = jtok.getBool();
   }
 
-  if(jtok = obj["DebugSolar"].getObject()["Elevation"])
+  if(jtok = obj["SunAngles"].getObject()["Elevation"])
   {
     debug.elevation = jtok.getFloat();
   }
+  if(jtok = obj["SunAngles"].getObject()["ElevationMin"])
+  {
+    debug.min_elevation = jtok.getFloat();
+  }
+  if(jtok = obj["SunAngles"].getObject()["ElevationMax"])
+  {
+    debug.max_elevation = jtok.getFloat();
+  }
 
-  if(jtok = obj["DebugSolar"].getObject()["Azimuth"])
+  if(jtok = obj["SunAngles"].getObject()["Azimuth"])
   {
     debug.azimuth = jtok.getFloat();
   }
-	#endif // ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+  #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
   
 }
 
@@ -964,6 +989,17 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
   if(calc.isvalid) 
   {
     time_t current_time = time(nullptr);
+
+    
+    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    JBI->Object_Start("Debug");      
+        JBI->Add("Enabled", (uint8_t)debug.enabled);
+        JBI->Add("Elevation", (float)debug.elevation);
+        JBI->Add("ElevationMin", (float)debug.min_elevation);
+        JBI->Add("ElevationMax", (float)debug.max_elevation);
+        JBI->Add("Azimuth", (float)debug.azimuth);
+    JBI->Object_End();
+    #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
     JBI->Add(PM_JSON__IS_SUN_RISING, (uint8_t)calc.is_sun_rising);
@@ -1106,11 +1142,11 @@ void mSunTracking::MQTTHandler_Init()
 
   struct handler<mSunTracking>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1120,8 +1156,8 @@ void mSunTracking::MQTTHandler_Init()
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -1131,8 +1167,8 @@ void mSunTracking::MQTTHandler_Init()
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -1140,31 +1176,6 @@ void mSunTracking::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   
 } 
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSunTracking::MQTTHandler_Set_DefaultPeriodRate()
-{
-//   for(auto& handle:mqtthandler_list){
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-//   }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSunTracking::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
-
 
 #endif // USE_MODULE_NETWORK_MQTT
 

@@ -277,12 +277,12 @@ enum SWITCH_SPLIT_TASK_IDS{
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
     
-    struct handler<mEnergyINA219> mqtthandler_settings_teleperiod;
+    struct handler<mEnergyINA219> mqtthandler_settings;
     struct handler<mEnergyINA219> mqtthandler_sensor_ifchanged;
     struct handler<mEnergyINA219> mqtthandler_sensor_teleperiod;
 

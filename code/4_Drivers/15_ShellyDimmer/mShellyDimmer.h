@@ -263,17 +263,17 @@ class mShellyDimmer :
 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mShellyDimmer>  mqtthandler_settings_teleperiod;
+    struct handler<mShellyDimmer>  mqtthandler_settings;
     struct handler<mShellyDimmer>  mqtthandler_state_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
     struct handler<mShellyDimmer>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_teleperiod
     };
 

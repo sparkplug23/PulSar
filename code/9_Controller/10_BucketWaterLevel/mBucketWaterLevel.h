@@ -139,12 +139,12 @@ void Pre_Init(void);
     #ifdef USE_MODULE_NETWORK_MQTT
 
       void MQTTHandler_Init();
-      void MQTTHandler_Set_RefreshAll();
-      void MQTTHandler_Set_DefaultPeriodRate();
+      void MQTTHandler_RefreshAll();
+      void MQTTHandler_Rate();
       
       void MQTTHandler_Sender();
 
-      struct handler<mBucketWaterLevel> mqtthandler_settings_teleperiod;
+      struct handler<mBucketWaterLevel> mqtthandler_settings;
       struct handler<mBucketWaterLevel> mqtthandler_state_ifchanged;
       struct handler<mBucketWaterLevel> mqtthandler_state_teleperiod;
 
@@ -152,7 +152,7 @@ void Pre_Init(void);
       
       
       struct handler<mBucketWaterLevel>* mqtthandler_list[3] = {
-        &mqtthandler_settings_teleperiod,
+        &mqtthandler_settings,
         &mqtthandler_state_ifchanged,
         &mqtthandler_state_teleperiod
       };

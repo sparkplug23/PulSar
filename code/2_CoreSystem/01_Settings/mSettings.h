@@ -68,9 +68,57 @@ struct DATA_BUFFER{
     uint16_t length_used = 0;
   }payload;
   uint16_t isserviced = 0; // Set to 0 on new mqtt
+  uint16_t moduleLock = 0;
   DATA_BUFFER_FLAGS flags;
 };
 extern struct DATA_BUFFER data_buffer;
+
+#include <Arduino.h> // Include Arduino header for millis() and delay()
+
+#define ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+
+#ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+
+//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+inline bool requestDataBufferLock(uint16_t module)
+{
+  unsigned long now = millis();
+
+  // This assumption here is another http thread must release itself to permit this function to proceed
+  while (data_buffer.moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+  if (millis()-now >= 1000) 
+  {
+    #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+    Serial.printf(PSTR("ERROR: Locking data buffer failed! (%d)\n\r"),data_buffer.moduleLock);
+    #endif
+    return false; // waiting time-outed
+  }
+
+  data_buffer.moduleLock = module ? module : 255;
+
+  #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+  Serial.printf(PSTR("DATA buffer locked (%d)\n\r"), data_buffer.moduleLock);
+  #endif
+
+  return true;
+}
+
+inline void releaseDataBufferLock()
+{
+  #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+  Serial.printf(PSTR("DATA buffer released (%d)\n\r"), data_buffer.moduleLock);
+  #endif
+  data_buffer.moduleLock = 0;
+}
+
+#else
+
+//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+inline bool requestDataBufferLock(uint16_t module){ return true; };
+inline void releaseDataBufferLock(){};
+
+#endif
 
 
 /**
@@ -696,8 +744,8 @@ typedef union {
   struct {
     uint8_t spare0 : 1;
     uint8_t spare1 : 1;
-    uint8_t bh1750_1_resolution : 2;       // Sensor10 1,2,3
-    uint8_t bh1750_2_resolution : 2;
+    // uint8_t bh1750_1_resolution : 2;       // Sensor10 1,2,3
+    // uint8_t bh1750_2_resolution : 2;
     uint8_t hx711_json_weight_change : 1;  // Sensor34 8,x - Enable JSON message on weight change
     uint8_t mhz19b_abc_disable : 1;        // Disable ABC (Automatic Baseline Correction for MHZ19(B) (0 = Enabled (default), 1 = Disabled with Sensor15 command)
   };
@@ -916,6 +964,7 @@ struct LoggingSettings{
   uint8_t       sys_level;              // 1AA
   uint8_t       web_level;              // 1AC
   uint8_t       telnet_level;              // 1AC
+  uint8_t       mqtt_level;              // 1AC
   uint8_t       time_isshort;  
 };
 

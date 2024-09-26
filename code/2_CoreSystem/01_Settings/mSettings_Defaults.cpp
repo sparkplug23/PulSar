@@ -27,34 +27,27 @@ void mSettings::SettingsDefault(void)
   // Erase ALL settings to 0
   memset(&Settings, 0x00, sizeof(SETTINGS));
 DEBUG_LINE_HERE2
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
+
   SystemSettings_DefaultHeader();
   DEBUG_LINE_HERE2
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
+  
   SystemSettings_DefaultBody();
 DEBUG_LINE_HERE2
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
-  DEBUG_LINE_HERE;
-  // Clear module defaults
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
+
+  // Clear module defaults  
   pCONT->Tasker_Interface(TASK_SETTINGS_DEFAULT); // replace with below?
   DEBUG_LINE_HERE;
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
+  
   pCONT->Tasker_Interface(TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
       
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
   DEBUG_LINE_HERE;
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
   #endif// ENABLE_LOG_LEVEL_INFO
 
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
   DEBUG_LINE_HERE;
   // After defaults are loaded everything should immediately be saved
   SettingsSaveAll();
-
-  
-  ALOG_INF(PSTR("Settings.switch_debounce is now? %d"), Settings.switch_debounce);
    
   DEBUG_LINE_HERE;
     
@@ -143,6 +136,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.logging.sys_level = SYS_LOG_LEVEL;
   Settings.logging.web_level = WEB_LOG_LEVEL;
   Settings.logging.telnet_level = TELNET_LOG_LEVEL;
+  Settings.logging.mqtt_level = LOG_LEVEL_IMPORTANT;
   Settings.logging.time_isshort = LOGTIME_DEFAULT_FORMAT;
   
   SettingsUpdateText(SET_SYSLOG_HOST, PSTR(SYS_LOG_HOST));
@@ -281,8 +275,6 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.sensors.latitude = LATITUDE;//(int)((double)LATITUDE * 1000000);
   Settings.sensors.longitude = LONGITUDE;//(int)((double)LONGITUDE * 1000000);
   Settings.sensors.flags.decimal_precision = 3;
-  Settings.SensorBits1.bh1750_1_resolution  = 1;
-  Settings.SensorBits1.bh1750_2_resolution  = 1;
   // Settings.flag_sensor.temperature_conversion = TEMP_CONVERSION;
   // Settings.flag_sensor.pressure_conversion = PRESSURE_CONVERSION;
   // Settings.flag_sensor.pressure_resolution = PRESSURE_RESOLUTION;

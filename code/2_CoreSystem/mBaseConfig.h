@@ -248,7 +248,7 @@ With latest version, all longer term shared debug features should be added here 
 
 
   // #define USE_MODULE_SENSORS_SUN_TRACKING
-  //   #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
 
 
 

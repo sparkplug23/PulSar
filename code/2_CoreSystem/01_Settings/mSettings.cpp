@@ -15,14 +15,6 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case TASK_EVERY_FIVE_SECOND:{
 
-      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
-        #ifdef ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
-
-        pCONT_set->SettingsSaveAll();
-
-        #endif
-      #endif
-
     }break;
 
     case TASK_EVERY_MINUTE:
@@ -50,7 +42,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case TASK_EVERY_HOUR:
 
-      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
         #ifdef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
         pCONT_set->SettingsSaveAll();
         #endif
@@ -58,7 +50,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_LOG_LEVEL_INFO
       DEBUG_PRINTLN("SettingsSave dis");
       #endif // ifdef ENABLE_LOG_LEVEL_INFO
-      #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+      #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
 
     break;   
     case TASK_ON_BOOT_SUCCESSFUL:

@@ -42,7 +42,7 @@ int8_t mExampleClass::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -118,7 +118,7 @@ void mExampleClass::MQTTHandler_Init(){
 
   struct handler<mExampleClass>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -151,21 +151,21 @@ void mExampleClass::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mExampleClass::MQTTHandler_Set_RefreshAll(){
+void mExampleClass::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
 
-void mExampleClass::MQTTHandler_Set_DefaultPeriodRate(){
+void mExampleClass::MQTTHandler_Rate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
-} //end "MQTTHandler_Set_DefaultPeriodRate"
+} //end "MQTTHandler_Rate"
 
 
 void mExampleClass::MQTTHandler_Sender(uint8_t mqtt_handler_id){

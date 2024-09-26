@@ -12,7 +12,7 @@ void mGPS_SD_Logger::MQTTHandler_Init(){
 
   struct handler<mGPS_SD_Logger>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -57,7 +57,7 @@ void mGPS_SD_Logger::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mGPS_SD_Logger::MQTTHandler_Set_RefreshAll()
+void mGPS_SD_Logger::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -67,7 +67,7 @@ void mGPS_SD_Logger::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mGPS_SD_Logger::MQTTHandler_Set_DefaultPeriodRate()
+void mGPS_SD_Logger::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

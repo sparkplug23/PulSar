@@ -152,12 +152,12 @@ class mNextionPanel :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mNextionPanel>*> mqtthandler_list;
-    struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
+    struct handler<mNextionPanel> mqtthandler_settings;
     struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
     struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
@@ -186,7 +186,7 @@ class mNextionPanel :
       int8_t page = 0;
       uint8_t page_saved = 0; //used to return to after message is flashed
       
-      uint8_t dynamic_log_level = 9;//9;// LOG_LEVEL_DEBUG_MORE; // used for certain addlog that may only have elevated states (to block large serial prints on recursive array prints)
+      uint8_t dynamic_log_level = 10;//9;// LOG_LEVEL_DEBUG_MORE; // used for certain addlog that may only have elevated states (to block large serial prints on recursive array prints)
 
       struct TimeoutCheck
       {

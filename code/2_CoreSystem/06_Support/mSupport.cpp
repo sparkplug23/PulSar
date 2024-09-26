@@ -528,7 +528,7 @@ void mSupport::ArduinoOTAInit(void)
       }
     #endif
 
-    ALOG_INF(PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
+    ALOG_IMP(PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
 
     arduino_ota_triggered = true;
     arduino_ota_progress_dot_count = 0;
@@ -576,7 +576,7 @@ void mSupport::ArduinoOTAInit(void)
         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
     }
 
-    ALOG_INF(PSTR(D_LOG_OTA "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
+    ALOG_IMP(PSTR(D_LOG_OTA "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
     
     if(error != OTA_BEGIN_ERROR)
       ESP.restart(); // Should only reach if the first failed
@@ -585,14 +585,14 @@ void mSupport::ArduinoOTAInit(void)
 
   ArduinoOTA.onEnd([this]()
   {
-    ALOG_INF(PSTR(D_LOG_UPLOAD "OTA " D_SUCCESSFUL ". " D_RESTARTING));
+    ALOG_IMP(PSTR(D_LOG_UPLOAD "OTA " D_SUCCESSFUL ". " D_RESTARTING));
     ESP.restart();
 	});
 
   ArduinoOTA.begin();
   ota_init_success = true;
 
-  ALOG_INF(PSTR(D_LOG_OTA "Started"));
+  ALOG_IMP(PSTR(D_LOG_OTA "Started"));
 
 }
 
@@ -903,6 +903,36 @@ uint16_t mSupport::WriteBuffer_P(const char* formatP, ...)     // Content send s
   va_end(arg);
   return bytes_written;
 }
+
+void mSupport::appendToBuffer(char* buffer, size_t bufferSize, const char* format, ...) 
+{
+    // Find the current length of the buffer (to append)
+    size_t currentLength = strlen(buffer);
+
+    // Create a va_list to handle the variable arguments
+    va_list args;
+    va_start(args, format);
+
+    // Use vsnprintf to append to the buffer, taking into account the current length
+    vsnprintf(buffer + currentLength, bufferSize - currentLength, format, args);
+
+    // End the argument list
+    va_end(args);
+}
+
+void mSupport::removeTrailingComma(char* buffer) {
+    size_t len = strlen(buffer);
+
+    // Check if the buffer ends with ", " (comma and space)
+    if (len >= 2 && strcmp(&buffer[len - 2], ", ") == 0) {
+        buffer[len - 2] = '\0';  // Remove the last ", "
+    }
+    // Otherwise, check if the buffer ends with ","
+    else if (len >= 1 && buffer[len - 1] == ',') {
+        buffer[len - 1] = '\0';  // Remove the last ","
+    }
+}
+
 
 
 int mSupport::Response_P(const char* format, ...)     // Content send snprintf_P char data

@@ -81,7 +81,7 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -376,7 +376,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, data_v.size());
+    JBI->Add_P(PM_JSON_SENSOR_COUNT, data_v.size());
   return JBI->End();
 
 }
@@ -389,16 +389,15 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_appe
   for( int ii=0; ii < data_v.size(); ii++)
   {
     JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
-      JBI->Add(D_JSON_ADDRESS,      data_v[ii].address );
-      JBI->Add(D_JSON_VOLTAGE,      data_v[ii].voltage);
-      JBI->Add(D_JSON_CURRENT,      data_v[ii].current);
-      JBI->Add(D_JSON_ACTIVE_POWER, data_v[ii].active_power);
-      JBI->Add(D_JSON_FREQUENCY,    data_v[ii].frequency);
-      JBI->Add(D_JSON_POWER_FACTOR, data_v[ii].power_factor);
-      JBI->Add(D_JSON_ENERGY,       data_v[ii].import_active);
+      JBI->Add_P(PM_JSON_ADDRESS,      data_v[ii].address );
+      JBI->Add_P(PM_JSON_VOLTAGE,      data_v[ii].voltage);
+      JBI->Add_P(PM_JSON_CURRENT,      data_v[ii].current);
+      JBI->Add_P(PM_JSON_ACTIVE_POWER, data_v[ii].active_power);
+      JBI->Add_P(PM_JSON_FREQUENCY,    data_v[ii].frequency);
+      JBI->Add_P(PM_JSON_POWER_FACTOR, data_v[ii].power_factor);
+      JBI->Add_P(PM_JSON_ENERGY,       data_v[ii].import_active);
     JBI->Object_End();
   }
-
   return JBI->End();
 
 }
@@ -414,7 +413,7 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
 
   struct handler<mEnergyPZEM004T>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
@@ -452,7 +451,7 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mEnergyPZEM004T::MQTTHandler_Set_RefreshAll()
+void mEnergyPZEM004T::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -462,7 +461,7 @@ void mEnergyPZEM004T::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mEnergyPZEM004T::MQTTHandler_Set_DefaultPeriodRate()
+void mEnergyPZEM004T::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

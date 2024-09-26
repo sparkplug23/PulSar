@@ -452,36 +452,51 @@ void mPalette::Init_Palettes()
     D_PALETTE_PURPLE_PINK_ENCODING
   );
 
+  addStaticPalette(
+    PALETTELIST_STATIC__SOLAR_SKY__ID, 
+    PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA, 
+    sizeof(PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA),
+    D_PALETTE_DYNAMIC__SOLAR_SKY_01__ENCODING
+  );
+
   /****************
    * DynamicPalettes : Do all dynamic palettes have no data? actually, I may want to encode data to be used for these (not RGB data, but byte encoded data), so keep
    ****************/
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
+    PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA, 
+    sizeof(PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA),
+    D_PALETTE__SOLAR__CCT_ELEVATION_01_ENCODING
   );
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
+    PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA, 
+    sizeof(PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA),
+    D_PALETTE__SOLAR__CCT_ELEVATION_01_ENCODING
   );
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
+    PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA, 
+    sizeof(PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA),
+    D_PALETTE__SOLAR__CCT_ELEVATION_01_ENCODING
   );
+
   
   addDynamicPalette(
     PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID, 
-    nullptr, 
-    0, 
-    PALETTE_ENCODING_TYPE_CRGBPalette16
+    PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA, 
+    sizeof(PM_PALETTE__SOLAR__CCT_ELEVATION_01__DATA),
+    D_PALETTE__SOLAR__CCT_ELEVATION_01_ENCODING
+  );
+
+  addDynamicPalette(
+    PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID, 
+    PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA, 
+    sizeof(PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA),
+    D_PALETTE_DYNAMIC__SOLAR_SKY_01__ENCODING
   );
 
   /****************
@@ -721,6 +736,37 @@ void mPalette::addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t 
 }
 
 
+mPalette::PALETTE_ENCODING_DATA mPalette::findPaletteEncoding(uint16_t id)
+{
+    // Search in static palettes
+    for (const auto& palette : static_palettes) {
+        if (palette.palettelist_id == id) {
+            ALOG_INF(PSTR("Found in static palettes with ID: %d"), id);
+            return palette.encoding;
+        }
+    }
+
+    // Search in dynamic palettes
+    for (const auto& palette : dynamic_palettes) {
+        if (palette.palettelist_id == id) {
+            ALOG_INF(PSTR("Found in dynamic palettes with ID: %d"), id);
+            return palette.encoding;
+        }
+    }
+
+    // Search in custom palettes
+    for (const auto& palette : custom_palettes) {
+        if (palette.palettelist_id == id) {
+            ALOG_INF(PSTR("Found in custom palettes with ID: %d"), id);
+            return palette.encoding;
+        }
+    }
+
+    // If not found, return a default encoding type or error code
+    ALOG_INF(PSTR("Palette with ID: %d not found"), id);
+    return {0}; // You could also return an error code here if needed
+}
+
 /*********************************************************************************************************************************************************************************
  *********************************************************************************************************************************************************************************
  * SECTION: Main requests to get colours from palettes
@@ -755,7 +801,8 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly //encoded value needs to be U32 since they can be 3 bytes wide
   uint8_t     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   uint8_t     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-  uint8_t     flag_crgb_exact_colour
+  uint8_t     flag_crgb_exact_colour,
+  bool        flag_request_is_for_full_visual_output
 ){
   
   DEBUG_PIN4_SET(0);
@@ -789,7 +836,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   ){
   
 
-    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+    uint8_t segIdx = pCONT_lAni->segment_current_index;
     if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
 
     CRGB fastled_col;
@@ -868,7 +915,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   
 
     uint8_t adjusted_id = palette_id - PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID;
-    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+    uint8_t segIdx = pCONT_lAni->segment_current_index;
 
     if(segIdx >= pCONT_lAni->segments.size() ){ segIdx = 0; } 
     if(adjusted_id < RGBCCTCOLOURS_SIZE)
@@ -915,7 +962,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     ((palette_id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
   ){  
   
-    
     uint16_t palette_adjusted_id = palette_id;// - PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID; // adjust back into correct indexing
 
     colour = Get_Encoded_DynamicPalette_Colour(
@@ -925,7 +971,9 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
         encoded_value,
         flag_spanned_segment,
         flag_wrap_hard_edge,
-        flag_crgb_exact_colour
+        flag_crgb_exact_colour,
+        false, // dont force gradient
+        flag_request_is_for_full_visual_output // eg for webui, override and show example with Live palettes
       );
 
   } // end of my palettes
@@ -1060,17 +1108,84 @@ mPalette::Get_Encoded_StaticPalette_Colour(
  * For now, I think dynamic should be made internal to the palette class and use an internal parameter in the place of aux
  * 
  * 
+ * I should add to dynamic palettes, an optional flag for "getting for webui view" and hence instead of showing the exact colour, it would show a demo of the possible colours. Eg Sky could be the full colour spectrum. It would mean a higher level option would select full 16 colours and send crgb16 palette view
+ * Or all dynamic palettes must have how it may look stored in memory, and that is used when the webui calls it. 
  */
 RgbcctColor mPalette::Get_Encoded_DynamicPalette_Colour(
   uint16_t palette_adjusted_id,
   uint8_t* palette_buffer,
   uint16_t _pixel_position,  
   uint8_t* encoded_value, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-  bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
   bool     flag_crgb_exact_colour,
-  bool     flag_force_gradient
+  bool     flag_force_gradient,
+  bool     flag_request_is_for_full_visual_output
 ){
+
+/**
+ * @brief New Sep24
+ * Dynamic palettes must still load from stored memory, if nothing is required it can be overwritten below, but this will serve as webui views. 
+ * So load, then if webui request, exist before generating the live part.
+ * 
+ */
+
+  // ATTENTION: Adjusting palette back here, so it correctly reads fro dynamic_palette, but switch below requires the ID without adjustment
+
+  uint8_t palette_adjusted_id_rel0 = palette_adjusted_id - PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+
+  // ALOG_INF(PSTR("palette_adjusted_id_rel0 %d"), palette_adjusted_id_rel0);
+  // Serial.flush();
+
+  uint8_t encoded_colour_width  = GetEncodedColourWidth(dynamic_palettes[palette_adjusted_id_rel0].encoding);   
+  uint8_t colours_in_palette = dynamic_palettes[palette_adjusted_id_rel0].data.size()/encoded_colour_width;
+  palette_buffer = &dynamic_palettes[palette_adjusted_id_rel0].data[0];
+  PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_adjusted_id_rel0].encoding;
+
+  // ALOG_INF(PSTR("color_from_palette %d"), colours_in_palette);
+  
+  RgbcctColor loaded_colour;
+
+  
+  
+  // _pixel_position = 0;
+
+  // loaded_colour = Get_Encoded_Palette_Colour(
+  //   palette_buffer,
+  //   _pixel_position,
+  //   encoded_colour_width,
+  //   colours_in_palette,
+  //   encoding,
+  //   encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  //   flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  //   flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  //   flag_crgb_exact_colour,
+  //   flag_force_gradient
+  // );
+
+  // loaded_colour.debug_print("loaded dynamic 0");
+  // // This load seciton above, will likely need to be called below X times depending on the values I want. 
+
+  // _pixel_position = 255;
+
+  // loaded_colour = Get_Encoded_Palette_Colour(
+  //   palette_buffer,
+  //   _pixel_position,
+  //   encoded_colour_width,
+  //   colours_in_palette,
+  //   encoding,
+  //   encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  //   flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  //   flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  //   flag_crgb_exact_colour,
+  //   flag_force_gradient
+  // );
+
+  // loaded_colour.debug_print("loaded dynamic 255");
+  // // This load seciton above, will likely need to be called below X times depending on the values I want. 
+
+
+
 
 // Here, I likely want to work conversions, then call the other methods that are needed.
 // For simplicity, the required colours will be requested from the static options that are in progmem.
@@ -1110,7 +1225,7 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
     case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:{
 
       #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-      float azimuth = pCONT_solar->GetAzimuth();
+      float azimuth = pCONT_solar->Get_Azimuth();
       #else
       float azimuth = 0;
       #endif
@@ -1120,8 +1235,10 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
       RgbcctColor colour1 = pSEGMENT_I(0).rgbcctcolors[0];
       RgbcctColor colour2 = pSEGMENT_I(0).rgbcctcolors[1];      
 
+      #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
       Serial.println(azimuth);
       Serial.println(progress);
+      #endif
 
       return RgbcctColor::LinearBlend(colour1, colour2, progress);
 
@@ -1134,144 +1251,301 @@ GetColourFromPalette_WithColourMapScale(normal colour map, pass in vector float 
      */
     case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
     {
-      
+
       #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-      float elevation = pCONT_solar->GetElevation();
+      float elevation = pCONT_solar->Get_Elevation();
+      float el_min = pCONT_solar->Get_Elevation_Min();
+      float el_max = pCONT_solar->Get_Elevation_Max();
       #else
       float elevation = 0;
+      float el_min = -30;
+      float el_max = 30;
       #endif
 
+      // Determine pixel length and position for full visual output
+      uint16_t pixel_length = pCONT_lAni->_virtualSegmentLength;
       RgbcctColor colour_out = RgbcctColor();  
 
-      float elevation_transition_degrees = 10; // degrees above/below horizon to transition between warm/cold white
-
-
-      if(fabs(elevation) > elevation_transition_degrees) // get amplitude of elevation from horizon
+      if (flag_request_is_for_full_visual_output) 
       {
 
-        if(elevation >= 0){ // daytime
-          colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT); // Cold White
-          colour_out.setRGB(255,255,255);
-          // ALOG_INF(PSTR("++++++ elevation %d"), (int)(elevation*100) );
-        }else{ //nighttime
-          colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT); // Warm White
-          colour_out.setRGB(0xFF,0x52,0x18);
-          // ALOG_INF(PSTR("------ elevation %d"), (int)(elevation*100) );
-        }
-      }else{ // transitioning, dusk/dawn
-        float progress = mSupport::mapfloat(
-                                              elevation, 
-                                              elevation_transition_degrees,    -1*elevation_transition_degrees, 
-                                              0.0f,                            1.0f
-                                            );
+        // Map the pixel position to the elevation range (el_min to el_max)
+        float mapped_elevation = mSupport::mapfloat(_pixel_position, 0.0f, 16.0f, el_min, el_max);
 
-        RgbcctColor colour1 = RgbcctColor();
-        colour1.setCCT_Kelvin(CCT_MIN_DEFAULT); // Cold White
-        colour1.setRGB(255,255,255); // Cold White with RGB (Full)
-        // colour1.setRGB(255,0,0); // Debugging
+        // Debug output for pixel_position_adjust and mapped_elevation
+        ALOG_INF(PSTR("Full Visual Output: Pixel Position: %d, Mapped Elevation: %d"), _pixel_position, (int)mapped_elevation);
 
-        RgbcctColor colour2 = RgbcctColor();
-        colour2.setCCT_Kelvin(CCT_MAX_DEFAULT); // Warm White
-        colour2.setRGB(0xFF,0x52,0x18);  // Warm White with RGB (White with reduced G,B)
-        // colour2.setRGB(0,0,255); // Debugging
+        // Based on the mapped elevation, assign cold or warm white, or blend between
+        float elevation_transition_degrees = 10; // degrees around which to blend
 
-        colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
+        if (fabs(mapped_elevation) > elevation_transition_degrees) {
+            if (mapped_elevation >= 0) {
+                colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT); // Cold White
+                colour_out.setRGB(255, 255, 255);          // Full RGB for Cold White
+            } else {
+                colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT); // Warm White
+                colour_out.setRGB(0xFF, 0x52, 0x18);       // Warm Orange for Warm White
+            }
+        } else {
+            float progress = mSupport::mapfloat(
+                mapped_elevation,
+                elevation_transition_degrees, 
+                -1 * elevation_transition_degrees, 
+                0.0f, 
+                1.0f
+            );
 
+            RgbcctColor colour1 = RgbcctColor();
+            colour1.setCCT_Kelvin(CCT_MIN_DEFAULT);  // Cold White
+            colour1.setRGB(255, 255, 255);           // Full RGB for Cold White
+
+            RgbcctColor colour2 = RgbcctColor();
+            colour2.setCCT_Kelvin(CCT_MAX_DEFAULT);  // Warm White
+            colour2.setRGB(0xFF, 0x52, 0x18);        // Warm Orange for Warm White
+
+            colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
+          }
+      } else {
+          // Default elevation-based calculation
+          float elevation_transition_degrees = 20; // degrees above/below horizon to transition between warm/cold white
+          float elevation_transition_offset = 0;   // Offset for the center of the transition
+
+          // Adjusted center point for the transition
+          float transition_min = elevation_transition_offset - elevation_transition_degrees / 2.0f;
+          float transition_max = elevation_transition_offset + elevation_transition_degrees / 2.0f;
+
+          if (fabs(elevation - elevation_transition_offset) > elevation_transition_degrees / 2.0f) {
+              if (elevation >= transition_max) {
+                  colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT);  // Cold White
+                  colour_out.setRGB(255, 255, 255);           // Full RGB for Cold White
+              } else if (elevation <= transition_min) {
+                  colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT);  // Warm White
+                  colour_out.setRGB(0xFF, 0x52, 0x18);        // Warm Orange for Warm White
+              }
+          } else {
+              float progress = mSupport::mapfloat(
+                  elevation,
+                  transition_max,
+                  transition_min,
+                  0.0f,
+                  1.0f
+              );
+
+              RgbcctColor colour1 = RgbcctColor();
+              colour1.setCCT_Kelvin(CCT_MIN_DEFAULT);  // Cold White
+              colour1.setRGB(255, 255, 255);           // Full RGB for Cold White
+
+              RgbcctColor colour2 = RgbcctColor();
+              colour2.setCCT_Kelvin(CCT_MAX_DEFAULT);  // Warm White
+              colour2.setRGB(0xFF, 0x52, 0x18);        // Warm Orange for Warm White
+
+              colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
+          }
       }
+
+      #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
       Serial.println(elevation);
       colour_out.debug_print("colour_out");
+      #endif
 
       return colour_out;
-
-       
-
-      // Serial.println(elevation);
-      // Serial.println(progress);
       
     }
     break;
     case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
     {
-        // 0 = peak day   ratio 1
-        // 1 = sunset     ratio 0
-        // 2 = peak night ratio 1
+        // Define the transition width around the horizon (±X degrees)
+        float elevation_transition_degrees = 10.0f; // Transition over 20 degrees total (10 above and 10 below)
 
+        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+        Serial.println("PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID");
+        #endif
 
+        // Retrieve the two colors for blending
+        RgbcctColor colour1 = pSEGMENT.rgbcctcolors[0]; // Daytime color
+        RgbcctColor colour2 = pSEGMENT.rgbcctcolors[1]; // Nighttime color
 
-      // float elevation = pCONT_solar->solar_position.elevation;
+        // Get the current solar elevation
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
+        float elevation = pCONT_solar->Get_Elevation();
+        #else
+        float elevation = 0;
+        #endif
 
-      RgbcctColor colour1 = pSEGMENT_I(0).rgbcctcolors[0];
-      RgbcctColor colour2 = pSEGMENT_I(0).rgbcctcolors[1]; 
-      // RgbcctColor colour_out = pSEGMENT_I(0).rgbcctcolors[1];     
+        RgbcctColor colour_out;
 
-      // if(elevation > 0) //daytime
-      // {
-      //   colour1 = pSEGMENT_I(0).rgbcctcolors[0];
-      //   colour2 = pSEGMENT_I(0).rgbcctcolors[1];  
-      //   float progress = mSupport::mapfloat(elevation, 0, pCONT_solar->solar_position.elevation_max, 1.0f, 0.0f);
-      //   colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
-      // }else{ //nighttime      
-      //   colour1 = pSEGMENT_I(0).rgbcctcolors[1];
-      //   colour2 = pSEGMENT_I(0).rgbcctcolors[2];  
-      //   float progress = mSupport::mapfloat(elevation, 0, pCONT_solar->solar_position.elevation_min, 0.0f, 1.0f);
-      //   colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
-      // }
+        if (flag_request_is_for_full_visual_output) {
+            // Full visual output: map _pixel_position to a range of 0 to 255 for a full transition demo
+            uint16_t pixel_length = pCONT_lAni->_virtualSegmentLength;
+            uint16_t pixel_position_adjust = (_pixel_position * 255) / (pixel_length - 1);
 
-      // return colour_out;
+            // Simulate a full visual gradient across the entire day-night transition
+            float progress;
+            if (pixel_position_adjust <= 110) {
+                // Solid day color
+                colour_out = colour1;
+            } else if (pixel_position_adjust >= 154) {
+                // Solid night color
+                colour_out = colour2;
+            } else if (pixel_position_adjust == 111) {
+                // Hard gradient stop at 111
+                colour_out = RgbcctColor::LinearBlend(colour1, colour2, 0.0f); // Hard stop at the beginning of transition
+            } else if (pixel_position_adjust >= 111 && pixel_position_adjust <= 153) {
+                // Blend between day and night color between 111 and 153
+                progress = mSupport::mapfloat(pixel_position_adjust, 111.0f, 153.0f, 0.0f, 1.0f);
+                colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
+            }
 
+            #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+            Serial.print("Full Visual Output: ");
+            Serial.print("Pixel Position Adjusted: ");
+            Serial.println(pixel_position_adjust);
+            colour_out.debug_print("colour_out");
+            #endif
+        } else {
+            // Standard elevation-based calculation
+            if (fabs(elevation) > elevation_transition_degrees) {
+                // Outside transition zone: fixed day or night color
+                if (elevation >= 0) { 
+                    colour_out = colour1; // Daytime
+                } else { 
+                    colour_out = colour2; // Nighttime
+                }
+            } else {
+                // Inside transition zone: blend between daytime and nighttime colors
+                float progress = mSupport::mapfloat(
+                    elevation, 
+                    elevation_transition_degrees,    // Upper bound for transition
+                    -elevation_transition_degrees,   // Lower bound for transition
+                    0.0f,                            // Start of the blend
+                    1.0f                             // End of the blend
+                );
 
-      
-      #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-      float elevation = pCONT_solar->GetElevation();
-      #else
-      float elevation = 0;
-      #endif
+                colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
+            }
 
-      RgbcctColor colour_out = RgbcctColor();  
-
-      float elevation_transition_degrees = 10; // degrees above/below horizon to transition between warm/cold white
-
-
-      if(fabs(elevation) > elevation_transition_degrees) // get amplitude of elevation from horizon
-      {
-
-        if(elevation >= 0){ // daytime
-          colour_out = colour1;
-          // ALOG_INF(PSTR("++++++ elevation %d"), (int)(elevation*100) );
-        }else{ //nighttime
-          colour_out = colour2;
-          // ALOG_INF(PSTR("------ elevation %d"), (int)(elevation*100) );
+            #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+            Serial.println(elevation);
+            colour_out.debug_print("colour_out");
+            #endif
         }
-      }else{ // transitioning, dusk/dawn
-        float progress = mSupport::mapfloat(
-                                              elevation, 
-                                              elevation_transition_degrees,    -1*elevation_transition_degrees, 
-                                              0.0f,                            1.0f
-                                            );
 
-        colour_out = RgbcctColor::LinearBlend(colour1, colour2, progress);
-
-      }
-      Serial.println(elevation);
-      colour_out.debug_print("colour_out");
-
-      return colour_out;
-
-      // Serial.println(elevation);
-      // Serial.println(progress);
-      
+        // Return the final blended or fixed color
+        return colour_out;
     }
     break;
+
+
+
     case PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID:
     {
 
       float progress = mSupport::mapfloat(pCONT_time->RtcTime.second, 0,59, 0.0f, 1.0f);
+      
+      #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
       Serial.println(progress);
+      #endif
 
-      RgbcctColor colour1 = pSEGMENT_I(0).rgbcctcolors[0];
-      RgbcctColor colour2 = pSEGMENT_I(0).rgbcctcolors[1];      
+
+      RgbcctColor colour1 = pSEGMENT.rgbcctcolors[0];
+      RgbcctColor colour2 = pSEGMENT.rgbcctcolors[1];      
 
       return RgbcctColor::LinearBlend(colour1, colour2, progress);
+
+    }
+    case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID:
+    {
+
+      uint16_t pixel_length = pCONT_lAni->_virtualSegmentLength;
+
+      uint16_t rescaled_palette_index;
+      
+      // Check if we're in preview mode
+      if (flag_request_is_for_full_visual_output) {
+
+        // Preview mode: Direct mapping without zoom, using the full range of the palette
+        // Directly map the pixel position into the full palette range (0-255)
+        rescaled_palette_index = _pixel_position;
+
+        ALOG_INF(PSTR("preview %d"), rescaled_palette_index);
+
+      } else {
+
+        // Running mode: Apply zoom based on elevation    
+
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
+        float elevation = pCONT_solar->Get_Elevation();
+        float el_min = pCONT_solar->Get_Elevation_Min();
+        float el_max = pCONT_solar->Get_Elevation_Max();
+        // Serial.print(elevation); Serial.print("|"); Serial.print(el_min); Serial.print("|"); Serial.println(el_max);
+        #else
+        float elevation = 0;
+        float el_min = -30;
+        float el_max = 30;
+        #endif
+
+
+        // Step 1: Convert the pixel position into the 0-255 range
+        uint16_t pixel_position_adjust = (_pixel_position * 255) / (pixel_length - 1);
+
+        // Debug output for scaled pixel position
+        // ALOG_INF(PSTR("Pixel Position Adjusted: %d"), pixel_position_adjust);
+
+        // Calculate 40% of the elevation range for zoom
+        float zoom_range_perc_as_ratio = 0.1f;
+        float elevation_offset = zoom_range_perc_as_ratio * (el_max - el_min);
+
+        // Calculate the elevation window around the current value
+        float el_minus_40 = elevation - elevation_offset;
+        float el_plus_40 = elevation + elevation_offset;
+
+        // Ensure the elevation window is clamped within the valid elevation range
+        if (el_minus_40 < el_min) el_minus_40 = el_min;
+        if (el_plus_40 > el_max) el_plus_40 = el_max;
+
+        // Debug output for elevation and its range
+        // ALOG_INF(PSTR("Elevation: %d, el_min: %d, el_max: %d, el_minus_40: %d, el_plus_40: %d"),
+        //     (int)elevation, (int)el_min, (int)el_max, (int)el_minus_40, (int)el_plus_40);
+
+        // Step 3: Now, map this elevation range into the palette (0 to 255)
+        uint16_t palette_start = (uint16_t)mSupport::mapfloat(el_minus_40, el_min, el_max, 0.0f, 255.0f);
+        uint16_t palette_end = (uint16_t)mSupport::mapfloat(el_plus_40, el_min, el_max, 0.0f, 255.0f);
+
+        // Debug output for palette start/end
+        // ALOG_INF(PSTR("Palette Start: %d, Palette End: %d"), palette_start, palette_end);
+
+        // Make sure palette_start is less than palette_end
+        if (palette_start >= palette_end) {
+            palette_start = (palette_end > 0) ? palette_end - 1 : 0;
+        }
+
+        // Step 4: Map the pixel position into the zoomed palette range
+        rescaled_palette_index = (uint16_t)mSupport::mapfloat(
+            pixel_position_adjust, 0.0f, 255.0f, palette_start, palette_end
+        );
+
+        // Debug output for the rescaled palette index
+        // ALOG_INF(PSTR("Rescaled Palette Index: %d"), rescaled_palette_index);
+
+        // Ensure rescaled_palette_index is clamped between 0 and 255
+        rescaled_palette_index = constrain(rescaled_palette_index, 0, 255);
+      }
+
+      // Fetch the color using the rescaled palette index, regardless of mode
+      RgbcctColor loaded_colour = Get_Encoded_Palette_Colour(
+          palette_buffer,
+          rescaled_palette_index,    // Pass the manually scaled 0-255 value here
+          encoded_colour_width,
+          colours_in_palette,
+          encoding,
+          encoded_value,
+          false,                     // Set flag_map_scaling to false, as we are doing the scaling ourselves
+          flag_wrap_hard_edge,
+          flag_crgb_exact_colour,
+          flag_force_gradient
+      );
+
+      return loaded_colour;
 
     }
     break;
@@ -1570,7 +1844,7 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
             ii<(PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID-PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID);
             ii++
   ){    
-    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR ); 
+    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR ); 
     if((id=mSupport::GetCommandID16_P(c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR))>=0)
     {
       ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
@@ -1684,14 +1958,25 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     uint8_t ii=0;
             ii<(PALETTELIST_DYNAMIC__LENGTH__ID-PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID);
             ii++
-  ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC_PALETTES_NAMES_CTR ); 
-    if((id=mSupport::GetCommandID16_P(c, PM_DYNAMIC_PALETTES_NAMES_CTR))>=0)
-    {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;            
+  ){  
+    ALOG_DBM(PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC_PALETTES_NAMES_CTR); 
+
+    // Check if "c" starts with "Live "
+    const char* adjusted_c = c;
+    const char* live_prefix = "Live ";
+    size_t live_prefix_len = strlen(live_prefix);
+
+    if (strncmp(c, live_prefix, live_prefix_len) == 0) {
+        adjusted_c = c + live_prefix_len;  // Skip the "Live " prefix
+    }
+
+    // Call GetCommandID16_P with the adjusted string
+    if ((id = mSupport::GetCommandID16_P(adjusted_c, PM_DYNAMIC_PALETTES_NAMES_CTR)) >= 0) {
+        ALOG_INF(PSTR("MATCH \"%s\" %d %d"), adjusted_c, ii, id); 
+        return id + PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;            
     }
   }
+
 
 
 
@@ -1795,7 +2080,9 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
     ((palette_id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
   ){           
     uint16_t adjusted_id = palette_id - PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
-    mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_DYNAMIC_PALETTES_NAMES_CTR);
+    // Prefixing "Live" to these palettes
+    sprintf(buffer, "Live ");
+    mSupport::GetTextIndexed_P(&buffer[5], buflen-5, adjusted_id, PM_DYNAMIC_PALETTES_NAMES_CTR);
   }
 
 

@@ -357,12 +357,12 @@ class mHVAC :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
     
     std::vector<struct handler<mHVAC>*> mqtthandler_list;
-    struct handler<mHVAC> mqtthandler_settings_teleperiod;
+    struct handler<mHVAC> mqtthandler_settings;
     struct handler<mHVAC> mqtthandler_program_timers_ifchanged;
     struct handler<mHVAC> mqtthandler_program_timers_teleperiod;
     struct handler<mHVAC> mqtthandler_program_temps_ifchanged;

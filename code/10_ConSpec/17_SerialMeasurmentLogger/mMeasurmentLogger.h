@@ -176,11 +176,11 @@
   
 //     #ifdef USE_MODULE_NETWORK_MQTT
 //     void MQTTHandler_Init();
-//     void MQTTHandler_Set_RefreshAll();
-//     void MQTTHandler_Set_DefaultPeriodRate();
+//     void MQTTHandler_RefreshAll();
+//     void MQTTHandler_Rate();
     
 //     void MQTTHandler_Sender();
-//     struct handler<mSerialCalibrationMeasurmentLogger> mqtthandler_settings_teleperiod;
+//     struct handler<mSerialCalibrationMeasurmentLogger> mqtthandler_settings;
 //     struct handler<mSerialCalibrationMeasurmentLogger> mqtthandler_sensor_ifchanged;
 //     struct handler<mSerialCalibrationMeasurmentLogger> mqtthandler_sensor_teleperiod;
 //     struct handler<mSerialCalibrationMeasurmentLogger> mqtthandler_sdcard_superframe;
@@ -190,7 +190,7 @@
 //     //with extra handlers example
         
 //     struct handler<mSerialCalibrationMeasurmentLogger>* mqtthandler_list[4] = {
-//       &mqtthandler_settings_teleperiod,
+//       &mqtthandler_settings,
 //       &mqtthandler_sensor_ifchanged,
 //       &mqtthandler_sensor_teleperiod,
 //       &mqtthandler_sdcard_superframe

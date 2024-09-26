@@ -232,12 +232,12 @@ class mGPS_Serial :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mGPS_Serial>*> mqtthandler_list;
-    struct handler<mGPS_Serial> mqtthandler_settings_teleperiod;
+    struct handler<mGPS_Serial> mqtthandler_settings;
     struct handler<mGPS_Serial> mqtthandler_gpspacket_minimal_teleperiod;
     struct handler<mGPS_Serial> mqtthandler_gpspacket_required;
     struct handler<mGPS_Serial> mqtthandler_gpspacket_all;

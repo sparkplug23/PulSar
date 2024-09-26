@@ -55,7 +55,7 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
       break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
       break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -683,7 +683,7 @@ void mSensorsLSM303D::MQTTHandler_Init(){
 
   struct handler<mSensorsLSM303D>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -720,7 +720,7 @@ void mSensorsLSM303D::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mSensorsLSM303D::MQTTHandler_Set_RefreshAll()
+void mSensorsLSM303D::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -730,7 +730,7 @@ void mSensorsLSM303D::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mSensorsLSM303D::MQTTHandler_Set_DefaultPeriodRate()
+void mSensorsLSM303D::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -233,12 +233,12 @@ uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mWebCam> mqtthandler_settings_teleperiod;
+    struct handler<mWebCam> mqtthandler_settings;
     struct handler<mWebCam> mqtthandler_state_ifchanged;
     struct handler<mWebCam> mqtthandler_state_teleperiod;
     struct handler<mWebCam> mqtthandler_scheduled_teleperiod;
@@ -250,7 +250,7 @@ uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
     };
       
     struct handler<mWebCam>* mqtthandler_list[4] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_ifchanged,
       &mqtthandler_state_teleperiod,
       &mqtthandler_scheduled_teleperiod

@@ -2049,7 +2049,7 @@
         "BrightnessRGB": 100,
         "BrightnessCCT": 100,
         "CCT_TempPercentage":100,
-        "ColourType":4
+        "ColourType":5
       },
       "ColourPalette":"Christmas 24",
       "Effects": {
@@ -2061,7 +2061,7 @@
         "RateMs": 1000
       },
       "ColourOrder":"rgbcw",
-      "ColourType":4, 
+      "ColourType":5, 
       "BrightnessRGB": 1,
       "BrightnessCCT": 1
     }
@@ -2103,7 +2103,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 0,
           "CCT_TempPercentage":100,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -2126,7 +2126,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":95,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function": 0
@@ -2378,7 +2378,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 0,
           "CCT_TempPercentage":100,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -2401,7 +2401,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":95,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function": 0
@@ -2463,7 +2463,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 0,
           "CCT_TempPercentage":100,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -2486,7 +2486,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":95,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function": 0
@@ -2565,7 +2565,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":50,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -2682,7 +2682,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":50,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -2708,7 +2708,7 @@
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":50,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -4615,7 +4615,7 @@
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -4628,7 +4628,7 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      // #ifdef USE_MODULE_SENSORS_MOTION
+      // #ifdef USE_MODULE_SENSORS_PIR
       // "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
       // #endif
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
@@ -5336,7 +5336,7 @@
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -5353,7 +5353,7 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      // #ifdef USE_MODULE_SENSORS_MOTION
+      // #ifdef USE_MODULE_SENSORS_PIR
       // "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
       // #endif
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
@@ -5379,7 +5379,7 @@
 
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -5390,7 +5390,7 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      // #ifdef USE_MODULE_SENSORS_MOTION
+      // #ifdef USE_MODULE_SENSORS_PIR
       // "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
       // #endif
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
@@ -9148,7 +9148,7 @@
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_DOOR
 
   #define USE_MODULE_TEMPLATE
@@ -9164,7 +9164,7 @@
       #ifdef USE_MODULE_SENSORS_DOOR
       "\"D7\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
@@ -9283,7 +9283,7 @@
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
   // #define USE_MODULE_SENSORS_DOOR
 
   #define USE_MODULE_TEMPLATE
@@ -9367,7 +9367,7 @@
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
   // #define USE_MODULE_SENSORS_DOOR
 
   #define USE_MODULE_TEMPLATE
@@ -9454,7 +9454,7 @@
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
 
   #define USE_MODULE_CORE_RULES
 
@@ -9467,14 +9467,14 @@
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
       #ifdef ESP8266
-        #ifdef USE_MODULE_SENSORS_MOTION
+        #ifdef USE_MODULE_SENSORS_PIR
         "\"D6\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR "\","
         "\"D1\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR "\","
         "\"D2\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR "\","
         #endif
         "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
       #else
-        #ifdef USE_MODULE_SENSORS_MOTION
+        #ifdef USE_MODULE_SENSORS_PIR
         "\"23\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR "\","
         #endif
         "\"19\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
@@ -10441,7 +10441,7 @@
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
@@ -10557,7 +10557,7 @@
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
@@ -14265,7 +14265,7 @@
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
      
-  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_PIR
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
@@ -14280,7 +14280,7 @@
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
       #endif      
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
@@ -14788,7 +14788,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
      
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BUTTONS
 
   #define USE_MODULE_TEMPLATE
@@ -14797,7 +14797,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
       #endif      
       "\"D2\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR     "\","
@@ -15473,7 +15473,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":90,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -15497,7 +15497,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":50,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -15650,7 +15650,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":50,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0
@@ -15674,7 +15674,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
           "BrightnessRGB": 100,
           "BrightnessCCT": 100,
           "CCT_TempPercentage":50,
-          "ColourType":4
+          "ColourType":5
         },
         "Effects": {
           "Function":0

@@ -93,6 +93,7 @@ class mBME :
     void Pre_Init(void);
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void BootMessage();
     
     static constexpr const char* PM_MODULE_SENSORS_BME_CTR = D_MODULE_SENSORS_BME_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BME_CTR; }
@@ -333,12 +334,12 @@ class mBME :
 
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
     std::vector<struct handler<mBME>*> mqtthandler_list;
-    struct handler<mBME> mqtthandler_settings_teleperiod;
+    struct handler<mBME> mqtthandler_settings;
     struct handler<mBME> mqtthandler_sensor_ifchanged;
     struct handler<mBME> mqtthandler_sensor_teleperiod;    
     #endif // USE_MODULE_NETWORK_MQTT

@@ -568,7 +568,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break; 
     case TASK_MQTT_SENDER:  
       MQTTHandler_Sender();
@@ -809,7 +809,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
 
 void mUltraSonicSensor::MQTTHandler_Init(){
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -862,21 +862,21 @@ void mUltraSonicSensor::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mUltraSonicSensor::MQTTHandler_Set_RefreshAll(){
+void mUltraSonicSensor::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
 
-void mUltraSonicSensor::MQTTHandler_Set_DefaultPeriodRate(){
+void mUltraSonicSensor::MQTTHandler_Rate(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
 
-} //end "MQTTHandler_Set_DefaultPeriodRate"
+} //end "MQTTHandler_Rate"
 
 
 void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
@@ -889,7 +889,7 @@ void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   };
   
   struct handler<mUltraSonicSensor>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
+    &mqtthandler_settings,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod,
     &mqtthandler_averaged_ifchanged

@@ -182,52 +182,62 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
     ALOG_INF(PSTR("MqttDataHandler"));
     return;
   }
-
-  D_DATA_BUFFER_SOFT_CLEAR();
-
-  data_buffer.topic.length_used = strlen(mqtt_topic);
-  strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.length_used);
-  data_buffer.topic.ctr[data_buffer.topic.length_used] = '\0'; // null terminate
-
-  data_buffer.payload.length_used = data_len;
-  memcpy(data_buffer.payload.ctr, mqtt_data, sizeof(char)*data_buffer.payload.length_used);
-  data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
-
-  if(data_len){
-    data_buffer.flags.waiting = true;
-  }
-
-  if(data_buffer.flags.waiting)
+  
+  if(requestDataBufferLock(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
   {
-    data_buffer.flags.waiting = false;
-    // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.logging.serial_level) {
-      LoggingLevels level = LOG_LEVEL_DEBUG_MORE;
-      #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
-      level = LOG_LEVEL_TEST;
-      #endif
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(level, PSTR(D_LOG_MQTT "<-- Topic   [len:%d] %s"), data_buffer.topic.length_used,  data_buffer.topic.ctr);
-        AddLog(level, PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
-      #endif// ENABLE_LOG_LEVEL_INFO
-    // }
 
-    data_buffer.isserviced = 0;
+    D_DATA_BUFFER_SOFT_CLEAR();
 
-    #ifdef ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
-    uint16_t estimated_commands = JBI->estimateJsonKeyValuePairs(data_buffer.payload.ctr, data_buffer.payload.length_used);
-    // ALOG_INF(PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
-    ALOG_DBM(PSTR("estimated_commands %d"), estimated_commands);
-    #endif
+    data_buffer.topic.length_used = strlen(mqtt_topic);
+    strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.length_used);
+    data_buffer.topic.ctr[data_buffer.topic.length_used] = '\0'; // null terminate
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
-    
-    ALOG_DBM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
+    data_buffer.payload.length_used = data_len;
+    memcpy(data_buffer.payload.ctr, mqtt_data, data_buffer.payload.length_used);
+    data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
 
-    if(data_buffer.isserviced != estimated_commands)
-    {
-      ALOG_WRN(PSTR("Commands mismatch %d/%d"), data_buffer.isserviced, estimated_commands);
+    if(data_len){
+      data_buffer.flags.waiting = true;
     }
-    
+
+    if(data_buffer.flags.waiting)
+    {
+      data_buffer.flags.waiting = false;
+      // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.logging.serial_level) {
+        LoggingLevels level = LOG_LEVEL_DEBUG_MORE;
+        #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+        level = LOG_LEVEL_TEST;
+        #endif
+        #ifdef ENABLE_LOG_LEVEL_INFO
+          AddLog(level, PSTR(D_LOG_MQTT "<-- Topic   [len:%d] %s"), data_buffer.topic.length_used,  data_buffer.topic.ctr);
+          AddLog(level, PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+        #endif// ENABLE_LOG_LEVEL_INFO
+      // }
+
+      data_buffer.isserviced = 0;
+
+      #ifdef ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
+      uint16_t estimated_commands = JBI->estimateJsonKeyValuePairs(data_buffer.payload.ctr, data_buffer.payload.length_used);
+      // ALOG_INF(PSTR(D_LOG_MQTT "<-- Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+      ALOG_DBM(PSTR("estimated_commands %d"), estimated_commands);
+      #endif
+
+      pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+      
+      ALOG_DBM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
+
+      if(data_buffer.isserviced != estimated_commands)
+      {
+        uint8_t log_level = LOG_LEVEL_WARNING;
+        #ifdef USE_MODULE_DISPLAYS_NEXTION
+        log_level = LOG_LEVEL_DEBUG_MORE; // Don't report when nextion is active
+        #endif
+        AddLog(log_level, PSTR("Commands mismatch %d/%d"), data_buffer.isserviced, estimated_commands);
+      }
+      
+    }
+    releaseDataBufferLock();
+
   }
 
 }

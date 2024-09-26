@@ -24,10 +24,9 @@
 
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
 
-// DS18S20: Fixed 9-bit resolution (1/2°C). Measures temperature in 750 mS.
-// DS18B20: Resolution of 9 to 12 bits (12-1/16°C).
-const char kDs18x20Types[] PROGMEM = "DS18x20|DS18S20|DS1822|DS18B20|MAX31850";
-uint8_t ds18x20_chipids[] = { 0, DS18S20_CHIPID, DS1822_CHIPID, DS18B20_CHIPID, MAX31850_CHIPID };
+
+constexpr uint8_t mDB18x20_ESP32::ds18x20_chipids[]; // Definition outside the class is required for c++14 or older. c++17 can remove this with "inline"
+
 
 
 int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
@@ -43,9 +42,12 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_INIT:
       Ds18x20Init();
     break;
+    case TASK_BOOT_MESSAGE:
+      BootMessage();
+    break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -70,14 +72,14 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -88,27 +90,55 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
 void mDB18x20_ESP32::Pre_Init(void)
 {
   
-  settings.pins_used = 0;
+  module_state.mode = ModuleStatus::Initialising;
+
+  module_state.pins_used = 0;
   for (uint8_t pins = 0; pins < MAX_DSB_PINS; pins++) 
   {
     ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
     if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
     {
       ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
-      ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), settings.pins_used);
-      settings.pins_used++;
+      ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), module_state.pins_used);
+      module_state.pins_used++;
     }
   }
 
-  settings.fEnableSensor = true;
+  if(module_state.pins_used)
+  {
+    module_state.mode = ModuleStatus::Running;
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DB18 "Running"));
+  }
 
+}
+
+
+void mDB18x20_ESP32::BootMessage()
+{
+  #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+  char buffer[100] = {0};
+  if(module_state.devices)
+  {
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "#%d ", module_state.devices);  
+    char buffer2[50];
+    for(uint8_t sensor_id = 0; sensor_id<module_state.devices; sensor_id++)
+    {      
+      mSupport::appendToBuffer(buffer, sizeof(buffer), "%d:\"%s\", ", sensor_id, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer2, sizeof(buffer2)));    
+    }
+  }
+  else{
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
+  }
+  mSupport::removeTrailingComma(buffer);
+  ALOG_IMP(PSTR(D_LOG_DB18 "%s"), buffer);
+  #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 }
 
 
 void mDB18x20_ESP32::Ds18x20Init(void) 
 {
   Ds18x20Search();
-  ALOG_INF(PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), settings.sensor_count);
+  ALOG_INF(PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), module_state.devices);
 }
 
 
@@ -117,7 +147,7 @@ void mDB18x20_ESP32::Ds18x20Search(void)
   uint8_t sensor_count = 0;
   uint8_t sensor = 0;
 
-  for (uint8_t pins = 0; pins < settings.pins_used; pins++) 
+  for (uint8_t pins = 0; pins < module_state.pins_used; pins++) 
   {
     ds = ds18x20_gpios[pins];
     ds->reset_search();
@@ -173,15 +203,15 @@ void mDB18x20_ESP32::Ds18x20Search(void)
       }
     }
   }
-  settings.sensor_count = sensor_count;
-  ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"),settings.sensor_count);
+  module_state.devices = sensor_count;
+  ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"),module_state.devices);
 
 }
 
 
 void mDB18x20_ESP32::Ds18x20Convert(void) 
 {
-  for (uint32_t i = 0; i < settings.pins_used; i++) {
+  for (uint32_t i = 0; i < module_state.pins_used; i++) {
     ds = ds18x20_gpios[i];
     ds->reset();
     #ifdef W1_PARASITE_POWER
@@ -266,7 +296,7 @@ void mDB18x20_ESP32::EverySecond(void)
 {
 
   // Check for sensors if none was found
-  if (settings.sensor_count==0) 
+  if (module_state.devices==0) 
   {     
     Ds18x20Search();      // Check for changes in sensors number
     return; 
@@ -277,7 +307,7 @@ void mDB18x20_ESP32::EverySecond(void)
     Ds18x20Convert();     // Start Conversion, takes up to one second
   } else {
     float t;
-    for (uint32_t i = 0; i < settings.sensor_count; i++) {
+    for (uint32_t i = 0; i < module_state.devices; i++) {
       // 12mS per device
       if (Ds18x20Read(i, t)) {   // Read temperature
         sensor_vector[i].reading.ischanged = (t != sensor_vector[i].reading.val)?true:false;
@@ -302,7 +332,7 @@ void mDB18x20_ESP32::SetDeviceNameID_WithAddress(const char* device_name, uint8_
   ALOG_INF(PSTR(D_LOG_DSB "Searching to find device with address"));
 
   int8_t search_id = 0;
-  for (uint32_t i = 0; i < settings.sensor_count; i++) 
+  for (uint32_t i = 0; i < module_state.devices; i++) 
   {
     // AddLog_Array("Searching Saved", sensor_vector[i].address, 8);
     if(ArrayCompare(array_val,8, sensor_vector[i].address,8))
@@ -337,14 +367,14 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_app
 {
 
   JBI->Start();
-    JBI->Add_P("NumDevices", settings.sensor_count);
+    JBI->Add_P("NumDevices", module_state.devices);
 
     JBI->Array_Start("DeviceNameIndex");
-    for (uint8_t i = 0; i < settings.sensor_count; i++){ JBI->Add(sensor_vector[i].device_name_index); }
+    for (uint8_t i = 0; i < module_state.devices; i++){ JBI->Add(sensor_vector[i].device_name_index); }
     JBI->Array_End();
 
     JBI->Array_Start("AddressList");
-    for (uint8_t i = 0; i < settings.sensor_count; i++) 
+    for (uint8_t i = 0; i < module_state.devices; i++) 
     {
       JBI->Array_Start();
       for (uint8_t a = 0; a < 8; a++){ JBI->Add(sensor_vector[i].address[a]); }
@@ -366,7 +396,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
 
   JBI->Start();
 
-  for (uint8_t sensor_id = 0; sensor_id < settings.sensor_count; sensor_id++) 
+  for (uint8_t sensor_id = 0; sensor_id < module_state.devices; sensor_id++) 
   {
     flag_send_data = true; // default 
     if((json_level == JSON_LEVEL_IFCHANGED) && (!sensor_vector[sensor_id].reading.ischanged))
@@ -500,82 +530,53 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
 
   struct handler<mDB18x20_ESP32>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
   ptr = &mqtthandler_debug; // Each sensor should have its own debug channel for extra output only when needed
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = 60; 
+  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
   ptr->json_level = JSON_LEVEL_ALL;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Debug;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
 
 } //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mDB18x20_ESP32::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mDB18x20_ESP32::MQTTHandler_Set_DefaultPeriodRate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mDB18x20_ESP32::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

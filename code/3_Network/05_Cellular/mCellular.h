@@ -131,12 +131,12 @@ class mCellular :
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     std::vector<struct handler<mCellular>*> mqtthandler_list;
     
-    struct handler<mCellular> mqtthandler_settings_teleperiod;
+    struct handler<mCellular> mqtthandler_settings;
     struct handler<mCellular> mqtthandler_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum

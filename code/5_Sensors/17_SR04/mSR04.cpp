@@ -49,7 +49,7 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -89,7 +89,7 @@ void mSR04::Config_Filters()
   readings.average_DEMA.filter = new DoubleEMAFilter<float>(readings.average_DEMA.alpha1, readings.average_DEMA.alpha2);
   #endif // ENABLE_DEVFEATURE_SR04_SINGLE_EMA_FILTERING
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
 
 }
 

@@ -62,7 +62,9 @@ void mAnimatorLight::doSaveState()
     DEBUG_LINE_HERE;
     #endif
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
     serializePlaylist(sObj);
+    #endif
   
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
@@ -287,6 +289,10 @@ void mAnimatorLight::applyPresetWithFallback(uint8_t index, uint8_t callMode, ui
 }
 
 
+/**
+ * @brief Gets called every loop, returns if none are waiting
+ * 
+ */
 void mAnimatorLight::handlePresets()
 {
 
@@ -303,7 +309,7 @@ void mAnimatorLight::handlePresets()
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
   }
 
-  ALOG_INF(PSTR("presetToApply %d"), presetToApply);
+  ALOG_INF(PSTR("mAnimatorLight::handlePresets presetToApply %d"), presetToApply);
 
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
@@ -360,6 +366,36 @@ void mAnimatorLight::handlePresets()
   DEBUG_LINE_HERE;
   #endif
 
+  ALOG_HGL(PSTR("mAnimatorLight::handlePresets is now being read as fileDoc and not compatable with my command structure"));
+
+  delay(4000);
+
+  /**
+   * @brief Run through my command structure.
+   * 
+   */
+  if(requestDataBufferLock(GetModuleUniqueID()))
+  {
+    D_DATA_BUFFER_SOFT_CLEAR();
+
+    // Serialise from ArduinoJson into buffer for parser to load
+    serializeJson(*pCONT_mfile->fileDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
+
+    LoggingLevels level = LOG_LEVEL_INFO;
+    #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+    level = LOG_LEVEL_TEST;
+    #endif
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(level, PSTR(D_LOG_LIGHT "My parser payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+    #endif// ENABLE_LOG_LEVEL_INFO
+
+    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+    releaseDataBufferLock();
+
+  }
+
+
   //HTTP API commands
   const char* httpwin = fdo["win"];
   if (httpwin) { 
@@ -384,6 +420,8 @@ void mAnimatorLight::handlePresets()
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
     #endif
+
+    ALOG_INF(PSTR("Here might be what resets the segments without my commands"));
 
     if (!fdo["seg"].isNull() || !fdo["on"].isNull() || !fdo["bri"].isNull() || !fdo["nl"].isNull() || !fdo["ps"].isNull() || !fdo[F("playlist")].isNull()) changePreset = true;
     if (!(tmpMode == CALL_MODE_BUTTON_PRESET && fdo["ps"].is<const char *>() && strchr(fdo["ps"].as<const char *>(),'~') != strrchr(fdo["ps"].as<const char *>(),'~')))

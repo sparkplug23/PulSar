@@ -122,7 +122,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
     strcat(colstr, i<4 ? strcat(tmpcol, ",") : tmpcol);
   }
   strcat(colstr, "]");
-  ALOG_INF(PSTR("colstr OUT = %s"), colstr);
+  // ALOG_INF(PSTR("colstr OUT = %s"), colstr);
   root["col"] = serialized(colstr);
 
   root["rgbbri"] = seg.getBrightnessRGB();
@@ -168,7 +168,10 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
     if (pCONT_mfile->errorFlag) {root[F("error")] = pCONT_mfile->errorFlag; pCONT_mfile->errorFlag = ERR_NONE;} //prevent error message to persist on screen
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;    
+    
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
     root[F("pl")] = currentPlaylist;
+    #endif
 
     JsonObject nl = root.createNestedObject("nl");
     nl["on"] = nightlightActive;
@@ -502,7 +505,11 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     for (JsonObject elem : segs) {
       if (deserializeSegment(elem, it++, presetId) && !elem["stop"].isNull() && elem["stop"]==0) deleted++;
     }
-    if (getSegmentsNum() > 3 && deleted >= getSegmentsNum()/2U) purgeSegments(); // batch deleting more than half segments
+    if (getSegmentsNum() > 3 && deleted >= getSegmentsNum()/2U)
+    {
+      ALOG_WRN(PSTR("Deleting segments"));
+      purgeSegments(); // batch deleting more than half segments
+    }
   }
 
   // usermods.readFromJsonState(root);
@@ -539,12 +546,16 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
       // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
       presetCycCurr = ps;
+      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
       unloadPlaylist();          // applying a preset unloads the playlist
+      #endif
       applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
       return stateResponse;
     }
   }
 
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
   JsonObject playlist = root[F("playlist")];
   if (!playlist.isNull() && loadPlaylist(playlist, presetId)) {
     //do not notify here, because the first playlist entry will do
@@ -554,6 +565,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   }else{
     ALOG_DBM(PSTR("playlist.isNull()"));
   }
+  #endif
 
   if (root.containsKey(F("rmcpal")) && root[F("rmcpal")].as<bool>()) {
     if (customPalettes.size()) {
@@ -1375,12 +1387,12 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   // getVal(elem["tt"], &transition_slider_time);
   // Map scale into internal rate
   
-        #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+  #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
   if (elem["tt"].is<int>()) {
     seg.time_ms = elem["tt"];//map(transition_slider_time, 0,255, 0,10000);
     ALOG_INF(PSTR("seg.time_ms = %d"), seg.time_ms);
   }
-        #endif // ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+  #endif // ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
 
   // uint8_t transition_slider_rate = 0;
   // getVal(elem["tr"], &transition_slider_rate);
@@ -1522,13 +1534,14 @@ void mAnimatorLight::setStaticContentCacheHeaders(AsyncWebServerResponse *respon
 {
   char tmp[40];
   // https://medium.com/@codebyamir/a-web-developers-guide-to-browser-caching-cc41f3b73e7c
-  #ifndef WLED_DEBUG
+  #ifdef ENABLE_DEVFEATURE_WEBPAGE__FORCE_NO_CACHE_WITH_RELOAD_ON_WEB_REFRESH
+  response->addHeader(F("Cache-Control"),"no-store,max-age=0"); // prevent caching if debug build
+  #else
   // This header name is misleading, "no-cache" will not disable cache,
   // it just revalidates on every load using the "If-None-Match" header with the last ETag value
   response->addHeader(F("Cache-Control"),"no-cache");
-  #else
-  response->addHeader(F("Cache-Control"),"no-store,max-age=0"); // prevent caching if debug build
   #endif
+
   snprintf_P(tmp, sizeof(tmp), PSTR("%d-%02x"), PROJECT_VERSION, cacheInvalidate);
   response->addHeader(F("ETag"), tmp);
 }
@@ -2185,7 +2198,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
   int itemPerPage = 8;
   #endif
 
-  int palettesCount = mPaletteI->GetPaletteListLength();
+  bool flag_request_is_for_full_visual_output = true;
+
+  int palettesCount = mPaletteI->GetPaletteListLength(); //includes the dynamic!
   int customPalettes = pCONT_lAni->customPalettes.size();
 
   // ALOG_HGL(PSTR("palettesCount=%d"), palettesCount); 
@@ -2207,36 +2222,30 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
    * @brief 
    * Start by sending the current palette loaded
    */
-
   for (int palette_id = start; palette_id < end; palette_id++) 
   {
         
     bool palette_display_as_banded_gradient = false;
 
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("i=%d|p%d|m%d"),palette_id,page,maxPage);
+    ALOG_INF(PSTR("p=%d|s%d|e%d"),palette_id,start,end);
+    #endif
 
-    // DEBUG_LINE_HERE_TRACE;
     SEGMENT.LoadPalette(palette_id); // Assume segment 1 exists, and use it to load all palettes. Effect should reset to active palette in main loop. Or here, have it then flip back. Though this may cause flickering midanimation. Animation may also need paused on esp32.
-    
-    // DEBUG_LINE_HERE_TRACE;
+
     uint16_t colours_in_palette = GetNumberOfColoursInPalette(palette_id);
    
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
+    #endif
 
-    // DEBUG_LINE_HERE_TRACE;
     JsonArray curPalette_obj = palettes.createNestedArray(String(palette_id));
     JsonObject curPalette_s_obj = palettes_style.createNestedObject(String(palette_id));
 
-    // palettes.createNestedObject("")
-    // JsonObject obj2 = curPalette_obj.createNestedObject();
-    //   obj2["TEST"] = 1;//.add("test",1);
-
-    // DEBUG_LINE_HERE_TRACE;
-
     /**
      * @brief To reduce memory usage, the static gradients that are stored with less than 16 colours, shall be read directly
-     * 
-     */
+     **/
     if(
       (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && 
       (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
@@ -2257,7 +2266,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         count++;
       } while ( u.index != 255);
 
-      ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
+      #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+      ALOG_DBM(PSTR("palette_id%d,count=%d"),palette_id,count);
+      #endif
 
       u = *ent;
       int indexstart = 0;
@@ -2279,254 +2290,207 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     }
     else
     {
+    
+      palette_display_as_banded_gradient = false;
 
-        DEBUG_LINE_HERE_TRACE;
+      encoded_gradient = 0;
       
-        palette_display_as_banded_gradient = false;
-
-        encoded_gradient = 0;
-        
-        RgbcctColor color;
+      RgbcctColor color;
 
 
-        #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-        WDT_Reset();
+      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+      WDT_Reset();
+      #endif
+
+      /** first check if the palette is one that uses the colour picker*/       
+      // Handle RGBCCT color palettes
+      if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID && palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID) {
+          const char* color_id = nullptr;
+          switch (palette_id) {
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID: color_id = "c1"; break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_02__ID: color_id = "c2"; break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_03__ID: color_id = "c3"; break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_04__ID: color_id = "c4"; break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_05__ID: color_id = "c5"; break;
+          }
+          if (color_id) {
+              curPalette_obj.add(color_id);
+          }
+      } 
+      // Handle CRGBPalette16 paired palettes
+      else if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID && palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID) {
+          const char* color_ids[] = {"c1", "c2", "c3", "c4", "c5"};
+          int color_count = 0;
+
+          switch (palette_id) {
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID:
+                  color_count = 2;
+                  break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID:
+                  color_count = 3;
+                  break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID:
+                  color_count = 4;
+                  break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID:
+                  color_count = 5;
+                  break;
+              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID:
+                  color_count = 5;
+                  for (int repeat = 0; repeat < 3; ++repeat) { // Repeat active colors three times
+                      for (int i = 0; i < color_count; ++i) {
+                          curPalette_obj.add(color_ids[i]);
+                      }
+                  }
+                  curPalette_obj.add("c5"); // Add one more "c5" as required
+                  break;
+          }
+
+          // Add the color IDs according to the count
+          for (int i = 0; i < color_count; ++i) {
+              curPalette_obj.add(color_ids[i]);
+              if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) {
+                  curPalette_obj.add(color_ids[i]); // Add the same color twice for the "two" palette
+              }
+          }
+      } 
+      // Handle random hue palettes
+      else if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID) {
+          // Add "r" for random color-based palettes
+          for (int i = 0; i < 4; ++i) {
+              curPalette_obj.add("r");
+          }
+      }
+
+      /**
+       * @brief Palettes that the RGB data should be retrived
+       * 
+       */
+      else
+      {
+
+        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+        ALOG_DBM(PSTR(DEBUG_INSERT_PAGE_BREAK "palette_id=%d"),palette_id);
         #endif
 
-        /** first check if the palette is one that uses the colour picker*/       
-        if(
-          (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)
-        ){
+        // /**
+        //  * @brief If the live palettes, just for the webui to get a preview, the colours in palette are expanded to 16
+        //  **/
+        // if(
+        //   (palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
+        // ){  
+        //   flag_request_is_for_full_visual_output = true;
+        //   colours_in_palette = 16; // for preview
+        // }
 
-          switch(palette_id)
-          {
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID: curPalette_obj.add("c1"); break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_02__ID: curPalette_obj.add("c2"); break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_03__ID: curPalette_obj.add("c3"); break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_04__ID: curPalette_obj.add("c4"); break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_05__ID: curPalette_obj.add("c5"); break;
-          }
-         
-        }else        
-        if(
-          (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && 
-          (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID)
-        ){
 
-          switch(palette_id)
-          {
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID: 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c2"); 
-            break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID: 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c3"); 
-            break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID: 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c3"); 
-              curPalette_obj.add("c4"); 
-            break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID: 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c3"); 
-              curPalette_obj.add("c4"); 
-              curPalette_obj.add("c5"); 
-            break;
-            case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID: 
 
-            // change later, any not black/off will be repeated
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c3"); 
-              curPalette_obj.add("c4"); 
-              curPalette_obj.add("c5"); 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c3"); 
-              curPalette_obj.add("c4"); 
-              curPalette_obj.add("c5"); 
-              curPalette_obj.add("c1"); 
-              curPalette_obj.add("c2"); 
-              curPalette_obj.add("c3"); 
-              curPalette_obj.add("c4"); 
-              curPalette_obj.add("c5"); 
-              curPalette_obj.add("c5");               
-            break;
-          }
-        
-        }
-        else
-        if(
-          (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
-          (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-        ){
-
-          curPalette_obj.add("r"); //redrawPalPrev
-          curPalette_obj.add("r"); 
-          curPalette_obj.add("r"); 
-          curPalette_obj.add("r"); 
-         
-        }
-        /**
-         * @brief Palettes that the RGB data should be retrived
-         * 
-         */
-        else
+        for (int j = 0; j < colours_in_palette; j++) 
         {
-
-          ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "palette_id=%d"),palette_id);
-
-          for (int j = 0; j < colours_in_palette; j++) 
-          {
-            
-            JsonArray colors =  curPalette_obj.createNestedArray();
+            JsonArray colors = curPalette_obj.createNestedArray();
 
             DEBUG_LINE_HERE_TRACE;
+
             // Load temporary palette
             color = GetColourFromUnloadedPalette2(
-              palette_id,
-              j,
-              PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colours, without gradients
-              &encoded_gradient
+                palette_id,
+                j,
+                PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colors, without gradients
+                &encoded_gradient,
+                flag_request_is_for_full_visual_output
             );
-            Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient");Serial.println(encoded_gradient);
-            DEBUG_LINE_HERE_TRACE;
 
-            /**
-             * @brief 
-             * First colour needs to be applied twice, or at least have the index increased
-             **/
+            #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+            Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient: ");
+            Serial.println(encoded_gradient);
+            Serial.flush();
+            #endif
 
-            /**
-             * @brief 
-             * Gradient Exists: encoded > 0, then take it directly. If it exists but is 0, then the else will still work to catch it
-             * Gradient Empty:  encoded == 0, scale colour_count into range
-             */
-            if(encoded_gradient)
+            // Handle the encoded gradient
+            if (encoded_gradient > 0) 
             {
-              
-              // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-              // uint8_t range_width = 255/(colours_in_palette+1);
-              // colors.add(map(encoded_gradient, 0,255, range_width,255)); // Rescale encoded value into new scale
-              // #else
-              colors.add(encoded_gradient); // when palette has gradient index value, it should be used instead of this
-              // #endif
-
-              
-                        
-
-            }
-            else
+              // Gradient exists, use the encoded value directly
+              colors.add(encoded_gradient); 
+            } 
+            else 
             {
-              // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-              // uint8_t range_width = 255/(colours_in_palette+1);
-              // colors.add(map(j, 0,colours_in_palette, range_width,255)); // when palette has gradient index value, it should be used instead of this
-              // #else
-              // colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
-              // #endif
-
-              if(colours_in_palette>1)
+              // If encoded gradient is 0, map j to create a smooth gradient
+              if (colours_in_palette > 1) 
               {
-                #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-                // uint8_t range_width = 255/(colours_in_palette+1);
-                colors.add(map(j, 0,colours_in_palette-1, 0,255)); // when palette has gradient index value, it should be used instead of this
-                #else
-                colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
-                #endif
-              }else{
-                colors.add(1);
+                /*
+                Issue with Scaling Using colours_in_palette:
+                  If you scale directly with colours_in_palette (i.e., mapping 0 to 255 across the range 0 to colours_in_palette), you end up with the following issue:
+                    You divide the range 0-255 into colours_in_palette equal segments.
+                    However, the last color in the palette, when mapped, gets placed beyond 255 (or at the last position), meaning it effectively doesn’t get visualized properly, and the gradient appears to be missing the final color.
+                Correct Scaling Using colours_in_palette - 1:
+                  When you use colours_in_palette - 1:
+                    You ensure that the entire range of colors, including the first and last, is properly displayed.
+                    The colors will be evenly distributed from 0 to 255, and the last color will correctly align with 255.*/
+                colors.add(map(j, 0, colours_in_palette - 1, 0, 255));
+              } 
+              else 
+              {
+                // If there's only one color, just add a default index
+                colors.add(0);  // Add a base index for a single-color palette
               }
-                
-
             }
 
+            // Add the RGB color components
             colors.add(color.red);
             colors.add(color.green);
             colors.add(color.blue);
 
-            // #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-            ALOG_HGL(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"),j,encoded_gradient,color.red,color.green,color.blue);
-            // #endif
-
-          }
-
+            #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+            ALOG_DBM(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"), j, encoded_gradient, color.red, color.green, color.blue);
+            #endif
         }
 
-      } //end CSL colours
+
+      }
+
+    } //end CSL colours
 
             
-      if(
-        ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))
-      )
-      {  
-          
-        palette_display_as_banded_gradient = true; // Assume banded, unless gradient index is provided
+    if (palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID && palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID) {  
+      palette_display_as_banded_gradient = true; // Assume banded by default
 
-        uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
+      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
+      mPalette::PALETTE_DATA* ptr = &mPaletteI->static_palettes[adjusted_id];
 
-        mPalette::PALETTE_DATA *ptr = &mPaletteI->static_palettes[adjusted_id];
-
-        if(ptr->encoding.index_gradient)
-        {
-          palette_display_as_banded_gradient = false;
-        };
-
+      if (ptr->encoding.index_gradient) {
+          palette_display_as_banded_gradient = false; // Use gradient if index_gradient is set
       }
-
-
-
-      if(
-        (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID)
-      ){  
-        palette_display_as_banded_gradient = false;
-      }
-
-
-      if(
-        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))   ||
-        ((palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID)    && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID))
-      ){  
-        palette_display_as_banded_gradient = false;
-      }
-
-      
-      /***
-       * Custom palettes
-       * 
-      */
-      if(
-        ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
-      )
-      {  
-          
-        uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
-
-        palette_display_as_banded_gradient = true; // Assume banded, unless gradient index is provided
-
-        if(mPaletteI->custom_palettes[adjusted_id].encoding.index_gradient)
-        {
-          palette_display_as_banded_gradient = false;
-        };
-
-      }
-
-
-      if(palette_display_as_banded_gradient)
-      {
-        curPalette_s_obj["bg"] = "B";//"B";
-      }else{
-        curPalette_s_obj["bg"] = "L";
-      }
-          
     }
+
+    if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID && palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID) {  
+      palette_display_as_banded_gradient = false; // No gradient for segment palettes
+    }
+
+    if (
+      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID) ||
+      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID) ||
+      (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
+    ) {  
+        palette_display_as_banded_gradient = false; // These palettes use gradients
+    }
+
+    /***
+     * Custom palettes
+     */
+    if (palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED && palette_id < mPaletteI->GetPaletteListLength()) {
+      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
+      palette_display_as_banded_gradient = true; // Assume banded for custom palettes
+
+      if (mPaletteI->custom_palettes[adjusted_id].encoding.index_gradient) {
+          palette_display_as_banded_gradient = false; // Use gradient if index_gradient is set
+      }
+    }
+
+    // Set the background type based on gradient detection
+    curPalette_s_obj["bg"] = palette_display_as_banded_gradient ? "B" : "L";
+
+        
+  }
 
 }
 
@@ -2569,7 +2533,7 @@ void mAnimatorLight::serializeModeData(JsonArray fxdata)
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer)/sizeof(char)-1);
     lineBuffer[sizeof(lineBuffer)/sizeof(char)-1] = '\0'; // terminate string
 
-    ALOG_INF(PSTR("lineBuffer %d %s"), i, lineBuffer);
+    ALOG_DBM(PSTR("lineBuffer %d %s"), i, lineBuffer);
 
     if (lineBuffer[0] != 0) {
       char* dataPtr = strchr(lineBuffer,'@');
@@ -3031,6 +2995,78 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     if (!this->requestJSONBufferLock(14)) return;
 
+    
+      #ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLISTS_2024
+
+      // // Retrieve the buffer and its length
+      // // char* jsonBuffer = static_cast<uint8_t*>(request->_tempObject);
+      // // size_t jsonBufferLength = request->contentLength();
+      // char* jsonBuffer = (char*)request->_tempObject;
+      // ALOG_INF(PSTR("request->contentLength %d"),request->contentLength());
+      // for(int i=0;i<request->contentLength();i++){
+      //   Serial.printf("[%03d] ",i);
+      //   Serial.println((char)jsonBuffer[i]);
+      // }
+
+      uint16_t jsonBufferLength = request->contentLength();
+      if(jsonBufferLength < 2000)
+      {
+        /**
+         * @brief DEBUG LOAD
+         * 
+         */
+        // char buffer[jsonBufferLength+1];
+        // // Copy the contents of jsonBuffer into buffer
+        // memcpy(buffer, jsonBuffer, jsonBufferLength);
+        // // Null-terminate the buffer
+        // buffer[jsonBufferLength] = '\0';
+        
+        // ALOG_INF(PSTR("webui ui buffer \n\r%s\n\r"), buffer);
+        // JsonParser parser(buffer);
+        // JsonParserObject rootObj = parser.getRootObject();   
+        // if (!rootObj) 
+        // {
+        //   ALOG_ERR(PSTR("DeserializationError with \"%s\""), buffer);
+        //   return;
+        // } 
+        // else
+        // {
+        //   ALOG_INF(PSTR("Deserialization Success with \"%s\""), buffer);
+        // }
+
+        /**
+         * @brief LOAD TO PARSE
+         * 
+         */
+        if(requestDataBufferLock(GetModuleUniqueID()))
+        {
+          D_DATA_BUFFER_SOFT_CLEAR();
+
+          char* jsonBuffer = (char*)request->_tempObject;
+
+          data_buffer.payload.length_used = jsonBufferLength;
+          memcpy(data_buffer.payload.ctr, jsonBuffer, data_buffer.payload.length_used);
+          data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
+        
+          LoggingLevels level = LOG_LEVEL_INFO;
+          #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+          level = LOG_LEVEL_TEST;
+          #endif
+          #ifdef ENABLE_LOG_LEVEL_INFO
+          AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+          #endif// ENABLE_LOG_LEVEL_INFO
+
+          pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+          releaseDataBufferLock();
+
+        }
+
+
+      }
+
+      #endif
+
     DeserializationError error = deserializeJson(doc, (uint8_t*)(request->_tempObject));
     JsonObject root = doc.as<JsonObject>();
     if (error || root.isNull()) {
@@ -3043,24 +3079,24 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     const String& url = request->url();
     isConfig = url.indexOf("cfg") > -1; 
     if (!isConfig) {
-      /*
-      #ifdef WLED_DEBUG
-        DEBUG_PRINTLN(F("Serialized HTTP"));
-        serializeJson(root,Serial);
-        DEBUG_PRINTLN();
-      #endif
-      */
-      ALOG_DBG(PSTR("deserializeState"));
+      ALOG_INF(PSTR("deserializeState"));
+      serializeJson(root,Serial);
+      // DEBUG_PRINTLN();
+      // ALOG_DBG(PSTR("deserializeState"));
+        
       verboseResponse = this->deserializeState(root);
+      
     } else {
       // if (!correctPIN && strlen(settingsPIN)>0) {
       //   request->send(403, "application/json", F("{\"error\":1}")); // ERR_DENIED
       //   this->releaseJSONBufferLock();
       //   return;
       // }
-    ALOG_DBG(PSTR("deserializeConfig"));
+      ALOG_INF(PSTR("deserializeConfig"));
       verboseResponse = this->deserializeConfig(root); //use verboseResponse to determine whether cfg change should be saved immediately
     }
+
+
     this->releaseJSONBufferLock();
 
     if (verboseResponse) {
@@ -3117,6 +3153,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 #endif
 
   pCONT_web->server->on("/iro.js", HTTP_GET, [this](AsyncWebServerRequest *request){
+    Serial.println("/iro.js");
     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", iroJs, iroJs_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     this->setStaticContentCacheHeaders(response);
@@ -3124,6 +3161,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   });
 
   pCONT_web->server->on("/rangetouch.js", HTTP_GET, [this](AsyncWebServerRequest *request){
+    Serial.println("/rangetouch.js");
     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", rangetouchJs, rangetouchJs_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     this->setStaticContentCacheHeaders(response);

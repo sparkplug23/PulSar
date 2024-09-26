@@ -62,11 +62,11 @@ class mLDRBasic :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mLDRBasic> mqtthandler_settings_teleperiod;
+    struct handler<mLDRBasic> mqtthandler_settings;
     struct handler<mLDRBasic> mqtthandler_sensor_ifchanged;
     struct handler<mLDRBasic> mqtthandler_sensor_teleperiod;
 
@@ -74,7 +74,7 @@ class mLDRBasic :
     
 
     struct handler<mLDRBasic>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

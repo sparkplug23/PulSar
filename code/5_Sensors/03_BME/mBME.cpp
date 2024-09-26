@@ -36,6 +36,9 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_INIT:
       Init();
     break;
+    case TASK_BOOT_MESSAGE:
+      BootMessage();
+    break;
   }
 
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -58,7 +61,7 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
       break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
       break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -146,7 +149,7 @@ void mBME::Pre_Init(){
 
   if(bmp_count){
     module_state.mode = ModuleStatus::Running;
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BME "Running"));
   }
 
 }
@@ -155,6 +158,27 @@ void mBME::Pre_Init(){
 void mBME::Init(void)
 {
   
+}
+
+void mBME::BootMessage()
+{
+  #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+  char buffer[100];
+  if(bmp_count)
+  {
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "#%d ", bmp_count);  
+    char buffer2[50];
+    for(uint8_t sensor_id = 0; sensor_id<bmp_count; sensor_id++)
+    {      
+      mSupport::appendToBuffer(buffer, sizeof(buffer), "%s:\"%s\", ", bmp_sensors[sensor_id].bmp_name, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer2, sizeof(buffer2)));    
+    }
+  }
+  else{
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
+  }
+  mSupport::removeTrailingComma(buffer);
+  ALOG_IMP(PSTR(D_LOG_BME "%s"), buffer);
+  #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 }
 
 
@@ -467,6 +491,7 @@ bool mBME::Bme680Init(uint8_t bmp_idx) {
   return true;
 }
 
+
 void mBME::Bme680Read(uint8_t bmp_idx)
 {
   if (!bme_dev) { return; }
@@ -535,12 +560,11 @@ uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   char buffer[50];
   JBI->Start();
-    JBI->Add(D_JSON_SENSOR_COUNT, bmp_count);
-
+    JBI->Add_P(PM_JSON_SENSOR_COUNT, bmp_count);
 
     for(uint8_t sensor_id = 0; sensor_id<bmp_count; sensor_id++){
       JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
-        JBI->Add("Type",bmp_sensors[sensor_id].bmp_type);
+        JBI->Add_P(PM_JSON_TYPE,bmp_sensors[sensor_id].bmp_type);
       JBI->Object_End();
     }
 
@@ -561,14 +585,14 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       (json_level == JSON_LEVEL_SHORT)
     ){
       JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
-        JBI->Add(D_JSON_TEMPERATURE, bmp_sensors[sensor_id].temperature);
-        JBI->Add(D_JSON_HUMIDITY, bmp_sensors[sensor_id].humidity);
-        JBI->Add(D_JSON_PRESSURE, bmp_sensors[sensor_id].pressure);
-        JBI->Add(D_JSON_ALTITUDE, bmp_sensors[sensor_id].altitude);
-        JBI->Add(D_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
-        JBI->Add("UTC", bmp_sensors[sensor_id].utc_measured_timestamp);
+        JBI->Add_P(PM_JSON_TEMPERATURE, bmp_sensors[sensor_id].temperature);
+        JBI->Add_P(PM_JSON_HUMIDITY, bmp_sensors[sensor_id].humidity);
+        JBI->Add_P(PM_JSON_PRESSURE, bmp_sensors[sensor_id].pressure);
+        JBI->Add_P(PM_JSON_ALTITUDE, bmp_sensors[sensor_id].altitude);
+        JBI->Add_P(PM_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
+        JBI->Add_P(PM_UTC_TIME, bmp_sensors[sensor_id].utc_measured_timestamp);
         uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - bmp_sensors[sensor_id].utc_measured_timestamp;
-        JBI->Add("Age", sensor_elapsed_time);
+        JBI->Add_P(PM_JSON_AGE, sensor_elapsed_time);
       JBI->Object_End();
     }
   }
@@ -589,7 +613,7 @@ void mBME::MQTTHandler_Init()
 
   struct handler<mBME>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0; // as 0, with SendNow=false, will trigger to send for the first time
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
@@ -603,7 +627,7 @@ void mBME::MQTTHandler_Init()
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = false; // Handled by MQTTHandler_Set_DefaultPeriodRate
+  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
   ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
@@ -614,7 +638,7 @@ void mBME::MQTTHandler_Init()
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = false; // Handled by MQTTHandler_Set_DefaultPeriodRate
+  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
   ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
@@ -627,7 +651,7 @@ void mBME::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mBME::MQTTHandler_Set_RefreshAll()
+void mBME::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -637,7 +661,7 @@ void mBME::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mBME::MQTTHandler_Set_DefaultPeriodRate()
+void mBME::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

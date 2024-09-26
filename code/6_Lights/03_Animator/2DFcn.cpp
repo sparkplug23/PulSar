@@ -15,6 +15,7 @@
 // so matrix should disable regular ledmap processing
 void mAnimatorLight::setUpMatrix() {
 
+    ALOG_INF(PSTR("setUpMatrix"));
 
   // ALOG_INF("?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????setUpMatrix()");
 
@@ -29,7 +30,9 @@ void mAnimatorLight::setUpMatrix() {
     // calculate width dynamically because it will have gaps
     Segment::maxWidth = 1;
     Segment::maxHeight = 1;
-      ALOG_INF("panel.size() = %d", panel.size());
+
+    ALOG_INF("panel size %d", panel.size());
+
     for (size_t i = 0; i < panel.size(); i++) {
       Panel &p = panel[i];
       if (p.xOffset + p.width > Segment::maxWidth) {
@@ -40,7 +43,8 @@ void mAnimatorLight::setUpMatrix() {
       }
     }
 
-    ALOG_INF(PSTR("Segment::maxHeight %d\n\r"), Segment::maxHeight);
+    ALOG_INF(PSTR("maxWidth  %d\n\r"), Segment::maxWidth);
+    ALOG_INF(PSTR("maxHeight %d\n\r"), Segment::maxHeight);
 
     // safety check
     if (Segment::maxWidth * Segment::maxHeight > MAX_LEDS || Segment::maxWidth <= 1 || Segment::maxHeight <= 1) {
@@ -56,7 +60,8 @@ void mAnimatorLight::setUpMatrix() {
 
     customMappingTable = new uint16_t[Segment::maxWidth * Segment::maxHeight];
 
-    if (customMappingTable != nullptr) {
+    if (customMappingTable != nullptr) 
+    {
       customMappingSize = Segment::maxWidth * Segment::maxHeight;
 
       // fill with empty in case we don't fill the entire matrix
@@ -116,6 +121,7 @@ void mAnimatorLight::setUpMatrix() {
           }
         }
       }
+
       DEBUG_LINE_HERE;
 
       // delete gap array as we no longer need it
@@ -132,7 +138,9 @@ void mAnimatorLight::setUpMatrix() {
       #endif
 
       DEBUG_LINE_HERE;
-    } else { // memory allocation error
+    } 
+    else  // memory allocation error
+    {
       DEBUG_PRINTLN(F("Ledmap alloc error."));
       isMatrix = false;
       panels = 0;
@@ -141,12 +149,13 @@ void mAnimatorLight::setUpMatrix() {
       Segment::maxHeight = 1;
       resetSegments2();
     }
-    ALOG_INF(PSTR("Segment::maxHeight %d\n\r"), Segment::maxHeight);
-    ALOG_INF(PSTR("Segment::maxWidth %d\n\r"), Segment::maxWidth);
-      DEBUG_LINE_HERE;
+
+    DEBUG_LINE_HERE;
+    
   }
-// #else
-//   isMatrix = false; // no matter what config says
+
+  ALOG_INF(PSTR("setUpMatrix Complete")); Serial.flush();
+  
 }
 #endif
 
@@ -184,15 +193,52 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   return;  // if pixel would fall out of virtual segment just exit
 }
 
+
+
   // DEBUG_LINE_HERE;
-  uint8_t _bri_t = currentBri();
-  if (_bri_t < 255) {
-    byte r = scale8(R(col), _bri_t);
-    byte g = scale8(G(col), _bri_t);
-    byte b = scale8(B(col), _bri_t);
-    byte w = scale8(W(col), _bri_t);
-    col = RGBW32(r, g, b, w);
-  }
+  /**
+   * @brief WLED brightness method replacing with mine, assumed must be applied
+   * 
+   */
+  // uint8_t _bri_t = currentBri();
+  // if (_bri_t < 255) {
+  //   byte r = scale8(R(col), _bri_t);
+  //   byte g = scale8(G(col), _bri_t);
+  //   byte b = scale8(B(col), _bri_t);
+  //   byte w = scale8(W(col), _bri_t);
+  //   col = RGBW32(r, g, b, w);
+  // }
+
+
+    RgbcctColor c = RgbcctColor(R(col), G(col), B(col), W(col), W(col));
+
+    /**
+     * @brief Apply "GLOBAL" brightness to the colour
+     * 
+     */
+    uint8_t bri_master = pCONT_iLight->getBriRGB_Global();
+    uint8_t bri_segment = getBrightnessRGB();
+
+    /**
+     * @brief Apply "SEGMENT" _brightness_rgb to the colour ALSO (rescale global brightness value, this is similar to WLED opacity)
+     * 
+     */
+    if(bri_segment!=255)
+    {
+      bri_master = scale8(bri_master, bri_segment); // adjust master by segment
+    }
+
+    // Apply global bri_master
+    c.R  = scale8(c.R,  bri_master);
+    c.G  = scale8(c.G,  bri_master);
+    c.B  = scale8(c.B,  bri_master);
+    c.W1 = scale8(c.W1, bri_master);
+    c.W2 = scale8(c.W2, bri_master);
+
+  
+  // This function bypassing the 1D to 2D set function that applies brightness, so we need to apply here before calling the busmanager
+
+    col = c.getU32();
 
   // DEBUG_LINE_HERE;
   if (reverse  ) x = virtualWidth()  - x - 1;
@@ -237,18 +283,19 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
       ALOG_INF(PSTR("--------setPixelColorXY %d, %d, %d, %d, %d -- w%d h%d"), start + xX, startY + yY, R(tmpCol), G(tmpCol), B(tmpCol), width(), height());
       #endif
 
+      // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
       pCONT_lAni->setPixelColorXY(start + xX, startY + yY, tmpCol);
 
       if (mirror) { //set the corresponding horizontally mirrored pixel
-        if (transpose) pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol);
-        else           pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);
+        if (transpose) pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol); // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
+        else           pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);// Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
       }
       if (mirror_y) { //set the corresponding vertically mirrored pixel
-        if (transpose) pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);
-        else           pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol);
+        if (transpose) pCONT_lAni->setPixelColorXY(start + width() - xX - 1, startY + yY, tmpCol);// Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
+        else           pCONT_lAni->setPixelColorXY(start + xX, startY + height() - yY - 1, tmpCol);// Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
       }
       if (mirror_y && mirror) { //set the corresponding vertically AND horizontally mirrored pixel
-        pCONT_lAni->setPixelColorXY(width() - xX - 1, height() - yY - 1, tmpCol);
+        pCONT_lAni->setPixelColorXY(width() - xX - 1, height() - yY - 1, tmpCol);// Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
       }
       
   // DEBUG_LINE_HERE;
@@ -316,8 +363,7 @@ DEBUG_LINE_HERE;
 // returns RGBW values of pixel
 uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y) 
 {
-  // ALOG_ERR(PSTR("getPixelColorXY: x=%d, y=%d"), x, y);
-
+  
   // Serial.println(__LINE__);
   // DEBUG_LINE_HERE;
   if (!isActive()) return 0; // not active
@@ -330,7 +376,8 @@ uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y)
     return 0;  // if pixel would fall out of virtual segment just exit
 
   }
-  // DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE3
+
   if (reverse  ) x = virtualWidth()  - x - 1;
   // DEBUG_LINE_HERE;
   if (reverse_y) y = virtualHeight() - y - 1;
@@ -342,7 +389,8 @@ uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y)
   y *= groupLength(); // expand to physical pixels
   // DEBUG_LINE_HERE;
   if (x >= width() || y >= height()) return 0;
-  // DEBUG_LINE_HERE;
+  
+  DEBUG_LINE_HERE3
   // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
   return pCONT_lAni->getPixelColorXY(start + x, startY + y);
   // DEBUG_LINE_HERE;
@@ -643,6 +691,118 @@ void mAnimatorLight::Segment::drawCharacter(unsigned char chr, int16_t x, int16_
     }
   }
 }
+
+/**
+ * @brief Need to move the segment.custom1 etc out of here, and into the effect itself so this function can be more generic. 
+ * 
+ * @param chr 
+ * @param x 
+ * @param y 
+ * @param w 
+ * @param h 
+ * @param rotate 
+ * @param solidPerChar 
+ * @param horizontalGradient 
+ * @param backgroundGradientHorizontal 
+ */
+void mAnimatorLight::Segment::drawCharacter_UsingGradientPalletes(  
+    unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h,   
+    int8_t rotate, bool solidPerChar, bool horizontalGradient, bool backgroundGradientHorizontal) {
+  
+  if (!isActive()) return; // not active
+  if (chr < 32 || chr > 126) return; // only ASCII 32-126 supported
+  chr -= 32; // align with font table entries
+  const uint16_t cols = virtualWidth();
+  const uint16_t rows = virtualHeight();
+  const int font = w * h;
+
+  // Fetch the background gradient color from the unloaded palette using params_user[0]
+  uint16_t backgroundPaletteId = custom1; // Palette ID for background
+  uint32_t backgroundColor;  // Will be fetched later based on pixel position
+
+  // Iterate over character rows (height)
+  for (int i = 0; i < h; i++) { 
+    uint8_t bits = 0;
+    switch (font) {
+      case 24: bits = pgm_read_byte_near(&console_font_4x6[(chr * h) + i]); break;
+      case 40: bits = pgm_read_byte_near(&console_font_5x8[(chr * h) + i]); break;
+      case 48: bits = pgm_read_byte_near(&console_font_6x8[(chr * h) + i]); break;
+      case 63: bits = pgm_read_byte_near(&console_font_7x9[(chr * h) + i]); break;
+      case 60: bits = pgm_read_byte_near(&console_font_5x12[(chr * h) + i]); break;
+      default: return;
+    }
+
+    for (int j = 0; j < w; j++) { // character width
+      int x0, y0;
+      switch (rotate) {
+        case -1: x0 = x + (h - 1) - i; y0 = y + (w - 1) - j; break; // -90 deg
+        case -2:
+        case  2: x0 = x + j;         y0 = y + (h - 1) - i; break; // 180 deg
+        case  1: x0 = x + i;         y0 = y + j;         break; // +90 deg
+        default: x0 = x + (w - 1) - j; y0 = y + i;         break; // no rotation
+      }
+
+      // Skip if drawing off-screen
+      if (x0 < 0 || x0 >= cols || y0 < 0 || y0 >= rows) continue;
+
+      // Use unloaded palette for background color based on pixel position (0-255)
+      uint16_t _pixel_position;
+      if (backgroundGradientHorizontal) {
+        // Explicitly handle the last pixel (edge case)
+        if (x0 == cols - 1) {
+          _pixel_position = 255;
+        } else {
+          _pixel_position = (x0 * 255) / (cols - 1);  // Horizontal gradient
+        }
+      } else {
+        // Explicitly handle the last pixel (edge case)
+        if (y0 == rows - 1) {
+          _pixel_position = 255;
+        } else {
+          _pixel_position = (y0 * 255) / (rows - 1);  // Vertical gradient
+        }
+      }
+
+      RgbcctColor bgCol  = pCONT_lAni->GetColourFromUnloadedPalette2(
+        backgroundPaletteId, _pixel_position,
+        PALETTE_INDEX_SPANS_SEGLEN_ON,  // Scale across the segment length
+        PALETTE_WRAP_ON,
+        PALETTE_DISCRETE_OFF
+      ); // Get the background color from the palette
+
+      bgCol.setBrightness( speed );
+
+      backgroundColor = bgCol.WithBrightness().getU32();
+
+      // Calculate the character color based on the gradient logic
+      uint32_t charColor;
+      if (solidPerChar) {
+        // Use a solid color for the entire character
+        charColor = GetPaletteColour(chr, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF).getU32();
+      } else {
+        // Apply a gradient either horizontally or vertically
+        if (horizontalGradient) {
+          charColor = GetPaletteColour(constrain((x0 * 255 / cols), 0, 255), PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF).getU32();
+        } else {
+          charColor = GetPaletteColour(constrain((y0 * 255 / rows), 0, 255), PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF).getU32();
+        }
+      }
+
+      // Set either character or background color based on the font bit
+      if (((bits >> (j + (8 - w))) & 0x01)) { // bit set, draw character
+        setPixelColorXY(x0, y0, charColor);
+      } else { // no bit set, draw background
+        setPixelColorXY(x0, y0, backgroundColor);
+      }
+    }
+  }
+}
+
+
+
+
+
+
 
 #define WU_WEIGHT(a,b) ((uint8_t) (((a)*(b)+(a)+(b))>>8))
 void mAnimatorLight::Segment::wu_pixel(uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu

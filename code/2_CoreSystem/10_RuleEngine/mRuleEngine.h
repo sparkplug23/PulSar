@@ -278,16 +278,16 @@ uint8_t rule_count2 = 0;
 
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mRuleEngine> mqtthandler_settings_teleperiod;
+    struct handler<mRuleEngine> mqtthandler_settings;
     struct handler<mRuleEngine> mqtthandler_state_ifchanged;
     
     struct handler<mRuleEngine>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_ifchanged
     };
   #endif //  USE_MODULE_NETWORK_MQTT

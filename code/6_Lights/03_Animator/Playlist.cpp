@@ -125,6 +125,7 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
 void mAnimatorLight::handlePlaylist() 
 {
 
+
   static unsigned long presetCycledTime = 0;
 
   // if fileDoc is not null JSON buffer is in use so just quit
@@ -135,11 +136,21 @@ void mAnimatorLight::handlePlaylist()
   }
 
 
+  if(mTime::TimeReached(&tSaved_playlist_debug, 1000)){
+    ALOG_INF(PSTR("tSaved_playlist_debug currentPlaylist %d %d"), currentPlaylist, playlistEntryDur);
+
+
+    ALOG_INF(PSTR("tSaved_playlist_debug presetCycledTime %d %d %d"), millis() , presetCycledTime, (100*playlistEntryDur) );
+  }
+
+
   if (millis() - presetCycledTime > (100*playlistEntryDur)) 
   {
 
+    ALOG_INF(PSTR("tSaved_playlist_debug Running"));//, currentPlaylist, playlistEntryDur);
+
     presetCycledTime = millis();
-    if (pCONT_iLight->getBri_Global() == 0 || nightlightActive) return;
+    // if (pCONT_iLight->getBri_Global() == 0 || nightlightActive) return;
 
     ++playlistIndex %= playlistLen; // -1 at 1st run (limit to playlistLen)
 

@@ -128,13 +128,13 @@ uint8_t Change_Detected(uint8_t sensor_id);
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
     struct handler<mPulseCounter>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mPulseCounter> mqtthandler_settings_teleperiod;
+    struct handler<mPulseCounter> mqtthandler_settings;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mPulseCounter> mqtthandler_sensor_ifchanged;
     struct handler<mPulseCounter> mqtthandler_sensor_teleperiod;

@@ -77,20 +77,20 @@ class mPWM :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     struct handler<mPWM>* ptr;
     void MQTTHandler_Sender();
 
-    struct handler<mPWM> mqtthandler_settings_teleperiod;
+    struct handler<mPWM> mqtthandler_settings;
     struct handler<mPWM> mqtthandler_state_ifchanged;
     struct handler<mPWM> mqtthandler_state_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     
     struct handler<mPWM>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_ifchanged,
       &mqtthandler_state_teleperiod
     };

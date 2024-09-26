@@ -62,13 +62,13 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
     //   MQTTHandler_Init();
     // break;
     // case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-    //   MQTTHandler_Set_DefaultPeriodRate();
+    //   MQTTHandler_Rate();
     // break;
     // case TASK_MQTT_SENDER:
     //   MQTTHandler_Sender();
     // break;
     // case TASK_MQTT_CONNECTED:
-    //   MQTTHandler_Set_RefreshAll();
+    //   MQTTHandler_RefreshAll();
     // break;
     // #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -1359,7 +1359,7 @@ void mIRRemote::parse_JSONCommand(JsonParserObject obj)
 		if(jtok.isNum())
 		{
 			// mySwitch->setReceiveProtocolMask(jtok.getUInt());
-			mqtthandler_settings_teleperiod.flags.SendNow = true;
+			mqtthandler_settings.flags.SendNow = true;
 		}
 
 		// JBI->Start();
@@ -1478,7 +1478,7 @@ void mIRRemote::MQTTHandler_Init()
 
   struct handler<mIRRemote>* ptr;
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
@@ -1504,7 +1504,7 @@ void mIRRemote::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mIRRemote::MQTTHandler_Set_RefreshAll()
+void mIRRemote::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -1514,7 +1514,7 @@ void mIRRemote::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mIRRemote::MQTTHandler_Set_DefaultPeriodRate()
+void mIRRemote::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

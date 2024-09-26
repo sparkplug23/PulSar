@@ -35,7 +35,7 @@ void mHVAC::MQTTHandler_Init(){
 
   //create "sendnow" (using handler) with passing construct level?
 
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
@@ -183,7 +183,7 @@ void mHVAC::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mHVAC::MQTTHandler_Set_RefreshAll()
+void mHVAC::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -193,7 +193,7 @@ void mHVAC::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mHVAC::MQTTHandler_Set_DefaultPeriodRate()
+void mHVAC::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

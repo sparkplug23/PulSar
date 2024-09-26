@@ -43,6 +43,7 @@ class mPalette
     int16_t Get_Static_PaletteIDbyName(const char* c);
     const char* GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
+
     /************************************************************************************************************************************
      * ************************************************************************************************************************************
      * @brief  Static palettes read from inside this class
@@ -275,6 +276,7 @@ class mPalette
       PALETTELIST_STATIC_FLOWER_SWEATPEA__ID,
       PALETTELIST_STATIC_PINK_PURPLE__ID,
       PALETTELIST_STATIC_PURPLE_PINK__ID,
+      PALETTELIST_STATIC__SOLAR_SKY__ID,
       PALETTELIST_STATIC_LENGTH__ID 
     };
 
@@ -291,6 +293,15 @@ class mPalette
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID,
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID,
       PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID, //palette will change from rgbcct01 to rgbcct02 over 60 seconds
+
+
+      // Palette that reflects how the sky looks at about 10 above the horizon throughout the day.
+      //   - day time, cyan blue
+      //   - towards sunset, sunset colours
+      //   - dusk, sunset to depp blue
+      //   - optional flag will show deepest blue or off at night
+      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID,
+
       PALETTELIST_DYNAMIC__LENGTH__ID
     };
 
@@ -383,6 +394,8 @@ class mPalette
 
     uint8_t GetColoursInCRGB16Palette(uint16_t palette_id);
 
+    PALETTE_ENCODING_DATA findPaletteEncoding(uint16_t id);
+
 
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
@@ -395,7 +408,8 @@ class mPalette
       uint8_t* encoded_index = nullptr,
       uint8_t     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       uint8_t     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t     flag_crgb_exact_colour = false
+      uint8_t     flag_crgb_exact_colour = false,
+      bool flag_request_is_for_full_visual_output = false
     );
   
 
@@ -420,7 +434,8 @@ class mPalette
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
       bool     flag_crgb_exact_colour = false,
-      bool     flag_forced_gradient = false
+      bool     flag_forced_gradient = false,
+      bool flag_request_is_for_full_visual_output = false // eg. webui, show what the whole range would be
     );
 
 

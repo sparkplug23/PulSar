@@ -95,19 +95,19 @@ class mRCSwitch :
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mRCSwitch> mqtthandler_settings_teleperiod;
+    struct handler<mRCSwitch> mqtthandler_settings;
     struct handler<mRCSwitch> mqtthandler_state_ifchanged;
 
     //No extra handlers: ie settings and "state" only
     
       
     struct handler<mRCSwitch>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_state_ifchanged
     };
 

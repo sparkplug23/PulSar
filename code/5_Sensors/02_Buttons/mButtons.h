@@ -155,11 +155,11 @@ bool IsButtonActive(uint8_t id);
   
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mButtons> mqtthandler_settings_teleperiod;
+    struct handler<mButtons> mqtthandler_settings;
     struct handler<mButtons> mqtthandler_sensor_ifchanged;
     struct handler<mButtons> mqtthandler_sensor_teleperiod;
 
@@ -167,7 +167,7 @@ bool IsButtonActive(uint8_t id);
     
     
     struct handler<mButtons>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

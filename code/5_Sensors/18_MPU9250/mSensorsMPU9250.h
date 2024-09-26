@@ -154,16 +154,16 @@ ICM20948_WE* myIMU;// = ICM20948_WE(ICM20948_ADDR);
     #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mSensorsMPU9250> mqtthandler_settings_teleperiod;
+    struct handler<mSensorsMPU9250> mqtthandler_settings;
     struct handler<mSensorsMPU9250> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsMPU9250> mqtthandler_sensor_teleperiod;
  
     struct handler<mSensorsMPU9250>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

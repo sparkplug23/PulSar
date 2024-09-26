@@ -69,13 +69,13 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Set_DefaultPeriodRate();
+      MQTTHandler_Rate();
     break;
     case TASK_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
     case TASK_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll();
+      MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
@@ -212,6 +212,20 @@ void mAnimatorLight::EveryLoop()
     
     if (aligned) makeAutoSegments();
     else fixInvalidSegments();
+
+    /**
+     * @brief Added by me, during 1D strips (no matrix) te customTable will be loaded from another file
+     * 
+     */
+    ALOG_HGL(PSTR("Loading 1D LED map."));
+    bool flag_deserializeMap = deserializeMap(0);
+    ALOG_HGL(PSTR("Loading 1D LED map. %d"), flag_deserializeMap);
+
+
+
+
+
+
     
     doSerializeConfig = true;
     // serializeConfig(); // in WLED This saved everything to json memory
@@ -268,7 +282,10 @@ void mAnimatorLight::EveryLoop()
 			// var topLeftX = px*ppL + space; //left margin
 			// var topLeftY = py*ppL + space; //top margin
 
-
+        /**
+         * @brief These are temporary define configs until the proper json commands are inserted for setting up matrix panels
+         * 
+         */
         #if defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32by8_PANEL)
 
 
@@ -297,6 +314,22 @@ void mAnimatorLight::EveryLoop()
         p.height = 8;//,      pnl["h"]);
         p.width = 32;//,       pnl["w"]);
         panel.push_back(p);
+
+
+        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__HORIZONTAL)
+
+
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 8;//,      pnl["h"]);
+        p.width = 32;//,       pnl["w"]);
+        panel.push_back(p);
+
 
 
         #else
@@ -338,8 +371,9 @@ void mAnimatorLight::EveryLoop()
   // }
 
   if (loadLedmap >= 0) {
-    ALOG_INF(PSTR("Loading LED map."));
-    if (!deserializeMap(loadLedmap) && isMatrix && loadLedmap == 0)
+    ALOG_HGL(PSTR("Loading LED map."));
+    bool flag_deserializeMap = deserializeMap(loadLedmap);
+    if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
     {
       ALOG_INF(PSTR("Matrix setup"));
       setUpMatrix();
@@ -409,8 +443,8 @@ void mAnimatorLight::EveryLoop()
 
   } // END realtimeMode
 
+  DEBUG_LINE_HERE
 
-  
   if(!realtimeMode)
   {
     
@@ -516,7 +550,7 @@ void mAnimatorLight::Init(void)
   customMappingTable = nullptr;
   customMappingSize = 0;
   _lastShow = 0;
-  _segment_index_primary = 0;
+  segment_current_index = 0;
   _mainSegment = 0;
 
   effects.function.reserve(effects.count);     // allocate memory to prevent initial fragmentation (does not increase size())
@@ -681,7 +715,7 @@ mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPaletteLoaded* _palett
   uint8_t segment_index = 0;
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
-  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
+  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->segment_current_index);
 
   /**
    * @brief If none was passed, then assume its the default for that segment and load its container
@@ -844,9 +878,9 @@ mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPaletteLoaded* _palett
   // DEBUG_LINE_HERE
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
     
-    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_HGL(PSTR("LOADING PALETTELIST_DYNAMIC palette_id_adj %d %d %d"),palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID); 
-    #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
+    #endif
     
     mPalette::PALETTE_DATA *ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
     _palette_container->pData = ptr->data;
@@ -1329,7 +1363,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
   bool update_output = false;
 
   _isServicing = true;
-  _segment_index_primary = 0;
+  segment_current_index = 0;
   
   for (uint16_t seg_i = 0; seg_i < segments.size(); seg_i++) // Not as clean as "for (segment_new &seg : segments)", but does not require a copy/destruction of seg on each loop
   {
@@ -1339,8 +1373,8 @@ void mAnimatorLight::SubTask_Segments_Effects()
     // SEGMENT_I(seg_i).effect_id = EFFECTS_FUNCTION__MATRIX__2D_DNA__ID;
 
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-      // ALOG_DBG(PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,SEGMENT_I(seg_i).isActive());
-      // ALOG_DBG(PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].start,_segments[_segment_index_primary].stop);
+      // ALOG_DBG(PSTR("_segments[%d].isActive()=%d"),segment_current_index,SEGMENT_I(seg_i).isActive());
+      // ALOG_DBG(PSTR("_segments[%d].istart/stop=%d %d"),segment_current_index,_segments[segment_current_index].start,_segments[segment_current_index].stop);
     // #endif
 
     // reset the segment runtime data if needed, called before isActive to ensure deleted segment's buffers are cleared
@@ -1361,7 +1395,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       if (SEGMENT_I(seg_i).grouping == 0) SEGMENT_I(seg_i).grouping = 1; //sanity check == move this into wherever it gets used (ie struct functions)
     
-      // ALOG_INF(PSTR("\n\r\n\rseg=%d,rate=%d,%d"),_segment_index_primary, SEGMENT_I(seg_i).cycle_time__rate_ms, SEGMENT_I(seg_i).flags.fForceUpdate);
+      // ALOG_INF(PSTR("\n\r\n\rseg=%d,rate=%d,%d"),segment_current_index, SEGMENT_I(seg_i).cycle_time__rate_ms, SEGMENT_I(seg_i).flags.fForceUpdate);
 
       // if (!seg.freeze) { //only run effect function if not frozen
 
@@ -1387,7 +1421,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       millis_at_start_of_effect_update = millis(); // internal millis used for animation to make calculations work correctly (instead of calling millis lots)
 
-      // ALOG_INF( PSTR("_segments[%d].effect_id=%d/%d \t%d"),_segment_index_primary, SEGMENT_I(seg_i).effect_id,effects.function.size(), millis()); 
+      // ALOG_INF( PSTR("_segments[%d].effect_id=%d/%d \t%d"),segment_current_index, SEGMENT_I(seg_i).effect_id,effects.function.size(), millis()); 
 
       SEGMENT_I(seg_i).performance.effect_build_ns = micros();
 
@@ -1399,7 +1433,11 @@ void mAnimatorLight::SubTask_Segments_Effects()
         DEBUG_PIN1_SET(LOW);
         #endif
   
+        DEBUG_LINE_HERE
+        
         (this->*effects.function[SEGMENT_I(seg_i).effect_id])(); // Call Effect Function (passes and returns nothing)
+        
+        DEBUG_LINE_HERE
 
         #ifdef ENABLE_EFFECTS_TIMING_DEBUG_GPIO
         DEBUG_PIN1_SET(HIGH);
@@ -1420,7 +1458,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
       }
       else
       { 
-        StartSegmentAnimation_AsAnimUpdateMemberFunction(_segment_index_primary); // First run must be reset after StartAnimation is first called 
+        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_current_index); // First run must be reset after StartAnimation is first called 
       }
               
       SEGMENT_I(seg_i).call++; // Used as progress counter for animations eg rainbow across all hues
@@ -1474,7 +1512,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
     /**
      * @brief Now iter forward on active segment
      **/
-    if( _segment_index_primary < getSegmentsNum() - 1 ) _segment_index_primary++; // fix for _segment_index_primary final iter going beyond getSegmentsNum() causing invalid index memory access
+    if( segment_current_index < getSegmentsNum() - 1 ) segment_current_index++; // fix for segment_current_index final iter going beyond getSegmentsNum() causing invalid index memory access
     
   } // END for
   // 
@@ -1526,7 +1564,7 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
     updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress); 
   // DEBUG_PIN2_SET(1); 
 
-    // ALOG_TST(PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
+    // ALOG_TST(PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),segment_current_index,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
 
   // DEBUG_PIN3_SET(0);
     SEGMENT.SetPixelColor(pixel, updatedColor, BRIGHTNESS_ALREADY_SET);
@@ -1631,6 +1669,8 @@ uint8_t mAnimatorLight::GetSizeOfPixel(ColourType colour_type)
 {
   switch(colour_type)
   {
+    default:
+    ALOG_WRN(PSTR("colour_type invalid"));
     case ColourType::COLOUR_TYPE__RGB__ID:     return 3;
     case ColourType::COLOUR_TYPE__RGBW__ID:    return 4;
     case ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
@@ -1727,7 +1767,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
 
-  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
+  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->segment_current_index);
 
   /**
    * @brief PaletteList Vectors should have the length stored in it. Actual pixel count depends on encoding type
@@ -1784,6 +1824,12 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
   }
   else
   if(
+    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)
+  ){
+    palette_colour_count = 16;
+  }
+  else
+  if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
   ){  
     palette_colour_count = 16;    
@@ -1814,7 +1860,10 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
         palette_colour_count = 1;
       break;
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
-        palette_colour_count = 1;
+        palette_colour_count = 16;
+     break;
+      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID:
+        palette_colour_count = sizeof(PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA)/6;
       break;
       // case mPalette::PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
       //   // if(SEGMENT.palette_container->pData.size())
@@ -2378,7 +2427,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer)/sizeof(char)-1);
     lineBuffer[sizeof(lineBuffer)/sizeof(char)-1] = '\0'; // terminate string
 
-    ALOG_INF(PSTR("lineBuffer %d %s"), i, lineBuffer);
+    ALOG_DBM(PSTR("lineBuffer %d %s"), i, lineBuffer);
     
     char* dataPtr = strchr(lineBuffer,'@');
     if (dataPtr) *dataPtr = 0; // replace name dividor with null termination. Escape "name@data"
@@ -2567,7 +2616,7 @@ bool mAnimatorLight::Segment::allocateData(size_t len)
     data = (byte*) ps_malloc(len);
   else
   #endif
-  
+
   data = (byte*) malloc(len);
 
   if (!data){
@@ -2576,11 +2625,11 @@ bool mAnimatorLight::Segment::allocateData(size_t len)
     return false; //allocation failed
   }
 
-  Serial.printf("NEW_MEMORY of %d bytes\n\r", len );// delay(2000);
-
   addUsedSegmentData(len);
   _dataLen = len;
   memset(data, 0, len);
+
+  DEBUG_LINE_HERE
 
   return true;
 }
@@ -3745,12 +3794,24 @@ void mAnimatorLight::finalizeInit(void)
 // void IRAM_ATTR mAnimatorLight::BUS_setPixelColor(int i, uint32_t col)
 void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
 {
+
+
+
+
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
   ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
   #endif 
   if (i >= _length) return;
-  if (i < customMappingSize) i = customMappingTable[i];
+  if (i < customMappingSize)
+  {
+    // ALOG_INF(PSTR("setPixelColor customMappingTable %d -> %d"), i, customMappingTable[i]);
+    i = customMappingTable[i];
+  }
   RgbcctColor c = RgbcctColor( R(col),G(col),B(col),W(col),W(col) );
+
+
+
+
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
   ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
   #endif
@@ -3768,6 +3829,36 @@ uint32_t mAnimatorLight::getPixelColor(uint16_t i)
   return c.getU32();
 }
 
+/**
+ * @brief NEw method which are the only entry point into the busmanager for RgbcctColour Types and hence enable mapping
+ * 
+ */
+void IRAM_ATTR mAnimatorLight::setPixelColor_Rgbcct(int i, RgbcctColor col)
+{
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
+  #endif 
+  if (i >= _length) return;
+  if (i < customMappingSize)
+  {
+    // ALOG_INF(PSTR("setPixelColor customMappingTable %d -> %d"), i, customMappingTable[i]);
+    i = customMappingTable[i];
+  }
+  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+  ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
+  #endif
+  pCONT_iLight->bus_manager->setPixelColor(i, col);
+}
+
+RgbcctColor mAnimatorLight::getPixelColor_Rgbcct(uint16_t i)
+{
+  if (i >= _length) return RgbcctColor((uint32_t)0);
+  if (i < customMappingSize) i = customMappingTable[i];
+  RgbcctColor c = pCONT_iLight->bus_manager->getPixelColor(i);
+  // if(i==0 || i==1)
+  //   c.debug_print("getPixelColor");
+  return c;
+}
 
 //DISCLAIMER
 //The following function attemps to calculate the current LED power usage,
@@ -4217,10 +4308,10 @@ bool mAnimatorLight::checkSegmentAlignment() {
 //otherwise it can lead to a crash on ESP32 because _segment_index is modified while in use by the main thread
 uint8_t mAnimatorLight::setPixelSegment(uint8_t n)
 {
-  uint8_t prevSegId = _segment_index_primary;
+  uint8_t prevSegId = segment_current_index;
   if (n < segments.size()) {
-    _segment_index_primary = n;
-    _virtualSegmentLength = segments[_segment_index_primary].virtualLength();
+    segment_current_index = n;
+    _virtualSegmentLength = segments[segment_current_index].virtualLength();
   }
   return prevSegId;
 }
@@ -4388,7 +4479,6 @@ mAnimatorLight::Segment::GetPaletteColour(
    */
   uint8_t* encoded_value  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
 ){
-
   
   if(palette_id != palette_container->loaded_palette_id)
   {
@@ -4427,8 +4517,6 @@ CRGB mAnimatorLight::ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t
 {
   if(SEGMENT.palette_id != SEGMENT.palette_container->loaded_palette_id)
   {
-    ALOG_DBG(PSTR("palette_id=%d, loaded_palette_id=%d"), SEGMENT.palette_id, SEGMENT.palette_container->loaded_palette_id);
-  DEBUG_LINE_HERE
     SEGMENT.LoadPalette(SEGMENT.palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   }
   return ColorFromPalette(pal, index, brightness, blendType);
@@ -4466,8 +4554,10 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
   bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
   bool     flag_crgb_exact_colour,
-  uint8_t* encoded_value  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  bool flag_request_is_for_full_visual_output
 ){
+
 
   // ALOG_INF(PSTR("Aflag_crgb_exact_colour=%d"), flag_crgb_exact_colour);
   /**
@@ -4485,7 +4575,8 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    flag_crgb_exact_colour
+    flag_crgb_exact_colour,
+    flag_request_is_for_full_visual_output
   );
 
   return colour;
@@ -4556,6 +4647,7 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
       brightness = scale8(brightness, _brightness_rgb);
     }
 
+    // Apply global brightness
     color_internal.R  = scale8(color_internal.R,  brightness);
     color_internal.G  = scale8(color_internal.G,  brightness);
     color_internal.B  = scale8(color_internal.B,  brightness);
@@ -4568,7 +4660,10 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
     // if(indexPixel==0) ALOG_INF(PSTR("NOOOOOOOOOOOOOOOT Applying brightness here"));
   }
 
-
+  /**
+   * @brief If we drop into the WLED style functions, then the customMappingTable will be applied
+   * 
+   */
 
   // ALOG_INF(PSTR("is2D() %d"), is2D());
   // ALOG_INF(PSTR("map1D2D %d"), map1D2D);
@@ -4623,6 +4718,7 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
 
   // if(indexPixel==0) ALOG_INF(PSTR("flag_brightness_already_applied %d"), flag_brightness_already_applied);
 
+// color_internal = RgbcctColor(255,255,255,255,255);
 
   /**
    * @brief Apply Pixel hardware colour mapping from internal to hardware order
@@ -4672,13 +4768,13 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
         indexMir += offset; // offset/phase
 
         if (indexMir >= stop) indexMir -= segment_length; // Wrap
-        pCONT_iLight->bus_manager->setPixelColor(indexMir, colour_hardware);
+        pCONT_lAni->setPixelColor_Rgbcct(indexMir, colour_hardware);
 
       }
       indexSet += offset; // offset/phase
 
       if (indexSet >= stop) indexSet -= segment_length; // Wrap
-      pCONT_iLight->bus_manager->setPixelColor(indexSet, colour_hardware);
+      pCONT_lAni->setPixelColor_Rgbcct(indexSet, colour_hardware);
       
       #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
 
@@ -4701,7 +4797,7 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
           new_indexSet <  stop
         ){
           // ALOG_INF(PSTR("new_indexSet d%d=%d"), d, new_indexSet);
-          pCONT_iLight->bus_manager->setPixelColor(new_indexSet, colour_hardware);
+          pCONT_lAni->setPixelColor_Rgbcct(new_indexSet, colour_hardware);
         }
       }
       #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
@@ -4726,38 +4822,32 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment::GetPixelColor(uint16_t indexPixel
   int vStrip = indexPixel>>16;
   indexPixel &= 0xFFFF;
 
-  
+DEBUG_LINE_HERE3
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  if (is2D()) {
+  if (is2D()) {DEBUG_LINE_HERE3
     uint16_t vH = virtualHeight();  // segment height in logical pixels
     uint16_t vW = virtualWidth();
     // ALOG_ERR(PSTR("\n\rmap1D2D %d set"), map1D2D);
     switch (map1D2D) {
       case M12_Pixels:
-      {
-        uint32_t c = getPixelColorXY(indexPixel % vW, indexPixel / vW);
-        // ALOG_INF(PSTR("c=%d"), c);
-        RgbcctColor c2 = RgbcctColor(c);
-        // ALOG_INF(PSTR("c2=%d,%d,%d,%d,%d"), c2.R, c2.G, c2.B, c2.W1, c2.W2);
         return RgbcctColor( getPixelColorXY(indexPixel % vW, indexPixel / vW) );
         break;
-      }
-      case M12_pBar:
+      case M12_pBar:DEBUG_LINE_HERE3
         if (vStrip>0) return RgbcctColor(getPixelColorXY(vStrip - 1, vH - indexPixel -1));
         else          return RgbcctColor(getPixelColorXY(0, vH - indexPixel -1));
         break;
-      case M12_pArc:
-      case M12_pCorner:
+      case M12_pArc:DEBUG_LINE_HERE3
+      case M12_pCorner:DEBUG_LINE_HERE3
         // use longest dimension
         return vW>vH ? RgbcctColor(getPixelColorXY(indexPixel, 0)) : RgbcctColor(getPixelColorXY(0, indexPixel));
         break;
-    }
+    }DEBUG_LINE_HERE3
     ALOG_ERR(PSTR("No map1D2D set"));
     return RgbcctColor((uint32_t)0);
   }
 #endif
-
+DEBUG_LINE_HERE3
   // Custom mapping
   // if (leds) return RGBW32(leds[i].r, leds[i].g, leds[i].b, 0);
 
@@ -4776,7 +4866,7 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment::GetPixelColor(uint16_t indexPixel
    * @brief To be fixed, my way maintains RGBCCT but this losses the CCT part. Functions need updated.
    * 
    */
-  RgbcctColor colour_hardware = pCONT_iLight->bus_manager->getPixelColor(physical_indexPixel);
+  RgbcctColor colour_hardware = pCONT_lAni->getPixelColor_Rgbcct(physical_indexPixel);
   // RgbcctColor colour_hardware = pCONT_lAni->getPixelColor(physical_indexPixel);//   pCONT_iLight->bus_manager->getPixelColor(physical_indexPixel);
   
   // ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
@@ -5339,6 +5429,24 @@ uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level, bool json_app
 {
 
   JBI->Start();
+  
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    JBI->Add("Length", playlistLen);
+
+    JBI->Array_Start("Loaded");
+    for(int i=0;i<playlistLen;i++)
+    {
+      JBI->Object_Start();
+        JBI->Add("preset",  playlistEntries[i].preset);
+        JBI->Add("dur",     playlistEntries[i].dur);
+        JBI->Add("tr",      playlistEntries[i].tr);
+      JBI->Object_End();
+    }
+    JBI->Array_End();
+    #endif 
+
+
+
 
     JBI->Add("millis", millis());
 
@@ -5543,6 +5651,29 @@ return JBI->End();
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
 
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+uint8_t mAnimatorLight::ConstructJSON_Debug__CustomMappingTable(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+
+    JBI->Add("customMappingSize",    customMappingSize);
+
+    if(customMappingSize)
+    {
+      JBI->Array_Start("MappingTable");
+      uint16_t send_size = customMappingSize < 400 ? customMappingSize : 400;
+      for(int i=0;i<send_size;i++)
+      {
+        JBI->Add(customMappingTable[i]);
+      }
+      JBI->Array_End();
+    }
+
+  return JBI->End();
+}
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+
+
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 
 /**
@@ -5728,7 +5859,7 @@ void mAnimatorLight::MQTTHandler_Init()
 
   struct handler<mAnimatorLight>* ptr;
   
-  ptr = &mqtthandler_settings_teleperiod;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -5852,7 +5983,20 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  ptr = &mqtthandler_debug__custom_mapping_table;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
+  mqtthandler_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
   ptr                         = &mqtthandler_debug_segments;
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
@@ -5860,10 +6004,10 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tRateSecs              = pCONT_mqtt->dt.ifchanged_secs; 
   ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level             = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Segments;
+  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_CUSTOM_MAPPING_TABLE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug__CustomMappingTable;
   mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
 
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   ptr = &mqtthandler_debug_animations_progress;
@@ -5896,7 +6040,7 @@ void mAnimatorLight::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mAnimatorLight::MQTTHandler_Set_RefreshAll()
+void mAnimatorLight::MQTTHandler_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -5906,7 +6050,7 @@ void mAnimatorLight::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
+void mAnimatorLight::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

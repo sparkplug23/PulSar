@@ -290,12 +290,12 @@ class mSIM7000G :
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     std::vector<struct handler<mSIM7000G>*> mqtthandler_list;
     
-    struct handler<mSIM7000G> mqtthandler_settings_teleperiod;
+    struct handler<mSIM7000G> mqtthandler_settings;
     struct handler<mSIM7000G> mqtthandler_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum

@@ -190,12 +190,12 @@ class mRelays :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();    
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
     std::vector<struct handler<mRelays>*> mqtthandler_list;
-    struct handler<mRelays> mqtthandler_settings_teleperiod;
+    struct handler<mRelays> mqtthandler_settings;
     struct handler<mRelays> mqtthandler_state_ifchanged;
     struct handler<mRelays> mqtthandler_state_teleperiod;
     struct handler<mRelays> mqtthandler_scheduled_teleperiod;

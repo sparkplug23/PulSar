@@ -410,7 +410,7 @@ Blue (Upstairs Link) ***********************************************************
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BH1750
 
   #define USE_MODULE_TEMPLATE
@@ -423,7 +423,7 @@ Blue (Upstairs Link) ***********************************************************
       "\"3\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"1\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"16\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
@@ -535,7 +535,7 @@ Blue (Upstairs Link) ***********************************************************
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BH1750
 
   #define USE_MODULE_TEMPLATE
@@ -548,7 +548,7 @@ Blue (Upstairs Link) ***********************************************************
       "\"3\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"1\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
+      #ifdef USE_MODULE_SENSORS_PIR
       "\"16\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"

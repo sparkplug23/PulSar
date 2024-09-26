@@ -444,11 +444,11 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_BH1750
   #include "5_Sensors/06_BH1750Light/mBH1750.h"
-  #define pCONT_motion                          static_cast<mBH1750*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BH1750_ID))
+  #define pCONT_bh1750                          static_cast<mBH1750*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BH1750_ID))
 #endif
-#ifdef USE_MODULE_SENSORS_MOTION
-  #include "5_Sensors/07_Motion/mMotion.h"
-  #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
+#ifdef USE_MODULE_SENSORS_PIR
+  #include "5_Sensors/07_PIR/mPIR.h"
+  #define pCONT_motion                            static_cast<mPIR*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_PIR_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_DOOR
   #include "5_Sensors/11_Door/mDoorSensor.h"
@@ -491,7 +491,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define pCONT_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-  #include "5_Sensors/22_SolarLunar/mSunTracking.h"
+  #include "5_Sensors/22_SunTracking/mSunTracking.h"
   #define   pCONT_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS

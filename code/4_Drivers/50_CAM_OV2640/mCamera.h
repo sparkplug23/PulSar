@@ -58,12 +58,12 @@ void setup_cam();
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
     struct handler<mCameraOV2640>* ptr;
-    struct handler<mCameraOV2640>  mqtthandler_settings_teleperiod;
+    struct handler<mCameraOV2640>  mqtthandler_settings;
     struct handler<mCameraOV2640>  mqtthandler_state_ifchanged;
     struct handler<mCameraOV2640>  mqtthandler_state_teleperiod;
     

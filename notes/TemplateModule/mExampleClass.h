@@ -42,11 +42,11 @@ class mExampleClass :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
+    void MQTTHandler_RefreshAll();
+    void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mExampleClass> mqtthandler_settings_teleperiod;
+    struct handler<mExampleClass> mqtthandler_settings;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mExampleClass> mqtthandler_sensor_ifchanged;
     struct handler<mExampleClass> mqtthandler_sensor_teleperiod;
@@ -59,7 +59,7 @@ class mExampleClass :
     };
     
     struct handler<mExampleClass>* list_ptr[3] = {
-      &mqtthandler_settings_teleperiod,
+      &mqtthandler_settings,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };

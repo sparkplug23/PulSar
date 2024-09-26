@@ -106,7 +106,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     JBI->Add(PM_JSON_VERSION_NAME,     pCONT_set->runtime.firmware_version.current.name_ctr);
     JBI->Add(PM_JSON_BUILDDATE,       __DATE__);
     
-    JBI->Add(PM_JSON_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level, buffer, sizeof(buffer)));
+    JBI->Add_P(PM_JSON_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level), VALUE_IS_PROGMEM);
     JBI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
     JBI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
     JBI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime().c_str());
@@ -175,10 +175,10 @@ uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level, bool json_appending){
   char buffer[30];
   JBI->Start();
     JBI->Object_Start(PM_JSON_LOGLEVELS);
-      JBI->Add(PM_JSON_SERIAL, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level, buffer, sizeof(buffer)));
-      JBI->Add(PM_JSON_SYSTEM, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.sys_level, buffer, sizeof(buffer)));
-      JBI->Add(PM_JSON_WEB,    pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.web_level, buffer, sizeof(buffer)));
-      JBI->Add(PM_JSON_TELNET, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.telnet_level, buffer, sizeof(buffer)));
+      JBI->Add_P(PM_JSON_SERIAL, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level), VALUE_IS_PROGMEM);
+      JBI->Add_P(PM_JSON_SYSTEM, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.sys_level), VALUE_IS_PROGMEM);
+      JBI->Add_P(PM_JSON_WEB,    pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.web_level), VALUE_IS_PROGMEM);
+      JBI->Add_P(PM_JSON_TELNET, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.telnet_level), VALUE_IS_PROGMEM);
     JBI->Object_End();
   return JBI->End();
 }

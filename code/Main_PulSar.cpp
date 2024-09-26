@@ -543,6 +543,15 @@ void setup(void)
   WDT_Reset();
   #endif  
 
+  #ifdef ENABLE_FEATURE_SYSTEM__BOOT_SPLASH__DISPLAY_BLOCK_TO_SHOW_END_OF_INIT
+  for(int i=0;i<(70*25)+1;i++){ // +1 so final line has \n
+    Serial.print('='); 
+    if(i % 70 == 0)
+      Serial.println();
+  }
+  #endif
+
+  pCONT->Tasker_Interface(TASK_BOOT_MESSAGE); // Display status of system
   
   #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
   // Must be at the end of your setup

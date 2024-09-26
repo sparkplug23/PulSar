@@ -4,10 +4,16 @@
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 
-enum TASKER_FUNCTION_TYPES {
-  // Init stuff (in importance of boot)
-  
-  // TASK_CHECK_POINTERS, //phased out
+enum TASKER_FUNCTION_TYPES 
+{
+ 
+ /************************************************************************************************************************************************
+  * ************************************************************************************************************************************************
+  * ************************************************************************************************************************************************
+  * @brief Start of setup tasks used during the "setup()" only, no main "loop()" tasks
+  * ************************************************************************************************************************************************
+  * ************************************************************************************************************************************************
+  * *************************************************************************************************************************************************/ 
 
   /**
    * module load should only be things that can happen before the init phase, 
@@ -69,9 +75,20 @@ enum TASKER_FUNCTION_TYPES {
   TASK_TRIGGER_EVENT_BUTTON_PRESSED,
   // TASK_TRIGGER_
   
-  
+  /**
+   * Called when we reach the end of "setup()" before loop starts
+   **/
   TASK_ON_BOOT_COMPLETE, //also used as boot percentage progress divisor : Reaches end of setup
-// END OF BOOT SECTION 
+  
+ /************************************************************************************************************************************************
+  * ************************************************************************************************************************************************
+  * ************************************************************************************************************************************************
+  * @brief Start of main loop tasks
+  * ************************************************************************************************************************************************
+  * ************************************************************************************************************************************************
+  * *************************************************************************************************************************************************/
+  // System/Status message
+  TASK_BOOT_MESSAGE, //at 10 seconds, show how the function is configured
   TASK_ON_BOOT_SUCCESSFUL, //should be triggered once after device is considered stable
 
   /**
@@ -131,8 +148,6 @@ enum TASKER_FUNCTION_TYPES {
   // New call functio similar to mqtt method, called from class loop (checked in support)
   TASK_FUNCTION_LAMBDA_LOOP,
 
-  // System/Status message
-  TASK_BOOT_MESSAGE, //at 10 seconds, show how the function is configured
 
   TASK_JSON_COMMAND_CHECK_TOPIC_ID,
   TASK_JSON_COMMAND_ID,  //ie check for the topic (in the future use module name are set/<moduclename>)
