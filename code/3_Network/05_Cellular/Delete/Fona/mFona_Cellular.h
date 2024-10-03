@@ -20,7 +20,7 @@
 #ifndef HEADER_MODULE_DRIVERS_FONA_CELLULAR_H
 #define HEADER_MODULE_DRIVERS_FONA_CELLULAR_H
   
-#define D_UNIQUE_MODULE_DRIVERS_FONA_CELLULAR_ID ((4*1000)+16) 
+#define D_UNIQUE_MODULE_DRIVERS_FONA_CELLULAR_ID 3005 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -134,13 +134,7 @@ class mFona_Cellular :
     static constexpr const char* PM_MODULE_DRIVERS_FONA_CELLULAR_CTR = D_MODULE_DRIVERS_FONA_CELLULAR_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_FONA_CELLULAR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_FONA_CELLULAR_ID; }
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mFona_Cellular);
-    };
-    #endif
-    
+       
     
     struct SETTINGS{
       uint8_t fEnableSensor = false;

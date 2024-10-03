@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_CORE_SPI_H
 #define _USE_MODULE_CORE_SPI_H 0.3
 
-#define D_UNIQUE_MODULE_CORE__SPI__ID ((2*1000)+32)
+#define D_UNIQUE_MODULE_CORE__SPI__ID 2032 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -24,9 +24,6 @@ class mSPI :
     static constexpr const char* PM_MODULE_CORE__SPI__CTR = D_MODULE_CORE__SPI__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__SPI__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__SPI__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mSPI);    };
-    #endif
     
     struct ClassState
     {

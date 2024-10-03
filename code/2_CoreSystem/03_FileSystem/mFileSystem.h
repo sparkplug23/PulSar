@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_CORE_FILESYSTEM_H
 #define _USE_MODULE_CORE_FILESYSTEM_H 0.3
 
-#define D_UNIQUE_MODULE_CORE_FILESYSTEM_ID ((2*1000)+03)
+#define D_UNIQUE_MODULE_CORE_FILESYSTEM_ID 2003 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 

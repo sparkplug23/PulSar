@@ -1,7 +1,7 @@
 // #ifndef _USE_MODULE_CORE_SERIAL_UART_H
 // #define _USE_MODULE_CORE_SERIAL_UART_H
 
-// #define D_UNIQUE_MODULE_CORE_SERIAL_UART_ID ((4*1000)+04)
+// #define D_UNIQUE_MODULE_CORE_SERIAL_UART_ID 2015 // [(Folder_Number*100)+ID_File]
 
 // #include "1_TaskerManager/mTaskerManager.h"
 
@@ -94,12 +94,6 @@
 //     static constexpr const char* PM_MODULE_CORE_SERIAL_UART_CTR;
 //     PGM_P GetModuleName(){          return PM_MODULE_CORE_SERIAL_UART_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SERIAL_UART_ID; }
-
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mSerialUART);
-//     };
-//     #endif
 
 
 //     char special_json_part_of_gps_buffer[300] = {0};

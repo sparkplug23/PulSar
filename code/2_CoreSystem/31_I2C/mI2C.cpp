@@ -345,7 +345,7 @@ void mI2C::I2cScan(char *devs, unsigned int devs_len)
   uint8_t address = 0;
   uint8_t any = 0;
 
-  snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_DEVICES_FOUND_AT));
+  snprintf_P(devs, devs_len, PSTR("{\"" D_I2CSCAN "\":\"" D_I2CSCAN_DEVICES_FOUND_AT));
 
   for (address = 1; address <= 127; address++) {
     wire->beginTransmission(address);
@@ -356,7 +356,7 @@ void mI2C::I2cScan(char *devs, unsigned int devs_len)
     }
     else if (error != 2) {  // Seems to happen anyway using this scan
       any = 2;
-      snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
+      snprintf_P(devs, devs_len, PSTR("{\"" D_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
       break;
     }
   }
@@ -364,12 +364,12 @@ void mI2C::I2cScan(char *devs, unsigned int devs_len)
     strncat(devs, "\"}", devs_len - strlen(devs) -1);
   }
   else {
-    snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_NO_DEVICES_FOUND "\"}"));
+    snprintf_P(devs, devs_len, PSTR("{\"" D_I2CSCAN "\":\"" D_I2CSCAN_NO_DEVICES_FOUND "\"}"));
   }
 
 // #else
 
-// snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"not on esp32 yet\"}" ));
+// snprintf_P(devs, devs_len, PSTR("{\"" D_I2CSCAN "\":\"not on esp32 yet\"}" ));
   
 
 // #endif
@@ -456,6 +456,12 @@ void mI2C::I2cSetActiveFound(uint32_t addr, const char *types)
   #ifdef ENABLE_LOG_LEVEL_INFO
   ALOG_INF(S_LOG_I2C_FOUND_AT, types, addr);
   #endif // ENABLE_LOG_LEVEL_INFO
+}
+void mI2C::I2cSetActiveFound_P(uint32_t addr, const char *types)
+{
+  char buffer[20];
+  snprintf_P(buffer, sizeof(buffer), types);
+  I2cSetActiveFound(addr, buffer);
 }
 
 bool mI2C::I2cActive(uint32_t addr)

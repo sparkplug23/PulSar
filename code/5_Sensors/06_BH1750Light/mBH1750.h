@@ -38,9 +38,7 @@ class mBH1750 :
     static constexpr const char* PM_MODULE_SENSORS_BH1750_CTR = D_MODULE_SENSORS_BH1750_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BH1750_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BH1750_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mBH1750);    };
-    #endif
+    
 
     struct ClassState
     {
@@ -52,8 +50,8 @@ class mBH1750 :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
     
-    uint8_t addresses[2] = { BH1750_ADDR1, BH1750_ADDR2 };
-    uint8_t resolution_register_value[3] = { BH1750_CONTINUOUS_HIGH_RES_MODE, BH1750_CONTINUOUS_HIGH_RES_MODE2, BH1750_CONTINUOUS_LOW_RES_MODE };
+    uint8_t i2c_addresses[2] = { BH1750_ADDR1, BH1750_ADDR2 };
+    uint8_t i2c_resolution_register_value[3] = { BH1750_CONTINUOUS_HIGH_RES_MODE, BH1750_CONTINUOUS_HIGH_RES_MODE2, BH1750_CONTINUOUS_LOW_RES_MODE };
 
     struct {
       uint8_t address;

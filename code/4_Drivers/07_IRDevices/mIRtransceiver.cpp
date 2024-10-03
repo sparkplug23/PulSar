@@ -95,7 +95,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 // enum IrErrors { IE_NO_ERROR, IE_INVALID_RAWDATA, IE_INVALID_JSON, IE_SYNTAX_IRSEND, IE_SYNTAX_IRHVAC };
 
 // enum IrRemoteCommands { CMND_IRSEND, CMND_IRHVAC };
-// const char kIrRemoteCommands[] PROGMEM = D_JSON_IRSEND "|" D_JSON_IRHVAC ;
+// const char kIrRemoteCommands[] PROGMEM = D_IRSEND "|" D_IRHVAC ;
 
 // // Based on IRremoteESP8266.h enum decode_type_t
 // const char kIrRemoteProtocols[] PROGMEM =
@@ -219,11 +219,11 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //       } else {
 //         snprintf_P(svalue, sizeof(svalue), PSTR("\"%s\""), hvalue);
 //       }
-//       Response_P(PSTR("{\"" D_JSON_IRRECEIVED "\":{\"" D_JSON_IR_PROTOCOL "\":\"%s\",\"" D_JSON_IR_BITS "\":%d,\"" D_JSON_IR_DATA "\":%s"),
+//       Response_P(PSTR("{\"" D_IRRECEIVED "\":{\"" D_IR_PROTOCOL "\":\"%s\",\"" D_IR_BITS "\":%d,\"" D_IR_DATA "\":%s"),
 //         GetTextIndexed_P(sirtype, sizeof(sirtype), iridx, kIrRemoteProtocols), results.bits, svalue);
 
 //       if (Settings.flag_network.receive_raw) {
-//         ResponseAppend_P(PSTR(",\"" D_JSON_IR_RAWDATA "\":["));
+//         ResponseAppend_P(PSTR(",\"" D_IR_RAWDATA "\":["));
 //         uint16_t i;
 //         for (i = 1; i < results.rawlen; i++) {
 //           if (i > 1) { ResponseAppend_P(PSTR(",")); }
@@ -240,11 +240,11 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //           // Add two extra entries for multiple larger than UINT16_MAX it is.
 //           extended_length += (usecs / (UINT16_MAX + 1)) * 2;
 //         }
-//         ResponseAppend_P(PSTR("],\"" D_JSON_IR_RAWDATA "Info\":[%d,%d,%d]"), extended_length, i -1, results.overflow);
+//         ResponseAppend_P(PSTR("],\"" D_IR_RAWDATA "Info\":[%d,%d,%d]"), extended_length, i -1, results.overflow);
 //       }
 
 //       ResponseAppend_P(PSTR("}}"));
-//       MqttPublishPrefixTopic_P(RESULT_OR_TELE, PSTR(D_JSON_IRRECEIVED));
+//       MqttPublishPrefixTopic_P(RESULT_OR_TELE, PSTR(D_IRRECEIVED));
 
 //       if (iridx) {
 //         XdrvRulesProcess();
@@ -286,7 +286,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //   }
 //   else if (CMND_IRSEND == command_code) {
 //     if (XdrvMailbox.data_len) {
-//       Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//       Response_P(S_JSON_COMMAND_SVALUE, command, D_DONE);
 
 //       if (strstr(XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be rawdata
 //         // IRsend <freq>,<rawdata>,<rawdata> ...
@@ -403,9 +403,9 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //           } else {
 //             // IRsend { "protocol": "SAMSUNG", "bits": 32, "data": 551502015 }
 //             char parm_uc[10];
-//             const char *protocol = root[UpperCase_P(parm_uc, PSTR(D_JSON_IR_PROTOCOL))];
-//             uint16_t bits = root[UpperCase_P(parm_uc, PSTR(D_JSON_IR_BITS))];
-//             uint64_t data = strtoull(root[UpperCase_P(parm_uc, PSTR(D_JSON_IR_DATA))], nullptr, 0);
+//             const char *protocol = root[UpperCase_P(parm_uc, PSTR(D_IR_PROTOCOL))];
+//             uint16_t bits = root[UpperCase_P(parm_uc, PSTR(D_IR_BITS))];
+//             uint64_t data = strtoull(root[UpperCase_P(parm_uc, PSTR(D_IR_DATA))], nullptr, 0);
 //             if (protocol && bits) {
 //               char protocol_text[20];
 //               int protocol_code = GetCommandCode(protocol_text, sizeof(protocol_text), protocol, kIrRemoteProtocols);
@@ -436,7 +436,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //                   irsend->sendPanasonic64(data, bits); break;
 //                 default:
 //                   irsend_active = false;
-//                   Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_PROTOCOL_NOT_SUPPORTED);
+//                   Response_P(S_JSON_COMMAND_SVALUE, command, D_PROTOCOL_NOT_SUPPORTED);
 //               }
 //             } else {
 //               error = IE_SYNTAX_IRSEND;
@@ -452,17 +452,17 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 
 //   switch (error) {
 //     case IE_INVALID_RAWDATA:
-//       Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_INVALID_RAWDATA);
+//       Response_P(S_JSON_COMMAND_SVALUE, command, D_INVALID_RAWDATA);
 //       break;
 //     case IE_INVALID_JSON:
-//       Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_INVALID_JSON);
+//       Response_P(S_JSON_COMMAND_SVALUE, command, D_INVALID_JSON);
 //       break;
 //     case IE_SYNTAX_IRSEND:
-//       Response_P(PSTR("{\"" D_JSON_IRSEND "\":\"" D_JSON_NO " " D_JSON_IR_PROTOCOL ", " D_JSON_IR_BITS " " D_JSON_OR " " D_JSON_IR_DATA "\"}"));
+//       Response_P(PSTR("{\"" D_IRSEND "\":\"" D_NO " " D_IR_PROTOCOL ", " D_IR_BITS " " D_OR " " D_IR_DATA "\"}"));
 //       break;
 // #ifdef USE_IR_HVAC
 //     case IE_SYNTAX_IRHVAC:
-//       Response_P(PSTR("{\"" D_JSON_IRHVAC "\":\"" D_JSON_WRONG " " D_JSON_IRHVAC_VENDOR ", " D_JSON_IRHVAC_MODE " " D_JSON_OR " " D_JSON_IRHVAC_FANSPEED "\"}"));
+//       Response_P(PSTR("{\"" D_IRHVAC "\":\"" D_WRONG " " D_IRHVAC_VENDOR ", " D_IRHVAC_MODE " " D_OR " " D_IRHVAC_FANSPEED "\"}"));
 //       break;
 // #endif // USE_IR_HVAC
 //   }

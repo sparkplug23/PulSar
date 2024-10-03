@@ -1,7 +1,7 @@
 #ifndef REMOTE_DEVICE_H
 #define REMOTE_DEVICE_H 0.2
 
-#define D_UNIQUE_MODULE_SENSORS_REMOTE_DEVICE_ID 135
+#define D_UNIQUE_MODULE_SENSORS_REMOTE_DEVICE_ID 5020 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -45,12 +45,6 @@ class mRemoteDevice :
     static constexpr const char* PM_MODULE_SENSORS_REMOTE_DEVICE_CTR = D_MODULE_SENSORS_REMOTE_DEVICE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_REMOTE_DEVICE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_REMOTE_DEVICE_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mRemoteDevice);
-    };
-    #endif
 
     uint8_t GetSensorCount(void) override
     {

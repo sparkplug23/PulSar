@@ -283,23 +283,6 @@ upload_protocol = espota
 
 
 
-[env:esp_32_hvac_oil_radiator]
-extends = env:tasmota32_base
-build_unflags               = ${esp32_defaults.build_unflags}
-build_flags                 = ${esp32_defaults.build_flags}
-                                    -D DEVICE_HVAC_OIL_RADIATOR
-                                    -w                                     
-lib_extra_dirs          = ${common32.lib_extra_dirs}
-                            lib/libesp32/network
-                            lib/lib_network
-                            lib/lib_energy
-; monitor_filters = esp32_exception_decoder
-; build_type = debug
-; upload_port = COM17
-upload_port = 192.168.0.41
-upload_protocol = espota
-
-
     
 
 ; [env:esp32doit-devkit-v1]

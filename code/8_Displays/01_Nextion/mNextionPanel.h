@@ -1,8 +1,7 @@
 #ifndef _MNEXTIONPANEL2_H
 #define _MNEXTIONPANEL2_H 0.2
 
-#define D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_DISPLAYS_NEXTION_ID    1    // Numerical accesending order of module within a group
+#define D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID   8001 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -110,10 +109,7 @@ class mNextionPanel :
     static constexpr const char* PM_MODULE_DISPLAYS_NEXTION_CTR = D_MODULE_DISPLAYS_NEXTION_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_NEXTION_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID; } 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mNextionPanel);    };
-    #endif    
-
+    
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.

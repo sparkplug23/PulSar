@@ -307,13 +307,13 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
     ){
 
       JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));   
-        JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
-        JBI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
+        JBI->Add(D_TEMPERATURE, sensor[sensor_id].instant.temperature);
+        JBI->Add(D_HUMIDITY,    sensor[sensor_id].instant.humidity);
         if(json_level >=  JSON_LEVEL_DETAILED)
         {     
-          JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-            JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-            JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+          JBI->Object_Start(D_ISCHANGEDMETHOD);
+            JBI->Add(D_TYPE, D_SIGNIFICANTLY);
+            JBI->Add(D_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
           JBI->Object_End();   
         }
       JBI->Object_End(); 

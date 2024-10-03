@@ -20,7 +20,7 @@
 #define HEADER_DRIVERS_RF433_RCSWITCH_EXTENDED_H
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID ((4*1000)+10) 
+#define D_UNIQUE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID 4010 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
 
@@ -45,12 +45,6 @@ class mRCSwitch :
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RF433_RCSWITCH_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID; }
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mRCSwitch);
-    };
-    #endif
-
     
     struct SETTINGS{
       uint8_t fEnableSensor = false;
@@ -60,10 +54,10 @@ class mRCSwitch :
       // uint8_t active_sensor = 0;
     }settings;
 
-    #define D_JSON_RF_PROTOCOL "Protocol"
-    #define D_JSON_RF_BITS "Bits"
-    #define D_JSON_RF_DATA "Data"
-    #define D_JSON_RF_PULSE "Pulse"
+    #define D_RF_PROTOCOL "Protocol"
+    #define D_RF_BITS "Bits"
+    #define D_RF_DATA "Data"
+    #define D_RF_PULSE "Pulse"
 
 
     #define RF_TIME_AVOID_DUPLICATE 1000  // Milliseconds

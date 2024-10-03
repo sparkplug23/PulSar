@@ -222,9 +222,9 @@ uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 
     JBI->Start();
       char buffer[80];
-      JBI->Add(D_JSON_LOCATION,  DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
-      JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&doorbell_switch.event.detected_time, buffer, sizeof(buffer)));
-      JBI->Add(D_JSON_EVENT, doorbell_switch.event.isactive ? "detected": "over");
+      JBI->Add(D_LOCATION,  DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
+      JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&doorbell_switch.event.detected_time, buffer, sizeof(buffer)));
+      JBI->Add(D_EVENT, doorbell_switch.event.isactive ? "detected": "over");
     JBI->End();
 
   }

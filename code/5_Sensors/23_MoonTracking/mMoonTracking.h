@@ -1,7 +1,7 @@
 #ifndef MODULE_SENSORS_MOON_TRACKING_H
 #define MODULE_SENSORS_MOON_TRACKING_H
 
-#define D_UNIQUE_MODULE_SENSORS_MOON_TRACKING_ID ((5*1000)+23)
+#define D_UNIQUE_MODULE_SENSORS_MOON_TRACKING_ID 5023 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -37,10 +37,7 @@ class mMoonTracking :
     static constexpr const char* PM_MODULE_SENSORS_MOON_TRACKING_CTR = D_MODULE_SENSORS_MOON_TRACKING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOON_TRACKING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOON_TRACKING_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mMoonTracking);    };
-    #endif
-
+    
     
     struct SETTINGS{
       uint8_t  fEnableSensor = false;

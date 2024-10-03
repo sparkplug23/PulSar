@@ -19,7 +19,7 @@
 #ifndef HEADER_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__H
 #define HEADER_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__H
   
-#define D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID ((4*1000)+03)
+#define D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID 4071 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -63,12 +63,6 @@ class mMAVLink_Telemetry_WiFi :
     static constexpr const char* PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR = D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID; }
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mMAVLink_Telemetry_WiFi);
-    };
-    #endif
     
     void CommandSet_LED_Power(uint8_t state, uint8_t index = 0);
 

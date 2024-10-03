@@ -1,7 +1,7 @@
 #ifndef _MODULE__SENSORS_GPS_MODEM__H
 #define _MODULE__SENSORS_GPS_MODEM__H
 
-#define D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID   ((5*1000)+51)
+#define D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID   5051 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -20,9 +20,7 @@ class mGPS_Modem :
     static constexpr const char* PM_MODULE__SENSORS_GPS_MODEM__CTR = D_MODULE__SENSORS_GPS_MODEM__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__SENSORS_GPS_MODEM__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mGPS_Modem);    };
-    #endif
+    
 
     void parse_JSONCommand(JsonParserObject obj);
 

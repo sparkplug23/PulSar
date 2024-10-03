@@ -387,7 +387,7 @@ void mSR04::SubTask_UpdateAmbientTemperature()
 uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
-    JBI->Add(D_JSON_TYPE, sr04_type);
+    JBI->Add(D_TYPE, sr04_type);
     
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     JBI->Object_Start("Filtered_EMA");
@@ -408,17 +408,17 @@ uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("Ping", readings.raw.ping_value);
-    JBI->Add(D_JSON_DISTANCE "_cm", readings.raw.distance_cm);
+    JBI->Add(D_DISTANCE "_cm", readings.raw.distance_cm);
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     JBI->Object_Start("Filtered_EMA");
-      JBI->Add(D_JSON_DISTANCE "_cm", readings.average_EMA.distance_cm);
+      JBI->Add(D_DISTANCE "_cm", readings.average_EMA.distance_cm);
       JBI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
       JBI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
     JBI->Object_Start("Filtered_DEMA");
-      JBI->Add(D_JSON_DISTANCE "_cm", readings.average_DEMA.distance_cm);
+      JBI->Add(D_DISTANCE "_cm", readings.average_DEMA.distance_cm);
       JBI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
       JBI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA

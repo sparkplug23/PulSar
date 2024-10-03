@@ -164,7 +164,7 @@ void mSensorsL3G::EveryLoop(){
 uint8_t mSensorsL3G::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+    JBI->Add(D_SENSOR_COUNT, settings.fSensorCount);
   return JBI->End();
 
 }

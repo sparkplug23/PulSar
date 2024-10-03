@@ -112,7 +112,7 @@ void mOLED_SSD1306::EverySecond(void)
       ShowStaticLog();
       break;
     case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
-    case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_JSON_ID:
+    case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_ID:
       // Refresh not needed, drawn directly on execution
       break;
     case EM_DISPLAY_MODE_UTC_TIME_ID:
@@ -275,7 +275,7 @@ void mOLED_SSD1306::ShowUTCTime(void)
 uint8_t mOLED_SSD1306::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }

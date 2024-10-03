@@ -84,7 +84,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    case TASK_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID:
+    case TASK_FILESYSTEM_APPEND__CONFIG_SETTINGS__ID:
       JsonAppend_Settings();
     break;
     /************
@@ -161,19 +161,19 @@ const char* mSettings::Get_Json_Level_Name(uint8_t id)
 {
     switch(id){
         case JSON_LEVEL_NONE:      
-            return PM_JSON_LEVEL_NONE_CTR;
+            return PM_LEVEL_NONE_CTR;
         case JSON_LEVEL_IFCHANGED: 
-            return PM_JSON_LEVEL_IFCHANGED_CTR;
+            return PM_LEVEL_IFCHANGED_CTR;
         case JSON_LEVEL_SHORT:     
-            return PM_JSON_LEVEL_SHORT_CTR;
+            return PM_LEVEL_SHORT_CTR;
         case JSON_LEVEL_DETAILED:  
-            return PM_JSON_LEVEL_DETAILED_CTR;
+            return PM_LEVEL_DETAILED_CTR;
         case JSON_LEVEL_ALL:       
-            return PM_JSON_LEVEL_ALL_CTR;
+            return PM_LEVEL_ALL_CTR;
         case JSON_LEVEL_DEBUG:     
-            return PM_JSON_LEVEL_DEBUG_CTR;
+            return PM_LEVEL_DEBUG_CTR;
         default:
-            return PM_JSON_LEVEL_NONE_CTR; // Default to "None" if an unknown id is passed
+            return PM_LEVEL_NONE_CTR; // Default to "None" if an unknown id is passed
     }
 }
 
@@ -271,12 +271,12 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   uint32_t current_len = end_pos - start_pos;
   int diff = replace_len - current_len;
 
- ALOG_INF(PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
+ ALOG_DBM(PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
    start_pos, end_pos, char_len, current_len, replace_len, diff);
 
   DEBUG_LINE_HERE
   int too_long = (char_len + diff) - settings_text_size;
-    ALOG_INF(PSTR(D_LOG_CONFIG "Text test by %d char(s)"), too_long);
+    ALOG_DBM(PSTR(D_LOG_CONFIG "Text test by %d char(s)"), too_long);
   if (too_long > 0) {
     ALOG_INF(PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
     return false;  // Replace text too long
@@ -355,7 +355,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
-  if(jtok = obj[PM_JSON_SYSTEM_RESTART]){
+  if(jtok = obj[PM_SYSTEM_RESTART]){
     // if(jtok.isStr()){
     //   if((tmp_id=GetPixelHardwareTypeIDbyName(jtok.getStr()))>=0){
     //     CommandSet_PixelHardwareTypeID(tmp_id);
@@ -382,7 +382,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   }
 
 
-  if(jtok = obj[PM_JSON_DEVICENAME])
+  if(jtok = obj[PM_DEVICENAME])
   { 
 
     char module_friendlyname_buffer[30];
@@ -395,11 +395,11 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
 
       ALOG_DBM( PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
   
-      if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer])
+      if(jtok = obj[PM_DEVICENAME].getObject()[module_friendlyname_buffer])
       { 
         ALOG_DBM( PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
 
-        JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
+        JsonParserArray arr = obj[PM_DEVICENAME].getObject()[module_friendlyname_buffer];
       
         if(arr){  
           //Get devices already present

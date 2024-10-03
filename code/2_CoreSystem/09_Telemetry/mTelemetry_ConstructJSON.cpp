@@ -26,35 +26,35 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
 {
 
   JBI->Start();
-    JBI->Add(PM_JSON_TIME,           pCONT_time->GetTime().c_str());
-    JBI->Add(PM_JSON_UPTIME,         pCONT_time->GetUptime().c_str());
-    JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->UpTime());
-    JBI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime.sleep ? "Dynamic" : "Unknown");
-    JBI->Add(PM_JSON_SLEEP,          pCONT_set->runtime.sleep); // typ. 20
-    JBI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec); // typ. 50hz
-    JBI->Add(PM_JSON_LOADAVERAGE,    pCONT_set->runtime.loop_load_avg); // average loops_per_second
-    JBI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
-    JBI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
+    JBI->Add(PM_TIME,           pCONT_time->GetTime().c_str());
+    JBI->Add(PM_UPTIME,         pCONT_time->GetUptime().c_str());
+    JBI->Add(PM_UPSECONDS,      pCONT_time->UpTime());
+    JBI->Add(PM_SLEEPMODE,      pCONT_set->runtime.sleep ? "Dynamic" : "Unknown");
+    JBI->Add(PM_SLEEP,          pCONT_set->runtime.sleep); // typ. 20
+    JBI->Add(PM_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec); // typ. 50hz
+    JBI->Add(PM_LOADAVERAGE,    pCONT_set->runtime.loop_load_avg); // average loops_per_second
+    JBI->Add(PM_FREEHEAP,       ESP.getFreeHeap());
+    JBI->Add(PM_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
 
     IPAddress localip = WiFi.localIP();
-    JBI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
-    JBI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
-    JBI->Add(PM_JSON_RSSI,         WiFi.RSSI());
+    JBI->Add_FV(PM_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
+    JBI->Add(PM_SSID,         WiFi.SSID().c_str());
+    JBI->Add(PM_RSSI,         WiFi.RSSI());
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    // JBI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
-    JBI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
-    JBI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
+    // JBI->Add(PM_CONNECTCOUNT, wifi_reconnects_counter);
+    JBI->Add(PM_DOWNTIME,     "00T00:00:00");
+    JBI->Add(PM_DOWNSECS,     (uint8_t)0);
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
       
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    // JBI->Object_Start(PM_JSON_MQTT);
-    //   JBI->Add(PM_JSON_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
-    //   JBI->Add(PM_JSON_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
-    //   JBI->Add(PM_JSON_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
+    // JBI->Object_Start(PM_MQTT);
+    //   JBI->Add(PM_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
+    //   JBI->Add(PM_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
+    //   JBI->Add(PM_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
     // JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     
-    // JBI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
+    // JBI->Add(PM_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
     // ALOG_INF(PSTR("JBI=\"%s\""),JBI->GetPtr());
   return JBI->End();
     
@@ -67,32 +67,32 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
   char buffer[50];
 
   JBI->Start();
-    JBI->Add(PM_JSON_MODULENAME,     pCONT_set->Settings.system_name.friendly);
-    JBI->Add_P(PM_JSON_FRIENDLYNAME,   pCONT_pins->ModuleName()); 
-    JBI->Add(PM_JSON_ROOMHINT, pCONT_set->Settings.room_hint);
+    JBI->Add(PM_MODULENAME,     pCONT_set->Settings.system_name.friendly);
+    JBI->Add_P(PM_FRIENDLYNAME,   pCONT_pins->ModuleName()); 
+    JBI->Add(PM_ROOMHINT, pCONT_set->Settings.room_hint);
 
-    JBI->Add(PM_JSON_POWER,          pCONT_set->runtime.power); 
+    JBI->Add(PM_POWER,          pCONT_set->runtime.power); 
     
-    JBI->Add(PM_JSON_SETTINGS_HOLDER,pCONT_set->Settings.cfg_holder);
-    JBI->Add_FV(PM_JSON_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
-    JBI->Add(PM_JSON_SAVECOUNT,      pCONT_set->Settings.save_flag);
+    JBI->Add(PM_SETTINGS_HOLDER,pCONT_set->Settings.cfg_holder);
+    JBI->Add_FV(PM_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
+    JBI->Add(PM_SAVECOUNT,      pCONT_set->Settings.save_flag);
 
     JBI->Add("Textbuffer", pCONT_set->Settings.text_pool);
     
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    JBI->Add(PM_JSON_POWERONSTATE,   pCONT_set->Settings.poweronstate); 
-    JBI->Add(PM_JSON_LEDSTATE,       pCONT_set->Settings.ledstate);
-    JBI->Add_FV(PM_JSON_LEDMASK,     PSTR("\"%04X\""), 0); 
-    JBI->Add(PM_JSON_SAVEDATA,       0); 
-    JBI->Add(PM_JSON_SAVESTATE,      0); 
-    JBI->Add(PM_JSON_SWITCHMODE,     0);
-    JBI->Add(PM_JSON_BAUDRATE,       (uint16_t)115200);
-    JBI->Add(PM_JSON_BUTTONRETAIN,   pCONT_set->Settings.flag_system.mqtt_button_retain); 
-    JBI->Add(PM_JSON_SWITCHRETAIN,   pCONT_set->Settings.flag_system.mqtt_switch_retain); 
-    JBI->Add(PM_JSON_SENSORRETAIN,   pCONT_set->Settings.flag_system.mqtt_sensor_retain); 
-    JBI->Add(PM_JSON_POWERRETAIN,    pCONT_set->Settings.flag_system.mqtt_power_retain);
-    JBI->Add(PM_JSON_OTAURL,         D_OTA_URL);
-    JBI->Add(PM_JSON_STARTUPUTC,     "2019-12-10T21:35:44");
+    JBI->Add(PM_POWERONSTATE,   pCONT_set->Settings.poweronstate); 
+    JBI->Add(PM_LEDSTATE,       pCONT_set->Settings.ledstate);
+    JBI->Add_FV(PM_LEDMASK,     PSTR("\"%04X\""), 0); 
+    JBI->Add(PM_SAVEDATA,       0); 
+    JBI->Add(PM_SAVESTATE,      0); 
+    JBI->Add(PM_SWITCHMODE,     0);
+    JBI->Add(PM_BAUDRATE,       (uint16_t)115200);
+    JBI->Add(PM_BUTTONRETAIN,   pCONT_set->Settings.flag_system.mqtt_button_retain); 
+    JBI->Add(PM_SWITCHRETAIN,   pCONT_set->Settings.flag_system.mqtt_switch_retain); 
+    JBI->Add(PM_SENSORRETAIN,   pCONT_set->Settings.flag_system.mqtt_sensor_retain); 
+    JBI->Add(PM_POWERRETAIN,    pCONT_set->Settings.flag_system.mqtt_power_retain);
+    JBI->Add(PM_OTAURL,         D_OTA_URL);
+    JBI->Add(PM_STARTUPUTC,     "2019-12-10T21:35:44");
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
   return JBI->End();
 
@@ -103,52 +103,52 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
   char buffer[30];
   JBI->Start();
   
-    JBI->Add(PM_JSON_VERSION_NAME,     pCONT_set->runtime.firmware_version.current.name_ctr);
-    JBI->Add(PM_JSON_BUILDDATE,       __DATE__);
+    JBI->Add(PM_VERSION_NAME,     pCONT_set->runtime.firmware_version.current.name_ctr);
+    JBI->Add(PM_BUILDDATE,       __DATE__);
     
-    JBI->Add_P(PM_JSON_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level), VALUE_IS_PROGMEM);
-    JBI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
-    JBI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
-    JBI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime().c_str());
-    JBI->Add(PM_JSON_BUILDTIME,       __TIME__);
-    JBI->Add(PM_JSON_VERSION_NUMBER,   (uint32_t)PROJECT_VERSION);
-    JBI->Add(PM_JSON_VERSION_NUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
-    JBI->Add(PM_JSON_VERSION_NUMBER_NOTYPE,   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
+    JBI->Add_P(PM_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level), VALUE_IS_PROGMEM);
+    JBI->Add(PM_BOOTCOUNT,       pCONT_set->Settings.bootcount);
+    JBI->Add(PM_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
+    JBI->Add(PM_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime().c_str());
+    JBI->Add(PM_BUILDTIME,       __TIME__);
+    JBI->Add(PM_VERSION_NUMBER,   (uint32_t)PROJECT_VERSION);
+    JBI->Add(PM_VERSION_NUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
+    JBI->Add(PM_VERSION_NUMBER_NOTYPE,   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
 
-    JBI->Object_Start(PM_JSON_VERSION_PARTS);
-      JBI->Object_Start(PM_JSON_CURRENT);
-        JBI->Add(PM_JSON_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE);
-        JBI->Add(PM_JSON_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR);
-        JBI->Add(PM_JSON_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR);
-        JBI->Add(PM_JSON_CORE,   (uint8_t)FIRMWARE_VERSION_CORE);
-        JBI->Add(PM_JSON_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE);
+    JBI->Object_Start(PM_VERSION_PARTS);
+      JBI->Object_Start(PM_CURRENT);
+        JBI->Add(PM_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE);
+        JBI->Add(PM_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR);
+        JBI->Add(PM_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR);
+        JBI->Add(PM_CORE,   (uint8_t)FIRMWARE_VERSION_CORE);
+        JBI->Add(PM_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE);
       JBI->Object_End();
-      JBI->Object_Start(PM_JSON_MINIMAL);
-        JBI->Add(PM_JSON_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE_MINIMAL);
-        JBI->Add(PM_JSON_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR_MINIMAL);
-        JBI->Add(PM_JSON_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR_MINIMAL);
-        JBI->Add(PM_JSON_CORE,   (uint8_t)FIRMWARE_VERSION_CORE_MINIMAL);
-        JBI->Add(PM_JSON_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE_MINIMAL);
+      JBI->Object_Start(PM_MINIMAL);
+        JBI->Add(PM_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE_MINIMAL);
+        JBI->Add(PM_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR_MINIMAL);
+        JBI->Add(PM_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR_MINIMAL);
+        JBI->Add(PM_CORE,   (uint8_t)FIRMWARE_VERSION_CORE_MINIMAL);
+        JBI->Add(PM_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE_MINIMAL);
       JBI->Object_End();
     JBI->Object_End();
 
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    JBI->Add(PM_JSON_ARDUINO_CORE,     ARDUINO_ESP8266_RELEASE); 
-    // JBI->Add(PM_JSON_DRIVERS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
-    // JBI->Add(PM_JSON_SENSORS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
-    JBI->Add_FV(PM_JSON_FEATURES,     PSTR("[\"%08X\",\"%08X\",\"%08X\",\"%08X\"]"), 0,0,0,0);
+    JBI->Add(PM_ARDUINO_CORE,     ARDUINO_ESP8266_RELEASE); 
+    // JBI->Add(PM_DRIVERS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
+    // JBI->Add(PM_SENSORS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
+    JBI->Add_FV(PM_FEATURES,     PSTR("[\"%08X\",\"%08X\",\"%08X\",\"%08X\"]"), 0,0,0,0);
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     
     #ifdef ESP8266
-    JBI->Add(PM_JSON_BOOTVERSION,     ESP.getBootVersion());
+    JBI->Add(PM_BOOTVERSION,     ESP.getBootVersion());
     #endif // ESP8266
-    JBI->Add(PM_JSON_SDKVERSION,      ESP.getSdkVersion());    
+    JBI->Add(PM_SDKVERSION,      ESP.getSdkVersion());    
 
-    JBI->Add(PM_JSON_SDKVERSION,      ESP.getSdkVersion());    
-    JBI->Add(PM_JSON_FREESKETCHSPACE,      ESP.getFreeSketchSpace());
+    JBI->Add(PM_SDKVERSION,      ESP.getSdkVersion());    
+    JBI->Add(PM_FREESKETCHSPACE,      ESP.getFreeSketchSpace());
 
     
-    JBI->Array_Start(PM_JSON_FASTBOOT_RECOVERY);
+    JBI->Array_Start(PM_FASTBOOT_RECOVERY);
     #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
     JBI->Add("OTA");
     #endif
@@ -161,10 +161,10 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     JBI->Array_End();
 
     #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-    JBI->Add(PM_JSON_WATCHDOG, "Enabled");
+    JBI->Add(PM_WATCHDOG, "Enabled");
     // JBI->Add("WatchDogTimeout", D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS);
     #else
-    JBI->Add(PM_JSON_WATCHDOG, "Disabled");
+    JBI->Add(PM_WATCHDOG, "Disabled");
     #endif
 
   return JBI->End();
@@ -174,11 +174,11 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
 uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level, bool json_appending){ 
   char buffer[30];
   JBI->Start();
-    JBI->Object_Start(PM_JSON_LOGLEVELS);
-      JBI->Add_P(PM_JSON_SERIAL, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level), VALUE_IS_PROGMEM);
-      JBI->Add_P(PM_JSON_SYSTEM, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.sys_level), VALUE_IS_PROGMEM);
-      JBI->Add_P(PM_JSON_WEB,    pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.web_level), VALUE_IS_PROGMEM);
-      JBI->Add_P(PM_JSON_TELNET, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.telnet_level), VALUE_IS_PROGMEM);
+    JBI->Object_Start(PM_LOGLEVELS);
+      JBI->Add_P(PM_SERIAL, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level), VALUE_IS_PROGMEM);
+      JBI->Add_P(PM_SYSTEM, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.sys_level), VALUE_IS_PROGMEM);
+      JBI->Add_P(PM_WEB,    pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.web_level), VALUE_IS_PROGMEM);
+      JBI->Add_P(PM_TELNET, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.telnet_level), VALUE_IS_PROGMEM);
     JBI->Object_End();
   return JBI->End();
 }
@@ -186,21 +186,21 @@ uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level, bool json_appending){
 
 uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending){ // Debug info
   JBI->Start();
-    JBI->Add(PM_JSON_PROGRAMSIZE,      ESP.getSketchSize()/1024);
+    JBI->Add(PM_PROGRAMSIZE,      ESP.getSketchSize()/1024);
     #ifdef ESP8266
-    JBI->Add(PM_JSON_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
-    JBI->Add(PM_JSON_HEAPSIZE,         ESP.getFreeHeap()/1024);
-    JBI->Add(PM_JSON_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
-    JBI->Add(PM_JSON_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
-    JBI->Add(PM_JSON_FLASHCHIPID,      ESP.getFlashChipId());
+    JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
+    JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap()/1024);
+    JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
+    JBI->Add(PM_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
+    JBI->Add(PM_FLASHCHIPID,      ESP.getFlashChipId());
     #else
-    JBI->Add(PM_JSON_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
-    JBI->Add(PM_JSON_HEAPSIZE,         ESP.getFreeHeap()/1024);
-    JBI->Add(PM_JSON_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
-    JBI->Add(PM_JSON_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
-    // JBI->Add(PM_JSON_FLASHCHIPID,      ESP.getFlashChipId());
+    JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
+    JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap()/1024);
+    JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
+    JBI->Add(PM_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
+    // JBI->Add(PM_FLASHCHIPID,      ESP.getFlashChipId());
     #endif // ESP8266
-    JBI->Add(PM_JSON_FLASHMODE,        (uint8_t)ESP.getFlashChipMode()); //FlashMode_t
+    JBI->Add(PM_FLASHMODE,        (uint8_t)ESP.getFlashChipMode()); //FlashMode_t
   return JBI->End();
 }
 
@@ -215,23 +215,23 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
   IPAddress dnsip     = IPAddress(pCONT_set->Settings.ip_address[3]);
 
   JBI->Start();
-    JBI->Add_FV(PM_JSON_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
-    JBI->Add(PM_JSON_SSID, WiFi.SSID().c_str());
-    JBI->Add(PM_JSON_SSID_NUMBERED, pCONT_set->Settings.sta_active); // Used to debug switching in grafana
-    JBI->Add(PM_JSON_RSSI, WiFi.RSSI());
-    // JBI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
-    JBI->Add(PM_JSON_HOSTNAME, pCONT_set->runtime.my_hostname);
-    JBI->Add_P(PM_JSON_TELNET_PORT, TELNET_PORT);
-    JBI->Add_FV(PM_JSON_STATIC_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),staticip[0],staticip[1],staticip[2],staticip[3]);
-    JBI->Add_FV(PM_JSON_GATEWAY,PSTR("\"%d.%d.%d.%d\""),gatewayip[0],gatewayip[1],gatewayip[2],gatewayip[3]);
-    JBI->Add_FV(PM_JSON_SUBNETMASK,PSTR("\"%d.%d.%d.%d\""),subnetip[0],subnetip[1],subnetip[2],subnetip[3]);
-    JBI->Add_FV(PM_JSON_DNSSERVER,PSTR("\"%d.%d.%d.%d\""),dnsip[0],dnsip[1],dnsip[2],dnsip[3]);
-    JBI->Add(PM_JSON_BSSID, WiFi.BSSIDstr().c_str());
-    JBI->Add(PM_JSON_MAC, WiFi.macAddress().c_str());
-    JBI->Add(PM_JSON_WEBSERVER_ENABLED, pCONT_set->Settings.webserver);
-    JBI->Add(PM_JSON_WIFICONFIG_STATE, pCONT_set->Settings.sta_config);
+    JBI->Add_FV(PM_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
+    JBI->Add(PM_SSID, WiFi.SSID().c_str());
+    JBI->Add(PM_SSID_NUMBERED, pCONT_set->Settings.sta_active); // Used to debug switching in grafana
+    JBI->Add(PM_RSSI, WiFi.RSSI());
+    // JBI->Add(PM_CONNECTCOUNT, wifi_reconnects_counter);
+    JBI->Add(PM_HOSTNAME, pCONT_set->runtime.my_hostname);
+    JBI->Add_P(PM_TELNET_PORT, TELNET_PORT);
+    JBI->Add_FV(PM_STATIC_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),staticip[0],staticip[1],staticip[2],staticip[3]);
+    JBI->Add_FV(PM_GATEWAY,PSTR("\"%d.%d.%d.%d\""),gatewayip[0],gatewayip[1],gatewayip[2],gatewayip[3]);
+    JBI->Add_FV(PM_SUBNETMASK,PSTR("\"%d.%d.%d.%d\""),subnetip[0],subnetip[1],subnetip[2],subnetip[3]);
+    JBI->Add_FV(PM_DNSSERVER,PSTR("\"%d.%d.%d.%d\""),dnsip[0],dnsip[1],dnsip[2],dnsip[3]);
+    JBI->Add(PM_BSSID, WiFi.BSSIDstr().c_str());
+    JBI->Add(PM_MAC, WiFi.macAddress().c_str());
+    JBI->Add(PM_WEBSERVER_ENABLED, pCONT_set->Settings.webserver);
+    JBI->Add(PM_WIFICONFIG_STATE, pCONT_set->Settings.sta_config);
 
-    JBI->Array_Start(PM_JSON_AP_LIST);
+    JBI->Array_Start(PM_AP_LIST);
       JBI->Add(pCONT_set->SettingsText(SET_STASSID1));
       JBI->Add(pCONT_set->SettingsText(SET_STASSID2));
     JBI->Array_End();
@@ -253,12 +253,12 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
     // JBI->Add("RetrySecs", pCONT_mqtt->dt.connection[0].retry);
 
-    JBI->Object_Start(PM_JSON_REFRESH_RATES);
-      JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_mqtt->dt.ifchanged_secs);
-      JBI->Add(PM_JSON_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_mqtt->dt.teleperiod_secs);
+    JBI->Object_Start(PM_REFRESH_RATES);
+      JBI->Add(PM_MQTT_REFRESH_RATE_IFCHANGED, pCONT_mqtt->dt.ifchanged_secs);
+      JBI->Add(PM_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_mqtt->dt.teleperiod_secs);
     JBI->Object_End();
     
-    JBI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
+    JBI->Add(PM_MQTT_ENABLE_RESTART,   (uint8_t)0);
 
 // {
 //   "ClientName":"tg_lighting_70-08:D1:F9:CA:0B:74",
@@ -346,13 +346,13 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_appending){
   char buffer[100];
        
   JBI->Start();
-    JBI->Add(PM_JSON_UTC_TIME,   pCONT_time->GetDateAndTime(DT_UTC).c_str() );
-    JBI->Add(PM_JSON_LOCAL_TIME, pCONT_time->GetDateAndTime(DT_LOCAL).c_str() );
-    JBI->Add(PM_JSON_STARTDST,   pCONT_time->GetDateAndTime(DT_DST).c_str() );
-    JBI->Add(PM_JSON_ENDDST,     pCONT_time->GetDateAndTime(DT_STD).c_str() );
-    JBI->Add(PM_JSON_TIMEZONE,   pCONT_time->GetDateAndTime(DT_TIMEZONE).c_str() );
-    JBI->Add(PM_JSON_SUNRISE,    pCONT_time->GetDateAndTime(DT_SUNRISE).c_str() );
-    JBI->Add(PM_JSON_SUNSET,     pCONT_time->GetDateAndTime(DT_SUNSET).c_str() );
+    JBI->Add(PM_UTC_TIME,   pCONT_time->GetDateAndTime(DT_UTC).c_str() );
+    JBI->Add(PM_LOCAL_TIME, pCONT_time->GetDateAndTime(DT_LOCAL).c_str() );
+    JBI->Add(PM_STARTDST,   pCONT_time->GetDateAndTime(DT_DST).c_str() );
+    JBI->Add(PM_ENDDST,     pCONT_time->GetDateAndTime(DT_STD).c_str() );
+    JBI->Add(PM_TIMEZONE,   pCONT_time->GetDateAndTime(DT_TIMEZONE).c_str() );
+    JBI->Add(PM_SUNRISE,    pCONT_time->GetDateAndTime(DT_SUNRISE).c_str() );
+    JBI->Add(PM_SUNSET,     pCONT_time->GetDateAndTime(DT_SUNSET).c_str() );
   return JBI->End();
 
 }
@@ -372,16 +372,16 @@ uint8_t mTelemetry::ConstructJSON_Debug_Devices(uint8_t json_level, bool json_ap
    * @brief DeviceNameBuffer, should become a debug topic
    * 
    */
-    JBI->Add(PM_JSON_MODULENAME,          pCONT_set->Settings.module);
+    JBI->Add(PM_MODULENAME,          pCONT_set->Settings.module);
     // If debug mode, show entire message
-    // JBI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.device_id));
-    // JBI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id));
+    // JBI->Array_AddArray(PM_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.device_id));
+    // JBI->Array_AddArray(PM_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id));
     // else, only show ysed
     JBI->Add("DLI->GetLengthIndexUsed()", DLI->GetLengthIndexUsed());
-    JBI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, DLI->GetLengthIndexUsed());
-    JBI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  DLI->GetLengthIndexUsed());  
-    JBI->Add(PM_JSON_BUFFER,        pCONT_set->Settings.device_name_buffer.name_buffer);
-    JBI->Add(PM_JSON_BUFLEN,        strlen(pCONT_set->Settings.device_name_buffer.name_buffer));
+    JBI->Array_AddArray(PM_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, DLI->GetLengthIndexUsed());
+    JBI->Array_AddArray(PM_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  DLI->GetLengthIndexUsed());  
+    JBI->Add(PM_BUFFER,        pCONT_set->Settings.device_name_buffer.name_buffer);
+    JBI->Add(PM_BUFLEN,        strlen(pCONT_set->Settings.device_name_buffer.name_buffer));
 
     uint8_t count = 0;
     if(strlen(pCONT_set->Settings.device_name_buffer.name_buffer)){ //if anything in buffer
@@ -424,20 +424,20 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
 
   JBI->Start();
   
-  JBI->Add(PM_JSON_DEVICE, pCONT_set->Settings.system_name.device);
-  JBI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
-  JBI->Add_FV(PM_JSON_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
+  JBI->Add(PM_DEVICE, pCONT_set->Settings.system_name.device);
+  JBI->Add(PM_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
+  JBI->Add_FV(PM_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
                       pCONT_time->RtcTime.day_of_month, pCONT_time->RtcTime.month, pCONT_time->RtcTime.year,
                       pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second
                     );
-  JBI->Object_Start(PM_JSON_COUNTER);
+  JBI->Object_Start(PM_COUNTER);
     JBI->Add("All", (uint8_t)0);
     // JBI->Add("WDT", (uint8_t)0);
   JBI->Object_End();
 
   // if (pCONT_sup->CrashFlag()) {
     
-  JBI->Object_Start(PM_JSON_CRASHDUMP);
+  JBI->Object_Start(PM_CRASHDUMP);
     pCONT_sup->WriteBuffer_P(PSTR(","));
     pCONT_sup->CrashDump_AddJson();
   JBI->Object_End();
@@ -470,18 +470,18 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_ap
   IPAddress localip = WiFi.localIP();
   
   JBI->Start();
-    JBI->Add(PM_JSON_UPTIME,         pCONT_time->GetUptime().c_str());// PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
-    JBI->Add(PM_JSON_UPSECONDS,      pCONT_time->UpTime());//uptime_seconds_nonreset);
-    JBI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay_temp);
-    JBI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
-    JBI->Add(PM_JSON_LOOPRATIO,      pCONT_sup->this_cycle_ratio);
+    JBI->Add(PM_UPTIME,         pCONT_time->GetUptime().c_str());// PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.day_of_year,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JBI->Add(PM_UPSECONDS,      pCONT_time->UpTime());//uptime_seconds_nonreset);
+    JBI->Add(PM_SLEEP,          pCONT_sup->loop_delay_temp);
+    JBI->Add(PM_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
+    JBI->Add(PM_LOOPRATIO,      pCONT_sup->this_cycle_ratio);
     // #ifdef USE_NETWORK_MDNS
-    // JBI->Add(PM_JSON_MDNS,           pCONT_set->runtime.boot_status.mdns_started_succesfully);
+    // JBI->Add(PM_MDNS,           pCONT_set->runtime.boot_status.mdns_started_succesfully);
     // #endif // #ifdef USE_NETWORK_MDNS
-    JBI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
-    JBI->Add(PM_JSON_VERSION_NAME,    pCONT_set->runtime.firmware_version.current.name_ctr);
-    JBI->Add_FV(PM_JSON_IPADDRESS,   PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
-    JBI->Add(PM_JSON_BOOTCOUNT,      pCONT_set->Settings.bootcount);
+    JBI->Add(PM_FREEHEAP,       ESP.getFreeHeap());
+    JBI->Add(PM_VERSION_NAME,    pCONT_set->runtime.firmware_version.current.name_ctr);
+    JBI->Add_FV(PM_IPADDRESS,   PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
+    JBI->Add(PM_BOOTCOUNT,      pCONT_set->Settings.bootcount);
   return JBI->End();
 
 }
@@ -495,7 +495,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
   char buffer[30];
   JBI->Start();
   JBI->Add("flag_serial_set_tx_set",pCONT_pins-> flag_serial_set_tx_set);
-    // JBI->Object_Start(PM_JSON_GPIO);
+    // JBI->Object_Start(PM_GPIO);
     // for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
     //   if(pCONT_pins->PinUsed(i)){ // skip pins not configured
     //     sprintf_P(buffer, PSTR("TASK_%d"), i);
@@ -503,7 +503,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     //   }
     // }
     // JBI->Object_End();
-    JBI->Object_Start(PM_JSON_GPIO);
+    JBI->Object_Start(PM_GPIO);
     for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++){ 
       if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i])){ // skip pins not configured
 
@@ -521,7 +521,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     }
     
     JBI->Object_End();
-    // JBI->Object_Start(D_JSON_GPIO "_map");
+    // JBI->Object_Start(D_GPIO "_map");
     // for(uint16_t i=0;i<MAX_USER_PINS;i++){ 
     //   sprintf_P(buffer, PSTR("%d"),
       
@@ -577,13 +577,13 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_a
       JBI->Add("Rules",              pCONT_set->runtime.template_loading.status.rules);
     JBI->Object_End();
 
-    JBI->Add_P(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module));
-    JBI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
+    JBI->Add_P(PM_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module));
+    JBI->Add(PM_MODULEID,   pCONT_set->Settings.module);
     JBI->Add("MyModuleType",pCONT_set->runtime.my_module_type);
     myio cmodule;
     pCONT_pins->TemplateGPIOs(&cmodule);
-    // JBI->Array_AddArray(PM_JSON_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));
-    JBI->Array_Start_P(PM_JSON_GPIO);
+    // JBI->Array_AddArray(PM_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));
+    JBI->Array_Start_P(PM_GPIO);
     for(int i=0;i<ARRAY_SIZE(cmodule.io);i++)
       JBI->Add(cmodule.io[i]);
     JBI->Array_End();

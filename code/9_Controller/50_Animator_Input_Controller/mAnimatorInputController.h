@@ -1,7 +1,7 @@
 // #ifndef _MCEILINGFAN_H
 // #define _MCEILINGFAN_H
 
-// #define D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID ((9*1000)+03)
+// #define D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID 9050 // [(Folder_Number*100)+ID_File]
 
 // #include "1_TaskerManager/mTaskerManager.h"
 
@@ -22,9 +22,7 @@
 //     static constexpr const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR;
 //     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CEILINGFAN_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID; }
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){      return sizeof(mSonoffIFan);    };
-//     #endif
+
 
 //     struct SETTINGS{
 //       uint8_t fEnableModule = false;

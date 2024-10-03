@@ -1,7 +1,7 @@
 #ifndef _MODULE_SENSORS_ROTARY_ENCODER_H
 #define _MODULE_SENSORS_ROTARY_ENCODER_H
 
-#define D_UNIQUE_MODULE_SENSORS_ROTARY_ENCODER_ID   ((5*1000)+21)
+#define D_UNIQUE_MODULE_SENSORS_ROTARY_ENCODER_ID   5021 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -25,9 +25,6 @@ class mRotaryEncoder :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ROTARY_ENCODER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ROTARY_ENCODER_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){ return sizeof(mRotaryEncoder); };
-    #endif
 
     struct SETTINGS{
       uint8_t sensors_active = 0;

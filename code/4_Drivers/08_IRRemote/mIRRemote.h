@@ -20,7 +20,7 @@
 #ifndef HEADER_MODULE_DRIVERS_IRREMOTE_H
 #define HEADER_MODULE_DRIVERS_IRREMOTE_H
   
-#define D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID 135
+#define D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID 4008 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -108,13 +108,7 @@ class mIRRemote :
     static constexpr const char* PM_MODULE_DRIVERS_IRREMOTE_CTR = D_MODULE_DRIVERS_IRREMOTE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_IRREMOTE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID; }
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mIRRemote);
-    };
-    #endif
-    
+        
     
     struct SETTINGS{
       uint8_t fEnableSensor = false;

@@ -3,7 +3,7 @@
 #ifndef _MRULEENGINE_H
 #define _MRULEENGINE_H
 
-#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID ((2*1000)+10)
+#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID 2010 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -27,11 +27,6 @@ class mRuleEngine :
     PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mRuleEngine);
-    };
-    #endif
 
     struct SETTINGS{
 
@@ -42,9 +37,9 @@ class mRuleEngine :
     uint16_t _dataLen = 0;
     uint16_t _dataUsedLen = 0;
 
-    #define D_JSON_COMMAND_BUFFER_LENGTH 255
+    #define D_COMMAND_BUFFER_LENGTH 255
     struct JSONCOMMANDS{
-      char data[D_JSON_COMMAND_BUFFER_LENGTH] = {0}; //use | delims
+      char data[D_COMMAND_BUFFER_LENGTH] = {0}; //use | delims
       uint8_t bytes_used = 0;
       int8_t delims_used = 0;
     }jsonbuffer;
@@ -278,18 +273,9 @@ uint8_t rule_count2 = 0;
 
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
-
+    std::vector<struct handler<mRuleEngine>*> mqtthandler_list;
     struct handler<mRuleEngine> mqtthandler_settings;
     struct handler<mRuleEngine> mqtthandler_state_ifchanged;
-    
-    struct handler<mRuleEngine>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
-    };
   #endif //  USE_MODULE_NETWORK_MQTT
 
 };

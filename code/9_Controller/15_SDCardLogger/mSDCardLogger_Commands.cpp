@@ -12,7 +12,7 @@
  
 //   uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
 
-//   if(jtok = obj[PM_JSON_POWERNAME]){
+//   if(jtok = obj[PM_POWERNAME]){
 //     if(jtok.isStr()){
 //       relay_id = GetRelayIDbyName(jtok.getStr());
 //     }else 
@@ -22,7 +22,7 @@
 //   }
 
 //   // Primary method since v0.86.14.21
-//   if(jtok = obj[PM_JSON_POWER_STATE]){
+//   if(jtok = obj[PM_POWER_STATE]){
 //     if(jtok.isStr()){
 //       state = pCONT_sup->GetStateNumber(jtok.getStr());
 //     }else 
@@ -38,7 +38,7 @@
 //   }
 
 //   // PHASE OUT by version 0.87
-//   if(jtok = obj[PM_JSON_ONOFF]){
+//   if(jtok = obj[PM_ONOFF]){
 //     if(jtok.isStr()){
 //       state = pCONT_sup->GetStateNumber(jtok.getStr());
 //     }else 
@@ -51,10 +51,10 @@
   
 
 
-//   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+//   if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
 //     CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
 //   }else
-//   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+//   if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
 //     CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
 //   }
 
@@ -89,19 +89,19 @@
 //   //   time_short_t offtime;
 //   //   uint8_t index = 0;
     
-//   //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_INDEX]){
+//   //   if(jtok = obj["EnabledTime"].getObject()[PM_INDEX]){
 //   //     index = jtok.getInt();    
 //   //   }
     
-//   //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ONTIME]){
+//   //   if(jtok = obj["EnabledTime"].getObject()[PM_ONTIME]){
 //   //     ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
 //   //     relay_status[relay_id].enabled_ranges[index].ontime = ontime;
 //   //   }
-//   //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_OFFTIME]){
+//   //   if(jtok = obj["EnabledTime"].getObject()[PM_OFFTIME]){
 //   //     offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
 //   //     relay_status[relay_id].enabled_ranges[index].offtime = offtime;
 //   //   }
-//   //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ENABLED]){
+//   //   if(jtok = obj["EnabledTime"].getObject()[PM_ENABLED]){
 //   //     relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
 //   //   }
 
@@ -131,7 +131,7 @@ void mSDCardLogger::CommandSet_SDCard_OpenClose_Toggle()
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
 }

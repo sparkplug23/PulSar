@@ -114,7 +114,7 @@ void mRotaryEncoder::EveryLoop_ReadSensor()
 uint8_t mRotaryEncoder::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }

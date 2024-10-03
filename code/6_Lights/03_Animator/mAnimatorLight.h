@@ -3,7 +3,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#define D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID 6003
+#define D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID 6003 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -322,9 +322,7 @@ class mAnimatorLight :
     static constexpr const char* PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ANIMATOR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mAnimatorLight);    };
-    #endif
+    
 
     struct ClassState
     {

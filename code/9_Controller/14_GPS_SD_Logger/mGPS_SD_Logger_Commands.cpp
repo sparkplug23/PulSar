@@ -27,7 +27,7 @@ void mGPS_SD_Logger::CommandSet_SDCard_OpenClose_Toggle()
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
 }
@@ -64,7 +64,7 @@ void mGPS_SD_Logger::CommandSet_LoggingState(uint8_t state)
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
 }

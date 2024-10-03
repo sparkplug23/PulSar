@@ -33,15 +33,14 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case TASK_MQTT_CONNECTED:
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      MQTTHandler_RefreshAll();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
@@ -340,40 +339,6 @@ void mTelemetry::MQTTHandler_Init()
   #endif // FIRMWARE_MINIMAL2
 
 } //end "MQTTHandler_Init"
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mTelemetry::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mTelemetry::MQTTHandler_Rate()
-{
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  // }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mTelemetry::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

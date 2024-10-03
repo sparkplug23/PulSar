@@ -1,7 +1,7 @@
 #ifndef _MDOORSENSOR_H
 #define _MDOORSENSOR_H 0.2
 
-#define D_UNIQUE_MODULE_SENSORS_DOOR_ID ((5*1000)+11)
+#define D_UNIQUE_MODULE_SENSORS_DOOR_ID 5011 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -10,8 +10,8 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 
-DEFINE_PGM_CTR(PM_EVENT_DOOR_OPENED_CTR) D_JSON_OPENED;
-DEFINE_PGM_CTR(PM_EVENT_DOOR_CLOSED_CTR) D_JSON_CLOSED;
+DEFINE_PGM_CTR(PM_EVENT_DOOR_OPENED_CTR) D_OPENED;
+DEFINE_PGM_CTR(PM_EVENT_DOOR_CLOSED_CTR) D_CLOSED;
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -28,11 +28,6 @@ class mDoorSensor :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DOOR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DOOR_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mDoorSensor);
-    };
-    #endif
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;

@@ -1,7 +1,7 @@
 #ifndef _MWEBCAM_WEBCAM_H
 #define _MWEBCAM_WEBCAM_H 0.1
 
-#define D_UNIQUE_MODULE_DRIVERS_CAMERA_WEBCAM_ID ((4*1000)+51)
+#define D_UNIQUE_MODULE_DRIVERS_CAMERA_WEBCAM_ID 4051 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -32,12 +32,6 @@ class mWebCam :
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_CAMERA_WEBCAM_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_CAMERA_WEBCAM_ID; }
 
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mWebCam);
-    };
-    #endif
 
  uint8_t    server_started = 0;
  void StartLocalServer();

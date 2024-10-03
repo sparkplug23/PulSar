@@ -124,7 +124,7 @@ void mOLED_SH1106::RefreshDisplay()
       ShowStaticLog();
     break;
     case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
-    case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_JSON_ID:
+    case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_ID:
       // Refresh not needed, drawn directly on execution
     break;
     case EM_DISPLAY_MODE_UTC_TIME_ID:

@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_DRIVERS_MODEM_800L_H
 #define _USE_MODULE_DRIVERS_MODEM_800L_H 0.3
 
-#define D_UNIQUE_MODULE_DRIVERS_MODEM_800L_ID 45
+#define D_UNIQUE_MODULE_DRIVERS_MODEM_800L_ID 4081 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -209,10 +209,7 @@ class mSIM800L :
     static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_MODEM_800L_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mSIM800L); };
-    #endif
-    
+        
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t leds_found = 0;
@@ -446,11 +443,6 @@ class mSIM800L :
     
 //     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mSIM800L);
-//     };
-//     #endif
     
 //     struct SETTINGS{
 //       uint8_t fEnableSensor = false;

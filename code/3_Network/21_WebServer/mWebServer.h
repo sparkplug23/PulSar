@@ -1,7 +1,7 @@
 #ifndef _MWEBSERVER_H
 #define _MWEBSERVER_H 0.3
 
-#define D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID  ((3*1000)+21)
+#define D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID  3021 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -1332,13 +1332,6 @@ public mTaskerInterface{
     static constexpr const char* PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WEBSERVER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mWebServer);
-    };
-    #endif
-
 
     AsyncWebServer* server = nullptr; //(80);
 

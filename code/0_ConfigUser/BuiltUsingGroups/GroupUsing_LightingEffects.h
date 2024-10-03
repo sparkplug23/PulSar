@@ -283,11 +283,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   // #define USE_LIGHTING_TEMPLATE
@@ -497,11 +497,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define USE_LIGHTING_TEMPLATE

@@ -123,7 +123,7 @@ void mAnimatorLight::Save_Module()
   JBI->Start();
 
   #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
+    JBI->Add(PM_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
   #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
   uint8_t bus_appended = 0;
@@ -631,7 +631,7 @@ void mAnimatorLight::EverySecond_AutoOff()
   
     if(SEGMENT_I(seg_i).auto_timeoff.UpdateTick())
     {
-      ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Running Value")), SEGMENT_I(seg_i).auto_timeoff.Value());
+      ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Running Value")), SEGMENT_I(seg_i).auto_timeoff.Value());
     }
 
     if(SEGMENT_I(seg_i).auto_timeoff.IsLastTick())
@@ -2411,7 +2411,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   char buffer[30];
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_EFFECTS, D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_COMMAND_SVALUE_SVALUE_K(D_EFFECTS, D_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -2606,7 +2606,7 @@ bool mAnimatorLight::Segment::allocateData(size_t len)
   deallocateData();
   if (mAnimatorLight::Segment::getUsedSegmentData() + len > MAX_SEGMENT_DATA)
   { 
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
     effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return false; //not enough memory
   }
@@ -2620,7 +2620,7 @@ bool mAnimatorLight::Segment::allocateData(size_t len)
   data = (byte*) malloc(len);
 
   if (!data){
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
     effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return false; //allocation failed
   }
@@ -5620,7 +5620,7 @@ JBI->Start();
     // JBI->Array_End();
     
 //   JBI->Start();  
-//     JBI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
+//     JBI->Add_P(PM_SIZE, pCONT_iLight->settings.light_size_count);
 //     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
 //     JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette_id );
 //     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette_id, buffer, sizeof(buffer)));

@@ -25,9 +25,9 @@
 // , CMND_LATITUDE, CMND_LONGITUDE
 // #endif
 //  };
-// const char kTimerCommands[] PROGMEM = D_JSON_TIMER "|" D_JSON_TIMERS
+// const char kTimerCommands[] PROGMEM = D_TIMER "|" D_TIMERS
 // #ifdef USE_SUNRISE
-// "|" D_JSON_LATITUDE "|" D_JSON_LONGITUDE
+// "|" D_LATITUDE "|" D_LONGITUDE
 // #endif
 // ;
 
@@ -315,7 +315,7 @@
 
 //   soutput[0] = '\0';
 //   if (devices_present) {
-//     snprintf_P(soutput, sizeof(soutput), PSTR(",\"" D_JSON_TIMER_OUTPUT "\":%d"), xtimer.device +1);
+//     snprintf_P(soutput, sizeof(soutput), PSTR(",\"" D_TIMER_OUTPUT "\":%d"), xtimer.device +1);
 //   }
 // #ifdef USE_SUNRISE
 //   int16_t hour = xtimer.time / 60;
@@ -325,10 +325,10 @@
 //       sign[0] = '-';
 //     }
 //   }
-//   ResponseAppend_P(PSTR("\"" D_JSON_TIMER "%d\":{\"" D_JSON_TIMER_ARM "\":%d,\"" D_JSON_TIMER_MODE "\":%d,\"" D_JSON_TIMER_TIME "\":\"%s%02d:%02d\",\"" D_JSON_TIMER_WINDOW "\":%d,\"" D_JSON_TIMER_DAYS "\":\"%s\",\"" D_JSON_TIMER_REPEAT "\":%d%s,\"" D_JSON_TIMER_ACTION "\":%d}"),
+//   ResponseAppend_P(PSTR("\"" D_TIMER "%d\":{\"" D_TIMER_ARM "\":%d,\"" D_TIMER_MODE "\":%d,\"" D_TIMER_TIME "\":\"%s%02d:%02d\",\"" D_TIMER_WINDOW "\":%d,\"" D_TIMER_DAYS "\":\"%s\",\"" D_TIMER_REPEAT "\":%d%s,\"" D_TIMER_ACTION "\":%d}"),
 //     index, xtimer.arm, xtimer.mode, sign, hour, xtimer.time % 60, xtimer.window, days, xtimer.repeat, soutput, xtimer.power);
 // #else
-//   ResponseAppend_P(PSTR("\"" D_JSON_TIMER "%d\":{\"" D_JSON_TIMER_ARM "\":%d,\"" D_JSON_TIMER_TIME "\":\"%02d:%02d\",\"" D_JSON_TIMER_WINDOW "\":%d,\"" D_JSON_TIMER_DAYS "\":\"%s\",\"" D_JSON_TIMER_REPEAT "\":%d%s,\"" D_JSON_TIMER_ACTION "\":%d}"),
+//   ResponseAppend_P(PSTR("\"" D_TIMER "%d\":{\"" D_TIMER_ARM "\":%d,\"" D_TIMER_TIME "\":\"%02d:%02d\",\"" D_TIMER_WINDOW "\":%d,\"" D_TIMER_DAYS "\":\"%s\",\"" D_TIMER_REPEAT "\":%d%s,\"" D_TIMER_ACTION "\":%d}"),
 //     index, xtimer.arm, xtimer.time / 60, xtimer.time % 60, xtimer.window, days, xtimer.repeat, soutput, xtimer.power);
 // #endif  // USE_SUNRISE
 // }
@@ -365,21 +365,21 @@
 //           StaticJsonBuffer<256> jsonBuffer;
 //           JsonObject& root = jsonBuffer.parseObject(dataBufUc);
 //           if (!root.success()) {
-//             Response_P(PSTR("{\"" D_JSON_TIMER "%d\":\"" D_JSON_INVALID_JSON "\"}"), index); // JSON decode failed
+//             Response_P(PSTR("{\"" D_TIMER "%d\":\"" D_INVALID_JSON "\"}"), index); // JSON decode failed
 //             error = 1;
 //           }
 //           else {
 //             char parm_uc[10];
 //             index--;
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_ARM))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_ARM))].success()) {
 //               Settings.timer[index].arm = (root[parm_uc] != 0);
 //             }
 // #ifdef USE_SUNRISE
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_MODE))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_MODE))].success()) {
 //               Settings.timer[index].mode = (uint8_t)root[parm_uc] & 0x03;
 //             }
 // #endif
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_TIME))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_TIME))].success()) {
 //               uint16_t itime = 0;
 //               int8_t value = 0;
 //               uint8_t sign = 0;
@@ -406,11 +406,11 @@
 //               }
 //               Settings.timer[index].time = itime;
 //             }
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_WINDOW))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_WINDOW))].success()) {
 //               Settings.timer[index].window = (uint8_t)root[parm_uc] & 0x0F;
 //               TimerSetRandomWindow(index);
 //             }
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_DAYS))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_DAYS))].success()) {
 //               // SMTWTFS = 1234567 = 0011001 = 00TW00S = --TW--S
 //               Settings.timer[index].days = 0;
 //               const char *tday = root[parm_uc];
@@ -423,14 +423,14 @@
 //                 ch = *tday++;
 //               }
 //             }
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_REPEAT))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_REPEAT))].success()) {
 //               Settings.timer[index].repeat = (root[parm_uc] != 0);
 //             }
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_OUTPUT))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_OUTPUT))].success()) {
 //               uint8_t device = ((uint8_t)root[parm_uc] -1) & 0x0F;
 //               Settings.timer[index].device = (device < devices_present) ? device : 0;
 //             }
-//             if (root[UpperCase_P(parm_uc, PSTR(D_JSON_TIMER_ACTION))].success()) {
+//             if (root[UpperCase_P(parm_uc, PSTR(D_TIMER_ACTION))].success()) {
 //               uint8_t action = (uint8_t)root[parm_uc] & 0x03;
 //               Settings.timer[index].power = (devices_present) ? action : 3;  // If no devices than only allow rules
 //             }
@@ -439,7 +439,7 @@
 //           }
 // #ifndef USE_RULES
 //         } else {
-//           Response_P(PSTR("{\"" D_JSON_TIMER "%d\":\"" D_JSON_TIMER_NO_DEVICE "\"}"), index);  // No outputs defined so nothing to control
+//           Response_P(PSTR("{\"" D_TIMER "%d\":\"" D_TIMER_NO_DEVICE "\"}"), index);  // No outputs defined so nothing to control
 //           error = 1;
 //         }
 // #endif
@@ -468,7 +468,7 @@
 //     uint8_t lines = 1;
 //     for (uint8_t i = 0; i < MAX_TIMERS; i++) {
 //       if (!jsflg) {
-//         Response_P(PSTR("{\"" D_JSON_TIMERS "%d\":{"), lines++);
+//         Response_P(PSTR("{\"" D_TIMERS "%d\":{"), lines++);
 //       } else {
 //         ResponseAppend_P(PSTR(","));
 //       }
@@ -476,7 +476,7 @@
 //       PrepShowTimer(i +1);
 //       if (jsflg > 3) {
 //         ResponseAppend_P(PSTR("}}"));
-//         MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_JSON_TIMERS));
+//         MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_TIMERS));
 //         jsflg = 0;
 //       }
 //     }
@@ -737,7 +737,7 @@
 //   Settings.flag_network.timers_enable = WebServer->hasParam("e0");
 //   WebGetArg(request,"t0", tmp, sizeof(tmp));
 //   char *p = tmp;
-//   snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_MQTT D_JSON_TIMERS " %d"), Settings.flag_network.timers_enable);
+//   snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_MQTT D_TIMERS " %d"), Settings.flag_network.timers_enable);
 //   for (uint8_t i = 0; i < MAX_TIMERS; i++) {
 //     timer.data = strtol(p, &p, 10);
 //     p++;  // Skip comma

@@ -605,7 +605,7 @@ void mSensorsLSM303D::CalculateOrientation(
 uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+    JBI->Add(D_SENSOR_COUNT, settings.fSensorCount);
   return JBI->End();
 
 }

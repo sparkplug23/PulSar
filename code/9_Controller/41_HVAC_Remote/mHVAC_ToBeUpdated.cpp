@@ -208,20 +208,20 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 //   //   if(ischanged){ ischanged = 0;
 //   //     //data_buffer.payload.json_pairs++;
 //   //     JsonObject json1 = obj.createNestedObject(GetSensorNameByID(device_id));
-//   //     json1[D_JSON_TEMP] = pCONT->mhs->watertemps.ptr->raw.val;
-//   //     json1[D_JSON_HUE] = mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val);
-//   //     json1[D_JSON_BRT] = mapHeatingTempToBrightness(pCONT->mhs->watertemps.ptr->raw.val);
+//   //     json1[D_TEMP] = pCONT->mhs->watertemps.ptr->raw.val;
+//   //     json1[D_HUE] = mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val);
+//   //     json1[D_BRT] = mapHeatingTempToBrightness(pCONT->mhs->watertemps.ptr->raw.val);
 
 //   //     char tmpctr[10];  memset(tmpctr,0,sizeof(tmpctr));
 //   //     RgbColor c = HsbColor(mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val)/360.0f,100/100.0f,100/100.0f);
 //   //     sprintf(tmpctr,"%02X%02X%02X",c.R,c.G,c.B);
-//   //     json1[D_JSON_RGB] = tmpctr;
+//   //     json1[D_RGB] = tmpctr;
 
 //   //     switch(device_id){
-//   //       case ID_DB18_DS: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_DS_ID); break;
-//   //       case ID_DB18_US: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_US_ID); break;
-//   //       case ID_DB18_WB: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_WB_ID); break;
-//   //       case ID_DB18_IH: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_IH_ID); break;
+//   //       case ID_DB18_DS: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_DS_ID); break;
+//   //       case ID_DB18_US: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_US_ID); break;
+//   //       case ID_DB18_WB: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_WB_ID); break;
+//   //       case ID_DB18_IH: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_IH_ID); break;
 //   //       default: break; //nothing
 //   //     }
 //   //   }

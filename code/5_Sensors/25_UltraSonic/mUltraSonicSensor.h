@@ -1,7 +1,7 @@
 #ifndef _MULTRASONICSENSOR_H
 #define _MULTRASONICSENSOR_H 0.7
 
-#define D_UNIQUE_MODULE_SENSORS_ULTRASONIC_ID 129
+#define D_UNIQUE_MODULE_SENSORS_ULTRASONIC_ID 5025 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -45,12 +45,6 @@ class mUltraSonicSensor :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ULTRASONIC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ULTRASONIC_ID; }
 
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mUltraSonicSensor);
-    };
-    #endif
     
     typedef union {
       uint8_t data; // allows full manipulating

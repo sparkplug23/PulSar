@@ -258,13 +258,15 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.button_debounce = KEY_DEBOUNCE_TIME;
   Settings.switch_debounce = SWITCH_DEBOUNCE_TIME;
   #ifdef USE_MODULE_SENSORS_SWITCHES
-    for (uint8_t i = 0; i < MAX_SWITCHES; i++) { Settings.switchmode[i] = SWITCH_MODE; }
+    for (uint8_t i = 0; i < MAX_SWITCHES_SET; i++) { Settings.switchmode[i] = SWITCH_MODE; }
   #endif
   ALOG_INF(PSTR("Settings.switch_debounce is set --- %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
   Settings.flag_system.button_restrict = 0;
   Settings.flag_system.button_swap = 0;
   Settings.flag_system.button_single = 0; // support only single press to support faster button recognition (disable to allow multipress)
   Settings.flag_network.button_switch_force_local =0;
+
+  Settings.flag_system.mqtt_switches = 0; // false default
 
   ALOG_INF(PSTR("switch_debounce?? %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
   /*********************************************************************************************

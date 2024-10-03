@@ -23,7 +23,7 @@
 
 // // #define USE_MQTT_OILFURNACE
 
-// #define D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID 55
+// #define D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID 9008 // [(Folder_Number*100)+ID_File]
 
 // //https://www.weather.gov/media/epz/wxcalc/speedOfSound.pdf
 // /*
@@ -79,14 +79,6 @@
 //     static constexpr const char* PM_MODULE_CONTROLLER_TANKVOLUME_CTR;
 //     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_TANKVOLUME_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID; }
-
-    
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mTankVolumeUltrasonic);
-//     };
-//     #endif
-
 
 //     #define ULTRA_ECHO_PIN D1
 //     #define ULTRA_TRIG_PIN D2

@@ -1,7 +1,7 @@
 #ifndef _NETWORK_INTERFACE_H
 #define _NETWORK_INTERFACE_H
 
-#define D_UNIQUE_MODULE__NETWORK_INTERFACE__ID  ((3*1000)+00)
+#define D_UNIQUE_MODULE__NETWORK_INTERFACE__ID  3000 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -21,9 +21,7 @@ class mInterfaceNetwork :
     static constexpr const char*    PM_MODULE__NETWORK_INTERFACE__CTR = D_MODULE__NETWORK_INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_INTERFACE__CTR; }
     uint16_t GetModuleUniqueID(){   return D_UNIQUE_MODULE__NETWORK_INTERFACE__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){ return sizeof(mInterfaceNetwork);    };
-    #endif
+    
     void Pre_Init();
     void Init(void);
     void EveryLoop();
@@ -119,11 +117,6 @@ class mInterfaceNetwork :
     
 //     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mInterfaceNetwork);
-//     };
-//     #endif
     
 //     struct SETTINGS{
 //       uint8_t fEnableSensor = false;

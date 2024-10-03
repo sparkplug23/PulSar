@@ -1,7 +1,7 @@
 #ifndef MSENSORSDHT_H
 #define MSENSORSDHT_H 0.2
 
-#define D_UNIQUE_MODULE_SENSORS_DHT_ID ((5*1000)+05)
+#define D_UNIQUE_MODULE_SENSORS_DHT_ID 5005 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -47,12 +47,6 @@ class mSensorsDHT :
     static constexpr const char* PM_MODULE_SENSORS_DHT_CTR = D_MODULE_SENSORS_DHT_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DHT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DHT_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSensorsDHT);
-    };
-    #endif
 
     uint8_t GetSensorCount(void) override
     {

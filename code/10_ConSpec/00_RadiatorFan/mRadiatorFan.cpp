@@ -115,7 +115,7 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appendin
           {
             // JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
             JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
-              JBI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
+              JBI->Add(D_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
             JBI->Object_End();  
           }
         }

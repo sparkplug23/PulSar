@@ -1,7 +1,7 @@
 // #ifndef _MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_H
 // #define _MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_H
 
-// #define D_UNIQUE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID   141  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+// #define D_UNIQUE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID   10017 // [(Folder_Number*100)+ID_File]  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 // #define D_GROUP_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID    1    // Numerical accesending order of module within a group
 
 // #include "1_TaskerManager/mTaskerManager.h"
@@ -48,11 +48,6 @@
 //     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID; }
 
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mSerialCalibrationMeasurmentLogger);
-//     };
-//     #endif
     
 
 //     typedef enum 

@@ -115,7 +115,7 @@ void mSideDoorLight::parse_JSONCommand(JsonParserObject obj)
 uint8_t mSideDoorLight::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    JBI->Add(D_COUNT, settings.fEnableSensor);
     
   return JBI->End();
 

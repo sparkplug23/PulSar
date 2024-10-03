@@ -30,18 +30,18 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   /**
    * @note device_id for which heating zone is being commanded
    * */
-  if(jtok = obj[D_JSON_HVAC_DEVICE]){ 
+  if(jtok = obj[D_HVAC_DEVICE]){ 
     if(jtok.isStr()){
-      if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(),GetModuleUniqueID()))>=0){ // D_JSON_DEVICE
-        ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+      if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(),GetModuleUniqueID()))>=0){ // D_DEVICE
+        ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_NVALUE_K(D_HVAC_DEVICE)),device_id);
       }else{
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_HVAC_DEVICE "device_id=%d"), device_id);
       }
     }else
     if(jtok.isNum()){
       device_id = jtok.getInt();
     }
-    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+    ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_HVAC_DEVICE)),device_id);
   }
 
 // ALOG_DBM(PSTR("TESTPOINT"));
@@ -52,23 +52,23 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
    * */
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
 
-  if(jtok = obj["HVAC"].getObject()[D_JSON_TIME_ON])
+  if(jtok = obj["HVAC"].getObject()[D_TIME_ON])
   { 
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
-    ALOG_COM( PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt() );
+    ALOG_COM( PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), jtok.getInt() );
   }
 
   #else
   #ifdef USE_MODULE_LIGHTS_INTERFACE
-  if(jtok = obj["HVAC"].getObject()[D_JSON_TIME_ON]){ 
+  if(jtok = obj["HVAC"].getObject()[D_TIME_ON]){ 
   #else
-  if(jtok = obj[D_JSON_TIME_ON]){ 
+  if(jtok = obj[D_TIME_ON]){ 
   #endif
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), jtok.getInt());
     // #endif
   }
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
@@ -77,64 +77,64 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   /**
    * Temperature Commands
    * */
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_SET]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_SET]){ 
     CommandSet_ProgramTemperature_Desired_Temperature(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TEMPERATURE D_SET)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_MODE]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_MODE]){ 
     CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()["StartDesired"]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()["StartDesired"]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     zone[device_id].program_temp_method->StartDesiredTemperature(jtok.getFloat());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_TIME_RUNNING].getObject()[D_LIMIT]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     zone[device_id].program_temp_method->SetTimer_Running_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_MAINTAINING].getObject()[D_JSON_LIMIT]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_TIME_MAINTAINING].getObject()[D_LIMIT]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     zone[device_id].program_temp_method->SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
 
-  if(jtok = obj[D_JSON_SCHEDULE].getObject()[D_JSON_MODE]){ 
+  if(jtok = obj[D_SCHEDULE].getObject()[D_MODE]){ 
     int8_t mode = GetScheduleModeIDByCtr(jtok.getStr());
     CommandSet_ProgramTemperature_Schedule_Mode(device_id,mode); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_K(D_JSON_SCHEDULE D_JSON_MODE)), jtok.getStr());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_K(D_SCHEDULE D_MODE)), jtok.getStr());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
+  if(jtok = obj[D_TIME_RUNNING].getObject()[D_LIMIT]){ 
     CommandSet_ProgramTemperature_TimeRunning_Limit(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TIME_RUNNING,D_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
     // #endif
   }
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
@@ -203,7 +203,7 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }

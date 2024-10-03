@@ -851,7 +851,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
  
   int8_t relay_id= -1,state=-1;    //assume index 0 if none given
 
-  if(jtok = obj[PM_JSON_POWERNAME]){
+  if(jtok = obj[PM_POWERNAME]){
     if(jtok.isStr()){
       relay_id = GetRelayIDbyName(jtok.getStr());
     ALOG_INF( PSTR("relay_id = %s"), jtok.getStr() );
@@ -863,7 +863,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   }
 
 
-  if(jtok = obj[PM_JSON_POWER_STATE]){
+  if(jtok = obj[PM_POWER_STATE]){
     if(jtok.isStr()){
       state = pCONT_sup->GetStateNumber(jtok.getStr());
     }else 
@@ -882,18 +882,18 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   } 
 
 
-  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+  if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
     CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   }else
-  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+  if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
     CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   }else
-  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_MINUTES]){
+  if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_MINUTES]){
     CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   }
 
 
-  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_OFF_THEN_ON_SECS]){
+  if(jtok = obj[PM_RELAY].getObject()[PM_TIME_OFF_THEN_ON_SECS]){
     CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(jtok.getInt(), relay_id);
   }
 
@@ -932,19 +932,19 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
     time_short_t offtime;
     uint8_t index = 0;
     
-    if(jtok = jobj[PM_JSON_INDEX]){
+    if(jtok = jobj[PM_INDEX]){
       index = jtok.getInt();    
     }
     
-    // if(jtok = jobj[PM_JSON_ONTIME]){
+    // if(jtok = jobj[PM_ONTIME]){
     //   ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
     //   rt.relay_status[relay_id].enabled_ranges[index].ontime = ontime;
     // }
-    // if(jtok = jobj[PM_JSON_OFFTIME]){
+    // if(jtok = jobj[PM_OFFTIME]){
     //   offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
     //   rt.relay_status[relay_id].enabled_ranges[index].offtime = offtime;
     // }
-    // if(jtok = jobj[PM_JSON_ENABLED]){
+    // if(jtok = jobj[PM_ENABLED]){
     //   rt.relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
     // }
 
@@ -970,7 +970,7 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
   // Only apply changes when state is changed
 void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
-  ALOG_INF(PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE), "CommandSet_Relay_Power","num",num,"state",state);  
+  ALOG_INF(PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_COMMAND_NVALUE " " D_COMMAND_NVALUE), "CommandSet_Relay_Power","num",num,"state",state);  
 
 	// Check state if it needs to toggle result
 
@@ -1052,7 +1052,7 @@ uint8_t mRelays::CommandGet_Relay_Power(uint8_t num){
 //   relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   #endif
 // }
 
@@ -1074,7 +1074,7 @@ void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
   rt.relay_status[relay_id].timer_decounter.seconds = time_secs;
   rt.relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, rt.relay_status[relay_id].timer_decounter.seconds);  
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, rt.relay_status[relay_id].timer_decounter.seconds);  
   #endif
 }
 
@@ -1083,7 +1083,7 @@ uint16_t mRelays::CommandGet_SecondsToRemainOn(uint8_t relay_id)
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
   return rt.relay_status[relay_id].timer_decounter.seconds;
@@ -1101,7 +1101,7 @@ void mRelays::CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(uint16_t time
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
   /**
@@ -1112,7 +1112,7 @@ void mRelays::CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(uint16_t time
   rt.relay_status[relay_id].timer_off_then_on_decounter.seconds = time_secs;
   rt.relay_status[relay_id].timer_off_then_on_decounter.active = time_secs > 0 ? true : false;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);  
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);  
   #endif
 
 
@@ -1126,7 +1126,7 @@ uint16_t mRelays::CommandGet_SecondsToRemainOff(uint8_t relay_id)
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
   return rt.relay_status[relay_id].timer_off_then_on_decounter.seconds;
@@ -1163,7 +1163,7 @@ void mRelays::CommandSet_PowerTimeOnLimit_Until_Reset()
 uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 
   JBI->Start();
-    // JBI->Add(PM_JSON_DEVICES_CONNECTED, module_state.devices);
+    // JBI->Add(PM_DEVICES_CONNECTED, module_state.devices);
 
     // JBI->Array_Start_P(PSTR("rel_inverted"));
     //   for(int8_t bits=0; bits<sizeof(rt.rel_inverted)*8; bits++)
@@ -1196,22 +1196,22 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
       //phase onoff out
 
 
-        JBI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
-        JBI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+        JBI->Add_P(PM_ONOFF,        CommandGet_Relay_Power(device_id));
+        JBI->Add_P(PM_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
 
-        JBI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
-        JBI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-        JBI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+        JBI->Add_P(PM_POWER_STATE,        CommandGet_Relay_Power(device_id));
+        JBI->Add_P(PM_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+        JBI->Add_P(PM_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
         JBI->Add("TimerDeCounter", CommandGet_SecondsToRemainOn(device_id)); //Phase out
         JBI->Add("SecondsToRemainOn", CommandGet_SecondsToRemainOn(device_id));          
         JBI->Add("SecondsToRemainOff", CommandGet_SecondsRelayHasBeenOn(device_id));
 
 
-        JBI->Level_Start_P(PM_JSON_LAST);
+        JBI->Level_Start_P(PM_LAST);
           snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", rt.relay_status[device_id].last.ontime.hour, rt.relay_status[device_id].last.ontime.minute, rt.relay_status[device_id].last.ontime.second);
-          JBI->Add_P(PM_JSON_ONTIME, buffer);
+          JBI->Add_P(PM_ONTIME, buffer);
           snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", rt.relay_status[device_id].last.offtime.hour, rt.relay_status[device_id].last.offtime.minute, rt.relay_status[device_id].last.offtime.second);
-          JBI->Add_P(PM_JSON_OFFTIME, buffer);
+          JBI->Add_P(PM_OFFTIME, buffer);
         JBI->Object_End();
       
       // Schedules time periods the relays are allowed to run (or should this be locking off?)
@@ -1221,11 +1221,11 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
           // time_short_t t = rt.relay_status[device_id].enabled_ranges[ii].ontime;
           // snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-          // JBI->Add_P(PM_JSON_ONTIME, buffer);
+          // JBI->Add_P(PM_ONTIME, buffer);
 
           // t = rt.relay_status[device_id].enabled_ranges[ii].offtime;
           // snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-          // JBI->Add_P(PM_JSON_OFFTIME, buffer);
+          // JBI->Add_P(PM_OFFTIME, buffer);
 
           // Add if relay is within window etc here
           JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));

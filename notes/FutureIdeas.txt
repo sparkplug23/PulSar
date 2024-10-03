@@ -281,7 +281,7 @@ Fix multiple repos "git push -f origin master"
     
 #Idea 94
     Add that commands are non case senstitive, and also checked without spacing ie 
-    #define D_JSON_TIMEZONE "TimeZone" possible values are:
+    #define D_TIMEZONE "TimeZone" possible values are:
         - "time zone"
         - "timezone" ie automatically remove all spacing
 

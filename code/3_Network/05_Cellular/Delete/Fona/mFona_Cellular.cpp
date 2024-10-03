@@ -1224,7 +1224,7 @@ bool mFona_Cellular::CommandSet_Power()
 uint8_t mFona_Cellular::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    // JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    // JBI->Add(D_COUNT, settings.fEnableSensor);
     // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
   return JBI->End();
 
@@ -1236,14 +1236,14 @@ uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_append
 
   JBI->Start();
 
-    // JBI->Object_Start(D_JSON_RFRECEIVED);
+    // JBI->Object_Start(D_RFRECEIVED);
   
     //   JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
-    //   // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
-    //   // JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
-    //   // JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   
-    //   // JBI->Add(D_JSON_MILLIS, rx_pkt.received_time_millis);   
-    //   // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+    //   // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
+    //   // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
+    //   // JBI->Add(D_RF_PULSE, rx_pkt.delay);   
+    //   // JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
+    //   // JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
     // JBI->Object_End();

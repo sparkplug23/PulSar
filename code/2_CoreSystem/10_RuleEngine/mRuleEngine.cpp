@@ -93,12 +93,15 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-      break;
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-      break;
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
@@ -531,7 +534,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       }
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_INF(PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -550,7 +553,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_INF(PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -570,7 +573,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
       }
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_INF(PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -596,7 +599,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_INF(PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -620,7 +623,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_INF(PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -650,7 +653,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
           jsonbuffer.bytes_used += strlen(jtok.getStr());
 
           // char dlist[200]; memset(dlist,0,sizeof(dlist));
-          // pCONT_sup->AppendDList(dlist, D_JSON_TRANSITION "," D_JSON_PIXELS_UPDATE_PERCENTAGE);
+          // pCONT_sup->AppendDList(dlist, D_TRANSITION "," D_PIXELS_UPDATE_PERCENTAGE);
   
           // I need to create the ability to move to add/edit buffer (like tas)
           // Rules can therefore only be created once at starttime for now          
@@ -809,7 +812,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     //     data_buffer.isserviced++;
     //   }
     //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   // ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    //   // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     // }//end trigger
@@ -962,7 +965,7 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
 //   }
   
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_TRANSITION,D_PIXELS_UPDATE_PERCENTAGE)), value);
 //   // #endif
 
 // }
@@ -977,7 +980,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
 
 
   JBI->Start();
-    // JBI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
+    // JBI->Add(PM_DEVICES_CONNECTED, settings.relays_connected);
 
     char buffer[200];
 
@@ -1030,8 +1033,8 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
                 //     JBI->Add("json", buffer); 
 
                     
-                char buffer_unescaped[D_JSON_COMMAND_BUFFER_LENGTH] = {0};
-                char buffer_escaped[D_JSON_COMMAND_BUFFER_LENGTH+50] = {0};
+                char buffer_unescaped[D_COMMAND_BUFFER_LENGTH] = {0};
+                char buffer_escaped[D_COMMAND_BUFFER_LENGTH+50] = {0};
                 uint8_t len  = 0;
                 
                 pCONT_sup->GetTextIndexed(
@@ -1128,41 +1131,6 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_State;
 
 } //end "MQTTHandler_Init"
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mRuleEngine::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mRuleEngine::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mRuleEngine::MQTTHandler_Sender()
-{
-  // DEBUG_LINE_HERE;
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

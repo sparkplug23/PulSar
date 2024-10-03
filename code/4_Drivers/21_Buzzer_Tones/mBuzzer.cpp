@@ -289,7 +289,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
  
   // uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
 
-  // if(jtok = obj[PM_JSON_POWERNAME]){
+  // if(jtok = obj[PM_POWERNAME]){
   //   if(jtok.isStr()){
   //     relay_id = GetRelayIDbyName(jtok.getStr());
   //   }else 
@@ -299,10 +299,10 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
   // }
 
 
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }else
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }
 
@@ -340,7 +340,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
 uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -349,7 +349,7 @@ uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 uint8_t mBuzzer::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, 0);
+    JBI->Add(D_VOLTAGE, 0);
   return JBI->End();
     
 }

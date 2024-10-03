@@ -256,7 +256,7 @@ static MyGPS static_gps( &gpsPort );
 
 static void static_configNMEA( uint8_t rate )
 {
-  for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
+  for (uint32_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
     ublox::configNMEA( static_gps, (NMEAGPS::nmea_msg_t) i, rate );
   }
 }
@@ -2088,7 +2088,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_a
 // */
 
 
-    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+    // JBI->Add_P(PM_TIME_MS, animation.time_ms);
   return JBI->End();
 
 }
@@ -2240,7 +2240,7 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json
 
 
 
-    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+    // JBI->Add_P(PM_TIME_MS, animation.time_ms);
   return JBI->End();
 
 }
@@ -2259,14 +2259,14 @@ uint8_t mGPS_Serial::ConstructJSON_Settings(uint8_t json_level, bool json_append
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
-    JBI->Add_P(PM_JSON_TIME, 1000);
-    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+    // JBI->Add_P(PM_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+    JBI->Add_P(PM_TIME, 1000);
+    // JBI->Add_P(PM_TIME_MS, animation.time_ms);
   return JBI->End();
 
 }
@@ -2286,14 +2286,14 @@ uint8_t mGPS_Serial::ConstructJSON_GPSPacket_Required(uint8_t json_level, bool j
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
-    JBI->Add_P(PM_JSON_TIME, 1000);
-    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+    // JBI->Add_P(PM_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+    JBI->Add_P(PM_TIME, 1000);
+    // JBI->Add_P(PM_TIME_MS, animation.time_ms);
   return JBI->End();
 
 }

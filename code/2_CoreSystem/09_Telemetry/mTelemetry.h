@@ -1,7 +1,7 @@
 #ifndef _MTELEMETRY_H_
 #define _MTELEMETRY_H_
 
-#define D_UNIQUE_MODULE_CORE_TELEMETRY_ID ((2*1000)+9)
+#define D_UNIQUE_MODULE_CORE_TELEMETRY_ID 2009 // [(Folder_Number*100)+ID_File]
 
 #include "2_CoreSystem/mBaseConfig.h"
 #include "2_CoreSystem/06_Support/mSupport.h"
@@ -19,8 +19,7 @@
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 #include "3_Network/21_WebServer/mWebServer.h"
-#endif // USE_MODULE_NETWORK_WEBSERVER
-
+#endif
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -35,10 +34,7 @@ class mTelemetry :
     static constexpr const char* PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mTelemetry);    };
-    #endif
-
+   
     uint8_t ConstructJSON_LWT_Online(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Health(uint8_t json_method = 0, bool json_appending = true);
     #ifndef FIRMWARE_MINIMAL2
@@ -65,14 +61,8 @@ class mTelemetry :
     #endif // FIRMWARE_MINIMAL2
 
     #ifdef USE_MODULE_NETWORK_MQTT    
-
-      void MQTTHandler_Init();
-      void MQTTHandler_RefreshAll();
-      void MQTTHandler_Rate();
-      void MQTTHandler_Sender();
-      
+      void MQTTHandler_Init();      
       std::vector<struct handler<mTelemetry>*> mqtthandler_list;    
-
       handler<mTelemetry> mqtthandler_lwt_online;
       handler<mTelemetry> mqtthandler_health;
       #ifndef FIRMWARE_MINIMAL2

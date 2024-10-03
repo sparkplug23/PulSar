@@ -159,8 +159,8 @@ uint8_t mFan::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 uint8_t mFan::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
-    JBI->Add_P(D_JSON_FANPWM, set_fan_pwm);  
+    JBI->Add_P(D_FANSPEED, GetFanspeed());  
+    JBI->Add_P(D_FANPWM, set_fan_pwm);  
   JBI->End();
 
 }

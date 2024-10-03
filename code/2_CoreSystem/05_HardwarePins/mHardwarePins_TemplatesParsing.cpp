@@ -17,7 +17,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   }
   
 
-  if(jtok = rootObj[PM_JSON_NAME])
+  if(jtok = rootObj[PM_NAME])
   {
     const char* name_ctr = jtok.getStr();
     ALOG_COM(PSTR(D_LOG_CONFIG "system_name %s"), name_ctr);
@@ -25,7 +25,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   }
 
 
-  if(jtok = rootObj[PM_JSON_FRIENDLYNAME])
+  if(jtok = rootObj[PM_FRIENDLYNAME])
   {
     const char* name_ctr = jtok.getStr();
     ALOG_COM(PSTR(D_LOG_CONFIG "Template NAME %s"), name_ctr);
@@ -38,7 +38,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
    * 
    * @param rootObj 
    */
-  if((rootObj[PM_JSON_GPIOC])||(rootObj[D_JSON_GPIO_FUNCTION]))
+  if((rootObj[PM_GPIOC])||(rootObj[D_GPIO_FUNCTION]))
   {
     // pCONT_set->runtime.boot_status.module_template_parse_success = true;
     for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io);ii++){
@@ -47,7 +47,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   }
 
 
-  if(jtok = rootObj[PM_JSON_GPIOC])
+  if(jtok = rootObj[PM_GPIOC])
   {
     
     int8_t  real_pin = -1;
@@ -70,7 +70,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
         jtok.nextOne();
         const char* value = jtok.getStr();
         gpio_number = GetGPIOFunctionIDbyName(value);
-        // ALOG_INF(PSTR("gpio_number=%d\n\r"), gpio_number);
+        ALOG_INF(PSTR("gpio_number=%d\n\r"), gpio_number);
 
         if(gpio_number != -1){
           // only template pins
@@ -98,10 +98,10 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
 
   // New method that assumes the function is the key, and the pin(s) are the values
   // pins may be represented as single ints, or array of ints (e.g. Lighting pins)
-  if(jtok = rootObj[D_JSON_GPIO_FUNCTION])
+  if(jtok = rootObj[D_GPIO_FUNCTION])
   { 
 
-    ALOG_INF(PSTR("Found %s"), D_JSON_GPIO_FUNCTION);
+    ALOG_INF(PSTR("Found %s"), D_GPIO_FUNCTION);
     
     int8_t  real_pin = -1;
     int16_t gpio_function_id = -1;
@@ -171,7 +171,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   }
   
     
-  if(jtok = rootObj[PM_JSON_BASE])
+  if(jtok = rootObj[PM_BASE])
   {    
     const char* base_ctr = jtok.getStr();
     ALOG_COM(PSTR(D_LOG_CONFIG "Template BASE Searching \"%s\""), base_ctr);

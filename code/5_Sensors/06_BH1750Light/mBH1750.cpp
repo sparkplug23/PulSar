@@ -97,12 +97,12 @@ void mBH1750::Init(void)
   
   module_state.devices = 0;
 
-  for (uint32_t i = 0; i < sizeof(addresses); i++) 
+  for (uint32_t i = 0; i < sizeof(i2c_addresses); i++) 
   {
 
-    if (pCONT_i2c->I2cActive(addresses[i])) { continue; }
+    if (pCONT_i2c->I2cActive(i2c_addresses[i])) { continue; }
 
-    device_data[module_state.devices].address = addresses[i];
+    device_data[module_state.devices].address = i2c_addresses[i];
 
     if (Set_MeasurementTimeRegister(module_state.devices, device_data[module_state.devices].mtreg)) 
     {
@@ -148,7 +148,7 @@ uint8_t mBH1750::Get_Resolution_Mode(uint8_t sensor_id)
 // Get the command byte for the given resolution mode
 uint8_t mBH1750::Get_Resolution_RegisterValue(uint8_t mode) 
 {
-  return resolution_register_value[mode];
+  return i2c_resolution_register_value[mode];
 }
 
 
@@ -266,17 +266,17 @@ void mBH1750::parse_JSONCommand(JsonParserObject obj)
     JsonParserToken jtok_sub = 0;
 
     uint8_t sensor_index = 0;
-    if(jtok_sub = jobj[PM_JSON_INDEX])
+    if(jtok_sub = jobj[PM_INDEX])
     {
       sensor_index = jtok_sub.getInt();
     }
 
-    if(jtok_sub = jobj[PM_JSON_RESOLUTION])
+    if(jtok_sub = jobj[PM_RESOLUTION])
     {
       Set_Resolution_Mode(sensor_index, jtok_sub.getInt());
     }
 
-    if(jtok_sub = jobj[PM_JSON_TIME])
+    if(jtok_sub = jobj[PM_TIME])
     {
       Set_MeasurementTimeRegister(sensor_index, jtok_sub.getInt());
     }
@@ -294,10 +294,10 @@ uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
 
   JBI->Start();
-  JBI->Add(D_JSON_COUNT, module_state.devices);    
+  JBI->Add(D_COUNT, module_state.devices);    
   for (uint32_t ii = 0; ii < module_state.devices; ii++)
   {
-    JBI->Add(D_JSON_ADDRESS, device_data[ii].address);
+    JBI->Add(D_ADDRESS, device_data[ii].address);
   }
   return JBI->End();
 
@@ -311,8 +311,8 @@ uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
     
   for (uint32_t sensor_index = 0; sensor_index < module_state.devices; sensor_index++) {
     if (device_data[sensor_index].valid) {
-      JBI->Add(D_JSON_ILLUMINANCE, device_data[sensor_index].illuminance);
-      JBI->Add(D_JSON_LEVEL, device_data[sensor_index].level);
+      JBI->Add(D_ILLUMINANCE, device_data[sensor_index].illuminance);
+      JBI->Add(D_LEVEL, device_data[sensor_index].level);
     }
   }
 

@@ -23,7 +23,7 @@
  * MPU9250 has the magnet on i2c via bypass, its not direct, thus has delay(10) while switching. So this may be slower than what I want.
  * */
 
-#define D_UNIQUE_MODULE_SENSORS_MPU9250_ID 144
+#define D_UNIQUE_MODULE_SENSORS_MPU9250_ID 5018 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -56,12 +56,6 @@ class mSensorsMPU9250 :
     static constexpr const char* PM_MODULE_SENSORS_MPU9250_CTR = D_MODULE_SENSORS_MPU9250_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MPU9250_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MPU9250_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSensorsMPU9250);
-    };
-    #endif
 
 
 /* There are several ways to create your ICM20948 object:

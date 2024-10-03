@@ -1,7 +1,7 @@
 #ifndef _MODULE__SENSORS_BATTERY_MODEM__H
 #define _MODULE__SENSORS_BATTERY_MODEM__H
 
-#define D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID   ((5*1000)+52)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID   5052 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -20,12 +20,6 @@ class mBattery_Modem :
     static constexpr const char* PM_MODULE__SENSORS_BATTERY_MODEM__CTR = D_MODULE__SENSORS_BATTERY_MODEM__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__SENSORS_BATTERY_MODEM__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mBattery_Modem);
-    };
-    #endif
 
     void parse_JSONCommand(JsonParserObject obj);
 

@@ -107,7 +107,7 @@
 //   //                             100/sizeof(animation_mode_list_ids),
 //   //                             "", //no span
 //   //                             "animod" " " "buttonh",
-//   //                             D_JSON_ANIMATIONMODE, 
+//   //                             D_ANIMATIONMODE, 
 //   //                             GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
 //   //                             GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
 //   //                             ""

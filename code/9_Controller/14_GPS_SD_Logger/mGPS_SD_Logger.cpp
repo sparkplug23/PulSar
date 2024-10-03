@@ -205,7 +205,7 @@ void mGPS_SD_Logger::SubTask_UpdateOLED_Detailed_GPS()
 uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -214,7 +214,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_app
 uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, 0);
+    JBI->Add(D_VOLTAGE, 0);
   return JBI->End();
     
 }

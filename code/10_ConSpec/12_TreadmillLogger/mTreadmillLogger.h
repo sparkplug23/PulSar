@@ -20,7 +20,7 @@
 #define HEADER_CONTROLLER_CUSTOM__TREADMILL_LOGGER_H
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID   10012
+#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID   10012 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
 
@@ -47,9 +47,7 @@ class mTreadmillLogger :
     static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR = D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mTreadmillLogger); };
-    #endif
+    
     
 
     struct SETTINGS{

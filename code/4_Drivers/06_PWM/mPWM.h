@@ -1,7 +1,7 @@
 #ifndef _DRIVERS_PWM_H_
 #define _DRIVERS_PWM_H_
 
-#define D_UNIQUE_MODULE_DRIVERS_PWM_ID 122
+#define D_UNIQUE_MODULE_DRIVERS_PWM_ID 4006 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -36,11 +36,6 @@ class mPWM :
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_PWM_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_PWM_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mPWM);
-    };
-    #endif
 
     void parse_JSONCommand(JsonParserObject obj);
 

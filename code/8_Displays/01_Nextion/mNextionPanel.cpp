@@ -343,7 +343,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["Debug"].getObject()["Nextion"])
   {
     settings.dynamic_log_level = jtok.getInt();
-    ALOG_COM(PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE_K("Debug")), settings.dynamic_log_level);
+    ALOG_COM(PSTR(D_LOG_NEXTION D_COMMAND_NVALUE_K("Debug")), settings.dynamic_log_level);
   }
 
   
@@ -411,10 +411,10 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj)
     }
 
 
-    if(jtok = obj["Display"].getObject()[PM_JSON_BAUDRATE])
+    if(jtok = obj["Display"].getObject()[PM_BAUDRATE])
     {
       CommandSet_Baud(jtok.getInt());
-      ALOG_COM(PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE_K(D_JSON_BAUDRATE)), jtok.getInt());
+      ALOG_COM(PSTR(D_LOG_NEXTION D_COMMAND_NVALUE_K(D_BAUDRATE)), jtok.getInt());
     }
 
 
@@ -1219,7 +1219,7 @@ void mNextionPanel::nextionProcessInput()
       screen_press.tSavedButtonONEvent = millis();
       screen_press.fEnableImmediateButtonTime = true; 
 
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_ON);
               
       memset(event_ctr,0,sizeof(event_ctr));
       sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
@@ -1228,7 +1228,7 @@ void mNextionPanel::nextionProcessInput()
         JBI->Add("Page", screen_press.page);
         JBI->Add("ID", screen_press.event);
         JBI->Add("event", event_ctr);
-        JBI->Add("value", D_JSON_ON);
+        JBI->Add("value", D_ON);
       JBI->End();
 
       pCONT_mqtt->Publish("status/nextion/event",JBI->GetBufferPtr(),0);
@@ -1243,7 +1243,7 @@ void mNextionPanel::nextionProcessInput()
       screen_press.tSavedButtonONDurationEvent = screen_press.tSavedButtonOFFEvent - screen_press.tSavedButtonONEvent;
       screen_press.duration = screen_press.tSavedButtonONDurationEvent;
       
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_OFF);
               
       memset(event_ctr,0,sizeof(event_ctr));
       sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
@@ -1252,7 +1252,7 @@ void mNextionPanel::nextionProcessInput()
         JBI->Add("Page", screen_press.page);
         JBI->Add("ID", screen_press.event);
         JBI->Add("event", event_ctr);
-        JBI->Add("value", D_JSON_OFF);
+        JBI->Add("value", D_OFF);
         JBI->Add("duration", screen_press.tSavedButtonONDurationEvent);
       JBI->End();
 
@@ -2015,13 +2015,13 @@ void mNextionPanel::EverySecond_FlashScreen(){
 
   if(flash_message.cShowSeconds==0){
     // Return screen to previous
-    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
     Command_SetPage(settings.page_saved);
     flash_message.cShowSeconds = -1;
   }else
   if(flash_message.cShowSeconds>0){
     flash_message.cShowSeconds--;
-    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
   }
 
 } //end F

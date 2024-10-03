@@ -987,7 +987,7 @@ String mSupport::GetResetReason(void)
   #ifdef ESP8266
   // char buff[32];
   // if (oswatch_blocked_loop) {
-  //   strncpy_P(buff, PSTR(D_JSON_BLOCKED_LOOP), sizeof(buff));
+  //   strncpy_P(buff, PSTR(D_BLOCKED_LOOP), sizeof(buff));
   //   return String(buff);
   // } else {
     return ESP.getResetReason();
@@ -1001,7 +1001,7 @@ const char* mSupport::GetResetReason(char* buffer, uint8_t buflen)
 {
   #ifdef ESP8266
   // if (oswatch_blocked_loop) {
-  //   strncpy_P(buffer, PSTR(D_JSON_BLOCKED_LOOP), buflen);
+  //   strncpy_P(buffer, PSTR(D_BLOCKED_LOOP), buflen);
   // } else {
     sprintf(buffer, "%s", ESP.getResetReason().c_str());
   // }

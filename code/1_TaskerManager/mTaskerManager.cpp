@@ -18,7 +18,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     JsonParser parser(data_buffer.payload.ctr);
     obj = parser.getRootObject();   
     if (!obj) {
-      ALOG_ERR(PM_JSON_DESERIALIZATION_ERROR);
+      ALOG_ERR(PM_DESERIALIZATION_ERROR);
       return FUNCTION_RESULT_ERROR_ID;
     }
 
@@ -646,8 +646,8 @@ const char* mTaskerManager::GetTaskName(uint8_t task)
     case TASK_WEB_ROOT_SEND_BODY:                     return PM_TASK_WEB_ROOT_SEND_BODY_CTR;
     case TASK_WEB_ROOT_SEND_STATUS:                   return PM_TASK_WEB_ROOT_SEND_STATUS_CTR;
     case TASK_WEB_ADD_ROOT_SHOWS:                     return PM_TASK_WEB_ADD_ROOT_SHOWS_CTR;
-    case TASK_WEB_ADD_JSON_FETCH_RESULT:              return PM_TASK_WEB_ADD_JSON_FETCH_RESULT_CTR;
-    case TASK_WEB_ADD_JSON_DATA_FETCH_URL:            return PM_TASK_WEB_ADD_JSON_DATA_FETCH_URL_CTR;
+    case TASK_WEB_ADD_FETCH_RESULT:              return PM_TASK_WEB_ADD_FETCH_RESULT_CTR;
+    case TASK_WEB_ADD_DATA_FETCH_URL:            return PM_TASK_WEB_ADD_DATA_FETCH_URL_CTR;
     case TASK_WEB_ADD_ROOT_TABLE_ROWS:                return PM_TASK_WEB_ADD_ROOT_TABLE_ROWS_CTR;
     case TASK_WEB_ADD_ROOT_SCRIPT:                    return PM_TASK_WEB_ADD_ROOT_SCRIPT_CTR;
     case TASK_WEB_ADD_ROOT_STYLE:                     return PM_TASK_WEB_ADD_ROOT_STYLE_CTR;

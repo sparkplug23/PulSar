@@ -92,7 +92,7 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     // RemoteDevice2 = "Bedroom,Humdiity"
    * */
 /**
-  D_JSON_REMOTE_SENSOR_NAME
+  D_REMOTE_SENSOR_NAME
   {
    "RemoteSensorNames":["Bedroom"],
    //just search for all, cycling around their names
@@ -112,19 +112,19 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     value->sensor_type.clear();
     value->data_f.clear();
 
-    if(jtok2 = sensor_obj[D_JSON_TEMPERATURE])
+    if(jtok2 = sensor_obj[D_TEMPERATURE])
     {
       value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data_f.push_back(jtok2.getFloat());
     }
     
-    if(jtok2 = sensor_obj[D_JSON_HUMIDITY])
+    if(jtok2 = sensor_obj[D_HUMIDITY])
     {
       value->sensor_type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
       value->data_f.push_back(jtok2.getFloat());
     }
 
-    if(jtok2 = sensor_obj[D_JSON_PRESSURE])
+    if(jtok2 = sensor_obj[D_PRESSURE])
     {
       value->sensor_type.push_back(SENSOR_TYPE_PRESSURE_ID);
       value->data_f.push_back(jtok2.getFloat());
@@ -133,7 +133,7 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     ALOG_DBM( PSTR("Remote Read %d" ), (int)value->data_f[0]);
     //  
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
 
     D_MQTT_COMMAND_HANDLED_COUNT_INC;
@@ -213,9 +213,9 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
 
   sensors_reading_t* data = &sensor_data;
   
-  JBI->Add(D_JSON_TEMPERATURE, data->GetFloat(SENSOR_TYPE_TEMPERATURE_ID));
-  JBI->Add(D_JSON_HUMIDITY,    data->GetFloat(SENSOR_TYPE_RELATIVE_HUMIDITY_ID));
-  JBI->Add(D_JSON_PRESSURE,    data->GetFloat(SENSOR_TYPE_PRESSURE_ID));
+  JBI->Add(D_TEMPERATURE, data->GetFloat(SENSOR_TYPE_TEMPERATURE_ID));
+  JBI->Add(D_HUMIDITY,    data->GetFloat(SENSOR_TYPE_RELATIVE_HUMIDITY_ID));
+  JBI->Add(D_PRESSURE,    data->GetFloat(SENSOR_TYPE_PRESSURE_ID));
 
   // for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
   //   if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))
@@ -223,11 +223,11 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   //     ){
 
   //     JBI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
-  //       JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
-  //       JBI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
-  //       JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
-  //         JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-  //         JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+  //       JBI->Add(D_TEMPERATURE, sensor[sensor_id].instant.temperature);
+  //       JBI->Add(D_HUMIDITY,    sensor[sensor_id].instant.humidity);
+  //       JBI->Object_Start(D_ISCHANGEDMETHOD);
+  //         JBI->Add(D_TYPE, D_SIGNIFICANTLY);
+  //         JBI->Add(D_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
   //       JBI->Object_End();   
   //     JBI->Object_End(); 
   //   }
@@ -235,12 +235,12 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   // }
   //   for(int dht_id=0;dht_id<2;dht_id++){
   //   JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
-  //     JBI->Add(D_JSON_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
-  //     JBI->Add(D_JSON_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
-  //     JBI->Add(D_JSON_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
-  //     JBI->Add(D_JSON_ISCHANGED, pCONT_dht->sensor[dht_id].instant.ischanged);
+  //     JBI->Add(D_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
+  //     JBI->Add(D_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
+  //     JBI->Add(D_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
+  //     JBI->Add(D_ISCHANGED, pCONT_dht->sensor[dht_id].instant.ischanged);
   //     // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;
-  //     // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime_seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
+  //     // json1[D_SECS] = (int)abs(pCONT_time->uptime_seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
   //     // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE
   //     // json1["dewpoint"] = pCONT->mhs->climate.ptr->raw.dewPoint;
   //   JBI->Object_End();

@@ -1002,33 +1002,33 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-    JBI->Add(PM_JSON__IS_SUN_RISING, (uint8_t)calc.is_sun_rising);
+    JBI->Add(PM__IS_SUN_RISING, (uint8_t)calc.is_sun_rising);
     #endif
    
    #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-    JBI->Object_Start(PM_JSON__ANGLES);    
-        JBI->Add(PM_JSON__AZIMUTH, (float)calc.position.azimuth);
-        JBI->Add(PM_JSON__ELEVATION, (float)calc.position.elevation);
-        JBI->Add(PM_JSON__ELEVATION_MAX, calc.max_elevation);
-        JBI->Add(PM_JSON__ELEVATION_MIN, calc.min_elevation);
+    JBI->Object_Start(PM__ANGLES);    
+        JBI->Add(PM__AZIMUTH, (float)calc.position.azimuth);
+        JBI->Add(PM__ELEVATION, (float)calc.position.elevation);
+        JBI->Add(PM__ELEVATION_MAX, calc.max_elevation);
+        JBI->Add(PM__ELEVATION_MIN, calc.min_elevation);
     JBI->Object_End();
     #endif
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-    JBI->Add(PM_JSON__ZENITH, (float)calc.zenith);
-    JBI->Add(PM_JSON__AIR_MASS, (float)calc.air_mass);
-    JBI->Add(PM_JSON__SOLAR_IRRADIANCE, (float)calc.irradiance);
-    JBI->Add(PM_JSON__DECLINATION_ANGLE, (float)calc.declination_angle);
-    JBI->Add(PM_JSON__DAY_LENGTH, (float)calc.day_length);
+    JBI->Add(PM__ZENITH, (float)calc.zenith);
+    JBI->Add(PM__AIR_MASS, (float)calc.air_mass);
+    JBI->Add(PM__SOLAR_IRRADIANCE, (float)calc.irradiance);
+    JBI->Add(PM__DECLINATION_ANGLE, (float)calc.declination_angle);
+    JBI->Add(PM__DAY_LENGTH, (float)calc.day_length);
 
     if (!calc.is_daytime) {
-        JBI->Add(PM_JSON__SHADOW_LENGTH, PM_JSON__NONE);
+        JBI->Add(PM__SHADOW_LENGTH, PM__NONE);
     } else {
         if (isinf(CalculateShadowLength())) {
-            JBI->Add(PM_JSON__SHADOW_LENGTH, PM_JSON__INF);
+            JBI->Add(PM__SHADOW_LENGTH, PM__INF);
         } else {
             calc.shadow_length = CalculateShadowLength();
-            JBI->Add(PM_JSON__SHADOW_LENGTH, calc.shadow_length);
+            JBI->Add(PM__SHADOW_LENGTH, calc.shadow_length);
         }
     }
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
@@ -1036,84 +1036,84 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__DETAILED_MQTT_INFO_UNIX
     if(json_method == JSON_LEVEL_DETAILED)
     {
-        JBI->Object_Start(PM_JSON__UNIX_EVENTS);
-            JBI->Add(PM_JSON__DAWN, (float)calc.today.dawn);
-            JBI->Add(PM_JSON__SUNRISE, (float)calc.today.sunrise);
-            JBI->Add(PM_JSON__SOLAR_NOON, (float)calc.today.solar_noon);
-            JBI->Add(PM_JSON__SUNSET, (float)calc.today.sunset);
-            JBI->Add(PM_JSON__DUSK, (float)calc.today.dusk);
+        JBI->Object_Start(PM__UNIX_EVENTS);
+            JBI->Add(PM__DAWN, (float)calc.today.dawn);
+            JBI->Add(PM__SUNRISE, (float)calc.today.sunrise);
+            JBI->Add(PM__SOLAR_NOON, (float)calc.today.solar_noon);
+            JBI->Add(PM__SUNSET, (float)calc.today.sunset);
+            JBI->Add(PM__DUSK, (float)calc.today.dusk);
         JBI->Object_End();
     }
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__DETAILED_MQTT_INFO_UNIX
 
     #if defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY) || defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)  
-    JBI->Add(PM_JSON__DST_ACTIVE, (uint8_t)calc.daylight_savings_active);
-    JBI->Object_Start(PM_JSON__TODAY);
-        JBI->Object_Start(PM_JSON__DATE_TIME_EVENTS);
-            JBI->Add(PM_JSON__DAWN, FormatTime(static_cast<time_t>(calc.today.dawn)).c_str());
-            JBI->Add(PM_JSON__SUNRISE, FormatTime(static_cast<time_t>(calc.today.sunrise)).c_str());
-            JBI->Add(PM_JSON__SOLAR_NOON, FormatTime(static_cast<time_t>(calc.today.solar_noon)).c_str());
-            JBI->Add(PM_JSON__SUNSET, FormatTime(static_cast<time_t>(calc.today.sunset)).c_str());
-            JBI->Add(PM_JSON__DUSK, FormatTime(static_cast<time_t>(calc.today.dusk)).c_str());
-            JBI->Add(PM_JSON__DAYLIGHT_DURATION, (float)calc.today.daylight_duration);
+    JBI->Add(PM__DST_ACTIVE, (uint8_t)calc.daylight_savings_active);
+    JBI->Object_Start(PM__TODAY);
+        JBI->Object_Start(PM__DATE_TIME_EVENTS);
+            JBI->Add(PM__DAWN, FormatTime(static_cast<time_t>(calc.today.dawn)).c_str());
+            JBI->Add(PM__SUNRISE, FormatTime(static_cast<time_t>(calc.today.sunrise)).c_str());
+            JBI->Add(PM__SOLAR_NOON, FormatTime(static_cast<time_t>(calc.today.solar_noon)).c_str());
+            JBI->Add(PM__SUNSET, FormatTime(static_cast<time_t>(calc.today.sunset)).c_str());
+            JBI->Add(PM__DUSK, FormatTime(static_cast<time_t>(calc.today.dusk)).c_str());
+            JBI->Add(PM__DAYLIGHT_DURATION, (float)calc.today.daylight_duration);
         JBI->Object_End();
         #ifdef ENABLE_MQTT_REPORTING__SUN_TRACKING__SECONDS_UNTIL
-        JBI->Object_Start(PM_JSON__SECONDS_UNTIL);
-            JBI->Add(PM_JSON__DAWN, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dawn)));
-            JBI->Add(PM_JSON__SUNRISE, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunrise)));
-            JBI->Add(PM_JSON__SOLAR_NOON, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.solar_noon)));
-            JBI->Add(PM_JSON__SUNSET, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunset)));
-            JBI->Add(PM_JSON__DUSK, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dusk)));
+        JBI->Object_Start(PM__SECONDS_UNTIL);
+            JBI->Add(PM__DAWN, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dawn)));
+            JBI->Add(PM__SUNRISE, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunrise)));
+            JBI->Add(PM__SOLAR_NOON, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.solar_noon)));
+            JBI->Add(PM__SUNSET, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunset)));
+            JBI->Add(PM__DUSK, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dusk)));
         JBI->Object_End();
         #endif // ENABLE_MQTT_REPORTING__SUN_TRACKING__SECONDS_UNTIL
-        JBI->Object_Start(PM_JSON__TIME_UNTIL);
-            JBI->Add(PM_JSON__DAWN, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dawn))).c_str());
-            JBI->Add(PM_JSON__SUNRISE, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunrise))).c_str());
-            JBI->Add(PM_JSON__SOLAR_NOON, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.solar_noon))).c_str());
-            JBI->Add(PM_JSON__SUNSET, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunset))).c_str());
-            JBI->Add(PM_JSON__DUSK, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dusk))).c_str());
+        JBI->Object_Start(PM__TIME_UNTIL);
+            JBI->Add(PM__DAWN, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dawn))).c_str());
+            JBI->Add(PM__SUNRISE, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunrise))).c_str());
+            JBI->Add(PM__SOLAR_NOON, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.solar_noon))).c_str());
+            JBI->Add(PM__SUNSET, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.sunset))).c_str());
+            JBI->Add(PM__DUSK, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.today.dusk))).c_str());
         JBI->Object_End();
     JBI->Object_End();
     #endif // defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY) || defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)
       
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-    JBI->Object_Start(PM_JSON__TOMORROW);
-        JBI->Object_Start(PM_JSON__DATE_TIME_EVENTS);
-            JBI->Add(PM_JSON__DAWN, FormatTime(static_cast<time_t>(calc.tomorrow.dawn)).c_str());
-            JBI->Add(PM_JSON__SUNRISE, FormatTime(static_cast<time_t>(calc.tomorrow.sunrise)).c_str());
-            JBI->Add(PM_JSON__SOLAR_NOON, FormatTime(static_cast<time_t>(calc.tomorrow.solar_noon)).c_str());
-            JBI->Add(PM_JSON__SUNSET, FormatTime(static_cast<time_t>(calc.tomorrow.sunset)).c_str());
-            JBI->Add(PM_JSON__DUSK, FormatTime(static_cast<time_t>(calc.tomorrow.dusk)).c_str());
+    JBI->Object_Start(PM__TOMORROW);
+        JBI->Object_Start(PM__DATE_TIME_EVENTS);
+            JBI->Add(PM__DAWN, FormatTime(static_cast<time_t>(calc.tomorrow.dawn)).c_str());
+            JBI->Add(PM__SUNRISE, FormatTime(static_cast<time_t>(calc.tomorrow.sunrise)).c_str());
+            JBI->Add(PM__SOLAR_NOON, FormatTime(static_cast<time_t>(calc.tomorrow.solar_noon)).c_str());
+            JBI->Add(PM__SUNSET, FormatTime(static_cast<time_t>(calc.tomorrow.sunset)).c_str());
+            JBI->Add(PM__DUSK, FormatTime(static_cast<time_t>(calc.tomorrow.dusk)).c_str());
         JBI->Object_End();
         #ifdef ENABLE_MQTT_REPORTING__SUN_TRACKING__SECONDS_UNTIL
-        JBI->Object_Start(PM_JSON__SECONDS_UNTIL);
-            JBI->Add(PM_JSON__DAWN, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dawn)));
-            JBI->Add(PM_JSON__SUNRISE, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunrise)));
-            JBI->Add(PM_JSON__SOLAR_NOON, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.solar_noon)));
-            JBI->Add(PM_JSON__SUNSET, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunset)));
-            JBI->Add(PM_JSON__DUSK, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dusk)));
+        JBI->Object_Start(PM__SECONDS_UNTIL);
+            JBI->Add(PM__DAWN, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dawn)));
+            JBI->Add(PM__SUNRISE, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunrise)));
+            JBI->Add(PM__SOLAR_NOON, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.solar_noon)));
+            JBI->Add(PM__SUNSET, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunset)));
+            JBI->Add(PM__DUSK, CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dusk)));
         JBI->Object_End();
         #endif // ENABLE_MQTT_REPORTING__SUN_TRACKING__SECONDS_UNTIL
-        JBI->Object_Start(PM_JSON__TIME_UNTIL);
-            JBI->Add(PM_JSON__DAWN, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dawn))).c_str());
-            JBI->Add(PM_JSON__SUNRISE, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunrise))).c_str());
-            JBI->Add(PM_JSON__SOLAR_NOON, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.solar_noon))).c_str());
-            JBI->Add(PM_JSON__SUNSET, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunset))).c_str());
-            JBI->Add(PM_JSON__DUSK, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dusk))).c_str());
+        JBI->Object_Start(PM__TIME_UNTIL);
+            JBI->Add(PM__DAWN, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dawn))).c_str());
+            JBI->Add(PM__SUNRISE, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunrise))).c_str());
+            JBI->Add(PM__SOLAR_NOON, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.solar_noon))).c_str());
+            JBI->Add(PM__SUNSET, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.sunset))).c_str());
+            JBI->Add(PM__DUSK, pCONT_time->formatTimeUntil(CalculateTimeUntilEvent(current_time, static_cast<time_t>(calc.tomorrow.dusk))).c_str());
         JBI->Object_End();
     JBI->Object_End();
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-    JBI->Object_Start(PM_JSON__NEXT);
+    JBI->Object_Start(PM__NEXT);
         time_t utc_time = pCONT_time->UtcTime();   
-        JBI->Add(PM_JSON__DAWN, FormatTime(GetNext_Dawn(utc_time, calc.today, calc.tomorrow)).c_str());
-        JBI->Add(PM_JSON__SUNRISE, FormatTime(GetNext_Sunrise(utc_time, calc.today, calc.tomorrow)).c_str());
-        JBI->Add(PM_JSON__SOLAR_NOON, FormatTime(GetNext_SolarNoon(utc_time, calc.today, calc.tomorrow)).c_str());
-        JBI->Add(PM_JSON__SUNSET, FormatTime(GetNext_Sunset(utc_time, calc.today, calc.tomorrow)).c_str());
-        JBI->Add(PM_JSON__DUSK, FormatTime(GetNext_Dusk(utc_time, calc.today, calc.tomorrow)).c_str());
-        JBI->Add(PM_JSON__DAYLIGHT_DURATION, (float)Get_Daylight_Duration(calc.today));
-        JBI->Add(PM_JSON__DAYLIGHT_DURATION_DIFF, (float)Get_Daylight_Duration_Difference(calc.today, calc.tomorrow));
+        JBI->Add(PM__DAWN, FormatTime(GetNext_Dawn(utc_time, calc.today, calc.tomorrow)).c_str());
+        JBI->Add(PM__SUNRISE, FormatTime(GetNext_Sunrise(utc_time, calc.today, calc.tomorrow)).c_str());
+        JBI->Add(PM__SOLAR_NOON, FormatTime(GetNext_SolarNoon(utc_time, calc.today, calc.tomorrow)).c_str());
+        JBI->Add(PM__SUNSET, FormatTime(GetNext_Sunset(utc_time, calc.today, calc.tomorrow)).c_str());
+        JBI->Add(PM__DUSK, FormatTime(GetNext_Dusk(utc_time, calc.today, calc.tomorrow)).c_str());
+        JBI->Add(PM__DAYLIGHT_DURATION, (float)Get_Daylight_Duration(calc.today));
+        JBI->Add(PM__DAYLIGHT_DURATION_DIFF, (float)Get_Daylight_Duration_Difference(calc.today, calc.tomorrow));
     JBI->Object_End();
     #endif
 

@@ -1,13 +1,13 @@
 #ifndef _CONTROLLER_INTERNAL_CLOCK_H
 #define _CONTROLLER_INTERNAL_CLOCK_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_INTERNAL_CLOCK_ID ((9*1000)+30)
+#define D_UNIQUE_MODULE_CONTROLLER_INTERNAL_CLOCK_ID 9030 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CONTROLLER_INTERNAL_CLOCK
 
-//const char TEST_DLIST[] PROGMEM = {D_JSON_LIGHTPOWER "|" D_JSON_FANSPEED"|" D_JSON_FANSPEED"|" D_JSON_FANSPEED"|" D_JSON_FANSPEED};
+//const char TEST_DLIST[] PROGMEM = {D_LIGHTPOWER "|" D_FANSPEED"|" D_FANSPEED"|" D_FANSPEED"|" D_FANSPEED};
 // DEFINE_PGM_CTR(kListFanControls) "Light|Off|Low|Medium|High";
 
 const uint8_t MAX_FAN_SPEED = 4;            // Max number of iFan02 fan speeds (0 .. 3)
@@ -30,11 +30,6 @@ class mInternalClock :
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CEILINGFAN_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mInternalClock);
-    };
-    #endif
     struct SETTINGS{
       uint8_t fEnableModule = false;
     }settings;

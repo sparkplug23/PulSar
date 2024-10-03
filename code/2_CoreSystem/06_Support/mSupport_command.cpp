@@ -62,7 +62,7 @@ void mSupport::CommandSet_Restart(int8_t command)
   {
     // case 1:
     // restart_flag = 2;
-    // //ResponseCmndChar(D_JSON_RESTARTING);
+    // //ResponseCmndChar(D_RESTARTING);
     // break;
     case -1:
       CmndCrash();    // force a crash
@@ -84,7 +84,7 @@ void mSupport::CommandSet_Restart(int8_t command)
       ESP.restart();
     break;
     default:
-      ALOG_INF(PSTR(D_JSON_ONE_TO_RESTART));
+      ALOG_INF(PSTR(D_ONE_TO_RESTART));
     break;
   }
 

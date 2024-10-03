@@ -349,7 +349,7 @@ void mInterfaceLight::Save_Module()
   JBI->Start();
 
   #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
+    JBI->Add(PM_UTC_TIME, pCONT_time->GetDateAndTime(DT_UTC).c_str() );
   #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
   
@@ -882,7 +882,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   }
   
 
-  if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER])
+  if(jtok = obj[PM_RGB_COLOUR_ORDER])
   {
     if(jtok.isStr())
     {
@@ -1037,46 +1037,46 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
    * SetBrightnessOutput <= scale8( scale8(Raw255Colour, SegmentBrightness), MasterBrightness) 
    * 
    */
-  if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Range 0-100
+  if(jtok = obj[PM_BRIGHTNESS]){ // Range 0-100
     float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
     CommandSet_Brt_255( (uint8_t)value );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), getBri_Global());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS)), getBri_Global());
     data_buffer.isserviced++;
   }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // Range 0-255
+  if(jtok = obj[PM_BRIGHTNESS_255]){ // Range 0-255
     CommandSet_Brt_255( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), getBri_Global());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS)), getBri_Global());
     data_buffer.isserviced++;
   }
 
 
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Range 0-100
+  if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
     float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
     CommandSet_Global_BrtRGB_255( (uint8_t)value );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB_Global());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), getBriRGB_Global());
     data_buffer.isserviced++;
   }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // Range 0-255
+  if(jtok = obj[PM_BRIGHTNESS_RGB_255]){ // Range 0-255
     CommandSet_Global_BrtRGB_255( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB_Global());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB_255)), getBriRGB_Global());
     data_buffer.isserviced++;
   }
 
 
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Range 0-100
+  if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
     float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
     CommandSet_Global_BrtCCT_255( (uint8_t)value );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCCT_Global());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), getBriCCT_Global());
     data_buffer.isserviced++;
   }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // Range 0-255
+  if(jtok = obj[PM_BRIGHTNESS_CCT_255]){ // Range 0-255
     CommandSet_Global_BrtCCT_255( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCCT_Global());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT_255)), getBriCCT_Global());
     data_buffer.isserviced++;
   }
 
 
-  if(jtok = obj[PM_JSON_LIGHTPOWER])
+  if(jtok = obj[PM_LIGHTPOWER])
   {
     int8_t state = 0;
     if(jtok.isStr()){
@@ -1087,12 +1087,12 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     }
     ModifyStateNumberIfToggled(&state, light_power_state);
     CommandSet_LightPowerState(state);
-    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+    ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_LIGHTPOWER)), light_power_state);
   }
 
-  if(jtok = obj[PM_JSON_LIGHT].getObject()[PM_JSON_TIME_ON]){ // default to secs
+  if(jtok = obj[PM_LIGHT].getObject()[PM_TIME_ON]){ // default to secs
     CommandSet_Auto_Time_Off_Secs(jtok.getInt());
-    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), auto_off_settings.time_decounter_secs ); 
+    ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_TIME_ON)), auto_off_settings.time_decounter_secs ); 
     data_buffer.isserviced++;
   }
 
@@ -1110,7 +1110,7 @@ void mInterfaceLight::CommandSet_Auto_Time_Off_Secs(uint16_t value){
 void mInterfaceLight::CommandSet_LightPowerState(uint8_t state)
 {
 
-  ALOG_INF( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+  ALOG_INF( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_LIGHTPOWER)), light_power_state);
 
   if(state == LIGHT_POWER_STATE_OFF_ID) // turn off
   {
@@ -1166,7 +1166,7 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
   setBriCT_Global(brt_new);
 
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
+  // ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1189,7 +1189,7 @@ void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_
   _briRGB_Global = bri;
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
+  // ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1207,7 +1207,7 @@ void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_
   
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
+  // ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1230,11 +1230,11 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_level, bool json_ap
   
   JBI->Start();
 
-  // JBI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
+  // JBI->Add_P(PM_TYPE, pCONT_set->Settings.light_settings.type);
 
-  // // JBI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
+  // // JBI->Add_P(PM_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  // JBI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->SEGMENT_I(0).transition.pixels_to_update_as_number);
+  // JBI->Add_P(PM_PIXELS_UPDATE_NUMBER, pCONT_lAni->SEGMENT_I(0).transition.pixels_to_update_as_number);
   // #endif // USE_MODULE_LIGHTS_ANIMATOR
 
   return JBI->End();

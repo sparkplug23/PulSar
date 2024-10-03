@@ -206,7 +206,7 @@ void mPIR::parse_JSONCommand(JsonParserObject obj)
 uint8_t mPIR::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -237,10 +237,10 @@ uint8_t mPIR::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
         
         pir_detect[sensor_id].ischanged = false;
 
-        JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer))); 
+        JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer))); 
         JBI->Add("Time", pCONT_time->GetTimeStr(pCONT_time->Rtc.local_time).c_str());
         JBI->Add("UTCTime", pCONT_time->Rtc.local_time);
-        JBI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+        JBI->Add(D_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
       }
     }

@@ -19,7 +19,7 @@
 #ifndef MSENSORSBME_H
 #define MSENSORSBME_H
 
-#define D_UNIQUE_MODULE_SENSORS_BME_ID ((5*1000)+03)
+#define D_UNIQUE_MODULE_SENSORS_BME_ID 5003 // [(Folder_Number*1000)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -98,10 +98,7 @@ class mBME :
     static constexpr const char* PM_MODULE_SENSORS_BME_CTR = D_MODULE_SENSORS_BME_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BME_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BME_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mBME);    };
-    #endif
-
+    
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
@@ -333,11 +330,7 @@ class mBME :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
-    
+    void MQTTHandler_Init();    
     std::vector<struct handler<mBME>*> mqtthandler_list;
     struct handler<mBME> mqtthandler_settings;
     struct handler<mBME> mqtthandler_sensor_ifchanged;

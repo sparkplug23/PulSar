@@ -1,7 +1,7 @@
 #ifndef _RTC_SETTINGS_H_
 #define _RTC_SETTINGS_H_
 
-#define D_UNIQUE_MODULE_CORE_RTCSETTINGS_ID ((2*1000)+02)
+#define D_UNIQUE_MODULE_CORE_RTCSETTINGS_ID 2002 // [(Folder_Number*100)+ID_File]
 
 #include "2_CoreSystem/mBaseConfig.h"
 

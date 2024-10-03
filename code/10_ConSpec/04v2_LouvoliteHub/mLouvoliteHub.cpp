@@ -232,7 +232,7 @@ void mLouvoliteHub::parse_JSONCommand(JsonParserObject obj)
       data_buffer.isserviced++;
     }
     ALOG_COM( 
-      PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), 
+      PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), 
       CommandMode_GetName_by_ID(jtok.getInt(), buffer, sizeof(buffer))
     );
   }
@@ -424,7 +424,7 @@ void mLouvoliteHub::CommandSet_BlindTransmit_Stop(int8_t device_id)
 uint8_t mLouvoliteHub::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    JBI->Add(D_COUNT, settings.fEnableSensor);
     JBI->Add("RfMask", transceive->GetReceiveProtolMask());
   return JBI->End();
 

@@ -80,11 +80,14 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif
   }
@@ -99,7 +102,6 @@ void mEnergyPZEM004T::Pre_Init(void)
 
   if (pCONT_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   {
-    pCONT_set->runtime.energy_driver = 1; // D_GROUP_MODULE_ENERGY_PZEM004T_ID;
     module_state.mode = ModuleStatus::Initialising;
   }
   
@@ -117,17 +119,9 @@ void mEnergyPZEM004T::Init(void)
 
   if (result) {
     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
-    pCONT_sup->ClaimSerial();
-    /**
-     * Unknown sensor count until a search is performed, them memory for readings can be allocated.
-     * This needs to be done with a delayed start so PZEM MCU will always be ready when power cut happens
-     * */
-    
+    pCONT_sup->ClaimSerial();    
     module_state.mode = ModuleStatus::Initialising;
-
   } else {
-    // pCONT_set->runtime.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
-    // settings.fEnableSensor = false;
     module_state.mode = ModuleStatus::NoGPIOConfigured;
     return;
   }
@@ -376,7 +370,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add_P(PM_JSON_SENSOR_COUNT, data_v.size());
+    JBI->Add_P(PM_SENSOR_COUNT, data_v.size());
   return JBI->End();
 
 }
@@ -389,13 +383,13 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_appe
   for( int ii=0; ii < data_v.size(); ii++)
   {
     JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
-      JBI->Add_P(PM_JSON_ADDRESS,      data_v[ii].address );
-      JBI->Add_P(PM_JSON_VOLTAGE,      data_v[ii].voltage);
-      JBI->Add_P(PM_JSON_CURRENT,      data_v[ii].current);
-      JBI->Add_P(PM_JSON_ACTIVE_POWER, data_v[ii].active_power);
-      JBI->Add_P(PM_JSON_FREQUENCY,    data_v[ii].frequency);
-      JBI->Add_P(PM_JSON_POWER_FACTOR, data_v[ii].power_factor);
-      JBI->Add_P(PM_JSON_ENERGY,       data_v[ii].import_active);
+      JBI->Add_P(PM_ADDRESS,      data_v[ii].address );
+      JBI->Add_P(PM_VOLTAGE,      data_v[ii].voltage);
+      JBI->Add_P(PM_CURRENT,      data_v[ii].current);
+      JBI->Add_P(PM_ACTIVE_POWER, data_v[ii].active_power);
+      JBI->Add_P(PM_FREQUENCY,    data_v[ii].frequency);
+      JBI->Add_P(PM_POWER_FACTOR, data_v[ii].power_factor);
+      JBI->Add_P(PM_ENERGY,       data_v[ii].import_active);
     JBI->Object_End();
   }
   return JBI->End();
@@ -446,41 +440,7 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
   
-} 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mEnergyPZEM004T::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
 }
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mEnergyPZEM004T::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule();
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->GetIfChangedPeriod_SubModule();
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mEnergyPZEM004T::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
 #endif // USE_MODULE_NETWORK_MQTT
 
 

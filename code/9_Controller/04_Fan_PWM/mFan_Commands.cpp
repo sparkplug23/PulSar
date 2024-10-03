@@ -13,7 +13,7 @@ void mFan::parse_JSONCommand(JsonParserObject obj){
    * As order of importance, others that rely on previous commands must come after
    * */
 
-  if(jtok = obj[PM_JSON_FANSPEED_MANUAL]){
+  if(jtok = obj[PM_FANSPEED_MANUAL]){
   //   if(jtok.isStr()){
   //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
   //       CommandSet_PaletteID(tmp_id);
@@ -27,12 +27,12 @@ void mFan::parse_JSONCommand(JsonParserObject obj){
       data_buffer.isserviced++;
     }
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
 
-  if(jtok = obj[PM_JSON_FANSPEED]){
+  if(jtok = obj[PM_FANSPEED]){
   //   if(jtok.isStr()){
   //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
   //       CommandSet_PaletteID(tmp_id);
@@ -46,7 +46,7 @@ void mFan::parse_JSONCommand(JsonParserObject obj){
       data_buffer.isserviced++;
     }
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   

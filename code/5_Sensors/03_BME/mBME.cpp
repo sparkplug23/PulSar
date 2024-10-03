@@ -60,12 +60,15 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
       break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-      break;
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-      break;
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
@@ -74,7 +77,8 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
 }
 
 
-void mBME::Pre_Init(){
+void mBME::Pre_Init()
+{
 
   module_state.mode = ModuleStatus::Initialising;
   bmp_count = 0;
@@ -92,19 +96,11 @@ void mBME::Pre_Init(){
   for (uint8_t i = 0; i < BMP_MAX_SENSORS; i++) 
   {
     
-    // if (!pCONT_i2c->I2cSetDevice(bmp_addresses[i])) 
-    // {
-    //   DEBUG_LINE_HERE;
-    //   continue; 
-    // }    
-    // if(pCONT_i2c->I2cDevice(bmp_addresses[i]))
-    // {
-    //   DEBUG_LINE_HERE;
-    // }
-    // if(pCONT_i2c->I2cDevice_IsConnected(bmp_addresses[i]))
-    // {
-    //   DEBUG_LINE_HERE;
-    // }
+    if (pCONT_i2c->I2cActive(bmp_addresses[i])) 
+    { 
+      ALOG_INF(PSTR(D_LOG_BME "Addr 0x%x not found"), bmp_addresses[i]); 
+      continue; 
+    }
     
     uint8_t bmp_type = pCONT_i2c->I2cRead8(bmp_addresses[i], BMP_REGISTER_CHIPID);
     if (bmp_type) {
@@ -560,11 +556,11 @@ uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   char buffer[50];
   JBI->Start();
-    JBI->Add_P(PM_JSON_SENSOR_COUNT, bmp_count);
+    JBI->Add_P(PM_SENSOR_COUNT, bmp_count);
 
     for(uint8_t sensor_id = 0; sensor_id<bmp_count; sensor_id++){
       JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
-        JBI->Add_P(PM_JSON_TYPE,bmp_sensors[sensor_id].bmp_type);
+        JBI->Add_P(PM_TYPE,bmp_sensors[sensor_id].bmp_type);
       JBI->Object_End();
     }
 
@@ -585,14 +581,17 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       (json_level == JSON_LEVEL_SHORT)
     ){
       JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
-        JBI->Add_P(PM_JSON_TEMPERATURE, bmp_sensors[sensor_id].temperature);
-        JBI->Add_P(PM_JSON_HUMIDITY, bmp_sensors[sensor_id].humidity);
-        JBI->Add_P(PM_JSON_PRESSURE, bmp_sensors[sensor_id].pressure);
-        JBI->Add_P(PM_JSON_ALTITUDE, bmp_sensors[sensor_id].altitude);
-        JBI->Add_P(PM_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
+        JBI->Add_P(PM_TEMPERATURE, bmp_sensors[sensor_id].temperature);
+        JBI->Add_P(PM_HUMIDITY, bmp_sensors[sensor_id].humidity);
+        JBI->Add_P(PM_PRESSURE, bmp_sensors[sensor_id].pressure);
+        JBI->Add_P(PM_ALTITUDE, bmp_sensors[sensor_id].altitude);
+        if(bmp_sensors[sensor_id].bmp_type == BME680_CHIPID)
+        {
+          JBI->Add_P(PM_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
+        }
         JBI->Add_P(PM_UTC_TIME, bmp_sensors[sensor_id].utc_measured_timestamp);
         uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - bmp_sensors[sensor_id].utc_measured_timestamp;
-        JBI->Add_P(PM_JSON_AGE, sensor_elapsed_time);
+        JBI->Add_P(PM_AGE, sensor_elapsed_time);
       JBI->Object_End();
     }
   }
@@ -648,39 +647,6 @@ void mBME::MQTTHandler_Init()
   
 } //end "MQTTHandler_Init"
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mBME::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mBME::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule();
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->GetIfChangedPeriod_SubModule();
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mBME::MQTTHandler_Sender()
-{    
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-  
 #endif // USE_MODULE_NETWORK_MQTT
 
 #endif // USE_MODULE_SENSORS_BME

@@ -427,18 +427,18 @@ const char* mHVAC::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* b
 // #ifdef USE_SCHEDULED_HEATING
 int8_t mHVAC::GetScheduleModeIDByCtr(const char* c){
   if(*c=='\0'){ return -1; }
-  if(strcasecmp(c,D_JSON_SCHEDULED_OFF)==0){ return SCHEDULED_OFF_ID; }
-  if(strcasecmp(c,D_JSON_SCHEDULED_SET)==0){ return SCHEDULED_SET_ID; }
-  if(strcasecmp(c,D_JSON_SCHEDULED_ON)==0){ return SCHEDULED_ON_ID; }
-  if(strcasecmp(c,D_JSON_MANUAL_ON)==0){ return SCHEDULED_MANUAL_ON_ID; }
+  if(strcasecmp(c,D_SCHEDULED_OFF)==0){ return SCHEDULED_OFF_ID; }
+  if(strcasecmp(c,D_SCHEDULED_SET)==0){ return SCHEDULED_SET_ID; }
+  if(strcasecmp(c,D_SCHEDULED_ON)==0){ return SCHEDULED_ON_ID; }
+  if(strcasecmp(c,D_MANUAL_ON)==0){ return SCHEDULED_MANUAL_ON_ID; }
   return -1; // none
 }
 const char* mHVAC::GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen){
   switch(mode){
-    case SCHEDULED_OFF_ID:       memcpy(buffer, D_JSON_SCHEDULED_OFF, sizeof(D_JSON_SCHEDULED_OFF)); break;
-    case SCHEDULED_SET_ID:       memcpy(buffer, D_JSON_SCHEDULED_SET, sizeof(D_JSON_SCHEDULED_SET)); break;
-    case SCHEDULED_ON_ID:        memcpy(buffer, D_JSON_SCHEDULED_ON, sizeof(D_JSON_SCHEDULED_ON)); break;
-    case SCHEDULED_MANUAL_ON_ID: memcpy(buffer, D_JSON_MANUAL_ON, sizeof(D_JSON_MANUAL_ON)); break;
+    case SCHEDULED_OFF_ID:       memcpy(buffer, D_SCHEDULED_OFF, sizeof(D_SCHEDULED_OFF)); break;
+    case SCHEDULED_SET_ID:       memcpy(buffer, D_SCHEDULED_SET, sizeof(D_SCHEDULED_SET)); break;
+    case SCHEDULED_ON_ID:        memcpy(buffer, D_SCHEDULED_ON, sizeof(D_SCHEDULED_ON)); break;
+    case SCHEDULED_MANUAL_ON_ID: memcpy(buffer, D_MANUAL_ON, sizeof(D_MANUAL_ON)); break;
   }
   return buffer;
 }
@@ -760,20 +760,20 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 //   //   if(ischanged){ ischanged = 0;
 //   //     //data_buffer.payload.json_pairs++;
 //   //     JsonObject json1 = obj.createNestedObject(GetSensorNameByID(device_id));
-//   //     json1[D_JSON_TEMP] = pCONT->mhs->watertemps.ptr->raw.val;
-//   //     json1[D_JSON_HUE] = mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val);
-//   //     json1[D_JSON_BRT] = mapHeatingTempToBrightness(pCONT->mhs->watertemps.ptr->raw.val);
+//   //     json1[D_TEMP] = pCONT->mhs->watertemps.ptr->raw.val;
+//   //     json1[D_HUE] = mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val);
+//   //     json1[D_BRT] = mapHeatingTempToBrightness(pCONT->mhs->watertemps.ptr->raw.val);
 
 //   //     char tmpctr[10];  memset(tmpctr,0,sizeof(tmpctr));
 //   //     RgbColor c = HsbColor(mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val)/360.0f,100/100.0f,100/100.0f);
 //   //     sprintf(tmpctr,"%02X%02X%02X",c.R,c.G,c.B);
-//   //     json1[D_JSON_RGB] = tmpctr;
+//   //     json1[D_RGB] = tmpctr;
 
 //   //     switch(device_id){
-//   //       case ID_DB18_DS: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_DS_ID); break;
-//   //       case ID_DB18_US: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_US_ID); break;
-//   //       case ID_DB18_WB: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_WB_ID); break;
-//   //       case ID_DB18_IH: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_IH_ID); break;
+//   //       case ID_DB18_DS: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_DS_ID); break;
+//   //       case ID_DB18_US: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_US_ID); break;
+//   //       case ID_DB18_WB: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_WB_ID); break;
+//   //       case ID_DB18_IH: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_IH_ID); break;
 //   //       default: break; //nothing
 //   //     }
 //   //   }
@@ -805,38 +805,38 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   /**
    * @note device_id for which heating zone is being commanded
    * */
-  if(jtok = obj[D_JSON_HVAC_DEVICE]){ 
+  if(jtok = obj[D_HVAC_DEVICE]){ 
     if(jtok.isStr()){
       if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(), GetModuleUniqueID()))>=0)
-      { // D_JSON_DEVICE
-        ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+      { // D_DEVICE
+        ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_NVALUE_K(D_HVAC_DEVICE)),device_id);
       }else{
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_HVAC_DEVICE "device_id=%d"), device_id);
       }
     }else
     if(jtok.isNum()){
       device_id = jtok.getInt();
     }
-    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+    ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_HVAC_DEVICE)),device_id);
   }
 
   /**
    *  @note Timer Commands
    * */
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-  if(jtok = obj["HVAC"].getObject()[D_JSON_TIME_ON]){ 
+  if(jtok = obj["HVAC"].getObject()[D_TIME_ON]){ 
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj["HVAC"].getObject()[D_JSON_ADD_TIME_ON]){ 
+  if(jtok = obj["HVAC"].getObject()[D_ADD_TIME_ON]){ 
     CommandSet_ProgramTimer_AddTimeOn(device_id, jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_ADD_TIME_ON)), jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_ADD_TIME_ON)), jtok.getInt());
     // #endif
   }
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
@@ -845,64 +845,64 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   /**
    * Temperature Commands
    * */
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_SET]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_SET]){ 
     CommandSet_ProgramTemperature_Desired_Temperature(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TEMPERATURE D_SET)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_MODE]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_MODE]){ 
     CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()["StartDesired"]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()["StartDesired"]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     rt.zone[device_id].program_temp_method.StartDesiredTemperature(jtok.getFloat());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_TIME_RUNNING].getObject()[D_LIMIT]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     rt.zone[device_id].program_temp_method.SetTimer_Running_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_MAINTAINING].getObject()[D_JSON_LIMIT]){ 
+  if(jtok = obj[D_TEMPERATURE].getObject()[D_TIME_MAINTAINING].getObject()[D_LIMIT]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
     rt.zone[device_id].program_temp_method.SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), jtok.getInt());
     // #endif
   }
 
 
-  if(jtok = obj[D_JSON_SCHEDULE].getObject()[D_JSON_MODE]){ 
+  if(jtok = obj[D_SCHEDULE].getObject()[D_MODE]){ 
     int8_t mode = GetScheduleModeIDByCtr(jtok.getStr());
     CommandSet_ProgramTemperature_Schedule_Mode(device_id,mode); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_K(D_JSON_SCHEDULE D_JSON_MODE)), jtok.getStr());
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_K(D_SCHEDULE D_MODE)), jtok.getStr());
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
+  if(jtok = obj[D_TIME_RUNNING].getObject()[D_LIMIT]){ 
     CommandSet_ProgramTemperature_TimeRunning_Limit(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
+    ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TIME_RUNNING,D_LIMIT)), jtok.getInt()); // The debug prints should always get the jtok value, internal commandset will echo the set value
     // #endif
   }
   
@@ -971,7 +971,7 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint16_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
+    ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -990,7 +990,7 @@ void mHVAC::CommandSet_ProgramTimer_AddTimeOn(uint8_t zone_id, uint16_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
+    ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1011,7 +1011,7 @@ uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
   // // isanychanged_timers = true;
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   ALOG_INF(PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
+  //   ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), rt.zone[zone_id].program_timer_method.GetTimer_Minutes());
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1022,7 +1022,7 @@ void mHVAC::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t zone_id, f
   rt.zone[zone_id].program_temp_method.SetDesiredTemperature(value);
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)rt.zone[zone_id].program_temp_method.GetDesiredTemperature());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TEMPERATURE D_SET)), (int)rt.zone[zone_id].program_temp_method.GetDesiredTemperature());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1034,7 +1034,7 @@ void mHVAC::CommandSet_ProgramTemperature_Mode(uint8_t zone_id, uint8_t value)
   rt.zone[zone_id].program_temp_method.SetMode(value);
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), rt.zone[zone_id].program_temp_method.GetMode());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), rt.zone[zone_id].program_temp_method.GetMode());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1046,7 +1046,7 @@ void mHVAC::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_id, u
 
   //   program_temps[device_id].time_running.limit = value;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
+  //   ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_SVALUE_NVALUE_K(D_TIME_RUNNING,D_LIMIT)),program_temps[device_id].time_running.limit);
   // #endif
   //   // fForceHeatingTempsUpdate = true;
   //   data_buffer.isserviced++;
@@ -1080,10 +1080,10 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   // program_temps[device_id].time_maintaining.on,
   // program_temps[device_id].schedule.mode_sch);
 
-  //   //ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   //ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_SVALUE),D_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)value);
+  // // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TEMPERATURE D_SET)), (int)value);
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1261,8 +1261,8 @@ uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level, bool json_appendi
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
     JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),zone_id,buffer,sizeof(buffer)));
-      JBI->Add(D_JSON_TIME_ON, rt.zone[zone_id].program_timer_method.GetTimer_Minutes() != -1 ? rt.zone[zone_id].program_timer_method.GetTimer_Minutes() : 0); // If "-1" ie disabled, send zero
-      JBI->Add(D_JSON_TIME_ON_SECS, rt.zone[zone_id].program_timer_method.GetTimer_Seconds());
+      JBI->Add(D_TIME_ON, rt.zone[zone_id].program_timer_method.GetTimer_Minutes() != -1 ? rt.zone[zone_id].program_timer_method.GetTimer_Minutes() : 0); // If "-1" ie disabled, send zero
+      JBI->Add(D_TIME_ON_SECS, rt.zone[zone_id].program_timer_method.GetTimer_Seconds());
     JBI->Object_End();
   }
 
@@ -1283,41 +1283,41 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level, bool json_appendin
 
     JBI->Level_Start_P( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),zone_id,buffer,sizeof(buffer)) );
   
-      JBI->Level_Start_P(D_JSON_TEMPERATURE);   
-        JBI->Add(D_JSON_CURRENT, rt.zone[zone_id].program_temp_method.GetCurrentTemperature());
-        JBI->Add(D_JSON_DESIRED, rt.zone[zone_id].program_temp_method.GetDesiredTemperature());
-        JBI->Add(D_JSON_ERROR,   rt.zone[zone_id].program_temp_method.GetErrorTemperature());
+      JBI->Level_Start_P(D_TEMPERATURE);   
+        JBI->Add(D_CURRENT, rt.zone[zone_id].program_temp_method.GetCurrentTemperature());
+        JBI->Add(D_DESIRED, rt.zone[zone_id].program_temp_method.GetDesiredTemperature());
+        JBI->Add(D_ERROR,   rt.zone[zone_id].program_temp_method.GetErrorTemperature());
       JBI->Object_End();
-      JBI->Level_Start_P(D_JSON_STATUS);   
-        // JBI->Add(D_JSON_MODE, GetTempModeByDeviceIDCtr(zone_id, buffer, sizeof(buffer)));
-        // JBI->Add(D_JSON_DATA, program_temps[zone_id].status.data.ctr);
+      JBI->Level_Start_P(D_STATUS);   
+        // JBI->Add(D_MODE, GetTempModeByDeviceIDCtr(zone_id, buffer, sizeof(buffer)));
+        // JBI->Add(D_DATA, program_temps[zone_id].status.data.ctr);
       JBI->Object_End();
-      JBI->Level_Start_P(D_JSON_TIME_RUNNING); 
-        JBI->Add(D_JSON_TIME_ON, rt.zone[zone_id].program_temp_method.GetTimer_Running_Minutes() != -1 ? rt.zone[zone_id].program_temp_method.GetTimer_Running_Minutes() : 0);
-        JBI->Add(D_JSON_TIME_ON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Running_Seconds());  
-        JBI->Add(D_JSON_LIMIT, rt.zone[zone_id].program_temp_method.GetTimer_Running_Limit_Minutes());
-        JBI->Add(D_JSON_LIMIT D_JSON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());        
+      JBI->Level_Start_P(D_TIME_RUNNING); 
+        JBI->Add(D_TIME_ON, rt.zone[zone_id].program_temp_method.GetTimer_Running_Minutes() != -1 ? rt.zone[zone_id].program_temp_method.GetTimer_Running_Minutes() : 0);
+        JBI->Add(D_TIME_ON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Running_Seconds());  
+        JBI->Add(D_LIMIT, rt.zone[zone_id].program_temp_method.GetTimer_Running_Limit_Minutes());
+        JBI->Add(D_LIMIT D_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());        
       JBI->Object_End();  
-      JBI->Level_Start_P(D_JSON_TIME_MAINTAINING); 
-        JBI->Add(D_JSON_TIME_ON, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() != -1 ? rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() : 0);
-        JBI->Add(D_JSON_TIME_ON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Seconds());  
-        JBI->Add(D_JSON_LIMIT, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes());
-        JBI->Add(D_JSON_LIMIT D_JSON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());  
+      JBI->Level_Start_P(D_TIME_MAINTAINING); 
+        JBI->Add(D_TIME_ON, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() != -1 ? rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes() : 0);
+        JBI->Add(D_TIME_ON_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Seconds());  
+        JBI->Add(D_LIMIT, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Minutes());
+        JBI->Add(D_LIMIT D_SECS, rt.zone[zone_id].program_temp_method.GetTimer_Maintaining_Limit_Seconds());  
       JBI->Object_End();  
-      JBI->Level_Start_P(D_JSON_TIME_TO_HEAT);
-        //  time_to_heatobj[D_JSON_SECONDS] = GetHeatingProfilesTimeSeconds(zone_id,program_temps[zone_id].temp.current,program_temps[zone_id].temp.desired);
-        //       //   time_to_heatobj[D_JSON_MINUTES] = GetHeatingProfilesTimeMinutes(zone_id,program_temps[zone_id].temp.current,program_temps[zone_id].temp.desired);    
+      JBI->Level_Start_P(D_TIME_TO_HEAT);
+        //  time_to_heatobj[D_SECONDS] = GetHeatingProfilesTimeSeconds(zone_id,program_temps[zone_id].temp.current,program_temps[zone_id].temp.desired);
+        //       //   time_to_heatobj[D_MINUTES] = GetHeatingProfilesTimeMinutes(zone_id,program_temps[zone_id].temp.current,program_temps[zone_id].temp.desired);    
       JBI->Object_End();  
-      JBI->Level_Start_P(D_JSON_SCHEDULE); 
-        // JBI->Add(D_JSON_MODE, GetScheduleNameCtrbyID(program_temps[zone_id].schedule.mode_sch, buffer, sizeof(buffer)));
-        // JBI->Add(D_JSON_ISRUNNING, program_temps[zone_id].schedule.fRunning);     
+      JBI->Level_Start_P(D_SCHEDULE); 
+        // JBI->Add(D_MODE, GetScheduleNameCtrbyID(program_temps[zone_id].schedule.mode_sch, buffer, sizeof(buffer)));
+        // JBI->Add(D_ISRUNNING, program_temps[zone_id].schedule.fRunning);     
         // char time_ctr[20]; memset(time_ctr,'\0',sizeof(time_ctr));
         // sprintf(time_ctr, "%02d:%02d:%02d",(int)program_temps[zone_id].schedule.ontime.hour,(int)program_temps[zone_id].schedule.ontime.minute,(int)program_temps[zone_id].schedule.ontime.second);
-        // scheduleobj[D_JSON_ONTIME] = time_ctr;//pCONT_time->getFormattedTime();
+        // scheduleobj[D_ONTIME] = time_ctr;//pCONT_time->getFormattedTime();
         // char time_ctr2[20];
         // memset(time_ctr2,'\0',sizeof(time_ctr2));
         // sprintf(time_ctr2, "%02d:%02d:%02d",(int)program_temps[zone_id].schedule.offtime.hour,(int)program_temps[zone_id].schedule.offtime.minute,(int)program_temps[zone_id].schedule.offtime.second);
-        // scheduleobj[D_JSON_OFFTIME] = time_ctr2;//pCONT_time->getFormattedTime();   
+        // scheduleobj[D_OFFTIME] = time_ctr2;//pCONT_time->getFormattedTime();   
       JBI->Object_End();  
     JBI->Object_End();
   }
@@ -1332,35 +1332,35 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level, bool json_appendin
 uint8_t mHVAC::ConstructJSON_ProgramActive(uint8_t json_level, bool json_appending){
   JBI->Start();
   // DEBUG_LINE_HERE;
-    JBI->Level_Start_P(D_JSON_RELAY);   
+    JBI->Level_Start_P(D_RELAY);   
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_US, GetHeatingRelay(DEVICE_US_ID));
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_DS, GetHeatingRelay(DEVICE_DS_ID));
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_IH, GetHeatingRelay(DEVICE_IH_ID));
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_WB, GetHeatingRelay(DEVICE_WB_ID));
-      // JBI->Add(D_JSON_ANY,                     GetAnyHeatingRelay());      
+      // JBI->Add(D_ANY,                     GetAnyHeatingRelay());      
     JBI->Object_End();
-    JBI->Level_Start_P(D_JSON_TIMER);  
+    JBI->Level_Start_P(D_TIMER);  
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_US, activeprograms[DEVICE_US_ID].timers.state); 
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_DS, activeprograms[DEVICE_DS_ID].timers.state); 
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_IH, activeprograms[DEVICE_IH_ID].timers.state); 
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_WB, activeprograms[DEVICE_WB_ID].timers.state); 
     JBI->Object_End();
-    JBI->Level_Start_P(D_JSON_TEMPERATURE);  
+    JBI->Level_Start_P(D_TEMPERATURE);  
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_US, activeprograms[DEVICE_US_ID].temps.state); 
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_DS, activeprograms[DEVICE_DS_ID].temps.state); 
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_IH, activeprograms[DEVICE_IH_ID].temps.state); 
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_WB, activeprograms[DEVICE_WB_ID].temps.state); 
     JBI->Object_End();
-    JBI->Level_Start_P(D_JSON_STATUS);  
-      // JBI->Add(D_JSON_MESSAGE, status_message.ctr);  //nice human message that remains the same
-      // JBI->Add(D_JSON_LENGTH, status_message.len); 
-      // JBI->Add(D_JSON_IMPORTANCE, status_message.importance); 
+    JBI->Level_Start_P(D_STATUS);  
+      // JBI->Add(D_MESSAGE, status_message.ctr);  //nice human message that remains the same
+      // JBI->Add(D_LENGTH, status_message.len); 
+      // JBI->Add(D_IMPORTANCE, status_message.importance); 
     JBI->Object_End();
 
-    // JBI->Level_Start_P(D_JSON_STATUS "_Short");  
-    //   JBI->Add(D_JSON_MESSAGE, status_message.ctr);  //nice human message that remains the same
-    //   JBI->Add(D_JSON_LENGTH, status_message.len); 
-    //   JBI->Add(D_JSON_IMPORTANCE, status_message.importance); 
+    // JBI->Level_Start_P(D_STATUS "_Short");  
+    //   JBI->Add(D_MESSAGE, status_message.ctr);  //nice human message that remains the same
+    //   JBI->Add(D_LENGTH, status_message.len); 
+    //   JBI->Add(D_IMPORTANCE, status_message.importance); 
     // JBI->Object_End();
 
   return JBI->End();
@@ -1374,10 +1374,10 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level, bool json_appendi
   JBI->Start();
   for(int device_id=0;device_id<settings.active_zones;device_id++){
     JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID(pCONT_mry->GetModuleUniqueID(), device_id, buffer, sizeof(buffer)));
-      JBI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->rt.relay_status[device_id].last.ontime.hour,  pCONT_mry->rt.relay_status[device_id].last.ontime.minute,  pCONT_mry->rt.relay_status[device_id].last.ontime.second);
-      JBI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->rt.relay_status[device_id].last.offtime.hour,  pCONT_mry->rt.relay_status[device_id].last.offtime.minute,  pCONT_mry->rt.relay_status[device_id].last.offtime.second);
-      JBI->Add(D_JSON_TIME_ON "_Seconds",   pCONT_mry->rt.relay_status[device_id].time_seconds_on);
-      JBI->Add(D_JSON_TIME_ON "_Mins",   pCONT_mry->rt.relay_status[device_id].time_seconds_on/60);
+      JBI->Add_FV(D_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->rt.relay_status[device_id].last.ontime.hour,  pCONT_mry->rt.relay_status[device_id].last.ontime.minute,  pCONT_mry->rt.relay_status[device_id].last.ontime.second);
+      JBI->Add_FV(D_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->rt.relay_status[device_id].last.offtime.hour,  pCONT_mry->rt.relay_status[device_id].last.offtime.minute,  pCONT_mry->rt.relay_status[device_id].last.offtime.second);
+      JBI->Add(D_TIME_ON "_Seconds",   pCONT_mry->rt.relay_status[device_id].time_seconds_on);
+      JBI->Add(D_TIME_ON "_Mins",   pCONT_mry->rt.relay_status[device_id].time_seconds_on/60);
     JBI->Object_End();
   }
   return JBI->End();
@@ -1394,8 +1394,8 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level, bool json_appending
 
   for(int zone_id=0;zone_id<settings.active_zones;zone_id++){
     JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), zone_id, buffer, sizeof(buffer)));
-      // if(rt.zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, rt.zone[zone_id].sensor.temperature); }
-      // if(rt.zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, rt.zone[zone_id].sensor.humidity);       }
+      // if(rt.zone[zone_id].sensor.temperature){ JBI->Add(D_TEMPERATURE, rt.zone[zone_id].sensor.temperature); }
+      // if(rt.zone[zone_id].sensor.humidity)   { JBI->Add(D_HUMIDITY, rt.zone[zone_id].sensor.humidity);       }
       JBI->Add("ModuleID",rt.zone[zone_id].sensor.module_id);
       JBI->Add("Index",rt.zone[zone_id].sensor.index);
     JBI->Object_End();

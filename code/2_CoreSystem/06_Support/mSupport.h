@@ -2,7 +2,7 @@
 #ifndef _MSUPPORT_H_
 #define _MSUPPORT_H_
 
-#define D_UNIQUE_MODULE_CORE_SUPPORT_ID 2006 // ((2*1000)+6)
+#define D_UNIQUE_MODULE_CORE_SUPPORT_ID 2006 // [(Folder_Number*100)+ID_File]
 
 /*********************************************************************************************
  * Watchdog related
@@ -347,6 +347,23 @@ T ConvertStateNumberIfToggled(T command_state, U check_state){
   return command_state; // return new state
 }
 
+#include <string>
+
+template <typename T>
+std::string toBinaryString(T value, size_t bitCount = sizeof(T) * 8) {
+    static_assert(std::is_integral<T>::value, "Type must be an integral type");
+
+    std::string result;
+    result.reserve(bitCount);  // Reserve space for the bits
+
+    for (size_t i = 0; i < bitCount; ++i) {
+        // Extract the bit from the value, starting from the MSB
+        result += (value & (1 << (bitCount - 1 - i))) ? '1' : '0';
+    }
+
+    return result;
+}
+
 extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack, uint32_t stack_end);
 
 extern uint32_t ResetReason_g(void);
@@ -383,9 +400,7 @@ class mSupport :
     static constexpr const char* PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mSupport);    };
-    #endif
+    
 
     void CheckResetConditions();
 
@@ -455,6 +470,7 @@ class mSupport :
     uint32_t ResetReason(void);
     String GetResetReason(void);
     const char* GetResetReason(char* buffer, uint8_t buflen);
+
 
     size_t strchrspn(const char *str1, int character);
     static char* float2CString(float number, unsigned char prec, char *s);

@@ -1,7 +1,7 @@
 #ifndef _MFURNACE_SENSOR_LEVEL_H
 #define _MFURNACE_SENSOR_LEVEL_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_FURNACE_SENSOR_ID   ((10*1000)+03)
+#define D_UNIQUE_MODULE_CONTROLLER_FURNACE_SENSOR_ID   10003 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -118,11 +118,6 @@ class mFurnaceSensor :
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_FURNACE_SENSOR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_FURNACE_SENSOR_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mFurnaceSensor);
-    };
-    #endif
     
     void SubTasker_MQTTSender();
 

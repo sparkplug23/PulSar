@@ -236,7 +236,7 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -305,18 +305,21 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
                               
               if(val.timestamp)
               {
-                uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - val.timestamp;
-                if(sensor_elapsed_time) // If positive and NOT val.timestamp set to 0 as skipped
+                if(pCONT_time->RtcTime.valid) // Only enable timestamp checks when time is valid
                 {
-                  if(sensor_elapsed_time > unified_sensor_reporting_invalid_reading_timeout_seconds)
+                  uint32_t sensor_elapsed_time = pCONT_time->UtcTime() - val.timestamp;
+                  if(sensor_elapsed_time) // If positive and NOT val.timestamp set to 0 as skipped
                   {
-                    #ifdef ENABLE_DEVFEATURE_UNIFIED_REPORTING_SKIPPING_INVALID_TIMEOUT_READINGS
-                    ALOG_WRN(PSTR("sensor time invalid %d > %d"), sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
-                    continue; // skip the result in this loop
-                    #else
-                    DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-                    ALOG_WRN(PSTR("Age needs adding to module %S %s %d %d"), pmod->GetModuleName(), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
-                    #endif
+                    if(sensor_elapsed_time > unified_sensor_reporting_invalid_reading_timeout_seconds)
+                    {
+                      #ifdef ENABLE_DEVFEATURE_UNIFIED_REPORTING_SKIPPING_INVALID_TIMEOUT_READINGS
+                      ALOG_WRN(PSTR("sensor time invalid %d > %d"), sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                      continue; // skip the result in this loop
+                      #else
+                      DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
+                      ALOG_WRN(PSTR("sensor_elapsed_time missing %S %s %d %d"), pmod->GetModuleName(), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                      #endif
+                    }
                   }
                 }
               }
@@ -502,7 +505,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //               // Only add sensor type if any has been found
 //               if(flag_level_started != true)
 //               {     
-//                 JBI->Object_Start("TemperatureHeatMapBrightness");//PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
+//                 JBI->Object_Start("TemperatureHeatMapBrightness");//PM_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
 //                 flag_level_started = true;
 //                 flag_level_ended_needed = true;
 //               }
@@ -645,7 +648,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //               // Only add sensor type if any has been found
 //               if(flag_level_started != true)
 //               {     
-//                 JBI->Level_Start_P(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
+//                 JBI->Level_Start_P(PM_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
 //                 flag_level_started = true;
 //                 flag_level_ended_needed = true;
 //               }
@@ -808,7 +811,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
               // Only add sensor type if any has been found
               if(flag_level_started != true)
               {     
-                JBI->Object_Start(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
+                JBI->Object_Start(PM_TEMPERATURE_HEATMAP_RGBSTRING);//PM_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
                 flag_level_started = true;
                 flag_level_ended_needed = true;
               }
@@ -954,7 +957,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
               // Only add sensor type if any has been found
               if(flag_level_started != true)
               {     
-                JBI->Level_Start_P(PM_JSON_TEMPERATURE_HEATMAP_ADJUSTED_BRIGHTNESS_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
+                JBI->Level_Start_P(PM_TEMPERATURE_HEATMAP_ADJUSTED_BRIGHTNESS_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
                 flag_level_started = true;
                 flag_level_ended_needed = true;
               }
@@ -1320,18 +1323,20 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool j
   /**
    * @brief Motion Event : PIR module
    **/
+  #ifdef USE_MODULE_SENSORS_PIR
   if(pCONT_rules->event_triggered.module_id == pCONT_motion->GetModuleUniqueID())
   {
     uint16_t device_id   = pCONT_rules->event_triggered.device_id;
     uint16_t state_id = pCONT_rules->event_triggered.value.data[0];  
 
-    JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( pCONT_motion->GetModuleUniqueID(), device_id, buffer, sizeof(buffer))); 
+    JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( pCONT_motion->GetModuleUniqueID(), device_id, buffer, sizeof(buffer))); 
     JBI->Add("Time", pCONT_time->GetTimeStr(pCONT_time->Rtc.local_time).c_str());
     JBI->Add("UTCTime", pCONT_time->Rtc.local_time);
-    JBI->Add(D_JSON_EVENT, state_id ? "detected": "over");
+    JBI->Add(D_EVENT, state_id ? "detected": "over");
     JBI->Add("Sensor", pCONT_motion->GetModuleName());
 
   }
+  #endif // USE_MODULE_SENSORS_PIR
 
   return JBI->End();
     
@@ -1362,9 +1367,9 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool j
       
   //     pir_detect[sensor_id].ischanged = false;
       
-  //     JBI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
-  //     JBI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-  //     JBI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+  //     JBI->Add(D_LOCATION, DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+  //     JBI->Add(D_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+  //     JBI->Add(D_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
   //triggering sensor (via module id)
   // also module name
   /// also sensor index

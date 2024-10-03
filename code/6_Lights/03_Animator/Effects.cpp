@@ -1050,7 +1050,7 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
   ALOG_ERR( "delete, replaced by spanned palette" );
   
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
     return;
   }
@@ -1494,7 +1494,7 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }
@@ -1659,7 +1659,7 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }
@@ -1774,7 +1774,7 @@ static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
 //   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length();
 
 //   if (!SEGMENT.allocateData(dataSize)){    
-//     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+//     ALOG_ERR( PM_MEMORY_INSUFFICIENT );
 //     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
 //     return;
 //   }
@@ -1853,7 +1853,7 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
   //ALOG_TST(PSTR("dataSize = %d"), dataSize);
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }
@@ -1955,7 +1955,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.virtualLength();
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
     return;
   }
@@ -2068,7 +2068,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.virtualLength();
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
     return;
   }
@@ -2199,7 +2199,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
 // effect not written yet, copied from another
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
     return;
   }
@@ -7037,7 +7037,7 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst()
   uint16_t dataSize = sizeof(star) * numStars;
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION;
     return;
   }
@@ -7158,7 +7158,7 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows()
   uint16_t dataSize = sizeof(star) * numStars;
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION;
     return;
   }
@@ -7286,7 +7286,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks()
   uint16_t dataSize = sizeof(spark) * numSparks;
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION;
     return;
   }
@@ -7420,7 +7420,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
   uint16_t dataSize = sizeof(spark) * numSparks;
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION;
     return;
   }
@@ -8627,7 +8627,7 @@ void mAnimatorLight::EffectAnim__Oscillate()
   uint16_t dataSize = sizeof(oscillator) * numOscillators;
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }
@@ -8964,7 +8964,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Colour()
 {
   uint16_t dataSize = (SEGLEN+7) >> 3; //1 bit per LED
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }
@@ -9070,7 +9070,7 @@ static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM = "Lake@!;Fx;!";
 void mAnimatorLight::EffectAnim__Meteor()
 {
   if (!SEGMENT.allocateData(SEGLEN)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }
@@ -11621,7 +11621,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(bool fl
     starting_colour.debug_print("starting_colour");
 
     
-    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K("effect >"D_JSON_HUE)), desired_colour.getHue360());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K("effect >"D_HUE)), desired_colour.getHue360());
 
 
     // Serial.println(desired_colour.raw[0]);
@@ -12375,16 +12375,16 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 
 // // // // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
-// // //   if(!obj[D_JSON_NAME].isNull()){ 
-// // //     const char* scenectr = obj[D_JSON_NAME];
+// // //   if(!obj[D_NAME].isNull()){ 
+// // //     const char* scenectr = obj[D_NAME];
 // // //     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
 // // //       scene.name_id = tmp_id;
 // // //       pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
-// // //       ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
-// // //       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
+// // //       ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_SVALUE),D_NAME,GetSceneName(buffer));
+// // //       // Response_mP(S_JSON_COMMAND_SVALUE,D_NAME,GetSceneName(buffer));
 // // //       data_buffer.isserviced++;
 // // //     }else{
-// // //       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
+// // //       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_SVALUE),D_NAME,scenectr);
 // // //     }
 // // //   }
 
@@ -12396,63 +12396,63 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   // ambilightsettings.screens[SCREEN_CENTRE].top
 // // //   //screen
   
-// // //   if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
-// // //     uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+// // //   if(!obj[F("top")][F(D_HUE)].isNull()){ 
+// // //     uint16_t hue = obj[F("top")][F(D_HUE)];
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_HUE,hue);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HUE_N2F(hue);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     data_buffer.isserviced++;
 // // //   }
-// // //   if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
-// // //     uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+// // //   if(!obj[F("top")][F(D_SAT)].isNull()){ 
+// // //     uint8_t sat = obj[F("top")][F(D_SAT)];
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_SAT,sat);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
 // // //     data_buffer.isserviced++;
 // // //   }
-// // //   if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
-// // //     uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+// // //   if(!obj[F("top")][F(D_BRT)].isNull()){ 
+// // //     uint8_t brt = obj[F("top")][F(D_BRT)];
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_BRT,brt);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,pCONT_iLight->animation.brightness);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,pCONT_iLight->animation.brightness);
 // // //     data_buffer.isserviced++;
 // // //   }
 
 
 
-// // //   if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
-// // //     uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+// // //   if(!obj[F("bottom")][F(D_HUE)].isNull()){ 
+// // //     uint16_t hue = obj[F("bottom")][F(D_HUE)];
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_HUE,hue);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HUE_N2F(hue);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     data_buffer.isserviced++;
 // // //   }
-// // //   if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
-// // //     uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+// // //   if(!obj[F("bottom")][F(D_SAT)].isNull()){ 
+// // //     uint8_t sat = obj[F("bottom")][F(D_SAT)];
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_SAT,sat);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
 // // //     data_buffer.isserviced++;
 // // //   }
-// // //   if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
-// // //     uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+// // //   if(!obj[F("bottom")][F(D_BRT)].isNull()){ 
+// // //     uint8_t brt = obj[F("bottom")][F(D_BRT)];
+// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_BRT,brt);
 // // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,pCONT_iLight->animation.brightness);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,pCONT_iLight->animation.brightness);
 // // //     data_buffer.isserviced++;
 // // //   }
 
 
 
 
-// // //   if(!obj[D_JSON_RGB].isNull()){
-// // //     const char* rgbpacked = obj[D_JSON_RGB];
+// // //   if(!obj[D_RGB].isNull()){
+// // //     const char* rgbpacked = obj[D_RGB];
 // // //     uint32_t colour32bit = 0;
 // // //     if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
 // // //     }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
@@ -12468,17 +12468,17 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   }
 
 // // //   // TIME with different units
-// // //   if(!obj[D_JSON_TIME].isNull()){ //default to secs
+// // //   if(!obj[D_TIME].isNull()){ //default to secs
 // // //     pCONT_iLight->animation.time_ms.val = obj["time"];
 // // //     pCONT_iLight->animation.time_ms.val *= 1000;
 // // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
 // // //   }else
-// // //   if(!obj[D_JSON_TIME].isNull()){
+// // //   if(!obj[D_TIME].isNull()){
 // // //     pCONT_iLight->animation.time_ms.val = obj["time_secs"];
 // // //     pCONT_iLight->animation.time_ms.val *= 1000;
 // // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
 // // //   }else
-// // //   if(!obj[D_JSON_TIME_MS].isNull()){
+// // //   if(!obj[D_TIME_MS].isNull()){
 // // //     pCONT_iLight->animation.time_ms.val = obj["time_ms"];
 // // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
 // // //   }
@@ -13715,7 +13715,7 @@ void mAnimatorLight::EffectAnim__Christmas_Musical__01()
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
   if (!SEGMENT.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
   }

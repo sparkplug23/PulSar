@@ -1,8 +1,7 @@
 #ifndef _MODULE_ENERGY_ADE7953_H
 #define _MODULE_ENERGY_ADE7953_H
 
-#define D_UNIQUE_MODULE_ENERGY_ADE7953_ID    131
-#define D_GROUP_MODULE_ENERGY_ADE7953_ID    1
+#define D_UNIQUE_MODULE_ENERGY_ADE7953_ID    7002 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -27,12 +26,6 @@ class mEnergyADE7953 :
     static constexpr const char* PM_MODULE_ENERGY_ADE7953_CTR = D_MODULE_ENERGY_ADE7953_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_ADE7953_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_ADE7953_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mEnergyADE7953);
-    };
-    #endif
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;

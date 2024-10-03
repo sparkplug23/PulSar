@@ -1,7 +1,7 @@
 #ifndef _mLDRBasic_H_
 #define _mLDRBasic_H_
 
-#define D_UNIQUE_MODULE_SENSORS_LDR_BASIC_ID 122
+#define D_UNIQUE_MODULE_SENSORS_LDR_BASIC_ID 5014 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -36,12 +36,6 @@ class mLDRBasic :
     static constexpr const char* PM_MODULE_SENSORS_LDR_BASIC_CTR = D_MODULE_SENSORS_LDR_BASIC_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_LDR_BASIC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_LDR_BASIC_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mLDRBasic);
-    };
-    #endif
 
     void EveryLoop();
     void EverySecond();

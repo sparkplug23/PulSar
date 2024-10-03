@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_CORE_I2C_H
 #define _USE_MODULE_CORE_I2C_H 0.3
 
-#define D_UNIQUE_MODULE_CORE__I2C__ID ((2*1000)+31)
+#define D_UNIQUE_MODULE_CORE__I2C__ID 2031 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -24,9 +24,6 @@ class mI2C :
     static constexpr const char* PM_MODULE_CORE__I2C__CTR = D_MODULE_CORE__I2C__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__I2C__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__I2C__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mI2C);    };
-    #endif
     
     struct ClassState
     {
@@ -71,6 +68,7 @@ class mI2C :
     void I2cResetActive(uint32_t addr, uint32_t count = 1);
     void I2cSetActive(uint32_t addr, uint32_t count = 1);
     void I2cSetActiveFound(uint32_t addr, const char *types);
+    void I2cSetActiveFound_P(uint32_t addr, const char *types);
     bool I2cActive(uint32_t addr);
     bool I2cSetDevice(uint32_t addr);
     bool I2cEnabled(uint32_t i2c_index);

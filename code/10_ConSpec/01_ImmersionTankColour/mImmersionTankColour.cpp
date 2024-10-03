@@ -144,14 +144,14 @@ void mImmersionTankColour::EverySecond()
   if(data.time_on->UpdateTick())
   {
     flag_show_enabled = true;
-    ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Running Value")), data.time_on->Value());
+    ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Running Value")), data.time_on->Value());
     mqtthandler_sensor_ifchanged.tRateSecs = 1;
   }
   else
   {
     flag_show_enabled = false;
     mqtthandler_sensor_ifchanged.tRateSecs = 60;
-    // ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Not Running Value")), data.time_on->Value());
+    // ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Not Running Value")), data.time_on->Value());
   }
 
   switch(data.mode)
@@ -395,7 +395,7 @@ uint8_t mImmersionTankColour::ConstructJSON_Settings(uint8_t json_level, bool js
 uint8_t mImmersionTankColour::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    // JBI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
+    // JBI->Add_P(D_LIGHTPOWER, GetLightState());
 
     JBI->Add("TimeOn", data.time_on->Value());
     JBI->Add("Mode",   data.mode);
@@ -430,7 +430,7 @@ void mImmersionTankColour::parse_JSONCommand(JsonParserObject obj)
 
     data.mode = MODE_SHOW_COLOURS_GRADIENT_COLOUR_TEMP_ON_ID;
 
-    ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K("ColourTimeOn")), data.time_on->Value() );
+    ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K("ColourTimeOn")), data.time_on->Value() );
 
   }
 

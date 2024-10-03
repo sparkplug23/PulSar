@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_CORE_UPDATES_H
 #define _USE_MODULE_CORE_UPDATES_H 0.3
 
-#define D_UNIQUE_MODULE_CORE_UPDATES_ID 7
+#define D_UNIQUE_MODULE_CORE_UPDATES_ID 2014 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -22,12 +22,6 @@ class mUpdates :
     PGM_P GetModuleName(){         return PM_MODULE_CORE_UPDATES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_UPDATES_ID; }
 
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mUpdates);
-    };
-    #endif
 
     void init(void);
     void Pre_Init();

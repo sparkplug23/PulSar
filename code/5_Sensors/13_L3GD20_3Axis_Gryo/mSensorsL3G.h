@@ -19,7 +19,7 @@
 #ifndef MSENSORSL3G_H
 #define MSENSORSL3G_H
 
-#define D_UNIQUE_MODULE_SENSORS_L3G_ID 143
+#define D_UNIQUE_MODULE_SENSORS_L3G_ID 5013 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -52,11 +52,6 @@ class mSensorsL3G :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_L3G_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_L3G_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSensorsL3G);
-    };
-    #endif
 
     uint32_t tSavedMeasure = millis();
 

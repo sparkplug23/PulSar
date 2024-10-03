@@ -1,7 +1,7 @@
 #ifndef _MCUSE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_H
 #define _MCUSE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID     ((10*1000)+01)
+#define D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID     10001 // [(Folder_Number*100)+ID_File]
 
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -21,11 +21,6 @@ class mImmersionTankColour :
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mImmersionTankColour);
-    };
-    #endif
 
 
 

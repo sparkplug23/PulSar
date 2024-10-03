@@ -25,9 +25,6 @@ class mRelayStateLEDStrip :
     static constexpr const char* PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR = D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID; }    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mRelayStateLEDStrip);    };
-    #endif
     
 
     struct ClassState

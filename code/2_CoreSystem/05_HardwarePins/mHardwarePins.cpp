@@ -1672,11 +1672,11 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
 
 void mHardwarePins::TemplateJson()
 {
-  // Response_P(PSTR("{\"" D_JSON_NAME "\":\"%s\",\"" D_JSON_GPIO "\":["), pCONT_set->Settings.user_template.name);
+  // Response_P(PSTR("{\"" D_NAME "\":\"%s\",\"" D_GPIO "\":["), pCONT_set->Settings.user_template.name);
   // for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template.hardware.gp); i++) {
   //   ResponseAppend_P(PSTR("%s%d"), (i>0)?",":"", pCONT_set->Settings.user_template.hardware.gp.io[i]);
   // }
-  // ResponseAppend_P(PSTR("],\"" D_JSON_FLAG "\":%d,\"" D_JSON_BASE "\":%d}"), pCONT_set->Settings.user_template.flag, pCONT_set->Settings.user_template_base +1);
+  // ResponseAppend_P(PSTR("],\"" D_FLAG "\":%d,\"" D_BASE "\":%d}"), pCONT_set->Settings.user_template.flag, pCONT_set->Settings.user_template_base +1);
 }
 
 
@@ -1749,6 +1749,9 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id){
 //
 int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   if(*c=='\0'){ return -1; }
+
+  char buffer[50];  // Buffer to hold the formatted string (e.g., "SWT32" or "SWT1 Inv")
+  
   if(strcmp_P(c,PM_GPIO_FUNCTION_NONE_CTR)==0){       return GPIO_NONE_ID; }
   // else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA1_CTR)==0){   return GPIO_RGB_DATA_ID; } // force legacy pin version for now
   // else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA_CTR)==0){   return GPIO_RGB_DATA_ID; }
@@ -1780,31 +1783,57 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   #endif // USE_MODULE_SENSORS_LDR_BASIC
   
   #ifdef USE_MODULE_SENSORS_SWITCHES
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_NP_CTR)==0){  return GPIO_SWT1_NP_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_NP_CTR)==0){  return GPIO_SWT2_NP_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_NP_CTR)==0){  return GPIO_SWT1_NP_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_NP_CTR)==0){  return GPIO_SWT2_NP_ID; }
 
   
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_INV_CTR)==0){  return GPIO_SWT1_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_INV_CTR)==0){  return GPIO_SWT2_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT3_INV_CTR)==0){  return GPIO_SWT3_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT4_INV_CTR)==0){  return GPIO_SWT4_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT5_INV_CTR)==0){  return GPIO_SWT5_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT6_INV_CTR)==0){  return GPIO_SWT6_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT7_INV_CTR)==0){  return GPIO_SWT7_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT8_INV_CTR)==0){  return GPIO_SWT8_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_INV_CTR)==0){  return GPIO_SWT1_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_INV_CTR)==0){  return GPIO_SWT2_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT3_INV_CTR)==0){  return GPIO_SWT3_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT4_INV_CTR)==0){  return GPIO_SWT4_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT5_INV_CTR)==0){  return GPIO_SWT5_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT6_INV_CTR)==0){  return GPIO_SWT6_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT7_INV_CTR)==0){  return GPIO_SWT7_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT8_INV_CTR)==0){  return GPIO_SWT8_INV_ID; }
 
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_CTR)==0){  return GPIO_SWT1_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_CTR)==0){  return GPIO_SWT2_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT3_CTR)==0){  return GPIO_SWT3_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT4_CTR)==0){  return GPIO_SWT4_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT5_CTR)==0){  return GPIO_SWT5_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT6_CTR)==0){  return GPIO_SWT6_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT7_CTR)==0){  return GPIO_SWT7_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT8_CTR)==0){  return GPIO_SWT8_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_CTR)==0){  return GPIO_SWT1_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_CTR)==0){  return GPIO_SWT2_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT3_CTR)==0){  return GPIO_SWT3_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT4_CTR)==0){  return GPIO_SWT4_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT5_CTR)==0){  return GPIO_SWT5_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT6_CTR)==0){  return GPIO_SWT6_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT7_CTR)==0){  return GPIO_SWT7_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT8_CTR)==0){  return GPIO_SWT8_ID; }
+
+  // Check for "SWT1" to "SWT32"
+  for (int i = 1; i <= 32; i++) {
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_SWT1_ID + (i - 1);  // Return the corresponding ID (GPIO_SWT1_ID to GPIO_SWT32_ID)
+    }
+
+    // Check inverted switches "SWT1 Inv" to "SWT32 Inv"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_INV_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_SWT1_INV_ID + (i - 1);  // Return the corresponding inverted switch ID
+    }
+
+    // Check non-pull switches "SWT1_NP" to "SWT32_NP"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_NP_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_SWT1_NP_ID + (i - 1);  // Return the corresponding non-pull switch ID
+    }
+
+    // Check inverted non-pull switches "SWT1 Inv NP" to "SWT32 Inv NP"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_INV_NP_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_SWT1_INV_NP_ID + (i - 1);  // Return the corresponding inverted non-pull switch ID
+    }
+  }
   #endif
 
   #ifdef USE_MODULE_DRIVERS_RELAY
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_REL1_INV_CTR)==0){  return GPIO_REL1_INV_ID; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_REL1_INV_CTR)==0){  return GPIO_REL1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL2_INV_CTR)==0){  return GPIO_REL2_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL3_INV_CTR)==0){  return GPIO_REL3_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_REL4_INV_CTR)==0){  return GPIO_REL4_INV_ID; }
@@ -1935,21 +1964,64 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   // else if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR)==0){  return GPIO__ROTARY_ENCODER_B__ID; }
   // #endif
   #ifdef USE_MODULE_SENSORS_BUTTONS
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_INV_CTR)==0){  return GPIO_KEY2_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_INV_CTR)==0){  return GPIO_KEY3_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY4_INV_CTR)==0){  return GPIO_KEY4_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY5_INV_CTR)==0){  return GPIO_KEY5_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY6_INV_CTR)==0){  return GPIO_KEY6_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY7_INV_CTR)==0){  return GPIO_KEY7_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY8_INV_CTR)==0){  return GPIO_KEY8_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_INV_CTR)==0){  return GPIO_KEY2_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_INV_CTR)==0){  return GPIO_KEY3_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY4_INV_CTR)==0){  return GPIO_KEY4_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY5_INV_CTR)==0){  return GPIO_KEY5_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY6_INV_CTR)==0){  return GPIO_KEY6_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY7_INV_CTR)==0){  return GPIO_KEY7_INV_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY8_INV_CTR)==0){  return GPIO_KEY8_INV_ID; }
 
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_CTR)==0){  return GPIO_KEY2_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_CTR)==0){  return GPIO_KEY3_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_TOUCH_CTR)==0){  return GPIO_KEY1_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_TOUCH_CTR)==0){  return GPIO_KEY2_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_TOUCH_CTR)==0){  return GPIO_KEY3_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY4_TOUCH_CTR)==0){  return GPIO_KEY4_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY5_TOUCH_CTR)==0){  return GPIO_KEY5_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY6_TOUCH_CTR)==0){  return GPIO_KEY6_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY7_TOUCH_CTR)==0){  return GPIO_KEY7_TOUCH_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY8_TOUCH_CTR)==0){  return GPIO_KEY8_TOUCH_ID; }
+
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_CTR)==0){  return GPIO_KEY2_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_CTR)==0){  return GPIO_KEY3_ID; }
 
   
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_NP_CTR)==0){  return GPIO_KEY1_NP_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_NP_CTR)==0){  return GPIO_KEY1_NP_ID; }
+
+  for (int i = 1; i <= 32; i++) {
+    // Check normal keys "KEY1" to "KEY32"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_KEY_NUM_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_KEY1_ID + (i - 1);  // Return the corresponding key ID
+    }
+
+    // Check inverted keys "KEY1 Inv" to "KEY32 Inv"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_KEY_NUM_INV_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_KEY1_INV_ID + (i - 1);  // Return the corresponding inverted key ID
+    }
+
+    // Check non-pull keys "KEY1_NP" to "KEY32_NP"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_KEY_NUM_NP_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_KEY1_NP_ID + (i - 1);  // Return the corresponding non-pull key ID
+    }
+
+    // Check inverted non-pull keys "KEY1 Inv NP" to "KEY32 Inv NP"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_KEY_NUM_INV_NP_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_KEY1_INV_NP_ID + (i - 1);  // Return the corresponding inverted non-pull key ID
+    }
+
+    // Check touch keys "KEY1_TOUCH" to "KEY32_TOUCH"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_KEY_NUM_TOUCH_CTR, i);
+    ALOG_INF(PSTR("c=%s to %s"),c,buffer);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_KEY1_TOUCH_ID + (i - 1);  // Return the corresponding touch key ID
+    }
+  }
+
   #endif
 
   // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_PULLDOWN_CTR)==0){  return GPIO_KEY1_PULLDOWN_ID; }
@@ -2006,7 +2078,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
   
   #ifdef ESP32
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH4_CTR)==0){  return GPIO_ADC1_CH4_ID; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH4_CTR)==0){  return GPIO_ADC1_CH4_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH6_CTR)==0){  return GPIO_ADC1_CH6_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH7_CTR)==0){  return GPIO_ADC1_CH7_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR)==0){  return GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID; }
@@ -2058,18 +2130,78 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 }
 
 
+const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t buflen) 
+{
 
-// actually use buffer and return it
-const char* mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id, char* buffer){
+    // Check for KEY1 to KEY32
+    if (id >= GPIO_KEY1_ID && id <= GPIO_KEY32_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_CTR, id - GPIO_KEY1_ID + 1);
+      return buffer;
+    }
+    // Check for KEY1_INV to KEY32_INV
+    else if (id >= GPIO_KEY1_INV_ID && id <= GPIO_KEY32_INV_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_INV_CTR, id - GPIO_KEY1_INV_ID + 1);
+      return buffer;
+    }
+    // Check for KEY1_NP to KEY32_NP
+    else if (id >= GPIO_KEY1_NP_ID && id <= GPIO_KEY32_NP_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_NP_CTR, id - GPIO_KEY1_NP_ID + 1);
+      return buffer;
+    }
+    // Check for KEY1_INV_NP to KEY32_INV_NP
+    else if (id >= GPIO_KEY1_INV_NP_ID && id <= GPIO_KEY32_INV_NP_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_INV_NP_CTR, id - GPIO_KEY1_INV_NP_ID + 1);
+      return buffer;
+    }
+    // Check for KEY1_TOUCH to KEY32_TOUCH
+    else if (id >= GPIO_KEY1_TOUCH_ID && id <= GPIO_KEY32_TOUCH_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_TOUCH_CTR, id - GPIO_KEY1_TOUCH_ID + 1);
+      return buffer;
+    }
 
-  if(buffer == nullptr){ return 0; }
 
-  // memcpy_P(GetGPIOFunctionNamebyID_P(id)  
-  //strcpy_P
+    // Check for SWT1 to SWT32
+    if (id >= GPIO_SWT1_ID && id <= GPIO_SWT32_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_CTR, id - GPIO_SWT1_ID + 1);
+      return buffer;
+    }    
+    // Check for SWT1_INV to SWT32_INV
+    else if (id >= GPIO_SWT1_INV_ID && id <= GPIO_SWT32_INV_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_INV_CTR, id - GPIO_SWT1_INV_ID + 1);
+      return buffer;
+    }    
+    // Check for SWT1_NP to SWT32_NP
+    else if (id >= GPIO_SWT1_NP_ID && id <= GPIO_SWT32_NP_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_NP_CTR, id - GPIO_SWT1_NP_ID + 1);
+      return buffer;
+    }    
+    // Check for SWT1_INV_NP to SWT32_INV_NP
+    else if (id >= GPIO_SWT1_INV_NP_ID && id <= GPIO_SWT32_INV_NP_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_INV_NP_CTR, id - GPIO_SWT1_INV_NP_ID + 1);
+      return buffer;
+    }
 
+
+
+    // Step 2: Use the progmem function for other IDs
+    PGM_P progmem_str = GetGPIOFunctionNamebyID_P(id);
+    if (progmem_str != PM_SEARCH_NOMATCH) {
+        // Copy the progmem string to the buffer
+        strncpy_P(buffer, progmem_str, buflen - 1);
+        buffer[buflen - 1] = '\0'; // Ensure null-termination
+        return buffer;
+    }
+    
+    // Default case if no match found
+    snprintf_P(buffer, buflen, PSTR("No Match"));
+    return buffer;
 }
 
+
 PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
+
+ALOG_ERR(PSTR("GetGPIOFunctionNamebyID_P PO %d"), id);
+
   switch(id){
     default:           return PM_SEARCH_NOMATCH;
     case GPIO_NONE_ID: return PM_GPIO_FUNCTION_NONE_CTR;
@@ -2080,30 +2212,39 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 
 
     #ifdef USE_MODULE_SENSORS_BUTTONS
-    case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
-    case GPIO_KEY2_ID: return PM_GPIO_FUNCTION_KEY2_CTR;
-    case GPIO_KEY3_ID: return PM_GPIO_FUNCTION_KEY3_CTR;
+    // case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
+    // case GPIO_KEY2_ID: return PM_GPIO_FUNCTION_KEY2_CTR;
+    // case GPIO_KEY3_ID: return PM_GPIO_FUNCTION_KEY3_CTR;
     
-    case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
-    case GPIO_KEY2_INV_ID: return PM_GPIO_FUNCTION_KEY2_INV_CTR;
-    case GPIO_KEY3_INV_ID: return PM_GPIO_FUNCTION_KEY3_INV_CTR;
-    case GPIO_KEY4_INV_ID: return PM_GPIO_FUNCTION_KEY4_INV_CTR;
-    case GPIO_KEY5_INV_ID: return PM_GPIO_FUNCTION_KEY5_INV_CTR;
-    case GPIO_KEY6_INV_ID: return PM_GPIO_FUNCTION_KEY6_INV_CTR;
-    case GPIO_KEY7_INV_ID: return PM_GPIO_FUNCTION_KEY7_INV_CTR;
-    case GPIO_KEY8_INV_ID: return PM_GPIO_FUNCTION_KEY8_INV_CTR;
+    // case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
+    // case GPIO_KEY2_INV_ID: return PM_GPIO_FUNCTION_KEY2_INV_CTR;
+    // case GPIO_KEY3_INV_ID: return PM_GPIO_FUNCTION_KEY3_INV_CTR;
+    // case GPIO_KEY4_INV_ID: return PM_GPIO_FUNCTION_KEY4_INV_CTR;
+    // case GPIO_KEY5_INV_ID: return PM_GPIO_FUNCTION_KEY5_INV_CTR;
+    // case GPIO_KEY6_INV_ID: return PM_GPIO_FUNCTION_KEY6_INV_CTR;
+    // case GPIO_KEY7_INV_ID: return PM_GPIO_FUNCTION_KEY7_INV_CTR;
+    // case GPIO_KEY8_INV_ID: return PM_GPIO_FUNCTION_KEY8_INV_CTR;
+
+    // case GPIO_KEY1_TOUCH_ID: return PM_GPIO_FUNCTION_KEY1_TOUCH_CTR;
+    // case GPIO_KEY2_TOUCH_ID: return PM_GPIO_FUNCTION_KEY2_TOUCH_CTR;
+    // case GPIO_KEY3_TOUCH_ID: return PM_GPIO_FUNCTION_KEY3_TOUCH_CTR;
+    // case GPIO_KEY4_TOUCH_ID: return PM_GPIO_FUNCTION_KEY4_TOUCH_CTR;
+    // case GPIO_KEY5_TOUCH_ID: return PM_GPIO_FUNCTION_KEY5_TOUCH_CTR;
+    // case GPIO_KEY6_TOUCH_ID: return PM_GPIO_FUNCTION_KEY6_TOUCH_CTR;
+    // case GPIO_KEY7_TOUCH_ID: return PM_GPIO_FUNCTION_KEY7_TOUCH_CTR;
+    // case GPIO_KEY8_TOUCH_ID: return PM_GPIO_FUNCTION_KEY8_TOUCH_CTR;
     #endif
 
     #ifdef USE_MODULE_SENSORS_SWITCHES
-    case GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR; 
-    case GPIO_SWT2_ID: return PM_GPIO_FUNCTION_SWT2_CTR; 
-    case GPIO_SWT3_ID: return PM_GPIO_FUNCTION_SWT3_CTR; 
+    // case GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR; 
+    // case GPIO_SWT2_ID: return PM_GPIO_FUNCTION_SWT2_CTR; 
+    // case GPIO_SWT3_ID: return PM_GPIO_FUNCTION_SWT3_CTR; 
 
 
-    case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
+    // case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
     //   GPIO_SWT1_NP_ID,
     //   GPIO_SWT2_ID,
-    case  GPIO_SWT2_NP_ID: return PM_GPIO_FUNCTION_SWT2_NP_CTR;        
+    // case  GPIO_SWT2_NP_ID: return PM_GPIO_FUNCTION_SWT2_NP_CTR;        
     //   GPIO_SWT3_ID,
     //   GPIO_SWT3_NP_ID,
     //   GPIO_SWT4_ID,

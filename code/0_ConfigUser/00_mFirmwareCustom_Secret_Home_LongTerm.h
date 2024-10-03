@@ -393,10 +393,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR  "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR  "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
@@ -404,7 +404,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
@@ -457,16 +457,16 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     /**
      * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
      * DONT MAKE THIS DEFAULT until I can set this gpio for button here, and hence combine this "DEVICE_...GPIO_BUTTON" with above using ifdef around GPIOC
      * */
-    // "\"" D_JSON_GPIOC "\":{"
+    // "\"" D_GPIOC "\":{"
     //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
     // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
@@ -474,7 +474,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
@@ -556,16 +556,16 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     /**
      * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
      * */
-    // "\"" D_JSON_GPIOC "\":{"
+    // "\"" D_GPIOC "\":{"
     //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
     // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
@@ -573,7 +573,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
@@ -670,9 +670,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
@@ -680,7 +680,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
@@ -742,10 +742,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
@@ -755,7 +755,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
       "],"
@@ -803,9 +803,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
       "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
       "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
@@ -822,8 +822,8 @@ Bathroom
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
       // Button1 GPIO2
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
@@ -833,7 +833,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
@@ -916,10 +916,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
@@ -931,7 +931,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
@@ -1030,9 +1030,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
       #endif
@@ -1041,8 +1041,8 @@ Bathroom
       #endif 
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Virtual"
@@ -1050,7 +1050,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
@@ -1117,10 +1117,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
@@ -1132,7 +1132,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
@@ -1262,14 +1262,14 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   
@@ -1542,15 +1542,15 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       "\"18\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
       "\"4\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR   "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG  "DiningRoom"
@@ -1558,7 +1558,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_PIR_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -1652,16 +1652,16 @@ Bathroom
 //   #define USE_MODULE_TEMPLATE
 //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
+//     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_GPIOC "\":{"
 //       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
 //       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
 //       #endif
 //       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
 //     "},"
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-//     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
 //   "}";
 
 //   #define STRIP_SIZE_MAX 33
@@ -1715,43 +1715,43 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
       "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
   #define STRIP_SIZE_MAX 1
   #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":1,"
-  //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-  //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
-  //   "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
-  //   "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
-  //   "\"" D_JSON_BRIGHTNESS     "\":100"
+  //   "\"" D_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+  //   "\"" D_STRIP_SIZE       "\":1,"
+  //   "\"" D_RGB_COLOUR_ORDER   "\":\"RGBCW\","
+  //   "\"" D_TRANSITION     "\":{\"" D_TIME "\":2,\"" D_RATE "\":20},"
+  //   "\"" D_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
+  //   "\"" D_ANIMATIONMODE  "\":\"Effects\","
+  //   "\"" D_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+  //   "\"" D_BRIGHTNESS     "\":100"
   // "}";
 
   
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
+    "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_STRIP_SIZE       "\":1,"
+    "\"" D_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_TRANSITION       "\":{\"" D_TIME "\":2,\"" D_RATE "\":20},"
+    "\"" D_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
     "\"Hue\":345,\"Sat\":100,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
-    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
+    "\"" D_ANIMATIONMODE    "\":\"Effects\","
+    "\"" D_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_BRIGHTNESS_RGB   "\":100,"
+    "\"" D_BRIGHTNESS_CCT   "\":100"
   "}";
 
 
@@ -1797,9 +1797,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"25\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
@@ -1808,8 +1808,8 @@ Bathroom
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Kitchen"
@@ -1818,7 +1818,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -1887,30 +1887,30 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
       "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
   #define STRIP_SIZE_MAX 1
   #define USE_LIGHTING_TEMPLATE  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
+    "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_STRIP_SIZE       "\":1,"
+    "\"" D_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_TRANSITION       "\":{\"" D_TIME "\":2,\"" D_RATE "\":20},"
+    "\"" D_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
     "\"Hue\":345,\"Sat\":100,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
-    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
+    "\"" D_ANIMATIONMODE    "\":\"Effects\","
+    "\"" D_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_BRIGHTNESS_RGB   "\":100,"
+    "\"" D_BRIGHTNESS_CCT   "\":100"
   "}";
 
 #endif
@@ -1933,16 +1933,16 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
 #endif
@@ -1978,30 +1978,30 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
       "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
   #define STRIP_SIZE_MAX 1
   #define USE_LIGHTING_TEMPLATE  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
+    "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_STRIP_SIZE       "\":1,"
+    "\"" D_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_TRANSITION       "\":{\"" D_TIME "\":2,\"" D_RATE "\":20},"
+    "\"" D_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
     "\"Hue\":345,\"Sat\":100,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
-    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
+    "\"" D_ANIMATIONMODE    "\":\"Effects\","
+    "\"" D_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_BRIGHTNESS_RGB   "\":100,"
+    "\"" D_BRIGHTNESS_CCT   "\":100"
   "}";
 
 #endif
@@ -2056,9 +2056,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
@@ -2072,8 +2072,8 @@ Bathroom
       "\"19\":\"" D_GPIO_FUNCTION_LED2_INV_CTR "\","
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Utility"
@@ -2082,7 +2082,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
@@ -2238,9 +2238,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       #ifdef USE_MODULE_SENSORS_BME
@@ -2253,8 +2253,8 @@ Bathroom
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" 
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -2374,7 +2374,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_PIR_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"
@@ -2413,7 +2413,7 @@ Bathroom
         "\"" D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "\""
       "]"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_1_ADDRESS ","
@@ -2429,7 +2429,7 @@ Bathroom
         D_DEVICE_SENSOR_PZEM004T_11_ADDRESS ""
       "]"  
     "},"
-    "\"" D_JSON_ENERGY "\":{"
+    "\"" D_ENERGY "\":{"
         "\"DeviceCount\":12"    
     "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
@@ -2478,9 +2478,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
@@ -2494,8 +2494,8 @@ Bathroom
       #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Attic"
@@ -2512,7 +2512,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -2534,7 +2534,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_SR04_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
@@ -2575,9 +2575,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
@@ -2587,8 +2587,8 @@ Bathroom
       #endif
       "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "LivingRoom"
@@ -2597,7 +2597,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -2719,9 +2719,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"   
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"   
       // 3P - Top Right
       #ifdef USE_MODULE_SENSORS_PIR
       "\"23\":\""  D_GPIO_FUNCTION_SWT1_CTR     "\","
@@ -2742,8 +2742,8 @@ Bathroom
       #endif
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DRIVER_RELAY_NAME_LONG               "Fan"
@@ -2764,7 +2764,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
@@ -2783,7 +2783,7 @@ Bathroom
         "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
@@ -2979,9 +2979,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"5\":\""  GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  "\","
       "\"18\":\"" GPIO_NAME_ZONE1_UPSTAIRS_RELAY    "\","
@@ -3007,8 +3007,8 @@ Bathroom
       #endif    
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
@@ -3062,7 +3062,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
@@ -3094,7 +3094,7 @@ Bathroom
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\""
       "]"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         // Downstairs
         "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\":" D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
@@ -3212,10 +3212,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Sidedoor"
@@ -3226,7 +3226,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
@@ -3270,10 +3270,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   // {"RfReceived":{"Data":11071155,"Bits":24,"Protocol":1,"Pulse":191,"millis":83687314,"Time":"18:48:02"}} // black doorbell
@@ -3734,9 +3734,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"2\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"15\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
@@ -3745,8 +3745,8 @@ Bathroom
       "\"4\":\""  D_GPIO_FUNCTION_SWT1_CTR "\""
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -3759,7 +3759,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
@@ -3840,10 +3840,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -3853,7 +3853,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -3914,9 +3914,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  
@@ -3925,8 +3925,8 @@ Bathroom
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
     "},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
 #endif
@@ -3962,9 +3962,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_SR04
       "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
       "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
@@ -3972,8 +3972,8 @@ Bathroom
       "\"27\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
 
@@ -3989,7 +3989,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\""
@@ -3998,7 +3998,7 @@ Bathroom
         "\"" D_DEVICE_SR04_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ""
@@ -4045,9 +4045,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
@@ -4067,8 +4067,8 @@ Bathroom
       #endif
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
   #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
@@ -4094,7 +4094,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -4119,7 +4119,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
@@ -4195,10 +4195,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway"
@@ -4210,7 +4210,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
@@ -4481,10 +4481,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -4494,7 +4494,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -4570,10 +4570,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -4583,7 +4583,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -4651,10 +4651,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -4664,7 +4664,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -4776,9 +4776,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
@@ -4794,8 +4794,8 @@ Bathroom
       "\"33\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1
@@ -4805,7 +4805,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -4865,10 +4865,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR  "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR  "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -4878,7 +4878,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -4972,10 +4972,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
     
   #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Fan"
@@ -4984,7 +4984,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
       "],"
@@ -5134,9 +5134,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
@@ -5147,8 +5147,8 @@ Bathroom
       #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Bathroom"
@@ -5157,7 +5157,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
@@ -5253,10 +5253,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -5266,7 +5266,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -5537,9 +5537,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
       #endif
@@ -5588,8 +5588,8 @@ Bathroom
       // 5  // i2c oled needs to be another bus because of BME? or, what if it shared!!
       // 15
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   
@@ -5645,7 +5645,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_01_NAME "\""
       "],"
@@ -5684,7 +5684,7 @@ Bathroom
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
       "]"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         // Group 1
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
@@ -5843,10 +5843,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -5877,10 +5877,10 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -5890,7 +5890,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -5998,9 +5998,9 @@ Bathroom
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
@@ -6021,8 +6021,8 @@ Bathroom
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Bedroom"
@@ -6033,7 +6033,7 @@ Bathroom
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
@@ -6158,10 +6158,10 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -6191,10 +6191,10 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
@@ -6227,10 +6227,10 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -6266,10 +6266,10 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -6304,10 +6304,10 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -6341,16 +6341,16 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"Relay1\","
         "\"Relay2\","
@@ -6391,16 +6391,16 @@ HVAC controllers here
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"Relay1\","
         "\"Relay2\","

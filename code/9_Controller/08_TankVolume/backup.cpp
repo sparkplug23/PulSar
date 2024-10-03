@@ -256,8 +256,8 @@
 // //   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
 // //   // if(error){
-// //   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
-// //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
+// //   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_DESERIALIZATION_ERROR));
+// //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_DESERIALIZATION_ERROR);
 // //   //   return 0;
 // //   // }
 // //   // JsonObject obj = doc.as<JsonObject>();
@@ -535,7 +535,7 @@
 // //   //                             100/sizeof(animation_mode_list_ids),
 // //   //                             "", //no span
 // //   //                             "animod" " " "buttonh",
-// //   //                             D_JSON_ANIMATIONMODE, 
+// //   //                             D_ANIMATIONMODE, 
 // //   //                             GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
 // //   //                             GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
 // //   //                             ""
@@ -777,7 +777,7 @@
 
 //   JBI->Start();
 
-//     JBI->Add(D_JSON_CHANNELCOUNT"232",         0);
+//     JBI->Add(D_CHANNELCOUNT"232",         0);
   
 //   return JBI->End();
 
@@ -817,7 +817,7 @@
 
 //   JBI->Start();
 
-//     JBI->Add(D_JSON_CHANNELCOUNT"232",         0);
+//     JBI->Add(D_CHANNELCOUNT"232",         0);
   
 //   return JBI->End();
     

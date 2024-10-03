@@ -202,7 +202,7 @@ void mDoorSensor::ShowSensor_AddLog()
 uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    //JBI->Add_P(PM_JSON_SENSORCOUNT, settings.);
+    //JBI->Add_P(PM_SENSORCOUNT, settings.);
   return JBI->End();
 
 }
@@ -213,12 +213,12 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50];
 
   JBI->Start();
-  JBI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
+  JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
   JBI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){
-    JBI->Add(D_JSON_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
-    JBI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
+    JBI->Add(D_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
+    JBI->Add(D_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
   }
 
   JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
@@ -733,7 +733,7 @@ void Ds18x20Show(bool json) {
         for (uint32_t j = 0; j < 6; j++) {
           sprintf(address+2*j, "%02X", ds18x20_sensor[index].address[6-j]);  // Skip sensor type and crc
         }
-        ResponseAppend_P(PSTR(",\"%s\":{\"" D_JSON_ID "\":\"%s\",\"" D_JSON_TEMPERATURE "\":%*_f}"),
+        ResponseAppend_P(PSTR(",\"%s\":{\"" D_ID "\":\"%s\",\"" D_TEMPERATURE "\":%*_f}"),
           DS18X20Data.name, address, Settings->flag2.temperature_resolution, &ds18x20_sensor[index].temperature);
 #ifdef USE_DOMOTICZ
         if ((0 == TasmotaGlobal.tele_period) && (0 == i)) {

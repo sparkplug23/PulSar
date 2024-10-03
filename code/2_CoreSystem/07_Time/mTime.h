@@ -1,7 +1,7 @@
 #ifndef MODULE_CORE_TIME_H
 #define MODULE_CORE_TIME_H
   
-#define D_UNIQUE_MODULE_CORE_TIME_ID  2007 // ((2*1000)+7)
+#define D_UNIQUE_MODULE_CORE_TIME_ID  2007 // [(Folder_Number*100)+ID_File]
 
 #include <Arduino.h>
 #include <Ticker.h>
@@ -123,9 +123,6 @@ class mTime :
     static constexpr const char* PM_MODULE_CORE_TIME_CTR = D_MODULE_CORE_TIME_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TIME_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mTime);    };
-    #endif
 
     struct ClassState
     {

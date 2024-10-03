@@ -74,12 +74,12 @@
 //   #define USE_MODULE_TEMPLATE
 //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
+//     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_GPIOC "\":{"
 //       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
 //     "},"
-//   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 //   "}";
 
 //   #define STRIP_SIZE_MAX 60
@@ -87,25 +87,25 @@
 //   #define USE_LIGHTING_TEMPLATE
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-//     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-//     "\"" D_JSON_EFFECTS "\":{" 
-//       "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+//     "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+//     "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","
+//     "\"" D_ANIMATIONMODE    "\":\""  D_EFFECTS  "\","
+//     "\"" D_EFFECTS "\":{" 
+//       "\"" D_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
 //     "},"
-//     "\"" D_JSON_TRANSITION       "\":{"
-//       "\"" D_JSON_TIME_MS "\":1000,"
-//       "\"" D_JSON_RATE_MS "\":1000,"
-//       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-//       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+//     "\"" D_TRANSITION       "\":{"
+//       "\"" D_TIME_MS "\":1000,"
+//       "\"" D_RATE_MS "\":1000,"
+//       "\"" D_PIXELS_UPDATE_PERCENTAGE "\":2,"
+//       "\"" D_ORDER "\":\"" D_RANDOM "\""
 //     "},"
-//     "\"" D_JSON_CCT_TEMP "\":300,"
-//     "\"" D_JSON_HUE "\":25,"
-//     "\"" D_JSON_SAT "\":100,"
-//     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-//     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-//     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+//     "\"" D_CCT_TEMP "\":300,"
+//     "\"" D_HUE "\":25,"
+//     "\"" D_SAT "\":100,"
+//     "\"" D_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
+//     "\"" D_BRIGHTNESS_CCT "\":100,"
+//     "\"" D_BRIGHTNESS_RGB "\":100"
 //   "}";
 
 // #endif
@@ -129,34 +129,34 @@
 //   #define USE_MODULE_TEMPLATE
 //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+//     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
 //   "}";
   
 //   #define STRIP_SIZE_MAX 1 // PWM type, set size to 1
 //   #define USE_LIGHTING_TEMPLATE
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
-//     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-//     "\"" D_JSON_EFFECTS "\":{" 
-//       "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+//     "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+//     "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_RGB_COLOUR_ORDER "\":\"RGBCW\","
+//     "\"" D_ANIMATIONMODE    "\":\""  D_EFFECTS  "\","
+//     "\"" D_EFFECTS "\":{" 
+//       "\"" D_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
 //     "},"
-//     "\"" D_JSON_TRANSITION       "\":{"
-//       "\"" D_JSON_TIME "\":1,"
-//       "\"" D_JSON_RATE "\":5,"
-//       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-//       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+//     "\"" D_TRANSITION       "\":{"
+//       "\"" D_TIME "\":1,"
+//       "\"" D_RATE "\":5,"
+//       "\"" D_PIXELS_UPDATE_PERCENTAGE "\":2,"
+//       "\"" D_ORDER "\":\"" D_RANDOM "\""
 //     "},"
-//     "\"" D_JSON_CCT_TEMP "\":300,"
-//     "\"" D_JSON_HUE "\":25,"
-//     "\"" D_JSON_SAT "\":100,"
-//     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-//     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-//     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+//     "\"" D_CCT_TEMP "\":300,"
+//     "\"" D_HUE "\":25,"
+//     "\"" D_SAT "\":100,"
+//     "\"" D_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
+//     "\"" D_BRIGHTNESS_CCT "\":100,"
+//     "\"" D_BRIGHTNESS_RGB "\":100"
 //   "}";
           
 // #endif
@@ -183,13 +183,13 @@
 //   #define USE_MODULE_TEMPLATE
 //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
+//     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_GPIOC "\":{"
 //       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
 //       //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
 //     "},"
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 //   "}";
 
 // /**
@@ -207,10 +207,10 @@
 //   #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-//     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+//     "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//     "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
+//     "\"" D_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
 //     "\"ColourPalette\":\"Christmas 06\"," 
 //     "\"Effects\":{"
 //       "\"Function\":1"
@@ -226,10 +226,10 @@
 //   #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-//     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+//     "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//     "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
+//     "\"" D_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
 //     "\"ColourPalette\":\"Christmas 21\"," 
 //     "\"Effects\":{"
 //       "\"Function\":29"
@@ -247,9 +247,9 @@
 //   "{"
 //     "\"Segment0\":{"
 //       "\"PixelRange\":[0,19],"
-//       "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//       "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//       "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+//       "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//       "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//       "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
 //       "\"Effects\":{"
 //         "\"Function\":\"Static\""
 //       "},"
@@ -262,9 +262,9 @@
 //     "},"
 //     "\"Segment1\":{"
 //       "\"PixelRange\":[20,29],"
-//       "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//       "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//       "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+//       "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//       "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//       "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","   
 //       "\"Effects\":{"
 //         "\"Function\":\"Solid RGBCCT\""
 //       "},"
@@ -277,9 +277,9 @@
 //     "},"
 //     "\"Segment2\":{"
 //       "\"PixelRange\":[30,49],"
-//       "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//       "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//       "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+//       "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//       "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//       "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
 //       "\"Effects\":{"
 //         "\"Function\":\"Slow Glow\""
 //       "},"
@@ -290,7 +290,7 @@
 //       "},"    
 //       "\"BrightnessRGB\":100"
 //     "},"
-//     "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+//     "\"" D_ANIMATIONMODE    "\":\"Effects\","
 //     "\"BrightnessRGB\":100"
 //   "}";
 //   #endif
@@ -300,9 +300,9 @@
 //   "{"
 //     "\"Segment0\":{"
 //       "\"PixelRange\":[0,19],"
-//       "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//       "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//       "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+//       "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//       "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//       "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
 //       "\"Effects\":{"
 //         "\"Function\":29"
 //       "},"
@@ -315,9 +315,9 @@
 //     "},"
 //     "\"Segment1\":{"
 //       "\"PixelRange\":[20,29],"
-//       "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//       "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//       "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+//       "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//       "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//       "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","   
 //       "\"Effects\":{"
 //         "\"Function\":28"
 //       "},"
@@ -332,9 +332,9 @@
 //     "},"
 //     "\"Segment2\":{"
 //       "\"PixelRange\":[30,49],"
-//       "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//       "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//       "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+//       "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//       "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//       "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
 //       "\"Effects\":{"
 //         "\"Function\":\"Slow Glow\""
 //       "},"
@@ -345,7 +345,7 @@
 //       "},"    
 //       "\"BrightnessRGB\":100"
 //     "},"
-//     "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+//     "\"" D_ANIMATIONMODE    "\":\"Effects\","
 //     "\"BrightnessRGB\":100"
 //   "}";
 //   #endif
@@ -371,12 +371,12 @@
 // //   #define USE_MODULE_TEMPLATE
 // //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
 // //   "{"
-// //     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-// //     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-// //     "\"" D_JSON_GPIOC "\":{"
+// //     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+// //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+// //     "\"" D_GPIOC "\":{"
 // //       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
 // //     "},"
-// //     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+// //     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 // //   "}";
 
 // //  #define STRIP_SIZE_MAX 50
@@ -384,10 +384,10 @@
 
 // //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 // //   "{"
-// //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-// //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-// //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-// //     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+// //     "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+// //     "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+// //     "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
+// //     "\"" D_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
 // //     "\"ColourPalette\":\"Christmas 06\"," 
 // //     "\"Effects\":{"
 // //       "\"Function\":1"
@@ -442,13 +442,13 @@
 //   #define USE_MODULE_TEMPLATE
 //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
+//     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_GPIOC "\":{"
 //       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
 //       //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
 //     "},"
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 //   "}";
 
 // /**
@@ -462,10 +462,10 @@
 
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-//     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+//     "\"" D_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//     "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_RGB_COLOUR_ORDER "\":\"GRB\","    
+//     "\"" D_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
 //     "\"ColourPalette\":\"Christmas 06\"," 
 //     "\"Effects\":{"
 //       "\"Function\":\"Static Palette\""

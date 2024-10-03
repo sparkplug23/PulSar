@@ -28,7 +28,7 @@ class Decounter{
     bool UpdateTick()
     {
         
-        // ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("limit")), std::numeric_limits<T>::max());
+        // ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("limit")), std::numeric_limits<T>::max());
         /**
          * @brief Is ticking
          * counter set to max to describe disabled counter
@@ -41,13 +41,13 @@ class Decounter{
         if((counter > 0)&&(counter != std::numeric_limits<T>::max()))
         { 
             counter--;
-            //ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("counter")), counter);
+            //ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("counter")), counter);
             return true;
         }else 
         if(counter == 0)
         {
             counter = std::numeric_limits<T>::max(); // Not active at max value
-            //ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("counter")), counter);
+            //ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("counter")), counter);
             return false;
         }else{
             //ALOG_ERR( PSTR("Unknown State") );

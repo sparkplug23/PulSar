@@ -1,7 +1,7 @@
 #ifndef _MMOISTURESENSOR_H
 #define _MMOISTURESENSOR_H 0.1
 
-#define D_UNIQUE_MODULE_SENSORS_MOTION_ID 131
+#define D_UNIQUE_MODULE_SENSORS_MOTION_ID 5016 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -31,14 +31,6 @@ class mMoistureSensor :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; }
 
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mMoistureSensor);
-    };
-    #endif
-
-
-
     #define MOISTURE_DETECT_INIT() pinMode(MOISTURE_DIGITAL_PIN,INPUT_PULLUP)
     #ifdef MOISTURE_ISACTIVELOW
       #define MOISTURE_DETECTED()  !digitalRead(MOISTURE_DIGITAL_PIN) //motion when LOW

@@ -1629,14 +1629,14 @@ uint8_t mSerial::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JBI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
+  //   JBI->Add_P(PM_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    // JBI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JBI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JBI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
-    JBI->Add_P(PM_JSON_TIME, 1000);
-    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+    // JBI->Add_P(PM_HUE, rgbcct_controller.getHue360());
+    // JBI->Add_P(PM_SAT, rgbcct_controller.getSat255());
+    // JBI->Add_P(PM_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB());
+    JBI->Add_P(PM_TIME, 1000);
+    // JBI->Add_P(PM_TIME_MS, animation.time_ms);
   return JBI->End();
 
 }
@@ -1646,7 +1646,7 @@ uint8_t mSerial::ConstructJSON_UARTInfo(uint8_t json_level, bool json_appending)
   
   JBI->Start();  
 
-    JBI->Add_P(PM_JSON_TIME, 1000);
+    JBI->Add_P(PM_TIME, 1000);
 
     // JBI->Object_Start("UART1");
     //   JBI->Add("receive_interrupts_enable", settings.uart1.receive_interrupts_enable);
@@ -1672,7 +1672,7 @@ uint8_t mSerial::ConstructJSON_UARTInfo(uint8_t json_level, bool json_appending)
     JBI->Object_End();
     #endif
 
-    // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+    // JBI->Add_P(PM_TIME_MS, animation.time_ms);
   return JBI->End();
 
 }

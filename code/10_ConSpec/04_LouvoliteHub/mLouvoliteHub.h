@@ -40,7 +40,7 @@
  */
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_CONTROLLER_LOUVOLITE_HUB_ID ((10*1000)+4) 
+#define D_UNIQUE_MODULE_CONTROLLER_LOUVOLITE_HUB_ID 10004 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
 
@@ -71,11 +71,6 @@ class mLouvoliteHub :
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_LOUVOLITE_HUB_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_LOUVOLITE_HUB_ID; }
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mLouvoliteHub);
-    };
-    #endif
     
     #define PULSE_SHORT 280
     #define PULSE_LONG 600 

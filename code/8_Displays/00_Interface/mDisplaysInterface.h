@@ -37,15 +37,15 @@ enum EM_DISPLAY_MODE_IDS{
   /**
    * When advanced commands manually write to the display
    * */
-  EM_DISPLAY_MODE_USER_TEXT_ADVANCED_JSON_ID,
+  EM_DISPLAY_MODE_USER_TEXT_ADVANCED_ID,
   EM_DISPLAY_MODE_LENGTH_ID
 };
 
 
-DEFINE_PGM_CTR(PM_JSON_ADDLOG)   D_JSON_ADDLOG;
-DEFINE_PGM_CTR(PM_JSON_CLEARLOG) D_JSON_CLEARLOG;
-DEFINE_PGM_CTR(PM_JSON_DISPLAY) D_JSON_DISPLAY;
-DEFINE_PGM_CTR(PM_JSON_MODEL)   D_JSON_MODEL;
+DEFINE_PGM_CTR(PM_ADDLOG)   D_ADDLOG;
+DEFINE_PGM_CTR(PM_CLEARLOG) D_CLEARLOG;
+DEFINE_PGM_CTR(PM_DISPLAY) D_DISPLAY;
+DEFINE_PGM_CTR(PM_MODEL)   D_MODEL;
 
 
 class mDisplaysInterface :
@@ -64,9 +64,7 @@ class mDisplaysInterface :
     static constexpr const char* PM_MODULE_DISPLAYS_INTERFACE_CTR = D_MODULE_DISPLAYS_INTERFACE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID; }    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mDisplaysInterface);    };
-    #endif    
+    
 
     struct ClassState
     {

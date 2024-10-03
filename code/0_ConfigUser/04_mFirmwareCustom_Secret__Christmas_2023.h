@@ -101,17 +101,17 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\","
       #endif
       "\"4\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
   #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
@@ -128,7 +128,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
       "]"
@@ -340,13 +340,13 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{"
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{"
       "\"19\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
     "},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -584,13 +584,13 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{"
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{"
       "\"19\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
     "},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -798,11 +798,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -1091,9 +1091,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_NUMBER "\":{" 
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{" 
       #ifdef GPIO_SET_LEFT_TO_LOW
       "\"4\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
       "\"16\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
@@ -1113,8 +1113,8 @@
       "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""
       #endif
     "},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -1487,11 +1487,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -1691,11 +1691,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -1953,13 +1953,13 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{"
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{"
       "\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\":16"
     "},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -2147,11 +2147,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -2333,11 +2333,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -2578,11 +2578,11 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{},"
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************
@@ -2814,19 +2814,19 @@
   // #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBwc\","
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
-  //     "\"" D_JSON_FUNCTION "\":8"//\"Sun Elevation RGBCCT Solid Palette 01\""
+  //   "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+  //   "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_RGB_COLOUR_ORDER "\":\"RGBwc\","
+  //   "\"" D_ANIMATIONMODE    "\":\""  D_EFFECTS  "\","
+  //   "\"" D_EFFECTS "\":{" 
+  //     // "\"" D_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+  //     "\"" D_FUNCTION "\":8"//\"Sun Elevation RGBCCT Solid Palette 01\""
   //   "},"
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME "\":1,"
-  //     "\"" D_JSON_RATE "\":5,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+  //   "\"" D_TRANSITION       "\":{"
+  //     "\"" D_TIME "\":1,"
+  //     "\"" D_RATE "\":5,"
+  //     "\"" D_PIXELS_UPDATE_PERCENTAGE "\":2,"
+  //     "\"" D_ORDER "\":\"" D_RANDOM "\""
   //   "},"
     
 
@@ -2847,11 +2847,11 @@
   //     "\"BrightnessRGB\": 100"
   //   "},"
   //   #ifdef DEFAULT_STRIP_POWER_STATE_ON
-  //   "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  //   "\"" D_BRIGHTNESS_CCT "\":100,"
+  //   "\"" D_BRIGHTNESS_RGB "\":100"
   //   #else
-  //   "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  //   "\"" D_BRIGHTNESS_CCT "\":100,"
+  //   "\"" D_BRIGHTNESS_RGB "\":100"
   //   #endif
 
 
@@ -2868,13 +2868,13 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME          "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{"
+    "\"" D_NAME          "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME  "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{"
       "\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\":16"
     "},"
-    "\"" D_JSON_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   /***********************************

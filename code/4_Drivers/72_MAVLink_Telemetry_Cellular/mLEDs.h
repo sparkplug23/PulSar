@@ -19,7 +19,7 @@
 // #ifndef HEADER_MODULE_DRIVERS_LEDS_H
 // #define HEADER_MODULE_DRIVERS_LEDS_H
   
-// #define D_UNIQUE_MODULE_DRIVERS_LEDS_ID ((4*1000)+03)
+// #define D_UNIQUE_MODULE_DRIVERS_LEDS_ID 4072 // [(Folder_Number*100)+ID_File]
 
 // #include "1_TaskerManager/mTaskerManager.h"
 
@@ -42,12 +42,6 @@
 //     static constexpr const char* PM_MODULE_DRIVERS_LEDS_CTR;
 //     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_LEDS_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_LEDS_ID; }
-    
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mLEDs);
-//     };
-//     #endif
     
 //     void CommandSet_LED_Power(uint8_t state, uint8_t index = 0);
 

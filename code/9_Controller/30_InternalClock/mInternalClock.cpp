@@ -323,8 +323,8 @@ uint8_t mInternalClock::ConstructJSON_Settings(uint8_t json_level, bool json_app
 uint8_t mInternalClock::ConstructJSON_Power(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
-    JBI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
+    JBI->Add_P(D_LIGHTPOWER, GetLightState());
+    JBI->Add_P(D_FANSPEED, GetFanspeed());  
   JBI->End();
 
 }

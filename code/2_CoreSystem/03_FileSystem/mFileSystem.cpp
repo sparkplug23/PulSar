@@ -1161,7 +1161,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 
   readFile(FILE_SYSTEM, filename);
 
-  ALOG_COM(PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+  ALOG_COM(PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ReadFile")), filename);
 
 } 
 

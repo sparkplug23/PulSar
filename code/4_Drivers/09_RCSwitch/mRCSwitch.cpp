@@ -162,9 +162,9 @@ void mRCSwitch::ReceiveCheck(void)
       //  snprintf_P(stemp, sizeof(stemp), PSTR("\"0x%lX\""), (uint32_t)data);
       // }
 
-      // ResponseTime_P(PSTR(",\"" D_JSON_RFRECEIVED "\":{\"" D_JSON_RF_DATA "\":%s,\"" D_JSON_RF_BITS "\":%d,\"" D_JSON_RF_PROTOCOL "\":%d,\"" D_JSON_RF_PULSE "\":%d}}"),
+      // ResponseTime_P(PSTR(",\"" D_RFRECEIVED "\":{\"" D_RF_DATA "\":%s,\"" D_RF_BITS "\":%d,\"" D_RF_PROTOCOL "\":%d,\"" D_RF_PULSE "\":%d}}"),
       //   stemp, bits, protocol, delay);
-      // MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_JSON_RFRECEIVED));
+      // MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_RFRECEIVED));
 
         ALOG_TST(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
       
@@ -222,7 +222,7 @@ void mRCSwitch::ReceiveCheck(void)
 //     }
 //     thisdat <<=1;
 //   }
-//   if (!gotone) { ResponseAppend_P(PSTR(D_JSON_NONE_ENABLED)); }
+//   if (!gotone) { ResponseAppend_P(PSTR(D_NONE_ENABLED)); }
 //   ResponseAppend_P(PSTR("\""));
 //   ResponseJsonEnd();
 // }
@@ -245,11 +245,11 @@ void mRCSwitch::ReceiveCheck(void)
 //     if (root) {
 //       // RFsend {"data":0x501014,"bits":24,"protocol":1,"repeat":10,"pulse":350}
 //       char parm_uc[10];
-//       data = root.getULong(PSTR(D_JSON_RF_DATA), data);	// read payload data even >32bit
-//       bits = root.getUInt(PSTR(D_JSON_RF_BITS), bits);
-//       protocol = root.getInt(PSTR(D_JSON_RF_PROTOCOL), protocol);
-//       repeat = root.getInt(PSTR(D_JSON_RF_REPEAT), repeat);
-//       pulse = root.getInt(PSTR(D_JSON_RF_PULSE), pulse);
+//       data = root.getULong(PSTR(D_RF_DATA), data);	// read payload data even >32bit
+//       bits = root.getUInt(PSTR(D_RF_BITS), bits);
+//       protocol = root.getInt(PSTR(D_RF_PROTOCOL), protocol);
+//       repeat = root.getInt(PSTR(D_RF_REPEAT), repeat);
+//       pulse = root.getInt(PSTR(D_RF_PULSE), pulse);
 //     } else {
 //       //  RFsend data, bits, protocol, repeat, pulse
 //       char *p;
@@ -291,7 +291,7 @@ void mRCSwitch::ReceiveCheck(void)
 //     error = true;
 //   }
 //   if (error) {
-//     Response_P(PSTR("{\"" D_CMND_RFSEND "\":\"" D_JSON_NO " " D_JSON_RF_DATA ", " D_JSON_RF_BITS ", " D_JSON_RF_PROTOCOL ", " D_JSON_RF_REPEAT " " D_JSON_OR " " D_JSON_RF_PULSE "\"}"));
+//     Response_P(PSTR("{\"" D_CMND_RFSEND "\":\"" D_NO " " D_RF_DATA ", " D_RF_BITS ", " D_RF_PROTOCOL ", " D_RF_REPEAT " " D_OR " " D_RF_PULSE "\"}"));
 //   }
 // }
 
@@ -361,7 +361,7 @@ void mRCSwitch::parse_JSONCommand(JsonParserObject obj)
 uint8_t mRCSwitch::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    JBI->Add(D_COUNT, settings.fEnableSensor);
     JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
   return JBI->End();
 
@@ -373,14 +373,14 @@ uint8_t mRCSwitch::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Object_Start(D_JSON_RFRECEIVED);
+    JBI->Object_Start(D_RFRECEIVED);
   
-      JBI->Add(D_JSON_DATA, rx_pkt.data);
-      JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
-      JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
-      JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   
-      JBI->Add(D_JSON_MILLIS, rx_pkt.received_time_millis);   
-      JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+      JBI->Add(D_DATA, rx_pkt.data);
+      JBI->Add(D_RF_BITS, rx_pkt.bit_length);
+      JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
+      JBI->Add(D_RF_PULSE, rx_pkt.delay);   
+      JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
+      JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
     JBI->Object_End();

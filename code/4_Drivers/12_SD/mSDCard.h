@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_DRIVERS_SDCARD_H
 #define _USE_MODULE_DRIVERS_SDCARD_H 0.3
 
-#define D_UNIQUE_MODULE_DRIVERS_SDCARD_ID 45
+#define D_UNIQUE_MODULE_DRIVERS_SDCARD_ID 4012 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -92,11 +92,6 @@ class mSDCard :
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_SDCARD_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SDCARD_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSDCard);
-    };
-    #endif
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   

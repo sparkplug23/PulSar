@@ -48,7 +48,7 @@ at this FS setting, so the value of -1009 corresponds to -1009 * 1 =
 */
 
 
-#define D_UNIQUE_MODULE_SENSORS_LSM303D_ID 144
+#define D_UNIQUE_MODULE_SENSORS_LSM303D_ID 5015 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -72,11 +72,6 @@ class mSensorsLSM303D :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_LSM303D_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_LSM303D_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSensorsLSM303D);
-    };
-    #endif
 
     struct xyzFloat {
         float x;

@@ -158,7 +158,7 @@ void mRelayStateLEDStrip::parse_JSONCommand(JsonParserObject obj)
  
   int8_t relay_id= -1,state=-1;    //assume index 0 if none given
 
-  // if(jtok = obj[PM_JSON_POWERNAME]){
+  // if(jtok = obj[PM_POWERNAME]){
   //   if(jtok.isStr()){
   //     relay_id = GetRelayIDbyName(jtok.getStr());
   //   ALOG_INF( PSTR("relay_id = %s"), jtok.getStr() );
@@ -171,7 +171,7 @@ void mRelayStateLEDStrip::parse_JSONCommand(JsonParserObject obj)
   // }
 
   // // Primary method since v0.86.14.21
-  // if(jtok = obj[PM_JSON_POWER_STATE]){
+  // if(jtok = obj[PM_POWER_STATE]){
   //   if(jtok.isStr()){
   //     state = pCONT_sup->GetStateNumber(jtok.getStr());
   //   }else 
@@ -206,7 +206,7 @@ void mRelayStateLEDStrip::parse_JSONCommand(JsonParserObject obj)
 uint8_t mRelayStateLEDStrip::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 
   JBI->Start();
-    // JBI->Add(PM_JSON_DEVICES_CONNECTED, module_state.devices);
+    // JBI->Add(PM_DEVICES_CONNECTED, module_state.devices);
 
     // JBI->Array_Start_P(PSTR("rel_inverted"));
     //   for(int8_t bits=0; bits<sizeof(rt.rel_inverted)*8; bits++)

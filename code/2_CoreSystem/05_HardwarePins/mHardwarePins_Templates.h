@@ -2,7 +2,7 @@
 #define _mHardwareTemplates2_H_
 
 
-#define D_UNIQUE_MODULE_CORE_HARDWARETEMPLATES_ID ((2*1000)+4)
+#define D_UNIQUE_MODULE_CORE_HARDWARETEMPLATES_ID 2005 // [(Folder_Number*100)+ID_File]
 
 
 #include "stdint.h"

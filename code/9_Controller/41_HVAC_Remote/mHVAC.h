@@ -19,9 +19,7 @@
 #ifndef MHEATING2_H
 #define MHEATING2_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_HVAC_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_CONTROLLER_HVAC_ID    1    // Numerical accesending order of module within a group
-
+#define D_UNIQUE_MODULE_CONTROLLER_HVAC_ID   9041 // [(Folder_Number*100)+ID_File]
 /**
  * Moving forward, try making this heating work for all systems. "Heating" as a controller should accept any sensor, with any relays out
  * I will use this with one sensor and one relay to controller a room electric heater, this will be my development testbed
@@ -80,10 +78,10 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR) "relays";
 
 DEFINE_PGM_CTR(PM_TEMP_MODE_OFF_CTR)  D_TEMP_MODE_OFF_CTR;
 
-DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_OFF_CTR)            D_JSON_OFF;
-DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_SET_CTR)            D_JSON_SCHEDULED_SET;
-DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_ON_CTR)             D_JSON_SCHEDULED_ON;
-DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_MANUAL_ON_CTR)      D_JSON_MANUAL_ON;
+DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_OFF_CTR)            D_OFF;
+DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_SET_CTR)            D_SCHEDULED_SET;
+DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_ON_CTR)             D_SCHEDULED_ON;
+DEFINE_PGM_CTR(PM_HVAC_SCHEDULED_NAME_MANUAL_ON_CTR)      D_MANUAL_ON;
 
 
 
@@ -116,12 +114,6 @@ class mHVAC :
     static constexpr const char* PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE_CONTROLLER_HVAC_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_HVAC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_HVAC_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mHVAC);
-    };
-    #endif
 
     // Leave as single zone for now, scale to array
 

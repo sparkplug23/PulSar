@@ -130,10 +130,10 @@ uint8_t mGPS_Modem::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
 {
 
   JBI->Start();
-  JBI->Add(D_JSON_COUNT, settings.sensor_count);    
+  JBI->Add(D_COUNT, settings.sensor_count);    
   // for (uint32_t ii = 0; ii < settings.sensor_count; ii++)
   // {
-  //   JBI->Add(D_JSON_ADDRESS, device_data[ii].address);
+  //   JBI->Add(D_ADDRESS, device_data[ii].address);
   // }
   return JBI->End();
 

@@ -1,7 +1,7 @@
 #ifndef _mDB18x20_ESP32_H
 #define _mDB18x20_ESP32_H
 
-#define D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID ((5*1000)+41)
+#define D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID 5041 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -42,9 +42,7 @@ class mDB18x20_ESP32 :
     static constexpr const char* PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR = D_MODULE_SENSORS_DB18S20_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mDB18x20_ESP32); };
-    #endif
+    
 
     struct ClassState
     {
@@ -82,8 +80,8 @@ class mDB18x20_ESP32 :
         float val;
         uint8_t isvalid   = D_SENSOR_VALID_TIMEOUT_SECS;
         uint8_t ischanged = false;
-        uint32_t capture_time_millis = 0;
       }reading;
+      uint32_t utc_measured_timestamp = 0;
     }
     sensors_t;
     std::vector<SENS> sensor_vector; // Using vector for dynamic memory
@@ -110,6 +108,9 @@ class mDB18x20_ESP32 :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       if(index > sensor_vector.size()-1) {value->sensor_type.push_back(0); return ;}
+      
+      value->timestamp = sensor_vector[index].utc_measured_timestamp;
+
       value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data_f.push_back(sensor_vector[index].reading.val);
       value->sensor_id = sensor_vector[index].device_name_index;

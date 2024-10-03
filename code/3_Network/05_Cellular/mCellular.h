@@ -1,7 +1,7 @@
 #ifndef _CELLULAR_H
 #define _CELLULAR_H
 
-#define D_UNIQUE_MODULE__NETWORK_CELLULAR__ID  ((3*1000)+05)
+#define D_UNIQUE_MODULE__NETWORK_CELLULAR__ID  3005 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -101,9 +101,6 @@ class mCellular :
     static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mCellular); };
-    #endif
     
     /**
      * @brief Common Tasker functions and configuration settings
@@ -173,11 +170,6 @@ class mCellular :
     
 //     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mCellular);
-//     };
-//     #endif
     
 //     struct SETTINGS{
 //       uint8_t fEnableSensor = false;

@@ -1,7 +1,7 @@
 #ifndef _MODULE__DRIVERS_MAVLINK_DECODER__H
 #define _MODULE__DRIVERS_MAVLINK_DECODER__H
 
-#define D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID   ((4*1000)+05)
+#define D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID   4070 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -266,10 +266,7 @@ class mMAVLink_Decoder :
     static constexpr const char* PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR = D_MODULE__DRIVERS_MAVLINK_DECODER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID; }    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mMAVLink_Decoder);    };
-    #endif    
-
+    
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.

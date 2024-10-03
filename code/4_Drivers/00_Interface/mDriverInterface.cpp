@@ -180,7 +180,7 @@ void mDriverInterface::parse_JSONCommand(JsonParserObject obj)
 uint8_t mDriverInterface::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }

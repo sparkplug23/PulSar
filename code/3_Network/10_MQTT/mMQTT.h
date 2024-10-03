@@ -1,7 +1,7 @@
 #ifndef _MMQTT
 #define _MMQTT 0.7
 
-#define D_UNIQUE_MODULE_NETWORK_MQTT_ID  3010 // ((3*1000)+10)
+#define D_UNIQUE_MODULE_NETWORK_MQTT_ID  3010 // [(Folder_Number*100)+ID_File]
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
 
@@ -319,9 +319,7 @@ class mMQTTManager :
     static constexpr const char* PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_MQTT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_MQTT_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mMQTTManager);     };
-    #endif
+    
 
     struct ClassState
     {
@@ -545,13 +543,15 @@ Serial.flush();
 
     // Centralized template function
     template <typename HandlerType>
-    void MQTTHandler_Rate(std::vector<struct handler<HandlerType>*>& handler_list) {
-        for (auto& handle : handler_list) {
-            if (handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-                handle->tRateSecs = GetTelePeriod_SubModule();
-            else if (handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-                handle->tRateSecs = GetIfChangedPeriod_SubModule();
-        }
+    void MQTTHandler_Rate(std::vector<struct handler<HandlerType>*>& handler_list) 
+    {
+      for (auto& handle : handler_list) 
+      {
+        if (handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+          handle->tRateSecs = GetTelePeriod_SubModule();
+        else if (handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+          handle->tRateSecs = GetIfChangedPeriod_SubModule();
+      }
     }
 
 
@@ -706,6 +706,7 @@ Serial.flush();
     template<typename T>
     void MQTTHandler_Sender(std::vector<struct handler<T>*>& handler_list, T& class_ptr) {
         for (auto& handle : handler_list) {
+            // Serial.printf("MQTTHandler_Sender");
             MQTTHandler_Command_UniqueID(class_ptr, class_ptr.GetModuleUniqueID(), handle);
         }
     }

@@ -1,7 +1,7 @@
 #ifndef _MRADIATORFAN_H
 #define _MRADIATORFAN_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_RADIATORFAN_ID 175
+#define D_UNIQUE_MODULE_CONTROLLER_RADIATORFAN_ID 10001 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -31,11 +31,6 @@ class mRadiatorFan :
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_RADIATORFAN_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_RADIATORFAN_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mRadiatorFan);
-    };
-    #endif
     
     void SubTasker_MQTTSender();
 

@@ -267,7 +267,7 @@ uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_level, bool json_appe
 
   JBI->Start();  
 
-    JBI->Add_P(PM_JSON_TIME, 1000);
+    JBI->Add_P(PM_TIME, 1000);
 
     // JBI->Add("serial_active",hardware_serial_active);
 
@@ -285,7 +285,7 @@ uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_level, bool json_appendi
   
   JBI->Start();  
 
-    JBI->Add_P(PM_JSON_BRIGHTNESS, map(dimmer.brightness,0,1000,0,100));
+    JBI->Add_P(PM_BRIGHTNESS, map(dimmer.brightness,0,1000,0,100));
     JBI->Add("CommandGet_SecondsToRemainOn", CommandGet_SecondsToRemainOn());
     JBI->Add("CommandGet_SecondsToRemainOn_Active", timer_decounter.active);
 
@@ -922,7 +922,7 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
   uint16_t new_brightness = 0;
     
 
-  if(jtok = obj[PM_JSON_BRIGHTNESS]){
+  if(jtok = obj[PM_BRIGHTNESS]){
 
     req_brightness = map(jtok.getInt(),0,100,0,1000);
     SetBrightnessReq();
@@ -966,13 +966,13 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
 
   }
   
-  if(jtok = obj["ShellyDimmer"].getObject()[PM_JSON_TIME_ON]){
+  if(jtok = obj["ShellyDimmer"].getObject()[PM_TIME_ON]){
     CommandSet_Timer_Decounter(jtok.getInt());
   }else
-  if(jtok = obj["ShellyDimmer"].getObject()[PM_JSON_TIME_ON_SECS]){
+  if(jtok = obj["ShellyDimmer"].getObject()[PM_TIME_ON_SECS]){
     CommandSet_Timer_Decounter(jtok.getInt());
   }else
-  if(jtok = obj["ShellyDimmer"].getObject()[PM_JSON_TIME_ON_MINUTES]){
+  if(jtok = obj["ShellyDimmer"].getObject()[PM_TIME_ON_MINUTES]){
     CommandSet_Timer_Decounter(jtok.getInt()*60);
   }
   
@@ -992,7 +992,7 @@ void mShellyDimmer::CommandSet_Timer_Decounter(uint16_t time_secs)
   timer_decounter.seconds = time_secs;
   timer_decounter.active = time_secs > 0 ? true : false;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "%d" D_UNIT_SECOND), timer_decounter.seconds);  
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "%d" D_UNIT_SECOND), timer_decounter.seconds);  
   #endif
 }
 
@@ -1001,7 +1001,7 @@ uint16_t mShellyDimmer::CommandGet_SecondsToRemainOn()
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   // #endif
 
   return timer_decounter.seconds;
@@ -1114,7 +1114,7 @@ void CmndShdWarmupTime(void)
 //   readFile(SD_MMC, filename);
 
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ReadFile")), filename);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // } 

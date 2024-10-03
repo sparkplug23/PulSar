@@ -20,7 +20,7 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
   // JsonParserObject obj = parser.getRootObject();   
   // if (!obj) { 
   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+  //   AddLog(LOG_LEVEL_ERROR, PSTR(D_DESERIALIZATION_ERROR));
   //   #endif //ENABLE_LOG_LEVEL_COMMANDS
   //   return;
   // }  
@@ -34,11 +34,11 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
    * As order of importance, others that rely on previous commands must come after
    * */
   
-  if(jtok = obj[D_JSON_FREQUENCY]){
+  if(jtok = obj[D_FREQUENCY]){
     default_freq = jtok.getInt();
   }
 
-  if(jtok = obj[D_JSON_RINGDOORBELL]){
+  if(jtok = obj[D_RINGDOORBELL]){
   //   if(jtok.isStr()){
   //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
   //       CommandSet_PaletteID(tmp_id);
@@ -54,12 +54,12 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
     
     RingDoorBellSet(jtok.getInt(), default_freq);
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
 
-  if(jtok = obj[D_JSON_RINGDOORBELL "_Single"]){
+  if(jtok = obj[D_RINGDOORBELL "_Single"]){
   //   if(jtok.isStr()){
   //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
   //       CommandSet_PaletteID(tmp_id);
@@ -75,7 +75,7 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
     
     RingDoorBellSet(1, 500);
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 

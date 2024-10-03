@@ -728,58 +728,58 @@ uint8_t mUltraSonicSensor::ConstructJSON_Settings(uint8_t json_level){
 uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
 
   JBI->Start(); 
-    JBI->Object_Start(D_JSON_SENSOR);
-      JBI->Add(D_JSON_ISVALID, ultrasonic.isvalid);
-      JBI->Add(D_JSON_DURATION, ultrasonic.duration);
-      JBI->Add(D_JSON_DURATION_RAW, ultrasonic.duration_raw);
-      JBI->Add(D_JSON_TEMPERATURE, ultrasonic.temperature);
-      JBI->Add(D_JSON_TEMPERATURE "_Age", abs(millis()-ultrasonic.tPermitTempUpdate));
-      JBI->Add(D_JSON_SPEEDOFSOUND, ultrasonic.speedofsound);
-      JBI->Add(D_JSON_LASTREAD, abs(millis()-ultrasonic.tUltraSonicSensorReadLast));
+    JBI->Object_Start(D_SENSOR);
+      JBI->Add(D_ISVALID, ultrasonic.isvalid);
+      JBI->Add(D_DURATION, ultrasonic.duration);
+      JBI->Add(D_DURATION_RAW, ultrasonic.duration_raw);
+      JBI->Add(D_TEMPERATURE, ultrasonic.temperature);
+      JBI->Add(D_TEMPERATURE "_Age", abs(millis()-ultrasonic.tPermitTempUpdate));
+      JBI->Add(D_SPEEDOFSOUND, ultrasonic.speedofsound);
+      JBI->Add(D_LASTREAD, abs(millis()-ultrasonic.tUltraSonicSensorReadLast));
       if(json_level >= JSON_LEVEL_DETAILED){
-        JBI->Object_Start(D_JSON_ACCURACY);
-          JBI->Add(D_JSON_INSIDE, ultrasonic.accuracy.insidecount);
-          JBI->Add(D_JSON_OUTSIDE, ultrasonic.accuracy.outsidecount);
-          JBI->Add(D_JSON_PERCENTAGE, ultrasonic.accuracy.percent);
-        JBI->Object_End(); // D_JSON_ACCURACY
-        JBI->Level_Start_P(  PSTR(D_JSON_THRESHOLD));
-          JBI->Add_P(          PSTR(D_JSON_SET     D_JSON_PERCENT), ultrasonic.threshold.setpercent);
-          JBI->Add_P(          PSTR(D_JSON_NARROW  D_JSON_PERCENT), ultrasonic.threshold.narrowpercent);
-          JBI->Add_P(          PSTR(D_JSON_WIDE    D_JSON_PERCENT), ultrasonic.threshold.widepercent);
-          JBI->Add_P(          PSTR(D_JSON_LOWER   D_JSON_VALUE),   ultrasonic.threshold.lowervalue);
-          JBI->Add_P(          PSTR(D_JSON_UPPER   D_JSON_VALUE),   ultrasonic.threshold.uppervalue);
-          JBI->Add_P(          PSTR(D_JSON_INSIDE  D_JSON_COUNT),   ultrasonic.threshold.insidecount);
-          JBI->Add_P(          PSTR(D_JSON_OUTSIDE D_JSON_COUNT),   ultrasonic.threshold.outsidecount);
-          JBI->Level_Start_P(  PSTR(D_JSON_RATIO));
-            JBI->Add_P(          PSTR(D_JSON_POSITIVE),   ultrasonic.threshold.ratio_pos);
-            JBI->Add_P(          PSTR(D_JSON_NEGATIVE),   ultrasonic.threshold.ratio_pos);
-            JBI->Add_P(          PSTR(D_JSON_RELATIVE),   ultrasonic.threshold.ratio_pos);
-          JBI->Object_End(); // D_JSON_RATIO
-        JBI->Object_End(); // D_JSON_THRESHOLD
+        JBI->Object_Start(D_ACCURACY);
+          JBI->Add(D_INSIDE, ultrasonic.accuracy.insidecount);
+          JBI->Add(D_OUTSIDE, ultrasonic.accuracy.outsidecount);
+          JBI->Add(D_PERCENTAGE, ultrasonic.accuracy.percent);
+        JBI->Object_End(); // D_ACCURACY
+        JBI->Level_Start_P(  PSTR(D_THRESHOLD));
+          JBI->Add_P(          PSTR(D_SET     D_PERCENT), ultrasonic.threshold.setpercent);
+          JBI->Add_P(          PSTR(D_NARROW  D_PERCENT), ultrasonic.threshold.narrowpercent);
+          JBI->Add_P(          PSTR(D_WIDE    D_PERCENT), ultrasonic.threshold.widepercent);
+          JBI->Add_P(          PSTR(D_LOWER   D_VALUE),   ultrasonic.threshold.lowervalue);
+          JBI->Add_P(          PSTR(D_UPPER   D_VALUE),   ultrasonic.threshold.uppervalue);
+          JBI->Add_P(          PSTR(D_INSIDE  D_COUNT),   ultrasonic.threshold.insidecount);
+          JBI->Add_P(          PSTR(D_OUTSIDE D_COUNT),   ultrasonic.threshold.outsidecount);
+          JBI->Level_Start_P(  PSTR(D_RATIO));
+            JBI->Add_P(          PSTR(D_POSITIVE),   ultrasonic.threshold.ratio_pos);
+            JBI->Add_P(          PSTR(D_NEGATIVE),   ultrasonic.threshold.ratio_pos);
+            JBI->Add_P(          PSTR(D_RELATIVE),   ultrasonic.threshold.ratio_pos);
+          JBI->Object_End(); // D_RATIO
+        JBI->Object_End(); // D_THRESHOLD
       }
-    JBI->Object_End(); // D_JSON_SENSOR
-    JBI->Object_Start(D_JSON_INSTANT);
-      JBI->Add(D_JSON_ISVALID, averaged.instant.isvalid);
-      JBI->Add(D_JSON_DISTANCE "_mm", averaged.instant.final.distance_mm);
-    JBI->Object_End();   // D_JSON_INSTANT 
-    JBI->Object_Start(D_JSON_SMOOTH "_1m");
-      JBI->Add(D_JSON_ISVALID, averaged.smooth_1m.isvalid);
-      JBI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1m.final.distance_mm);
+    JBI->Object_End(); // D_SENSOR
+    JBI->Object_Start(D_INSTANT);
+      JBI->Add(D_ISVALID, averaged.instant.isvalid);
+      JBI->Add(D_DISTANCE "_mm", averaged.instant.final.distance_mm);
+    JBI->Object_End();   // D_INSTANT 
+    JBI->Object_Start(D_SMOOTH "_1m");
+      JBI->Add(D_ISVALID, averaged.smooth_1m.isvalid);
+      JBI->Add(D_DISTANCE "_mm", averaged.smooth_1m.final.distance_mm);
       if(json_level >= JSON_LEVEL_DETAILED){
-      JBI->Add(D_JSON_DEVIATION, averaged.smooth_1m.averaging.deviationaverage);
-      JBI->Add(D_JSON_OUTLIERS, averaged.smooth_1m.averaging.outliercount);
-      JBI->Add(D_JSON_RATIO, averaged.smooth_1m.averaging.usableratio);
+      JBI->Add(D_DEVIATION, averaged.smooth_1m.averaging.deviationaverage);
+      JBI->Add(D_OUTLIERS, averaged.smooth_1m.averaging.outliercount);
+      JBI->Add(D_RATIO, averaged.smooth_1m.averaging.usableratio);
       }
-    JBI->Object_End();  // D_JSON_SMOOTH "_1m"
-    JBI->Object_Start(D_JSON_SMOOTH "_1hr");
-      JBI->Add(D_JSON_ISVALID, averaged.smooth_1hr.isvalid);
-      JBI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1hr.final.distance_mm);
+    JBI->Object_End();  // D_SMOOTH "_1m"
+    JBI->Object_Start(D_SMOOTH "_1hr");
+      JBI->Add(D_ISVALID, averaged.smooth_1hr.isvalid);
+      JBI->Add(D_DISTANCE "_mm", averaged.smooth_1hr.final.distance_mm);
       if(json_level >= JSON_LEVEL_DETAILED){
-      JBI->Add(D_JSON_DEVIATION, averaged.smooth_1hr.averaging.deviationaverage);
-      JBI->Add(D_JSON_OUTLIERS, averaged.smooth_1hr.averaging.outliercount);
-      JBI->Add(D_JSON_RATIO, averaged.smooth_1hr.averaging.usableratio);
+      JBI->Add(D_DEVIATION, averaged.smooth_1hr.averaging.deviationaverage);
+      JBI->Add(D_OUTLIERS, averaged.smooth_1hr.averaging.outliercount);
+      JBI->Add(D_RATIO, averaged.smooth_1hr.averaging.usableratio);
       }
-    JBI->Object_End(); // D_JSON_SMOOTH "_1hr"
+    JBI->Object_End(); // D_SMOOTH "_1hr"
 
   return JBI->End();
 

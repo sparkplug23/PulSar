@@ -94,10 +94,10 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
     
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
@@ -106,7 +106,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
@@ -262,9 +262,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Power0"
@@ -278,7 +278,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
@@ -537,9 +537,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
   "}";
 
   #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
@@ -549,7 +549,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
@@ -621,10 +621,10 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
  
   #define USE_RULES_TEMPLATE
@@ -794,9 +794,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       /** 
        * OLED
        * */
@@ -809,7 +809,7 @@
        * */
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
 #endif // DEVICE_TEMPLATE_OLED_SH1106
@@ -836,21 +836,21 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
@@ -884,21 +884,21 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
@@ -933,21 +933,21 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
@@ -978,21 +978,21 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" "BLUE_WHITE_B_W" "\","
         "\"" "WHITE_BLUE_W_B" "\""
@@ -1084,9 +1084,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_ENERGY_PZEM004T_V3
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
@@ -1103,7 +1103,7 @@
       "\"2\":\""  D_GPIO_FUNCTION_REL2_INV_CTR  "\""  // Using Builtin LED
       #endif  
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
   #define D_DEVICE_DRIVER_RELAY_0_NAME "DriverZone0"
@@ -1130,7 +1130,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_DEVICENAME "\":{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\""
@@ -1155,7 +1155,7 @@
         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
       "],"
     "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
+    "\"" D_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
       "},"  
@@ -1181,7 +1181,7 @@
         "}"
       "]"
     "},"
-    "\"" D_JSON_ENERGY "\":{"
+    "\"" D_ENERGY "\":{"
         "\"DeviceCount\":1"    
     "}"
   "}";
@@ -1222,9 +1222,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{" 
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
@@ -1232,8 +1232,8 @@
       "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
       #endif
     "},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif // DEVICE_TEMPLATE__ESP8266_LOW_MEMORY
@@ -1253,9 +1253,9 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  
@@ -1264,8 +1264,8 @@
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
     "},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
 #endif

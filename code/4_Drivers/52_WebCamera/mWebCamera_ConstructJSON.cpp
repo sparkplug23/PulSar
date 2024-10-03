@@ -6,7 +6,7 @@
 uint8_t mWebCamera::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    JBI->Add(D_COUNT, settings.fEnableSensor);
   return JBI->End();
 
 }
@@ -17,7 +17,7 @@ uint8_t mWebCamera::ConstructJSON_State(uint8_t json_level, bool json_appending)
 
   JBI->Start();
 
-    JBI->Object_Start(D_JSON_RFRECEIVED);
+    JBI->Object_Start(D_RFRECEIVED);
   
     
     JBI->Object_End();

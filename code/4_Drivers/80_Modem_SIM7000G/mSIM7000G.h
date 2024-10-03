@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_DRIVERS_MODEM_7000G_H
 #define _USE_MODULE_DRIVERS_MODEM_7000G_H 0.3
 
-#define D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID 45
+#define D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID 4080 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -95,10 +95,7 @@ class mSIM7000G :
     static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mSIM7000G); };
-    #endif
-    
+        
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t leds_found = 0;
@@ -332,11 +329,6 @@ class mSIM7000G :
     
 //     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){
-//       return sizeof(mSIM7000G);
-//     };
-//     #endif
     
 //     struct SETTINGS{
 //       uint8_t fEnableSensor = false;

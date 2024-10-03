@@ -1,8 +1,7 @@
 #ifndef _MODULE_CONTROLLER_GPS_SD_LOGGER_H
 #define _MODULE_CONTROLLER_GPS_SD_LOGGER_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_GPS_SD_LOGGER_ID   141  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_CONTROLLER_GPS_SD_LOGGER_ID    1    // Numerical accesending order of module within a group
+#define D_UNIQUE_MODULE_CONTROLLER_GPS_SD_LOGGER_ID   9014 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -26,11 +25,6 @@ class mGPS_SD_Logger :
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_GPS_SD_LOGGER_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mGPS_SD_Logger);
-    };
-    #endif
     void parse_JSONCommand(JsonParserObject obj);
 
     struct SETTINGS{

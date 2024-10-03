@@ -746,7 +746,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // strlcpy(pCONT_set->Settings.sta_pwd[0], (!strlen(tmp)) ? "" : (strlen(tmp) < 5) ? pCONT_set->Settings.sta_pwd[0] : tmp, sizeof(pCONT_set->Settings.sta_pwd[0]));
 //   // WebGetArg(request,"p2", tmp, sizeof(tmp));
 //   // strlcpy(pCONT_set->Settings.sta_pwd[1], (!strlen(tmp)) ? "" : (strlen(tmp) < 5) ? pCONT_set->Settings.sta_pwd[1] : tmp, sizeof(pCONT_set->Settings.sta_pwd[1]));
-//   // ALOG_INF(PSTR(D_LOG_WIFI D_JSON_HOSTNAME " %s, " D_JSON_SSID "1 %s, " D_JSON_SSID "2 %s"), pCONT_set->Settings.hostname, pCONT_set->Settings.sta_ssid[0], pCONT_set->Settings.sta_ssid[1]);
+//   // ALOG_INF(PSTR(D_LOG_WIFI D_HOSTNAME " %s, " D_SSID "1 %s, " D_SSID "2 %s"), pCONT_set->Settings.hostname, pCONT_set->Settings.sta_ssid[0], pCONT_set->Settings.sta_ssid[1]);
 // }
 
 // /*-------------------------------------------------------------------------------------------*/
@@ -809,7 +809,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // if ((pCONT_set->Settings.tele_period > 0) && (pCONT_set->Settings.tele_period < 10)) {
 //   //   pCONT_set->Settings.tele_period = 10;   // Do not allow periods < 10 seconds
 //   // }
-//   // ALOG_INF(PSTR(D_LOG_LOG D_JSON_SERIALLOG " %d, " D_JSON_WEBLOG " %d, " D_JSON_SYSLOG " %d, " D_JSON_LOGHOST " %s, " D_JSON_LOGPORT " %d, " D_JSON_TELEPERIOD " %d"),
+//   // ALOG_INF(PSTR(D_LOG_LOG D_SERIALLOG " %d, " D_WEBLOG " %d, " D_SYSLOG " %d, " D_LOGHOST " %s, " D_LOGPORT " %d, " D_TELEPERIOD " %d"),
 //   //   pCONT_set->Settings.logging.serial_level, pCONT_set->Settings.logging.web_level, pCONT_set->Settings.syslog_level, pCONT_set->Settings.syslog_host, pCONT_set->Settings.syslog_port, pCONT_set->Settings.tele_period);
 // }
 
@@ -877,7 +877,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   WebGetArg(request,"b2", tmp, sizeof(tmp));
 // //   pCONT_set->Settings.flag_power.emulation = (!strlen(tmp)) ? 0 : atoi(tmp);
 // // #endif  // USE_EMULATION
-// //   snprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), PSTR(D_LOG_OTHER D_MQTT_ENABLE " %s, " D_JSON_EMULATION " %d, " D_JSON_FRIENDLYNAME), pCONT_sup->GetStateText(pCONT_set->Settings.flag_system.mqtt_enabled), pCONT_set->Settings.flag_power.emulation);
+// //   snprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), PSTR(D_LOG_OTHER D_MQTT_ENABLE " %s, " D_EMULATION " %d, " D_FRIENDLYNAME), pCONT_sup->GetStateText(pCONT_set->Settings.flag_system.mqtt_enabled), pCONT_set->Settings.flag_power.emulation);
 // //   for (uint8_t i = 0; i < MAX_FRIENDLYNAMES; i++) {
 // //     snprintf_P(webindex, sizeof(webindex), PSTR("a%d"), i);
 // //     WebGetArg(request, webindex, tmp, sizeof(tmp));
@@ -889,11 +889,11 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   WebGetArg(request,"t1", tmp, sizeof(tmp));
 // //   if (strlen(tmp)) {  // {"NAME":"12345678901234","GPIO":[255,255,255,255,255,255,255,255,255,255,255,255,255],"FLAG":255,"BASE":255}
 // //     char svalue[128];
-// //     snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_TEMPLATE " %s"), tmp);
+// //     snprintf_P(svalue, sizeof(svalue), PSTR(D_TEMPLATE " %s"), tmp);
 // //     ExecuteWebCommand(svalue, SRC_WEBGUI);
 
 // //     if (request->hasParam("t2")) {
-// //       snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_MODULE " 0"));
+// //       snprintf_P(svalue, sizeof(svalue), PSTR(D_MODULE " 0"));
 // //       ExecuteWebCommand(svalue, SRC_WEBGUI);
 // //     }
 
@@ -960,7 +960,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // WSContentStop(request);
 
 //   // char command[CMDSZ];
-//   // snprintf_P(command, sizeof(command), PSTR(D_JSON_RESET " 1"));
+//   // snprintf_P(command, sizeof(command), PSTR(D_RESET " 1"));
 //   // ExecuteWebCommand(command, SRC_WEBGUI);
 // }
 
@@ -1116,7 +1116,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // char svalue[128];                                         // Template command string
 
 //   // WebGetArg(request,"s1", tmp, sizeof(tmp));                        // NAME
-//   // snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_TEMPLATE " {\"" D_JSON_NAME "\":\"%s\",\"" D_JSON_GPIO "\":["), tmp);
+//   // snprintf_P(svalue, sizeof(svalue), PSTR(D_TEMPLATE " {\"" D_NAME "\":\"%s\",\"" D_GPIO "\":["), tmp);
 
 //   // uint8_t j = 0;
 //   // for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template.hardware.gp); i++) {
@@ -1138,7 +1138,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // WebGetArg(request,"g99", tmp, sizeof(tmp));                       // BASE
 //   // uint8_t base = atoi(tmp) +1;
 
-//   // snprintf_P(svalue, sizeof(svalue), PSTR("%s],\"" D_JSON_FLAG "\":%d,\"" D_JSON_BASE "\":%d}"), svalue, flag, base);
+//   // snprintf_P(svalue, sizeof(svalue), PSTR("%s],\"" D_FLAG "\":%d,\"" D_BASE "\":%d}"), svalue, flag, base);
 //   // ExecuteWebCommand(svalue, SRC_WEBGUI);
 // }
 
@@ -1281,7 +1281,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //     }
 //   //   }
 //   // }
-//   // ALOG_INF(PSTR(D_LOG_MODULE "%s " D_JSON_MODULE "%s"), pCONT_sup->ModuleName().c_str(), gpios.c_str());
+//   // ALOG_INF(PSTR(D_LOG_MODULE "%s " D_MODULE "%s"), pCONT_sup->ModuleName().c_str(), gpios.c_str());
 // }
 
 
@@ -1470,7 +1470,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // char otaurl[sizeof(pCONT_set->Settings.ota_url)];
 //   // WebGetArg(request,"o", otaurl, sizeof(otaurl));
 //   // if (strlen(otaurl)) {
-//   //   snprintf_P(command, sizeof(command), PSTR(D_JSON_OTAURL " %s"), otaurl);
+//   //   snprintf_P(command, sizeof(command), PSTR(D_OTAURL " %s"), otaurl);
 //   //   ExecuteWebCommand(command, SRC_WEBGUI);
 //   // }
 
@@ -1482,7 +1482,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // WSContentSpaceButton(request, BUTTON_MAIN);
 //   // WSContentStop(request);
 
-//   // snprintf_P(command, sizeof(command), PSTR(D_JSON_UPGRADE " 1"));
+//   // snprintf_P(command, sizeof(command), PSTR(D_UPGRADE " 1"));
 //   // ExecuteWebCommand(command, SRC_WEBGUI);
 // }
 
@@ -2244,7 +2244,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   //     if (device < 2) {
 // //   //       //ExecuteCommandPower(1, POWER_TOGGLE, SRC_IGNORE);
 // //   //     } else {
-// //   //       snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_FANSPEED " %d"), device -2);
+// //   //       snprintf_P(svalue, sizeof(svalue), PSTR(D_FANSPEED " %d"), device -2);
 // //   //       //ExecuteCommand(svalue, SRC_WEBGUI);
 // //   //     }
 // //   //   } else {
@@ -2253,18 +2253,18 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   // }
 // //   WebGetArg(request,"d", tmp, sizeof(tmp));  // 0 - 100 Dimmer value
 // //   if (strlen(tmp)) {
-// //     snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_DIMMER " %s"), tmp);
+// //     snprintf_P(svalue, sizeof(svalue), PSTR(D_DIMMER " %s"), tmp);
 // //     ExecuteWebCommand(svalue, SRC_WEBGUI);
 // //   }
 // //   // WebGetArg(request,"t", tmp, sizeof(tmp));  // 153 - 500 Color temperature
 // //   // if (strlen(tmp)) {
 // //   //   // Convert ?command to longer (t -> CT)
-// //   //   snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_COLORTEMPERATURE " %s"), tmp);
+// //   //   snprintf_P(svalue, sizeof(svalue), PSTR(D_COLORTEMPERATURE " %s"), tmp);
 // //   //   ExecuteWebCommand(svalue, SRC_WEBGUI);
 // //   // }
 // //   // WebGetArg(request,"k", tmp, sizeof(tmp));  // 1 - 16 Pre defined RF keys
 // //   // if (strlen(tmp)) {
-// //   //   snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_RFKEY "%s"), tmp);
+// //   //   snprintf_P(svalue, sizeof(svalue), PSTR(D_RFKEY "%s"), tmp);
 // //   //   ExecuteWebCommand(svalue, SRC_WEBGUI);
 // //   // }
 

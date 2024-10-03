@@ -21,10 +21,6 @@ class mTaskerInterface
     virtual PGM_P GetModuleName();
     virtual uint16_t GetModuleUniqueID();
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    virtual uint16_t GetClassSize();
-    #endif    
-
     /**
      * Get device count for each module that should be in module.settings
      * */

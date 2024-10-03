@@ -170,7 +170,7 @@ void mUARTLogger::SubTask_UpdateOLED()
 uint8_t mUARTLogger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -179,7 +179,7 @@ uint8_t mUARTLogger::ConstructJSON_Settings(uint8_t json_level, bool json_append
 uint8_t mUARTLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, 0);
+    JBI->Add(D_VOLTAGE, 0);
   return JBI->End();
     
 }

@@ -28,7 +28,7 @@
 #define HEADER_DRIVERS__CAMERA_WEBCAM_V4_H
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_DRIVERS__CAMERA_WEBCAM_V4_ID ((4*1000)+10) 
+#define D_UNIQUE_MODULE_DRIVERS__CAMERA_WEBCAM_V4_ID 4052 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
 
@@ -82,11 +82,6 @@ class mWebCamera :
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS__CAMERA_WEBCAM_V4_ID; }
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mWebCamera);
-    };
-    #endif
 
 // ===========================
 // Enter your WiFi credentials

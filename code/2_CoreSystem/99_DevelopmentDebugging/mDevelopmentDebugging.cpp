@@ -35,8 +35,8 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_EVERY_SECOND:{
 
       #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
-        ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
-        ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_FREEHEAP, ESP.getFreeHeap());
+        ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
+        ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_FREEHEAP, ESP.getFreeHeap());
       #endif // ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
       // ALOG_INF( PSTR("loops_per_second %d"), pCONT_sup->loops_per_second);

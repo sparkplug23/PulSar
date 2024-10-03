@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_DRIVERS_CAMERA_OV2640_H
 #define _USE_MODULE_DRIVERS_CAMERA_OV2640_H 0.1
 
-#define D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID 51
+#define D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID 4050 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -22,14 +22,7 @@ class mCameraOV2640 :
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_CAMERA_OV2640_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID; }
 
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mCameraOV2640);
-    };
-    #endif
-
-    
+        
     void init();
     void Pre_Init();
     int8_t pin = -1;

@@ -168,7 +168,7 @@ void mDB18x20_ESP32::Ds18x20Search(void)
 
       if(sensor_count > sensor_vector.size())
       { // Sanity check
-        ALOG_ERR(PSTR(PM_JSON_MEMORY_INSUFFICIENT));
+        ALOG_ERR(PSTR(PM_MEMORY_INSUFFICIENT));
         return; 
       }
 
@@ -313,8 +313,8 @@ void mDB18x20_ESP32::EverySecond(void)
         sensor_vector[i].reading.ischanged = (t != sensor_vector[i].reading.val)?true:false;
         sensor_vector[i].reading.isvalid   = D_SENSOR_VALID_TIMEOUT_SECS;
         sensor_vector[i].reading.val = t;
-        sensor_vector[i].reading.capture_time_millis = millis();
-        ALOG_DBM(PSTR(D_LOG_DSB "Read i%02d a%03d Alias%02d =-> %d"), i, sensor_vector[i].address[7], sensor_vector[i].device_name_index, (int)t);
+        sensor_vector[i].utc_measured_timestamp = pCONT_time->UtcTime();
+        ALOG_DBG(PSTR(D_LOG_DSB "Read i%02d a%03d Alias%02d =-> %d"), i, sensor_vector[i].address[7], sensor_vector[i].device_name_index, (int)t);
       } else {
         if (sensor_vector[i].reading.isvalid) { sensor_vector[i].reading.isvalid--; }
         ALOG_ERR(PSTR(D_LOG_DB18 "Missed Reading %d"), sensor_vector[i].reading.isvalid, D_SENSOR_VALID_TIMEOUT_SECS - sensor_vector[i].reading.isvalid);
@@ -410,18 +410,18 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
       alias_i = sensor_vector[sensor_id].device_name_index;
   
       JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), alias_i, buffer, sizeof(buffer)));         
-        JBI->Add(PM_JSON_TEMPERATURE, sensor_vector[sensor_id].reading.val);
-        JBI->Add(PM_JSON_ADDRESS,     sensor_vector[sensor_id].address[7]);
+        JBI->Add(PM_TEMPERATURE, sensor_vector[sensor_id].reading.val);
+        JBI->Add(PM_ADDRESS,     sensor_vector[sensor_id].address[7]);
 
         if(json_level >= JSON_LEVEL_DETAILED)
         {
-          JBI->Add(PM_JSON_VALID, sensor_vector[sensor_id].reading.isvalid);
-          JBI->Add(PM_JSON_TIME_ELASPED, (uint32_t)abs(millis()-sensor_vector[sensor_id].reading.capture_time_millis));
+          JBI->Add(PM_VALID, sensor_vector[sensor_id].reading.isvalid);
+          JBI->Add(PM_TIME_ELASPED, (uint32_t)abs(millis()-sensor_vector[sensor_id].utc_measured_timestamp));
         }
 
         if(json_level >= JSON_LEVEL_DEBUG)
         {
-          JBI->Add(PM_JSON_ID, sensor_id);
+          JBI->Add(PM_ID, sensor_id);
           JBI->Array_Start_P(PSTR("Device%d"), sensor_id);
             for(int a=0;a<8;a++){ JBI->Add(sensor_vector[sensor_id].address[a]); }
           JBI->Array_End();
@@ -478,11 +478,11 @@ void mDB18x20_ESP32::parse_JSONCommand(JsonParserObject obj)
    *        A uint8_t saves that index, so looking up the name of the address will require the correct index (or left as -1 to unknown)
    * 
    */
-  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_CTR])
+  if(jtok = obj[PM_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_CTR])
   {
     
     JsonParserArray array_group = jtok; 
-    ALOG_COM(PSTR(PM_JSON_SENSORADDRESS));
+    ALOG_COM(PSTR(PM_SENSORADDRESS));
 
     uint8_t pair_count = jtok.size();
 

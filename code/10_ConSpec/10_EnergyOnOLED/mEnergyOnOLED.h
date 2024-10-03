@@ -20,7 +20,7 @@
 #define HEADER_CONTROLLER_CUSTOM__ENERGY_OLED_H
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_ID   10010
+#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_ID   10010 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
 
@@ -48,10 +48,7 @@ class mEnergyOLED :
     static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_ID; }    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mEnergyOLED);    };
-    #endif    
-
+    
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.

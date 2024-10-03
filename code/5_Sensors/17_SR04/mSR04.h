@@ -1,7 +1,7 @@
 #ifndef _MODULE_SENSORS_SR04_H
 #define _MODULE_SENSORS_SR04_H
 
-#define D_UNIQUE_MODULE_SENSORS_SR04_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_SENSORS_SR04_ID   5017 // [(Folder_Number*100)+ID_File]  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 #define D_GROUP_MODULE_SENSORS_SR04_ID    1    // Numerical accesending order of module within a group
 
 // #define USE_MODULE_EXAMPLE_CLASS
@@ -47,11 +47,6 @@ class mSR04 :
 
     #define MAX_SENSORS_SR04_COUNT 1
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSR04);
-    };
-    #endif
     void parse_JSONCommand(JsonParserObject obj);
 
     enum EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__IDS{

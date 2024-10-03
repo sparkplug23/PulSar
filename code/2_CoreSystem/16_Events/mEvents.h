@@ -6,7 +6,7 @@
 #ifndef _MEVENT_H
 #define _MEVENT_H
 
-#define D_UNIQUE_MODULE_CORE_EVENTS_ID ((2*1000)+16)
+#define D_UNIQUE_MODULE_CORE_EVENTS_ID 2016 // [(Folder_Number*100)+ID_File]
 
 #include <stdint.h>
 

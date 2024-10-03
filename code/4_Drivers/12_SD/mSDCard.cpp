@@ -831,7 +831,7 @@ uint8_t mSDCard::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
       JBI->Array_End();
     JBI->Object_End();
   
-    JBI->Add_P(PM_JSON_TIME, 1000);
+    JBI->Add_P(PM_TIME, 1000);
   return JBI->End();
 
 }
@@ -992,7 +992,7 @@ void mSDCard::parse_JSONCommand(JsonParserObject obj){
     //   data_buffer.isserviced++;
     // }
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -1106,7 +1106,7 @@ void mSDCard::CommandSet_ReadFile(const char* filename){
   readFile(SD, filename);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ReadFile")), filename);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 } 
@@ -1129,7 +1129,7 @@ void mSDCard::CommandSet_WriteFile(const char* filename, const char* data){
   }
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("WriteFile")), filename_with_extention);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("WriteFile")), filename_with_extention);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 } 
@@ -1150,7 +1150,7 @@ void mSDCard::CommandSet_CreateFile_WithName(char* value){
 
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ListDir")), dirname);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 } 
@@ -1163,13 +1163,13 @@ void mSDCard::CommandSet_CreateFile_WithName(char* value){
 
 void mSDCard::CommandSet_SerialPrint_FileNames(const char* dirname){
 
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("TESTListDir")), dirname);
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("TESTListDir")), dirname);
   listDir(SD, dirname, 0);
 
   // listDir(SD, "/", 0);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ListDir")), dirname);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 } 

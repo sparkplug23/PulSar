@@ -21,7 +21,7 @@
 #ifndef ADC_I2S_Sampler_H
 #define ADC_I2S_Sampler_H
 
-#define D_UNIQUE_MODULE_SENSORS_ADC_I2S_INTERNAL_ID 143
+#define D_UNIQUE_MODULE_SENSORS_ADC_I2S_INTERNAL_ID 5031 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -175,11 +175,6 @@ struct ISR_DUAL_CAPTURE{
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ADC_I2S_INTERNAL_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mADC_I2S_Sampler);
-    };
-    #endif
 
     struct SETTINGS{
       uint8_t fEnableSensor= false;

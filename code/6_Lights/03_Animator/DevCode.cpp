@@ -431,7 +431,7 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
   
   
 
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(0).rgbcctcolors[0].getHue360());
+    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_HUE)), SEGMENT_I(0).rgbcctcolors[0].getHue360());
 
 
 
@@ -522,10 +522,10 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
     segments[0].rgbcctcolors[0].debug_print("post colour Segment 0 colour");
 
     // CommandSet_SegColour_RgbcctColour_Hue_360                (data[0],                0, segment_index);
-    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(segment_index).rgbcctcolors[0].getHue360());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_HUE)), SEGMENT_I(segment_index).rgbcctcolors[0].getHue360());
     // CommandSet_SegColour_RgbcctColour_Sat_255      (mapvalue (data[1], 0,100, 0,255), 0, segment_index);
     // CommandSet_SegColour_RgbcctColour_BrightnessRGB(mapvalue (data[2], 0,100, 0,255), 0, segment_index);
-    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).rgbcctcolors[0].getBrightnessRGB());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).rgbcctcolors[0].getBrightnessRGB());
   }
 
   

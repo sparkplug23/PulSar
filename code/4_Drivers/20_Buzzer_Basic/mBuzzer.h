@@ -1,7 +1,7 @@
 #ifndef _MODULE_DRIVERS_BUZZER_H
 #define _MODULE_DRIVERS_BUZZER_H
 
-#define D_UNIQUE_MODULE_DRIVERS_BUZZER_ID   ((4*1000)+05)
+#define D_UNIQUE_MODULE_DRIVERS_BUZZER_ID   4020 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -18,12 +18,6 @@ class mBuzzer :
     static constexpr const char* PM_MODULE_DRIVERS_BUZZER_CTR = D_MODULE_DRIVERS_BUZZER_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_BUZZER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_BUZZER_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mBuzzer);
-    };
-    #endif
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;

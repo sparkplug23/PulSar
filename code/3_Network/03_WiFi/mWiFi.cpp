@@ -904,8 +904,8 @@ void mWiFi::WifiCheck(uint8_t param)
   // ALOG_TST(PSTR("connection.config_counter=%d"),connection.config_counter);
 
 
-  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"connection.counter",connection.counter,"param",param);
-  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"config_counter",connection.config_counter,"counter",connection.counter);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_COMMAND_NVALUE ", " D_COMMAND_NVALUE),"connection.counter",connection.counter,"param",param);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_COMMAND_NVALUE ", " D_COMMAND_NVALUE),"config_counter",connection.config_counter,"counter",connection.counter);
 
   // if ((WL_CONNECTED != WiFi.status()) || (static_cast<uint32_t>(WiFi.localIP()) == 0)) {
   //   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s=%d,%s=%d,%s=%d"),"connection.+_counter",connection.config_counter,"connection.counter",connection.counter,"connection.+_state",connection.scan_state);
@@ -942,7 +942,7 @@ void mWiFi::WifiCheck(uint8_t param)
     //         }
     //         pCONT_set->Settings.sta_active = 0;
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    //         ALOG_INF(PSTR(D_LOG_WIFI D_JSON_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
+    //         ALOG_INF(PSTR(D_LOG_WIFI D_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
     // #endif// ENABLE_LOG_LEVEL_INFO
     //       }
 
@@ -963,7 +963,7 @@ void mWiFi::WifiCheck(uint8_t param)
         if (connection.scan_state) { 
         // DEBUG_LINE_HERE;
           #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE),"scan_state",connection.scan_state);
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_WIFI D_COMMAND_NVALUE),"scan_state",connection.scan_state);
           #endif// ENABLE_LOG_LEVEL_INFO
           ScanBestAndBeginWifi(); 
         }

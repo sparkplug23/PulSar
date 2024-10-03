@@ -1,7 +1,7 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
-#define D_UNIQUE_MODULE_CORE_SETTINGS_ID ((2*1000)+01)
+#define D_UNIQUE_MODULE_CORE_SETTINGS_ID 2001 // [(Folder_Number*100)+ID_File]
 
 #include "2_CoreSystem/mBaseConfig.h"
 
@@ -236,12 +236,12 @@ enum DATABUILDER_JSON_LEVEL{ //in order of importance
 };
 
 
-DEFINE_PGM_CTR(PM_JSON_LEVEL_NONE_CTR)        "None";
-DEFINE_PGM_CTR(PM_JSON_LEVEL_IFCHANGED_CTR)   "IfChanged";
-DEFINE_PGM_CTR(PM_JSON_LEVEL_SHORT_CTR)       "Short";
-DEFINE_PGM_CTR(PM_JSON_LEVEL_DETAILED_CTR)    "Detailed";
-DEFINE_PGM_CTR(PM_JSON_LEVEL_ALL_CTR)         "All";
-DEFINE_PGM_CTR(PM_JSON_LEVEL_DEBUG_CTR)       "Debug";
+DEFINE_PGM_CTR(PM_LEVEL_NONE_CTR)        "None";
+DEFINE_PGM_CTR(PM_LEVEL_IFCHANGED_CTR)   "IfChanged";
+DEFINE_PGM_CTR(PM_LEVEL_SHORT_CTR)       "Short";
+DEFINE_PGM_CTR(PM_LEVEL_DETAILED_CTR)    "Detailed";
+DEFINE_PGM_CTR(PM_LEVEL_ALL_CTR)         "All";
+DEFINE_PGM_CTR(PM_LEVEL_DEBUG_CTR)       "Debug";
   
 
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
@@ -467,9 +467,6 @@ class mSettings :
     static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){ return sizeof(mSettings); };
-    #endif
 
   #ifdef ESP8266
     #if AUTOFLASHSIZE
@@ -636,7 +633,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t knx_enable_enhancement : 1;   // bit 27 (v5.14.0a)  - CMND_KNX_ENHANCED
     uint32_t rf_receive_decimal : 1;       // bit 28 (v6.0.0a)   - SetOption28 - RF receive data format
     uint32_t ir_receive_decimal : 1;       // bit 29 (v6.0.0a)   - SetOption29 - IR receive data format
-    uint32_t hass_light : 1;               // bit 30 (v6.0.0b)   - SetOption30 - Enforce HAss autodiscovery as light
+    uint32_t mqtt_switches : 1;               // bit 30 (v6.0.0b)   - SetOption30 - Enforce HAss autodiscovery as light
     uint32_t global_state : 1;             // bit 31 (v6.1.0)    - SetOption31 - Control link led blinking
   };
 } SysBitfield_System;
@@ -1014,8 +1011,7 @@ struct SETTINGS {
   int8_t        timezone;                  // 016
   uint8_t       timezone_minutes;          // 66D 
   int8_t        timezone2;                  // 016
-  uint8_t       timezone_minutes2;          // 66D 
-  uint8_t       ina219_mode;               // 531
+  uint8_t       timezone_minutes2;          // 66D
   SysBitfield_Drivers    flag_drivers;  
   int16_t       toffset[2];                // 30E
 
@@ -1107,7 +1103,6 @@ struct SETTINGS {
   struct RUNTIME_GLOBALS{
     uint8_t sleep;                              // Current copy of Settings.sleep
     uint32_t tSavedUpdateLoopStatistics;
-    uint8_t energy_driver;                    // Energy monitor configured    // phase this out, more than one can exist
     uint8_t light_driver;                     // Light module configured
     uint8_t light_type;                       // Light types
     TemplateLoading template_loading;

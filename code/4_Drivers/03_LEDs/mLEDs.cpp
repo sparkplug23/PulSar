@@ -1,5 +1,21 @@
 #include "mLEDs.h"
 
+/**
+ * @brief This driver will need to control any LED only pins.
+ * If possible, it could also use the PWM driver? PWM should become CoreSystem/33_PWM and always be enabled
+ * So yes, LEDs will tell it what it write out and it will manage ESPTypes
+ * 
+ * I either need to "link" LEDx as STATUS led, or have it as its own method.
+ * Though, it would be useful to assign LEDs different system rolls
+ * ** normal, manual control
+ * ** status, network connection error
+ * ** power, if the relay of the same index is on
+ * ** status+power, both of the above, perhaps I should use a uint8_t bitmask for this to assign LED roles
+ * ** wifi is AP mode, to serve IP for local config (use timed pulses, eg 3 seconds off, double blink)
+ * 
+ */
+
+
 #ifdef USE_MODULE_DRIVERS_LEDS
 
 
@@ -414,13 +430,13 @@ uint16_t state_value = 0;
   
 
 
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }else
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }else
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_MINUTES]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_MINUTES]){
   //   CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   // }
 
@@ -498,7 +514,7 @@ ALOG_INF(PSTR("HER3"));
 uint8_t mLEDs::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.leds_found);
+    JBI->Add(D_COUNT, settings.leds_found);
     // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
   return JBI->End();
 
@@ -510,18 +526,18 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    // JBI->Object_Start(D_JSON_RFRECEIVED);
+    // JBI->Object_Start(D_RFRECEIVED);
   
       // JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
 
       JBI->Add("LED1_INV", pCONT_pins->GetPin(GPIO_LED1_INV_ID));
       JBI->Add("LED2_INV", pCONT_pins->GetPin(GPIO_LED2_INV_ID));
 
-      // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
-      // JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
-      // JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   
-      // JBI->Add(D_JSON_MILLIS, rx_pkt.received_time_millis);   
-      // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+      // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
+      // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
+      // JBI->Add(D_RF_PULSE, rx_pkt.delay);   
+      // JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
+      // JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
     // JBI->Object_End();

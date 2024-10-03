@@ -283,7 +283,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
  
   // uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
 
-  // if(jtok = obj[PM_JSON_POWERNAME]){
+  // if(jtok = obj[PM_POWERNAME]){
   //   if(jtok.isStr()){
   //     relay_id = GetRelayIDbyName(jtok.getStr());
   //   }else 
@@ -293,10 +293,10 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
   // }
 
 
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }else
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }
 
@@ -319,7 +319,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
 //   relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   #endif
 // }
 
@@ -330,7 +330,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
 uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -339,7 +339,7 @@ uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 uint8_t mBuzzer::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, 0);
+    JBI->Add(D_VOLTAGE, 0);
   return JBI->End();
     
 }

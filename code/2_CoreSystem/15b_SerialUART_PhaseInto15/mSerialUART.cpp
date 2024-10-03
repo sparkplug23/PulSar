@@ -1550,8 +1550,8 @@
 
   
 
-// //   if(obj.containsKey(D_JSON_FANSPEED)){
-// //     int speed = obj[D_JSON_FANSPEED];
+// //   if(obj.containsKey(D_FANSPEED)){
+// //     int speed = obj[D_FANSPEED];
 // //     test_val = speed;
 // //     if(speed>0){
 // //       analogWrite(pin, test_val);
@@ -1562,13 +1562,13 @@
 // //       digitalWrite(pin, LOW);
 // //     }
 // //     // if(speed>3){
-// //     //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
+// //     //   Response_mP(S_JSON_COMMAND_SVALUE, D_FANSPEED,D_PARSING_NOMATCH);
 // //     //   speed=0; //default off
 // //     // }      
 // //     // SetFanSpeed(speed, false);
 // //     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-// //     ALOG_INF(PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-// //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+// //     ALOG_INF(PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_COMMAND_NVALUE),D_FANSPEED,speed);
+// //     // Response_mP(S_JSON_COMMAND_NVALUE,D_FANSPEED,speed);
 // //     // isserviced++;
 // //   }
   
@@ -1606,7 +1606,7 @@
 // //   JsonParserObject obj = parser.getRootObject();   
 // //   if (!obj) { 
 // //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-// //     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+// //     AddLog(LOG_LEVEL_ERROR, PSTR(D_DESERIALIZATION_ERROR));
 // //     #endif //ENABLE_LOG_LEVEL_COMMANDS
 // //     return;
 // //   }  
@@ -1646,7 +1646,7 @@
 // //     //   data_buffer.isserviced++;
 // //     // }
 // //   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-// //   //   ALOG_DBG(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+// //   //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
 // //   //   #endif // ENABLE_LOG_LEVEL_DEBUG
 // //   }
   
@@ -1672,7 +1672,7 @@
 // //   readFile(SD_MMC, filename);
 
 // //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ReadFile")), filename);
 // //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // // } 
@@ -1695,7 +1695,7 @@
 // //   }
 
 // //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("WriteFile")), filename_with_extention);
+// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("WriteFile")), filename_with_extention);
 // //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // // } 
@@ -1716,7 +1716,7 @@
 
 
 // //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-// //   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
+// //   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ListDir")), dirname);
 // //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // // } 
@@ -1729,13 +1729,13 @@
 
 // // void mSerialUART::CommandSet_SerialPrint_FileNames(const char* dirname){
 
-// //   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("TESTListDir")), dirname);
+// //   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("TESTListDir")), dirname);
 // //   listDir(SD_MMC, dirname, 0);
 
 // //   // listDir(SD_MMC, "/", 0);
 
 // //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
+// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ListDir")), dirname);
 // //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // // } 
@@ -1753,8 +1753,8 @@
   
 //   JBI->Start();  
 
-//     JBI->Add_P(PM_JSON_TIME, 1000);
-//     // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+//     JBI->Add_P(PM_TIME, 1000);
+//     // JBI->Add_P(PM_TIME_MS, animation.time_ms);
 //   return JBI->End();
 
 // }
@@ -1764,7 +1764,7 @@
   
 //   JBI->Start();  
 
-//     JBI->Add_P(PM_JSON_TIME, 1000);
+//     JBI->Add_P(PM_TIME, 1000);
 
 //     // JBI->Object_Start("UART1");
 //     //   JBI->Add("receive_interrupts_enable", settings.uart1.receive_interrupts_enable);
@@ -1788,7 +1788,7 @@
 
 //     JBI->Object_End();
 
-//     // JBI->Add_P(PM_JSON_TIME_MS, animation.time_ms);
+//     // JBI->Add_P(PM_TIME_MS, animation.time_ms);
 //   return JBI->End();
 
 // }

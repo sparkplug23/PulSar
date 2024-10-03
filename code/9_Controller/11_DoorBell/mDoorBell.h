@@ -1,7 +1,7 @@
 #ifndef _mDOORBELL_H
 #define _mDOORBELL_H 0.1
 
-#define D_UNIQUE_MODULE_CONTROLLER_DOORBELL_ID 170
+#define D_UNIQUE_MODULE_CONTROLLER_DOORBELL_ID 9011 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -38,11 +38,6 @@ class mDoorBell :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_DOORBELL_ID; }
 
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mDoorBell);
-    };
-    #endif
 
 
     #define ON_LOGIC_LEVEL LOW

@@ -1,7 +1,7 @@
 #ifndef _MCUSE_MODULE_CONTROLLER_USERMOD_01_H
 #define _MCUSE_MODULE_CONTROLLER_USERMOD_01_H 0.3
 
-#define D_UNIQUE_MODULE_CONTROLLER_USERMOD_01_ID 145
+#define D_UNIQUE_MODULE_CONTROLLER_USERMOD_01_ID 9099 // [(Folder_Number*100)+ID_File]
 
 // PWM Fan and Sonoff Fan to be brought together? One fan controller, different output methods
 
@@ -26,12 +26,6 @@ class mUserMod_01 :
     static constexpr const char* PM_MODULE_CONTROLLER_USERMOD_01_CTR = D_MODULE_CONTROLLER_USERMOD_01_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_USERMOD_01_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_USERMOD_01_ID; }
-
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSonoffIFan);
-    };
-    #endif
 
     void parse_JSONCommand(JsonParserObject obj);
 

@@ -85,7 +85,7 @@
  */
 
 
-#define D_UNIQUE_MODULE_DRIVERS__CAMERA_TASMOTA__ID ((4*1000)+61)
+#define D_UNIQUE_MODULE_DRIVERS__CAMERA_TASMOTA__ID 4061 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -122,9 +122,7 @@ class mWebCamera :
     static constexpr const char* PM_MODULE_DRIVERS__CAMERA_TASMOTA__CTR = D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS__CAMERA_TASMOTA__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS__CAMERA_TASMOTA__ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){    return sizeof(mWebCamera); };
-    #endif
+    
 
     struct SETTINGS    { 
       uint8_t fEnableSensor = false;

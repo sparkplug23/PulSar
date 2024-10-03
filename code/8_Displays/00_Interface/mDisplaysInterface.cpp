@@ -607,19 +607,19 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
    * @brief New method
    * How to check for a json level that is repeated 
    */
-  if(obj_sub = obj[PM_JSON_DISPLAY])
+  if(obj_sub = obj[PM_DISPLAY])
   {
 
-    if(jtok = obj_sub[PM_JSON_MODEL])
+    if(jtok = obj_sub[PM_MODEL])
     {
       pCONT_set->Settings.display.model = jtok.getInt();
-      ALOG_COM( PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_MODEL, pCONT_set->Settings.display.model );
+      ALOG_COM( PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_MODEL, pCONT_set->Settings.display.model );
     }
 
-    if(jtok = obj_sub[PM_JSON_MODE])
+    if(jtok = obj_sub[PM_MODE])
     {
       pCONT_set->Settings.display.mode = jtok.getInt();
-      ALOG_COM( PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_MODE, pCONT_set->Settings.display.mode );
+      ALOG_COM( PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_MODE, pCONT_set->Settings.display.mode );
     }
 
     // if(jtok = obj["DisplayRefresh"]){
@@ -628,7 +628,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     if(jtok = obj_sub["DisplayRows"]){
       pCONT_set->Settings.display.rows = jtok.getInt();
       ALOG_INF(PSTR("DisplayRows=%d"), pCONT_set->Settings.display.rows);
-      // ALOG_COM( PM_JSON_COMMAND_PM_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_MODEL, pCONT_set->Settings.display.model );
+      // ALOG_COM( PM_COMMAND_PM_SVALUE_NVALUE, PM_DISPLAY, PM_MODEL, pCONT_set->Settings.display.model );
     }
     if(jtok = obj_sub["DisplayCols"])
     {
@@ -667,33 +667,33 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     //     data_buffer.isserviced++;
     //   }
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-      ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+      ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayText"));//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     //   #endif // ENABLE_LOG_LEVEL_DEBUG
     }
 
     /**
      * @brief Display:AddLog
      * */
-    if(jtok = obj_sub[PM_JSON_ADDLOG])
+    if(jtok = obj_sub[PM_ADDLOG])
     {
       if(jtok.isStr()){
         CommandSet_DisplayAddLog(jtok.getStr());
       }
-      ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_SVALUE, PM_JSON_DISPLAY, PM_JSON_ADDLOG, jtok.getStr());
+      ALOG_COM(PM_COMMAND_PM_SVALUE_SVALUE_SVALUE, PM_DISPLAY, PM_ADDLOG, jtok.getStr());
     }
 
     /**
      * @brief Display:ClearLog
      * */
-    if(jtok = obj_sub[PM_JSON_CLEARLOG])
+    if(jtok = obj_sub[PM_CLEARLOG])
     {
       if(jtok.isInt()){
         CommandSet_DisplayClearLog(jtok.getInt());
       }
-      ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_CLEARLOG, jtok.getInt());
+      ALOG_COM(PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_CLEARLOG, jtok.getInt());
     }
 
-    if(jtok = obj_sub[PM_JSON_BRIGHTNESS])
+    if(jtok = obj_sub[PM_BRIGHTNESS])
     {
       // if(jtok.isInt()){
       //   CommandSet_DisplayClearLog(jtok.getInt());
@@ -701,7 +701,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
 // I need to introduce how tasmota has a received/mailbox so I can store the brightness to then call sub displays to set them by hardware
 
-      ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_CLEARLOG, jtok.getInt());
+      ALOG_COM(PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_CLEARLOG, jtok.getInt());
     }
 
 
@@ -735,7 +735,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     LogBuffer_Add((char*)jtok.getStr());
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     #endif
   }
 
@@ -794,14 +794,14 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     CommandSet_DisplayText_Advanced_JSON(obj);
 
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DrawText" ));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    ALOG_DBG(PSTR(D_LOG_LIGHT "DrawText" ));//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     // #endif // ENABLE_LOG_LEVEL_DEBUG
 
 
   }
 
 
-  if(jtok = obj[PM_JSON_DISPLAY_MODE]){
+  if(jtok = obj[PM_DISPLAY_MODE]){
     SetDisplayMode(jtok.getInt());
   }
 
@@ -1571,7 +1571,7 @@ void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
   pCONT->Tasker_Interface(TASK_DISPLAY_REFRESH_SHOW_ID);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   #endif
 }
 
@@ -1582,7 +1582,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 {  
   LogBuffer_Clear(); 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
   #endif
 }
 
@@ -1595,7 +1595,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //   SetDisplayMode(EM_DISPLAY_MODE_LOG_STATIC_ID);
 //   LogBuffer_Add((char*)c);
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+//   ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
 //   #endif
 // }
 
@@ -2048,7 +2048,7 @@ uint8_t mDisplaysInterface::ConstructJSON_Settings(uint8_t json_level, bool json
 uint8_t mDisplaysInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, 0);
+    JBI->Add(D_VOLTAGE, 0);
   return JBI->End();
     
 }

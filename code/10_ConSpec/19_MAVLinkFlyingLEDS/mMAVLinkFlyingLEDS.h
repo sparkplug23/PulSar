@@ -20,7 +20,7 @@
 #define HEADER_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_H
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_ID   10019
+#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_ID   10019 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
 
@@ -46,10 +46,7 @@ class mMavlinkFlyingLEDS :
     static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_CTR = D_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_ID; }    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mMavlinkFlyingLEDS);    };
-    #endif    
-
+    
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.

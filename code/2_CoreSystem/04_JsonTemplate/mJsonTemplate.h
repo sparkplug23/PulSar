@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_CORE__JSON_TEMPLATE_H
 #define _USE_MODULE_CORE__JSON_TEMPLATE_H 0.3
 
-#define D_UNIQUE_MODULE_CORE_JSON_TEMPLATE_ID ((2*1000)+4)
+#define D_UNIQUE_MODULE_CORE_JSON_TEMPLATE_ID 2004 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -24,9 +24,6 @@ class mJsonTemplate :
     static constexpr const char* PM_MODULE_CORE__TEMPLATE_LOADING__CTR = D_MODULE_CORE__TEMPLATE_LOADING__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__TEMPLATE_LOADING__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_JSON_TEMPLATE_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mJsonTemplate);    };
-    #endif
     
     struct ClassState
     {

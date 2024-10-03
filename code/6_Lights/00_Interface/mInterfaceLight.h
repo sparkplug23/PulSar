@@ -1,7 +1,7 @@
 #ifndef _DRIVER_INTERFACE_LIGHTS1_H
 #define _DRIVER_INTERFACE_LIGHTS1_H 0.1
 
-#define D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID ((6*1000)+00)
+#define D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID 6000 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -122,7 +122,7 @@ const gamma_table_t gamma_table_fast[] = {
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_CHANGE_POWER_NAME_CTR )   "Change Power"     ;   
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR   )      "Ambilight"  ;                
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_EFFECTS_NAME_CTR  )         D_JSON_EFFECTS;
+DEFINE_PGM_CTR(PM_ANIMATION_MODE_EFFECTS_NAME_CTR  )         D_EFFECTS;
 #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
 #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
@@ -151,9 +151,7 @@ class mInterfaceLight :
     static constexpr const char* PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mInterfaceLight);    };
-    #endif
+    
 
     struct ClassState
     {

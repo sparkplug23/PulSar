@@ -20,7 +20,7 @@
 #define HEADER_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_H
   
 #include "1_TaskerManager/mTaskerManager.h"
-#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_ID ((10*1000)+5) 
+#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_ID 10005 // [(Folder_Number*100)+ID_File]
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
 
@@ -43,13 +43,7 @@ class mSideDoorLight :
     static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_CTR = D_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_ID; }
-    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSideDoorLight);
-    };
-    #endif
-    
+        
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;

@@ -65,14 +65,11 @@ class mEnergyPZEM004T :
     void Init(void);
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void   parse_JSONCommand(JsonParserObject obj);
 
     static constexpr const char* PM_MODULE_ENERGY_PZEM004T_CTR = D_MODULE_ENERGY_PZEM004T_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_PZEM004T_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_PZEM004T_ID; }    
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mEnergyPZEM004T);    };
-    #endif    
+      
 
     struct ClassState
     {
@@ -107,23 +104,14 @@ class mEnergyPZEM004T :
     #endif
 
     #ifndef DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH
-      #define DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH MAX_PZEM004T_DEVICES
+      #define DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH 20//MAX_PZEM004T_DEVICES // this needs changed out!
+      // or if none is found, a slower search happens, ie every 5 seconds, another 5 devices is searched for until 
+      // a practical upper limit of like 20. Any address higher than this should be enabled as option only.
     #endif
     
     void DeviceSearch(uint8_t address_limit = DEFAULT_MAX_PZEM004T_ADDRESS_FOR_SEARCH); // address 248 is reserved for broadcast
     void AddDeviceIfNotExists(uint8_t address_to_save);    
     void SetIDWithAddress(uint8_t address_id, uint8_t address_to_save);
-
-    enum TRANSCEIVE_MODE_IDS{
-      TRANSCEIVE_RESPONSE_TIMEOUT_ID=-2,
-      TRANSCEIVE_RESPONSE_ERROR_ID=-1,
-      TRANSCEIVE_IDLE_ID=0,
-      TRANSCEIVE_REQUEST_READING_ID,
-      TRANSCEIVE_AWAITING_RESPONSE_ID,
-      TRANSCEIVE_RESPONSE_SUCCESS_ID,
-      TRANSCEIVE_AWAITING_LENGTH_ID,
-    };
-    TRANSCEIVE_MODE_IDS transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
 
     TasmotaModbus *modbus;
     timereached_t measure_time;
@@ -170,10 +158,13 @@ class mEnergyPZEM004T :
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
+    
+    void   parse_JSONCommand(JsonParserObject obj);
 
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
@@ -182,10 +173,6 @@ class mEnergyPZEM004T :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();    
-    void MQTTHandler_Sender();
-
     std::vector<struct handler<mEnergyPZEM004T>*> mqtthandler_list;
     struct handler<mEnergyPZEM004T> mqtthandler_settings;
     struct handler<mEnergyPZEM004T> mqtthandler_state_ifchanged;

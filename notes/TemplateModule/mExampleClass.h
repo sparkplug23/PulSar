@@ -1,8 +1,7 @@
 #ifndef _MODULE_SENSORS_EXAMPLE_H
 #define _MODULE_SENSORS_EXAMPLE_H
 
-#define D_UNIQUE_MODULE_SENSORS_EXAMPLE_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_SENSORS_EXAMPLE_ID    1    // Numerical accesending order of module within a group
+#define D_UNIQUE_MODULE_SENSORS_EXAMPLE_ID   4020 // [(Folder_Number*100)+ID_File]
 
 // #define USE_MODULE_EXAMPLE_CLASS
 
@@ -22,11 +21,6 @@ class mExampleClass :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_EXAMPLE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_EXAMPLE_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mExampleClass);
-    };
-    #endif
     void parse_JSONCommand(JsonParserObject obj);
 
     struct SETTINGS{

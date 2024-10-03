@@ -40,6 +40,8 @@
   #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/TestGroups/FirmwareGroup_HVAC.h"
+  #include "0_ConfigUser/TestGroups/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_CellularDatalinks.h"
 #endif // USE_USER_MICHAEL
@@ -268,7 +270,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CORE__SERIAL
   #include "2_CoreSystem/15_SerialUART/mSerial.h"
-  #define   tkr_Serial                              static_cast<mSerial*>(pCONT->pModule[TaskerID::CORE__SERIAL])
+  #define   tkr_Serial                           static_cast<mSerial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__SERIAL__ID))
 #endif
 // #ifdef USE_MODULE_CORE_SERIAL_UART
 //   #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
@@ -516,7 +518,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   #include "5_Sensors/50_GPS_Serial/mGPS_Serial.h"
-  #define pCONT_gps                                 static_cast<mGPS_Serial*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID])
+  #define pCONT_gps                                static_cast<mGPS_Serial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_MODEM
   #include "5_Sensors/51_GPS_Modem/mGPS_Modem.h"

@@ -261,12 +261,12 @@ void mIRRemote::IrReceiveInit(void)
 //       } else {
 //         snprintf_P(svalue, sizeof(svalue), PSTR("\"0x%s\""), hvalue);
 //       }
-//       ResponseTime_P(PSTR(",\"" D_JSON_IRRECEIVED "\":{\"" D_JSON_IR_PROTOCOL "\":\"%s\",\"" D_JSON_IR_BITS "\":%d"),
+//       ResponseTime_P(PSTR(",\"" D_IRRECEIVED "\":{\"" D_IR_PROTOCOL "\":\"%s\",\"" D_IR_BITS "\":%d"),
 //         GetTextIndexed(sirtype, sizeof(sirtype), iridx, kIrRemoteProtocols), results.bits);
 //       if (iridx) {
-//         ResponseAppend_P(PSTR(",\"" D_JSON_IR_DATA "\":%s"), svalue);
+//         ResponseAppend_P(PSTR(",\"" D_IR_DATA "\":%s"), svalue);
 //       } else {
-//         ResponseAppend_P(PSTR(",\"" D_JSON_IR_HASH "\":%s"), svalue);
+//         ResponseAppend_P(PSTR(",\"" D_IR_HASH "\":%s"), svalue);
 //       }
 
 //       IRRawTable raw_table;
@@ -274,7 +274,7 @@ void mIRRemote::IrReceiveInit(void)
 //       bool ir_high = true;          // alternate high/low
 //       // Add raw data in a compact format
 //       if (Settings->flag3.receive_raw) {  // SetOption58 - Add IR Raw data to JSON message
-//         ResponseAppend_P(PSTR(",\"" D_JSON_IR_RAWDATA "\":\""));
+//         ResponseAppend_P(PSTR(",\"" D_IR_RAWDATA "\":\""));
 //         size_t rawlen = results.rawlen;
 //         uint32_t i;
 
@@ -297,11 +297,11 @@ void mIRRemote::IrReceiveInit(void)
 //           if (ResponseLength() + 40 > ResponseSize()) { break; }  // Quit if char string becomes too long
 //         }
 //         uint16_t extended_length = getCorrectedRawLength(&results);
-//         ResponseAppend_P(PSTR("\",\"" D_JSON_IR_RAWDATA "Info\":[%d,%d,%d]"), extended_length, i -1, results.overflow);
+//         ResponseAppend_P(PSTR("\",\"" D_IR_RAWDATA "Info\":[%d,%d,%d]"), extended_length, i -1, results.overflow);
 //       }
 
 //       ResponseJsonEndEnd();
-//       MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_JSON_IRRECEIVED));
+//       MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_IRRECEIVED));
 
 //     }
 
@@ -326,10 +326,10 @@ void mIRRemote::IrReceiveInit(void)
 
 //   // IRsend { "protocol": "SAMSUNG", "bits": 32, "data": 551502015 }
 //   // IRsend { "protocol": "NEC", "bits": 32, "data":"0x02FDFE80", "repeat": 2 }
-//   const char *protocol = root.getStr(PSTR(D_JSON_IR_PROTOCOL), "");
-//   uint16_t bits = root.getUInt(PSTR(D_JSON_IR_BITS), 0);
-//   uint64_t data = root.getULong(PSTR(D_JSON_IR_DATA), 0);
-//   uint16_t repeat = root.getUInt(PSTR(D_JSON_IR_REPEAT), 0);
+//   const char *protocol = root.getStr(PSTR(D_IR_PROTOCOL), "");
+//   uint16_t bits = root.getUInt(PSTR(D_IR_BITS), 0);
+//   uint64_t data = root.getULong(PSTR(D_IR_DATA), 0);
+//   uint16_t repeat = root.getUInt(PSTR(D_IR_REPEAT), 0);
 
 //   // check if the IRSend<x> is great than repeat
 //   if (XdrvMailbox.index > repeat + 1) {
@@ -395,16 +395,16 @@ void mIRRemote::IrReceiveInit(void)
 // {
 //   switch (error) {
 //     case IE_INVALID_RAWDATA:
-//       ResponseCmndChar_P(PSTR(D_JSON_INVALID_RAWDATA));
+//       ResponseCmndChar_P(PSTR(D_INVALID_RAWDATA));
 //       break;
 //     case IE_INVALID_JSON:
-//       ResponseCmndChar_P(PSTR(D_JSON_INVALID_JSON));
+//       ResponseCmndChar_P(PSTR(D_INVALID_JSON));
 //       break;
 //     case IE_PROTO_UNSUPPORTED:
-//       ResponseCmndChar(D_JSON_PROTOCOL_NOT_SUPPORTED);
+//       ResponseCmndChar(D_PROTOCOL_NOT_SUPPORTED);
 //       break;
 //     case IE_SYNTAX_IRSEND:
-//       Response_P(PSTR("{\"" D_CMND_IRSEND "\":\"" D_JSON_NO " " D_JSON_IR_PROTOCOL ", " D_JSON_IR_BITS " " D_JSON_OR " " D_JSON_IR_DATA "\"}"));
+//       Response_P(PSTR("{\"" D_CMND_IRSEND "\":\"" D_NO " " D_IR_PROTOCOL ", " D_IR_BITS " " D_OR " " D_IR_DATA "\"}"));
 //       break;
 //     default:  // IE_NO_ERROR
 //       ResponseCmndDone();
@@ -698,63 +698,63 @@ void mIRRemote::IrReceiveInit(void)
 
 // String sendACJsonState(const stdAc::state_t &state) {
 //   JsonGeneratorObject json;
-//   json.add(PSTR(D_JSON_IRHVAC_VENDOR), typeToString(state.protocol));
-//   json.add(PSTR(D_JSON_IRHVAC_MODEL), state.model);
+//   json.add(PSTR(D_IRHVAC_VENDOR), typeToString(state.protocol));
+//   json.add(PSTR(D_IRHVAC_MODEL), state.model);
 
-//   json.add(PSTR(D_JSON_IRHVAC_MODE), IRac::opmodeToString(state.mode));
+//   json.add(PSTR(D_IRHVAC_MODE), IRac::opmodeToString(state.mode));
 //   // Home Assistant wants power to be off if mode is also off.
 //   if (state.mode == stdAc::opmode_t::kOff) {
-//     json.add(PSTR(D_JSON_IRHVAC_POWER),  IRac::boolToString(false));
+//     json.add(PSTR(D_IRHVAC_POWER),  IRac::boolToString(false));
 //   } else {
-//     json.add(PSTR(D_JSON_IRHVAC_POWER), IRac::boolToString(state.power));
+//     json.add(PSTR(D_IRHVAC_POWER), IRac::boolToString(state.power));
 //   }
-//   json.add(PSTR(D_JSON_IRHVAC_CELSIUS), IRac::boolToString(state.celsius));
+//   json.add(PSTR(D_IRHVAC_CELSIUS), IRac::boolToString(state.celsius));
 //   if (floorf(state.degrees) == state.degrees) {
-//     json.add(PSTR(D_JSON_IRHVAC_TEMP), (int32_t) floorf(state.degrees));       // integer
+//     json.add(PSTR(D_IRHVAC_TEMP), (int32_t) floorf(state.degrees));       // integer
 //   } else {
 //     // TODO can do better here
-//     json.addStrRaw(PSTR(D_JSON_IRHVAC_TEMP), String(state.degrees, 1).c_str());   // non-integer, limit to only 1 sub-digit
+//     json.addStrRaw(PSTR(D_IRHVAC_TEMP), String(state.degrees, 1).c_str());   // non-integer, limit to only 1 sub-digit
 //   }
 
-//   json.add(PSTR(D_JSON_IRHVAC_FANSPEED), IRac::fanspeedToString(state.fanspeed));
-//   json.add(PSTR(D_JSON_IRHVAC_SWINGV), IRac::swingvToString(state.swingv));
-//   json.add(PSTR(D_JSON_IRHVAC_SWINGH), IRac::swinghToString(state.swingh));
-//   json.add(PSTR(D_JSON_IRHVAC_QUIET), IRac::boolToString(state.quiet));
-//   json.add(PSTR(D_JSON_IRHVAC_TURBO), IRac::boolToString(state.turbo));
-//   json.add(PSTR(D_JSON_IRHVAC_ECONO), IRac::boolToString(state.econo));
-//   json.add(PSTR(D_JSON_IRHVAC_LIGHT), IRac::boolToString(state.light));
-//   json.add(PSTR(D_JSON_IRHVAC_FILTER), IRac::boolToString(state.filter));
-//   json.add(PSTR(D_JSON_IRHVAC_CLEAN), IRac::boolToString(state.clean));
-//   json.add(PSTR(D_JSON_IRHVAC_BEEP), IRac::boolToString(state.beep));
-//   json.add(PSTR(D_JSON_IRHVAC_SLEEP), state.sleep);
+//   json.add(PSTR(D_IRHVAC_FANSPEED), IRac::fanspeedToString(state.fanspeed));
+//   json.add(PSTR(D_IRHVAC_SWINGV), IRac::swingvToString(state.swingv));
+//   json.add(PSTR(D_IRHVAC_SWINGH), IRac::swinghToString(state.swingh));
+//   json.add(PSTR(D_IRHVAC_QUIET), IRac::boolToString(state.quiet));
+//   json.add(PSTR(D_IRHVAC_TURBO), IRac::boolToString(state.turbo));
+//   json.add(PSTR(D_IRHVAC_ECONO), IRac::boolToString(state.econo));
+//   json.add(PSTR(D_IRHVAC_LIGHT), IRac::boolToString(state.light));
+//   json.add(PSTR(D_IRHVAC_FILTER), IRac::boolToString(state.filter));
+//   json.add(PSTR(D_IRHVAC_CLEAN), IRac::boolToString(state.clean));
+//   json.add(PSTR(D_IRHVAC_BEEP), IRac::boolToString(state.beep));
+//   json.add(PSTR(D_IRHVAC_SLEEP), state.sleep);
 
 //   String payload = json.toString(); // copy string before returning, the original is on the stack
 //   return payload;
 // }
 
 // void sendIRJsonState(const struct decode_results &results) {
-//   ResponseAppend_P(PSTR("\"" D_JSON_IR_PROTOCOL "\":\"%s\",\"" D_JSON_IR_BITS "\":%d"),
+//   ResponseAppend_P(PSTR("\"" D_IR_PROTOCOL "\":\"%s\",\"" D_IR_BITS "\":%d"),
 //                   typeToString(results.decode_type).c_str(),
 //                   results.bits);
 
 //   if (hasACState(results.decode_type)) {
-//     ResponseAppend_P(PSTR(",\"" D_JSON_IR_DATA "\":\"%s\""),
+//     ResponseAppend_P(PSTR(",\"" D_IR_DATA "\":\"%s\""),
 //                           resultToHexidecimal(&results).c_str());
 //   } else {
-//     ResponseAppend_P(PSTR(",\"%s\":"), UNKNOWN != results.decode_type ? PSTR(D_JSON_IR_DATA) : PSTR(D_JSON_IR_HASH));
+//     ResponseAppend_P(PSTR(",\"%s\":"), UNKNOWN != results.decode_type ? PSTR(D_IR_DATA) : PSTR(D_IR_HASH));
 //     if (Settings->flag.ir_receive_decimal) {  // SetOption29 - IR receive data format
 //       ResponseAppend_P(PSTR("%u"), (uint32_t) results.value);
 //     } else {
 //       if (UNKNOWN != results.decode_type) {
 //         uint64_t reverse = reverseBitsInBytes64(results.value);
-//         ResponseAppend_P(PSTR("\"0x%0_X\",\"" D_JSON_IR_DATALSB "\":\"0x%0_X\""),
+//         ResponseAppend_P(PSTR("\"0x%0_X\",\"" D_IR_DATALSB "\":\"0x%0_X\""),
 //                          &results.value, &reverse);
 //       } else {    // UNKNOWN
 //         ResponseAppend_P(PSTR("\"0x%08X\""), (uint32_t) results.value);  // Unknown is always 32 bits
 //       }
 //     }
 //   }
-//   ResponseAppend_P(PSTR(",\"" D_JSON_IR_REPEAT "\":%d"), results.repeat);
+//   ResponseAppend_P(PSTR(",\"" D_IR_REPEAT "\":%d"), results.repeat);
 
 //   stdAc::state_t new_state;
 //   if (IRAcUtils::decodeToState(&results, &new_state, irhvac_stateful && irac_prev_state.protocol == results.decode_type ? &irac_prev_state : nullptr)) {
@@ -774,7 +774,7 @@ void mIRRemote::IrReceiveInit(void)
 // //    if ((now - ir_lasttime > IR_TIME_AVOID_DUPLICATE) && (UNKNOWN != results.decode_type) && (results.bits > 0)) {
 //     if (now - ir_lasttime > IR_TIME_AVOID_DUPLICATE) {
 //       ir_lasttime = now;
-//       Response_P(PSTR("{\"" D_JSON_IRRECEIVED "\":{"));
+//       Response_P(PSTR("{\"" D_IRRECEIVED "\":{"));
 //       sendIRJsonState(results);
 
 //       IRRawTable raw_table;
@@ -782,7 +782,7 @@ void mIRRemote::IrReceiveInit(void)
 //       bool ir_high = true;          // alternate high/low
 //       // Add raw data in a compact format
 //       if (Settings->flag3.receive_raw) {  // SetOption58 - Add IR Raw data to JSON message
-//         ResponseAppend_P(PSTR(",\"" D_JSON_IR_RAWDATA "\":\""));
+//         ResponseAppend_P(PSTR(",\"" D_IR_RAWDATA "\":\""));
 //         size_t rawlen = results.rawlen;
 //         uint32_t i;
 
@@ -805,11 +805,11 @@ void mIRRemote::IrReceiveInit(void)
 //           if (ResponseLength() + 40 > ResponseSize()) { break; }  // Quit if char string becomes too long
 //         }
 //         uint16_t extended_length = getCorrectedRawLength(&results);
-//         ResponseAppend_P(PSTR("\",\"" D_JSON_IR_RAWDATA "Info\":[%d,%d,%d]"), extended_length, i -1, results.overflow);
+//         ResponseAppend_P(PSTR("\",\"" D_IR_RAWDATA "Info\":[%d,%d,%d]"), extended_length, i -1, results.overflow);
 //       }
 
 //       ResponseJsonEndEnd();
-//       MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_JSON_IRRECEIVED));
+//       MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_IRRECEIVED));
 //     }
 
 //     irrecv->resume();
@@ -857,11 +857,11 @@ void mIRRemote::IrReceiveInit(void)
 // StateModes strToStateMode(class JsonParserToken token, StateModes def) {
 //   if (token.isStr()) {
 //     const char * str = token.getStr();
-//     if (!strcasecmp_P(str, PSTR(D_JSON_IRHVAC_STATE_MODE_SEND_ONLY)))
+//     if (!strcasecmp_P(str, PSTR(D_IRHVAC_STATE_MODE_SEND_ONLY)))
 //       return StateModes::SEND_ONLY;
-//     else if (!strcasecmp_P(str, PSTR(D_JSON_IRHVAC_STATE_MODE_STORE_ONLY)))
+//     else if (!strcasecmp_P(str, PSTR(D_IRHVAC_STATE_MODE_STORE_ONLY)))
 //       return StateModes::STORE_ONLY;
-//     else if (!strcasecmp_P(str, PSTR(D_JSON_IRHVAC_STATE_MODE_SEND_STORE)))
+//     else if (!strcasecmp_P(str, PSTR(D_IRHVAC_STATE_MODE_SEND_STORE)))
 //       return StateModes::SEND_STORE;
 //   }
 //   return def;
@@ -902,13 +902,13 @@ void mIRRemote::IrReceiveInit(void)
 //   state.clock = -1;  // Don't set any current time if we can avoid it.
 
 //   JsonParserToken val;
-//   if (val = root[PSTR(D_JSON_IRHVAC_VENDOR)]) { state.protocol = strToDecodeType(val.getStr()); }
-//   if (val = root[PSTR(D_JSON_IRHVAC_PROTOCOL)]) { state.protocol = strToDecodeType(val.getStr()); }
+//   if (val = root[PSTR(D_IRHVAC_VENDOR)]) { state.protocol = strToDecodeType(val.getStr()); }
+//   if (val = root[PSTR(D_IRHVAC_PROTOCOL)]) { state.protocol = strToDecodeType(val.getStr()); }
 //   if (decode_type_t::UNKNOWN == state.protocol) { return IE_UNSUPPORTED_HVAC; }
 //   if (!IRac::isProtocolSupported(state.protocol)) { return IE_UNSUPPORTED_HVAC; }
 
 //   // for fan speed, we also support 1-5 values
-//   JsonParserToken tok_fan_speed = root[PSTR(D_JSON_IRHVAC_FANSPEED)];
+//   JsonParserToken tok_fan_speed = root[PSTR(D_IRHVAC_FANSPEED)];
 //   if (tok_fan_speed) {
 //     uint32_t fan_speed = tok_fan_speed.getUInt();
 //     if ((fan_speed >= 1) && (fan_speed <= 5)) {
@@ -918,32 +918,32 @@ void mIRRemote::IrReceiveInit(void)
 //     }
 //   }
 
-//   if (val = root[PSTR(D_JSON_IRHVAC_MODEL)]) { state.model = IRac::strToModel(val.getStr()); }
-//   if (val = root[PSTR(D_JSON_IRHVAC_MODE)]) { state.mode = IRac::strToOpmode(val.getStr()); }
-//   if (val = root[PSTR(D_JSON_IRHVAC_SWINGV)]) { state.swingv = IRac::strToSwingV(val.getStr()); }
-//   if (val = root[PSTR(D_JSON_IRHVAC_SWINGH)]) { state.swingh = IRac::strToSwingH(val.getStr()); }
-//   state.degrees = root.getFloat(PSTR(D_JSON_IRHVAC_TEMP), state.degrees);
+//   if (val = root[PSTR(D_IRHVAC_MODEL)]) { state.model = IRac::strToModel(val.getStr()); }
+//   if (val = root[PSTR(D_IRHVAC_MODE)]) { state.mode = IRac::strToOpmode(val.getStr()); }
+//   if (val = root[PSTR(D_IRHVAC_SWINGV)]) { state.swingv = IRac::strToSwingV(val.getStr()); }
+//   if (val = root[PSTR(D_IRHVAC_SWINGH)]) { state.swingh = IRac::strToSwingH(val.getStr()); }
+//   state.degrees = root.getFloat(PSTR(D_IRHVAC_TEMP), state.degrees);
 //   // ALOG_DBG(PSTR("model %d, mode %d, fanspeed %d, swingv %d, swingh %d"),
 //   //             state.model, state.mode, state.fanspeed, state.swingv, state.swingh);
 
 //   // if and how we should handle the state for IRremote
 //   StateModes stateMode = StateModes::SEND_ONLY; // default
-//   if (irhvac_stateful && (val = root[PSTR(D_JSON_IRHVAC_STATE_MODE)])) { stateMode = strToStateMode(val, stateMode); }
+//   if (irhvac_stateful && (val = root[PSTR(D_IRHVAC_STATE_MODE)])) { stateMode = strToStateMode(val, stateMode); }
 
 //   // decode booleans
-//   state.power   = strToBool(root[PSTR(D_JSON_IRHVAC_POWER)], state.power);
-//   state.celsius = strToBool(root[PSTR(D_JSON_IRHVAC_CELSIUS)], state.celsius);
-//   state.light   = strToBool(root[PSTR(D_JSON_IRHVAC_LIGHT)], state.light);
-//   state.beep    = strToBool(root[PSTR(D_JSON_IRHVAC_BEEP)], state.beep);
-//   state.econo   = strToBool(root[PSTR(D_JSON_IRHVAC_ECONO)], state.econo);
-//   state.filter  = strToBool(root[PSTR(D_JSON_IRHVAC_FILTER)], state.filter);
-//   state.turbo   = strToBool(root[PSTR(D_JSON_IRHVAC_TURBO)], state.turbo);
-//   state.quiet   = strToBool(root[PSTR(D_JSON_IRHVAC_QUIET)], state.quiet);
-//   state.clean   = strToBool(root[PSTR(D_JSON_IRHVAC_CLEAN)], state.clean);
+//   state.power   = strToBool(root[PSTR(D_IRHVAC_POWER)], state.power);
+//   state.celsius = strToBool(root[PSTR(D_IRHVAC_CELSIUS)], state.celsius);
+//   state.light   = strToBool(root[PSTR(D_IRHVAC_LIGHT)], state.light);
+//   state.beep    = strToBool(root[PSTR(D_IRHVAC_BEEP)], state.beep);
+//   state.econo   = strToBool(root[PSTR(D_IRHVAC_ECONO)], state.econo);
+//   state.filter  = strToBool(root[PSTR(D_IRHVAC_FILTER)], state.filter);
+//   state.turbo   = strToBool(root[PSTR(D_IRHVAC_TURBO)], state.turbo);
+//   state.quiet   = strToBool(root[PSTR(D_IRHVAC_QUIET)], state.quiet);
+//   state.clean   = strToBool(root[PSTR(D_IRHVAC_CLEAN)], state.clean);
 
 //   // optional timer and clock
-//   state.sleep = root.getInt(PSTR(D_JSON_IRHVAC_SLEEP), state.sleep);
-//   //if (json[D_JSON_IRHVAC_CLOCK]) { state.clock = json[D_JSON_IRHVAC_CLOCK]; }   // not sure it's useful to support 'clock'
+//   state.sleep = root.getInt(PSTR(D_IRHVAC_SLEEP), state.sleep);
+//   //if (json[D_IRHVAC_CLOCK]) { state.clock = json[D_IRHVAC_CLOCK]; }   // not sure it's useful to support 'clock'
 
 //   if (!IR_RCV_WHILE_SENDING && (irrecv != nullptr)) { irrecv->disableIRIn(); }
 //   if (stateMode == StateModes::SEND_ONLY || stateMode == StateModes::SEND_STORE) {
@@ -988,19 +988,19 @@ void mIRRemote::IrReceiveInit(void)
 //   JsonParserToken value;
 
 //   decode_type_t protocol = decode_type_t::UNKNOWN;
-//   value = root[PSTR(D_JSON_IRHVAC_VENDOR)];
+//   value = root[PSTR(D_IRHVAC_VENDOR)];
 //   if (root) { protocol = strToDecodeType(value.getStr()); }
-//   value = root[PSTR(D_JSON_IRHVAC_PROTOCOL)];
+//   value = root[PSTR(D_IRHVAC_PROTOCOL)];
 //   if (root) { protocol = strToDecodeType(value.getStr()); }
 //   if (decode_type_t::UNKNOWN == protocol) { return IE_UNSUPPORTED_PROTOCOL; }
 
-//   uint16_t bits = root.getUInt(PSTR(D_JSON_IR_BITS), 0);
-//   uint16_t repeat = root.getUInt(PSTR(D_JSON_IR_REPEAT), 0);
+//   uint16_t bits = root.getUInt(PSTR(D_IR_BITS), 0);
+//   uint16_t repeat = root.getUInt(PSTR(D_IR_REPEAT), 0);
 
 //   uint64_t data;
-//   value = root[PSTR(D_JSON_IR_DATALSB)];
+//   value = root[PSTR(D_IR_DATALSB)];
 //   if (root) { data = reverseBitsInBytes64(value.getULong()); }    // accept LSB values
-//   value = root[PSTR(D_JSON_IR_DATA)];
+//   value = root[PSTR(D_IR_DATA)];
 //   if (value) { data = value.getULong(); }       // or classical MSB (takes priority)
 //   if (0 == bits) { return IE_SYNTAX_IRSEND; }
 
@@ -1017,7 +1017,7 @@ void mIRRemote::IrReceiveInit(void)
 //   if (!IR_RCV_WHILE_SENDING && (irrecv != nullptr)) { irrecv->enableIRIn(); }
 
 //   if (!success) {
-//       ResponseCmndChar(D_JSON_PROTOCOL_NOT_SUPPORTED);
+//       ResponseCmndChar(D_PROTOCOL_NOT_SUPPORTED);
 //   }
 //   return IE_NO_ERROR;
 // }
@@ -1275,25 +1275,25 @@ void mIRRemote::IrReceiveInit(void)
 // {
 //   switch (error) {
 //     case IE_INVALID_RAWDATA:
-//       ResponseCmndChar_P(PSTR(D_JSON_INVALID_RAWDATA));
+//       ResponseCmndChar_P(PSTR(D_INVALID_RAWDATA));
 //       break;
 //     case IE_INVALID_JSON:
-//       ResponseCmndChar_P(PSTR(D_JSON_INVALID_JSON));
+//       ResponseCmndChar_P(PSTR(D_INVALID_JSON));
 //       break;
 //     case IE_SYNTAX_IRSEND:
-//       Response_P(PSTR("{\"" D_CMND_IRSEND "\":\"" D_JSON_NO " " D_JSON_IR_BITS " " D_JSON_OR " " D_JSON_IR_DATA "\"}"));
+//       Response_P(PSTR("{\"" D_CMND_IRSEND "\":\"" D_NO " " D_IR_BITS " " D_OR " " D_IR_DATA "\"}"));
 //       break;
 //     case IE_SYNTAX_IRHVAC:
-//       Response_P(PSTR("{\"" D_CMND_IRHVAC "\":\"" D_JSON_WRONG " " D_JSON_IRHVAC_VENDOR ", " D_JSON_IRHVAC_MODE " " D_JSON_OR " " D_JSON_IRHVAC_FANSPEED "\"}"));
+//       Response_P(PSTR("{\"" D_CMND_IRHVAC "\":\"" D_WRONG " " D_IRHVAC_VENDOR ", " D_IRHVAC_MODE " " D_OR " " D_IRHVAC_FANSPEED "\"}"));
 //       break;
 //     case IE_UNSUPPORTED_HVAC:
-//       Response_P(PSTR("{\"" D_CMND_IRHVAC "\":\"" D_JSON_WRONG " " D_JSON_IRHVAC_VENDOR " (%s)\"}"), listSupportedProtocols(true).c_str());
+//       Response_P(PSTR("{\"" D_CMND_IRHVAC "\":\"" D_WRONG " " D_IRHVAC_VENDOR " (%s)\"}"), listSupportedProtocols(true).c_str());
 //       break;
 //     case IE_UNSUPPORTED_PROTOCOL:
-//       Response_P(PSTR("{\"" D_CMND_IRSEND "\":\"" D_JSON_WRONG " " D_JSON_IRHVAC_PROTOCOL " (%s)\"}"), listSupportedProtocols(false).c_str());
+//       Response_P(PSTR("{\"" D_CMND_IRSEND "\":\"" D_WRONG " " D_IRHVAC_PROTOCOL " (%s)\"}"), listSupportedProtocols(false).c_str());
 //       break;
 //     case IE_MEMORY:
-//       ResponseCmndChar_P(PSTR(D_JSON_MEMORY_ERROR));
+//       ResponseCmndChar_P(PSTR(D_MEMORY_ERROR));
 //       break;
 //     default:  // IE_NO_ERROR
 //       ResponseCmndDone();
@@ -1436,7 +1436,7 @@ uint16_t state_value = 0;
 uint8_t mIRRemote::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    JBI->Add(D_COUNT, settings.fEnableSensor);
     // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
   return JBI->End();
 
@@ -1448,14 +1448,14 @@ uint8_t mIRRemote::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Object_Start(D_JSON_RFRECEIVED);
+    JBI->Object_Start(D_RFRECEIVED);
   
       JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
-      // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
-      // JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
-      // JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   
-      // JBI->Add(D_JSON_MILLIS, rx_pkt.received_time_millis);   
-      // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+      // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
+      // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
+      // JBI->Add(D_RF_PULSE, rx_pkt.delay);   
+      // JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
+      // JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
     JBI->Object_End();

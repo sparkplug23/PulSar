@@ -1,7 +1,7 @@
 #ifndef _MSTREAMOUT_H
 #define _MSTREAMOUT_H 0.5
 
-#define D_UNIQUE_MODULE_CORE_LOGGING_ID   2008 // ((2*1000)+8)
+#define D_UNIQUE_MODULE_CORE_LOGGING_ID   2008 // [(Folder_Number*100)+ID_File]
 
 #include <Arduino.h>
 #ifdef ESP32
@@ -607,11 +607,6 @@ public:
     void init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mLogging);
-    };
-    #endif
 
     static constexpr const char* PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }

@@ -1,7 +1,7 @@
 #ifndef _MBUCKET_WATER_LEVEL_H
 #define _MBUCKET_WATER_LEVEL_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID 175
+#define D_UNIQUE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID 9010 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -116,11 +116,6 @@ void Pre_Init(void);
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID; }
 
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mBucketWaterLevel);
-    };
-    #endif
     
     void SubTasker_MQTTSender();
 

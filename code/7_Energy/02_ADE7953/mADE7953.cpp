@@ -269,7 +269,7 @@ bool mEnergyADE7953::Command(void)
 uint8_t mEnergyADE7953::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_CHANNELCOUNT, 0);
+    JBI->Add(D_CHANNELCOUNT, 0);
   return JBI->End();
 
 }
@@ -278,13 +278,13 @@ uint8_t mEnergyADE7953::ConstructJSON_Settings(uint8_t json_level, bool json_app
 uint8_t mEnergyADE7953::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, measured.voltage_rms);
+    JBI->Add(D_VOLTAGE, measured.voltage_rms);
     JBI->Add("period", measured.period);
-    JBI->Array_Start(D_JSON_CURRENT);
+    JBI->Array_Start(D_CURRENT);
       JBI->Add(measured.current_rms[0]);
       JBI->Add(measured.current_rms[1]);
     JBI->Array_End();
-    JBI->Array_Start(D_JSON_ACTIVE_POWERUSAGE);
+    JBI->Array_Start(D_ACTIVE_POWERUSAGE);
       JBI->Add(measured.active_power[0]);
       JBI->Add(measured.active_power[1]);
     JBI->Array_End();

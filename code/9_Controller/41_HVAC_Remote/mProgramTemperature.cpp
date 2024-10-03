@@ -157,7 +157,7 @@ void mHVAC::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t zone_id, f
   zone[zone_id].program_temp_method->SetDesiredTemperature(value);
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)zone[zone_id].program_temp_method->GetDesiredTemperature());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TEMPERATURE D_SET)), (int)zone[zone_id].program_temp_method->GetDesiredTemperature());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -169,7 +169,7 @@ void mHVAC::CommandSet_ProgramTemperature_Mode(uint8_t zone_id, uint8_t value)
   zone[zone_id].program_temp_method->SetMode(value);
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), zone[zone_id].program_temp_method->GetMode());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_COMMAND_SVALUE_NVALUE_K(D_TEMPERATURE,D_MODE)), zone[zone_id].program_temp_method->GetMode());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -181,7 +181,7 @@ void mHVAC::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_id, u
 
   //   program_temps[device_id].time_running.limit = value;
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
+  //   ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_SVALUE_NVALUE_K(D_TIME_RUNNING,D_LIMIT)),program_temps[device_id].time_running.limit);
   // #endif
   //   // fForceHeatingTempsUpdate = true;
   //   data_buffer.isserviced++;
@@ -215,10 +215,10 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   // program_temps[device_id].time_maintaining.on,
   // program_temps[device_id].schedule.mode_sch);
 
-  //   //ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   //ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_SVALUE),D_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TEMPERATURE D_JSON_SET)), (int)value);
+  // // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TEMPERATURE D_SET)), (int)value);
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }

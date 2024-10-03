@@ -16,7 +16,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
  
   uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
 
-  // if(jtok = obj[PM_JSON_POWERNAME]){
+  // if(jtok = obj[PM_POWERNAME]){
   //   if(jtok.isStr()){
   //     relay_id = GetRelayIDbyName(jtok.getStr());
   //   }else 
@@ -26,7 +26,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
   // }
 
   // // Primary method since v0.86.14.21
-  // if(jtok = obj[PM_JSON_POWER_STATE]){
+  // if(jtok = obj[PM_POWER_STATE]){
   //   if(jtok.isStr()){
   //     state = pCONT_sup->GetStateNumber(jtok.getStr());
   //   }else 
@@ -51,7 +51,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
   // }
 
   // // PHASE OUT by version 0.87
-  // if(jtok = obj[PM_JSON_ONOFF]){
+  // if(jtok = obj[PM_ONOFF]){
   //   if(jtok.isStr()){
   //     state = pCONT_sup->GetStateNumber(jtok.getStr());
   //   }else 
@@ -64,17 +64,17 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
   
 
 
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }else
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
   //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
   // }else
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_MINUTES]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_MINUTES]){
   //   CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   // }
 
-  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_OFF_THEN_ON_SECS]){
+  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_OFF_THEN_ON_SECS]){
   //   CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(jtok.getInt(), relay_id);
   // }
 
@@ -117,19 +117,19 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
   //   time_short_t offtime;
   //   uint8_t index = 0;
     
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_INDEX]){
+  //   if(jtok = obj["EnabledTime"].getObject()[PM_INDEX]){
   //     index = jtok.getInt();    
   //   }
     
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ONTIME]){
+  //   if(jtok = obj["EnabledTime"].getObject()[PM_ONTIME]){
   //     ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
   //     relay_status[relay_id].enabled_ranges[index].ontime = ontime;
   //   }
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_OFFTIME]){
+  //   if(jtok = obj["EnabledTime"].getObject()[PM_OFFTIME]){
   //     offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
   //     relay_status[relay_id].enabled_ranges[index].offtime = offtime;
   //   }
-  //   if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ENABLED]){
+  //   if(jtok = obj["EnabledTime"].getObject()[PM_ENABLED]){
   //     relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
   //   }
 
@@ -157,19 +157,19 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //     time_short_t offtime;
 //     uint8_t index = 0;
     
-//     if(jtok = jobj[PM_JSON_INDEX]){
+//     if(jtok = jobj[PM_INDEX]){
 //       index = jtok.getInt();    
 //     }
     
-//     if(jtok = jobj[PM_JSON_ONTIME]){
+//     if(jtok = jobj[PM_ONTIME]){
 //       ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
 //       relay_status[relay_id].enabled_ranges[index].ontime = ontime;
 //     }
-//     if(jtok = jobj[PM_JSON_OFFTIME]){
+//     if(jtok = jobj[PM_OFFTIME]){
 //       offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
 //       relay_status[relay_id].enabled_ranges[index].offtime = offtime;
 //     }
-//     if(jtok = jobj[PM_JSON_ENABLED]){
+//     if(jtok = jobj[PM_ENABLED]){
 //       relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
 //     }
 
@@ -195,7 +195,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   // Only apply changes when state is changed
 // void mWebCam::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
-//   ALOG_INF(PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
+//   ALOG_INF(PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_COMMAND_NVALUE " " D_COMMAND_NVALUE)
 //     ,"CommandSet_Relay_Power","num",num,"state",state);  
 
 // 	// Check state if it needs to toggle result
@@ -271,7 +271,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 // //   relay_status[relay_id].timer_decounter.seconds = time_secs;
 // //   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 // //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-// //     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+// //     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 // //   #endif
 // // }
 
@@ -280,7 +280,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   // relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   // #endif
 
 //   return relay_status[relay_id].time_seconds_on;
@@ -299,7 +299,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   #endif
 // }
 
@@ -308,7 +308,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   // relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   // #endif
 
 //   return relay_status[relay_id].timer_decounter.seconds;
@@ -326,7 +326,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   // relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   // #endif
 
 //   /**
@@ -337,7 +337,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   relay_status[relay_id].timer_off_then_on_decounter.seconds = time_secs;
 //   relay_status[relay_id].timer_off_then_on_decounter.active = time_secs > 0 ? true : false;
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_off_then_on_decounter.seconds);  
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_off_then_on_decounter.seconds);  
 //   #endif
 
 
@@ -351,7 +351,7 @@ void mWebCam::parse_JSONCommand(JsonParserObject obj)
 //   // relay_status[relay_id].timer_decounter.seconds = time_secs;
 //   // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
 //   // #endif
 
 //   return relay_status[relay_id].timer_off_then_on_decounter.seconds;

@@ -1,7 +1,7 @@
 #ifndef _MWIFI_H
 #define _MWIFI_H
 
-#define D_UNIQUE_MODULE_NETWORK_WIFI_ID  ((3*1000)+03)
+#define D_UNIQUE_MODULE_NETWORK_WIFI_ID  3003 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -54,11 +54,6 @@ class mWiFi :
   public:
     mWiFi(){};
     
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mWiFi);
-    };
-    #endif
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);    

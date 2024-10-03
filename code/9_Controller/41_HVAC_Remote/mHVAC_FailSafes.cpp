@@ -26,20 +26,20 @@ return;
       (time_minutes_on<FAILSAFE_MINUTES_ERROR)
     ){
       // snprintf(tmpctr, sizeof(tmpctr), "Warning, %s heating has been on for a long time of %d minutes",GetDeviceNameLongbyIDCtr(device_id),heating_device_relays[device_id].time_minutes_on);
-      // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
+      // ALOG_DBG(PSTR(D_LOG_HEATING D_FAILSAFE D_WARNING "\"%s\""),tmpctr);
       fMessageToSend = true;
     }else 
     if(time_minutes_on>FAILSAFE_MINUTES_ERROR){
       // snprintf(tmpctr, sizeof(tmpctr), "Error, %s heating has been on for too long. Turning off now.",GetDeviceNameLongbyIDCtr(device_id));
-      // ALOG_DBG(PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
+      // ALOG_DBG(PSTR(D_LOG_HEATING D_FAILSAFE D_ERROR "\"%s\""),tmpctr);
       fMessageToSend = true;
     }
 
   //   // if(fMessageToSend){
   //   //   StaticJsonDocument<300> doc;
   //   //   JsonObject obj = doc.to<JsonObject>();
-  //   //   obj[D_JSON_TYPE] = "voice+notification"; // broadcast (public/non bedroom speakers), notification(on phones) //SPECIAL, can contain both
-  //   //   obj[D_JSON_MESSAGE] = tmpctr;
+  //   //   obj[D_TYPE] = "voice+notification"; // broadcast (public/non bedroom speakers), notification(on phones) //SPECIAL, can contain both
+  //   //   obj[D_MESSAGE] = tmpctr;
   //   //   data_buffer.payload.len = measureJson(obj)+1;
   //   //   serializeJson(doc,data_buffer.payload.ctr);
   //   //   pCONT->mqt->publish_device("status/alert",data_buffer.payload.ctr,false);

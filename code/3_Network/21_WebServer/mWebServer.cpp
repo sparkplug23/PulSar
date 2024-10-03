@@ -210,7 +210,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 //   }
 //   if(webserver_state != type){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     ALOG_INF(PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
+//     ALOG_INF(PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
     
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //     // pCONT_set->rules_flag.http_init = 1;
@@ -962,7 +962,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //             }
 // //           }
 // //           data_buffer.payload.ctr[j] = '\0';
-// //           MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_JSON_WEBSEND));
+// //           MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_WEBSEND));
 // // */
 // //         }
 // //         status = 0;                           // No error - Done
@@ -1001,7 +1001,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //   // // if (!obj.success()) { return false; }
 
 // //   // char parm_lc[10];
-// //   // if (obj[pCONT_sup->LowerCase(parm_lc, D_JSON_WEBCOLOR)].isNull()) {
+// //   // if (obj[pCONT_sup->LowerCase(parm_lc, D_WEBCOLOR)].isNull()) {
 // //   //   for (uint8_t i = 0; i < pCONT_set->COL_LAST; i++) {
 // //   //     const char* color = obj[parm_lc][i];
 // //   //     if (color != nullptr) {
@@ -1013,8 +1013,8 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // }
 
 // enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRESH, CMND_WEBSEND, CMND_WEBCOLOR, CMND_EMULATION };
-// // const char kWebCommands[] PROGMEM = D_JSON_WEBSERVER "|" D_JSON_WEBPASSWORD "|" D_JSON_WEBLOG "|" D_JSON_WEBREFRESH "|" D_JSON_WEBSEND "|" D_JSON_WEBCOLOR "|" D_JSON_EMULATION ;
-// // const char kWebSendStatus[] PROGMEM = D_JSON_DONE "|" D_JSON_WRONG_PARAMETERS "|" D_JSON_CONNECT_FAILED "|" D_JSON_HOST_NOT_FOUND ;
+// // const char kWebCommands[] PROGMEM = D_WEBSERVER "|" D_WEBPASSWORD "|" D_WEBLOG "|" D_WEBREFRESH "|" D_WEBSEND "|" D_WEBCOLOR "|" D_EMULATION ;
+// // const char kWebSendStatus[] PROGMEM = D_DONE "|" D_WRONG_PARAMETERS "|" D_CONNECT_FAILED "|" D_HOST_NOT_FOUND ;
 
 // // bool mWebServer::WebCommand(void)
 // // {
@@ -1028,7 +1028,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //   if (CMND_WEBSERVER == command_code) {
 // // //     if ((pCONT_set->XdrvMailbox.payload >= 0) && (pCONT_set->XdrvMailbox.payload <= 2)) { pCONT_set->Settings.webserver = pCONT_set->XdrvMailbox.payload; }
 // // //     if (pCONT_set->Settings.webserver) {
-// // //       pCONT_sup->Response_P(PSTR("{\"" D_JSON_WEBSERVER "\":\"" D_JSON_ACTIVE_FOR " %s " D_JSON_ON_DEVICE " %s " D_JSON_WITH_IP_ADDRESS " %s\"}"),
+// // //       pCONT_sup->Response_P(PSTR("{\"" D_WEBSERVER "\":\"" D_ACTIVE_FOR " %s " D_ON_DEVICE " %s " D_WITH_IP_ADDRESS " %s\"}"),
 // // //         (2 == pCONT_set->Settings.webserver) ? D_ADMIN : D_USER, pCONT_set->my_hostname, WiFi.localIP().toString().c_str());
 // // //     } else {
 // // //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetStateText(0));
@@ -1071,7 +1071,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //         JsonWebColor(pCONT_set->XdrvMailbox.data);
 // // //       }
 // // //     }
-// // //     pCONT_sup->Response_P(PSTR("{\"" D_JSON_WEBCOLOR "\":["));
+// // //     pCONT_sup->Response_P(PSTR("{\"" D_WEBCOLOR "\":["));
 // // //     for (uint8_t i = 0; i < pCONT_set->COL_LAST; i++) {
 // // //       if (i) { pCONT_sup->ResponseAppend_P(PSTR(",")); }
 // // //       pCONT_sup->ResponseAppend_P(PSTR("\"#%06x\""), WebColor(i));

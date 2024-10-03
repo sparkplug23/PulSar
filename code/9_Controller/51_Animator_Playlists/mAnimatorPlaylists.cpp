@@ -323,7 +323,7 @@
 
 //   if(time_on->UpdateTick())
 //   {
-//     ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Running Value")), time_on->Value());
+//     ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Running Value")), time_on->Value());
 //     mqtthandler_power_ifchanged.tRateSecs = 1;
 //   }
 //   else
@@ -355,7 +355,7 @@
 //   /***
 //    * As order of importance, others that rely on previous commands must come after
 //    * */
-//   if(jtok = obj[D_JSON_LIGHTPOWER]){
+//   if(jtok = obj[D_LIGHTPOWER]){
 //     int light = jtok.getInt();
 //     if(light == 2){
 //       SetLightState(!GetLightState());
@@ -363,17 +363,17 @@
 //       SetLightState(light);      
 //     }
 
-//     ALOG_COM( PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE), D_JSON_LIGHTPOWER, GetLightState()?"On":"Off");
+//     ALOG_COM( PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_COMMAND_SVALUE), D_LIGHTPOWER, GetLightState()?"On":"Off");
 
-//     Response_mP(S_JSON_COMMAND_SVALUE_NVALUE, D_JSON_LIGHTPOWER, D_TOGGLE);
+//     Response_mP(S_JSON_COMMAND_SVALUE_NVALUE, D_LIGHTPOWER, D_TOGGLE);
 
 //   }
 
 
-//   if(jtok = obj[D_JSON_FANSPEED]){
+//   if(jtok = obj[D_FANSPEED]){
 //     int speed = jtok.getInt();
 //     if(speed>3){
-//       // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
+//       // Response_mP(S_JSON_COMMAND_SVALUE, D_FANSPEED,D_PARSING_NOMATCH);
 //       speed=0; //default off
 //     }      
 
@@ -384,11 +384,11 @@
 
 //     SetFanSpeed(speed, false);
 //     AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-//     ALOG_INF(PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-//     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+//     ALOG_INF(PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_COMMAND_NVALUE),D_FANSPEED,speed);
+//     // Response_mP(S_JSON_COMMAND_NVALUE,D_FANSPEED,speed);
 //   }
   
-//   if(jtok = obj[D_JSON_FANTIMER]){
+//   if(jtok = obj[D_FANTIMER]){
 //     int time_on_seconds = jtok.getInt();
 
 //     time_on->Start(time_on_seconds*60); // incoming command is minutes, internally held as seconds
@@ -399,7 +399,7 @@
 //      * 
 //      */
 
-//     ALOG_COM( PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE), D_JSON_FANTIMER, time_on->Value());
+//     ALOG_COM( PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_COMMAND_NVALUE), D_FANTIMER, time_on->Value());
     
 //   }
   
@@ -425,10 +425,10 @@
 // uint8_t mSonoffIFan::ConstructJSON_Power(uint8_t json_level, bool json_appending){
 
 //   JBI->Start();
-//     JBI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
-//     JBI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
-//     JBI->Add_P(D_JSON_FANTIMER "Seconds", time_on->ValueWithDisabledAsZero());  
-//     JBI->Add_P(D_JSON_FANTIMER "Minutes", (int)(time_on->ValueWithDisabledAsZero()/60));  
+//     JBI->Add_P(D_LIGHTPOWER, GetLightState());
+//     JBI->Add_P(D_FANSPEED, GetFanspeed());  
+//     JBI->Add_P(D_FANTIMER "Seconds", time_on->ValueWithDisabledAsZero());  
+//     JBI->Add_P(D_FANTIMER "Minutes", (int)(time_on->ValueWithDisabledAsZero()/60));  
 //   JBI->End();
 
 // }

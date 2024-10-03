@@ -1,7 +1,7 @@
 #ifndef _MODULE_ENERGY_INTERFACE_H
 #define _MODULE_ENERGY_INTERFACE_H
 
-#define D_UNIQUE_MODULE_ENERGY_INTERFACE_ID   ((7*1000)+00)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_ENERGY_INTERFACE_ID   7000 // [(Folder_Number*100)+ID_File]
 
 #include "stdint.h"
 
@@ -26,10 +26,7 @@ class mEnergyInterface :
     static constexpr const char* PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
-    #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mEnergyInterface);    };
-    #endif
-
+    
     void parse_JSONCommand(JsonParserObject obj);
 
     struct SETTINGS
@@ -85,7 +82,6 @@ class mEnergyInterface :
 // #ifndef _DRIVER_ENERGY_H
 // #define _DRIVER_ENERGY_H 0.1
 
-// #define D_UNIQUE_MODULE_ENERGY_INTERFACE_ID ((7*1000)+00)
 
 
 
@@ -135,9 +131,6 @@ class mEnergyInterface :
 //     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
 //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
 
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){ return sizeof(mEnergyInterface); };
-//     #endif
 
 //     #ifndef MAX_ENERGY_SENSORS
 //     #define MAX_ENERGY_SENSORS 12
@@ -246,11 +239,11 @@ class mEnergyInterface :
 //     //#define ENERGY_NONE            0
 //     #define ENERGY_WATCHDOG        4        // Allow up to 4 seconds before deciding no valid data presen
 
-//     #define D_JSON_POWERCAL "PowerCal"
-//     #define D_JSON_VOLTAGECAL "VoltageCal"
-//     #define D_JSON_CURRENTCAL "CurrentCal"
-//     #define D_JSON_TARIFF "Tariff"
-//     #define D_JSON_MODULEADDRESS "ModuleAddress"
+//     #define D_POWERCAL "PowerCal"
+//     #define D_VOLTAGECAL "VoltageCal"
+//     #define D_CURRENTCAL "CurrentCal"
+//     #define D_TARIFF "Tariff"
+//     #define D_MODULEADDRESS "ModuleAddress"
 
 //     struct ENERGY {
 

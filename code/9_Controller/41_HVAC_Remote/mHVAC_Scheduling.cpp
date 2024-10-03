@@ -73,18 +73,18 @@ const char* mHVAC::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* b
 // #ifdef USE_SCHEDULED_HEATING
 int8_t mHVAC::GetScheduleModeIDByCtr(const char* c){
   if(*c=='\0'){ return -1; }
-  if(strcasecmp(c,D_JSON_SCHEDULED_OFF)==0){ return SCHEDULED_OFF_ID; }
-  if(strcasecmp(c,D_JSON_SCHEDULED_SET)==0){ return SCHEDULED_SET_ID; }
-  if(strcasecmp(c,D_JSON_SCHEDULED_ON)==0){ return SCHEDULED_ON_ID; }
-  if(strcasecmp(c,D_JSON_MANUAL_ON)==0){ return SCHEDULED_MANUAL_ON_ID; }
+  if(strcasecmp(c,D_SCHEDULED_OFF)==0){ return SCHEDULED_OFF_ID; }
+  if(strcasecmp(c,D_SCHEDULED_SET)==0){ return SCHEDULED_SET_ID; }
+  if(strcasecmp(c,D_SCHEDULED_ON)==0){ return SCHEDULED_ON_ID; }
+  if(strcasecmp(c,D_MANUAL_ON)==0){ return SCHEDULED_MANUAL_ON_ID; }
   return -1; // none
 }
 const char* mHVAC::GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen){
   switch(mode){
-    case SCHEDULED_OFF_ID:       memcpy(buffer, D_JSON_SCHEDULED_OFF, sizeof(D_JSON_SCHEDULED_OFF)); break;
-    case SCHEDULED_SET_ID:       memcpy(buffer, D_JSON_SCHEDULED_SET, sizeof(D_JSON_SCHEDULED_SET)); break;
-    case SCHEDULED_ON_ID:        memcpy(buffer, D_JSON_SCHEDULED_ON, sizeof(D_JSON_SCHEDULED_ON)); break;
-    case SCHEDULED_MANUAL_ON_ID: memcpy(buffer, D_JSON_MANUAL_ON, sizeof(D_JSON_MANUAL_ON)); break;
+    case SCHEDULED_OFF_ID:       memcpy(buffer, D_SCHEDULED_OFF, sizeof(D_SCHEDULED_OFF)); break;
+    case SCHEDULED_SET_ID:       memcpy(buffer, D_SCHEDULED_SET, sizeof(D_SCHEDULED_SET)); break;
+    case SCHEDULED_ON_ID:        memcpy(buffer, D_SCHEDULED_ON, sizeof(D_SCHEDULED_ON)); break;
+    case SCHEDULED_MANUAL_ON_ID: memcpy(buffer, D_MANUAL_ON, sizeof(D_MANUAL_ON)); break;
   }
   return buffer;
 }
