@@ -109,7 +109,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   #endif
   // ModuleDefault(WEMOS);  // to do
   for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) { Settings.module_pins.io[i] = GPIO_NONE_ID; }
-  SettingsUpdateText(SET_FRIENDLYNAME1, PSTR(FRIENDLY_NAME)); // Init
+  SettingsUpdateText(SET_FRIENDLYNAME1, PSTR(DEVICENAME_FRIENDLY_CTR)); // Init
   #ifdef DEVICENAME_CTR
   SettingsUpdateText(SET_DEVICENAME, PSTR(DEVICENAME_CTR));
   #else

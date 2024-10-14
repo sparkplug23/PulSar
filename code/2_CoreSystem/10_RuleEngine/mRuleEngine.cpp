@@ -1130,7 +1130,7 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_State;
 
-} //end "MQTTHandler_Init"
+} 
 
 #endif // USE_MODULE_NETWORK_MQTT
 

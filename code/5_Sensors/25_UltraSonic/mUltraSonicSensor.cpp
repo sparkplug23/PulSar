@@ -859,7 +859,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
   ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_SensorsAveraged;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mUltraSonicSensor::MQTTHandler_RefreshAll(){
@@ -868,7 +868,7 @@ void mUltraSonicSensor::MQTTHandler_RefreshAll(){
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mUltraSonicSensor::MQTTHandler_Rate(){

@@ -1507,7 +1507,7 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR;
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame;
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

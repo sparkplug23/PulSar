@@ -1128,7 +1128,7 @@ void mCameraOV2640::MQTTHandler_Init(){
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
 //   ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_Debug;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mCameraOV2640::MQTTHandler_RefreshAll(){
@@ -1138,7 +1138,7 @@ void mCameraOV2640::MQTTHandler_RefreshAll(){
   // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
 //   mqtthandler_scene_teleperiod.flags.SendNow = true;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mCameraOV2640::MQTTHandler_Rate(){

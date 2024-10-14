@@ -46,6 +46,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
     }
   }
 
+ALOG_ERR(PSTR("HERE WE ARE"));
 
   if(jtok = rootObj[PM_GPIOC])
   {
@@ -94,7 +95,15 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
 
     }
 
+    // for (uint32_t ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io);ii++)
+    // {
+    //   ALOG_INF(PSTR("io[%d] %d"),ii,pCONT_set->Settings.user_template.hardware.gp.io[ii]);
+    //   //this works
+    // }
+
   }
+ALOG_ERR(PSTR("HERE WE ARE"));
+// delay(3000);
 
   // New method that assumes the function is the key, and the pin(s) are the values
   // pins may be represented as single ints, or array of ints (e.g. Lighting pins)
@@ -258,9 +267,8 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   uint8_t j = 0;
   for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.user_template.hardware.gp.io); i++) {    
     dest[j] = src[i];    
-    // ALOG_DBG(PSTR("Copying %d\ti%d\tp%d\t%d\ti%d"), dest[j],j, ConvertIndexPinToRealPin(dest[i]), src[i],i);
-
-    
+    ALOG_DBM(PSTR("Copying %d\ti%d\tp%d\t%d\ti%d"), dest[j],j, ConvertIndexPinToRealPin(dest[i]), src[i],i);
+   
     #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     ALOG_DBG(PSTR("Copying dest=%d[%d]\t index/real = %d/%d"), 
       dest[j],j, 
@@ -373,11 +381,11 @@ void mHardwarePins::GpioInit(void)
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
       #ifdef ENABLE_LOG_LEVEL_INFO
       ALOG_DBM(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
-        pCONT_set->my_module.io[i],
+        pCONT_set->runtime.my_module.io[i],
         def_gp.io[i],
         i,
         ConvertIndexPinToRealPin(i),
-        GetGPIOFunctionNamebyID_P(pCONT_set->my_module.io[i])
+        GetGPIOFunctionNamebyID_P(pCONT_set->runtime.my_module.io[i])
       );
       #endif // ENABLE_LOG_LEVEL_INFO
       #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
@@ -385,7 +393,7 @@ void mHardwarePins::GpioInit(void)
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     }
     else{
-      ALOG_DBM(PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
+      ALOG_INF(PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
     }
 
   }
@@ -411,15 +419,15 @@ void mHardwarePins::GpioInit(void)
     ALOG_DBM( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
 
     // Phasing section out : moving into their modules
-    if (mgpio) {    
+    // if (mgpio) {    
       
-      //PWM
-      if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
-        bitSet(pCONT_set->runtime.pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
-        mgpio -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
-      } 
+    //   //PWM
+    //   if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
+    //     bitSet(pCONT_set->runtime.pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
+    //     mgpio -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
+    //   } 
 
-    }    
+    // }    
     //new way
     if(mgpio){ SetPin(real_pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
     

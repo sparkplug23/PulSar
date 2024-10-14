@@ -285,7 +285,7 @@ void mRemoteDevice::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mRemoteDevice::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

@@ -1619,7 +1619,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Motion_Event;
   mqtthandler_list.push_back(ptr);
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

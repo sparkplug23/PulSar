@@ -301,7 +301,7 @@ void mOLED_SSD1306::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Settings;
   
-} //end "MQTTHandler_Init"
+} 
 
 
 // Can these be replaced by mqtt shared function that gets the mqtt from the module
@@ -309,7 +309,7 @@ void mOLED_SSD1306::MQTTHandler_RefreshAll(){
 
   mqtthandler_settings.flags.SendNow = true;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mOLED_SSD1306::MQTTHandler_Rate(){

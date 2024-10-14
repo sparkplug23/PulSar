@@ -279,7 +279,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**
@@ -2095,7 +2095,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
 //   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_ThresholdLimits;
 
-// } //end "MQTTHandler_Init"
+// } 
 
 // /**
 //  * @brief Set flag for all mqtthandlers to send

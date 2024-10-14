@@ -41,7 +41,7 @@ void mLDRBasic::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mLDRBasic::ConstructJSON_State;
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

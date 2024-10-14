@@ -576,7 +576,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
 
-} //end "MQTTHandler_Init"
+} 
 
 #endif // USE_MODULE_NETWORK_MQTT
 

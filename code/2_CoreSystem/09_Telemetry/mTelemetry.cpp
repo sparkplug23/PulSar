@@ -338,7 +338,7 @@ void mTelemetry::MQTTHandler_Init()
 
   #endif // FIRMWARE_MINIMAL2
 
-} //end "MQTTHandler_Init"
+} 
 
 #endif // USE_MODULE_NETWORK_MQTT
 

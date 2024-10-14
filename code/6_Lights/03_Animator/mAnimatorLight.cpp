@@ -23,7 +23,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case TASK_EVERY_SECOND:
+    case TASK_EVERY_SECOND:{
       EverySecond_AutoOff(); 
 
 
@@ -37,8 +37,20 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       #endif // USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
 
 
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+      uint8_t log_level = pCONT_time->UpTime() < 600 ? LOG_LEVEL_TEST : LOG_LEVEL_DEBUG_MORE;
+      AddLog(log_level, PSTR("starting %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__starting_colour / 1000 : lighting_time_critical_logging.dynamic_buffer__starting_colour, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("desired  %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__desired_colour / 1000 : lighting_time_critical_logging.dynamic_buffer__desired_colour, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("effect_call  %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.effect_call / 1000 : lighting_time_critical_logging.effect_call, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("segment_effects  ---------> %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.segment_effects / 1000 : lighting_time_critical_logging.segment_effects, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
 
-    break;
+
+      #endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+
+
+    }break;
     case TASK_LOOP:     
       EveryLoop();  
     break;        
@@ -453,7 +465,9 @@ void mAnimatorLight::EveryLoop()
     #endif 
 
     #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS
-    SubTask_Segments_Effects();
+      DEBUG_LIGHTING__START_TIME_RECORDING(1)
+      SubTask_Segments_Effects();
+      DEBUG_LIGHTING__SAVE_TIME_RECORDING(1, lighting_time_critical_logging.segment_effects);
     #endif  
 
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
@@ -655,22 +669,31 @@ void mAnimatorLight::EverySecond_AutoOff()
 
 
 // Assumed should be integrated into RgbcctController
-RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness){
-  
-  uint8_t new_brightness_255 = 0;
+IRAM_ATTR RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness)
+{
+    uint8_t new_brightness_255 = brightness;
 
-  new_brightness_255 = brightness;
+    #ifdef ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
+    // If gamma correction is enabled, adjust brightness using gamma lookup
+    if (SEGMENT_I(0).flags.use_gamma_for_brightness)
+    {
+        new_brightness_255 = pCONT_iLight->ledGamma(new_brightness_255);
+    }
+    #endif // ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
 
-  #ifdef ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
-  if(SEGMENT_I(0).flags.use_gamma_for_brightness)
-  {
-    new_brightness_255 = pCONT_iLight->ledGamma(new_brightness_255);
-  }
-  #endif // ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
+    // Pre-calculate scale factor
+    uint16_t scale = new_brightness_255 + 1;  // Add 1 to avoid division by zero and maintain full range
 
-  return RgbcctColor::ApplyBrightnesstoRgbcctColour(full_range_colour, new_brightness_255);
+    // Directly apply brightness scaling to each color component
+    full_range_colour.R  = (full_range_colour.R * scale) >> 8;
+    full_range_colour.G  = (full_range_colour.G * scale) >> 8;
+    full_range_colour.B  = (full_range_colour.B * scale) >> 8;
+    full_range_colour.WW = (full_range_colour.WW * scale) >> 8;
+    full_range_colour.CW = (full_range_colour.CW * scale) >> 8;
 
+    return full_range_colour;
 }
+
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -715,7 +738,7 @@ mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPaletteLoaded* _palett
   uint8_t segment_index = 0;
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
-  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->segment_current_index);
+  ALOG_WRN(PSTR("Should only happen once ============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->segment_current_index);
 
   /**
    * @brief If none was passed, then assume its the default for that segment and load its container
@@ -1285,20 +1308,20 @@ void mAnimatorLight::Init_Segments()
 void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index)
 {
 
-  ALOG_INF(PSTR("Segment_AppendNew:: getSegmentsNum() new index %d of count:%d"), seg_index, getSegmentsNum());
+  ALOG_ERR(PSTR("Segment_AppendNew:: getSegmentsNum() new index %d of count:%d"), seg_index, getSegmentsNum());
 
   if (seg_index >= getSegmentsNum()) 
   {
 
-    ALOG_INF(PSTR("Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
+    ALOG_ERR(PSTR("Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
     appendSegment(Segment(start_pixel, stop_pixel));
     seg_index = getSegmentsNum()-1; // segments are added at the end of list, -1 for index of LENGTH minus 1
-    ALOG_INF(PSTR("Segment_AppendNew::new seg_index %d"), seg_index);
+    ALOG_ERR(PSTR("Segment_AppendNew::new seg_index %d"), seg_index);
       
   }
   else
   {  
-    ALOG_INF(PSTR("ELSEEEEEEEEEEEEEEEEEEEE Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
+    ALOG_ERR(PSTR("ELSEEEEEEEEEEEEEEEEEEEE Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
   }
 
 }
@@ -1353,6 +1376,7 @@ void mAnimatorLight:: addEffect(uint8_t id, RequiredFunction function, const cha
 void mAnimatorLight::SubTask_Segments_Effects()
 {
 
+  // DEBUG_TIME__START
   
   #ifdef ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
   // pCONT_iLight->neopixel_runner->IsBusy();
@@ -1435,8 +1459,11 @@ void mAnimatorLight::SubTask_Segments_Effects()
   
         DEBUG_LINE_HERE
         
+        DEBUG_LIGHTING__START_TIME_RECORDING(2)
         (this->*effects.function[SEGMENT_I(seg_i).effect_id])(); // Call Effect Function (passes and returns nothing)
-        
+        DEBUG_LIGHTING__SAVE_TIME_RECORDING(2, lighting_time_critical_logging.effect_call); // Only last segment will be recorded
+
+  // DEBUG_TIME__SHOW
         DEBUG_LINE_HERE
 
         #ifdef ENABLE_EFFECTS_TIMING_DEBUG_GPIO
@@ -1518,6 +1545,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
   // 
 
   
+  // DEBUG_TIME__SHOW
   /**
    * @brief Only show not every segment has updated buffers
    */
@@ -1534,79 +1562,174 @@ void mAnimatorLight::SubTask_Segments_Effects()
   pCONT_iLight->neopixel_runner->flag_block_show = false;
   #endif // ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
 
+  // DEBUG_TIME__SHOW
 
 } // SubTask_Effects_PhaseOut
 
 
-/**
- * @brief New allocated buffers must contain colour info
- * 
- * @param param 
- */
+// /**
+//  * @brief New allocated buffers must contain colour info
+//  * 
+//  * @param param 
+//  */
+// void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
+// {    
+  
+//   DEBUG_PIN6_SET(0);
+
+//   RgbcctColor updatedColor;
+//   TransitionColourPairs colour_pairs;
+
+//   for (uint16_t pixel = 0; 
+//                 pixel < SEGMENT.virtualLength();
+//                 pixel++
+//   ){  
+    
+//   // DEBUG_PIN1_SET(0);
+//     GetTransitionColourBuffer(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type__used_in_effect_generate, &colour_pairs);
+//   // DEBUG_PIN1_SET(1);
+
+//   // DEBUG_PIN2_SET(0);
+//     updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress); 
+//   // DEBUG_PIN2_SET(1); 
+
+//     // ALOG_TST(PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),segment_current_index,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
+
+//   // DEBUG_PIN3_SET(0);
+//     SEGMENT.SetPixelColor(pixel, updatedColor, BRIGHTNESS_ALREADY_SET);
+//   // DEBUG_PIN3_SET(1);
+
+//   }
+  
+//   DEBUG_PIN6_SET(1);
+
+
+// }
+
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
 void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
 {    
-  
-  DEBUG_PIN6_SET(0);
+    DEBUG_PIN6_SET(0);
 
-  RgbcctColor updatedColor;
-  TransitionColourPairs colour_pairs;
+    // Pre-calculate values that are constant outside the loop
+    byte* buffer = SEGMENT.Data();  // Fetch buffer pointer once
+    uint16_t buflen = SEGMENT.DataLength();
+    uint16_t pixel_size = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate);  // Fetch pixel size once
+    ColourType pixel_type = SEGMENT.colour_type__used_in_effect_generate;
 
-  for (uint16_t pixel = 0; 
-                pixel < SEGMENT.virtualLength();
-                pixel++
-  ){  
+    // ALOG_ERR(PSTR("pixel_size %d"), pixel_size);
+    // ALOG_ERR(PSTR("buflen %d"), buflen);
+
+    for (uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++) {  
+        uint16_t pixel_start_i = pixel * pixel_size * 2;
+
+        // Ensure we don't exceed buffer limits
+        if (pixel_start_i + pixel_size > buflen) {
+            ALOG_ERR(PSTR("Never reach this"));
+            continue;  // Skip if out of bounds
+        }
     
-  // DEBUG_PIN1_SET(0);
-    GetTransitionColourBuffer(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type__used_in_effect_generate, &colour_pairs);
-  // DEBUG_PIN1_SET(1);
+        // ALOG_INF(PSTR("Pixel: %d, pixel_start_i: %d, pixel_size: %d, buflen: %d"), pixel, pixel_start_i, pixel_size, buflen);
 
-  // DEBUG_PIN2_SET(0);
-    updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress); 
-  // DEBUG_PIN2_SET(1); 
+        // Pointer to pixel data
+        byte* c = &buffer[pixel_start_i];
 
-    // ALOG_TST(PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),segment_current_index,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
+        // Variables for starting and desired colors
+        RgbcctColor startingColour, desiredColour;
+                
+        // ALOG_INF(PSTR("pixel_type %d"), pixel_type);
 
-  // DEBUG_PIN3_SET(0);
-    SEGMENT.SetPixelColor(pixel, updatedColor, BRIGHTNESS_ALREADY_SET);
-  // DEBUG_PIN3_SET(1);
+        // Directly access pixel color values based on pixel type
+        switch (pixel_type) {
+            case ColourType::COLOUR_TYPE__RGB__ID:
+                startingColour = RgbcctColor(c[0], c[1], c[2], 0, 0);
+                desiredColour  = RgbcctColor(c[3], c[4], c[5], 0, 0);
+                break;
 
-  }
-  
-  DEBUG_PIN6_SET(1);
+            case ColourType::COLOUR_TYPE__RGBW__ID:
+                startingColour = RgbcctColor(c[0], c[1], c[2], c[3], 0);
+                desiredColour  = RgbcctColor(c[4], c[5], c[6], c[7], 0);
+                break;
 
+            case ColourType::COLOUR_TYPE__RGBCCT__ID:
+                startingColour = RgbcctColor(c[0], c[1], c[2], c[3], c[4]);
+                desiredColour  = RgbcctColor(c[5], c[6], c[7], c[8], c[9]);
+                break;
+        }
 
+        // Perform the linear blend for this pixel
+        RgbcctColor updatedColor = RgbcctColor::LinearBlend(startingColour, desiredColour, param.progress);
+
+                
+        // ALOG_TST(PSTR("StartingColour=           =   %d,%d,%d,%d,%d"),startingColour.R,startingColour.G,startingColour.B,startingColour.CW,startingColour.WW);
+        // ALOG_TST(PSTR("DesiredColour=           -->  %d,%d,%d,%d,%d"),desiredColour.R,desiredColour.G,desiredColour.B,desiredColour.CW,desiredColour.WW);
+        // AddLog_Array_Block(LOG_LEVEL_TEST, PSTR("segdata"), &c[0] , 30, 6, true);
+
+        // if(pixel==0) //force pixel 1 for debug
+        // updatedColor = RgbcctColor(0,255,0);
+
+        // Set the pixel color
+        SEGMENT.SetPixelColor(pixel, updatedColor, BRIGHTNESS_ALREADY_SET);
+    }
+    
+    DEBUG_PIN6_SET(1);
 }
 
-
-/**
- * @brief New allocated buffers must contain colour info
- * @brief Replicate one colour across whole string (ie scences for h801 or addressable)
- * 
- * @param param 
- */
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
 void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
 {    
+    DEBUG_PIN6_SET(0);
 
-  RgbcctColor updatedColor;
-  TransitionColourPairs colour_pairs;
-  GetTransitionColourBuffer(SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type__used_in_effect_generate, &colour_pairs);
-  
-  updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
-  
-  ALOG_DBM( PSTR("SEGMENT.colour_type__used_in_effect_generate=%d, seg%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type__used_in_effect_generate, getCurrSegmentId(), updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
-
-  // ALOG_TST(PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
-  // ALOG_TST(PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
+    // Pre-calculate values that are constant outside the loop
+    byte* buffer = SEGMENT.Data();  // Fetch buffer pointer once
+    uint16_t buflen = SEGMENT.DataLength();
+    uint16_t pixel_size = GetSizeOfPixel(SEGMENT.colour_type__used_in_effect_generate);  // Fetch pixel size once
+    ColourType pixel_type = SEGMENT.colour_type__used_in_effect_generate;
     
-  for (uint16_t pixel = 0; 
-                pixel < SEGLEN; 
-                pixel++
-  ){  
-    // ALOG_INF(PSTR("SEGMENT.pixel =%d"), pixel);
-    // updatedColor.setChannelsRaw(255,0,0,1,2);
-    SEGMENT.SetPixelColor(pixel, updatedColor, SET_BRIGHTNESS);
-  }
-  
+    // Assume there's only one color for the entire buffer
+    RgbcctColor startingColour, desiredColour;
+    RgbcctColor updatedColor;
+
+    // Get the first color pair from the buffer (single color)
+    byte* c = &buffer[0];
+
+    // Extract the starting and desired colors based on the pixel type
+    switch (pixel_type) {
+        case ColourType::COLOUR_TYPE__RGB__ID:
+            startingColour = RgbcctColor(c[0], c[1], c[2], 0, 0);
+            desiredColour  = RgbcctColor(c[3], c[4], c[5], 0, 0);
+            break;
+
+        case ColourType::COLOUR_TYPE__RGBW__ID:
+            startingColour = RgbcctColor(c[0], c[1], c[2], c[3], 0);
+            desiredColour  = RgbcctColor(c[4], c[5], c[6], c[7], 0);
+            break;
+
+        case ColourType::COLOUR_TYPE__RGBCCT__ID:
+            startingColour = RgbcctColor(c[0], c[1], c[2], c[3], c[4]);
+            desiredColour  = RgbcctColor(c[5], c[6], c[7], c[8], c[9]);
+            break;
+    }
+
+    // Perform the linear blend for this single color
+    updatedColor = RgbcctColor::LinearBlend(startingColour, desiredColour, param.progress);    
+
+    // Log the color type and the first desired color for debugging
+    ALOG_DBM(PSTR("SEGMENT.colour_type__used_in_effect_generate=%d, seg%d, desired_colour1=%d,%d,%d,%d,%d"), SEGMENT.colour_type__used_in_effect_generate, getCurrSegmentId(), updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.WC, updatedColor.WW);
+    
+    // Replicate this single blended color across all pixels in the segment
+    ALOG_INF(PSTR("len%d"), SEGLEN);
+    
+    for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {  
+        SEGMENT.SetPixelColor(pixel, updatedColor, SET_BRIGHTNESS);
+    }
+
+    DEBUG_PIN6_SET(1);
 }
 
 
@@ -1675,85 +1798,6 @@ uint8_t mAnimatorLight::GetSizeOfPixel(ColourType colour_type)
     case ColourType::COLOUR_TYPE__RGBW__ID:    return 4;
     case ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
   }
-
-}
-
-void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
-  byte* buffer, 
-  uint16_t buflen, 
-  uint16_t pixel_index, 
-  ColourType pixel_type, 
-  RgbcctColor starting_colour
-){
-
-  if(buffer == nullptr)
-  {
-    return;
-  }
-
-  // note right now it is storing the full rgbcct value
-  uint16_t pixel_start_i = 0;
-
-  // ALOG_TST(PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
-  switch(pixel_type)
-  {
-    case ColourType::COLOUR_TYPE__RGB__ID:
-    
-      pixel_start_i = pixel_index*6;
-
-      if(pixel_start_i + 6 <= buflen)
-      {
-        byte* start_of_pixel_pair = &buffer[pixel_start_i];
-        start_of_pixel_pair[0] = starting_colour.R;
-        start_of_pixel_pair[1] = starting_colour.G;
-        start_of_pixel_pair[2] = starting_colour.B;
-      }
-
-    break;
-    case ColourType::COLOUR_TYPE__RGBW__ID:
-    
-      pixel_start_i = pixel_index*8;
-
-      if(pixel_start_i + 8 <= buflen)
-      {
-        byte* start_of_pixel_pair = &buffer[pixel_start_i];
-        start_of_pixel_pair[0] = starting_colour.R;
-        start_of_pixel_pair[1] = starting_colour.G;
-        start_of_pixel_pair[2] = starting_colour.B;
-        start_of_pixel_pair[3] = starting_colour.W1;        
-      }
-
-    break;
-    case ColourType::COLOUR_TYPE__RGBCCT__ID:
-    
-      pixel_start_i = pixel_index*10;
-
-      if(pixel_start_i + 10 <= buflen)
-      {
-        byte* start_of_pixel_pair = &buffer[pixel_start_i];
-        start_of_pixel_pair[0] = starting_colour.R;
-        start_of_pixel_pair[1] = starting_colour.G;
-        start_of_pixel_pair[2] = starting_colour.B;
-        start_of_pixel_pair[3] = starting_colour.WW;
-        start_of_pixel_pair[4] = starting_colour.CW;
-      }
-
-    break;
-  }
-
-  // uint16_t pixel_start_i =pixel_index*sizeof(TransitionColourPairs);
-  //   // ALOG_TST(PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen); 
-  // // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
-
-  // // ALOG_TST(PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
-  // //   pixel_index,
-  // //   colour_pair->DesiredColour.R,
-  // //   colour_pair->DesiredColour.G,
-  // //   colour_pair->DesiredColour.B,
-  // //   colour_pair->StartingColour.R,
-  // //   colour_pair->StartingColour.G,
-  // //   colour_pair->StartingColour.B
-  // // );
 
 }
 
@@ -2025,257 +2069,101 @@ CRGB mAnimatorLight::col_to_crgb(uint32_t color)
   return fastled_col;
 }
 
-
-void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, RgbcctColor desired_colour)
-{   
-  
-  // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  //ALOG_INF( PSTR("EFFECT sIndexIO=I%d start%d,stop%d\tp%d,PL %d, RGB:%d,%d,%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, mPaletteI->GetNumberOfColoursInPalette(SEGMENT.palette_id), colour.R, colour.G, colour.B );
-  // #endif
-
-  if(buffer == nullptr)
-  {
-    return;
-  } 
-
-  // note right now it is storing the full rgbcct value
-  uint16_t pixel_start_i = 0;
-  byte* start_of_pixel_pair = nullptr;
-
-  #ifdef ENABLE_DEVFEATURE_PIXEL_MATRIX
-  ALOG_TST(PSTR("[%d] \t pixel_start_i/buflen=%d\t%d"),pixel_index, pixel_start_i,buflen);
-  #endif 
-
-  /**
-   * @brief Construct a new switch object
-   * 
-   * Since rgbcct is the base colour anyway, then the code below can be simplified by indexing (not using "R", "G", "B" etc)
-   * Instead just use width of colour up to 5 bytes wide. "GetSizeOfPixel" and perhaps memcpy?
-   * 
-   */
-
-  switch(pixel_type)
-  {
-    case ColourType::COLOUR_TYPE__RGB__ID:
-    
-      pixel_start_i = pixel_index*6;
-
-      if(pixel_start_i + 6 <= buflen)
-      {
-        start_of_pixel_pair = &buffer[pixel_start_i];
-        start_of_pixel_pair[3] = desired_colour.R;
-        start_of_pixel_pair[4] = desired_colour.G;
-        start_of_pixel_pair[5] = desired_colour.B;
-      }
-
-    break;
-    case ColourType::COLOUR_TYPE__RGBW__ID:
-    
-      pixel_start_i = pixel_index*8; // rgbw * 2
-
-      if(pixel_start_i + 8 <= buflen)
-      {
-        start_of_pixel_pair = &buffer[pixel_start_i];
-        start_of_pixel_pair[4] = desired_colour.R;
-        start_of_pixel_pair[5] = desired_colour.G;
-        start_of_pixel_pair[6] = desired_colour.B;
-        start_of_pixel_pair[7] = desired_colour.W1;
-      }
-
-    break;
-    case ColourType::COLOUR_TYPE__RGBCCT__ID:
-    
-      pixel_start_i = pixel_index*10;
-
-      if(pixel_start_i + 10 <= buflen)
-      {
-        start_of_pixel_pair = &buffer[pixel_start_i];
-        start_of_pixel_pair[5] = desired_colour.R;
-        start_of_pixel_pair[6] = desired_colour.G;
-        start_of_pixel_pair[7] = desired_colour.B;
-        start_of_pixel_pair[8] = desired_colour.WW;
-        start_of_pixel_pair[9] = desired_colour.CW;
-      }
-
-    break;
-    default: return;
-  }
-
-  // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
-  // ALOG_TST(PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
-  //   pixel_index,
-  //   colour_pair->DesiredColour.R,
-  //   colour_pair->DesiredColour.G,
-  //   colour_pair->DesiredColour.B,
-  //   colour_pair->StartingColour.R,
-  //   colour_pair->StartingColour.G,
-  //   colour_pair->StartingColour.B
-  // );
-
-}
-
-
-/**
- * @brief 
- * 
- * @param allocated_buffer 
- * @param pixel_index 
- * @param pixel_type 
- * @param starting_colour 
- * @param desired_colour 
- * @return true succesfully added to buffer
- * @return false 
- */
-
-  /**
-buffer = [length_of_pixel_type * length_of_pixels * copies_of_that_pixel]
-
-length_of_pixel_type 
-     rgb = 3
-     rgbw = 4
-     rgbcct = 5
-copies_of_that_pixel 
-    ie starting and desired, so 2
-length_of_pixels
-    number of pixel in that segment up to (100?) then replicate and wrap output*/
-bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, 
-RgbcctColor starting_colour, RgbcctColor desired_colour)
-{
-
-  if(buffer == nullptr)
-  {
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    ALOG_TST(PSTR("buffer == nullptr"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-    return false;
-  } 
-
-// note right now it is storing the full rgbcct value
-
-  uint16_t pixel_start_i =pixel_index*sizeof(TransitionColourPairs);
-
-
-    // ALOG_TST(PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
-
-  if(pixel_start_i + 10 <= buflen)
-  {
-    byte* start_of_pixel_pair = &buffer[pixel_start_i];
-    start_of_pixel_pair[0] = starting_colour.R;
-    start_of_pixel_pair[1] = starting_colour.G;
-    start_of_pixel_pair[2] = starting_colour.B;
-    start_of_pixel_pair[3] = starting_colour.WW;
-    start_of_pixel_pair[4] = starting_colour.CW;
-    start_of_pixel_pair[5] = desired_colour.R;
-    start_of_pixel_pair[6] = desired_colour.G;
-    start_of_pixel_pair[7] = desired_colour.B;
-    start_of_pixel_pair[8] = desired_colour.WW;
-    start_of_pixel_pair[9] = desired_colour.CW;
-  }else{
-    
-    #ifdef ENABLE_LOG_LEVEL_WARNING
-    ALOG_TST(PSTR("NOT enough memory"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-  }
-  
-  // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
-  // ALOG_TST(PSTR("SET colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
-  //   pixel_index,
-  //   colour_pair->DesiredColour.R,
-  //   colour_pair->DesiredColour.G,
-  //   colour_pair->DesiredColour.B,
-  //   colour_pair->StartingColour.R,
-  //   colour_pair->StartingColour.G,
-  //   colour_pair->StartingColour.B
-  // );
-    
-  return true;
-
-}
-
-
-/**
- * @brief 
- * New method for getting colours from dynamic buffers
- * 
- * @param ptr 
- * @param pixel_num 
- * @param pixel_position 
- * @return RgbcctColor 
- */
-// mAnimatorLight::TransitionColourPairs* 
-void IRAM_ATTR mAnimatorLight::GetTransitionColourBuffer(
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+void mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
   ColourType pixel_type, 
-  mAnimatorLight::TransitionColourPairs* colour  // Get and Set colours will still only store in rgb or rgbw format, for now, limited to rgb
-){
+  const RgbcctColor& starting_colour  // Use reference for efficiency
+) {
+  if (buffer == nullptr) return;
 
+  uint8_t pixel_width = GetSizeOfPixel(pixel_type);
+  uint16_t pixel_start_i = pixel_index * pixel_width * 2;  // Dynamically calculate pixel size
 
-  if(buffer == nullptr)
-  {
-    return;
-  }  
+  if (pixel_start_i + pixel_width <= buflen) {
+    byte* start_of_pixel_pair = &buffer[pixel_start_i];
 
-uint16_t pixel_start_i = 0;
+    const uint8_t* starting_raw = starting_colour.getData();  // Get raw data from starting colour
 
-//   uint16_t pixel_pair_index_location_in_buffer = pixel_index*sizeof(TransitionColourPairs);
+    switch (pixel_type) {
+      case ColourType::COLOUR_TYPE__RGB__ID:
+        memcpy(start_of_pixel_pair, starting_raw, 3);  // Set starting RGB
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGB - starting_colour    "), starting_raw, 3);
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGB - start_of_pixel_pair"), start_of_pixel_pair, 6);
+        break;
 
-// // ALOG_TST(PSTR("GetTransitionColourBuffer=%d \t%d"),pixel_index, pixel_pair_index_location_in_buffer );
-// ALOG_TST(PSTR("pixel_type=%d"),pixel_type );
+      case ColourType::COLOUR_TYPE__RGBW__ID:
+        memcpy(start_of_pixel_pair, starting_raw, 4);  // Set starting RGB + W1
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBW - starting_colour"), starting_raw, 4);
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBW - start_of_pixel_pair"), start_of_pixel_pair, 8);
+        break;
 
-    byte* c = nullptr;
-//   byte* start_of_pair = &buffer[pixel_pair_index_location_in_buffer];
+      case ColourType::COLOUR_TYPE__RGBCCT__ID:
+        memcpy(start_of_pixel_pair, starting_raw, 5);  // Set starting RGB + WW + CW
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBCCT - starting_colour"), starting_raw, 5);
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBCCT - start_of_pixel_pair"), start_of_pixel_pair, 10);
+        break;
 
-  // AddLog_Array(LOG_LEVEL_TEST, PSTR("Abuffer"), &start_of_pair[0] , 10);
-
-  switch(pixel_type)
-  {
-    default: return;
-    case ColourType::COLOUR_TYPE__RGB__ID:
-      pixel_start_i = pixel_index*6;
-      c = &buffer[pixel_start_i];
-      colour->StartingColour = RgbColor(c[0], c[1], c[2]);
-      colour->DesiredColour  = RgbColor(c[3], c[4], c[5]);
-      break;
-    case ColourType::COLOUR_TYPE__RGBW__ID:
-      pixel_start_i = pixel_index*8;
-      c = &buffer[pixel_start_i];
-      colour->StartingColour = RgbwColor(c[0], c[1], c[2], c[3]);
-      colour->DesiredColour  = RgbwColor(c[4], c[5], c[6], c[7]);
-      break;
-    case ColourType::COLOUR_TYPE__RGBCCT__ID:
-      pixel_start_i = pixel_index*10;
-      c = &buffer[pixel_start_i];
-      colour->StartingColour = RgbcctColor(c[0], c[1], c[2], c[3], c[4]);
-      colour->DesiredColour  = RgbcctColor(c[5], c[6], c[7], c[8], c[9]);
-    break;
+      default:
+        break;
+    }
   }
-
-// ALOG_TST(PSTR("colour->StartingColour=%d,%d,%d,%d,%d"),colour->StartingColour.R,colour->StartingColour.G,colour->StartingColour.B,colour->StartingColour.WC,colour->StartingColour.WW);
-// ALOG_TST(PSTR("colour->DesiredColour=%d,%d,%d,%d,%d"),colour->DesiredColour.R,colour->DesiredColour.G,colour->DesiredColour.B,colour->DesiredColour.WC,colour->DesiredColour.WW);
-
-      
-  // AddLog_Array(LOG_LEVEL_TEST, PSTR("Abuffer"), &start_of_pair[pixel_pair_index_location_in_buffer    ] , 10);
-
-  // ALOG_TST(PSTR("GET DesiredColour[%d] = %d,%d,%d,%d,%d"), 
-  //   pixel_index,
-  //   colour->DesiredColour.R,
-  //   colour->DesiredColour.G,
-  //   colour->DesiredColour.B,
-  //   colour->DesiredColour.WW,
-  //   colour->DesiredColour.WC
-  // );
-
-
-  return ;
-
-
-} // end function
+}
 
 
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+void mAnimatorLight::SetTransitionColourBuffer_DesiredColour(
+  byte* buffer, 
+  uint16_t buflen, 
+  uint16_t pixel_index, 
+  ColourType pixel_type, 
+  const RgbcctColor& desired_colour  // Use reference for efficiency
+) {
+  if(buffer == nullptr) return;
 
+  uint8_t pixel_width = GetSizeOfPixel(pixel_type);
+
+  uint16_t pixel_start_i = pixel_index * pixel_width * 2;  // Dynamically calculate pixel size
+
+  if(pixel_start_i + pixel_width <= buflen) {
+    byte* start_of_pixel_pair = &buffer[pixel_start_i];
+
+    const uint8_t* desired_raw = desired_colour.getData();  // Get raw buffer
+
+    switch(pixel_type) {
+      default:
+      case ColourType::COLOUR_TYPE__RGB__ID:
+        // Copy desired RGB starting from the 3rd byte
+        memcpy(&start_of_pixel_pair[3], desired_raw, 3); 
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGB - desired            "), desired_raw, 3);
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGB - start_of_pixel_pair"), start_of_pixel_pair, 6);
+        break;
+
+      case ColourType::COLOUR_TYPE__RGBW__ID:
+        // Copy desired RGB + W1 starting from the 4th byte
+        memcpy(&start_of_pixel_pair[4], desired_raw, 4); 
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBW - desired"), desired_raw, 4);
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBW - start_of_pixel_pair"), start_of_pixel_pair, 8);
+        break;
+
+      case ColourType::COLOUR_TYPE__RGBCCT__ID:
+        // Copy desired RGB + WW + CW starting from the 5th byte
+        memcpy(&start_of_pixel_pair[5], desired_raw, 5); 
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBCCT - desired"), desired_raw, 5);
+        // AddLog_Array(LOG_LEVEL_ERROR, PSTR("RGBCCT - start_of_pixel_pair"), start_of_pixel_pair, 10);
+        break;
+    }
+    
+    // AddLog_Array_Block(LOG_LEVEL_TEST, PSTR("updated"), buffer, 30, 6, true);
+  }
+}
 
 
 mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE)
@@ -2294,19 +2182,23 @@ mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_
  */
 void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
 {
-  for(int pixel=0;
-          pixel<SEGMENT.virtualLength();
-          pixel++
-  ){
-    SetTransitionColourBuffer_StartingColour( SEGMENT.Data(), 
-                                              SEGMENT.DataLength(),
-                                              pixel, 
-                                              SEGMENT.colour_type__used_in_effect_generate, 
-                                              SEGMENT.GetPixelColor(pixel)
-                                            );
+
+  // Cache the values that don’t change inside the loop
+  byte* segmentData = SEGMENT.Data();
+  uint16_t segmentDataLength = SEGMENT.DataLength();
+  auto colourTypeUsed = SEGMENT.colour_type__used_in_effect_generate;
+  int segmentLength = SEGMENT.virtualLength();  // Cache virtual length as well
+
+  // Retrieve the pixel color and update the transition buffer
+  RgbcctColor pixelColor;  // Declared outside the loop to avoid repeated construction/destruction
+  for (int pixel = 0; pixel < segmentLength; pixel++) {
+    pixelColor = SEGMENT.GetPixelColor(pixel);  // Just assign a new value each iteration
+    SetTransitionColourBuffer_StartingColour(segmentData, segmentDataLength, pixel, colourTypeUsed, pixelColor);
   }
 
 }
+
+
 
 void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_WithFade(uint8_t fade)
 {
@@ -3736,9 +3628,9 @@ void mAnimatorLight::finalizeInit(void)
       continue; // continue breaks one loop occurance only (unlike break)
     }
 
-    if (bus->getStart() + bus->getLength() > MAX_LEDS)
+    if (bus->getStart() + bus->getLength() > PIXEL_RANGE_LIMIT)
     {
-      DEBUG_PRINTF("bus->getStart() + bus->getLength() > MAX_LEDS\n\r");
+      DEBUG_PRINTF("bus->getStart() + bus->getLength() > PIXEL_RANGE_LIMIT MAX_LEDS\n\r");
       break;
     }
     //RGBW mode is enabled if at least one of the strips is RGBW
@@ -3836,29 +3728,42 @@ uint32_t mAnimatorLight::getPixelColor(uint16_t i)
 void IRAM_ATTR mAnimatorLight::setPixelColor_Rgbcct(int i, RgbcctColor col)
 {
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-  ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
+  ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, col.R, col.G, col.B);
   #endif 
-  if (i >= _length) return;
+  if (i >= _length)
+  {
+    ALOG_INF(PSTR("i len %d %d"),i,_length);
+    return;
+  }
   if (i < customMappingSize)
   {
+    ALOG_INF(PSTR("setPixelColor customMappingSize %d -> %d"), i, customMappingSize);
     // ALOG_INF(PSTR("setPixelColor customMappingTable %d -> %d"), i, customMappingTable[i]);
     i = customMappingTable[i];
   }
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-  ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
+  ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, col.R, col.G, col.B);
   #endif
+
+  // ALOG_INF(PSTR("busnum %d"), pCONT_iLight->bus_manager->getNumBusses());
+
   pCONT_iLight->bus_manager->setPixelColor(i, col);
 }
 
 RgbcctColor mAnimatorLight::getPixelColor_Rgbcct(uint16_t i)
 {
-  if (i >= _length) return RgbcctColor((uint32_t)0);
-  if (i < customMappingSize) i = customMappingTable[i];
-  RgbcctColor c = pCONT_iLight->bus_manager->getPixelColor(i);
-  // if(i==0 || i==1)
-  //   c.debug_print("getPixelColor");
-  return c;
+  if (i >= _length) {
+    return RgbcctColor((uint32_t)0);  // Early exit if index exceeds length
+  }
+  
+  if (i < customMappingSize) {
+    i = customMappingTable[i];  // Update index if it's within custom mapping size
+  }
+  
+  // Directly return the color retrieved from the bus manager
+  return pCONT_iLight->bus_manager->getPixelColor(i);
 }
+
 
 //DISCLAIMER
 //The following function attemps to calculate the current LED power usage,
@@ -4546,7 +4451,7 @@ uint8_t mAnimatorLight::Segment::GetPaletteDiscreteWidth()
  */
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-IRAM_ATTR #error
+IRAM_ATTR
 #endif 
 mAnimatorLight::GetColourFromUnloadedPalette2(
   uint16_t palette_id,
@@ -4557,6 +4462,12 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   bool flag_request_is_for_full_visual_output
 ){
+
+  /**
+   * @brief Load is not always required, some palettes are read directly so the Load can be skipped. 
+   * So since this, actually leads directly into the preload function, I should make another that combines
+   * 
+   */
 
 
   // ALOG_INF(PSTR("Aflag_crgb_exact_colour=%d"), flag_crgb_exact_colour);
@@ -4582,6 +4493,65 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
   return colour;
 
 }
+
+RgbcctColor 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR
+#endif 
+mAnimatorLight::GetColourFromUnloadedPalette3(
+  uint16_t palette_id,
+  uint16_t _pixel_position,
+  bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  bool     flag_crgb_exact_colour,
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  bool     flag_request_is_for_full_visual_output
+){
+  /**
+   * @brief Directly handle certain palette types that don't need loading.
+   * These palette types are handled directly, bypassing the LoadPalette function.
+   */
+  if (
+    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_COLOUR_LENGTH__ID))
+  ) {
+    // These palettes do not require loading into RAM. Directly call GetColourFromPreloadedPaletteBuffer_2023
+    return mPaletteI->GetColourFromPreloadedPaletteBuffer_2023(
+      palette_id,
+      nullptr, // No buffer required for these types
+      _pixel_position,
+      encoded_value,
+      flag_spanned_segment,
+      flag_wrap_hard_edge,
+      flag_crgb_exact_colour,
+      flag_request_is_for_full_visual_output
+    );
+  }
+
+  /**
+   * @brief Load is required for other palette types, so we call LoadPalette
+   */
+  mPaletteLoaded palette_container_temp = mPaletteLoaded();
+  SEGMENT.LoadPalette(palette_id, &palette_container_temp);
+  
+  return mPaletteI->GetColourFromPreloadedPaletteBuffer_2023(
+    palette_id,
+    &palette_container_temp.pData[0],
+    _pixel_position,
+    encoded_value,
+    flag_spanned_segment,
+    flag_wrap_hard_edge,
+    flag_crgb_exact_colour,
+    flag_request_is_for_full_visual_output
+  );
+}
+
+
+
+
 
 
 void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool segment_brightness_needs_applied)
@@ -4612,6 +4582,8 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, uint3
 void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, bool flag_brightness_already_applied)
 {
 
+  DEBUG_TIME__START
+
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
   ALOG_INF(PSTR("SetPixelColor %d"), indexPixel);
   #endif
@@ -4620,53 +4592,22 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
   indexPixel &= 0xFFFF;
   if (indexPixel >= virtualLength() || indexPixel<0) return;  // if pixel would fall out of segment just exit
 
-  /**
-   * @brief 
-   * 2023 method had the original WLED effects request brightness applied at the end, however, this is adding function call complexity
-   * 2024 version will now assume brightness must always be applied (and keeps WLED effects closer to original), and my own methods must report "brightness_ALREADY_applied" and thus the brightness will not be applied twice
-   *
-   * DEFAULT: brightness is applied
-   **/
-  if(flag_brightness_already_applied == false)
-  {
-
-    // if(indexPixel==0) ALOG_INF(PSTR("Applying brightness here"));
-    
-    /**
-     * @brief Apply "GLOBAL" brightness to the colour
-     * 
-     */
+  // Apply brightness if needed
+  if (!flag_brightness_already_applied) {
     uint8_t brightness = pCONT_iLight->getBriRGB_Global();
 
-    /**
-     * @brief Apply "SEGMENT" brightness to the colour ALSO (rescale global brightness value, this is similar to WLED opacity)
-     * 
-     */
-    if(_brightness_rgb!=255)
-    {
+    if (_brightness_rgb != 255) {
       brightness = scale8(brightness, _brightness_rgb);
     }
 
-    // Apply global brightness
-    color_internal.R  = scale8(color_internal.R,  brightness);
-    color_internal.G  = scale8(color_internal.G,  brightness);
-    color_internal.B  = scale8(color_internal.B,  brightness);
+    // Apply brightness to all channels
+    color_internal.R = scale8(color_internal.R, brightness);
+    color_internal.G = scale8(color_internal.G, brightness);
+    color_internal.B = scale8(color_internal.B, brightness);
     color_internal.W1 = scale8(color_internal.W1, brightness);
     color_internal.W2 = scale8(color_internal.W2, brightness);
-    
-  }
-  else
-  {    
-    // if(indexPixel==0) ALOG_INF(PSTR("NOOOOOOOOOOOOOOOT Applying brightness here"));
   }
 
-  /**
-   * @brief If we drop into the WLED style functions, then the customMappingTable will be applied
-   * 
-   */
-
-  // ALOG_INF(PSTR("is2D() %d"), is2D());
-  // ALOG_INF(PSTR("map1D2D %d"), map1D2D);
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   uint32_t col = color_internal.getU32();
     if (is2D()) {
@@ -4714,99 +4655,111 @@ void IRAM_ATTR mAnimatorLight::Segment::SetPixelColor(uint16_t indexPixel, Rgbcc
     }
   #endif
 
-
-
-  // if(indexPixel==0) ALOG_INF(PSTR("flag_brightness_already_applied %d"), flag_brightness_already_applied);
-
-// color_internal = RgbcctColor(255,255,255,255,255);
-
-  /**
-   * @brief Apply Pixel hardware colour mapping from internal to hardware order
-   **/
-  RgbcctColor colour_hardware = color_internal; // Copy
-    
-  uint16_t physical_indexPixel = indexPixel; // Going from virtual/internal index to physical/external index
-  uint16_t segment_length      = length();
-
-  /**
-   * @brief Modify pixel index if required: start, grouping, spacing, offset
-   **/
-  physical_indexPixel = physical_indexPixel * groupLength();
-  if (reverse) { // is segment reversed?
-    if (mirror) { // is segment mirrored?
-      physical_indexPixel = (segment_length - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
-    } else {
-      physical_indexPixel = (segment_length - 1) - physical_indexPixel;
+  // Modify pixel index if required: start, grouping, spacing, offset
+  indexPixel *= groupLength();
+  if (reverse) {  // If segment is reversed
+    if (mirror) {  // Mirrored reversal
+      indexPixel = (length() - 1) / 2 - indexPixel;  // Only need to index half the pixels
+    } else {  // Normal reversal
+      indexPixel = (length() - 1) - indexPixel;
     }
   }
-  physical_indexPixel += start;
+  indexPixel += start;
 
   #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  ALOG_INF( PSTR("pIndex=%d,%d"), physical_indexPixel-start, physical_indexPixel);
-  #endif // ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+  ALOG_INF(PSTR("pIndex=%d"), indexPixel);
+  #endif
 
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__DECIMATE_V2
 
-
-
-
-  /**
-   * @brief Set all pixels in the group
-   **/
-  for (uint16_t j = 0; j < grouping; j++) 
+  // New version 2 Method - Decimate with Grouping
+  // Set all pixels in the group
+  for (uint16_t group_i = 0; group_i < grouping; group_i++) 
   {
+    uint16_t indexSet = indexPixel + ((reverse) ? -group_i : group_i);
 
-    uint16_t indexSet = physical_indexPixel + ((reverse) ? -j : j);
-    
-    if (
-      indexSet >= start && 
-      indexSet <  stop
-    ){
-
+    if (indexSet >= start && indexSet < stop) 
+    {
+      // Handle mirroring of the segment if enabled
       if (mirror) 
-      { //set the corresponding mirrored pixel
-        uint16_t indexMir = stop - indexSet + start - 1;          
-        indexMir += offset; // offset/phase
-
-        if (indexMir >= stop) indexMir -= segment_length; // Wrap
-        pCONT_lAni->setPixelColor_Rgbcct(indexMir, colour_hardware);
-
-      }
-      indexSet += offset; // offset/phase
-
-      if (indexSet >= stop) indexSet -= segment_length; // Wrap
-      pCONT_lAni->setPixelColor_Rgbcct(indexSet, colour_hardware);
-      
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-
-      
-
-      // Replicate for virtuallength*decimate
-      for(uint8_t d=0;d<decimate;d++) 
       {
+        uint16_t indexMir = stop - indexSet + start - 1;          
+        indexMir += offset;
+        if (indexMir >= stop) indexMir -= length();  // Wrap around
+        pCONT_lAni->setPixelColor_Rgbcct(indexMir, color_internal);
+      }
 
-        // tmp fix, decimate and grouping on together breaks it
-        if(j>0)
+      // Apply offset and wrap around if necessary
+      indexSet += offset;
+      if (indexSet >= stop) indexSet -= length();  // Wrap around
+      
+      // Set the pixel color for the current index
+      pCONT_lAni->setPixelColor_Rgbcct(indexSet, color_internal);
+
+      // Decimate and handle pixel replication
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      for (uint8_t d = 0; d < decimate; d++) 
+      {
+        // Decimate logic takes grouping into account now: 
+        // We apply decimation after setting the entire group
+        uint16_t decimate_offset = d * (grouping * virtualLength());
+
+        // Calculate the decimated index based on grouping
+        uint16_t new_indexSet = indexSet + decimate_offset;
+
+        // Ensure the new index is within bounds before setting the color
+        if (new_indexSet >= start && new_indexSet < stop) 
         {
-          break; //dont apply decimate when grouping is on
-        }
-
-        uint16_t new_indexSet = indexSet + (d*virtualLength());
-       // recheck still within range
-       if (
-          new_indexSet >= start && 
-          new_indexSet <  stop
-        ){
-          // ALOG_INF(PSTR("new_indexSet d%d=%d"), d, new_indexSet);
-          pCONT_lAni->setPixelColor_Rgbcct(new_indexSet, colour_hardware);
+          // Apply decimation to the grouped pixels
+          pCONT_lAni->setPixelColor_Rgbcct(new_indexSet, color_internal);
         }
       }
-      #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      #endif
     }
-  
-    // ALOG_INF(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
-
   }
 
+  #else // Working Version 1 Method
+
+  // Set all pixels in the group
+  for (uint16_t group_i = 0; group_i < grouping; group_i++) 
+  {
+    uint16_t indexSet = indexPixel + ((reverse) ? -group_i : group_i);
+
+    if (indexSet >= start && indexSet < stop) 
+    {
+      if (mirror) 
+      {
+        uint16_t indexMir = stop - indexSet + start - 1;          
+        indexMir += offset;
+        if (indexMir >= stop) indexMir -= length();  // Wrap
+        pCONT_lAni->setPixelColor_Rgbcct(indexMir, color_internal);
+      }
+
+      indexSet += offset;
+      if (indexSet >= stop) indexSet -= length();  // Wrap
+
+      pCONT_lAni->setPixelColor_Rgbcct(indexSet, color_internal);
+
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      for (uint8_t d = 0; d < decimate; d++) 
+      {
+        if (group_i > 0) break;  // Skip decimate when grouping is on
+
+        uint16_t new_indexSet = indexSet + (d * virtualLength());
+        if (new_indexSet >= start && new_indexSet < stop) 
+        {
+          pCONT_lAni->setPixelColor_Rgbcct(new_indexSet, color_internal);
+        }
+      }
+      #endif
+    }
+  }
+   
+  ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
+ 
+  #endif
+  
+  DEBUG_TIME__SHOW
 
 }
 
@@ -4822,9 +4775,7 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment::GetPixelColor(uint16_t indexPixel
   int vStrip = indexPixel>>16;
   indexPixel &= 0xFFFF;
 
-DEBUG_LINE_HERE3
-
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (is2D()) {DEBUG_LINE_HERE3
     uint16_t vH = virtualHeight();  // segment height in logical pixels
     uint16_t vW = virtualWidth();
@@ -4846,32 +4797,29 @@ DEBUG_LINE_HERE3
     ALOG_ERR(PSTR("No map1D2D set"));
     return RgbcctColor((uint32_t)0);
   }
-#endif
-DEBUG_LINE_HERE3
-  // Custom mapping
-  // if (leds) return RGBW32(leds[i].r, leds[i].g, leds[i].b, 0);
+  #endif
 
-  uint16_t physical_indexPixel = indexPixel;
+  // Custom mapping logic and physical index calculation
+  uint16_t physical_indexPixel = reverse ? virtualLength() - indexPixel - 1 : indexPixel;
 
-  
-  if (reverse) physical_indexPixel = virtualLength() - physical_indexPixel - 1;
   physical_indexPixel *= groupLength();
-  physical_indexPixel += start;
-  /* offset/phase */
-  physical_indexPixel += offset;
-  if (physical_indexPixel >= stop) physical_indexPixel -= length();
+  physical_indexPixel += start + offset;
   
+  // Adjust if beyond stop
+  if (physical_indexPixel >= stop) {
+    physical_indexPixel -= length();
+  }
 
-  /**
-   * @brief To be fixed, my way maintains RGBCCT but this losses the CCT part. Functions need updated.
-   * 
-   */
+  #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
   RgbcctColor colour_hardware = pCONT_lAni->getPixelColor_Rgbcct(physical_indexPixel);
-  // RgbcctColor colour_hardware = pCONT_lAni->getPixelColor(physical_indexPixel);//   pCONT_iLight->bus_manager->getPixelColor(physical_indexPixel);
-  
-  // ALOG_DBM(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
-
+  ALOG_DBG(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"), 
+    physical_indexPixel, 
+    colour_hardware.R, colour_hardware.G, colour_hardware.B, 
+    colour_hardware.W1, colour_hardware.W2);
   return colour_hardware;
+  #else
+  return pCONT_lAni->getPixelColor_Rgbcct(physical_indexPixel);
+  #endif
 
 }
 
@@ -6035,7 +5983,7 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
 
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

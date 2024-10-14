@@ -87,7 +87,7 @@
 //  * 
 //  */
 // uint8_t leds_present = 0;                   // Max number of LED supported
-// uint8_t led_inverted = 0;                   // LED inverted flag (1 = (0 = On, 1 = Off))
+// uint8_t inverted_bitmask = 0;                   // LED inverted flag (1 = (0 = On, 1 = Off))
 // uint8_t led_power = 0;                      // LED power state
 // uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = On, 1 = Off))
 

@@ -259,15 +259,23 @@ typedef unsigned long power_t;              // Power (Relay) type
  * Constants
 \*********************************************************************************************/
 
+/**
+ * @brief 
+ * I need to recheck these sizes match my GPIO enums, as its causing issues
+ * 
+ */
+
+
 const uint8_t MAX_RELAYS_SET = 32;          // Max number of relays
 const uint8_t MAX_KEYS_SET = 32;            // Max number of keys
 // Changes to the following MAX_ defines will impact settings layout
 const uint8_t MAX_INTERLOCKS_SET = 14;      // Max number of interlock groups (MAX_RELAYS_SET / 2)
 const uint8_t MAX_SWITCHES_SET = 28;        // Max number of switches
+const uint8_t MAX_DIGITAL_LEDS = 8;                 // MAX_LEDS Max number of leds
 const uint8_t MAX_PWMS_LEGACY = 5;          // Max number of PWM channels in first settings block - Legacy limit for ESP8266, but extended for ESP32 (see below)
 #ifdef ESP32                                // Max number of PWM channels (total including extended) - ESP32 only
   #if CONFIG_IDF_TARGET_ESP32
-  const uint8_t MAX_PWMS = 16;              // ESP32: 16 ledc PWM channels in total - TODO for now
+  const uint8_t MAX_PWMS = 5;              // ESP32: 16 ledc PWM channels in total - TODO for now
   #elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
   const uint8_t MAX_PWMS = 8;               // ESP32S2/S3: 8 ledc PWM channels in total
   #elif CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
@@ -370,7 +378,7 @@ const uint32_t START_VALID_UTC_TIME = 1697014158;  // Time is synced and after 2
 #define STR(x) STR_HELPER(x)
 #endif
 
-enum LedStateOptions {LED_OFF, LED_POWER, LED_MQTTSUB, LED_POWER_MQTTSUB, LED_MQTTPUB, LED_POWER_MQTTPUB, LED_MQTT, LED_POWER_MQTT, MAX_LED_OPTION};
+enum LedStateOptions {LED_OFF1, LED_POWER, LED_MQTTSUB, LED_POWER_MQTTSUB, LED_MQTTPUB, LED_POWER_MQTTPUB, LED_MQTT, LED_POWER_MQTT, MAX_LED_OPTION};
 
 // Change these to have matching words
 enum ExecuteCommandPowerOptions { POWER_OFF, POWER_ON, POWER_TOGGLE, POWER_BLINK, POWER_BLINK_STOP,
@@ -597,6 +605,9 @@ struct SystemName{
   char          friendly[50]; // Used in titles, set by templates "FriendlyName"
   char          device[50];   // USed as mqtt topic by default, set by templates "Name"
 };
+#ifdef DEVICENAME_CTR
+static_assert(sizeof(DEVICENAME_CTR) - 1 <= 50, "DEVICENAME_CTR exceeds max length");
+#endif 
 
 
 #define PARAM8_SIZE 18            // Number of param bytes (SetOption)

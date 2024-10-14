@@ -885,7 +885,7 @@
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
 
-// } //end "MQTTHandler_Init"
+// } 
 
 
 // void mTankVolumeUltrasonic::MQTTHandler_RefreshAll(){
@@ -896,7 +896,7 @@
 //   mqtthandler_furnace_ifchanged.flags.SendNow = true;
 //   mqtthandler_furnace_teleperiod.flags.SendNow = true;
 
-// } //end "MQTTHandler_Init"
+// } 
 
 
 // void mTankVolumeUltrasonic::MQTTHandler_Rate(){

@@ -191,11 +191,11 @@
 // #define NTP_PACKET_SIZE 48
 
 //maximum number of rendered LEDs - this does not have to match max. physical LEDs, e.g. if there are virtual busses 
-#ifndef MAX_LEDS
+#ifndef MAX_LEDS_NEO
 #ifdef ESP8266
-#define MAX_LEDS 1664 //can't rely on memory limit to limit this to 1600 LEDs
+#define MAX_LEDS_NEO 1664 //can't rely on memory limit to limit this to 1600 LEDs
 #else
-#define MAX_LEDS 8192
+#define MAX_LEDS_NEO 8192
 #endif
 #endif
 
@@ -212,7 +212,7 @@
 #endif
 
 #ifndef MAX_LEDS_PER_BUS
-#define MAX_LEDS_PER_BUS 2048   // may not be enough for fast LEDs (i.e. APA102)
+#define MAX_LEDS_PER_BUS 4000   // may not be enough for fast LEDs (i.e. APA102)
 #endif
 
 // string temp buffer (now stored in stack locally)

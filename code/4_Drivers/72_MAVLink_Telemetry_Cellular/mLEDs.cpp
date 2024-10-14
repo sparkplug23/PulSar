@@ -84,17 +84,17 @@
 //     if(pCONT_pins->PinUsed(GPIO_LED1_ID, ii))
 //     {
 //       leds[settings.leds_found].pin = pCONT_pins->GetPin(GPIO_LED1_ID, ii);
-//       bitSet(led_inverted, 0);
+//       bitSet(inverted_bitmask, 0);
 //       pinMode(leds[settings.leds_found].pin, OUTPUT); // Note: GPIO16/D0 inversion is pulldown, not up
-//       digitalWrite(leds[settings.leds_found].pin, bitRead(led_inverted, ii));
+//       digitalWrite(leds[settings.leds_found].pin, bitRead(inverted_bitmask, ii));
 //       if(settings.leds_found++ >= MAX_LEDS){ break; }
 //     }else
 //     if(pCONT_pins->PinUsed(GPIO_LED1_INV_ID, ii))
 //     {
 //       leds[settings.leds_found].pin = pCONT_pins->GetPin(GPIO_LED1_INV_ID, ii);
-//       bitSet(led_inverted, 1);
+//       bitSet(inverted_bitmask, 1);
 //       pinMode(leds[settings.leds_found].pin, OUTPUT); // Note: GPIO16/D0 inversion is pulldown, not up
-//       digitalWrite(leds[settings.leds_found].pin, bitRead(led_inverted, ii));
+//       digitalWrite(leds[settings.leds_found].pin, bitRead(inverted_bitmask, ii));
 //       if(settings.leds_found++ >= MAX_LEDS){ break; }
 //     }
 //   }
@@ -150,7 +150,7 @@
 
 //  bool mLEDs::GetState(uint8_t index)
 //   {
-//     return digitalRead(bitRead(led_inverted, index)==1?0:1); // inverted, ON when low
+//     return digitalRead(bitRead(inverted_bitmask, index)==1?0:1); // inverted, ON when low
 //   };
 
 //   void mLEDs::CommandSet_LED_Power(uint8_t state, uint8_t index)
@@ -173,7 +173,7 @@
 //      * 
 //      */
     
-//         digitalWrite(pin_v, state);//bitRead(led_inverted, state)?0:1); // inverted, ON when low
+//         digitalWrite(pin_v, state);//bitRead(inverted_bitmask, state)?0:1); // inverted, ON when low
 //   };
 
 
@@ -210,11 +210,11 @@
 // // // #endif //USE_LIGHT
 
 // // #ifdef ESP8266
-// //       analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(pCONT_set->led_inverted, led) ? pCONT_set->Settings.pwm_range - pwm : pwm);
+// //       analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(pCONT_set->inverted_bitmask, led) ? pCONT_set->Settings.pwm_range - pwm : pwm);
       
 // // #endif // ESP8266
 // //     } else {
-// //       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
+// //       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->inverted_bitmask, led) ? !state : state);
 // //     }
 // //   }
 // // // #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
@@ -565,7 +565,7 @@
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
 //   ptr->ConstructJSON_function = &mLEDs::ConstructJSON_State;
 
-// } //end "MQTTHandler_Init"
+// } 
 
 
 // /**

@@ -109,7 +109,7 @@ void mButtons::Pre_Init(void)
   Button.used = 0;    
 
   // Lets check each type on their own, normal, inverted etc
-  for(uint8_t i=0;i<MAX_SWITCHES_SET;i++)
+  for(uint32_t i=0;i<MAX_KEYS_SET;i++)
   {
   
     int8_t pin = -1;
@@ -152,7 +152,7 @@ void mButtons::Pre_Init(void)
     }
     #endif // SOC_TOUCH_VERSION_1
     else{
-      ALOG_INF(PSTR(D_LOG_BUTTONS "%d None"), i);
+      ALOG_DBG(PSTR(D_LOG_BUTTONS "%d None"), i);
     }
 
     if(pin != -1)
@@ -607,7 +607,7 @@ void mButtons::ButtonHandler(void) {
         if (pCONT_set->Settings.flag_system.button_single) {                  // SetOption13 (0) - Allow only single button press for immediate action
           if (Button.hold_timer[button_index] == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button held for factor times longer
             snprintf_P(scmnd, sizeof(scmnd), PSTR("SetOption" "13 0"));  // Disable single press only
-            ALOG_INF(PSTR("ExecuteCommand(scmnd, SRC_BUTTON);"));
+            ALOG_INF(PSTR("button was held : ExecuteCommand(scmnd, SRC_BUTTON);"));
             pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, button_index, 2, button, INPUT_TYPE_SINGLE_HOLD_ID);    // ERROR - Not sure what this section will do, long press no multi?
           
           }
@@ -615,7 +615,7 @@ void mButtons::ButtonHandler(void) {
           if (Button.hold_timer[button_index] == loops_per_second * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button hold
             Button.press_counter[button_index] = 0;
             if (pCONT_set->Settings.flag3.mqtt_buttons) {              // SetOption73 (0) - Decouple button from relay and send just mqtt topic
-              ALOG_INF(PSTR("MqttButtonTopic(button_index +1, 3, 1);"));
+              ALOG_INF(PSTR("Decouple button from relay and send just mqtt topic MqttButtonTopic(button_index +1, 3, 1);"));
             } else {
               ALOG_INF(PSTR("SendKey(KEY_BUTTON, button_index +1, POWER_HOLD);"));  // Execute Hold command via MQTT if ButtonTopic is set
             }
@@ -633,7 +633,7 @@ void mButtons::ButtonHandler(void) {
               if ((Button.hold_timer[button_index] == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10)) {  // SetOption32 (40) - Button held for factor times longer
                 Button.press_counter[button_index] = 0;
                 snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_RESET " 1"));
-                ALOG_INF(PSTR("ExecuteCommand(scmnd, SRC_BUTTON);"));
+                ALOG_INF(PSTR("The tasmota way was this caused a system reset, I want to decouple : ExecuteCommand(scmnd, SRC_BUTTON);"));
                 // pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, TASK_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // Resetting command
                 
               }
@@ -690,7 +690,7 @@ void mButtons::ButtonHandler(void) {
 //                    }
                   if (!pCONT_set->Settings.flag3.mqtt_buttons) {       // SetOption73 - Detach buttons from relays and enable MQTT action state for multipress
                     if (Button.press_counter[button_index] == 1) {  // By default first press always send a TOGGLE (2)
-                      ALOG_INF(PSTR("ExecuteCommandPower(button_index + Button.press_counter[button_index], POWER_TOGGLE, SRC_BUTTON);"));
+                      ALOG_INF(PSTR("By default first press always send a TOGGLE (2) ExecuteCommandPower(button_index + Button.press_counter[button_index], POWER_TOGGLE, SRC_BUTTON);"));
                     } else {
                       SendKey(KEY_BUTTON, button_index +1, Button.press_counter[button_index] +9);    // 2,3,4 and 5 press send just the key value (11,12,13 and 14) for rules
                       // if (0 == button_index) {               // BUTTON1 can toggle up to 5 relays if present. If a relay is not present will send out the key value (2,11,12,13 and 14) for rules
@@ -841,7 +841,7 @@ void mButtons::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
   
-} //end "MQTTHandler_Init"
+} 
 
 #endif// USE_MODULE_NETWORK_MQTT
 

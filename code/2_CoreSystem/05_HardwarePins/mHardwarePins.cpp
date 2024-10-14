@@ -17,250 +17,250 @@
 GPIOViewer gpio_viewer;
 #endif
 
-const uint16_t mHardwarePins::GPIO_Function_EnabledList_IDs[] PROGMEM = {
-  GPIO_NONE_ID,           // Not used
-  GPIO_KEY1_ID,           // Buttons
-  GPIO_KEY1_NP_ID,
-  GPIO_KEY1_INV_ID,
-  GPIO_KEY1_INV_NP_ID,
-  GPIO_KEY2_ID,
-  GPIO_KEY2_NP_ID,
-  GPIO_KEY2_INV_ID,
-  GPIO_KEY2_INV_NP_ID,
-  GPIO_KEY3_ID,
-  GPIO_KEY3_NP_ID,
-  GPIO_KEY3_INV_ID,
-  GPIO_KEY3_INV_NP_ID,
-  GPIO_KEY4_ID,
-  GPIO_KEY4_NP_ID,
-  GPIO_KEY4_INV_ID,
-  GPIO_KEY4_INV_NP_ID,
-  GPIO_SWT1_ID,           // User connected external switches
-  GPIO_SWT1_NP_ID,
-  GPIO_SWT2_ID,
-  GPIO_SWT2_NP_ID,
-  GPIO_SWT3_ID,
-  GPIO_SWT3_NP_ID,
-  GPIO_SWT4_ID,
-  GPIO_SWT4_NP_ID,
-  GPIO_SWT5_ID,
-  GPIO_SWT5_NP_ID,
-  GPIO_SWT6_ID,
-  GPIO_SWT6_NP_ID,
-  GPIO_SWT7_ID,
-  GPIO_SWT7_NP_ID,
-  GPIO_SWT8_ID,
-  GPIO_SWT8_NP_ID,
-  GPIO_REL1_ID,           // Relays
-  GPIO_REL1_INV_ID,
-  GPIO_REL2_ID,
-  GPIO_REL2_INV_ID,
-  GPIO_REL3_ID,
-  GPIO_REL3_INV_ID,
-  GPIO_REL4_ID,
-  GPIO_REL4_INV_ID,
-  GPIO_REL5_ID,
-  GPIO_REL5_INV_ID,
-  GPIO_REL6_ID,
-  GPIO_REL6_INV_ID,
-  GPIO_REL7_ID,
-  GPIO_REL7_INV_ID,
-  GPIO_REL8_ID,
-  GPIO_REL8_INV_ID,
-  GPIO_LED1_ID,           // Leds
-  GPIO_LED1_INV_ID,
-  GPIO_LED2_ID,
-  GPIO_LED2_INV_ID,
-  GPIO_LED3_ID,
-  GPIO_LED3_INV_ID,
-  GPIO_LED4_ID,
-  GPIO_LED4_INV_ID,
-  GPIO_PWM1_ID,           // RGB   Red   or C  Cold White
-  GPIO_PWM1_INV_ID,
-  GPIO_PWM2_ID,           // RGB   Green or CW Warm White
-  GPIO_PWM2_INV_ID,
-  GPIO_PWM3_ID,           // RGB   Blue
-  GPIO_PWM3_INV_ID,
-  GPIO_PWM4_ID,           // RGBW  (Cold) White
-  GPIO_PWM4_INV_ID,
-  GPIO_PWM5_ID,           // RGBCW Warm White
-  GPIO_PWM5_INV_ID,
-  GPIO_CNTR1_ID,          // Counters
-  GPIO_CNTR1_NP_ID,
-  GPIO_CNTR2_ID,
-  GPIO_CNTR2_NP_ID,
-  GPIO_CNTR3_ID,
-  GPIO_CNTR3_NP_ID,
-  GPIO_CNTR4_ID,
-  GPIO_CNTR4_NP_ID,
-  GPIO_HWSERIAL0_TX_ID,            // Serial interface
-  GPIO_HWSERIAL0_RX_ID,            // Serial interface
-  GPIO_HWSERIAL1_TX_ID,            // Serial interface
-  GPIO_HWSERIAL1_RX_ID,            // Serial interface
-  GPIO_HWSERIAL2_TX_ID,            // Serial interface
-  GPIO_HWSERIAL2_RX_ID,            // Serial interface
-  GPIO_SWSERIAL0_TX_ID,            // Serial interface
-  GPIO_SWSERIAL0_RX_ID,            // Serial interface
-#ifdef USE_MODULE_CORE_I2C
-  GPIO_I2C_SCL_ID,        // I2C SCL
-  GPIO_I2C_SDA_ID,        // I2C SDA
-#endif
-#ifdef USE_SPI
-  GPIO_SPI_CS_ID,         // SPI Chip Select
-  GPIO_SPI_DC_ID,         // SPI Data Direction
-  GPIO_SSPI_MISO_ID,      // Software SPI Master Input Slave Output
-  GPIO_SSPI_MOSI_ID,      // Software SPI Master Output Slave Input
-  GPIO_SSPI_SCLK_ID,      // Software SPI Serial Clock
-  GPIO_SSPI_CS_ID,        // Software SPI Chip Select
-  GPIO_SSPI_DC_ID,        // Software SPI Data or Command
-#endif
-#ifdef USE_DISPLAY
-  GPIO_BACKLIGHT_ID,      // Display backlight control
-#endif
-#ifdef USE_MODULE_DRIVER_BUZZER
-  GPIO_BUZZER_ID,         // Buzzer
-  GPIO_BUZZER_INV_ID,     // Inverted buzzer
-#endif
-#ifdef USE_MODULE_SENSORS_DHT
-  GPIO_DHT11_1OF2_ID,          // DHT11
-  GPIO_DHT11_2OF2_ID,          // DHT11
-  GPIO_DHT22_1OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
-  GPIO_DHT22_2OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
-#endif
-//#if defined(USE_DS18B20) || defined(USE_DS18x20) || defined(USE_DS18x20_LEGACY)
-  GPIO_DSB_1OF2_ID,            // Single wire DS18B20 or DS18S20
-  GPIO_DSB_2OF2_ID,            // Single wire DS18B20 or DS18S20
-//#endif
-#ifdef USE_WS2812
-  GPIO_RGB_DATA_ID,         // WS2812 Led string
-  GPIO_RGB_CLOCK_ID,         // WS2812 Led string
-#endif
-#ifdef USE_IR_REMOTE
-  GPIO_IRSEND_ID,         // IR remote
-#ifdef USE_IR_RECEIVE
-  GPIO_IRRECV_ID,         // IR receiver
-#endif
-#endif
-#ifdef USE_RC_SWITCH
-  GPIO_RFSEND_ID,         // RF transmitter
-  GPIO_RFRECV_ID,         // RF receiver
-#endif
-// #ifdef USE_RF_SENSOR
-  GPIO_RF_433MHZ_RX_ID,      // Rf receiver with sensor decoding
+// const uint16_t mHardwarePins::GPIO_Function_EnabledList_IDs[] PROGMEM = {
+//   GPIO_NONE_ID,           // Not used
+//   GPIO_KEY1_ID,           // Buttons
+//   GPIO_KEY1_NP_ID,
+//   GPIO_KEY1_INV_ID,
+//   GPIO_KEY1_INV_NP_ID,
+//   GPIO_KEY2_ID,
+//   GPIO_KEY2_NP_ID,
+//   GPIO_KEY2_INV_ID,
+//   GPIO_KEY2_INV_NP_ID,
+//   GPIO_KEY3_ID,
+//   GPIO_KEY3_NP_ID,
+//   GPIO_KEY3_INV_ID,
+//   GPIO_KEY3_INV_NP_ID,
+//   GPIO_KEY4_ID,
+//   GPIO_KEY4_NP_ID,
+//   GPIO_KEY4_INV_ID,
+//   GPIO_KEY4_INV_NP_ID,
+//   GPIO_SWT1_ID,           // User connected external switches
+//   GPIO_SWT1_NP_ID,
+//   GPIO_SWT2_ID,
+//   GPIO_SWT2_NP_ID,
+//   GPIO_SWT3_ID,
+//   GPIO_SWT3_NP_ID,
+//   GPIO_SWT4_ID,
+//   GPIO_SWT4_NP_ID,
+//   GPIO_SWT5_ID,
+//   GPIO_SWT5_NP_ID,
+//   GPIO_SWT6_ID,
+//   GPIO_SWT6_NP_ID,
+//   GPIO_SWT7_ID,
+//   GPIO_SWT7_NP_ID,
+//   GPIO_SWT8_ID,
+//   GPIO_SWT8_NP_ID,
+//   GPIO_REL1_ID,           // Relays
+//   GPIO_REL1_INV_ID,
+//   GPIO_REL2_ID,
+//   GPIO_REL2_INV_ID,
+//   GPIO_REL3_ID,
+//   GPIO_REL3_INV_ID,
+//   GPIO_REL4_ID,
+//   GPIO_REL4_INV_ID,
+//   GPIO_REL5_ID,
+//   GPIO_REL5_INV_ID,
+//   GPIO_REL6_ID,
+//   GPIO_REL6_INV_ID,
+//   GPIO_REL7_ID,
+//   GPIO_REL7_INV_ID,
+//   GPIO_REL8_ID,
+//   GPIO_REL8_INV_ID,
+//   GPIO_LED1_ID,           // Leds
+//   GPIO_LED1_INV_ID,
+//   GPIO_LED2_ID,
+//   GPIO_LED2_INV_ID,
+//   GPIO_LED3_ID,
+//   GPIO_LED3_INV_ID,
+//   GPIO_LED4_ID,
+//   GPIO_LED4_INV_ID,
+//   GPIO_PWM1_ID,           // RGB   Red   or C  Cold White
+//   GPIO_PWM1_INV_ID,
+//   GPIO_PWM2_ID,           // RGB   Green or CW Warm White
+//   GPIO_PWM2_INV_ID,
+//   GPIO_PWM3_ID,           // RGB   Blue
+//   GPIO_PWM3_INV_ID,
+//   GPIO_PWM4_ID,           // RGBW  (Cold) White
+//   GPIO_PWM4_INV_ID,
+//   GPIO_PWM5_ID,           // RGBCW Warm White
+//   GPIO_PWM5_INV_ID,
+//   GPIO_CNTR1_ID,          // Counters
+//   GPIO_CNTR1_NP_ID,
+//   GPIO_CNTR2_ID,
+//   GPIO_CNTR2_NP_ID,
+//   GPIO_CNTR3_ID,
+//   GPIO_CNTR3_NP_ID,
+//   GPIO_CNTR4_ID,
+//   GPIO_CNTR4_NP_ID,
+//   GPIO_HWSERIAL0_TX_ID,            // Serial interface
+//   GPIO_HWSERIAL0_RX_ID,            // Serial interface
+//   GPIO_HWSERIAL1_TX_ID,            // Serial interface
+//   GPIO_HWSERIAL1_RX_ID,            // Serial interface
+//   GPIO_HWSERIAL2_TX_ID,            // Serial interface
+//   GPIO_HWSERIAL2_RX_ID,            // Serial interface
+//   GPIO_SWSERIAL0_TX_ID,            // Serial interface
+//   GPIO_SWSERIAL0_RX_ID,            // Serial interface
+// #ifdef USE_MODULE_CORE_I2C
+//   GPIO_I2C_SCL_ID,        // I2C SCL
+//   GPIO_I2C_SDA_ID,        // I2C SDA
 // #endif
-#ifdef USE_MODULE_SENSORS_ULTRASONICS
-  GPIO_SR04_TRIG_ID,      // SR04 Trigger pin
-  GPIO_SR04_ECHO_ID,      // SR04 Echo pin
-#endif
-// #if defined(USE_ENERGY_SENSOR) && defined(USE_HLW8012)
-//   GPIO_NRG_SEL_ID,        // HLW8012/HLJ-01 Sel output (1 = Voltage)
-//   GPIO_NRG_SEL_INV_ID,    // HLW8012/HLJ-01 Sel output (0 = Voltage)
-//   GPIO_NRG_CF1_ID,        // HLW8012/HLJ-01 CF1 voltage / current
-//   GPIO_HLW_CF_ID,         // HLW8012 CF power
-//   GPIO_HJL_CF_ID,         // HJL-01/BL0937 CF power
+// #ifdef USE_SPI
+//   GPIO_SPI_CS_ID,         // SPI Chip Select
+//   GPIO_SPI_DC_ID,         // SPI Data Direction
+//   GPIO_SSPI_MISO_ID,      // Software SPI Master Input Slave Output
+//   GPIO_SSPI_MOSI_ID,      // Software SPI Master Output Slave Input
+//   GPIO_SSPI_SCLK_ID,      // Software SPI Serial Clock
+//   GPIO_SSPI_CS_ID,        // Software SPI Chip Select
+//   GPIO_SSPI_DC_ID,        // Software SPI Data or Command
 // #endif
-// #if defined(USE_ENERGY_SENSOR) && defined(USE_I2C) && defined(USE_ADE7953)
-  GPIO_ADE7953_IRQ_ID,    // ADE7953 IRQ
+// #ifdef USE_DISPLAY
+//   GPIO_BACKLIGHT_ID,      // Display backlight control
 // #endif
-#if defined(USE_ENERGY_SENSOR) && defined(USE_MCP39F501)
-  GPIO_MCP39F5_TX_ID,     // MCP39F501 Serial interface (Shelly2)
-  GPIO_MCP39F5_RX_ID,     // MCP39F501 Serial interface (Shelly2)
-  GPIO_MCP39F5_RST_ID,    // MCP39F501 Reset (Shelly2)
-#endif
-// #if defined(USE_MODULE_ENERGY_PZEM004T_V3) || defined(USE_PZEM_DC)
-  GPIO_PZEM0XX_TX_ID,     // PZEM0XX Serial interface
+// #ifdef USE_MODULE_DRIVER_BUZZER
+//   GPIO_BUZZER_ID,         // Buzzer
+//   GPIO_BUZZER_INV_ID,     // Inverted buzzer
 // #endif
-// #ifdef USE_PZEM004T
-  GPIO_PZEM004_RX_ID,     // PZEM004T Serial interface
+// #ifdef USE_MODULE_SENSORS_DHT
+//   GPIO_DHT11_1OF2_ID,          // DHT11
+//   GPIO_DHT11_2OF2_ID,          // DHT11
+//   GPIO_DHT22_1OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
+//   GPIO_DHT22_2OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
 // #endif
-// #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  GPIO_PZEM0XX_RX_MODBUS_ID,     // PZEM-014_ID,016 Serial Modbus interface
+// //#if defined(USE_DS18B20) || defined(USE_DS18x20) || defined(USE_DS18x20_LEGACY)
+//   GPIO_DSB_1OF2_ID,            // Single wire DS18B20 or DS18S20
+//   GPIO_DSB_2OF2_ID,            // Single wire DS18B20 or DS18S20
+// //#endif
+// #ifdef USE_WS2812
+//   GPIO_RGB_DATA_ID,         // WS2812 Led string
+//   GPIO_RGB_CLOCK_ID,         // WS2812 Led string
 // #endif
-// #ifdef USE_PZEM_DC
-  GPIO_PZEM017_RX_ID,     // PZEM-003_ID,017 Serial Modbus interface
+// #ifdef USE_IR_REMOTE
+//   GPIO_IRSEND_ID,         // IR remote
+// #ifdef USE_IR_RECEIVE
+//   GPIO_IRRECV_ID,         // IR receiver
 // #endif
-#ifdef USE_SDM120
-  GPIO_SDM120_TX_ID,      // SDM120 Serial interface
-  GPIO_SDM120_RX_ID,      // SDM120 Serial interface
-#endif
-#ifdef USE_SDM630
-  GPIO_SDM630_TX_ID,      // SDM630 Serial interface
-  GPIO_SDM630_RX_ID,      // SDM630 Serial interface
-#endif
-#ifdef USE_SERIAL_BRIDGE
-  GPIO_SBR_TX_ID,         // Serial Bridge Serial interface
-  GPIO_SBR_RX_ID,         // Serial Bridge Serial interface
-#endif
-#ifdef USE_SENSEAIR
-  GPIO_SAIR_TX_ID,        // SenseAir Serial interface
-  GPIO_SAIR_RX_ID,        // SenseAir Serial interface
-#endif
-#ifdef USE_NOVA_SDS
-  GPIO_SDS0X1_TX_ID,      // Nova Fitness SDS011 Serial interface
-  GPIO_SDS0X1_RX_ID,      // Nova Fitness SDS011 Serial interface
-#endif
-#ifdef USE_PMS5003
-  GPIO_PMS5003_ID,        // Plantower PMS5003 Serial interface
-#endif
-#ifdef USE_TX20_WIND_SENSOR
-  GPIO_TX20_TXD_BLACK_ID, // TX20 Transmission Pin
-#endif
-#ifdef USE_MP3_PLAYER
-  GPIO_MP3_DFR562_ID,     // RB-DFR-562_ID, DFPlayer Mini MP3 Player Serial interface
-#endif
-#ifdef USE_TUYA_DIMMER
-  GPIO_TUYA_TX_ID,        // Tuya Serial interface
-  GPIO_TUYA_RX_ID,        // Tuya Serial interface
-#endif
-#ifdef USE_AZ7798
-  GPIO_AZ_TXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
-  GPIO_AZ_RXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
-#endif
-#ifdef USE_PN532_HSU
-  GPIO_PN532_TXD_ID,      // PN532 HSU Tx
-  GPIO_PN532_RXD_ID,      // PN532 HSU Rx
-#endif
-#ifdef USE_MGC3130
-  GPIO_MGC3130_XFER_ID,
-  GPIO_MGC3130_RESET_ID,
-#endif
-#ifdef USE_MAX31855
-  GPIO_MAX31855CS_ID,     // MAX31855 Serial interface
-  GPIO_MAX31855CLK_ID,    // MAX31855 Serial interface
-  GPIO_MAX31855DO_ID,     // MAX31855 Serial interface
-#endif
-#ifdef USE_SM16716
-  GPIO_SM16716_CLK_ID,    // SM16716 CLOCK
-  GPIO_SM16716_DAT_ID,    // SM16716 DATA
-  GPIO_SM16716_SEL_ID,    // SM16716 SELECT
-#endif // USE_SM16716
-#ifdef ROTARY_V1
-  GPIO_ROT1A_ID,          // Rotary switch1 A Pin
-  GPIO_ROT1B_ID,          // Rotary switch1 B Pin
-  GPIO_ROT2A_ID,          // Rotary switch2 A Pin
-  GPIO_ROT2B_ID,          // Rotary switch2 B Pin
-#endif
-#ifdef USE_ARILUX_RF
-  GPIO_ARIRFRCV_ID,       // AliLux RF Receive input
-#endif
-#ifdef USE_HRE
-  GPIO_HRE_CLOCK_ID,
-  GPIO_HRE_DATA
-#endif
-#ifdef USE_MODULE_SENSORS_DOOR
-  GPIO_DOOR_OPEN_ID,
-#endif
-#ifdef USE_SENSOR_DOOR_LOCK
-  GPIO_DOOR_LOCK_ID,
-#endif
-#ifdef USE_MODULE_DRIVERS_HBRIDGE
-   GPIO_HBRIDGE_L9110_IA_ID,
-   GPIO_HBRIDGE_L9110_IA_ID,
-   GPIO_HBRIDGE_L9110_OA_ID,
-   GPIO_HBRIDGE_L9110_OA_ID,
-   GPIO_HBRIDGE_ANALOG_SENSE_ID,
-#endif
-};
+// #endif
+// #ifdef USE_RC_SWITCH
+//   GPIO_RFSEND_ID,         // RF transmitter
+//   GPIO_RFRECV_ID,         // RF receiver
+// #endif
+// // #ifdef USE_RF_SENSOR
+//   GPIO_RF_433MHZ_RX_ID,      // Rf receiver with sensor decoding
+// // #endif
+// #ifdef USE_MODULE_SENSORS_ULTRASONICS
+//   GPIO_SR04_TRIG_ID,      // SR04 Trigger pin
+//   GPIO_SR04_ECHO_ID,      // SR04 Echo pin
+// #endif
+// // #if defined(USE_ENERGY_SENSOR) && defined(USE_HLW8012)
+// //   GPIO_NRG_SEL_ID,        // HLW8012/HLJ-01 Sel output (1 = Voltage)
+// //   GPIO_NRG_SEL_INV_ID,    // HLW8012/HLJ-01 Sel output (0 = Voltage)
+// //   GPIO_NRG_CF1_ID,        // HLW8012/HLJ-01 CF1 voltage / current
+// //   GPIO_HLW_CF_ID,         // HLW8012 CF power
+// //   GPIO_HJL_CF_ID,         // HJL-01/BL0937 CF power
+// // #endif
+// // #if defined(USE_ENERGY_SENSOR) && defined(USE_I2C) && defined(USE_ADE7953)
+//   GPIO_ADE7953_IRQ_ID,    // ADE7953 IRQ
+// // #endif
+// #if defined(USE_ENERGY_SENSOR) && defined(USE_MCP39F501)
+//   GPIO_MCP39F5_TX_ID,     // MCP39F501 Serial interface (Shelly2)
+//   GPIO_MCP39F5_RX_ID,     // MCP39F501 Serial interface (Shelly2)
+//   GPIO_MCP39F5_RST_ID,    // MCP39F501 Reset (Shelly2)
+// #endif
+// // #if defined(USE_MODULE_ENERGY_PZEM004T_V3) || defined(USE_PZEM_DC)
+//   GPIO_PZEM0XX_TX_ID,     // PZEM0XX Serial interface
+// // #endif
+// // #ifdef USE_PZEM004T
+//   GPIO_PZEM004_RX_ID,     // PZEM004T Serial interface
+// // #endif
+// // #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+//   GPIO_PZEM0XX_RX_MODBUS_ID,     // PZEM-014_ID,016 Serial Modbus interface
+// // #endif
+// // #ifdef USE_PZEM_DC
+//   GPIO_PZEM017_RX_ID,     // PZEM-003_ID,017 Serial Modbus interface
+// // #endif
+// #ifdef USE_SDM120
+//   GPIO_SDM120_TX_ID,      // SDM120 Serial interface
+//   GPIO_SDM120_RX_ID,      // SDM120 Serial interface
+// #endif
+// #ifdef USE_SDM630
+//   GPIO_SDM630_TX_ID,      // SDM630 Serial interface
+//   GPIO_SDM630_RX_ID,      // SDM630 Serial interface
+// #endif
+// #ifdef USE_SERIAL_BRIDGE
+//   GPIO_SBR_TX_ID,         // Serial Bridge Serial interface
+//   GPIO_SBR_RX_ID,         // Serial Bridge Serial interface
+// #endif
+// #ifdef USE_SENSEAIR
+//   GPIO_SAIR_TX_ID,        // SenseAir Serial interface
+//   GPIO_SAIR_RX_ID,        // SenseAir Serial interface
+// #endif
+// #ifdef USE_NOVA_SDS
+//   GPIO_SDS0X1_TX_ID,      // Nova Fitness SDS011 Serial interface
+//   GPIO_SDS0X1_RX_ID,      // Nova Fitness SDS011 Serial interface
+// #endif
+// #ifdef USE_PMS5003
+//   GPIO_PMS5003_ID,        // Plantower PMS5003 Serial interface
+// #endif
+// #ifdef USE_TX20_WIND_SENSOR
+//   GPIO_TX20_TXD_BLACK_ID, // TX20 Transmission Pin
+// #endif
+// #ifdef USE_MP3_PLAYER
+//   GPIO_MP3_DFR562_ID,     // RB-DFR-562_ID, DFPlayer Mini MP3 Player Serial interface
+// #endif
+// #ifdef USE_TUYA_DIMMER
+//   GPIO_TUYA_TX_ID,        // Tuya Serial interface
+//   GPIO_TUYA_RX_ID,        // Tuya Serial interface
+// #endif
+// #ifdef USE_AZ7798
+//   GPIO_AZ_TXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
+//   GPIO_AZ_RXD_ID,         // AZ-Instrument 7798 CO2 datalogger Serial interface
+// #endif
+// #ifdef USE_PN532_HSU
+//   GPIO_PN532_TXD_ID,      // PN532 HSU Tx
+//   GPIO_PN532_RXD_ID,      // PN532 HSU Rx
+// #endif
+// #ifdef USE_MGC3130
+//   GPIO_MGC3130_XFER_ID,
+//   GPIO_MGC3130_RESET_ID,
+// #endif
+// #ifdef USE_MAX31855
+//   GPIO_MAX31855CS_ID,     // MAX31855 Serial interface
+//   GPIO_MAX31855CLK_ID,    // MAX31855 Serial interface
+//   GPIO_MAX31855DO_ID,     // MAX31855 Serial interface
+// #endif
+// #ifdef USE_SM16716
+//   GPIO_SM16716_CLK_ID,    // SM16716 CLOCK
+//   GPIO_SM16716_DAT_ID,    // SM16716 DATA
+//   GPIO_SM16716_SEL_ID,    // SM16716 SELECT
+// #endif // USE_SM16716
+// #ifdef ROTARY_V1
+//   GPIO_ROT1A_ID,          // Rotary switch1 A Pin
+//   GPIO_ROT1B_ID,          // Rotary switch1 B Pin
+//   GPIO_ROT2A_ID,          // Rotary switch2 A Pin
+//   GPIO_ROT2B_ID,          // Rotary switch2 B Pin
+// #endif
+// #ifdef USE_ARILUX_RF
+//   GPIO_ARIRFRCV_ID,       // AliLux RF Receive input
+// #endif
+// #ifdef USE_HRE
+//   GPIO_HRE_CLOCK_ID,
+//   GPIO_HRE_DATA
+// #endif
+// #ifdef USE_MODULE_SENSORS_DOOR
+//   GPIO_DOOR_OPEN_ID,
+// #endif
+// #ifdef USE_SENSOR_DOOR_LOCK
+//   GPIO_DOOR_LOCK_ID,
+// #endif
+// #ifdef USE_MODULE_DRIVERS_HBRIDGE
+//    GPIO_HBRIDGE_L9110_IA_ID,
+//    GPIO_HBRIDGE_L9110_IA_ID,
+//    GPIO_HBRIDGE_L9110_OA_ID,
+//    GPIO_HBRIDGE_L9110_OA_ID,
+//    GPIO_HBRIDGE_ANALOG_SENSE_ID,
+// #endif
+// };
 
 
 
@@ -937,47 +937,6 @@ void mHardwarePins::ModuleSettings_ShowTemplateLog()
 
   // char buffer[50];
 
-  // AddLog(LOG_LEVEL_TEST,
-  //   PSTR(
-  //     "\n\r"
-  //     //"Template: %s\n\r"
-  //     "(Friendly)Name: %s\n\r"
-  //     "MQTT Topic Prefix: %s\n\r"
-  //     "Gpio: \n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r" //5
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r" //10
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r" //12
-  //       "\t%d(%d):%d\n\r" //13
-  //     "BASE : %08X (%s)\n\r"
-  //   ),
-  //   pCONT_set->Settings.user_template.full_ctr,
-  //   //pCONT_set->Settings.user_template.hardware.name,
-  //   pCONT_set->Settings.system_name.device,
-  //   0,0,pCONT_set->Settings.user_template.hardware.gp.io[0],
-  //   1,1,pCONT_set->Settings.user_template.hardware.gp.io[1],
-  //   2,2,pCONT_set->Settings.user_template.hardware.gp.io[2],
-  //   3,3,pCONT_set->Settings.user_template.hardware.gp.io[3],
-  //   4,4,pCONT_set->Settings.user_template.hardware.gp.io[4],
-  //   5,5,pCONT_set->Settings.user_template.hardware.gp.io[5],
-  //   6,9,pCONT_set->Settings.user_template.hardware.gp.io[6],
-  //   7,10,pCONT_set->Settings.user_template.hardware.gp.io[7],
-  //   8,12,pCONT_set->Settings.user_template.hardware.gp.io[8],
-  //   9,13,pCONT_set->Settings.user_template.hardware.gp.io[9],
-  //   10,14,pCONT_set->Settings.user_template.hardware.gp.io[10],
-  //   11,15,pCONT_set->Settings.user_template.hardware.gp.io[11],
-  //   12,16,pCONT_set->Settings.user_template.hardware.gp.io[12],
-  //   pCONT_set->Settings.user_template.base,
-  //   GetModuleNameByID(pCONT_set->Settings.user_template.base, buffer)
-  // );
 
   DEBUG_LINE;
   
@@ -998,46 +957,6 @@ void mHardwarePins::ModuleSettings_ShowActiveTemplate()
   //   ),
   char buffer[50];
 
-  // AddLog(LOG_LEVEL_TEST,
-  //   PSTR(
-  //     "\n\r"
-  //     //"Template: %s\n\r"
-  //     //"(Friendly)Name: %s\n\r"
-  //     "MQTT Topic Prefix: %s\n\r"
-  //     "Gpio: \n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //       "\t%d(%d):%d\n\r"
-  //     "Module : %s\n\r"
-  //   ),
-  //   //pCONT_set->Settings.user_template.full_ctr,
-  //   //pCONT_set->Settings.user_template.hardware.name,
-  //   pCONT_set->Settings.system_name.device,
-  //   0,0,pCONT_set->Settings.user_template.hardware.gp.io[0],
-  //   1,1,pCONT_set->Settings.user_template.hardware.gp.io[1],
-  //   2,2,pCONT_set->Settings.user_template.hardware.gp.io[2],
-  //   3,3,pCONT_set->Settings.user_template.hardware.gp.io[3],
-  //   4,4,pCONT_set->Settings.user_template.hardware.gp.io[4],
-  //   5,5,pCONT_set->Settings.user_template.hardware.gp.io[5],
-  //   6,9,pCONT_set->Settings.user_template.hardware.gp.io[6],
-  //   7,10,pCONT_set->Settings.user_template.hardware.gp.io[7],
-  //   8,12,pCONT_set->Settings.user_template.hardware.gp.io[8],
-  //   9,13,pCONT_set->Settings.user_template.hardware.gp.io[9],
-  //   10,14,pCONT_set->Settings.user_template.hardware.gp.io[10],
-  //   11,15,pCONT_set->Settings.user_template.hardware.gp.io[11],
-  //   12,16,pCONT_set->Settings.user_template.hardware.gp.io[12],
-  //   GetModuleNameByID(pCONT_set->Settings.module, buffer)
-  // );
 
 }
 
@@ -1219,9 +1138,6 @@ bool mHardwarePins::UsuableGPIOPin(uint8_t pin)
 }
 
 
-int16_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
-  return Pin(gpio, index);
-}
 uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think this should be returning uint32_t here? #D10APR22
   return Pin(gpio, index);
 }
@@ -1234,7 +1150,11 @@ uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think
  * @param index if more than one gpio was set (eg Relay1, Relay2)
  * @return -1 if none found, or the pin number real_pin
  */
+#ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index, bool enable_debug)
+#else
 int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
+#endif
 {
   //  ALOG_TST(PSTR("mHardwarePins::Pin(uint32_t gpio, uint32_t index)(%d,%d)"),gpio,index);
    
@@ -1254,20 +1174,28 @@ int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
   // Get any pins with gpio attached
   for(uint16_t index_pin=0; index_pin<ARRAY_SIZE(pin_attached_gpio_functions); index_pin++)
   {
-    
-// Serial.printf("pin_attached_gpio_functions[index_pin] == real_gpio %d %d %d\n\r",
-// pin_attached_gpio_functions[index_pin],
-// index_pin,
-// real_gpio);
-
+    #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+    if(enable_debug)
+    {
+      Serial.printf("real_gpio=%d ->? gpio_functions[%d] ==  %d\n\r",
+      real_gpio,
+      index_pin,
+      pin_attached_gpio_functions[index_pin]
+      );
+    }
+    #endif
     // Function (ie func_gpio) that is attached to pin (saved in array), search for the func_gpio
     if(pin_attached_gpio_functions[index_pin] == real_gpio) // gpio has been used for a pin
     {
+      // Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
+      
+      #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+      if(enable_debug)
+      {
+        ALOG_TST(PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
+      }
+      #endif
 
-// Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
-
-// DEBUG_LINE_HERE;
-//       ALOG_TST(PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
       return gpio_pin_by_index[index_pin]; // real_pin
     }
   }
@@ -1309,10 +1237,25 @@ int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
  * @param gpio sensor, driver (eg Relay)
  * @param index if more than one gpio was set (eg Relay1, Relay2)
  * @return true/false if GPIO is found
+ * 
+ * place "enable_debug" with debug flag later
+ * 
+ * 
  */
-boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index) {
+// #define ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+
+
+#ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index, bool enable_debug)
+{
+  return (Pin(gpio, index, enable_debug) >= 0);
+}
+#else
+boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index)
+{
   return (Pin(gpio, index) >= 0);
 }
+#endif
 
 /**
  * @brief Assigns a pin with a GPIO
@@ -1372,7 +1315,7 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
   uint8_t real_pin = Pin(gpio_pin, index);
 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_TST(PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
+    ALOG_DBM(PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   // if (PinUsed(gpio_pin, index)) {
     digitalWrite(real_pin, state &1);
@@ -1848,7 +1791,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   #endif
 
   #ifdef USE_MODULE_CORE_I2C
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SCL_CTR)==0){  return GPIO_I2C_SCL_ID; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SCL_CTR)==0){  return GPIO_I2C_SCL_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SDA_CTR)==0){  return GPIO_I2C_SDA_ID; }
   #endif
 
@@ -1936,19 +1879,22 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   
 
 
-    #ifdef USE_MODULE_DRIVERS_LEDS
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED1_INV_CTR)==0){  return GPIO_LED1_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED2_INV_CTR)==0){  return GPIO_LED2_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED3_INV_CTR)==0){  return GPIO_LED3_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED4_INV_CTR)==0){  return GPIO_LED4_INV_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED1_CTR)==0){  return GPIO_LED1_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED2_CTR)==0){  return GPIO_LED2_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED3_CTR)==0){  return GPIO_LED3_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LED4_CTR)==0){  return GPIO_LED4_ID; }
+  #ifdef USE_MODULE_DRIVERS_LEDS
+  for (int i = 1; i <= 8; i++) {
+    // Check normal LEDs "LED1" to "LED8"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_LED_NUM_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_LED1_ID + (i - 1);  // Return the corresponding LED ID
+    }
+
+    // Check inverted LEDs "LED1 Inv" to "LED8 Inv"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_LED_NUM_INV_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_LED1_INV_ID + (i - 1);  // Return the corresponding inverted LED ID
+    }
+  }
   #endif
   
-  // if(strcmp_P(c,PM_GPIO_FUNCTION_LED5_CTR)==0){  return GPIO_LED5_ID; }
-  // if(strcmp_P(c,PM_GPIO_FUNCTION_LED5_INV_CTR)==0){  return GPIO_LED5_INV_ID; }
 
   #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_TX_CTR)==0){  return GPIO_PZEM0XX_TX_ID; }
@@ -1964,30 +1910,6 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   // else if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR)==0){  return GPIO__ROTARY_ENCODER_B__ID; }
   // #endif
   #ifdef USE_MODULE_SENSORS_BUTTONS
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_INV_CTR)==0){  return GPIO_KEY2_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_INV_CTR)==0){  return GPIO_KEY3_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY4_INV_CTR)==0){  return GPIO_KEY4_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY5_INV_CTR)==0){  return GPIO_KEY5_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY6_INV_CTR)==0){  return GPIO_KEY6_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY7_INV_CTR)==0){  return GPIO_KEY7_INV_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY8_INV_CTR)==0){  return GPIO_KEY8_INV_ID; }
-
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_TOUCH_CTR)==0){  return GPIO_KEY1_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_TOUCH_CTR)==0){  return GPIO_KEY2_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_TOUCH_CTR)==0){  return GPIO_KEY3_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY4_TOUCH_CTR)==0){  return GPIO_KEY4_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY5_TOUCH_CTR)==0){  return GPIO_KEY5_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY6_TOUCH_CTR)==0){  return GPIO_KEY6_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY7_TOUCH_CTR)==0){  return GPIO_KEY7_TOUCH_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY8_TOUCH_CTR)==0){  return GPIO_KEY8_TOUCH_ID; }
-
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_CTR)==0){  return GPIO_KEY2_ID; }
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_CTR)==0){  return GPIO_KEY3_ID; }
-
-  
-  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_NP_CTR)==0){  return GPIO_KEY1_NP_ID; }
 
   for (int i = 1; i <= 32; i++) {
     // Check normal keys "KEY1" to "KEY32"
@@ -2133,6 +2055,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t buflen) 
 {
 
+    // ALOG_INF(PSTR("---------------id %d"),id);
+
+    #ifdef USE_MODULE_SENSORS_BUTTONS
     // Check for KEY1 to KEY32
     if (id >= GPIO_KEY1_ID && id <= GPIO_KEY32_ID) {
       snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_CTR, id - GPIO_KEY1_ID + 1);
@@ -2158,8 +2083,9 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, ui
       snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_KEY_NUM_TOUCH_CTR, id - GPIO_KEY1_TOUCH_ID + 1);
       return buffer;
     }
+    #endif // USE_MODULE_SENSORS_BUTTONS
 
-
+    #ifdef USE_MODULE_SENSORS_SWITCHES
     // Check for SWT1 to SWT32
     if (id >= GPIO_SWT1_ID && id <= GPIO_SWT32_ID) {
       snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_CTR, id - GPIO_SWT1_ID + 1);
@@ -2180,7 +2106,21 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, ui
       snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_INV_NP_CTR, id - GPIO_SWT1_INV_NP_ID + 1);
       return buffer;
     }
+    #endif // USE_MODULE_SENSORS_SWITCHES
 
+    #ifdef USE_MODULE_DRIVERS_LEDS
+    // Check for LED1 to LED8
+    if (id >= GPIO_LED1_ID && id <= GPIO_LED8_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_LED_NUM_CTR, id - GPIO_LED1_ID + 1);
+      return buffer;
+    }
+
+    // Check for LED1_INV to LED8_INV
+    else if (id >= GPIO_LED1_INV_ID && id <= GPIO_LED8_INV_ID) {
+      snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_LED_NUM_INV_CTR, id - GPIO_LED1_INV_ID + 1);
+      return buffer;
+    }
+    #endif
 
 
     // Step 2: Use the progmem function for other IDs
@@ -2200,7 +2140,7 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, ui
 
 PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 
-ALOG_ERR(PSTR("GetGPIOFunctionNamebyID_P PO %d"), id);
+ALOG_ERR(PSTR("GetGPIOFunctionNamebyID_P GPIO needs moved %d"), id);
 
   switch(id){
     default:           return PM_SEARCH_NOMATCH;
@@ -2281,16 +2221,6 @@ ALOG_ERR(PSTR("GetGPIOFunctionNamebyID_P PO %d"), id);
     case  GPIO_OLED_RESET_ID: return PM_GPIO_FUNCTION_OLED_RESET_CTR;           // Relays
     #endif
 
-    #ifdef USE_MODULE_DRIVERS_LEDS
-    case GPIO_LED1_ID:      return PM_GPIO_FUNCTION_LED1_CTR;
-    case GPIO_LED1_INV_ID:  return PM_GPIO_FUNCTION_LED1_INV_CTR;
-    case GPIO_LED2_ID:      return PM_GPIO_FUNCTION_LED2_CTR;
-    case GPIO_LED2_INV_ID:  return PM_GPIO_FUNCTION_LED2_INV_CTR;
-    case GPIO_LED3_ID:      return PM_GPIO_FUNCTION_LED3_CTR;
-    case GPIO_LED3_INV_ID:  return PM_GPIO_FUNCTION_LED3_INV_CTR;
-    case GPIO_LED4_ID:      return PM_GPIO_FUNCTION_LED4_CTR;
-    case GPIO_LED4_INV_ID:  return PM_GPIO_FUNCTION_LED4_INV_CTR;
-    #endif
     
     #ifdef USE_MODULE_DRIVERS_PWM
     case GPIO_PWM1_ID:      return PM_GPIO_FUNCTION_PWM1_CTR;

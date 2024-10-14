@@ -2330,7 +2330,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
 
   #endif // ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

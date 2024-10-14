@@ -111,7 +111,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"), 
         ESP.getFreeHeap(), // 4 * (sp - g_pcont->stack), 
         isconnected ? 'Y' : 'N',
-        pCONT_time->GetUptime(),
+        pCONT_time->GetUptime().c_str(),
         pCONT_log->GetLogLevelNamebyID(loglevel),
         pCONT_log->log_data
       );
@@ -200,6 +200,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
    * 
    * 
    */
+  #ifdef ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
   if (loglevel <= pCONT_set->Settings.logging.mqtt_level) 
   {    
     char topic[100];
@@ -219,6 +220,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
     pCONT_mqtt->Publish(topic, pCONT_log->log_data);
   }
+  #endif // ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
   
 }
 

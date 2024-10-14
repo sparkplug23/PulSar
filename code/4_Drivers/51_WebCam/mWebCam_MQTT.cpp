@@ -52,7 +52,7 @@ void mWebCam::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mWebCam::ConstructJSON_Scheduled;
 
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

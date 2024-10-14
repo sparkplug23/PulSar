@@ -204,6 +204,61 @@ enum LoggingLevels {
 #endif
 
 
+#if defined(ENABLE_DEBUG_TIME__PRINT)
+    // Macro to start time measurement, creates a local variable to store the start time
+    #define DEBUG_TIME__START uint32_t __debug_time_start__ = micros();
+    #define DEBUG_TIME__RESET __debug_time_start__ = micros();
+
+    // Macro to show the elapsed time with a custom message
+    #define DEBUG_TIME__SHOW_MESSAGE(message) \
+        SERIAL_DEBUG.printf("%s - Time elapsed: %lu us\n", message, micros() - __debug_time_start__); \
+        SERIAL_DEBUG.flush();
+
+    // Macro to show the elapsed time with file, function, and line information
+    // #define DEBUG_TIME__SHOW \
+    //     SERIAL_DEBUG.printf("(%s:%d) %luus\n\r", \
+    //                         __FILE__, __LINE__, micros() - __debug_time_start__); \
+    //     SERIAL_DEBUG.flush();
+    // Macro to show the elapsed time with file, function, and line information  with MS
+    #define DEBUG_TIME__SHOW \
+        SERIAL_DEBUG.printf("(%s:%d) %luus %dms\n\r", \
+                            __FILE__, __LINE__, micros() - __debug_time_start__, (micros() - __debug_time_start__)/1000); \
+        SERIAL_DEBUG.flush();
+    // Macro to show the elapsed time with file, function, and line information
+    #define DEBUG_TIME__SHOW_F \
+        SERIAL_DEBUG.printf("Time elapsed: %lu us in function %s (%s:%d)\n", \
+                            micros() - __debug_time_start__, __func__, __FILE__, __LINE__); \
+        SERIAL_DEBUG.flush();
+
+#else
+    #define DEBUG_TIME__START  // No operation if debug is disabled
+    #define DEBUG_TIME__SHOW_MESSAGE(message)  // No operation if debug is disabled
+    #define DEBUG_TIME__SHOW  // No operation if debug is disabled
+#endif
+
+
+
+// Added indexing, as nested debug points need different saved start points. 
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+    #define DEBUG_LIGHTING__START_TIME_RECORDING(X) lighting_time_critical_logging.start_value[X] = micros();
+    #define DEBUG_LIGHTING__SAVE_TIME_RECORDING(X, Y)  Y = micros() - lighting_time_critical_logging.start_value[X];
+
+#else
+
+  #define DEBUG_LIGHTING__START_TIME_RECORDING(X) //none
+  #define DEBUG_LIGHTING__SAVE_TIME_RECORDING(X,Y) //none
+
+#endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+
+
+
+
+
+
+
+
 
 
 #if defined(ENABLE_DEBUG_LINE_HERE)
@@ -462,79 +517,79 @@ int ResponseAppend_mP(const char* format, ...);
 void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
 
 
-template<typename T, typename U>
-void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-{
+// template<typename T, typename U>
+// void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
 
-  // if(
-  //   (loglevel>pCONT_set->Settings.logging.serial_level)&&
-  //   (loglevel>pCONT_set->Settings.logging.web_level)
-  //   ){
-  //   return;
-  // }  
+//   // if(
+//   //   (loglevel>pCONT_set->Settings.logging.serial_level)&&
+//   //   (loglevel>pCONT_set->Settings.logging.web_level)
+//   //   ){
+//   //   return;
+//   // }  
 
-  // if(loglevel>pCONT_set->Settings.logging.serial_level){
-  //   return;
-  // }
+//   // if(loglevel>pCONT_set->Settings.logging.serial_level){
+//   //   return;
+//   // }
   
-  #ifndef DISABLE_SERIAL_LOGGING
-  SERIAL_DEBUG.printf("%s = ",name_ctr);
-  for(T index=0;index<arr_len;index++){
-    SERIAL_DEBUG.printf("%d,", arr[index]);
-  }
-  SERIAL_DEBUG.printf("\n\r");
-  #endif
+//   #ifndef DISABLE_SERIAL_LOGGING
+//   SERIAL_DEBUG.printf("%s = ",name_ctr);
+//   for(T index=0;index<arr_len;index++){
+//     SERIAL_DEBUG.printf("%d,", arr[index]);
+//   }
+//   SERIAL_DEBUG.printf("\n\r");
+//   #endif
 
-}
+// }
 
-template<typename T, typename U>
-void AddLog_Array(const char* name_ctr, T* arr, U arr_len)
-{
+// template<typename T, typename U>
+// void AddLog_Array(const char* name_ctr, T* arr, U arr_len)
+// {
   
-  #ifndef DISABLE_SERIAL_LOGGING
-  SERIAL_DEBUG.printf("%s = ",name_ctr);
-  for(T index=0;index<arr_len;index++){
-    SERIAL_DEBUG.printf("%d,", arr[index]);
-  }
-  SERIAL_DEBUG.printf("\n\r");
-  #endif
+//   #ifndef DISABLE_SERIAL_LOGGING
+//   SERIAL_DEBUG.printf("%s = ",name_ctr);
+//   for(T index=0;index<arr_len;index++){
+//     SERIAL_DEBUG.printf("%d,", arr[index]);
+//   }
+//   SERIAL_DEBUG.printf("\n\r");
+//   #endif
 
-}
-
-
-/**
- * @brief Form into message then pass into normal AddLog
- * 
- * @tparam T 
- * @tparam U 
- * @param loglevel 
- * @param name_ctr 
- * @param arr 
- * @param arr_len 
- */
-template<typename T, typename U>
-void AddLog_Array2(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-{
-
-  // form into string then send to normal addlog
-
-  char buffer[100] = {0}; // short buffer
-  uint16_t buflen = 0;
-
-  buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array2 %s = ", name_ctr);
-
-  AddLog(loglevel, buffer);
+// }
 
 
-  // #ifndef DISABLE_SERIAL_LOGGING
-  // SERIAL_DEBUG.printf("%s = ",name_ctr);
-  // for(T index=0;index<arr_len;index++){
-  //   SERIAL_DEBUG.printf("%d,", arr[index]);
-  // }
-  // SERIAL_DEBUG.printf("\n\r");
-  // #endif
+// /**
+//  * @brief Form into message then pass into normal AddLog
+//  * 
+//  * @tparam T 
+//  * @tparam U 
+//  * @param loglevel 
+//  * @param name_ctr 
+//  * @param arr 
+//  * @param arr_len 
+//  */
+// template<typename T, typename U>
+// void AddLog_Array2(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
 
-}
+//   // form into string then send to normal addlog
+
+//   char buffer[100] = {0}; // short buffer
+//   uint16_t buflen = 0;
+
+//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array2 %s = ", name_ctr);
+
+//   AddLog(loglevel, buffer);
+
+
+//   // #ifndef DISABLE_SERIAL_LOGGING
+//   // SERIAL_DEBUG.printf("%s = ",name_ctr);
+//   // for(T index=0;index<arr_len;index++){
+//   //   SERIAL_DEBUG.printf("%d,", arr[index]);
+//   // }
+//   // SERIAL_DEBUG.printf("\n\r");
+//   // #endif
+
+// }
 
 
 enum ERROR_MESSAGE_TYPES
@@ -545,49 +600,139 @@ enum ERROR_MESSAGE_TYPES
 void ErrorMessage_P(uint8_t error_type, const char* message);
 void ErrorMessage(uint8_t error_type, const char* message);
 
+template<typename T, typename U>
+void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+{
+    // Create a buffer to store the log message
+    char logBuffer[512];  // Adjust the size if needed
+    char* logPointer = logBuffer;
+
+    // Add the array name to the log message
+    size_t written = snprintf(logPointer, sizeof(logBuffer), "%s = ", name_ctr);
+    logPointer += written;
+
+    // Add array elements to the log message
+    for (U index = 0; index < arr_len && (logPointer - logBuffer) < sizeof(logBuffer) - 10; ++index) {  // Limit size to avoid buffer overflow
+        written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), "%d,", arr[index]);
+        logPointer += written;
+    }
+
+    // Null-terminate the string
+    if ((logPointer - logBuffer) < sizeof(logBuffer)) {
+        *logPointer = '\0';
+    }
+
+    // Pass the formatted string to AddLog
+    AddLog(loglevel, PSTR("%s"), logBuffer);
+}
+template<typename T, typename U>
+void AddLog_Array_Block(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len, U arr_width, bool use_tabs)
+{
+    // Create a buffer to store the log message
+    char logBuffer[512];  // Adjust the size if needed
+    char* logPointer = logBuffer;
+
+    // Add the array name to the log message and start a new line
+    size_t written = snprintf(logPointer, sizeof(logBuffer), "\r\n%s =\r\n", name_ctr);
+    logPointer += written;
+
+    // Add array elements to the log message
+    for (U index = 0; index < arr_len && (logPointer - logBuffer) < sizeof(logBuffer) - 10; ++index) {
+        // Write the value to the buffer
+        if (use_tabs) {
+            written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), "%d\t", arr[index]);
+        } else {
+            written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), "%d,", arr[index]);
+        }
+        logPointer += written;
+
+        // Insert a new line every 'arr_width' values
+        if ((index + 1) % arr_width == 0) {
+            written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), "\r\n");
+            logPointer += written;
+        }
+    }
+
+    // Null-terminate the string
+    if ((logPointer - logBuffer) < sizeof(logBuffer)) {
+        *logPointer = '\0';
+    }
+
+    // Pass the formatted string to AddLog
+    AddLog(loglevel, PSTR("%s"), logBuffer);
+}
+
+
+// template<typename T, typename U>
+// void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
+//   T ch;
+//   #ifndef DISABLE_SERIAL_LOGGING
+//   SERIAL_DEBUG.printf("%S = ",name_ctr);
+//   for(T index=0;index<arr_len;index++){
+//     ch = pgm_read_byte(arr + index);
+//     SERIAL_DEBUG.printf("%d,", ch);
+//   }
+//   SERIAL_DEBUG.printf("\n\r");
+//   #endif
+// }
+
+
+// template<typename T, typename U>
+// void AddLog_Array_P(const char* name_ctr, T* arr, U arr_len)
+// {
+//   T ch;
+//   #ifndef DISABLE_SERIAL_LOGGING
+//   SERIAL_DEBUG.printf("%S = ",name_ctr);
+//   for(T index=0;index<arr_len;index++){
+//     ch = pgm_read_byte(arr + index);
+//     SERIAL_DEBUG.printf("%d,", ch);
+//   }
+//   SERIAL_DEBUG.printf("\n\r");
+//   #endif
+// }
 
 template<typename T, typename U>
 void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 {
-  T ch;
-  #ifndef DISABLE_SERIAL_LOGGING
-  SERIAL_DEBUG.printf("%S = ",name_ctr);
-  for(T index=0;index<arr_len;index++){
-    ch = pgm_read_byte(arr + index);
-    SERIAL_DEBUG.printf("%d,", ch);
-  }
-  SERIAL_DEBUG.printf("\n\r");
-  #endif
+    // Create a buffer to store the log message
+    char logBuffer[512];  // Adjust the size if needed
+    char* logPointer = logBuffer;
+
+    // Add the array name to the log message
+    size_t written = snprintf(logPointer, sizeof(logBuffer), "%s = ", name_ctr);
+    logPointer += written;
+
+    // Add array elements to the log message
+    for (U index = 0; index < arr_len && (logPointer - logBuffer) < sizeof(logBuffer) - 10; ++index) {  // Limit size to avoid buffer overflow
+        int value = pgm_read_byte(arr + index);
+        written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), "%d,", value);
+        logPointer += written;
+    }
+
+    // Null-terminate the string
+    if ((logPointer - logBuffer) < sizeof(logBuffer)) {
+        *logPointer = '\0';
+    }
+
+    // Pass the formatted string to AddLog
+    AddLog(loglevel, PSTR("%s"), logBuffer);
 }
 
 
-template<typename T, typename U>
-void AddLog_Array_P(const char* name_ctr, T* arr, U arr_len)
-{
-  T ch;
-  #ifndef DISABLE_SERIAL_LOGGING
-  SERIAL_DEBUG.printf("%S = ",name_ctr);
-  for(T index=0;index<arr_len;index++){
-    ch = pgm_read_byte(arr + index);
-    SERIAL_DEBUG.printf("%d,", ch);
-  }
-  SERIAL_DEBUG.printf("\n\r");
-  #endif
-}
 
-
-template<typename T>
-void AddLog_Array(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, const char* name_ctr, T* arr, T arr_len)//}, uint8_t fWithIndex = 0, uint8_t fVertical = 0)
-{
-  uint32_t time_now = *tSaved; //to allow compile of newer esp32
-  if(abs(
+// template<typename T>
+// void AddLog_Array(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, const char* name_ctr, T* arr, T arr_len)//}, uint8_t fWithIndex = 0, uint8_t fVertical = 0)
+// {
+//   uint32_t time_now = *tSaved; //to allow compile of newer esp32
+//   if(abs(
     
-    static_cast<long long>(millis()-time_now)
+//     static_cast<long long>(millis()-time_now)
     
-    )>=limit_ms){ *tSaved=millis();
-    AddLog_Array(loglevel,name_ctr,arr,arr_len);
-  }
-}
+//     )>=limit_ms){ *tSaved=millis();
+//     AddLog_Array(loglevel,name_ctr,arr,arr_len);
+//   }
+// }
 
 
 // #define TEST_SINGLETON
@@ -669,21 +814,21 @@ uint8_t web_log_index = 1;                  // Index in Web log buffer (should n
 // template<typename T, typename U>
 // void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len);
 
-template<typename T, typename U>
-void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-{
+// template<typename T, typename U>
+// void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
 
 
-  char buffer[100] = {0}; // short buffer
-  uint16_t buflen = 0;
+//   char buffer[100] = {0}; // short buffer
+//   uint16_t buflen = 0;
 
-  buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
+//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
 
-  AddLog(loglevel, buffer);
+//   AddLog(loglevel, buffer);
 
 
 
-}
+// }
 
 
 
@@ -701,49 +846,49 @@ void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
     
 };
 
-// need to work out type for this to be generic using json methods
-template<typename T, typename U>
-void AddLog_Array5(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-{
+// // need to work out type for this to be generic using json methods
+// template<typename T, typename U>
+// void AddLog_Array5(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
   
-  char buffer[100] = {0}; // short buffer
-  uint16_t buflen = 0;
+//   char buffer[100] = {0}; // short buffer
+//   uint16_t buflen = 0;
 
-  buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
+//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
 
-  for(T index=0;index<arr_len;index++)
-  {
-    buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
-      arr[index], 
-      index==arr_len ? "," : ""      
-    );
-  }
+//   for(T index=0;index<arr_len;index++)
+//   {
+//     buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
+//       arr[index], 
+//       index==arr_len ? "," : ""      
+//     );
+//   }
 
-  AddLog(loglevel, "%s", buffer);
+//   AddLog(loglevel, "%s", buffer);
 
-}
+// }
 
 
-template<typename T, typename U>
-void AddLog_Array_Int(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-{
+// template<typename T, typename U>
+// void AddLog_Array_Int(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
   
-  char buffer[100] = {0}; // short buffer
-  uint16_t buflen = 0;
+//   char buffer[100] = {0}; // short buffer
+//   uint16_t buflen = 0;
 
-  buflen += snprintf(buffer+buflen, sizeof(buffer), "Array_Int %s = ", name_ctr);
+//   buflen += snprintf(buffer+buflen, sizeof(buffer), "Array_Int %s = ", name_ctr);
 
-  for(T index=0;index<arr_len;index++)
-  {
-    buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
-      arr[index], 
-      index<(arr_len-1) ? "," : ""      
-    );
-  }
+//   for(T index=0;index<arr_len;index++)
+//   {
+//     buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
+//       arr[index], 
+//       index<(arr_len-1) ? "," : ""      
+//     );
+//   }
 
-  AddLog(loglevel, "%s", buffer);
+//   AddLog(loglevel, "%s", buffer);
 
-}
+// }
 
 
 

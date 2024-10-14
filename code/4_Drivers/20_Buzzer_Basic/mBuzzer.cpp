@@ -376,7 +376,7 @@ void mBuzzer::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Sensor;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

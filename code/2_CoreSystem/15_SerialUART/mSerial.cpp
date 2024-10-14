@@ -1709,7 +1709,7 @@ void mSerial::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

@@ -91,7 +91,7 @@ void mSwitches::Pre_Init(void)
       pinMode(pin, INPUT);
       SwitchPulldownFlag(i);
     }else{
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d None"), i);
+      ALOG_DBG(PSTR(D_LOG_SWITCHES "%d None"), i);
     }
 
     if(pin != -1)
@@ -528,14 +528,21 @@ void mSwitches::SwitchHandler(void) {
       }
       Switch.last_state[i] = button;
     }
-    if (switchflag <= POWER_TOGGLE) {
+
+
+    if (switchflag <= POWER_TOGGLE) { // ie where <3 was before
       if (!pCONT_set->Settings.flag_system.mqtt_switches) {                   // SetOption114 (0) - Detach Switches from relays and enable MQTT action state for all the SwitchModes
         // if (!SendKey(KEY_SWITCH, i +1, switchflag)) {         // Execute command via MQTT
         //   pCONT_mry->ExecuteCommandPower(i +1, switchflag, SRC_SWITCH);  // Execute command internally (if i < TasmotaGlobal.devices_present)
         //   // Should the rules of mine be here?
         // }                 // SetOption114 (0) - Detach Switches from relays and enable MQTT action state for all the SwitchModes
         // if (!SendKey(KEY_SWITCH, i +1, switchflag)) {         // Execute command via MQTT
-          pCONT_mry->ExecuteCommandPower(i, switchflag, SRC_SWITCH);  // Execute command internally (if i < TasmotaGlobal.devices_present)
+
+        ALOG_INF(PSTR("WHERE MY RULE SHOULD BE"));
+          
+          // #ifdef USE_MODULE_DRIVERS_RELAY    I DO NOT WANT INTERNAL RELAY CONTROL, BUT SHOULD BE RULE BASED!
+          // pCONT_mry->ExecuteCommandPower(i, switchflag, SRC_SWITCH);  // Execute command internally (if i < TasmotaGlobal.devices_present)
+          // #endif
           // Should the rules of mine be here?
         // }
       } else { mqtt_action = switchflag; }
@@ -595,24 +602,25 @@ ALOG_INF(PSTR("SendKey %d %d %d"), key, device, state);
 
   // if (switchflag < 3) 
   // {
-  //   #ifndef ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
+    #ifndef ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
 
-  //     #ifdef USE_MODULE_CORE_RULES
-  //       // Active high means start of motion always, so check for inversion
-  //       uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
-  //       DEBUG_LINE_HERE
-  //       ALOG_INF( PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
+      #ifdef USE_MODULE_CORE_RULES
+        // Active high means start of motion always, so check for inversion
+        uint8_t new_state = state;//switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
+        uint8_t i = device;
+        DEBUG_LINE_HERE
+        ALOG_INF( PSTR("switchflag=%d, new_state=%d, state=%d"),0,new_state,state);
 
-  //       pCONT_rules->NewEventRun_NumArg(
-  //         D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
-  //         TASK_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
-  //         i, // SWitch index
-  //         1, // Embedded data length
-  //         new_state); // Event has occured, save and check it            
-  //         DEBUG_LINE_HERE
-  //     #endif
+        pCONT_rules->NewEventRun_NumArg(
+          D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
+          TASK_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
+          i, // SWitch index
+          1, // Embedded data length
+          new_state); // Event has occured, save and check it            
+          DEBUG_LINE_HERE
+      #endif
       
-  //   #endif // ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
+    #endif // ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
   // }
 
   // switches[i].lastwallswitch = state;
@@ -1195,7 +1203,7 @@ void mSwitches::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
   
-} //end "MQTTHandler_Init"
+} 
 
 #endif // USE_MODULE_NETWORK_MQTT
 

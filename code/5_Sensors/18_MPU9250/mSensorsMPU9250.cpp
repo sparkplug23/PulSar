@@ -435,7 +435,7 @@ void mSensorsMPU9250::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsMPU9250::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 
 

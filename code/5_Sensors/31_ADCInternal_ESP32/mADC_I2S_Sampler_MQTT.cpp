@@ -65,7 +65,7 @@ void mADC_I2S_Sampler::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mADC_I2S_Sampler::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

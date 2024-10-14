@@ -384,10 +384,10 @@
    * SECTION: TEMPLATE: Names
   ************************************/    
 
-  #define D_DEVICE_UNIQUE_NAME "OilRadiator01"
+  #define D_DEVICE_UNIQUE_NAME "Socket"
   #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
   #define D_DEVICE_SENSOR_ZONE_0_NAME "OilRadiator01-BME0"
-  #define D_DEVICE_DRIVER_RELAY_0_NAME "OilRadiator01-DriverZone0"
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Socket"
   
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
@@ -407,7 +407,7 @@
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+        "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"      
       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""

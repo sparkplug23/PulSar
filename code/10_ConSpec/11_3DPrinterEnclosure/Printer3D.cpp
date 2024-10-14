@@ -239,7 +239,7 @@ void mPrinter3D::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mPrinter3D::ConstructJSON_State;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

@@ -474,7 +474,7 @@ void mLouvoliteHub::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mLouvoliteHub::ConstructJSON_State;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

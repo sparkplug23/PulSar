@@ -254,8 +254,8 @@ typedef struct Segment {
     uint16_t _dataLen;
     static uint16_t _usedSegmentData;
 
-    uint16_t DataLength(){ return _dataLen; };
-    byte* Data(){ return data; };
+    inline uint16_t DataLength(){ return _dataLen; };
+    inline byte* Data(){ return data; };
 
     #ifdef ENABLE_DEBUGFEATURE__SEGMENT_FRAME_TIME
     float frames_per_second = 0;

@@ -735,11 +735,11 @@ void BusManager::show()
 void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, RgbcctColor c, int16_t cct) 
 {
   // DEBUG_LINE_HERE;
-  // ALOG_INF(PSTR("numBusses = %d"),numBusses);
+  // ALOG_ERR(PSTR("numBusses = %d"),numBusses);
   // c.debug_print("BusManager::setPixelColor");
   
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-  ALOG_INF(PSTR("BusManagersetPixelColor %d, %d, %d, %d"), pix, c.R, c.G, c.B);
+  ALOG_ERR(PSTR("BusManagersetPixelColor %d, %d, %d, %d"), pix, c.R, c.G, c.B);
   #endif
 
   for (uint8_t i = 0; i < numBusses; i++) 
@@ -747,10 +747,10 @@ void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, RgbcctColor c, int16_t cc
     Bus* b = busses[i];
     uint16_t bstart = b->getStart();
     if (pix < bstart || pix >= bstart + b->getLength()){
-      // ALOG_INF(PSTR("breaking here %d %d %d"), pix, bstart, b->getLength());
+      // ALOG_ERR(PSTR("breaking here %d %d %d"), pix, bstart, b->getLength());
       continue;
     }
-    // ALOG_INF(PSTR("busses %d pix %d"), i, pix);
+    // ALOG_ERR(PSTR("busses %d pix %d"), i, pix);
     busses[i]->setPixelColor(pix - bstart, c);
   }
 }
@@ -760,11 +760,14 @@ RgbcctColor BusManager::getPixelColor(uint16_t pix)
 {
   for (uint8_t i = 0; i < numBusses; i++) {
     Bus* b = busses[i];
-    uint16_t bstart = b->getStart();
-    if (pix < bstart || pix >= bstart + b->getLength()) continue;
-    return b->getPixelColor(pix - bstart);
+    uint16_t bstart = b->getStart();  // Cache the start value to avoid repeated function calls
+    uint16_t blength = b->getLength(); // Cache the length value
+
+    if (pix >= bstart && pix < bstart + blength) {
+      return b->getPixelColor(pix - bstart);  // Direct return once a match is found
+    }
   }
-  return RgbcctColor();
+  return RgbcctColor();  // Default return when no bus matches
 }
 
 

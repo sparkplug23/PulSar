@@ -24,7 +24,7 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
 #ifdef ESP32
-#define PIXEL_RANGE_LIMIT 3200
+#define PIXEL_RANGE_LIMIT 3300
 #else
 #define PIXEL_RANGE_LIMIT 1000
 #endif 
@@ -385,7 +385,7 @@ class mAnimatorLight :
     void BootMessage();
                 
 
-    RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
+    IRAM_ATTR RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
     
     #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
     void Test_Config();
@@ -1866,11 +1866,6 @@ class mAnimatorLight :
 
 
 
-  struct TransitionColourPairs
-  {
-    RgbcctColor StartingColour;
-    RgbcctColor DesiredColour;
-  };
   enum ColourType{ 
       // COLOUR_TYPE__NONE__ID=0, 
       COLOUR_TYPE__SINGLE__ID=1, // likely never used for me, remove
@@ -1883,10 +1878,6 @@ class mAnimatorLight :
       // COLOUR_TYPE__RGBWC__ID, //remove
       // COLOUR_TYPE__RGBCW__ID //remove
   };
-
-  // TransitionColourPairs* 
-  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
-  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
 
   uint8_t GetSizeOfPixel(ColourType colour_type);
 
@@ -1902,17 +1893,58 @@ class mAnimatorLight :
   void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
   void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
   void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
+
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+  IRAM_ATTR 
+  #endif 
   void AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
-  void AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
+
+
+
   void AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSegColours(const AnimationParam& param);
 
-  void SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, RgbcctColor starting_colour);
-  void SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  ColourType pixel_type, RgbcctColor starting_colour);
 
-  void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+  IRAM_ATTR 
+  #endif 
+  void AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
+
+  void 
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+  IRAM_ATTR 
+  #endif 
+  SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, const RgbcctColor& starting_colour);
+  
+  void 
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+  IRAM_ATTR 
+  #endif 
+  SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  ColourType pixel_type, const RgbcctColor& desired_colour);
+
+  void 
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+  IRAM_ATTR 
+  #endif 
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+
+
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_WithFade(uint8_t fade = 0);
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
   void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+  struct TimeCriticalLogging{
+    uint32_t start_value[4]; // use as temp to record start of measurment, use here for speed
+    uint32_t dynamic_buffer__starting_colour;
+    uint32_t dynamic_buffer__desired_colour;
+    uint32_t effect_call;
+    uint32_t segment_effects;
+
+    bool time_unit_output_ms = true;
+  }lighting_time_critical_logging;
+  #endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
 
   #ifdef ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
@@ -2188,6 +2220,20 @@ class mAnimatorLight :
     IRAM_ATTR 
     #endif 
     GetColourFromUnloadedPalette2(
+      uint16_t palette_id,
+      uint16_t desired_index_from_palette = 0,
+      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      uint8_t* encoded_index = nullptr,
+      bool flag_request_is_for_full_visual_output = false
+    );
+
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromUnloadedPalette3(
       uint16_t palette_id,
       uint16_t desired_index_from_palette = 0,
       bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"

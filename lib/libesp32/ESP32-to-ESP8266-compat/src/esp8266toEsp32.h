@@ -90,7 +90,7 @@ inline void analogAttach(uint32_t pin, uint32_t channel) {
   _pwm_channel[channel &7] = pin;
   ledcAttachPin(pin, channel + PWM_CHANNEL_OFFSET);
   ledcSetup(channel + PWM_CHANNEL_OFFSET, _pwm_frequency, _pwm_bit_num);
-//  Serial.printf("attach %d - %d\n", channel, pin);
+  Serial.printf("attach %d - %d\n", channel, pin);
 }
 
 inline void analogWrite(uint8_t pin, int val)

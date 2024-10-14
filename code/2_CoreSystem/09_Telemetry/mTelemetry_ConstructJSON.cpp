@@ -503,24 +503,20 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     //   }
     // }
     // JBI->Object_End();
+
+
     JBI->Object_Start(PM_GPIO);
-    for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++){ 
-      if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i])){ // skip pins not configured
-
-      // ALOG_TST(PSTR("buffer=%s %d %d %d"),
-      // pCONT_pins->GetGPIOFunctionNamebyID_P(pCONT_pins->pin_attached_gpio_functions[i]),
-      // pCONT_pins->pin_attached_gpio_functions[i],
-      // pCONT_pins->GetPin(i),
-      // i 
-      // );
-
-
-        sprintf_P(buffer, PSTR("%s"), pCONT_pins->GetGPIOFunctionNamebyID_P(pCONT_pins->pin_attached_gpio_functions[i]));
+    for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
+    {
+      if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i]))
+      {
+        sprintf_P(buffer, PSTR("%s"), pCONT_pins->GetGPIOFunctionNamebyID(pCONT_pins->pin_attached_gpio_functions[i], buffer, sizeof(buffer)));
         JBI->Add(buffer, pCONT_pins->GetPin(pCONT_pins->pin_attached_gpio_functions[i]));
       }
-    }
-    
+    }    
     JBI->Object_End();
+
+
     // JBI->Object_Start(D_GPIO "_map");
     // for(uint16_t i=0;i<MAX_USER_PINS;i++){ 
     //   sprintf_P(buffer, PSTR("%d"),
@@ -548,7 +544,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     {
 // DEBUG_LINE_HERE;
       JBI->Add(
-        pCONT_pins->GetPinWithGPIO(pCONT_pins->pin_attached_gpio_functions[i])
+        pCONT_pins->GetPin(pCONT_pins->pin_attached_gpio_functions[i])
         
         
         );

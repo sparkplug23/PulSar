@@ -1362,7 +1362,7 @@ void mRelays::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mRelays::ConstructJSON_Scheduled;
   mqtthandler_list.push_back(ptr);
 
-} //end "MQTTHandler_Init"
+} 
 
 #endif // USE_MODULE_NETWORK_MQTT
 

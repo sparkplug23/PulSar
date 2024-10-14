@@ -73,7 +73,6 @@ DEFINE_PGM_CTR(PM_BUSTYPE__NET_ARTNET_RGB__CTR) "NET_ARTNET_RGB";
 DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGBW__CTR) "NET_DDP_RGBW";
 DEFINE_PGM_CTR(PM_BUSTYPE__RESERVED__CTR) "RESERVED";
 
-
 // Temporary struct for passing bus configuration to bus
 struct BusConfig 
 {
@@ -121,9 +120,9 @@ struct BusConfig
   {
     if (!count) count = 1;
     if (count > MAX_LEDS_PER_BUS) count = MAX_LEDS_PER_BUS;
-    if (start >= MAX_LEDS) return false;
+    if (start >= MAX_LEDS_NEO) return false;
     // Limit length of strip if it would exceed total permissible LEDs
-    if (start + count > MAX_LEDS) count = MAX_LEDS - start;
+    if (start + count > MAX_LEDS_NEO) count = MAX_LEDS_NEO - start;
     // Extend total count accordingly
     if (start + count > total) total = start + count;
     return true;

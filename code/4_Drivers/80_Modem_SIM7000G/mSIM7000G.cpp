@@ -2448,7 +2448,7 @@ void mSIM7000G::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mSIM7000G::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

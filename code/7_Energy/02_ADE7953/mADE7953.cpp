@@ -335,7 +335,7 @@ void mEnergyADE7953::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyADE7953::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 
 void mEnergyADE7953::MQTTHandler_RefreshAll(){
@@ -344,7 +344,7 @@ void mEnergyADE7953::MQTTHandler_RefreshAll(){
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mEnergyADE7953::MQTTHandler_Rate(){

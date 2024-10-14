@@ -348,7 +348,7 @@ void mDriverInterface::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DRIVERS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mDriverInterface::ConstructJson_DriverStatus;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 /**

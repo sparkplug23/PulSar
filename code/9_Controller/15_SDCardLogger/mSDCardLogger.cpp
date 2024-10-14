@@ -233,7 +233,7 @@ void mSDCardLogger::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSDCardLogger::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 
 void mSDCardLogger::MQTTHandler_RefreshAll(){
@@ -242,7 +242,7 @@ void mSDCardLogger::MQTTHandler_RefreshAll(){
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mSDCardLogger::MQTTHandler_Rate(){

@@ -211,6 +211,8 @@ void mInterfaceLight::Template_Load()
 
     pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
+    Serial.println("we are here");
+
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
 
     #ifdef USE_LIGHTING_TEMPLATE_ANOTHER
@@ -1360,9 +1362,9 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
       JBI->Array_Start("CO");
         JBI->Add(colour_order.red);
         JBI->Add(colour_order.green);
-        // JBI->Add(colour_order.blue);
-        // JBI->Add(colour_order.white_cold);
-        // JBI->Add(colour_order.white_warm);
+        JBI->Add(colour_order.blue);
+        JBI->Add(colour_order.white_cold);
+        JBI->Add(colour_order.white_warm);
       JBI->Array_End();
 
       JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
@@ -1453,7 +1455,7 @@ void mInterfaceLight::MQTTHandler_Init()
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
 
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

@@ -393,7 +393,7 @@ void mBuzzer::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 
 void mBuzzer::MQTTHandler_RefreshAll(){
@@ -402,7 +402,7 @@ void mBuzzer::MQTTHandler_RefreshAll(){
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-} //end "MQTTHandler_Init"
+} 
 
 
 void mBuzzer::MQTTHandler_Rate(){

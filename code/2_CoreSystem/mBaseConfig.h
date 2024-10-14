@@ -35,6 +35,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 #include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
+#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_PZEM.h"
@@ -356,7 +357,9 @@ With latest version, all longer term shared debug features should be added here 
 \*********************************************************************************************/
 #define WEB_SERVER             2                 // [WebServer] Web server (0 = Off, 1 = Start as User, 2 = Start as Admin)
 #define WEB_PASSWORD           ""                // [WebPassword] Web server Admin mode Password for WEB_USERNAME (empty string = Disable)
+#ifdef DEVICENAME_FRIENDLY_CTR
 #define FRIENDLY_NAME          DEVICENAME_FRIENDLY_CTR   // [FriendlyName] Friendlyname up to 32 characters used by webpages and Alexa
+#endif
 // HTML hex color codes. Only 3 and 6 digit hex string values are supported!! See https://www.w3schools.com/colors/colors_hex.asp
 #define COLOR_TEXT                  "#fff"       // [WebColor1] Global text color - Black
 #define COLOR_BACKGROUND            "#000"       // [WebColor2] Global background color - White

@@ -1167,7 +1167,7 @@ void mShellyDimmer::MQTTHandler_Init(){
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
 //   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Debug;
 
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

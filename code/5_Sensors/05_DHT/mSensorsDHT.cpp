@@ -117,7 +117,7 @@ void mSensorsDHT::Pre_Init(void){
     // delay(2000);
   }
   // {"flag_serial_set_tx_set":0,"GPIO":{"DHT22_1":25},
-  // "pin_attached_gpio_functions":
+  // "p in_attached_gpio_functions":
   // [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   // "user_template_io":
   // [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -379,7 +379,7 @@ void mSensorsDHT::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send

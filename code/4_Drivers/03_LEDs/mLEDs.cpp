@@ -1,23 +1,6 @@
 #include "mLEDs.h"
 
-/**
- * @brief This driver will need to control any LED only pins.
- * If possible, it could also use the PWM driver? PWM should become CoreSystem/33_PWM and always be enabled
- * So yes, LEDs will tell it what it write out and it will manage ESPTypes
- * 
- * I either need to "link" LEDx as STATUS led, or have it as its own method.
- * Though, it would be useful to assign LEDs different system rolls
- * ** normal, manual control
- * ** status, network connection error
- * ** power, if the relay of the same index is on
- * ** status+power, both of the above, perhaps I should use a uint8_t bitmask for this to assign LED roles
- * ** wifi is AP mode, to serve IP for local config (use timed pulses, eg 3 seconds off, double blink)
- * 
- */
-
-
 #ifdef USE_MODULE_DRIVERS_LEDS
-
 
 int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -31,31 +14,21 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_INIT:
       Init();
     break;
+    case TASK_BOOT_MESSAGE:
+      BootMessage();
+    break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
     case TASK_LOOP: 
-      EveryLoop();
+      Config_StatusEffect();
+      Refresh_AllLEDs();  // This will update all the LEDs according to their modes
     break;
-    case TASK_EVERY_SECOND: 
-
-      
-
-      // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_INV_ID))); 
-      // digitalWrite(pCONT_pins->GetPin(GPIO_LED2_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED2_INV_ID))); 
-      // digitalWrite(pCONT_pins->GetPin(GPIO_LED3_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED3_INV_ID))); 
-
-
-      // EveryLoop();
-      // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID),!digitalRead(pCONT_pins->GetPin(GPIO_LED1_ID)));
-      // digitalWrite(pCONT_pins->GetPin(GPIO_LED2_ID),!digitalRead(pCONT_pins->GetPin(GPIO_LED2_ID)));
-
-      // SetState
     break;
     /************
      * COMMANDS SECTION * 
@@ -70,14 +43,14 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -85,38 +58,46 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-void mLEDs::Pre_Init(void){
+void mLEDs::Pre_Init(void)
+{
   
-  settings.fEnableSensor = false;
+  ALOG_HGL( PSTR("D_LOG_STARTUP" "LED Init") );
 
-  // Check all possible pin options
-  settings.leds_found = 0;    
+  inverted_bitmask = 0; // Reset all bits
 
   // Lets check each type on their own, normal, inverted etc
-  for(uint8_t ii=0; 
-              ii<MAX_LEDS; 
-              ii++
-  ){
+  for(uint32_t ii=0; ii<MAX_LEDS; ii++)
+  {
+
+    int8_t pin = -1;
+
     if(pCONT_pins->PinUsed(GPIO_LED1_ID, ii))
     {
-      leds[settings.leds_found].pin = pCONT_pins->GetPin(GPIO_LED1_ID, ii);
-      bitSet(led_inverted, 0);
-      pinMode(leds[settings.leds_found].pin, OUTPUT); // Note: GPIO16/D0 inversion is pulldown, not up
-      digitalWrite(leds[settings.leds_found].pin, bitRead(led_inverted, ii));
-      if(settings.leds_found++ >= MAX_LEDS){ break; }
+      SetUsed(ii);
+      pin = pCONT_pins->GetPin(GPIO_LED1_ID, ii);
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, LOW); // Default: OFF
     }else
     if(pCONT_pins->PinUsed(GPIO_LED1_INV_ID, ii))
     {
-      leds[settings.leds_found].pin = pCONT_pins->GetPin(GPIO_LED1_INV_ID, ii);
-      bitSet(led_inverted, 1);
-      pinMode(leds[settings.leds_found].pin, OUTPUT); // Note: GPIO16/D0 inversion is pulldown, not up
-      digitalWrite(leds[settings.leds_found].pin, bitRead(led_inverted, ii));
-      if(settings.leds_found++ >= MAX_LEDS){ break; }
+      SetUsed(ii);
+      pin = pCONT_pins->GetPin(GPIO_LED1_INV_ID, ii);
+      ALOG_INF(PSTR("%d %d %d"), GPIO_LED1_INV_ID, ii, pin);
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, HIGH); // Default: OFF
+      SetInvertFlag(ii);
+    }else{
+      ALOG_DBG(PSTR(D_LOG_LED "%d None"), ii);
     }
+
+    if(pin != -1)
+    {
+      ALOG_INF(PSTR(D_LOG_LED "%d pin=%d %s"), ii, pin, toBinaryString(used_bitmask, MAX_LEDS).c_str() );
+    }
+
   }
 
-  // pCONT_set->runtime.devices_present += settings.leds_found;
-  if(settings.leds_found){ settings.fEnableSensor = true; }
+  if(used_bitmask){ module_state.mode = ModuleStatus::Initialising; }
 
 }
 
@@ -124,255 +105,265 @@ void mLEDs::Pre_Init(void){
 void mLEDs::Init(void)
 {
   // Configured already
+  module_state.mode = ModuleStatus::Running;
+
+  leds.resize( UsedCount() );  // Allocate space for MAX_LEDS
+
+  for (uint8_t i = 0; i < UsedCount(); i++) {
+    // uint8_t pin = pCONT_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
+    // pinMode(pin, OUTPUT);  // Set the pin as output
+
+    // if (i == 0) {  // LED 1 - Blink 3 times, each blink 300ms apart, cycle every 5 seconds
+    //   StartEffect_Blink(i, 3, 100, 5000, 30);  
+    // } else if (i == 1) {  // LED 2 - Solid ON
+    //   StartEffect_Blink(i, 3, 250, 5000, 30);  
+    //   // StartEffect_On(i);
+    // } else if (i == 2) {  // LED 3 - Solid OFF
+    //   StartEffect_Blink(i, 10, 100, 5000, 30);  
+    //   // StartEffect_Off(i);
+    // } else if (i == 3) {  // LED 4 - Pulsing with 1-second period
+    //   StartEffect_Blink(i, 20, 100, 5000, 30);  
+    //   // StartEffect_Pulse(i, 1000);
+    // }
+  }
+
 }
 
 
-void mLEDs::EveryLoop()
+void mLEDs::BootMessage()
+{
+  #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+  char buffer[100];
+  if(used_bitmask)
+  {
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "#%d ", UsedCount());  
+    char buffer2[50];
+    for(uint8_t sensor_id = 0; sensor_id<MAX_LEDS; sensor_id++)
+    {      
+      //if bit0 is used as LEDSTATUS, then show this here too
+      mSupport::appendToBuffer(buffer, sizeof(buffer), "%d, ", sensor_id);    
+    }
+  }
+  else{
+    mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
+  }
+  mSupport::removeTrailingComma(buffer);
+  ALOG_IMP(PSTR(D_LOG_LOG "%s"), buffer);
+  #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+}
+
+
+void mLEDs::Refresh_AllLEDs() {
+  for (uint8_t i = 0; i < UsedCount(); i++) 
+  {
+    Refresh_LED(i);  // Update the state of each LED
+  }
+}
+
+
+void mLEDs::Refresh_LED(uint8_t led_index)
 {
 
-  SubTask_Status_LEDs();
+  LedState led = leds[led_index];
+  uint8_t pin = pCONT_pins->GetPin(GPIO_LED1_ID, led_index);  // Get the corresponding pin for each LED
 
+  uint32_t currentTime = millis();
+  uint32_t tElapsed = currentTime - led.lastUpdateTime;
 
-// digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_ID))); delay(200);
+  // Check if duration has exceeded, and only reset once
+  if (led.duration_secs > 0 && (currentTime - led.startTime) >= (led.duration_secs * 1000)) {
+      if (led.effect != LED_OFF) { // This check ensures that reset happens only once
+          digitalWrite(pin, LOW);  // Turn off the LED after duration is exceeded
+          led.effect = LED_OFF;      // Set the mode to OFF
+          ALOG_INF(PSTR("LED%d Reset OFF after duration"), pin);
+      }
+      return;  // Stop further processing as the LED is now off
+  }
 
-  // if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
-  //   door_detect.state = IsDoorOpen();
-  //   door_detect.tDetectTimeforDebounce = millis();
-  //   if(door_detect.state){ 
-  //     door_detect.isactive = true;
-  //     door_detect.detected_time = pCONT_time->GetTimeShortNow();
-  //     mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  //   }else{ 
-  //     door_detect.isactive = false;
-  //   }
-  //   door_detect.ischanged = true;
-  //   mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  // }
+  switch (led.effect) {
+      case LED_ON:
+          digitalWrite(pin, HIGH);
+          break;
+
+      case LED_OFF:
+          digitalWrite(pin, LOW);
+          break;
+
+      case LED_BLINK:
+      {
+          uint32_t totalCycle = (led.period * led.count) + led.groupPause;  // Total cycle time (blinks + pause)
+
+          if (tElapsed >= totalCycle) {
+              // Reset the cycle and start again
+              led.lastUpdateTime = currentTime;
+              tElapsed = 0;
+          }
+
+          // If we are within the blink phase
+          if (tElapsed < (led.period * led.count)) {
+              uint32_t phase = tElapsed / led.period;  // Which blink are we in?
+
+              // Toggle the LED on/off in each interval
+              if ((tElapsed % led.period) < (led.period / 2)) {
+                  digitalWrite(pin, HIGH);  // Turn LED on
+              } else {
+                  digitalWrite(pin, LOW);   // Turn LED off
+              }
+          } else {
+              // After the blinks, keep LED off during the pause
+              digitalWrite(pin, LOW);
+          }
+      }
+      break;
+
+      case LED_PULSE:
+      {
+          // Calculate the total time for pulse up and down (one complete pulse cycle)
+          uint32_t totalCycle = (led.period * led.count) + led.groupPause;
+
+          // Check if we are at the end of the pulse cycle (including pause)
+          if (tElapsed >= totalCycle) {
+              // ALOG_INF(PSTR("tElapsed >= totalCycle %d %d"),tElapsed,totalCycle);
+              // Reset the cycle and start again
+              led.lastUpdateTime = currentTime;
+              tElapsed = 0;  // Reset tElapsed for the new cycle
+          }
+
+              // ALOG_INF(PSTR("tElapsed < (led.period * led.count) %d %d %d"), tElapsed,led.period,led.count);
+          // If we are within the pulse phase
+          if (tElapsed < (led.period * led.count)) {
+              uint32_t currentPhaseTime = tElapsed % led.period;  // Get the current time within the period
+
+              // Calculate the duty cycle as a sine wave based on the current phase
+              float phase = (float)currentPhaseTime / (float)led.period;
+              float dutyCycle = (sin(2 * PI * phase) + 1) / 2;  // Sine wave for smooth pulsing
+
+              // Set PWM brightness based on the duty cycle (for smooth pulsing)
+              analogWrite(pin, (int)(dutyCycle * 255));  // Set brightness based on the duty cycle
+
+              // Debugging: Print the current duty cycle
+              // char floats[20] = {0}; 
+              // mSupport::float2CString(dutyCycle, 2, floats);
+              // ALOG_INF(PSTR("float %s"), floats);
+          } else {
+              // After the pulse, keep LED off during the pause period
+              analogWrite(pin, 0);  // Turn LED off (0 brightness)
+              // ALOG_INF(PSTR("off"));
+          }
+      }
+      break;
+
+  }
 
 }
+
+
+void mLEDs::StartEffect_On(uint8_t index) {
+  leds[index].effect = LED_ON;
+  leds[index].lastUpdateTime = millis();
+}
+
+
+void mLEDs::StartEffect_Off(uint8_t index) {
+  leds[index].effect = LED_OFF;
+  leds[index].lastUpdateTime = millis();
+}
+
+
+void mLEDs::StartEffect_Blink(uint8_t index, uint8_t blinkCount, uint16_t blinkInterval, uint16_t blinkGroupPause, uint8_t duration_secs) 
+{
+  leds[index].effect = LED_BLINK;
+  leds[index].count = blinkCount;
+  leds[index].period = blinkInterval;
+  leds[index].groupPause = blinkGroupPause;  // Pause time between blink groups
+  leds[index].lastUpdateTime = millis();
+  leds[index].state = LOW;  // Start with the LED off
+  leds[index].duration_secs = duration_secs;  // Duration in seconds
+  leds[index].startTime = millis();  // Record the start time
+}
+
+
+void mLEDs::StartEffect_Pulse(uint8_t index, uint8_t pulseCount, uint16_t period, uint16_t groupPause, uint8_t duration_secs) 
+{
+  leds[index].effect = LED_PULSE;
+  leds[index].period = period;
+  leds[index].groupPause = groupPause;  // Pause time between pulse cycles
+  leds[index].count = pulseCount;       // Number of pulses in each cycle
+  leds[index].lastUpdateTime = millis();
+  leds[index].duration_secs = duration_secs;  // Duration in seconds
+  leds[index].startTime = millis();  // Record the start time
+
+  // Attach the PWM channel to the pin for the pulse mode
+  uint8_t pin = pCONT_pins->GetPin(GPIO_LED1_ID, index);
+  analogAttach(pin, index);  // The PWM channel corresponds to the index of the LED
+}
+
+
+void mLEDs::SetInvertFlag(uint8_t b) {
+  bitSet(inverted_bitmask, b);
+}
+
+bool mLEDs::IsUsed(uint8_t index) {
+  return (pCONT_pins->PinUsed(GPIO_LED1_ID, index) || pCONT_pins->PinUsed(GPIO_LED1_INV_ID, index) || bitRead(used_bitmask, index));
+}
+
+void mLEDs::SetUsed(uint8_t index) {
+  bitSet(used_bitmask, index);
+}
+
+uint8_t mLEDs::UsedCount() {
+  return __builtin_popcount(used_bitmask);
+}
+
+
+/*
+ If LEDs are in this mode, update them (eg to blink/pulse etc)
+index if set with index, will set the power type (so if 4 power leds, then they are 0,1,2,3 which may not actually be started from the first ones)
+If index==255, then all are set regardless by index
+*/
+void mLEDs::Set_PowerLED(bool state, uint8_t index) 
+{
+  // This will cycle through and set all LEDs configured as power type
+
+
+}
+
+/*
+ If LEDs are in this mode, update them (eg to blink/pulse etc)
+ This function lets me set the status to show certain types, with timing, and effect (pulse/blink/on/off)
+*/
+void mLEDs::Set_StatusLED(uint8_t count, uint16_t interval, uint16_t event_pause, uint8_t duration_secs, LedEffect effect)
+{
+  // This will cycle through and set all LEDs configured as status type
+
+}
+
+
 
 /**
- * @brief Any LEDs configured as status leds will be handled here
+ * @brief Status LED 
+ * 
+ * For each LED configured as status type, this function will read all status flags across the systems and make sure the LEDs are configured to show.
+ * This is a interface of sorts.
  * 
  */
-void mLEDs::SubTask_Status_LEDs()
-{
-
-  
-
-
-}
-
-
- bool mLEDs::GetState(uint8_t index)
-  {
-    return digitalRead(bitRead(led_inverted, index)==1?0:1); // inverted, ON when low
-  };
-
-  void mLEDs::CommandSet_LED_Power(uint8_t state, uint8_t index)
-  {
-
-    
-    // needs to be made special, is PWM type or not
-    /**
-     * @brief digital 0 = off, 1> then ON
-     * 
-     */
-    int8_t pin_v = leds[index].pin;
-    uint8_t state2 = state;
-
-    ALOG_INF(PSTR("pin_v=%d,state=%d"), pin_v, state);
-
-    /**
-     * @brief 
-     * PWM, 0-1023 range since esp32 is 10bit, esp8266 is 8bit
-     * 
-     */
-    
-        digitalWrite(pin_v, state);//bitRead(led_inverted, state)?0:1); // inverted, ON when low
-  };
-
-
-
-
-void mLEDs::UpdateLedPowerAll()
-{
-	// for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {
-	// 	SetLedPowerIdx(i, bitRead(pCONT_set->led_power, i));
-	// }
-}
-
-void mLEDs::SetLedPowerIdx(uint32_t led, uint32_t state)
-{
-//   // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
-//   //   if (pCONT_pins->PinUsed(GPIO_LED1_ID, 1)) {
-//   //     led = 1;
-//   //   }
-//   // }
-//   if (pCONT_pins->PinUsed(GPIO_LED1_ID, led)) {
-//     uint32_t mask = 1 << led;
-//     if (state) {
-//       state = 1;
-//       pCONT_set->led_power |= mask;
-//     } else {
-//       pCONT_set->led_power &= (0xFF ^ mask);
-//     }
-//     uint16_t pwm = 0;
-//     if (bitRead(pCONT_set->Settings.ledpwm_mask, led)) {
-// // #ifdef USE_LIGHT
-// //       pwm = mapvalue(ledGamma10(state ? Settings.ledpwm_on : Settings.ledpwm_off), 0, 1023, 0, Settings.pwm_range); // gamma corrected
-// // #else //USE_LIGHT
-//       pwm = mapvalue((uint16_t)(state ? pCONT_set->Settings.ledpwm_on : pCONT_set->Settings.ledpwm_off), 0, 255, 0, pCONT_set->Settings.pwm_range); // linear
-// // #endif //USE_LIGHT
-
-// #ifdef ESP8266
-//       analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(pCONT_set->led_inverted, led) ? pCONT_set->Settings.pwm_range - pwm : pwm);
-      
-// #endif // ESP8266
-//     } else {
-//       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
-//     }
-//   }
-// // #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-// //   if (led == 0) {
-// //     BuzzerSetStateToLed(state);
-// //   }
-// // #endif // USE_MODULE__DRIVERS_BUZZER_BASIC
-}
-
-void mLEDs::SetLedPower(uint32_t state)
-{
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
-  //   #endif// ENABLE_LOG_LEVEL_INFO
-  // // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
-  // //   SetLedPowerIdx(0, state);
-  // // } else {
-  //   power_t mask = 1;
-  //   for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {  // Map leds to power
-  //     bool tstate = (pCONT_set->power & mask);
-  //     SetLedPowerIdx(i, tstate);
-  //     mask <<= 1;
-  //   }
-  // // }
-}
-
-void mLEDs::SetLedPowerAll(uint32_t state)
-{
-  // for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {
-  //   SetLedPowerIdx(i, state);
-  // }
-}
-
-void mLEDs::SetLedLink(uint32_t state)
-{
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
-//     #endif// ENABLE_LOG_LEVEL_INFO
-
-//   uint32_t led_pin = pCONT_pins->GetPin(GPIO_LED1_ID);
-//   uint32_t led_inv = pCONT_set->ledlnk_inverted;
-//   if (99 == led_pin) {                    // Legacy - LED1 is status
-//     SetLedPowerIdx(0, state);
-//   }
-//   else if (led_pin < 99) {
-//     if (state) { state = 1; }
-//     digitalWrite(led_pin, (led_inv) ? !state : state);
-//   }
-// // #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-// //   BuzzerSetStateToLed(state);
-// // #endif // USE_MODULE__DRIVERS_BUZZER_BASIC
-}
-
-/**
- * @brief 
- * 
- * Version 1: Just on/off functions
- * Version 2: Remove this and do my own method ie how neopixel notifications was to blink, pulse etc
- *
- * In this class, I will include a way to set a LED index as a specific type.
- * PowerLED (tied to relay), StatusLED (network/mqtt connection)
- * If none are set and only one exists, then assume as StatusLED and dont show PowerLED
- *  
- */
-void mLEDs::UpdateStatusBlink()
+void mLEDs::Config_StatusEffect()
 {
   
   DEBUG_LINE;
   uint8_t blinkinterval = 1;
-  // pCONT_set->global_state.network_down = (pCONT_set->global_state.wifi_down && pCONT_set->global_state.eth_down);
-
-  if (!pCONT_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
-    if (pCONT_set->runtime.global_state.data) {                              // Any problem
-      if (pCONT_set->runtime.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
-      if (pCONT_set->runtime.global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
-      pCONT_set->runtime.blinks = 201;                                       // Allow only a single blink in case the problem is solved
-    }
+  
+  if (pCONT_set->runtime.global_state.data) {                              // Any problem
+    if (pCONT_set->runtime.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
+    if (pCONT_set->runtime.global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
+    pCONT_set->runtime.blinks = 201;                                       // Allow only a single blink in case the problem is solved
   }
+  
 
-//DEBUG_LINE_HERE;
-  DEBUG_LINE;
-  if (pCONT_set->runtime.blinks || pCONT_set->runtime.restart_flag || pCONT_set->runtime.ota_state_flag) {
-
-    // Work out the led state based on time
-    if (pCONT_set->runtime.restart_flag || pCONT_set->runtime.ota_state_flag) {                 // Overrule blinks and keep led lit
-    
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_WARNING, PSTR("blinkstate phasing out for new method"));
-      
-
-    #endif //  ENABLE_LOG_LEVEL_INFO
-      
-      
-      pCONT_set->runtime.blinkstate = true;                                  // Stay lit
-    } else {
-      pCONT_set->runtime.blinkspeed--; // based of multiples of 200ms
-      if (!pCONT_set->runtime.blinkspeed) {
-        pCONT_set->runtime.blinkspeed = blinkinterval;                       // Set interval to 0.2 (default), 1 or 2 seconds
-        pCONT_set->runtime.blinkstate ^= 1;                                  // Blink
-      }
-    }
-
-//DEBUG_LINE_HERE;
-  DEBUG_LINE;
-    // Update Link LED
-    if ((!(pCONT_set->Settings.ledstate &0x08)) && ((pCONT_set->Settings.ledstate &0x06) || (pCONT_set->runtime.blinks > 200) || (pCONT_set->runtime.blinkstate))) {
-      pCONT_led->SetLedLink(pCONT_set->runtime.blinkstate);                            // Set led on or off
-    }
-
-    // If blink has completed
-    if (!pCONT_set->runtime.blinkstate) {
-      pCONT_set->runtime.blinks--;
-      if (200 == pCONT_set->runtime.blinks) pCONT_set->runtime.blinks = 0;                      // Disable blink
-    }
-
-  }
-
-
-//DEBUG_LINE_HERE;
-  // if (pCONT_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag)) ) {
-  //   bool tstate = pCONT_set->power & pCONT_set->Settings.ledmask;
-  //   // if ((MODULE_SONOFF_TOUCH == pCONT_set->my_module_type) || 
-  //   //(MODULE_SONOFF_T11 == pCONT_set->my_module_type) || 
-  //   //(MODULE_SONOFF_T12 == pCONT_set->my_module_type) || 
-  //   //(MODULE_SONOFF_T13 == pCONT_set->my_module_type)) {
-  //   //   tstate = (!pCONT_set->power) ? 1 : 0;                          // As requested invert signal for Touch devices to find them in the dark
-  //   // }
-  //  SetLedPower(tstate);
-  // }
-
-  DEBUG_LINE;
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->runtime.blinkstate,pCONT_set->blinks);
-  //   #endif// ENABLE_LOG_LEVEL_INFO
 
 }
 
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
 
-  
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
@@ -427,84 +418,33 @@ uint16_t state_value = 0;
 
 
 
-  
-
-
-  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON]){
-  //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
-  // }else
-  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_SECS]){
-  //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
-  // }else
-  // if(jtok = obj[PM_RELAY].getObject()[PM_TIME_ON_MINUTES]){
-  //   CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
-  // }
-
-ALOG_INF(PSTR("HER1"));
-  if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.leds_found)){
-ALOG_INF(PSTR("HER2"));
-    CommandSet_LED_Power(state,relay_id);
+  if(jtok = obj["Blink"])
+  {
+    std::vector<uint32_t> data;
+    for(auto v : jtok.getArray()) 
+    {
+      data.push_back(v.getInt());
+    }
+    ALOG_INF(PSTR("TEST BLINK"));
+    StartEffect_Blink(data[0], data[1], data[2], data[3], data[4]);
   }
-ALOG_INF(PSTR("HER3"));
+  if(jtok = obj["Pulse"])
+  {
+    std::vector<uint32_t> data;
+    for(auto v : jtok.getArray()) 
+    {
+      data.push_back(v.getInt());
+    }
+    ALOG_INF(PSTR("TEST PULSE"));
+    StartEffect_Pulse(data[0], data[1], data[2], data[3], data[4]);
+  }
+
+  if(IsWithinRange(state, 0,10)){//} && IsWithinRange(relay_id, 0,settings.leds_found)){
+    // If set manually, then override EffectMode to be manual
+    // CommandSet_LED_Power(state,relay_id);
+  }
 
 
-// 	if(jtok = obj["LED"].getObject()["Name"])
-// 	{
-
-// 		led_id = jtok.getInt();
-
-// 	}
-
-// 	if(jtok = obj["LED"].getObject()["SetState"])
-// 	{
-
-// 		if(jtok.isNum())
-// 		{
-// 			// mySwitch->setReceiveProtocolMask(jtok.getUInt());
-// 			mqtthandler_settings.flags.SendNow = true;
-// 		}
-
-// 	}
-
-
-
-//  if(jtok = obj["LEDName"]){
-//     // if(jtok.isStr()){
-//     //   relay_id = GetRelayIDbyName(jtok.getStr());
-//     // }else 
-//     // if(jtok.isNum()){
-//     //   relay_id  = jtok.getInt();
-//     // }
-// 	led_id = jtok.getInt();
-//   }
-
-//   // Primary method since v0.86.14.21
-//   if(jtok = obj["LEDState"]){
-//     // if(jtok.isStr()){
-//     //   state = pCONT_sup->GetStateNumber(jtok.getStr());
-//     // }else 
-//     // if(jtok.isNum()){
-//       state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
-//     // }
-
-//     /**
-//      * @brief If off, clear any timer decounters for relays
-//      * 
-//      */
-//     // if(state == 0)
-//     // {
-//     //   CommandSet_Timer_Decounter(0, relay_id);
-//     // }
-
-// 		//state needs checked for flipped
-// 		// if(state == 2){
-
-// 		// }
-		
-// // SetState()
-
-//   }
-    
 }
   
 /******************************************************************************************************************
@@ -514,8 +454,7 @@ ALOG_INF(PSTR("HER3"));
 uint8_t mLEDs::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_COUNT, settings.leds_found);
-    // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
+    JBI->Add(D_COUNT, UsedCount() );
   return JBI->End();
 
 }
@@ -526,29 +465,12 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    // JBI->Object_Start(D_RFRECEIVED);
-  
-      // JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
-
-      JBI->Add("LED1_INV", pCONT_pins->GetPin(GPIO_LED1_INV_ID));
-      JBI->Add("LED2_INV", pCONT_pins->GetPin(GPIO_LED2_INV_ID));
-
-      // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
-      // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
-      // JBI->Add(D_RF_PULSE, rx_pkt.delay);   
-      // JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
-      // JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
-      
-    
-    // JBI->Object_End();
-  
-  
+    JBI->Add("LED1_INV", pCONT_pins->GetPin(GPIO_LED1_INV_ID));
+    JBI->Add("LED2_INV", pCONT_pins->GetPin(GPIO_LED2_INV_ID));
 
   return JBI->End();
 
 }
-
-
   
 /******************************************************************************************************************
  * MQTT
@@ -564,62 +486,28 @@ void mLEDs::MQTTHandler_Init()
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true; // DEBUG CHANGE
-  ptr->tRateSecs = 120; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mLEDs::ConstructJSON_State;
+  mqtthandler_list.push_back(ptr);
 
-} //end "MQTTHandler_Init"
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mLEDs::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mLEDs::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mLEDs::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
+} 
 
 #endif // USE_MODULE_NETWORK_MQTT
-
-
 
 
 #endif

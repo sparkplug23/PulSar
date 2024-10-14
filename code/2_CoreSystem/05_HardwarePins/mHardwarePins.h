@@ -198,18 +198,8 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR)   D_GPIO_FUNCTION_GPS_SERIAL
 #endif // ESP32
 
 #ifdef USE_MODULE_DRIVERS_LEDS
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LEDLNK_CTR)         D_GPIO_FUNCTION_LEDLNK_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LEDLNK_INV_CTR)         D_GPIO_FUNCTION_LED1_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED1_CTR)          D_GPIO_FUNCTION_LED1_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED2_CTR)          D_GPIO_FUNCTION_LED2_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED3_CTR)          D_GPIO_FUNCTION_LED3_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED4_CTR)          D_GPIO_FUNCTION_LED4_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED5_CTR)          D_GPIO_FUNCTION_LED5_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED1_INV_CTR)     D_GPIO_FUNCTION_LED1_INV_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED2_INV_CTR)     D_GPIO_FUNCTION_LED2_INV_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED3_INV_CTR)     D_GPIO_FUNCTION_LED3_INV_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED4_INV_CTR)     D_GPIO_FUNCTION_LED4_INV_CTR;
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED5_INV_CTR)     D_GPIO_FUNCTION_LED5_INV_CTR;
+DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED_NUM_CTR)           "Led%d";
+DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED_NUM_INV_CTR)         "Led%d Inv";
 #endif
 
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
@@ -572,8 +562,8 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_PWM1_ID, GPIO_PWM2_ID, GPIO_PWM3_ID, GPIO_PWM4_ID, GPIO_PWM5_ID,
   GPIO_PWM1_INV_ID, GPIO_PWM2_INV_ID, GPIO_PWM3_INV_ID, GPIO_PWM4_INV_ID, GPIO_PWM5_INV_ID,
   // LEDs
-  GPIO_LED1_ID, GPIO_LED2_ID, GPIO_LED3_ID, GPIO_LED4_ID,
-  GPIO_LED1_INV_ID, GPIO_LED2_INV_ID, GPIO_LED3_INV_ID, GPIO_LED4_INV_ID,
+  GPIO_LED1_ID,     GPIO_LED2_ID,     GPIO_LED3_ID,     GPIO_LED4_ID,     GPIO_LED5_ID,     GPIO_LED6_ID,     GPIO_LED7_ID,     GPIO_LED8_ID,
+  GPIO_LED1_INV_ID, GPIO_LED2_INV_ID, GPIO_LED3_INV_ID, GPIO_LED4_INV_ID, GPIO_LED5_INV_ID, GPIO_LED6_INV_ID, GPIO_LED7_INV_ID, GPIO_LED8_INV_ID,
   // MH-Z19 Serial interface
   GPIO_MHZ_TXD_ID, GPIO_MHZ_RXD_ID,
   // SenseAir Serial interface
@@ -640,10 +630,6 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_PIR_1_INV_ID, GPIO_PIR_2_INV_ID, GPIO_PIR_3_INV_ID, //pulldown
   // Motion: ? other for later!
 
-
-  // Link/Status led
-  // Phase out link leds, it will default to led1
-  // GPIO_LEDLNK_ID, GPIO_LEDLNK_INV_ID,     // Inverted link led
   // Arilux RF Receive input
   GPIO_ARIRFRCV_ID, GPIO_ARIRFSEL_ID,
   // Buzzer
@@ -733,14 +719,18 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_SENSOR_END_ID 
 }; // used 171of 250
 
-/**
- * @brief Programmer selectable GPIO functionality
- */
+// Error as warning to rethink GPIO usage with max 2045
+static_assert(GPIO_SENSOR_END_ID < 2000, "Too many UserSelectablePins");
+
+
+// /**
+//  * @brief Programmer selectable GPIO functionality
+//  */
 enum ProgramSelectablePins {
-  GPIO_FIX_START_ID = 251,
-  GPIO_SPI_MISO_ID,       // SPI MISO library fixed pin GPIO12
-  GPIO_SPI_MOSI_ID,       // SPI MOSI library fixed pin GPIO13
-  GPIO_SPI_CLK_ID,        // SPI Clk library fixed pin GPIO14
+  GPIO_FIX_START_ID = 2046,//?
+  // GPIO_SPI_MISO_ID,       // SPI MISO library fixed pin GPIO12
+  // GPIO_SPI_MOSI_ID,       // SPI MOSI library fixed pin GPIO13
+  // GPIO_SPI_CLK_ID,        // SPI Clk library fixed pin GPIO14
   GPIO_USER_ID=9999,           // User configurable needs to be 255
   GPIO_MAX_ID };
 
@@ -913,11 +903,17 @@ class mHardwarePins :
     bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
     bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
-    int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+
+    #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+    boolean PinUsed(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
+    int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
+    #else
     boolean PinUsed(uint32_t gpio, uint32_t index = 0);
+    int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+    #endif
+
     void SetPin(uint32_t lpin, uint32_t gpio);
 
-    int16_t GetPinWithGPIO(uint16_t gpio, uint8_t index = 0);
     uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);

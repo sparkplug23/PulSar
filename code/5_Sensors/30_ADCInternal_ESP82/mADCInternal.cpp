@@ -467,7 +467,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mADCInternal::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send
@@ -796,7 +796,7 @@ void mADCInternal::MQTTHandler_Sender()
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
 //   ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Sensor;
   
-// } //end "MQTTHandler_Init"
+// } 
 
 
 // // void mSey

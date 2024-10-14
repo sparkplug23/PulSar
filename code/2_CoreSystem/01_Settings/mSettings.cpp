@@ -11,7 +11,6 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
     
     case TASK_EVERY_SECOND:
 
-          
     break;
     case TASK_EVERY_FIVE_SECOND:{
 
@@ -237,8 +236,8 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
 
   ALOG_DBM(PSTR("SettingsUpdateText %d %s"),index,replace_me);
 
-  Serial.println();
-  for(int i=0;i<138;i++){ Serial.print(Settings.text_pool[i]); } Serial.println();
+  // Serial.println();
+  // for(int i=0;i<138;i++){ Serial.print(Settings.text_pool[i]); } Serial.println();
 
   if (index >= SET_MAX) {
     return false;  // Setting not supported - internal error
@@ -278,7 +277,7 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   int too_long = (char_len + diff) - settings_text_size;
     ALOG_DBM(PSTR(D_LOG_CONFIG "Text test by %d char(s)"), too_long);
   if (too_long > 0) {
-    ALOG_INF(PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
+    ALOG_DBM(PSTR(D_LOG_CONFIG "Text overflow by %d char(s)"), too_long);
     return false;  // Replace text too long
   }
 
@@ -313,7 +312,7 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   }
   Serial.println();
 #else
-  ALOG_INF(PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d"), GetSettingsTextLen(), settings_text_size, settings_text_busy_count);
+  ALOG_DBM(PSTR(D_LOG_CONFIG "CR %d/%d, Busy %d"), GetSettingsTextLen(), settings_text_size, settings_text_busy_count);
 #endif
 
 

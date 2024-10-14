@@ -52,7 +52,7 @@ void mGPS_SD_Logger::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR;
   ptr->ConstructJSON_function = &mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame;
   
-} //end "MQTTHandler_Init"
+} 
 
 /**
  * @brief Set flag for all mqtthandlers to send
