@@ -13,9 +13,9 @@
  * 
  */
 
-#ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
-GPIOViewer gpio_viewer;
-#endif
+// #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+// GPIOViewer gpio_viewer;
+// #endif
 
 // const uint16_t mHardwarePins::GPIO_Function_EnabledList_IDs[] PROGMEM = {
 //   GPIO_NONE_ID,           // Not used

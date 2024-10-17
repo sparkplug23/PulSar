@@ -97,17 +97,17 @@ bool WebServer::_parseRequest(WiFiClient& client) {
   _currentUri = url;
   _chunked = false;
 
-  HTTPMethod method = HTTP_GET;
+  HTTPMethod method = HTTP_GET2;
   if (methodStr == "POST") {
-    method = HTTP_POST;
+    method = HTTP_POST2;
   } else if (methodStr == "DELETE") {
-    method = HTTP_DELETE;
+    method = HTTP_DELETE2;
   } else if (methodStr == "OPTIONS") {
-    method = HTTP_OPTIONS;
+    method = HTTP_OPTIONS2;
   } else if (methodStr == "PUT") {
-    method = HTTP_PUT;
+    method = HTTP_PUT2;
   } else if (methodStr == "PATCH") {
-    method = HTTP_PATCH;
+    method = HTTP_PATCH2;
   }
   _currentMethod = method;
 
@@ -130,7 +130,7 @@ bool WebServer::_parseRequest(WiFiClient& client) {
 
   String formData;
   // below is needed only when POST type request
-  if (method == HTTP_POST || method == HTTP_PUT || method == HTTP_PATCH || method == HTTP_DELETE){
+  if (method == HTTP_POST2 || method == HTTP_PUT2 || method == HTTP_PATCH2 || method == HTTP_DELETE2){
     String boundaryStr;
     String headerName;
     String headerValue;

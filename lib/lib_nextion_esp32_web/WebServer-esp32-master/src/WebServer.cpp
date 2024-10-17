@@ -40,7 +40,7 @@ const char * AUTHORIZATION_HEADER = "Authorization";
 
 WebServer::WebServer(IPAddress addr, int port)
 : _server(addr, port)
-, _currentMethod(HTTP_ANY)
+, _currentMethod(HTTP_ANY2)
 , _currentVersion(0)
 , _currentStatus(HC_NONE)
 , _statusChange(0)
@@ -58,7 +58,7 @@ WebServer::WebServer(IPAddress addr, int port)
 
 WebServer::WebServer(int port)
 : _server(port)
-, _currentMethod(HTTP_ANY)
+, _currentMethod(HTTP_ANY2)
 , _currentVersion(0)
 , _currentStatus(HC_NONE)
 , _statusChange(0)
@@ -133,7 +133,7 @@ void WebServer::requestAuthentication(){
 }
 
 void WebServer::on(const String &uri, WebServer::THandlerFunction handler) {
-  on(uri, HTTP_ANY, handler);
+  on(uri, HTTP_ANY2, handler);
 }
 
 void WebServer::on(const String &uri, HTTPMethod method, WebServer::THandlerFunction fn) {

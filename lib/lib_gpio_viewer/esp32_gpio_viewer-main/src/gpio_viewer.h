@@ -29,7 +29,9 @@ const String baseURL = "https://thelastoutpostworkshop.github.io/microcontroller
 #if ESP_ARDUINO_VERSION_MAJOR == 3
 #include "esp32-hal-periman.h"
 #else
-extern uint8_t channels_resolution[];
+// extern uint8_t channels_resolution[];
+uint8_t channels_resolution[16] = {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+
 #endif
 
 #define maxGPIOPins 49

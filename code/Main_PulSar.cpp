@@ -23,15 +23,18 @@
 
 // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
 
+
+#include "1_TaskerManager/mTaskerManager.h"
+
 #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
 // In Main_PulSar.cpp or another relevant file
-int channels_resolution = 10;  // or whatever the appropriate value/type is
+// int channels_resolution = 10;  // or whatever the appropriate value/type is
+// uint8_t channels_resolution[30];
 #include <gpio_viewer.h> // Must me the first include in your project
 GPIOViewer gpio_viewer;
 #endif
 
 
-#include "1_TaskerManager/mTaskerManager.h"
 
 /*********************************************************************************************
  * Hardware related
@@ -451,6 +454,12 @@ void setup(void)
    ** Initialise System and Modules ***********************************************************
   ********************************************************************************************/
 
+  #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+  // Must be at the end of your setup
+  // gpio_viewer.setSamplingInterval(25); // You can set the sampling interval in ms, if not set default is 100ms
+  gpio_viewer.begin();
+  #endif
+
   // Init the GPIOs
   pCONT_pins->GpioInit();
   // Start pins in modules
@@ -553,12 +562,6 @@ void setup(void)
 
   pCONT->Tasker_Interface(TASK_BOOT_MESSAGE); // Display status of system
   
-  #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
-  // Must be at the end of your setup
-  // gpio_viewer.setSamplingInterval(25); // You can set the sampling interval in ms, if not set default is 100ms
-  gpio_viewer.begin();
-  #endif
-
 
 }
 

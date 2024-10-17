@@ -14,7 +14,7 @@ public:
     }
 
     bool canHandle(HTTPMethod requestMethod, String requestUri) override  {
-        if (_method != HTTP_ANY && _method != requestMethod)
+        if (_method != HTTP_ANY2 && _method != requestMethod)
             return false;
 
         if (requestUri != _uri)
@@ -24,7 +24,7 @@ public:
     }
 
     bool canUpload(String requestUri) override  {
-        if (!_ufn || !canHandle(HTTP_POST, requestUri))
+        if (!_ufn || !canHandle(HTTP_POST2, requestUri))
             return false;
 
         return true;
@@ -73,7 +73,7 @@ public:
     }
 
     bool canHandle(HTTPMethod requestMethod, String requestUri) override  {
-        if (requestMethod != HTTP_GET)
+        if (requestMethod != HTTP_GET2)
             return false;
 
         if ((_isFile && requestUri != _uri) || !requestUri.startsWith(_uri))

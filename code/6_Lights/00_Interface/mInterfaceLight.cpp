@@ -811,7 +811,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     }
   }
 
-  ALOG_INF(PSTR("getNumBusses %d"), bus_count);
+  ALOG_DBM(PSTR("getNumBusses %d"), bus_count);
 
   uint16_t start = 0;
   uint16_t length = 10;
@@ -819,7 +819,6 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   uint8_t reversed = 0;
   COLOUR_ORDER_T ColourOrder = {COLOUR_ORDER_INIT_DISABLED};
   uint8_t pins[5] = {255}; // 255 is unset
-  
 
   if(jtok2 = obj["Pin"])
   {
@@ -837,11 +836,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
         pins[ii++] = value.getInt();
       }
     }
-    else
-    {
-      ALOG_INF(PSTR("Invalid pin type A"));
-    }  
-    ALOG_INF(PSTR("pins %d,%d,%d,%d,%d"), pins[0], pins[1], pins[2], pins[3], pins[4]);  
+    AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);  
   }
 
 
@@ -850,11 +845,6 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     start = jtok.getInt();
     ALOG_INF(PSTR("start %d"), start);
   }
-  // if(jtok = obj["S"])
-  // {
-  //   start = jtok.getInt();
-  //   ALOG_INF(PSTR("start %d"), start);
-  // }
 
 
   if(jtok = obj["Length"])
@@ -862,11 +852,6 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     length = jtok.getInt();
     ALOG_INF(PSTR("length %d"), length);
   }
-  // if(jtok = obj["L"])
-  // {
-  //   length = jtok.getInt();
-  //   ALOG_INF(PSTR("length %d"), length);
-  // }
 
 
   if(jtok = obj["BusType"])
@@ -891,24 +876,13 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
       ColourOrder = GetColourOrder_FromName(jtok.getStr());
     }
   }
-  // if(jtok = obj["CO"])
-  // {
-  //   if(jtok.isStr())
-  //   {
-  //     ColourOrder = GetColourOrder_FromName(jtok.getStr());
-  //   }
-  // }
+
 
   if(jtok = obj["Reversed"])
   {
     reversed = jtok.getInt();
     ALOG_INF(PSTR("reversed %d"), reversed);
   }
-  // if(jtok = obj["S"])
-  // {
-  //   start = jtok.getInt();
-  //   ALOG_INF(PSTR("start %d"), start);
-  // }
 
 
   uint8_t bus_index = bus_count; // next bus space 
@@ -1002,8 +976,6 @@ COLOUR_ORDER_T mInterfaceLight::GetColourOrder_FromName(const char* c)
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 {
 
-  ALOG_DBM( PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
-
   char buffer[50];
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -1023,14 +995,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
       }
     }
   }
-
-  #if FIRMWARE_VERSION_MAX(0,125)
-  /**
-   * @brief First thing after parsing the BusConfig, Segments should be created before any further commands
-   **/
-  pCONT_lAni->parse_JSONCommand(obj); // I think this should be removed to stop any double calling of the animation commands.
-  #endif
-
 
   /**
    * @brief Master (previously global) shall control the final output, but per segment within animator can exist. 

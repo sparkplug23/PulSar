@@ -58,6 +58,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       BootMessage();
     break;
     /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
      * STORAGE SECTION * 
     *******************/  
     #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
@@ -192,12 +198,9 @@ void mAnimatorLight::Save_Module()
 void mAnimatorLight::EveryLoop()
 {
      
-  
-  //LED settings have been saved, re-init busses
-  //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
   if (doInitBusses) {
     doInitBusses = false;
-    ALOG_INF(PSTR("Re-init busses."));
+    ALOG_INF(PSTR("Re-init busses"));
     
     bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
     pCONT_iLight->bus_manager->removeAll();
@@ -207,15 +210,12 @@ void mAnimatorLight::EveryLoop()
       if (pCONT_iLight->busConfigs[i] == nullptr) break;
       mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
       if (mem <= MAX_LED_MEMORY) 
-      {
-        
-        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
-        
+      {        
+        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);        
       }
       else
       {        
-        ALOG_ERR(PSTR("MEMORY ISSUE"));
-        
+        ALOG_ERR(PSTR("MEMORY ISSUE"));        
       }
       delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
     }
@@ -1721,16 +1721,15 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
 
     // Log the color type and the first desired color for debugging
     ALOG_DBM(PSTR("SEGMENT.colour_type__used_in_effect_generate=%d, seg%d, desired_colour1=%d,%d,%d,%d,%d"), SEGMENT.colour_type__used_in_effect_generate, getCurrSegmentId(), updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.WC, updatedColor.WW);
-    
-    // Replicate this single blended color across all pixels in the segment
-    ALOG_INF(PSTR("len%d"), SEGLEN);
-    
+        
     for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {  
-        SEGMENT.SetPixelColor(pixel, updatedColor, SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(pixel, updatedColor, SET_BRIGHTNESS);
     }
 
     DEBUG_PIN6_SET(1);
 }
+
+
 
 
 /**
@@ -3589,7 +3588,7 @@ uint8_t mAnimatorLight::Segment::get_random_wheel_index(uint8_t pos) {
 void mAnimatorLight::finalizeInit(void)
 {
 
-  ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), pCONT_iLight->bus_manager->getNumBusses());
+  // ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), pCONT_iLight->bus_manager->getNumBusses());
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
@@ -3678,7 +3677,7 @@ void mAnimatorLight::finalizeInit(void)
   //segments are created in makeAutoSegments();
   loadCustomPalettes(); // (re)load all custom palettes
   
-  ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), pCONT_iLight->bus_manager->getNumBusses());
+  // ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), pCONT_iLight->bus_manager->getNumBusses());
 
 }
 
@@ -5302,19 +5301,99 @@ uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_app
 uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_appending)
 {
 
+  char buffer[100];
+
   JBI->Start();
 
-    JBI->Add("millis", millis());
+    // JBI->Add("millis", millis());
 
-    for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
+    // for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
+    // {
+    //   JBI->Add("Start", SEGMENT_I(seg_i).start);
+    //   JBI->Add("Stop",  SEGMENT_I(seg_i).stop);
+    //   JBI->Add("StartY", SEGMENT_I(seg_i).startY);
+    //   JBI->Add("StopY",  SEGMENT_I(seg_i).stopY);
+    //   JBI->Add("EffectMicros",   SEGMENT_I(seg_i).performance.effect_build_ns);
+
+    // }
+
+
+
+
+
+    JBI->Add("Brightness_Master",    pCONT_iLight->getBri_Global());
+    JBI->Add("BrightnessRGB_Master", pCONT_iLight->getBriRGB_Global());
+    JBI->Add("BrightnessCCT_Master", pCONT_iLight->getBriCCT_Global());
+
+    uint8_t seg_count = getSegmentsNum();
+    seg_count = seg_count < 3 ? seg_count : 3; //limit memory overrun, or else later instead of reducing the seg count, reduce the data shared in another topic as overview
+
+    for(uint8_t seg_i =0; seg_i < seg_count; seg_i++)
     {
-      JBI->Add("Start", SEGMENT_I(seg_i).start);
-      JBI->Add("Stop",  SEGMENT_I(seg_i).stop);
-      JBI->Add("StartY", SEGMENT_I(seg_i).startY);
-      JBI->Add("StopY",  SEGMENT_I(seg_i).stopY);
-      JBI->Add("EffectMicros",   SEGMENT_I(seg_i).performance.effect_build_ns);
 
-    }
+      JBI->Object_Start_F("Segment%d", seg_i);
+
+        JBI->Add("BrightnessRGB", SEGMENT_I(seg_i).getBrightnessRGB());
+        JBI->Add("BrightnessCCT", SEGMENT_I(seg_i).getBrightnessCCT());
+        
+        JBI->Add("BrightnessRGB_wMaster", SEGMENT_I(seg_i).getBrightnessRGB_WithGlobalApplied());
+        JBI->Add("BrightnessCCT_wMaster", SEGMENT_I(seg_i).getBrightnessCCT_WithGlobalApplied());
+        
+        JBI->Array_Start("PixelRange");
+          JBI->Add(SEGMENT_I(seg_i).start);
+          JBI->Add(SEGMENT_I(seg_i).stop);
+          JBI->Add(SEGMENT_I(seg_i).startY);
+          JBI->Add(SEGMENT_I(seg_i).stopY);
+        JBI->Array_End();
+        JBI->Add("Effect",    SEGMENT_I(seg_i).effect_id);
+        JBI->Add("EffectName",    GetFlasherFunctionNamebyID( SEGMENT_I(seg_i).effect_id , buffer, sizeof(buffer), true) );
+        JBI->Add("Offset",    SEGMENT_I(seg_i).offset);
+        JBI->Add("Speed",     SEGMENT_I(seg_i).speed);
+        JBI->Add("Intensity", SEGMENT_I(seg_i).intensity);
+        JBI->Object_Start("Options");
+          JBI->Add("Selected",     SEGMENT_I(seg_i).selected);
+          JBI->Add("Reverse",      SEGMENT_I(seg_i).reverse);
+          JBI->Add("On",           SEGMENT_I(seg_i).on);
+          JBI->Add("Mirror",       SEGMENT_I(seg_i).mirror);
+          JBI->Add("Freeze",       SEGMENT_I(seg_i).freeze);
+          JBI->Add("Reset",        SEGMENT_I(seg_i).reset);
+          JBI->Add("Transitional", SEGMENT_I(seg_i).transitional);
+          JBI->Add("Reverse_y",    SEGMENT_I(seg_i).reverse_y);
+          JBI->Add("Mirror_y",     SEGMENT_I(seg_i).mirror_y);
+          JBI->Add("Transpose",    SEGMENT_I(seg_i).transpose);
+          JBI->Add("Map1D2D",      SEGMENT_I(seg_i).map1D2D);
+          JBI->Add("SoundSim",     SEGMENT_I(seg_i).soundSim);
+        JBI->Object_End();
+        JBI->Add("ColourType",     (uint8_t)SEGMENT_I(seg_i).colour_type__used_in_effect_generate);
+        JBI->Object_Start("Transition");
+          JBI->Add("Rate",         SEGMENT_I(seg_i).cycle_time__rate_ms);
+          JBI->Add("Time",         SEGMENT_I(seg_i).animator_blend_time_ms() );
+        JBI->Object_End();
+        JBI->Object_Start("RgbcctColours");
+        for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
+        {
+          JBI->Array_Start_P("Colour%d", rgb_i);
+          for(uint8_t c_i=0;c_i<5;c_i++)
+          {
+            JBI->Add(SEGMENT_I(seg_i).rgbcctcolors[rgb_i].raw[c_i]);
+          }
+          JBI->Array_End();
+          JBI->Object_Start("ColourTemp");
+            JBI->Add("Min",      SEGMENT_I(seg_i).rgbcctcolors[rgb_i].get_CTRangeMin());
+            JBI->Add("Max",      SEGMENT_I(seg_i).rgbcctcolors[rgb_i].get_CTRangeMax());
+            JBI->Add("Set",      SEGMENT_I(seg_i).rgbcctcolors[rgb_i].getCCT());
+          JBI->Object_End();
+        }
+        JBI->Object_End();
+          
+      JBI->Object_End();
+
+    } // END seg_i
+
+
+
+
+
   return JBI->End();
 
 }
