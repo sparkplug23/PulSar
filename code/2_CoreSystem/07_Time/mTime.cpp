@@ -950,17 +950,19 @@ Serial.print("Fractional part (raw): "); Serial.println(tmp_fraction);
 // Convert fractional part from 32-bit fixed point (2^-32) to nanoseconds (1e-9)
 uint64_t fraction = (((uint64_t)tmp_fraction) * 1000000000ULL) >> 32;
 
-Serial.print("Fractional part (nanoseconds): "); Serial.println(fraction);
 
 // Subtract the NTP epoch (1900-01-01) to Unix epoch (1970-01-01)
 uint64_t unix_seconds = ((uint64_t)secs_since_1900) - 2208988800ULL;
 
-Serial.print("Unix seconds: "); Serial.println(unix_seconds);
 
 // Combine the seconds and fractional parts to get the final result in nanoseconds
 uint64_t result = (unix_seconds * 1000000000ULL) + fraction;
 
+#ifdef ESP32
+Serial.print("Fractional part (nanoseconds): "); Serial.println(fraction);
+Serial.print("Unix seconds: "); Serial.println(unix_seconds);
 Serial.print("Final NTP result (nanoseconds): "); Serial.println(result);
+#endif
 
 
       return result;

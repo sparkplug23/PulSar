@@ -193,6 +193,7 @@ bool BusDigital::canShow()
 
 void IRAM_ATTR BusDigital::setPixelColor(uint16_t pix, RgbcctColor c) 
 {
+  // ALOG_INF(PSTR("p\t%d"), pix);
   if (reversed) pix = _len - pix -1;
   else pix += _skip;
   COLOUR_ORDER_T co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
@@ -201,10 +202,17 @@ void IRAM_ATTR BusDigital::setPixelColor(uint16_t pix, RgbcctColor c)
 
 RgbcctColor BusDigital::getPixelColor(uint16_t pix) 
 {
+  DEBUG_LIGHTING__START_TIME_RECORDING_TASK(6)
+  DEBUG_LIGHTING__START_TIME_RECORDING_TASK(5)
   if (reversed) pix = _len - pix -1;
   else pix += _skip;
   COLOUR_ORDER_T co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-  return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
+  DEBUG_LIGHTING__SAVE_TIME_RECORDING_TASK(5, lighting_time_critical_logging.dynamic_buffer__starting_colour_part1);
+  RgbcctColor tmp = PolyBus::getPixelColor(_busPtr, _iType, pix, co);
+  DEBUG_LIGHTING__SAVE_TIME_RECORDING_TASK(6, lighting_time_critical_logging.dynamic_buffer__starting_colour_part2);
+
+
+  return tmp;
 }
 
 
@@ -726,45 +734,6 @@ void BusManager::show()
 }
 
 
-void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, RgbcctColor c, int16_t cct) 
-{
-  // DEBUG_LINE_HERE;
-  // ALOG_ERR(PSTR("numBusses = %d"),numBusses);
-  // c.debug_print("BusManager::setPixelColor");
-  
-  #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-  ALOG_ERR(PSTR("BusManagersetPixelColor %d, %d, %d, %d"), pix, c.R, c.G, c.B);
-  #endif
-
-  for (uint8_t i = 0; i < numBusses; i++) 
-  {
-    Bus* b = busses[i];
-    uint16_t bstart = b->getStart();
-    if (pix < bstart || pix >= bstart + b->getLength()){
-      // ALOG_ERR(PSTR("breaking here %d %d %d"), pix, bstart, b->getLength());
-      continue;
-    }
-    // ALOG_ERR(PSTR("busses %d pix %d"), i, pix);
-    busses[i]->setPixelColor(pix - bstart, c);
-  }
-}
-
-
-RgbcctColor BusManager::getPixelColor(uint16_t pix) 
-{
-  for (uint8_t i = 0; i < numBusses; i++) {
-    Bus* b = busses[i];
-    uint16_t bstart = b->getStart();  // Cache the start value to avoid repeated function calls
-    uint16_t blength = b->getLength(); // Cache the length value
-
-    if (pix >= bstart && pix < bstart + blength) {
-      return b->getPixelColor(pix - bstart);  // Direct return once a match is found
-    }
-  }
-  return RgbcctColor();  // Default return when no bus matches
-}
-
-
 void BusManager::setSegmentCCT(int16_t cct, bool allowWBCorrection) {
   ALOG_ERR(PSTR("BusManager::setSegmentCCT needs WLED converted to PulSar CCT typing.")); // these functions are likely still needed to pass into the proper functions. 
   // if (cct > 255) cct = 255;
@@ -804,20 +773,20 @@ uint16_t BusManager::getTotalLength() {
 }
 
 
-const char* BusManager::getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len)
-{
-  Serial.println(_colorOrder.data, BIN);
+// const char* BusManager::getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len)
+// {
+//   Serial.println(_colorOrder.data, BIN);
 
-  if(len>=5)
-  {
-    if(_colorOrder.red < 5) buffer[_colorOrder.red] = 'r';
-    if(_colorOrder.green < 5) buffer[_colorOrder.green] = 'g';
-    if(_colorOrder.blue < 5) buffer[_colorOrder.blue] = 'b';
-    if(_colorOrder.white_cold < 5) buffer[_colorOrder.white_cold] = 'c';
-    if(_colorOrder.white_warm < 5) buffer[_colorOrder.white_warm] = 'w';
-  }
-  return buffer;
-}
+//   if(len>=5)
+//   {
+//     if(_colorOrder.red < 5) buffer[_colorOrder.red] = 'r';
+//     if(_colorOrder.green < 5) buffer[_colorOrder.green] = 'g';
+//     if(_colorOrder.blue < 5) buffer[_colorOrder.blue] = 'b';
+//     if(_colorOrder.white_cold < 5) buffer[_colorOrder.white_cold] = 'c';
+//     if(_colorOrder.white_warm < 5) buffer[_colorOrder.white_warm] = 'w';
+//   }
+//   return buffer;
+// }
 
 
 #ifdef ENABLE_DEVFEATURE_LIGHT__BUS_AUTO_WHITE_MODES

@@ -781,19 +781,19 @@ void mButtons::ButtonLoop(void) {
 #endif  // ENABLE_DEVFEATURE_BUTTON__V2
   
   
-uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+// uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JBI->Start();
-    JBI->Add(D_SENSOR_COUNT, Button.used);
-  return JBI->End();
+//   JBI->Start();
+//     JBI->Add(D_SENSOR_COUNT, Button.used);
+//   return JBI->End();
 
-}
-uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){ //Settings/State should be the pairing as the main payloads, not sensor
+// }
+// uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){ //Settings/State should be the pairing as the main payloads, not sensor
 
-  JBI->Start();
-    JBI->Add(D_SENSOR_COUNT, 0);
-  return JBI->End();
-}
+//   JBI->Start();
+//     JBI->Add(D_SENSOR_COUNT, 0);
+//   return JBI->End();
+// }
 
 
 
@@ -973,6 +973,126 @@ void mButtons::Pre_Init(void)
   //     bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
   //     );
   //   }
+  // }
+
+}
+
+
+void mButtons::Init(void)
+{
+
+  ALOG_INF(PSTR(D_LOG_BUTTONS "Init"));
+  
+#if defined(SOC_TOUCH_VERSION_1) || defined(SOC_TOUCH_VERSION_2)
+  touch_threshold = ESP32_TOUCH_THRESHOLD;
+#endif  // ESP32 SOC_TOUCH_VERSION_1 or SOC_TOUCH_VERSION_2
+
+
+  bool ac_detect = (pCONT_set->Settings.button_debounce % 10 == 9);
+//   Button.used = 0;
+// /*
+//   uint32_t last_used = 0;
+// */
+//   for (uint32_t i = 0; i < MAX_KEYS_SET; i++) {
+//     Button.last_state[i] = NOT_PRESSED;
+// #ifdef ESP8266
+//     if ((0 == i) && ((SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type))) {
+//       bitSet(Button.used, i);            // This pin is used
+//     } else
+// #endif  // ESP8266
+//     if (pCONT_pins->PinUsed(GPIO_KEY1_ID, i)) {
+//       bitSet(Button.used, i);            // This pin is used
+// #ifdef ESP8266
+//       pinMode(pCONT_pins->Pin(GPIO_KEY1, i), bitRead(Button.no_pullup_mask, i) ? INPUT : ((16 == pCONT_pins->Pin(GPIO_KEY1, i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
+// #endif  // ESP8266
+// #ifdef ESP32
+//       pinMode(pCONT_pins->Pin(GPIO_KEY1_ID, i), bitRead(Button.pulldown_mask, i) ? INPUT_PULLDOWN : bitRead(Button.no_pullup_mask, i) ? INPUT : INPUT_PULLUP);
+// #endif  // ESP32
+//       // Set global now so doesn't change the saved power state on first button check
+//       Button.last_state[i] = (digitalRead(pCONT_pins->Pin(GPIO_KEY1_ID, i)) != bitRead(Button.inverted_mask, i));
+//       if (ac_detect) {
+//         Button.state[i] = 0x80 + 2 * BUTTON_AC_PERIOD;
+//         Button.last_state[i] = 0;				 // Will set later in the debouncing code
+//       }
+//     }
+// #ifdef USE_ADC
+//     else if (PinUsed(GPIO_ADC_BUTTON, i) || PinUsed(GPIO_ADC_BUTTON_INV, i)) {
+//       bitSet(Button.used, i);            // This pin is used
+//     }
+// #endif  // USE_ADC
+//     else {
+//       // Insert, Skip and Append virtual buttons
+//       // XdrvMailbox.index = i;
+//       if (0){//XdrvCall(FUNC_ADD_BUTTON)) {
+//         // At entry:
+//         //   XdrvMailbox.index = button index
+//         // At exit:
+//         //   XdrvMailbox.index bit 0 = current state
+//         // bitSet(Button.used, i);                // This pin is used
+//         // bool state = (XdrvMailbox.index &1);
+//         // ButtonSetVirtualPinState(i, state);    // Virtual hardware pin state
+//         // if (!state) { ButtonInvertFlag(i); }   // Set inverted flag
+//         // // last_state[i] must be 1 to indicate no button pressed
+//         // Button.last_state[i] = (bitRead(Button.virtual_pin, i) != bitRead(Button.inverted_mask, i));
+
+//         // AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: Add vButton%d, State %d"), i +1, Button.last_state[i]);
+//       }
+//     }
+//     Button.debounced_state[i] = Button.last_state[i];
+// /*
+//     if (bitRead(Button.used, i)) {
+//       last_used = i +1;
+//     }
+// */
+//   }
+
+/*
+  // Append virtual buttons
+  for (uint32_t i = last_used; i < MAX_KEYS_SET; i++) {
+    Button.last_state[i] = NOT_PRESSED;
+
+    XdrvMailbox.index = i;
+    if (XdrvCall(FUNC_ADD_BUTTON)) {
+      // At entry:
+      //   XdrvMailbox.index = button index
+      // At exit:
+      //   XdrvMailbox.index bit 0 = current state
+      bitSet(Button.used, i);                // This pin is used
+      bool state = (XdrvMailbox.index &1);
+      ButtonSetVirtualPinState(i, state);    // Virtual hardware pin state
+      if (!state) { ButtonInvertFlag(i); }   // Set inverted flag
+      // last_state[i] must be 1 to indicate no button pressed
+      Button.last_state[i] = (bitRead(Button.virtual_pin, i) != bitRead(Button.inverted_mask, i));
+
+      AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: Add vButton%d, State %d"), i +1, Button.last_state[i]);
+    }
+
+    Button.debounced_state[i] = Button.last_state[i];
+  }
+*/
+
+//  AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: vPinUsed %08X, State %08X, Invert %08X"), Button.used, Button.virtual_pin, Button.inverted_mask);
+
+  TickerButton = new Ticker();
+
+  // if (Button.used) // Any bit set
+  // {
+  //   #ifdef ESP288
+  //   TickerSwitch->attach_ms(SWITCH_PROBE_INTERVAL, 
+  //     [this](void){
+  //       this->SwitchProbe();
+  //     }
+  //   );
+  //   #else // esp32
+  //     // (ac_detect) ? BUTTON_FAST_PROBE_INTERVAL : BUTTON_PROBE_INTERVAL,
+      
+
+  //   TickerButton->attach_ms(
+  //     BUTTON_PROBE_INTERVAL,
+  //     +[](mButtons* instance){ instance->ButtonProbe();}, this); //hacky solution to be fixed
+
+  //   module_state.mode = ModuleStatus::Running;
+  //   #endif
   // }
 
 }

@@ -63,6 +63,8 @@
 #define PALETTE_SOLID_WRAP              (paletteBlend == 1 || paletteBlend == 3)
 #define SET_BRIGHTNESS                  true
 #define BRIGHTNESS_ALREADY_SET          true
+#define BRIGHTNESS_NOT_YET_SET          false
+#define WITH_BRIGHTNESS_APPLIED      true
 
 /**
  * WLED conversions
@@ -92,7 +94,7 @@
   #ifndef MAX_NUM_SEGMENTS
     #define MAX_NUM_SEGMENTS  6
   #endif
-  #define MAX_SEGMENT_DATA  32767
+  #define MAX_SEGMENT_DATA  42767
 #endif
 
 #define IBN 5100
@@ -100,9 +102,6 @@
 /* How much data bytes each segment should max allocate to leave enough space for other segments,
   assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
 // #define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
-
-#define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
-
 
 // options
 // bit    7: segment is in transition mode
@@ -271,6 +270,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR)        
 #endif 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
+#endif 
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "debug/performance";
 #endif 
 
 
@@ -513,7 +515,6 @@ class mAnimatorLight :
     uint32_t color_wheel(uint8_t pos);
     uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
 
-    void Init_Pins();
     void Init_Segments();
 
 
@@ -1856,7 +1857,7 @@ class mAnimatorLight :
   typedef union {
     uint16_t data; // allows full manipulating
     struct { 
-      uint16_t fForceUpdate : 1; 
+      // uint16_t fForceUpdate : 1; // now using trigger, any update causes them all to update
       uint16_t fRunning : 1;
       uint16_t animator_first_run : 1;
       // Reserved
@@ -1879,7 +1880,17 @@ class mAnimatorLight :
       // COLOUR_TYPE__RGBCW__ID //remove
   };
 
-  uint8_t GetSizeOfPixel(ColourType colour_type);
+  inline uint8_t GetSizeOfPixel(ColourType colour_type)
+  {
+    switch(colour_type)
+    {
+      default:
+      case ColourType::COLOUR_TYPE__RGB__ID:     return 3;
+      case ColourType::COLOUR_TYPE__RGBW__ID:    return 4;
+      case ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
+    }
+  }
+
 
   /**
    * @brief New method that allows getting WLED basic 3 colours, but also applying the colour when getting, the same as my palette method
@@ -1899,6 +1910,12 @@ class mAnimatorLight :
   IRAM_ATTR 
   #endif 
   void AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
+
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+  IRAM_ATTR 
+  #endif 
+  void AnimationProcess_LinearBlend_Dynamic_Buffer_BrtNotSet(const AnimationParam& param);
 
 
 
@@ -1936,13 +1953,17 @@ class mAnimatorLight :
 
   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
   struct TimeCriticalLogging{
-    uint32_t start_value[4]; // use as temp to record start of measurment, use here for speed
+    uint32_t start_value[7]; // use as temp to record start of measurment, use here for speed
+
     uint32_t dynamic_buffer__starting_colour;
+    uint32_t dynamic_buffer__starting_colour_part1; // 5
+    uint32_t dynamic_buffer__starting_colour_part2; // 6
+
     uint32_t dynamic_buffer__desired_colour;
     uint32_t effect_call;
     uint32_t segment_effects;
 
-    bool time_unit_output_ms = true;
+    bool time_unit_output_ms = false;
   }lighting_time_critical_logging;
   #endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
@@ -2361,7 +2382,7 @@ class mAnimatorLight :
   uint32_t _colors_t_PHASE_OUT[3]; // color used for effect (includes transition)
   uint16_t _virtualSegmentLength;
 
-  std::vector<segment_new> segments;
+  std::vector<segment> segments;
   friend class Segment;
 
   uint16_t _length;
@@ -2376,8 +2397,11 @@ class mAnimatorLight :
     bool _isServicing          : 1;
     bool _isOffRefreshRequired : 1; //periodic refresh is required for the strip to remain off.
     bool _hasWhiteChannel      : 1;
-    bool _triggered            : 1;
+    bool _force_update : 1; //_triggered            : 1;
   };
+
+  inline void force_update(void) { _force_update = true; } // Forces the next frame to be computed on all active segments.
+
 
   void LoadEffects();
 
@@ -2439,7 +2463,6 @@ class mAnimatorLight :
     //   Serial.println(__LINE__); setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
 
 
-    inline void trigger(void) { _triggered = true; } // Forces the next frame to be computed on all active segments.
     inline void setShowCallback(show_callback cb) { _callback = cb; }
     inline void appendSegment(const Segment &seg = Segment()) {
 
@@ -2491,7 +2514,7 @@ class mAnimatorLight :
     inline uint16_t getMinShowDelay(void) { return MIN_SHOW_DELAY; }
     inline uint16_t getLengthTotal(void) { return _length; }
 
-    uint32_t millis_at_start_of_effect_update;
+    uint32_t millis_at_start_of_effect_update; // WLED "now"
     uint32_t timebase;
     uint32_t currentColor(uint32_t colorNew, uint8_t tNr);
     uint32_t getPixelColor(uint16_t);
@@ -2958,12 +2981,6 @@ typedef enum mapping1D2D {
   #endif
 #endif
 
-
-#ifdef ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
-void BusConfig_ManualLoad_16Pin();
-#endif // ENABLE_DEVFEATURE_LIGHTS__LOAD_HARDCODED_BUSCONFIG_ON_BOOT__16PIN_PARALLEL_OUTPUT_FOR_SNOWTREE
-
-
 // Timer mode types
 #define NL_MODE_SET               0            //After nightlight time elapsed, set to target brightness
 #define NL_MODE_FADE              1            //Fade to target brightness gradually
@@ -3125,7 +3142,8 @@ bool useAMPM _INIT(false);       // 12h/24h clock format
 
 #define FLASH_COUNT 4 
 #define LED_SKIP_AMOUNT  0
-#define MIN_SHOW_DELAY  15
+// #define MIN_SHOW_DELAY  15
+#define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
 #define DEFAULT_LED_COUNT 30
 
 // byte overlayCurrent _INIT(0);    // 0: no overlay 1: analog clock 2: was single-digit clock 3: was cronixie
@@ -3323,6 +3341,9 @@ bool useMainSegmentOnly _INIT(false);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
     uint8_t ConstructJSON_Debug_Palette_Vector(uint8_t json_level = 0, bool json_appending = true);
     #endif
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
+    uint8_t ConstructJSON_Debug_Performance(uint8_t json_level = 0, bool json_appending = true);
+    #endif 
     #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
       ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
@@ -3382,6 +3403,9 @@ bool useMainSegmentOnly _INIT(false);
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
       struct handler<mAnimatorLight> mqtthandler_debug_palette_vector;
+      #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
+      struct handler<mAnimatorLight> mqtthandler_debug__performance;
       #endif
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;

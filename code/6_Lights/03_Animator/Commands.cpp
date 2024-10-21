@@ -32,7 +32,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
   if(isserviced_start_count != data_buffer.isserviced) //ie something was parsed inside this function
   {
-    SEGMENT_I(0).flags.fForceUpdate = true;
+    pCONT_lAni->force_update();
   }
 
   uint8_t segments_found = 0;
@@ -737,8 +737,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
 
   if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
-    float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
-    SEGMENT_I(segment_index).setBrightnessRGB( (uint8_t)value );
+    SEGMENT_I(segment_index).setBrightnessRGB( map(jtok.getInt(), 0,100, 0,255) );
     ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
     data_buffer.isserviced++;
   }else
@@ -750,8 +749,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
 
   if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
-    float percentage = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
-    SEGMENT_I(segment_index).setBrightnessCCT( (uint8_t)percentage );
+    SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
     ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
     data_buffer.isserviced++;
   }else

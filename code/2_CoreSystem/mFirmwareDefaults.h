@@ -33,6 +33,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_PZEM.h"
@@ -380,7 +381,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
-    #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
+    
     
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
@@ -483,10 +484,10 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
     
   #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
   #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
   // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+  // #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
   #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 

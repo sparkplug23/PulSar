@@ -491,7 +491,6 @@ void mHardwarePins::GpioInit(void)
     uint32_t mgpio_function = ValidPin_AdjustGPIO(i, pCONT_set->runtime.my_module.io[i]);
     
 
-
     ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio_function);
 
     if(mgpio_function == GPIO_UNUSED_FORCED_LOW_ID)
@@ -510,6 +509,10 @@ void mHardwarePins::GpioInit(void)
         }
       }
 
+      uint8_t real_pin = ConvertIndexPinToRealPin(i);
+      pinMode(real_pin, OUTPUT);
+      digitalWrite(real_pin, LOW);
+
     }else
     if(mgpio_function == GPIO_UNUSED_FORCED_HIGH_ID)
     {
@@ -525,6 +528,11 @@ void mHardwarePins::GpioInit(void)
           #endif
         }
       }
+      
+      uint8_t real_pin = ConvertIndexPinToRealPin(i);
+      pinMode(real_pin, OUTPUT);
+      digitalWrite(real_pin, HIGH);
+
     }
     
   }

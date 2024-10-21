@@ -219,6 +219,8 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
 
 void mAnimatorLight::serializeInfo(JsonObject root)
 {
+  
+  pCONT_lAni->force_update(); // New data in, so we should update
 
   root[F("ver")] = "versionString";
   root[F("vid")] = PROJECT_VERSION;
@@ -1313,7 +1315,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
         ALOG_INF(PSTR("seg.setColor(%d, RGBW32(rgbw[%d],rgbw[%d],rgbw[%d],rgbw[%d]));"),i, rgbw[0], rgbw[1], rgbw[2], rgbw[3]);
     
         seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));
-        if (seg.animation_mode_id == 0) trigger(); //instant refresh
+        if (seg.animation_mode_id == 0) force_update(); //instant refresh
       }
     } else {
       // non RGB & non White segment (usually On/Off bus)
@@ -1504,7 +1506,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       }
     }
     seg.map1D2D = oldMap1D2D; // restore mapping
-    trigger(); // force segment update
+    force_update(); // force segment update
   }
 
   
@@ -2584,19 +2586,18 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   #endif
 
   uint16_t used = getLengthTotal();
-  uint16_t n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
+  uint16_t n = (used-1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
   char buffer[2000];
   strcpy_P(buffer, PSTR("{\"leds\":["));
   obuf = buffer;
   olen = 9;
 
-  for (size_t i= 0; i < used; i += n)
+  for (size_t i=0; i < used; i += n)
   {
-    // uint32_t c = BUS_getPixelColor(i);
     uint32_t c = getPixelColor(i);
 
     // if(i==0)
-    //   ALOG_INF(PSTR("c %d,%d,%d,%d"), R(c), G(c), B(c), W(c));
+      // ALOG_INF(PSTR("%d c %d,%d,%d,%d"), i, R(c), G(c), B(c), W(c));
 
     #ifdef ENABLE_FEATURE_LIGHTS__ADD_WHITE_TO_LIVEVIEW
     uint8_t r = qadd8(W(c), R(c)); //add white channel to RGB channels as a simple RGBW -> RGB map
@@ -2720,12 +2721,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       JsonObject info = lDoc.createNestedObject("info");
       serializeInfo(info);
 
-      if( segments.size() )
-      {
-        SEGMENT_I(0).flags.fForceUpdate = true; // New data in, so we should update
-      }
-
-      // ALOG_INF(PSTR("default==================================="));
+      pCONT_lAni->force_update(); // New data in, so we should update
 
       if (subJson != JSON_PATH_STATE_INFO)
       {

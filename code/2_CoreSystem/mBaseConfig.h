@@ -36,6 +36,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_PZEM.h"
@@ -209,7 +210,7 @@ With latest version, all longer term shared debug features should be added here 
   #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW // Phase in
   #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT // Phase in
   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED // Phase in
-  #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP // Phase in
+   // Phase in
   #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL // Phase in
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Phase in
    // Phase in

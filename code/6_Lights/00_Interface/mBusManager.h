@@ -25,7 +25,9 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
+// #ifndef ENABLE_DEVFEATURE_LIGHTING__OCT24_COLOUR_ORDER
 #include "mHardwareColourType.h"
+// #endif
 
 #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
 #define R(c) (byte((c) >> 16))
@@ -91,7 +93,7 @@ struct BusConfig
     uint8_t* ppins, 
     uint16_t pstart, 
     uint16_t length = 1,
-    COLOUR_ORDER_T _ColourOrder = {COLOUR_ORDER_INIT_DISABLED},
+    COLOUR_ORDER_T _ColourOrder = 0,//{COLOUR_ORDER_INIT_DISABLED},
     bool rev = false, 
     uint8_t skip = 0, 
     byte aw = RGBW_MODE_MANUAL_ONLY
@@ -295,7 +297,7 @@ class BusDigital : public Bus {
     }
 
   private:
-    COLOUR_ORDER_T _colorOrder = {COLOUR_ORDER_INIT_DISABLED};
+    COLOUR_ORDER_T _colorOrder = 0;//{COLOUR_ORDER_INIT_DISABLED};
     const ColorOrderMap &_colorOrderMap;
     uint8_t _pins[2] = {255, 255};
     uint8_t _iType = 0;
@@ -342,7 +344,7 @@ class BusPwm : public Bus {
     #endif
     uint8_t ledcAlloc[2] = {0x00, 0x00}; //16 LEDC channels
 
-    COLOUR_ORDER_T _colorOrder = {COLOUR_ORDER_INIT_DISABLED};
+    COLOUR_ORDER_T _colorOrder = 0;//{COLOUR_ORDER_INIT_DISABLED};
 
     void deallocatePins();
 };
@@ -434,9 +436,214 @@ class BusManager
     void removeAll();
 
     void show();
+    
+    Bus* busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
 
-    void IRAM_ATTR setPixelColor(uint16_t index, RgbcctColor c, int16_t cct=-1);
-    RgbcctColor getPixelColor(uint16_t pix);
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__BUS_MANAGER_SETGET_OPTIMISED
+
+      uint8_t lastBusIndex = 0; // Shared across getPixelColor and setPixelColor
+
+      RgbcctColor getPixelColor(uint16_t pix) {
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("getPixelColor() called for pixel %d, lastBusIndex = %d\n\r", pix, lastBusIndex);
+          #endif
+
+          // Check the last bus first to avoid searching through all buses again
+          Bus* lastBus = busses[lastBusIndex];
+          uint16_t bstart = lastBus->getStart();
+          uint16_t bend = bstart + lastBus->getLength();
+          
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("Checking cached lastBusIndex = %d (start = %d, end = %d)\n\r", lastBusIndex, bstart, bend);
+          #endif
+
+          if (pix >= bstart && pix < bend) {
+              #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+              Serial.printf("Pixel %d found in cached bus %d (start = %d)\n\r", pix, lastBusIndex, bstart);
+              #endif
+              return lastBus->getPixelColor(pix - bstart);
+          }
+
+          // Search from lastBusIndex to the end of the bus array
+          for (uint8_t i = lastBusIndex + 1; i < numBusses; i++) {
+              Bus* b = busses[i];
+              bstart = b->getStart();
+              bend = bstart + b->getLength();
+
+              #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+              Serial.printf("Checking bus %d (start = %d, end = %d)\n\r", i, bstart, bend);
+              #endif
+              
+              if (pix >= bstart && pix < bend) {
+                  lastBusIndex = i; // Cache the bus index
+
+                  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+                  Serial.printf("Pixel %d found in bus %d (start = %d)\n\r", pix, i, bstart);
+                  #endif
+                  return b->getPixelColor(pix - bstart);
+              }
+          }
+
+          // If not found, search from index 0 to lastBusIndex
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("Searching from index 0 to lastBusIndex = %d\n\r", lastBusIndex);
+          #endif
+
+          for (uint8_t i = 0; i <= lastBusIndex; i++) {
+              Bus* b = busses[i];
+              bstart = b->getStart();
+              bend = bstart + b->getLength();
+
+              #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+              Serial.printf("Checking bus %d (start = %d, end = %d)\n\r", i, bstart, bend);
+              #endif
+
+              if (pix >= bstart && pix < bend) {
+                  lastBusIndex = i; // Cache the bus index
+
+                  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+                  Serial.printf("Pixel %d found in bus %d (start = %d)\n\r", pix, i, bstart);
+                  #endif
+                  return b->getPixelColor(pix - bstart);
+              }
+          }
+
+          // Pixel not found
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("Error: Pixel %d not found in any bus!\n\r", pix);
+          #endif
+
+          return RgbcctColor(); // Return default color (error case)
+      }
+
+      void setPixelColor(uint16_t pix, RgbcctColor c) {
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("setPixelColor() called for pixel %d, lastBusIndex = %d\n\r", pix, lastBusIndex);
+          #endif
+
+          // Check the last bus first to avoid searching through all buses again
+          Bus* lastBus = busses[lastBusIndex];
+          uint16_t bstart = lastBus->getStart();
+          uint16_t bend = bstart + lastBus->getLength();
+
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("Checking cached lastBusIndex = %d (start = %d, end = %d)\n\r", lastBusIndex, bstart, bend);
+          #endif
+
+          if (pix >= bstart && pix < bend) {
+              #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+              Serial.printf("Pixel %d found in cached bus %d (start = %d), setting color\n\r", pix, lastBusIndex, bstart);
+              #endif
+              lastBus->setPixelColor(pix - bstart, c);
+              return;
+          }
+
+          // Search from lastBusIndex to the end of the bus array
+          for (uint8_t i = lastBusIndex + 1; i < numBusses; i++) {
+              Bus* b = busses[i];
+              bstart = b->getStart();
+              bend = bstart + b->getLength();
+
+              #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+              Serial.printf("Checking bus %d (start = %d, end = %d)\n\r", i, bstart, bend);
+              #endif
+
+              if (pix >= bstart && pix < bend) {
+                  lastBusIndex = i; // Cache the bus index
+
+                  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+                  Serial.printf("Pixel %d found in bus %d (start = %d), setting color\n\r", pix, i, bstart);
+                  #endif
+                  b->setPixelColor(pix - bstart, c);
+                  return;
+              }
+          }
+
+          // If not found, search from index 0 to lastBusIndex
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("Searching from index 0 to lastBusIndex = %d\n\r", lastBusIndex);
+          #endif
+
+          for (uint8_t i = 0; i <= lastBusIndex; i++) {
+              Bus* b = busses[i];
+              bstart = b->getStart();
+              bend = bstart + b->getLength();
+
+              #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+              Serial.printf("Checking bus %d (start = %d, end = %d)\n\r", i, bstart, bend);
+              #endif
+
+              if (pix >= bstart && pix < bend) {
+                  lastBusIndex = i; // Cache the bus index
+
+                  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+                  Serial.printf("Pixel %d found in bus %d (start = %d), setting color\n\r", pix, i, bstart);
+                  #endif
+                  b->setPixelColor(pix - bstart, c);
+                  return;
+              }
+          }
+
+          // Pixel not found
+          #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SERIAL_PRINT__BUS_INDEX_SEARCH
+          Serial.printf("Error: Pixel %d not found in any bus!\n\r", pix);
+          #endif
+      }
+
+    #else // Original search method
+
+      void IRAM_ATTR setPixelColor(uint16_t pix, RgbcctColor c, int16_t cct=-1) 
+      {
+        // DEBUG_LINE_HERE;
+        // ALOG_ERR(PSTR("numBusses = %d"),numBusses);
+        // c.debug_print("BusManager::setPixelColor");
+        
+        #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+        ALOG_ERR(PSTR("BusManagersetPixelColor %d, %d, %d, %d"), pix, c.R, c.G, c.B);
+        #endif
+
+        for (uint8_t i = 0; i < numBusses; i++) 
+        {
+          Bus* b = busses[i];
+          uint16_t bstart = b->getStart();
+          if (pix < bstart || pix >= bstart + b->getLength()){
+            // ALOG_ERR(PSTR("breaking here %d %d %d"), pix, bstart, b->getLength());
+            continue;
+          }
+          // ALOG_ERR(PSTR("busses %d pix %d"), i, pix);
+          busses[i]->setPixelColor(pix - bstart, c);
+        }
+      }
+
+
+      RgbcctColor getPixelColor(uint16_t pix) 
+      {
+        // DEBUG_TIME__START
+        // for (uint8_t i = 0; i < numBusses; i++) {
+        //   Bus* b = busses[i];
+        //   uint16_t bstart = b->getStart();  // Cache the start value to avoid repeated function calls
+        //   uint16_t blength = b->getLength(); // Cache the length value
+
+        //   if (pix >= bstart && pix < bstart + blength) {
+        //     RgbcctColor c = b->getPixelColor(pix - bstart);  // Debug time, save then return
+        //     DEBUG_TIME__SHOW
+        //     return c;
+        //     // return b->getPixelColor(pix - bstart);  // Direct return once a match is found
+        //   }
+        // }
+        // return RgbcctColor();  // Default return when no bus matches
+
+        for (uint32_t i = 0; i < numBusses; i++) {
+          Bus* b = busses[i];
+          uint16_t bstart = b->getStart();
+          if (pix < bstart || pix >= bstart + b->getLength()) continue;
+          return b->getPixelColor(pix - bstart);
+        }
+        return RgbcctColor();
+      }
+
+    #endif
+    
 
     void setBrightness(uint8_t b);
     void setSegmentCCT(int16_t cct, bool allowWBCorrection = false);
@@ -463,9 +670,8 @@ class BusManager
       return numBusses;
     }
 
-    const char* getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len);
+    // const char* getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len);
 
-    Bus* busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
 
   private:
     uint8_t numBusses = 0;

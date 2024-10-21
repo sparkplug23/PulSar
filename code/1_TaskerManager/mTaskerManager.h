@@ -867,6 +867,23 @@ class mTaskerManager{
     std::vector<DEBUG_MODULE_TIME> debug_module_time;
     #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    struct TaskMetrics {
+      TASKER_FUNCTION_TYPES task_id;   // Task being monitored
+      uint16_t unique_id;
+      uint32_t max_time;      // Maximum time in microseconds
+      uint32_t min_time;      // Minimum time in microseconds
+      uint32_t total_time;    // Total time for calculating the average
+      uint32_t count;         // Number of times the task was executed
+      uint32_t avg_time;      // Average time in microseconds
+    };
+    #endif
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    std::vector<TASKER_FUNCTION_TYPES> monitor_task; // Vector to hold the tasks to monitor
+    std::vector<TaskMetrics> task_metrics;
+    #endif
+
+
 
     
 

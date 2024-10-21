@@ -52,6 +52,9 @@ typedef struct Segment {
     uint8_t grouping = 1;
     uint8_t  spacing = 0;
 
+    inline void grouping_set(uint8_t g){ grouping = g > 0 ? g : 1; } // Can never be ZERO
+    inline uint8_t grouping_get(void){ return grouping; } // Can never be ZERO
+
     /**
      * @brief
      * The colours that are generated directly within the effect function, and is used to define the type of storage buffered required to hold the colour buffer
@@ -81,6 +84,7 @@ typedef struct Segment {
     }
 
     ANIMATION_FLAGS flags;
+    
 
     // Effects (Scenes & Flasher), Ambilight, Adalight    
     uint8_t animation_mode_id = ANIMATION_MODE__EFFECTS; // rename to "effect_id"
@@ -106,37 +110,43 @@ typedef struct Segment {
      **/
     uint8_t _brightness_rgb = 255;
     uint8_t _brightness_cct = 255;
-    void setBrightnessRGB(uint8_t bri_rgb) 
+
+    uint8_t _brightness_rgb_combined = 255;
+    uint8_t _brightness_cct_combined = 255;
+    IRAM_ATTR void UpdateBrightness();
+
+    IRAM_ATTR void setBrightnessRGB(uint8_t bri_rgb)
     {
-      // Serial.printf("Setting brightness RGB: %d\n", bri_rgb);
       _brightness_rgb = bri_rgb;
     }
-    void setBrightnessCCT(uint8_t bri_ct) 
+
+    IRAM_ATTR void setBrightnessCCT(uint8_t bri_cct)
     {
-      // Serial.printf("Setting brightness CCT: %d\n", bri_ct);
-      _brightness_cct = bri_ct;
+      _brightness_cct = bri_cct;
     }
-    uint8_t getBrightnessRGB()
+
+    IRAM_ATTR uint8_t getBrightnessRGB() const
     {
       return _brightness_rgb;
     };
-    uint8_t getBrightnessCCT()
+
+    IRAM_ATTR uint8_t getBrightnessCCT() const
     {
       return _brightness_cct;
     };
-    uint8_t currentBri() // WLED method
+
+    IRAM_ATTR inline uint8_t getBrightnessRGB_WithGlobalApplied() const
     {
-      return getBrightnessRGB(); 
+      return _brightness_rgb_combined;
     }
 
+    IRAM_ATTR inline uint8_t getBrightnessCCT_WithGlobalApplied() const
+    {
+      return _brightness_cct_combined;
+    }
 
-    /**
-     * @brief Brightness applied in most cases should include the final (Segment+global) brightness level
-     * 
-     * @return uint8_t 
-     */
-    uint8_t getBrightnessRGB_WithGlobalApplied(); 
-    uint8_t getBrightnessCCT_WithGlobalApplied();
+    #define currentBri() getBrightnessRGB()
+
 
     // Flags and states that are used during one transition and reset when completed
     struct ANIMATION_SINGLE_USE_OVERRIDES_ANYTIME
@@ -162,6 +172,7 @@ typedef struct Segment {
       uint16_t time_ms = 0; //on boot
       // uint16_t cycle_time__rate_ms = 1000;
     }single_animation_override_turning_off; // ie "oneshot" variables that get checked and executed one time only
+
     
 
     uint16_t groupLength() { return grouping + spacing; }
@@ -169,8 +180,7 @@ typedef struct Segment {
     {
       uint16_t groupLen = groupLength();
       uint16_t vLength = (length() + groupLen - 1) / groupLen;
-      if (options & MIRROR)
-        vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
+      if(mirror) vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
 
       #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
       if(decimate > 0)
@@ -182,11 +192,21 @@ typedef struct Segment {
       return vLength;
     }
 
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
     struct PERFORMANCE{
 
-      uint32_t effect_build_ns = 0;
+      uint32_t effect_build_us = 0;
+      uint32_t bus_write_single_us = 0; // SetPixelColour to NPB (ignore decimate, includes initial write then times decimate amount)
+      uint32_t bus_read_single_us = 0;  // GetPixelColour from NPB (ignores decimate, includes full time)
+      uint32_t bus_write_total_us = 0; // SetPixelColour to NPB (ignore decimate, includes initial write then times decimate amount)
+      uint32_t bus_read_total_us = 0;  // GetPixelColour from NPB (ignores decimate, includes full time)
+
+      uint32_t millis_last_show = 0;
+      uint32_t elapsed_last_show = 0;
+      float fps = 0;
 
     }performance;
+    #endif // ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
 
     void setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1);
     
@@ -257,12 +277,6 @@ typedef struct Segment {
     inline uint16_t DataLength(){ return _dataLen; };
     inline byte* Data(){ return data; };
 
-    #ifdef ENABLE_DEBUGFEATURE__SEGMENT_FRAME_TIME
-    float frames_per_second = 0;
-    //gradient method is currently slow and needs improved
-    #endif
-
-
     /**
      * Each segment will have its own animator
      * This will also need to share its index into the animation so it knows what segments to run
@@ -282,7 +296,7 @@ typedef struct Segment {
     ANIM_FUNCTION_SIGNATURE;
     bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
 
-    uint32_t tSaved_AnimateRunTime = millis();
+    // uint32_t tSaved_AnimateRunTime = millis();
 
     Segment(uint16_t sStart=0, uint16_t sStop=30) :
       offset(0),
@@ -518,7 +532,11 @@ typedef struct Segment {
        * @brief encoded_value
        * ** [uint32_t*] : encoded value from palette
        */
-      uint8_t* encoded_value = nullptr // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+      uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+
+      
+
+      bool apply_brightness = false
     );
 
     uint8_t GetPaletteDiscreteWidth(); // Rename to colours in palette
@@ -641,7 +659,7 @@ typedef struct Segment {
   **/
 
 
-} segment_new;
+} segment;
 
 
 
