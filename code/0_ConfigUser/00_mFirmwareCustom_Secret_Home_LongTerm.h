@@ -2349,7 +2349,7 @@ Bathroom
 
   // #define USE_MODULE_SENSORS_INTERFACE  
   // #define USE_MODULE_SENSORS_BUTTONS
-  //   #define ENABLE_DEVFEATURE_BUTTON__V2
+  //   
     /**
      * @brief 
      * Button 1: Single button installs, means {"short":"iter over nice palettes", "long": "iter over 4 brightness levels"}
@@ -2389,6 +2389,7 @@ Bathroom
   #endif
   #define USE_MODULE_SENSORS_BUTTONS
     #define ENABLE_DEVFATURE_BUTTON__REMOVE_MQTT_BUTTONS
+    #define SOC_TOUCH_VERSION_1
 
   #define USE_MODULE_DRIVERS_LEDS  
 
@@ -2461,7 +2462,7 @@ Bathroom
         "Grouping":1,
         "RateMs": 1000
       },
-      "BrightnessRGB": 100,
+      "BrightnessRGB": 0,
       "BrightnessCCT": 100
     },
     "Segment1": {
@@ -2483,7 +2484,7 @@ Bathroom
         "Sat":100,
         "BrightnessRGB":0
       },
-      "BrightnessRGB": 100,
+      "BrightnessRGB": 0,
       "BrightnessCCT": 100
     },
     "Segment2": {
@@ -2504,7 +2505,7 @@ Bathroom
         "Sat":100,
         "BrightnessRGB":0
       },
-      "BrightnessRGB": 100,
+      "BrightnessRGB": 0,
       "BrightnessCCT": 100
     },
     "BrightnessRGB": 100
@@ -2533,7 +2534,8 @@ Bathroom
       "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
       #endif
       "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-      "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\""
+      "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED3_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2605,6 +2607,16 @@ Bathroom
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"" "WallRed" "\","
+        "\"" "WallBlue" "\","
+        "\"" "DoorAlert" "\""
+      "],"
+      "\"" D_MODULE_DRIVERS_LEDS_CTR "\":["
+        "\"" "WallRed" "\","
+        "\"" "WallBlue" "\","
+        "\"" "StatusLED" "\""
       "],"
       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
@@ -2783,7 +2795,7 @@ Bathroom
 
   // #define USE_MODULE_SENSORS_INTERFACE  
   // #define USE_MODULE_SENSORS_BUTTONS
-  //   #define ENABLE_DEVFEATURE_BUTTON__V2
+  //   
     /**
      * @brief 
      * Button 1: Single button installs, means {"short":"iter over nice palettes", "long": "iter over 4 brightness levels"}

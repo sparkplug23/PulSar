@@ -105,6 +105,7 @@ class mWiFi :
       uint8_t counter = 0;
       uint8_t retry_init = 0;
       uint8_t retry = 0;
+      uint8_t max_retry;
       uint8_t status = 0;
       uint8_t config_type = 0;
       uint8_t config_counter = D_WIFI_cONFIG_SEC_FIRST_CONNECT; // IMPORTANT!!
@@ -129,6 +130,16 @@ class mWiFi :
 
     uint8_t wps_result;
 
+    #ifdef ENABLE_DEVFEATURE_WIFI__CHECK_CONNECTION_2025
+    // Check to see if we have any routable IP address
+    // IPv4 has always priority
+    // Copy the value of the IP if pointer provided (optional)
+    // `exclude_ap` allows to exlude AP IP address and focus only on local STA
+    bool WifiGetIP(IPAddress *ip, bool exclude_ap = false);
+    bool WifiHasIP(void);
+    String WifiGetIPStr(void);
+    bool HasIP(void); // Has a routable IP, whether IPv4 or IPv6, Wifi or Ethernet  
+    #endif
 
 
     void SplashWifiScan();

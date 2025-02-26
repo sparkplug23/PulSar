@@ -1958,7 +1958,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
    * Displays
   *******************************************************************************************************************/
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_RX_CTR)==0){  return GPIO_NEXTION_RX_ID; }
   #endif
 

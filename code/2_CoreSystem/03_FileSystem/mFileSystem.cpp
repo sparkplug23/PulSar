@@ -474,6 +474,8 @@ static const uint8_t *getPresetCache(size_t &size) {
   //if (presetsModifiedTime != presetsCachedTime) DEBUG_PRINTLN(F("getPresetCache(): presetsModifiedTime changed."));
   //if (presetsCachedValidate != cacheInvalidate) DEBUG_PRINTLN(F("getPresetCache(): cacheInvalidate changed."));
 
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+
   if ((tkr_anim->presetsModifiedTime != presetsCachedTime) || (presetsCachedValidate != tkr_web->cacheInvalidate)) {
     if (presetsCached) {
       free(presetsCached);
@@ -497,6 +499,8 @@ static const uint8_t *getPresetCache(size_t &size) {
     }
   }
 
+  #endif // 
+
   size = presetsCachedSize;
   return presetsCached;
 }
@@ -504,6 +508,7 @@ static const uint8_t *getPresetCache(size_t &size) {
 
 bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
   
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
   ALOG_DBG(PSTR("WS FileRead: %s"), path);
   if(path.endsWith("/")) path += "index.htm";
   if(path.indexOf(F("sec")) > -1) return false;
@@ -522,6 +527,7 @@ bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
     request->send(request->beginResponse(FILE_SYSTEM, path, {}, request->hasArg(F("download")), {}));
     return true;
   }
+  #endif // USE_MODULE_LIGHTS_INTERFACE
   return false;
 
 

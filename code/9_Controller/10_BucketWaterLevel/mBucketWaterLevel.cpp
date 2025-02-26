@@ -134,7 +134,7 @@ void mBucketWaterLevel::Init(void)
 void mBucketWaterLevel::EveryLoop()
 {
 
-if(pCONT_mry->CommandGet_Relay_Power(0))
+if(tkr_relay->CommandGet_Relay_Power(0))
 {
   adc_values.adc1 = adc1_get_raw(ADC1_CHANNEL_4);
   
@@ -156,7 +156,7 @@ void mBucketWaterLevel::MeasureADCWithRelay()
    * Relay on
    * */
 
-  pCONT_mry->CommandSet_Relay_Power(1);
+  tkr_relay->CommandSet_Relay_Power(1);
 
   delay(1000);
 
@@ -225,7 +225,7 @@ void mBucketWaterLevel::MeasureADCWithRelay()
   }
 
 
-  pCONT_mry->CommandSet_Relay_Power(0);
+  tkr_relay->CommandSet_Relay_Power(0);
   mqtthandler_state_ifchanged.flags.SendNow = true;
 
 

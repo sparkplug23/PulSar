@@ -1021,12 +1021,12 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //   char command[CMDSZ];
 // //   bool serviced = true;
 
-// // //   int command_code = pCONT_sup->GetCommandCode(command, sizeof(command), tkr_set->XdrvMailbox.topic, kWebCommands);
+// // //   int command_code = pCONT_sup->GetCommandCode(command, sizeof(command), tkr_events->XdrvMailbox.topic, kWebCommands);
 // // //   if (-1 == command_code) {
 // // //     serviced = false;  // Unknown command
 // // //   }
 // // //   if (CMND_WEBSERVER == command_code) {
-// // //     if ((tkr_set->XdrvMailbox.payload >= 0) && (tkr_set->XdrvMailbox.payload <= 2)) { tkr_set->Settings.webserver = tkr_set->XdrvMailbox.payload; }
+// // //     if ((tkr_events->XdrvMailbox.payload >= 0) && (tkr_events->XdrvMailbox.payload <= 2)) { tkr_set->Settings.webserver = tkr_events->XdrvMailbox.payload; }
 // // //     if (tkr_set->Settings.webserver) {
 // // //       pCONT_sup->Response_P(PSTR("{\"" D_WEBSERVER "\":\"" D_ACTIVE_FOR " %s " D_ON_DEVICE " %s " D_WITH_IP_ADDRESS " %s\"}"),
 // // //         (2 == tkr_set->Settings.webserver) ? D_ADMIN : D_USER, tkr_set->my_hostname, WiFi.localIP().toString().c_str());
@@ -1035,40 +1035,40 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBPASSWORD == command_code) {
-// // //     if ((tkr_set->XdrvMailbox.data_len > 0) && (tkr_set->XdrvMailbox.data_len < sizeof(tkr_set->Settings.web_password))) {
-// // //       strlcpy(tkr_set->Settings.web_password, (SC_CLEAR == pCONT_sup->Shortcut(tkr_set->XdrvMailbox.data)) ? "" : (SC_DEFAULT == pCONT_sup->Shortcut(tkr_set->XdrvMailbox.data)) ? WEB_PASSWORD : tkr_set->XdrvMailbox.data, sizeof(tkr_set->Settings.web_password));
+// // //     if ((tkr_events->XdrvMailbox.data_len > 0) && (tkr_events->XdrvMailbox.data_len < sizeof(tkr_set->Settings.web_password))) {
+// // //       strlcpy(tkr_set->Settings.web_password, (SC_CLEAR == pCONT_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? "" : (SC_DEFAULT == pCONT_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? WEB_PASSWORD : tkr_events->XdrvMailbox.data, sizeof(tkr_set->Settings.web_password));
 // // //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_set->Settings.web_password);
 // // //     } else {
 // // //       pCONT_sup->Response_P(S_JSON_COMMAND_ASTERIX, command);
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBLOG == command_code) {
-// // //     if ((tkr_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (tkr_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { tkr_set->Settings.logging.web_level = tkr_set->XdrvMailbox.payload; }
+// // //     if ((tkr_events->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (tkr_events->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { tkr_set->Settings.logging.web_level = tkr_events->XdrvMailbox.payload; }
 // // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.logging.web_level);
 // // //   }
 // // //   else if (CMND_WEBREFRESH == command_code) {
-// // //     if ((tkr_set->XdrvMailbox.payload > 999) && (tkr_set->XdrvMailbox.payload <= 10000)) { tkr_set->Settings.web_refresh = tkr_set->XdrvMailbox.payload; }
+// // //     if ((tkr_events->XdrvMailbox.payload > 999) && (tkr_events->XdrvMailbox.payload <= 10000)) { tkr_set->Settings.web_refresh = tkr_events->XdrvMailbox.payload; }
 // // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.web_refresh);
 // // //   }
 // // //   else if (CMND_WEBSEND == command_code) {
-// // //     if (tkr_set->XdrvMailbox.data_len > 0) {
-// // //       uint8_t result = WebSend(request, tkr_set->XdrvMailbox.data);
+// // //     if (tkr_events->XdrvMailbox.data_len > 0) {
+// // //       uint8_t result = WebSend(request, tkr_events->XdrvMailbox.data);
 // // //       char stemp1[20];
 // // //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), result, kWebSendStatus));
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBCOLOR == command_code) {
-// // //     if (tkr_set->XdrvMailbox.data_len > 0) {
-// // //       if (strstr(tkr_set->XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be parameter
-// // //         if ((tkr_set->XdrvMailbox.data_len > 3) && (tkr_set->XdrvMailbox.index > 0) && (tkr_set->XdrvMailbox.index <= tkr_set->COL_LAST)) {
-// // //           pCONT_sup->WebHexCode(tkr_set->XdrvMailbox.index -1, tkr_set->XdrvMailbox.data);
+// // //     if (tkr_events->XdrvMailbox.data_len > 0) {
+// // //       if (strstr(tkr_events->XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be parameter
+// // //         if ((tkr_events->XdrvMailbox.data_len > 3) && (tkr_events->XdrvMailbox.index > 0) && (tkr_events->XdrvMailbox.index <= tkr_set->COL_LAST)) {
+// // //           pCONT_sup->WebHexCode(tkr_events->XdrvMailbox.index -1, tkr_events->XdrvMailbox.data);
 // // //         }
-// // //         else if (0 == tkr_set->XdrvMailbox.payload) {
+// // //         else if (0 == tkr_events->XdrvMailbox.payload) {
 // // //           tkr_set->SettingsDefaultWebColor();
 // // //         }
 // // //       }
 // // //       else {
-// // //         JsonWebColor(tkr_set->XdrvMailbox.data);
+// // //         JsonWebColor(tkr_events->XdrvMailbox.data);
 // // //       }
 // // //     }
 // // //     pCONT_sup->Response_P(PSTR("{\"" D_WEBCOLOR "\":["));
@@ -1473,7 +1473,9 @@ void mWebServer::initServer()
   });
   tkr_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
     tkr_web->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
+    #ifdef USE_MODULE_LIGHTS_INTERFACE
     tkr_anim->doReboot = true;
+    #endif
   });
 
   createEditHandler(true);

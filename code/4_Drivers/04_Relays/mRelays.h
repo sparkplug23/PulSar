@@ -75,6 +75,8 @@ class mRelays :
         power_t blink_powersave;                    // Blink start power save state
         power_t latching_power = 0;                 // Power state at latching start
         power_t rel_inverted = 0;                   // Relay inverted flag (1 = (0 = On, 1 = Off))
+        power_t rel_bistable;                     // Relay bistable bitmap
+        power_t power_on_delay_state  = 0;
       }bitpacked;
 
       uint8_t devices_present = 0;
@@ -151,6 +153,8 @@ class mRelays :
     void EverySecond();
     void SubTask_Relay_CycleTimer();
 
+    void StopAllPowerBlink();
+
 
     /************************************************************************************************
      * SECTION: Commands
@@ -165,7 +169,6 @@ class mRelays :
     void CommandSet_Relay_Power(uint8_t state, uint8_t relay_id = 0);
     uint8_t CommandGet_Relay_Power(uint8_t num);
     const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);
-    const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);
     int8_t GetRelayIDbyName(const char* c);
     int8_t GetDeviceIDbyName(const char* c);
     void SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_index = 0);

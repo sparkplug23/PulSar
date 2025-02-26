@@ -49,7 +49,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)             
 
 #ifdef USE_MODULE_SENSORS_INTERFACE
 
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR) "motion_event";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR) "event_motion";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR) "event_userinput";
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 #include <NeoPixelBus.h>
@@ -103,14 +104,15 @@ class mSensorsInterface :
 
     void EveryLoop();
 
-    void MQTT_Report_Event_Button();
-
     #ifdef USE_MODULE_LIGHTS_INTERFACE
     uint8_t flag_unified_sensor_colour_heatmap_type = 0;
     RgbwwColor GetColourValueUsingMaps_ForUnifiedSensor(float temperature);
     #endif // USE_MODULE_LIGHTS_INTERFACE
         
-    void CommandEvent_Motion(uint8_t event_type);
+
+    void Broadcast_Event_MotionDetected();
+    void Broadcast_Event_UserInput();
+
 
     float ConvertTemp(float c);
     char TempUnit(void);
@@ -127,11 +129,25 @@ class mSensorsInterface :
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/
+
+    /****
+     * Current plan Feb25
+     * 
+     * Interface has common topics
+     * 
+     * Sensors : Updated by themselves, can be parsed by openhab rule
+     * Event_Motion : PIR, Camera, Ultrasound, Radar, Door
+     * Event_UserInput : Switch, Button
+     * 
+     * 
+     * 
+     */
    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Event_Motion(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Event_UserInput(uint8_t json_level = 0, bool json_appending = true);
     
     /************************************************************************************************
      * SECITON: MQTT
@@ -145,10 +161,11 @@ class mSensorsInterface :
 
     std::vector<struct handler<mSensorsInterface>*> mqtthandler_list;
     struct handler<mSensorsInterface> mqtthandler_settings;
-    struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged;
+    struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged; // polling non-user interactive sensing
     struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
     struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
+    struct handler<mSensorsInterface> mqtthandler_event_input; // events triggered by user input
     #endif // USE_MODULE_NETWORK_MQTT
 
     /******************************************************************************************************************

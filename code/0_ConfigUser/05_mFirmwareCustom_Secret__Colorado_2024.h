@@ -229,7 +229,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -391,7 +391,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -641,7 +641,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -798,7 +798,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -990,7 +990,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -1142,7 +1142,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -1355,7 +1355,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -1865,11 +1865,11 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     #define SOC_TOUCH_VERSION_1
 
   #define USE_MODULE_SENSORS_SWITCHES
-    #define ENABLE_DEVFEATURE_SWITCHES__V2
+    
 
   /***********************************
    * SECTION: Display Configs
@@ -2152,7 +2152,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist

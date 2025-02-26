@@ -1256,10 +1256,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     byte colorOffset = 32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
 
 
-    void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
-    void LCDDisplay_showDigit(byte digit, byte color, byte pos);
-    void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
-    void LCDDisplay_showDots(byte dots, byte color);
+    uint16_t LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
+    uint16_t LCDDisplay_showDigit(byte digit, byte color, byte pos);
+    uint16_t LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
+    uint16_t LCDDisplay_showDots(byte dots, byte color);
 
     uint16_t EffectAnim__7SegmentDisplay__ClockTime_01();
     uint16_t EffectAnim__7SegmentDisplay__ClockTime_02();
@@ -2951,7 +2951,11 @@ typedef struct Segment
     [[gnu::hot]] uint16_t virtualLength(void) const;
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    [[gnu::hot]] void setPixelColor(int n, RgbwwColor c);                  // Main function others below call
+    [[gnu::hot]] void setPixelColor(int n, RgbwwColor c
+      #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+      ,bool brightness_already_set = false /*temporary fix*/
+      #endif
+    );                  // Main function others below call
     void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) 
     { 
       #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
@@ -3841,6 +3845,7 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
       std::vector<EffectFunction>     function;     // SRAM footprint: 4 bytes per element
       std::vector<const char*>        config;     // 
       std::vector<uint8_t>            development_stage; // 0:stable, 1:beta, 2:alpha, 3:dev
+      std::vector<uint8_t>            id; // 1 byte per element // uses extra memory but allows compile time switching of the effects included in a build (it enum list remains a full list)
     }effects;
 
 
@@ -3984,6 +3989,8 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     std::vector<Panel> panel;
 
     void setUpMatrix();
+
+    void subparse_MatrixConfig(JsonParserObject obj);
 
     // outsmart the compiler :) by correctly overloading
     inline void setPixelColorXY(int x, int y, uint32_t c){       setPixelColor(y * Segment::maxWidth + x, c); }

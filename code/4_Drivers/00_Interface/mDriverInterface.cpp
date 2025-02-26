@@ -37,11 +37,6 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    #ifdef ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES    
-    case TASK_EVENT_INPUT_STATE_CHANGED_ID:
-      MQTT_Report_Event_Button();
-      break;
-    #endif
     /************
      * RULES SECTION * 
     *******************/

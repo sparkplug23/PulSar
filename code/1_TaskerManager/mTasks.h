@@ -273,7 +273,7 @@ enum TASKER_FUNCTION_TYPES
   /**
    * Group of "Events" functions, which are called when sections of the code execute
    * */
-  TASK_EVENT_INPUT_STATE_CHANGED_ID,
+  TASK_EVENT_INPUT_STATE_CHANGED_ID, // ie press, switch
   TASK_EVENT_SET_POWER_ID,
   TASK_EVENT_SET_SPEED_ID,
 

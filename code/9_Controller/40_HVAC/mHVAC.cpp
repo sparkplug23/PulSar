@@ -477,12 +477,12 @@ return;
 
 
 void mHVAC::SetHeatingRelay(uint8_t device_id, uint8_t state){
-  pCONT_mry->CommandSet_Relay_Power(state,device_id);
+  tkr_relay->CommandSet_Relay_Power(state,device_id);
 }
 
 
 uint8_t mHVAC::GetHeatingRelay(uint8_t device_id){
-  return pCONT_mry->CommandGet_Relay_Power(device_id);
+  return tkr_relay->CommandGet_Relay_Power(device_id);
 }
 
 
@@ -498,7 +498,7 @@ uint8_t mHVAC::GetAnyHeatingRelay(){
 void mHVAC::FunctionHandler_Relay_Status(){ 
 
   for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
-    if(pCONT_mry->CommandGet_Relay_Power(device_id)){
+    if(tkr_relay->CommandGet_Relay_Power(device_id)){
       // activeprograms[device_id].relays.state = 1;
     }else{
       // activeprograms[device_id].relays.state = 0;
@@ -618,7 +618,7 @@ int8_t mHVAC::Tasker_PredictManualHeating(){
 //   //     sprintf(&status_message.ctr[status_message.len],"%s relays %d",
 //   //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
 //   //       // GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state, buffer, sizeof(buffer)),
-//   //       pCONT_mry->relay_status[device_id].time_seconds_on
+//   //       tkr_relay->relay_status[device_id].time_seconds_on
 //   //     );
 //   //     status_message.len = strlen(status_message.ctr);
 //   //   }
@@ -1373,11 +1373,11 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level, bool json_appendi
   char buffer[50];
   JBI->Start();
   for(int device_id=0;device_id<settings.active_zones;device_id++){
-    JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID(pCONT_mry->GetModuleUniqueID(), device_id, buffer, sizeof(buffer)));
-      JBI->Add_FV(D_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->rt.relay_status[device_id].last.ontime.hour,  pCONT_mry->rt.relay_status[device_id].last.ontime.minute,  pCONT_mry->rt.relay_status[device_id].last.ontime.second);
-      JBI->Add_FV(D_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->rt.relay_status[device_id].last.offtime.hour,  pCONT_mry->rt.relay_status[device_id].last.offtime.minute,  pCONT_mry->rt.relay_status[device_id].last.offtime.second);
-      JBI->Add(D_TIME_ON "_Seconds",   pCONT_mry->rt.relay_status[device_id].time_seconds_on);
-      JBI->Add(D_TIME_ON "_Mins",   pCONT_mry->rt.relay_status[device_id].time_seconds_on/60);
+    JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID(tkr_relay->GetModuleUniqueID(), device_id, buffer, sizeof(buffer)));
+      JBI->Add_FV(D_ONTIME, PSTR("\"%02d:%02d:%02d\""),  tkr_relay->rt.relay_status[device_id].last.ontime.hour,  tkr_relay->rt.relay_status[device_id].last.ontime.minute,  tkr_relay->rt.relay_status[device_id].last.ontime.second);
+      JBI->Add_FV(D_OFFTIME, PSTR("\"%02d:%02d:%02d\""), tkr_relay->rt.relay_status[device_id].last.offtime.hour,  tkr_relay->rt.relay_status[device_id].last.offtime.minute,  tkr_relay->rt.relay_status[device_id].last.offtime.second);
+      JBI->Add(D_TIME_ON "_Seconds",   tkr_relay->rt.relay_status[device_id].time_seconds_on);
+      JBI->Add(D_TIME_ON "_Mins",   tkr_relay->rt.relay_status[device_id].time_seconds_on/60);
     JBI->Object_End();
   }
   return JBI->End();

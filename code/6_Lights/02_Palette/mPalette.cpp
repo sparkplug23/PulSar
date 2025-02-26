@@ -1830,6 +1830,59 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
 }
 
 
+bool mPalette::IsPaletteGradient(uint16_t palette_id) {
+  PALETTE_ENCODING_DATA encoding = {0};
+
+  // Segment colours (discrete, not gradients)
+  if (palette_id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID &&
+      palette_id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID) {
+    return false;
+  }
+  // Static single colours (discrete, not gradients)
+  else if (palette_id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID &&
+           palette_id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID) {
+    return false;
+  }
+  // Static CRGB palettes (for example, rainbow colours)
+  else if (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID &&
+           palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID) {
+    uint16_t index = palette_id - PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
+    encoding = static_palettes[index].encoding;
+  }
+  // Static CRGB gradient palettes (e.g., sunset gradients)
+  else if (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID &&
+           palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID) {
+    uint16_t index = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    encoding = static_palettes[index].encoding;
+  }
+  // Other static palettes (like colourful defaults)
+  else if (palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID &&
+           palette_id < PALETTELIST_STATIC_LENGTH__ID) {
+    uint16_t index = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
+    encoding = static_palettes[index].encoding;
+  }
+  // Dynamic palettes
+  else if (palette_id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID &&
+           palette_id < PALETTELIST_DYNAMIC__LENGTH__ID) {
+    uint8_t index = palette_id - PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+    encoding = dynamic_palettes[index].encoding;
+  }
+  // Custom palettes
+  else if (palette_id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED &&
+           palette_id < GetPaletteListLength()) {
+    uint16_t index = palette_id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
+    encoding = custom_palettes[index].encoding;
+  }
+  else {
+    // If the palette ID doesn't match any known type, assume it's not a gradient.
+    return false;
+  }
+
+  // Return true if the encoding indicates a gradient.
+  return encoding.index_gradient;
+}
+
+
 
 /*********************************************************************************************************************************************************************************
  *********************************************************************************************************************************************************************************

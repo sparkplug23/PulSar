@@ -235,12 +235,12 @@ return;
 
 
 void mHVAC::SetHeatingRelay(uint8_t device_id, uint8_t state){
-  pCONT_mry->CommandSet_Relay_Power(state,device_id);
+  tkr_relay->CommandSet_Relay_Power(state,device_id);
 }
 
 
 uint8_t mHVAC::GetHeatingRelay(uint8_t device_id){
-  return pCONT_mry->CommandGet_Relay_Power(device_id);
+  return tkr_relay->CommandGet_Relay_Power(device_id);
 }
 
 
@@ -256,7 +256,7 @@ uint8_t mHVAC::GetAnyHeatingRelay(){
 void mHVAC::FunctionHandler_Relay_Status(){ 
 
   for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
-    if(pCONT_mry->CommandGet_Relay_Power(device_id)){
+    if(tkr_relay->CommandGet_Relay_Power(device_id)){
       // activeprograms[device_id].relays.state = 1;
     }else{
       // activeprograms[device_id].relays.state = 0;

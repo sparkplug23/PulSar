@@ -40,7 +40,7 @@
 // #define DEVICE_LIGHTING__LIGHTING_EFFECTS__MATRIX_SEGMENT_TESTER
 // #define DEVICE_ACTIVE_DEVELOPMENT__DOOR_LIGHTING__OFFICE
 // #define DEVICE_TESTBED__GPS_SERIAL
-#define DEVICE_ACTIVE_DEVELOPMENT__SWITCHES_AND_BUTTONS
+// #define DEVICE_ACTIVE_DEVELOPMENT__SWITCHES_AND_BUTTONS
 
 
 /**************************************************************************************************************************************************
@@ -457,6 +457,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
     #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
   // #define USE_MODULE_SENSORS_SWITCHES
   #endif
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS  
 
   // #define ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
     
@@ -723,6 +725,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    #define USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
 
   #endif // ENABLE_TEMPLATE_SECTION__CONTROLLER__HVAC
+ 
 
    // add new controller custom that instead shows the other sensors as PZEM is on nextion
    /**
@@ -783,6 +786,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #ifdef USE_MODULE_SENSORS_PIR
       "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
       #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      #endif  
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
@@ -864,6 +870,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"" "ResetGPIO0" "\""
       "],"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\","
@@ -7813,12 +7822,11 @@ new 26GHz radar sensor
   // #endif
 
   #define USE_MODULE_SENSORS_INTERFACE  
-  #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+  #define USE_MODULE_SENSORS_BUTTONS    
     #define SOC_TOUCH_VERSION_1
 
   #define USE_MODULE_SENSORS_SWITCHES
-    #define ENABLE_DEVFEATURE_SWITCHES__V2
+    
 
   /***********************************
    * SECTION: Display Configs
@@ -7864,6 +7872,11 @@ new 26GHz radar sensor
    * SECTION: MQTT Template Test Loading
   ************************************/  
 
+ #define ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+//  #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+ #define ENABLE_RULES_ENGINE__TEST_BUTTON0_RELAY0
+ #define ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+
   /***********************************
    * SECTION: GPIO Template
   ************************************/  
@@ -7889,6 +7902,7 @@ new 26GHz radar sensor
       #ifdef SOC_TOUCH_VERSION_1
       "\"32\":\"" D_GPIO_FUNCTION_KEY5_TOUCH_CTR  "\","
       "\"33\":\"" D_GPIO_FUNCTION_KEY6_TOUCH_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\","
       #endif
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
@@ -7896,10 +7910,10 @@ new 26GHz radar sensor
       "\"19\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"12\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"13\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL4_CTR  "\""
+      "\"27\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
+      "\"14\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
+      "\"13\":\"" D_GPIO_FUNCTION_REL4_CTR  "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -7940,12 +7954,16 @@ new 26GHz radar sensor
         "\"" "SwitchClose" "\""
       "],"
       "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
-        "\"" "BUT1" "\","
-        "\"" "BUT2" "\","
-        "\"" "BUT3" "\","
+        "\"" "WallRed" "\","
+        "\"" "WallBlue" "\","
+        "\"" "DoorAlert" "\""
+        // "\"" "BUT1" "\","
+        // "\"" "BUT2" "\","
+        // "\"" "BUT3" "\","
         "\"" "BUT4" "\","
         "\"" "BUT5" "\","
-        "\"" "BUT6" "\""
+        "\"" "BUT6" "\","
+        "\"" "ResetGPIO0" "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""

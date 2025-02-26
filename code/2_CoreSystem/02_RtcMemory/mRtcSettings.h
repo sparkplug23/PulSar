@@ -38,6 +38,7 @@ typedef struct {
   uint16_t      valid;                     // 290  (RTC memory offset 100)
   uint8_t       oswatch_blocked_loop;      // 292
   uint8_t       ota_loader;                // 293
+  uint8_t       boot_was_completed_ota_event; // to be added, will be set prior to OTA reset on success only, so next boot knows to skip WiFi delayed start 
   uint32_t      energy_kWhtoday;           // 294
   uint32_t      energy_kWhtotal;           // 298
   // volatile uint32_t pulse_counter[MAX_COUNTERS];  // 29C - See #9521 why volatile

@@ -4,6 +4,69 @@
 #ifdef USE_MODULE_CORE_RULES
 
 /**
+ * @brief New dynamic based rules
+ * With button index, and relay index, create rule that links them
+ * 
+ */
+#if defined(USE_MODULE_SENSORS_BUTTONS) && defined(USE_MODULE_DRIVERS_RELAY)
+void mRuleEngine::Preset_Link_ButtonToggleRelay(uint8_t triggered_index, uint8_t output_index)
+{
+
+    EventPackage event_trig;
+    EventPackage event_comm;
+
+    memset(&event_trig, 0, sizeof(EventPackage));
+    memset(&event_comm, 0, sizeof(EventPackage));
+
+    // Trigger0
+    event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.device_id = triggered_index; // Button0
+    event_trig.value.length = 0;
+    event_trig.value.data[event_trig.value.length++] = INPUT_TYPE_SINGLE_PRESS_ID;  // Pressed 
+    // Command0
+    event_comm.module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
+    event_comm.function_id = TASK_EVENT_SET_POWER_ID;
+    event_comm.device_id = output_index;
+    event_comm.value.length = 0;
+    event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_TOGGLE_ID; // POWER_TOGGLE;  // STATE_NUMBER_INCREMENT_ID
+    // AddRule
+    AppendEventToRules(&event_trig, &event_comm);
+
+}
+#endif
+
+
+#if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
+void mRuleEngine::Preset_Link_SwitchToggleRelay(uint8_t triggered_index, uint8_t output_index)
+{
+
+    EventPackage event_trig;
+    EventPackage event_comm;
+
+    memset(&event_trig, 0, sizeof(EventPackage));
+    memset(&event_comm, 0, sizeof(EventPackage));
+
+    // Trigger0
+    event_trig.module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
+    event_trig.function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
+    event_trig.device_id = triggered_index; // Button0
+    event_trig.value.length = 0;
+    event_trig.value.data[event_trig.value.length++] = INPUT_TYPE_SINGLE_PRESS_ID;  // Pressed 
+    // Command0
+    event_comm.module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
+    event_comm.function_id = TASK_EVENT_SET_POWER_ID;
+    event_comm.device_id = output_index;
+    event_comm.value.length = 0;
+    event_comm.value.data[event_comm.value.length++] = STATE_NUMBER_TOGGLE_ID; // POWER_TOGGLE;  // STATE_NUMBER_INCREMENT_ID
+    // AddRule
+    AppendEventToRules(&event_trig, &event_comm);
+
+}
+#endif
+
+
+/**
  * @brief Add Rules that pair buttons with toggling the relays on board
  * 
  */
@@ -13,7 +76,7 @@ void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 
     ALOG_DBM(PSTR("DefaultRule_Sonoff_4CHPRO") );
     
-    mEvent::EVENT_PART* p_event = nullptr;
+    EventPackage* p_event = nullptr;
 
     if(GetConfiguredCount()>D_MAX_RULES){
         ALOG_ERR(PSTR("Unable to add rules: Out of memory"));
@@ -22,11 +85,11 @@ void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 
     #if defined(USE_MODULE_SENSORS_BUTTONS) && defined(USE_MODULE_DRIVERS_RELAY)
     
-    mEvent::EVENT_PART event_trig;
-    mEvent::EVENT_PART event_comm;
+    EventPackage event_trig;
+    EventPackage event_comm;
 
-    memset(&event_trig, 0, sizeof(mEvent::EVENT_PART));
-    memset(&event_comm, 0, sizeof(mEvent::EVENT_PART));
+    memset(&event_trig, 0, sizeof(EventPackage));
+    memset(&event_comm, 0, sizeof(EventPackage));
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
@@ -103,7 +166,7 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 
     ALOG_DBM( PSTR("DefaultRule_Sonoff_iFan03"));
     
-    mEvent::EVENT_PART* p_event = nullptr;
+    EventPackage* p_event = nullptr;
 
     if(GetConfiguredCount()>D_MAX_RULES){
         ALOG_ERR(PSTR("Unable to add rules: Out of memory"));
@@ -112,11 +175,11 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 
     #if defined(USE_MODULE_SENSORS_BUTTONS) && defined(USE_MODULE_CONTROLLER_SONOFF_IFAN)
     
-    mEvent::EVENT_PART event_trig;
-    mEvent::EVENT_PART event_comm;
+    EventPackage event_trig;
+    EventPackage event_comm;
 
-    memset(&event_trig, 0, sizeof(mEvent::EVENT_PART));
-    memset(&event_comm, 0, sizeof(mEvent::EVENT_PART));
+    memset(&event_trig, 0, sizeof(EventPackage));
+    memset(&event_comm, 0, sizeof(EventPackage));
 
     // Trigger0
     event_trig.module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
@@ -146,7 +209,7 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 
 //     #endif // ENABLE_LOG_LEVEL_INFO
 
-//     mEvent::EVENT_PART* p_event = nullptr;
+//     EventPackage* p_event = nullptr;
 
 //     if(tkr_rules->rules_active_index>2){ return; } //block new rules
 
@@ -188,7 +251,7 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
 
     #endif // ENABLE_LOG_LEVEL_INFO
 
-    mEvent::EVENT_PART* p_event = nullptr;
+    EventPackage* p_event = nullptr;
 
     if(tkr_rules->rules_active_index>2){ return; } //block new rules
 
@@ -292,7 +355,7 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     ALOG_DBG(PSTR("DefaultRule_Shelly_2p5"));
 
     #endif //  ENABLE_LOG_LEVEL_INFO
-    mEvent::EVENT_PART* p_event = nullptr;
+    EventPackage* p_event = nullptr;
 
     if(tkr_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
 

@@ -310,6 +310,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE__SERIAL
   addTasker(new mSerial());
   #endif
+  #ifdef USE_MODULE_CORE_EVENTS
+  addTasker(new mEvent());
+  #endif
   #ifdef USE_MODULE_CORE_I2C
   addTasker(new mI2C());
   #endif

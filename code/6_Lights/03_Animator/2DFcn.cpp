@@ -17,7 +17,7 @@ void mAnimatorLight::setUpMatrix() {
 
     ALOG_INF(PSTR("setUpMatrix"));
 
-  // ALOG_INF("?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????setUpMatrix()");
+  ALOG_INF("?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????setUpMatrix()");
 
   // erase old ledmap, just in case.
   if (customMappingTable != nullptr) delete[] customMappingTable;
@@ -30,8 +30,16 @@ void mAnimatorLight::setUpMatrix() {
     // calculate width dynamically because it will have gaps
     Segment::maxWidth = 1;
     Segment::maxHeight = 1;
+    // temporary fix, make sure the start/stop of the segment are right
+    ALOG_WRN(PSTR("Fixing segment range to match matrix, this needs resolving in the future to allow multiple matrix elements"));
+
+
 
     ALOG_INF("panel size %d", panel.size());
+    if(panel.size()==0)
+    {
+      ALOG_INF("panel size 0");
+    }
 
     for (size_t i = 0; i < panel.size(); i++) {
       Panel &p = panel[i];
@@ -54,6 +62,7 @@ void mAnimatorLight::setUpMatrix() {
       Segment::maxHeight = 1;
       panels = 0;
       panel.clear(); // release memory allocated by panels
+      ALOG_INF(PSTR("panel.clear() HERE B?????????????????????????????????????????????????????"));
       resetSegments2();
       return;
     }
@@ -145,6 +154,7 @@ void mAnimatorLight::setUpMatrix() {
       isMatrix = false;
       panels = 0;
       panel.clear();
+      ALOG_INF(PSTR("panel.clear() HERE A?????????????????????????????????????????????????????"));
       Segment::maxWidth = _length;
       Segment::maxHeight = 1;
       resetSegments2();
@@ -189,11 +199,10 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 
   // DEBUG_LINE_HERE;
   if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
-{
-  
-//  ALOG_INF(PSTR("out of segment")); 
-  return;  // if pixel would fall out of virtual segment just exit
-}
+  {    
+  //  ALOG_INF(PSTR("out of segment")); 
+    return;  // if pixel would fall out of virtual segment just exit
+  }
 
 
 
@@ -237,6 +246,23 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   //   c.WW = scale8(c.WW, bri_master);
   //   c.CW = scale8(c.CW, bri_master);
 
+  bool flag_brightness_already_applied = false;
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
+  // // Apply brightness if needed
+  if (flag_brightness_already_applied==false) {
+    // uint8_t brightness = pCONT_iLight->getBriRGB_Global();//scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+    // Extract, scale, and repack in one step
+    col = RGBW32(
+      (R(col) * scale) >> 8,  // Red
+      (G(col) * scale) >> 8,  // Green
+      (B(col) * scale) >> 8,  // Blue
+      (W(col) * scale) >> 8   // White
+    );
+  }
+  #endif
   
   // // This function bypassing the 1D to 2D set function that applies brightness, so we need to apply here before calling the busmanager
 
@@ -282,7 +308,7 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 //       if (_modeBlend) tmpCol = color_blend(getPixelColorXY(start + xX, startY + yY), col, 0xFFFFU - progress(), true);
 // #endif
       #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-      ALOG_INF(PSTR("--------setPixelColorXY %d, %d, %d, %d, %d -- w%d h%d"), start + xX, startY + yY, R(tmpCol), G(tmpCol), B(tmpCol), width(), height());
+      // ALOG_INF(PSTR("--------setPixelColorXY %d, %d, %d, %d, %d -- w%d h%d"), start + xX, startY + yY, R(tmpCol), G(tmpCol), B(tmpCol), width(), height());
       #endif
 
       // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
@@ -306,7 +332,7 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   // DEBUG_LINE_HERE;
   }
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 }
 
 
@@ -381,7 +407,7 @@ uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y) const
     return 0;  // if pixel would fall out of virtual segment just exit
 
   }
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
 
   if (reverse  ) x = virtualWidth()  - x - 1;
   // DEBUG_LINE_HERE;
@@ -395,7 +421,7 @@ uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y) const
   // DEBUG_LINE_HERE;
   if (x >= width() || y >= height()) return 0;
   
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
   // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
   return tkr_anim->getPixelColorXY(start + x, startY + y);
   // DEBUG_LINE_HERE;

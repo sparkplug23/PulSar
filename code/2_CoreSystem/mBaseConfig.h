@@ -42,6 +42,7 @@ With latest version, all longer term shared debug features should be added here 
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
+#include "2_CoreSystem/mFirmwareDefaults.h" //addded feb2025
 #else
 // #error "here"
 #endif // USE_USER_MICHAEL

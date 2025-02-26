@@ -66,7 +66,7 @@ int8_t mHVAC::Tasker_PredictManualHeating(){
 //   //     sprintf(&status_message.ctr[status_message.len],"%s relays %d",
 //   //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
 //   //       // GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state, buffer, sizeof(buffer)),
-//   //       pCONT_mry->relay_status[device_id].time_seconds_on
+//   //       tkr_relay->relay_status[device_id].time_seconds_on
 //   //     );
 //   //     status_message.len = strlen(status_message.ctr);
 //   //   }

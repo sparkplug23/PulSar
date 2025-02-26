@@ -17,6 +17,17 @@ uint8_t mTelemetry::ConstructJSON_LWT_Online(uint8_t json_level, bool json_appen
   JBI->Start();
     JBI->Add("LWT", "Online");
     JBI->Add("ResetReason", "TBA");
+    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+    if(RtcSettings.boot_was_completed_ota_event == 1)
+    {
+      JBI->Add("OTABootReason", "OTAYes");
+    }else{
+      JBI->Add("OTABootReason", "OTANo");
+    }
+    
+    #else
+    JBI->Add("OTABootReason", "Unknown");
+    #endif
   return JBI->End();
     
 }
@@ -131,6 +142,13 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
         JBI->Add(PM_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE_MINIMAL);
       JBI->Object_End();
     JBI->Object_End();
+
+    #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE_DEFAULT
+    JBI->Add("LightingBase", FIRMWARE_DEFAULT_DESCRIPTION);
+    #else
+    JBI->Add("LightingBase", "Disabled");
+    #endif
+
 
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     JBI->Add(PM_ARDUINO_CORE,     ARDUINO_ESP8266_RELEASE); 

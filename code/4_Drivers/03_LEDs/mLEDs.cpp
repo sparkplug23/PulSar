@@ -373,32 +373,53 @@ void mLEDs::parse_JSONCommand(JsonParserObject obj)
 {
 
   JsonParserToken jtok = 0; 
+  JsonParserToken jtok_sub = 0; 
   int8_t tmp_id = 0;
 
 int8_t led_id = -1;
 uint16_t state_value = 0;
 
-  int8_t relay_id= -1,state=-1;    //assume index 0 if none given
+  // int8_t relay_id= -1,
+  int8_t state = -1;    //assume index 0 if none given
 
-  if(jtok = obj["LED"].getObject()["Name"]){
-    if(jtok.isStr()){
-      // relay_id = GetRelayIDbyName(jtok.getStr());
-      ALOG_INF( PSTR("relay_id = %s"), jtok.getStr() );
-    }else 
-    if(jtok.isNum()){
-      relay_id  = jtok.getInt();
-    }
+  int8_t led_index = -1; // -1 means unset
 
-    ALOG_INF( PSTR("relay_id = %d"), relay_id );
+  if(!(jtok = obj["LED"]))
+  {
+    return;
   }
 
-  // Primary method since v0.86.14.21
-  if(jtok = obj["LED"].getObject()["State"]){
-    if(jtok.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok.getStr());
+  // All commands are inside {"LED":{X}}
+  JsonParserObject jobj = jtok.getObject();
+  // JsonParserToken jtok_sub = 0;
+
+  if(jtok_sub = jobj["Name"])
+  {
+    if(jtok_sub.isStr()){
+      // relay_id = GetRelayIDbyName(jtok.getStr());
+      int8_t id_tmp = DLI->GetDeviceIDbyName(jtok_sub.getStr(), GetModuleUniqueID());
+      if(IsWithinRange(id_tmp, 0, UsedCount()))
+      {
+        led_index = id_tmp;
+        ALOG_INF(PSTR("Valid index %d for %s"), led_index, jtok_sub.getStr());
+      }
+      ALOG_INF( PSTR("led_index = %s"), jtok_sub.getStr() ); // setting via name is not actually supported at this time
     }else 
-    if(jtok.isNum()){
-      state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+    if(jtok_sub.isNum()){
+      led_index  = jtok_sub.getInt();
+    }
+
+    ALOG_INF( PSTR("relay_id = %d"), led_index );
+  }
+
+
+  // Primary method since v0.86.14.21
+  if(jtok_sub = jobj["State"]){
+    if(jtok_sub.isStr()){
+      state = pCONT_sup->GetStateNumber(jtok_sub.getStr());
+    }else 
+    if(jtok_sub.isNum()){
+      state  = jtok_sub.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
     }
 
     /**
@@ -419,31 +440,45 @@ uint16_t state_value = 0;
 
 
 
-  if(jtok = obj["Blink"])
+  if(jtok_sub = jobj["Blink"])
   {
     std::vector<uint32_t> data;
-    for(auto v : jtok.getArray()) 
+    for(auto v : jtok_sub.getArray()) 
     {
       data.push_back(v.getInt());
     }
     ALOG_INF(PSTR("TEST BLINK"));
+
+    if(led_index != -1)
+    {
+      // Assume set via name, so will override the array
+      data[0] = led_index;
+    }
+
     StartEffect_Blink(data[0], data[1], data[2], data[3], data[4]);
   }
-  if(jtok = obj["Pulse"])
+  if(jtok_sub = jobj["Pulse"])
   {
     std::vector<uint32_t> data;
-    for(auto v : jtok.getArray()) 
+    for(auto v : jtok_sub.getArray()) 
     {
       data.push_back(v.getInt());
     }
     ALOG_INF(PSTR("TEST PULSE"));
+    
+    if(led_index != -1)
+    {
+      // Assume set via name, so will override the array
+      data[0] = led_index;
+    }
+    
     StartEffect_Pulse(data[0], data[1], data[2], data[3], data[4]);
   }
 
-  if(IsWithinRange(state, 0,10)){//} && IsWithinRange(relay_id, 0,settings.leds_found)){
-    // If set manually, then override EffectMode to be manual
-    // CommandSet_LED_Power(state,relay_id);
-  }
+  // if(IsWithinRange(state, 0,10)){//} && IsWithinRange(relay_id, 0,settings.leds_found)){
+  //   // If set manually, then override EffectMode to be manual
+  //   // CommandSet_LED_Power(state,relay_id);
+  // }
 
 
 }

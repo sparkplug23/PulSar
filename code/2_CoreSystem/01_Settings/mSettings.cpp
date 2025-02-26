@@ -56,6 +56,8 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
 
       ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
+
+      RtcSettings.boot_was_completed_ota_event = false; // Reset the flag for next boot
   
       #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
       RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)

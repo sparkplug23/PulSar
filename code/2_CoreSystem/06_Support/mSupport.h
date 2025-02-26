@@ -478,6 +478,7 @@ class mSupport :
     uint32_t ResetReason(void);
     String GetResetReason(void);
     const char* GetResetReason(char* buffer, uint8_t buflen);
+    bool ResetReasonPowerOn(void);
 
 
     size_t strchrspn(const char *str1, int character);
@@ -525,6 +526,9 @@ class mSupport :
 
     void ClaimSerial(void);
     void ShowSource(int source);
+        
+    char* GetPowerDevice(char* dest, uint32_t idx, size_t size, uint32_t option);
+    char* GetPowerDevice(char* dest, uint32_t idx, size_t size);
 
     uint16_t WriteBuffer_P(const char* formatP, ...);
     uint16_t WriteBuffer_P(char* buffer, const char* formatP, ...);
@@ -555,10 +559,8 @@ class mSupport :
 
     void SleepDelay(uint32_t mseconds);
 
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
     void SetPulseTimer(uint32_t index, uint32_t time);
     uint32_t GetPulseTimer(uint32_t index);
-    #endif
 
     static int mSearchCtrIndexOf(const char* toSearch, const char* toFind);
     

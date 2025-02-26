@@ -49,13 +49,13 @@
 #include "2_CoreSystem/06_Support/mSensorType.h"
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
-#include "2_CoreSystem/16_Events/mEvents.h"
+// #include "2_CoreSystem/16_Events/mEvents.h"
 
 #include <DeCounter.h>
 
-#ifdef USE_MODULE_CORE_RULES
-#include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
-#endif
+// #ifdef USE_MODULE_CORE_RULES
+// #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
+// #endif
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 
@@ -159,7 +159,7 @@ enum ModuleStatus{
 };
 
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
+#include "2_CoreSystem/mFirmwareDefaults.h" // moving feb2025
 #include "2_CoreSystem/mSystemConfig.h"
 
 
@@ -218,6 +218,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 };
 
 #define pCONT mTaskerManager::GetInstance()
+#define tkr mTaskerManager::GetInstance()
 
 
 // macro to know if a module is a type (ie within a range)
@@ -260,10 +261,14 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "2_CoreSystem/09_Telemetry/mTelemetry.h"
   #define   pCONT_tel                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
 #endif 
-#ifdef USE_MODULE_CORE_RULES
-  #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
+// #ifdef USE_MODULE_CORE_EVENTS
+  #include "2_CoreSystem/12_Events/mEvents.h"
+  #define   tkr_events                           static_cast<mEvent*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_EVENTS_ID))
+// #endif
+// #ifdef USE_MODULE_CORE_RULES
+  #include "2_CoreSystem/13_RuleEngine/mRuleEngine.h"
   #define   tkr_rules                             static_cast<mRuleEngine*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID))
-#endif
+// #endif
 #ifdef USE_MODULE_CORE_UPDATES
   #include "2_CoreSystem/14_Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_UPDATES_ID))
@@ -332,7 +337,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/04_Relays/mRelays.h"
-  #define pCONT_mry                                 static_cast<mRelays*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_RELAY_ID))
+  #define tkr_relay                                 static_cast<mRelays*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_RELAY_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
   #include "4_Drivers/PWM/mPWM.h"
@@ -431,11 +436,11 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_SWITCHES
   #include "5_Sensors/01_Switches/mSwitches.h"
-  #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
+  #define tkr_switch                            static_cast<mSwitches*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SWITCHES_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_BUTTONS
   #include "5_Sensors/02_Buttons/mButtons.h"
-  #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define tkr_button                         static_cast<mButtons*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_BME
   #include "5_Sensors/03_BME/mBME.h"

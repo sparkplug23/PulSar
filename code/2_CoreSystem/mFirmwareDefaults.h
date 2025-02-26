@@ -26,24 +26,24 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "2_CoreSystem/mBaseConfig.h"
 
 /***** SECTION REMOVED DECEMBER 2024 */
-// #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
-// #ifdef USE_USER_MICHAEL
-// #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
-// #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-// #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
-// #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-// #include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
-// #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
-// #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
-// #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
-//   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
-//   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
-//   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
-// #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
-// #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
-// #else
-//   // #error "error"
-// #endif // USE_USER_MICHAEL
+#include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
+#ifdef USE_USER_MICHAEL
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
+#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
+#include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
+#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
+#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
+#include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
+#include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
+#else
+  // #error "error"
+#endif // USE_USER_MICHAEL
 
 /*********************************************************************************************\
  * Default global defines
@@ -62,6 +62,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_TIME
 #define USE_MODULE_CORE_RULES
 #define USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
+#define USE_MODULE_CORE_EVENTS
 
 // #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -116,6 +117,63 @@ typedef uint32_t ColourBaseType;
 ****** Default Firmware Configurations *******************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
+
+/**-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+In this section, the defaults that are used to select base versions of lighting are switched here to the correct/recent version
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE_DEFAULT
+#define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
+// #error "I HOPE"
+#endif
+
+
+/**-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+Evrything after this will be temporary configs outlining the above converted into defaults/base values future builds should use
+This enables switching to newer firmware versions, but falling back when an issue happens. Each version below shall be given a string name to be known in the build/mqtt
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+
+
 
   
 /**
@@ -203,6 +261,145 @@ typedef uint32_t ColourBaseType;
  * End Date: This should be removed
 */
 #ifdef USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
+  #define FIRMWARE_DEFAULT_DESCRIPTION /*USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__*/ "LATEST_LIGHTING_JANUARY_2025"
+
+  #ifndef DEVICE_TESTGROUP__LIGHTING_EFFECTS__60__SUBGROUP__BASE
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+    
+//   #define SETTINGS_HOLDER 1239
+
+//   // #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+//   // #define ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
+//   /***********************************
+//    * SECTION: System Debug Options
+//   ************************************/    
+//   ///////////////////////////////////////////// Enable Logs
+//   // #define DISABLE_SERIAL
+//   // #define DISABLE_SERIAL0_CORE
+//   // #define DISABLE_SERIAL_LOGGING
+//   // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+//   ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+//   // #define ENABLE_DEBUG_PRINT_F
+//   // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+//   // #define USE_DEBUG_PRINT
+//   // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
+
+// //   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
+// //   #define ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
+//   #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+
+// // #define ENABLE_DEBUG_MANUAL_DELAYS
+
+//   ///////////////////////////////////////////// Module Logs
+//   // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+//   // #define ENABLE_FREERAM_APPENDING_SERIAL
+  
+
+//   // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+//   /***********************************
+//    * SECTION: System Configs
+//   ************************************/    
+
+//   // #define USE_MODULE_CORE_FILESYSTEM
+//   //   #define WLED_ENABLE_FS_EDITOR
+//   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+//   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+//   // Settings saving and loading
+//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+//   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+
+
+//   /***********************************
+//    * SECTION: Network Configs
+//   ************************************/    
+
+//   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
+
+//   // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+//   // #define USE_MODULE_NETWORK_WEBSERVER
+//   // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+
+//   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+//   // #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+//   // // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+//   // // #define DISABLE_NETWORK
+//   // // #define DISABLE_NETWORK_WIFI
+//   // #define USE_MODULE_NETWORK_WIFI
+//   // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+
+
+//   /***********************************
+//    * SECTION: Lighting Configs
+//   ************************************/    
+
+//   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
+
+//   /***********************************
+//    * SECTION: MODULE_TEMPLATE Configs
+//   ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  // #define ENABLE_DEVFEATURE_LIGHT__EFFECT_SHOW_TIME_NEW
+  #define WLED_DEBUG
+
+
+#endif
+
 
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
@@ -387,19 +584,75 @@ typedef uint32_t ColourBaseType;
   // #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   // #define WLED_DISABLE_2D
 
+  // temporary fix until rgbww is added with matrix support functions
+  #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE // setPixelXY needs to be added to rgbww
+
   // #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
     #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+    #ifndef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP_DISABLED
     #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
+    #endif
     #define WLED_DEBUG
     #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
     // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
   #endif 
+
+  #endif // ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+
   #if defined(ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D) || defined(ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D)
     #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
   #endif
+
+/**
+ * @brief Tmp fixes to hard code matrix setup
+ * 
+ */
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_8W32H
+// #define ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__HORIZONTAL
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 32 // Height
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 8 // Width
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+#endif
+
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_32W8H
+// #define ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__HORIZONTAL
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 8 // Height
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 32 // Width
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+#endif
+
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H
+// #define ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__HORIZONTAL
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 16 // Height
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 16 // Width
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+#endif
+
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H_VERTICAL
+// #define ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__HORIZONTAL
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 16 // Height
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 16 // Width
+#define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+#endif
+
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_VERTICAL
+ #define ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__VERTICAL
+ #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+ #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 8 // Height
+ #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 32 // Width
+ #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+ #endif
 
 
   
@@ -957,7 +1210,7 @@ typedef uint32_t ColourBaseType;
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
 
   // #define ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
   // #define ENABLE_FEATURE_LIGHTS__DEMO_MODE

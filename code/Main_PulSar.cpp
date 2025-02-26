@@ -336,6 +336,7 @@ void setup(void)
    // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
   ALOG_DBG(PSTR("Loading settings from saved memory"));
   tkr_set->SettingsLoad();                   // Only the system level settings are loaded here, not the module settings which should happen below
+  tkr_set->SettingsDelta();
   
   // sprintf(tkr_set->Settings.debug, "debug12\0");
 

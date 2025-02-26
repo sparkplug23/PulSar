@@ -28,6 +28,15 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case TASK_INIT:
       // DefaultRuleForModule();
+
+      #ifdef ENABLE_RULES_ENGINE__TEST_BUTTON0_RELAY0
+      Preset_Link_ButtonToggleRelay(0,0);
+      Preset_Link_ButtonToggleRelay(1,1);
+      Preset_Link_SwitchToggleRelay(0,2);
+      Preset_Link_ButtonToggleRelay(5,3);
+      #endif
+
+
     break;
   }
 
@@ -473,7 +482,7 @@ rules_active_index = 0;
  * 
  * Perhaps this needs added into each module, ie the way the rule is encoded/decoded is contained within the module eg RF433 
  * */
-bool mRuleEngine::AppendEventToRules(mEvent::EVENT_PART* trigger_new, mEvent::EVENT_PART* command_new) // CHANGE TO ADD RULE
+bool mRuleEngine::AppendEventToRules(EventPackage* trigger_new, EventPackage* command_new) // CHANGE TO ADD RULE
 {
 
   uint8_t rule_count = GetConfiguredCount();
@@ -486,12 +495,12 @@ bool mRuleEngine::AppendEventToRules(mEvent::EVENT_PART* trigger_new, mEvent::EV
   // TBD: Add check for unique rule
 
   // Clear rule
-  memset(&rules[rule_count].trigger, 0, sizeof(mEvent::EVENT_PART));
-  memset(&rules[rule_count].command, 0, sizeof(mEvent::EVENT_PART));
+  memset(&rules[rule_count].trigger, 0, sizeof(EventPackage));
+  memset(&rules[rule_count].command, 0, sizeof(EventPackage));
 
   // Copy rule
-  memcpy(&rules[rule_count].trigger, trigger_new, sizeof(mEvent::EVENT_PART));
-  memcpy(&rules[rule_count].command, command_new, sizeof(mEvent::EVENT_PART));
+  memcpy(&rules[rule_count].trigger, trigger_new, sizeof(EventPackage));
+  memcpy(&rules[rule_count].command, command_new, sizeof(EventPackage));
   // Activate rule
   rules[rule_count].flag_configured = true;
   rules[rule_count].flag_enabled = true;
@@ -508,7 +517,7 @@ bool mRuleEngine::AppendEventToRules(mEvent::EVENT_PART* trigger_new, mEvent::EV
 *******************************************************************************************************************/
 
 
-void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* event){
+void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event){
 
     #ifdef ENABLE_LOG_LEVEL_INFO
   ALOG_TST(PSTR("parsesub_Rule_Part"));
@@ -708,7 +717,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
         // DEBUG_DELAY(1000);
       #endif // ENABLE_LOG_LEVEL_INFO
 
-      mEvent::EVENT_PART* p_event = nullptr;
+      EventPackage* p_event = nullptr;
 
       jobj = obj[rule_name].getObject()["Trigger"];
       if(!jobj.isNull()){
@@ -764,7 +773,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     
     
     
-    // mEvent::EVENT_PART* p_event = nullptr;
+    // EventPackage* p_event = nullptr;
 
 
     // jobj = obj[rule_name].getObject()["Trigger"];
@@ -846,7 +855,7 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
   
     ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow NEW Switch1Change->Relay1Follow"));
 
-    mEvent::EVENT_PART* p_event = nullptr;
+    EventPackage* p_event = nullptr;
 
     if(tkr_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
 
@@ -880,7 +889,7 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
   
   //   ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow NEW Switch1Change->Relay1Follow"));
 
-  //   mEvent::EVENT_PART* p_event = nullptr;
+  //   EventPackage* p_event = nullptr;
 
   //   if(tkr_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
 

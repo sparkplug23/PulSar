@@ -321,6 +321,7 @@ class mPalette
 
     uint16_t GetPaletteListLength(){ return PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + user_defined_palette_count; }
 
+    bool IsPaletteGradient(uint16_t palette_id);
     /**
      * @brief IMPORTANT
      * 

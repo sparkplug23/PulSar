@@ -3,13 +3,13 @@
 #ifndef _MRULEENGINE_H
 #define _MRULEENGINE_H
 
-#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID 2010 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID 2013 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CORE_RULES
+// #ifdef USE_MODULE_CORE_RULES
 
-//, public mEvent
+#include "2_CoreSystem/12_Events/EventPackage.h"
 
 #include <stdint.h>
 #include "3_Network/10_MQTT/mMQTT.h"
@@ -21,8 +21,10 @@ class mRuleEngine :
 {
         
   public:
-    #define D_MAX_RULES 5
-    
+    #ifndef D_MAX_RULES
+    #define D_MAX_RULES 20
+    #endif 
+
     static constexpr const char* PM_MODULE_CORE_RULES_CTR = D_MODULE_CORE_RULES_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID; }
@@ -47,10 +49,14 @@ class mRuleEngine :
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
     void ShowRuleEvent_AddLog(uint8_t show_type = 0);
 
-    bool AppendEventToRules(mEvent::EVENT_PART* trigger, mEvent::EVENT_PART* command);
+    bool AppendEventToRules(EventPackage* trigger, EventPackage* command);
 
     void RulesLoad_From_Progmem();
     void AppendRule_FromDefault_UsingName(const char* name);
+
+    void Preset_Link_ButtonToggleRelay(uint8_t triggered_index, uint8_t output_index); 
+    void Preset_Link_SwitchToggleRelay(uint8_t triggered_index, uint8_t output_index); 
+    
 
     // need a group of functions to "add" and remove from the buffer,
     // what about buffers? they can includes ids
@@ -128,53 +134,26 @@ class mRuleEngine :
     
 uint8_t rule_count2 = 0;
     
-    // /***
-    //  * 
-    //  * Future change:
-    //  * Events should become their own class, to hold things that happen.
-    //  * Rules can then only be turned on when needed in the primary loop, equally, I should add a check to only go through rules if any are active with a flag
-    //  * 
-    //  * 
-    //  * */
-    // struct EVENT_PART{
-    //   /**
-    //    * Buttons, Relays
-    //    * */
-    //   uint16_t module_id;
-    //   /**
-    //    * InputChange, Timer
-    //    */
-    //   uint16_t function_id;
-    //   /**
-    //    * ?? or buffer[0]
-    //    * */
-    //   uint8_t device_id;
-    //   /**
-    //    * Values
-    //    * */
-    //   struct VALUES{
-    //     uint8_t encoding = 0;
-    //     uint8_t data[5];
-    //     uint8_t length = 0;
-    //   }value;
-    //   /**
-    //    * jsoncommands stored in a dlist
-    //    * */
-    //   int8_t json_commands_dlist_id = -1;
-    // };
+    
 
     struct RULES{
       bool flag_enabled = false;
       bool flag_configured = false;
-      mEvent::EVENT_PART trigger;
-      mEvent::EVENT_PART command; //introduce multiple commands? Create a vector of rules?
+      EventPackage trigger;
+      EventPackage command; //introduce multiple commands? Create a vector of rules?
     }rules[D_MAX_RULES];
 
     // This will need to become an array or queue, that way consecutive rules can trigger at the same time
-    mEvent::EVENT_PART event_triggered;
+    EventPackage event_triggered;
 
 
     uint8_t rules_active_index = 0;
+
+    /****
+     * 
+     * Rules need changed to be vector based, so extra ones can be added "loaded" without particular order
+     * 
+     */
 
 
 
@@ -182,19 +161,19 @@ uint8_t rule_count2 = 0;
     // void Reset(){
     //   Reset(&EventTriggered);
     // }
-    void Reset(mEvent::EVENT_PART* e){
+    void Reset(EventPackage* e){
       e->module_id = 0;
       e->function_id = 0;
       // e->index = 0;
       // e->state = 0;
     };
-    void Add_All(mEvent::EVENT_PART* e, uint16_t _module_id=0, uint8_t _index=0, uint8_t _state=0){
+    void Add_All(EventPackage* e, uint16_t _module_id=0, uint8_t _index=0, uint8_t _state=0){
       e->module_id = _module_id;
       // e->function_id = _function_id;
       // e->index = _index;
       // e->state = _state;
     };
-    void Encoding(mEvent::EVENT_PART* e, uint8_t encoding){
+    void Encoding(EventPackage* e, uint8_t encoding){
       e->value.encoding = encoding;
     };
 
@@ -253,7 +232,7 @@ uint8_t rule_count2 = 0;
     #endif // USE_MODULE_TEMPLATE_SHELLY_2P5
 
     
-    void parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* event);
+    void parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event);
 
     
     bool Tasker_Rules_Interface(uint16_t function);
@@ -277,6 +256,21 @@ uint8_t rule_count2 = 0;
 
 
 
-#endif
+// #endif
 
 #endif //ifdef USE_MODULE_CORE_RULES
+
+/****
+ * 
+ * 
+ * 
+ * The next thing on this board as it is made, will be to use the onboard LED as the status led which I have never really coded right (network, relay power etc like tas does)
+any sonoff basic I flashed from september had no button controls, so you can see why I wanted this fixed
+going to restart OH though now,  usally once I mess with .things file it messes up and breaks over time, so best get ahead of it
+in the future, I should start getting ready and plan "outtage tests", for specifically that event. Ideally all switches etc just have local control when networking is down, but I should start planning and testing those. 
+
+oh oh !!! specialised rules. I should add "no network fallback" rules. Like I keep my motion and lighting split, as I want OH to centrally control things, but I should think ahead and add "no network" rules that kick in when the network is down, and enable local motion -> trigger lights etc
+
+
+
+ */

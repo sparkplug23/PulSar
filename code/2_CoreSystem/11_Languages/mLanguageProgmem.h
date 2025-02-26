@@ -713,6 +713,13 @@ DEFINE_PGM_CTR(kOptionFollowInv)        "FollowInv|Inverted";
 // const char HTTP_SNS_ENERGY_TOTAL[] PROGMEM = "{s}" D_ENERGY_TOTAL "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
 
 
+const char S_RSLT_POWER[] PROGMEM = D_RSLT_POWER;
+const char S_RSLT_RESULT[] PROGMEM = D_RSLT_RESULT;
+const char S_RSLT_WARNING[] PROGMEM = D_RSLT_WARNING;
+const char S_LWT[] PROGMEM = D_LWT;
+// const char S_LWT_OFFLINE[] PROGMEM = MQTT_LWT_OFFLINE;
+
+
 // const char S_MAIN_MENU[] PROGMEM = D_MAIN_MENU;
 // const char S_CONFIGURATION[] PROGMEM = D_CONFIGURATION;
 // const char S_SYSTEM_SETTINGS[] PROGMEM = D_SYSTEM_SETTINGS;

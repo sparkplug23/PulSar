@@ -64,9 +64,7 @@ class mButtons :
  * Inspired by (https://github.com/OLIMEX/olimex-iot-firmware-esp8266/blob/master/olimex/user/user_switch2.c)
 \*********************************************************************************************/
 
-#define MAX_RELAY_BUTTON1       5            // Max number of relay controlled by BUTTON1
-
-#define MAX_BUTTON_MULTIPRESS_COUNTER 7
+#define MAX_BUTTON_MULTIPRESS_COUNTER 5
 
 #ifndef DOUBLE_CLICK_WINDOW
  #define DOUBLE_CLICK_WINDOW 500             // Define Window size to recognize double clicks
@@ -78,9 +76,7 @@ const uint8_t BUTTON_PROBE_INTERVAL = 10;      // Time in milliseconds between b
 const uint8_t BUTTON_FAST_PROBE_INTERVAL = 2;  // Time in milliseconds between button input probe for AC detection
 const uint8_t BUTTON_AC_PERIOD = (20 + BUTTON_FAST_PROBE_INTERVAL - 1) / BUTTON_FAST_PROBE_INTERVAL;   // Duration of an AC wave in probe intervals
 
-const char kMultiPress[38] PROGMEM = "SINGLE|DOUBLE|TRIPLE|QUAD|PENTA|CLEAR";
-
-const char kInputTypeButton[43] PROGMEM = "Single|Multi|Hold|Hold Released|Hold Reset";
+const char kMultiPress[62] PROGMEM = "Single|Double|Triple|Quad|Penta|Hold|Hold Released|Hold Reset";
 
 Ticker* TickerButton;
 
@@ -153,6 +149,9 @@ void Handler(void);
 void Loop(void);
 
 void SetButtonUsed(uint32_t index);
+
+
+char* GetStateName(uint8_t state, uint8_t count, char* buffer, uint8_t buflen);
 
 
 bool SendButton(uint32_t device, uint32_t state, uint16_t count = 1);

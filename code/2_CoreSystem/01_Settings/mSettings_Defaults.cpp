@@ -190,7 +190,7 @@ void mSettings::SystemSettings_DefaultBody(void)
 
   Settings.flag_network.mdns_enabled = 1;
   runtime.mdns_delayed_start = 60;
-  sprintf(runtime.my_hostname,"%s",tkr_set->Settings.system_name.device);
+  snprintf(runtime.my_hostname, sizeof(runtime.my_hostname),"%s",tkr_set->Settings.system_name.device);
 
   /*********************************************************************************************
    ******* Networking: WebServer ********************************************************************
@@ -308,6 +308,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   #else
     Settings.poweronstate = APP_POWERON_STATE;
   #endif
+  Settings.power_lock = 0;
   
   Settings.ledmask = APP_LEDMASK;
   Settings.ledstate = APP_LEDSTATE;
@@ -404,4 +405,16 @@ void mSettings::SettingsResetDst(void)
   Settings.tflag[1].month = TIME_DST_MONTH;
   Settings.tflag[1].hour = TIME_DST_HOUR;
   Settings.toffset[1] = TIME_DST_OFFSET;
+}
+
+
+
+/**
+ * @brief Delta meaning change
+ * These are forcing settings when a new firmware has been created and a loaded settings needs newly added values merged
+ */
+void mSettings::SettingsDelta(void) 
+{
+
+
 }

@@ -280,7 +280,7 @@ uint8_t mTreadmillLogger::ConstructJSON_State(uint8_t json_level, bool json_appe
 
   JBI->Start();  
 
-  JBI->Add("TrackingEnable", pCONT_swt->IsSwitchActive(0) );
+  JBI->Add("TrackingEnable", tkr_switch->IsSwitchActive(0) );
 
 
   JBI->Add("EstimatedSpeed", rt.estimated_speed);

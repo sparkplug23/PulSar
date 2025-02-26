@@ -555,14 +555,9 @@ bool mSwitches::SendSwitch(uint32_t index, uint32_t state)
   
   char switch_name[50];
   DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), index, switch_name, sizeof(switch_name));  
-  char state_name_ctr[30]; char *name = state_name_ctr;    
-  if (state <= 3) { // First 4 options are stored in SettingsText
-    name = tkr_set->SettingsText(SET_STATE_TXT1 + state);
-    Serial.println(name);
-  } else {
-    pCONT_sup->GetTextIndexed(state_name_ctr, sizeof(state_name_ctr), state, kSwitchPressStates);
-  }
-  ALOG_INF(PSTR(D_LOG_SWITCHES "SendSwitch[%d|%s] type[%d|%s]"), index, switch_name, state, name);
+  char state_name_ctr[30];
+  GetStateName(event.type,state_name_ctr,sizeof(state_name_ctr));
+  ALOG_INF(PSTR(D_LOG_SWITCHES "SendSwitch[%d|%s] type[%d|%s]"), index, switch_name, state, state_name_ctr);
 
   // state 0 = POWER_OFF = off
   // state 1 = POWER_ON = on
@@ -652,19 +647,27 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
       DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), event.id, switch_name, sizeof(switch_name));  
       JBI->Add("Name", switch_name);
 
-      char state_name_ctr[30]; char *name = state_name_ctr;    
-      if (event.type <= 3) { // First 4 options are stored in SettingsText
-        name = tkr_set->SettingsText(SET_STATE_TXT1 + event.type);
-        Serial.println(name);
-      } else {
-        pCONT_sup->GetTextIndexed(state_name_ctr, sizeof(state_name_ctr), event.type, kSwitchPressStates);
-      }
+      char state_name_ctr[30]; 
+      GetStateName(event.type,state_name_ctr,sizeof(state_name_ctr));
 
-      JBI->Add("TypeName", name);
+      JBI->Add("TypeName", state_name_ctr);
       JBI->Add("LocalTime", tkr_time->GetTime().c_str());
     }
 
   return JBI->End();
+
+}
+
+char* mSwitches::GetStateName(uint8_t state, char* buffer, uint8_t buflen)
+{
+  if (state <= 3) { // First 4 options are stored in SettingsText
+    char *name = tkr_set->SettingsText(SET_STATE_TXT1 + state);
+    Serial.println(name);
+    snprintf(buffer, buflen, name);
+  } else {
+    pCONT_sup->GetTextIndexed(buffer, buflen, state, kSwitchPressStates);
+  }
+  return buffer;
 
 }
 

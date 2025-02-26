@@ -43,6 +43,7 @@
 #define D_MODULE_CORE_TELEMETRY_CTR               "telemetry"
 #define D_MODULE_CORE_TIME_CTR                    "time"
 #define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR   "debug_development"
+#define D_MODULE_CORE_EVENTS_CTR                  "events"
 #define D_MODULE_CORE_RULES_CTR                   "rules"
 #define D_MODULE_CORE_UPDATES_CTR                 "update"
 #define D_MODULE_SENSORS_SUN_TRACKING_CTR          "sun_track"

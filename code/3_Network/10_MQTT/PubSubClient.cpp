@@ -125,12 +125,18 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             return false;
         }
         if (_client->connected()) {
+            // Serial.println("Already connected");
             result = 1;
         } else {
+            // Serial.println("connected trying");
             if (domain.length() != 0) {
                 result = _client->connect(this->domain.c_str(), this->port);
+                // Serial.println(this->domain);
+                // Serial.println(this->port);
             } else {
                 result = _client->connect(this->ip, this->port);
+                // Serial.println(this->ip);
+                // Serial.println(this->port);
             }
         }
         if (result == 1) {
@@ -219,6 +225,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             }
             _client->stop();
         } else {
+            // Serial.println("Connect failed");
             _state = MQTT_CONNECT_FAILED;
         }
         return false;

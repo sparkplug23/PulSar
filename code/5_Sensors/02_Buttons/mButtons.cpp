@@ -529,9 +529,9 @@ void mButtons::Handler(void) {
     #endif  // FIRMWARE_MINIMAL
     #endif  // USE_ADC
 
-    tkr_set->XdrvMailbox.index = button_index;
-    tkr_set->XdrvMailbox.payload = button;
-    tkr_set->XdrvMailbox.command_code = (Button.last_state[button_index] & 0xFF) | ((Button.press_counter[button_index] & 0xFF) << 8);
+    tkr_events->XdrvMailbox.index = button_index;
+    tkr_events->XdrvMailbox.payload = button;
+    tkr_events->XdrvMailbox.command_code = (Button.last_state[button_index] & 0xFF) | ((Button.press_counter[button_index] & 0xFF) << 8);
     if (pCONT->Tasker_Interface(TASK_BUTTON_PRESSED) == FUNCTION_RESULT_HANDLED_ID){
       // Serviced
     }
@@ -553,7 +553,7 @@ void mButtons::Handler(void) {
 
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Immediate: %d | %s " D_IMMEDIATE), button_index, button, button==PRESSED?"ACTIVE":"Not Active" );          
                       
-          SendButton(button_index, INPUT_TYPE_SINGLE_PRESS_ID);
+          SendButton(button_index, INPUT_TYPE_SINGLE_PRESS_ID, 1);
         
         } 
         /***
@@ -665,7 +665,7 @@ void mButtons::Handler(void) {
             !tkr_set->runtime.restart_flag && 
             !Button.hold_timer[button_index] && 
             (Button.press_counter[button_index] > 0) && 
-            (Button.press_counter[button_index] < MAX_BUTTON_MULTIPRESS_COUNTER)
+            (Button.press_counter[button_index] <= MAX_BUTTON_MULTIPRESS_COUNTER)
           ){
 
             bool single_press = false;
@@ -685,8 +685,8 @@ void mButtons::Handler(void) {
               }
             }
             
-            tkr_set->XdrvMailbox.index = button_index;
-            tkr_set->XdrvMailbox.payload = button;
+            tkr_events->XdrvMailbox.index = button_index;
+            tkr_events->XdrvMailbox.payload = button;
             if (pCONT->Tasker_Interface(TASK_BUTTON_MULTI_PRESSED) == FUNCTION_RESULT_HANDLED_ID) {
               // Serviced
               AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: FUNC_BUTTON_MULTI_PRESSED serviced"));
@@ -695,7 +695,7 @@ void mButtons::Handler(void) {
               #ifdef ROTARY_V1
               if (!RotaryButtonPressed(button_index)) {
               #endif
-                if (Button.press_counter[button_index] < MAX_BUTTON_MULTIPRESS_COUNTER) { // Single to 5 press
+                if (Button.press_counter[button_index] <= MAX_BUTTON_MULTIPRESS_COUNTER) { // Single to 5 press
 
                   SendButton(button_index, Button.press_counter[button_index] == 1 ? INPUT_TYPE_SINGLE_PRESS_ID : INPUT_TYPE_MULTIPLE_PRESS_ID, Button.press_counter[button_index]);
 
@@ -739,6 +739,33 @@ uint8_t mButtons::SerialProbe(uint8_t serial_in_byte) {
   return serial_in_byte;
 }
 
+char* mButtons::GetStateName(uint8_t state, uint8_t count, char* buffer, uint8_t buflen)
+{
+  // for now, use last loaded event in buttons
+
+  uint8_t press_type = 0;
+
+  if (state == INPUT_TYPE_SINGLE_HOLD_ID) { // First 4 options are stored in SettingsText
+    press_type = 5;
+  } else 
+  if (state == INPUT_TYPE_SINGLE_HOLD_RELEASED_ID) { // First 4 options are stored in SettingsText
+    press_type = 6;
+  } else 
+  if (state == INPUT_TYPE_SINGLE_HOLD_RESET_TIME_ID) { // First 4 options are stored in SettingsText
+    press_type = 6;
+  } else 
+  if( (state == INPUT_TYPE_SINGLE_PRESS_ID) || (count == 1) ) // Single or one multipress
+  {
+    press_type = 0;
+  }
+  else // Multipress
+  {
+    press_type = count-1;
+  }
+  pCONT_sup->GetTextIndexed(buffer, buflen, press_type, kMultiPress);
+  return buffer;
+
+}
 
 /**
  * @brief A new wrapper I am making in place of sendkey, this make sure the button module reacts to the press event type then broadcasts it via rules to the other modules
@@ -755,7 +782,7 @@ bool mButtons::SendButton(uint32_t index, uint32_t state, uint16_t count)
   char button_name[50];
   DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), index, button_name, sizeof(button_name));  
   char state_name_ctr[30];
-  pCONT_sup->GetTextIndexed_P(state_name_ctr, sizeof(state_name_ctr), state, kInputTypeButton);
+  GetStateName(state, count, state_name_ctr, sizeof(state_name_ctr));
     
   ALOG_INF(PSTR(D_LOG_BUTTONS "SendButton[%d|%s] type[%d|%s] count[%d]"), index, button_name, state, state_name_ctr, count);
 
@@ -823,7 +850,8 @@ uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_appending
 }
 
 /**
- * @brief I dont like having the reporting here tied to rules, it must be its own thing
+ * @brief 
+ * 
  * 
  * @param json_level 
  * @param json_appending 
@@ -841,7 +869,7 @@ uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       JBI->Add("Name", button_name);
       JBI->Add("Type", event.type);
       char state_name_ctr[30];
-      pCONT_sup->GetTextIndexed_P(state_name_ctr, sizeof(state_name_ctr), event.type, kInputTypeButton);
+      GetStateName(event.type, event.presses, state_name_ctr, sizeof(state_name_ctr));
       JBI->Add("TypeName", state_name_ctr);
       JBI->Add("Count", event.presses);
       JBI->Add("LocalTime", tkr_time->GetTime().c_str());

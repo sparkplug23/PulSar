@@ -156,11 +156,11 @@ uint8_t mInternalClock::GetFanspeed(void)
 // Probably to be handled using "light_interface?"
 uint8_t mInternalClock::GetLightState(void)
 {
-  return pCONT_mry->CommandGet_Relay_Power(0);
+  return tkr_relay->CommandGet_Relay_Power(0);
 }
 void mInternalClock::SetLightState(uint8_t state)
 {
-  pCONT_mry->CommandSet_Relay_Power(state);
+  tkr_relay->CommandSet_Relay_Power(state);
 }
 
 /*********************************************************************************************/
@@ -190,7 +190,7 @@ void mInternalClock::SetFanSpeed(uint8_t fanspeed, bool sequence)
   // }
   for (uint32_t i = 1; i < 4; i++) {
     uint8_t state = (fans &1) + POWER_OFF_NO_STATE;  // Add no publishPowerState
-    pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4 (index 1,2,3 skipping 0)
+    tkr_relay->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4 (index 1,2,3 skipping 0)
     fans >>= 1;
   }
 

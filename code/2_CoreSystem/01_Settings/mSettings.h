@@ -268,7 +268,9 @@ const uint8_t PARAM8_SIZE = 18;            // Number of param bytes (SetOption)
  * Power Type
 \*********************************************************************************************/
 
-typedef unsigned long power_t;              // Power (Relay) type
+typedef uint32_t power_t;                   // Power (Relay) type
+const uint32_t POWER_MASK = 0xFFFFFFFFUL;   // Power (Relay) full mask
+const uint32_t POWER_SIZE = 32;             // Power (relay) bit count
 
 /*********************************************************************************************\
  * Constants
@@ -279,6 +281,13 @@ typedef unsigned long power_t;              // Power (Relay) type
  * I need to recheck these sizes match my GPIO enums, as its causing issues
  * 
  */
+#ifdef ESP8266
+const uint8_t MAX_INTERLOCKS = 16;          // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
+#endif  // ESP8266
+#ifdef ESP32
+const uint8_t MAX_INTERLOCKS = 16;          // Max number of interlock groups (up to MAX_INTERLOCKS_SET)
+#endif  // ESP32
+
 
 
 const uint8_t MAX_RELAYS_SET = 32;          // Max number of relays
@@ -301,7 +310,7 @@ const uint8_t MAX_PWMS_LEGACY = 5;          // Max number of PWM channels in fir
 #else
 const uint8_t MAX_PWMS = 5;                 // (not used on ESP8266)
 #endif
-const uint32_t POWER_MASK = 0xffffffffUL;   // Power (Relay) full mask
+
 const uint8_t MAX_COUNTERS = 4;             // Max number of counter sensors
 const uint8_t MAX_TIMERS = 16;              // Max number of Timers
 const uint8_t MAX_PULSETIMERS = 32;         // Max number of supported pulse timers
@@ -396,7 +405,7 @@ const uint32_t START_VALID_UTC_TIME = 1697014158;  // Time is synced and after 2
 enum LedStateOptions {LED_OFF1, LED_POWER, LED_MQTTSUB, LED_POWER_MQTTSUB, LED_MQTTPUB, LED_POWER_MQTTPUB, LED_MQTT, LED_POWER_MQTT, MAX_LED_OPTION};
 
 // Change these to have matching words
-enum ExecuteCommandPowerOptions { POWER_OFF, POWER_ON, POWER_TOGGLE, POWER_BLINK, POWER_BLINK_STOP,
+enum ExecuteCommandPowerOptions { POWER_OFF, POWER_ON, POWER_TOGGLE, POWER_BLINK, POWER_BLINK_STOP, POWER_OFF_FORCE,
                                   POWER_OFF_NO_STATE = 8, POWER_ON_NO_STATE, POWER_TOGGLE_NO_STATE,
                                   POWER_SHOW_STATE = 16 };
                                   
@@ -454,10 +463,10 @@ enum SO32_49Index { P_HOLD_TIME,              // SetOption32 - (Button/Switch) K
                     P_OVER_TEMP,              // SetOption42 - (Energy) Turn all power off at or above this temperature (default 90C)
                     P_ROTARY_MAX_STEP,        // SetOption43 - (Rotary) Rotary step boundary (default 10)
                     P_IR_TOLERANCE,           // SetOption44 - (IR) Base tolerance percentage for matching incoming IR messages (default 25, max 100)
-                    P_SO45_FREE,              // SetOption45
-                    P_SO46_FREE,              // SetOption46
-                    P_SO47_FREE,              // SetOption47
-                    P_SO48_FREE,              // SetOption48
+                    P_BISTABLE_PULSE,         // SetOption45 - (Bistable) Pulse time for two coil bistable latching relays (default 40)
+                    P_POWER_ON_DELAY,         // SetOption46 - (PowerOn) Add delay of 10 x value milliseconds at power on
+                    P_POWER_ON_DELAY2,        // SetOption47 - (PowerOn) Add delay of value seconds at power on before activating relays
+                    P_DUMMY_RELAYS,           // SetOption48 - (Energy) Support energy dummy relays
                     P_SO49_FREE               // SetOption49
                   };  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
 
@@ -533,6 +542,7 @@ class mSettings :
   uint32_t GetSettingsAddress(void);
   void SettingsSave(uint8_t rotate);
   void SettingsLoad(void);
+  void SettingsDelta();
   void SettingsErase(uint8_t type);
   bool SettingsEraseConfig(void) ;
   void SettingsSdkErase(void);
@@ -818,6 +828,43 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 } SOBitfield3;
 
 
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+  uint32_t data;                           // Allow bit manipulation using SetOption
+  struct {                                 // SetOption146 .. SetOption177
+    uint32_t use_esp32_temperature : 1;    // bit 0  (v12.1.1.1) - SetOption146 - (ESP32) Show ESP32 internal temperature sensor
+    uint32_t mqtt_disable_publish : 1;     // bit 1  (v12.1.1.2) - SetOption147 - MQTT_DISABLE_SSERIALRECEIVED - (MQTT) Disable publish SSerialReceived/IRReceived MQTT messages, you must use event trigger rules instead.
+    uint32_t artnet_autorun : 1;           // bit 2  (v12.2.0.4) - SetOption148 - (Light) start DMX ArtNet at boot, listen to UDP port as soon as network is up
+    uint32_t dns_ipv6_priority : 1;        // bit 3  (v12.2.0.6) - SetOption149 - (Wifi) prefer IPv6 DNS resolution to IPv4 address when available. Requires `#define USE_IPV6`
+    uint32_t no_voltage_common : 1;        // bit 4  (v12.3.1.5) - SetOption150 - (Energy) Force no voltage/frequency common
+    uint32_t matter_enabled : 1;           // bit 5  (v12.3.1.5) - SetOption151 - MATTER_ENABLED - (Matter) Enable Matter protocol over Wifi
+    uint32_t bistable_single_pin : 1;      // bit 6  (v12.5.0.1) - SetOption152 - (Power) Switch between two (0) or one (1) pin bistable relay control
+    uint32_t berry_no_autoexec : 1;        // bit 7  (v12.5.0.3) - SetOption153 - (Berry) Disable autoexec.be on restart (1)
+    uint32_t berry_light_scheme : 1;       // bit 8  (v12.5.0.3) - SetOption154 - (Berry) Handle berry led using RMT0 as additional WS2812 scheme
+    uint32_t zcfallingedge : 1;            // bit 9  (v13.0.0.1) - SetOption155 - (ZCDimmer) Enable rare falling Edge dimmer instead of leading edge
+    uint32_t sen5x_passive_mode : 1;       // bit 10 (v13.1.0.1) - SetOption156 - (Sen5x) Run in passive mode when there is another I2C master (e.g. Ikea Vindstyrka), i.e. do not set up Sen5x sensor, higher polling interval
+    uint32_t neopool_outputsensitive : 1;  // bit 11 (v13.2.0.1) - SetOption157 - (NeoPool) Output sensitive data (1)
+    uint32_t mqtt_disable_modbus : 1;      // bit 12 (v13.3.0.5) - SetOption158 - MQTT_DISABLE_MODBUSRECEIVED - (MQTT) Disable publish ModbusReceived MQTT messages (1), you must use event trigger rules instead
+    uint32_t counter_both_edges : 1;       // bit 13 (v13.3.0.5) - SetOption159 - (Counter) Enable counting on both rising and falling edge (1)
+    uint32_t ld2410_use_pin : 1;           // bit 14 (v14.3.0.2) - SetOption160 - (LD2410) Disable generate moving event by sensor report - use LD2410 out pin for events (1)
+    uint32_t gui_no_state_text : 1;        // bit 15 (v14.3.0.7) - SetOption161 - GUI_NOSHOW_STATETEXT - (GUI) Disable display of state text (1)
+    uint32_t no_export_energy_today : 1;   // bit 16 (v14.3.0.7) - SetOption162 - (Energy) Do not add export energy to energy today (1)
+    uint32_t gui_device_name : 1;          // bit 17 (v14.4.1.1) - SetOption163 - GUI_NOSHOW_DEVICENAME - (GUI) Disable display of GUI device name (1)
+    uint32_t spare18 : 1;                  // bit 18
+    uint32_t spare19 : 1;                  // bit 19
+    uint32_t spare20 : 1;                  // bit 20
+    uint32_t spare21 : 1;                  // bit 21
+    uint32_t spare22 : 1;                  // bit 22
+    uint32_t spare23 : 1;                  // bit 23
+    uint32_t spare24 : 1;                  // bit 24
+    uint32_t spare25 : 1;                  // bit 25
+    uint32_t spare26 : 1;                  // bit 26
+    uint32_t spare27 : 1;                  // bit 27
+    uint32_t spare28 : 1;                  // bit 28
+    uint32_t spare29 : 1;                  // bit 29
+    uint32_t spare30 : 1;                  // bit 30
+    uint32_t spare31 : 1;                  // bit 31
+  };
+} SOBitfield6;
 
 
 
@@ -1012,7 +1059,7 @@ struct SETTINGS {
   Template_Config user_template; 
   SystemName      system_name;                             // Move into SettingsText
   char room_hint[50];                                      // Move into SettingsText
-  SysBitfield_System   flag_system;                      // 010
+  SysBitfield_System   flag_system;     // flag ie flag0                  // 010
   RulesBitfield rules_flag;                 // Rule state flags (16 bits)
   int16_t       save_data;                 // 014
   myio          module_pins;                     // 484     
@@ -1024,7 +1071,7 @@ struct SETTINGS {
   char          serial_delimiter;          // 451
   uint8_t       sbaudrate;                 // 452
   uint8_t       sleep;                     // 453
-  uint8_t       setoption_255[PARAM8_SIZE]; // https://tasmota.github.io/docs/Commands/#setoptions
+  uint8_t       setoption_255[PARAM8_SIZE]; // https://tasmota.github.io/docs/Commands/#setoptions "aka param"
   // Core
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
   // Network
@@ -1051,6 +1098,7 @@ struct SETTINGS {
   // Lighting
   SysBitfield_Lighting    flag_lighting;
   // Pulse Counter
+  uint16_t      pulse_timer[MAX_PULSETIMERS];  // 57C
   uint16_t      pulse_counter_type;        // 5D0
   uint16_t      pulse_counter_debounce;    // 5D2
   // Sensors
@@ -1074,6 +1122,8 @@ struct SETTINGS {
   // Power
   unsigned long power;                     // 2E8
   uint8_t       poweronstate;              // 398
+  power_t       interlock[MAX_INTERLOCKS_SET];  // 4D0 MAX_INTERLOCKS = MAX_RELAYS / 2
+  
   // Energy
   EnergyUsageNew   energy_usage;           // 77C 
   SysBitfield_Power  flag_power;           // 5BC
@@ -1088,9 +1138,11 @@ struct SETTINGS {
   #ifdef ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   char settings_holder_ctr[10];
   #endif
+  uint32_t      power_lock;                // F9C
   uint32_t      bootcount_reset_time;      // FD4
   TimeRule      tflag[2];                  // 2E2
   SOBitfield3   flag3;                     // 3A0
+  SOBitfield6   flag6;                     // 3A0
   uint32_t      ipv4_address[5];           // 544
   uint32_t      ipv4_rgx_address;          // 558
   uint32_t      ipv4_rgx_subnetmask;       // 55C
@@ -1137,7 +1189,9 @@ struct SETTINGS {
     uint8_t light_type;                       // Light types
     TemplateLoading template_loading;
     FIRMWARE_VERSION firmware_version;    
+    uint32_t pulse_timer[MAX_PULSETIMERS];    // Power off timer
     power_t power = 0;                          // Current copy of Settings.power
+    power_t power_latching;                   // Current state of single pin latching power
     int ota_state_flag = 0;                     // OTA state flag
     int ota_result = 0;                         // OTA result
     int restart_flag = 0;                       // Sonoff restart flag
@@ -1170,10 +1224,15 @@ struct SETTINGS {
     bool spi_flg = false;                       // SPI configured
     bool soft_spi_flg = false;                  // Software SPI configured
     bool ntp_force_sync = false;                // Force NTP sync
+    uint8_t power_on_delay = 0;                   // Delay relay power on to reduce power surge (SetOption47)
+
+    uint32_t blink_timer;                     // Power cycle timer
+    uint16_t blink_counter;                   // Number of blink cycles
+  
     myio my_module;                             // Active copy of Module GPIOs (17 x 8 bits)
     gpio_flag my_module_flag;                   // Active copy of Module GPIO flags
     StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
-    char my_hostname[33];                       // Composed Wifi hostname
+    char my_hostname[50];                       // Composed Wifi hostname
     uint8_t flag_boot_complete = false;
     int wifi_state_flag = 0;         // WIFI_RESTART Wifi state flag    
     bool settings_lkg = false;  // Settings saved as Last Known Good
@@ -1181,19 +1240,6 @@ struct SETTINGS {
     uint8_t enable_serial_logging_filtering = false;    
     bool settings_holder_hardcorded_stored_changed = false; // if true, other files may want to reset too
   }runtime;
-
-  
-  struct XDRVMAILBOX {
-    bool          grpflg;
-    bool          usridx;
-    uint16_t      command_code;
-    uint32_t      index;
-    uint32_t      data_len;
-    int32_t       payload;
-    char         *topic;
-    char         *data;
-    char         *command;
-  } XdrvMailbox;
 
   #define RESET_BOOT_STATUS() memset(&tkr_set->runtime.boot_status,0,sizeof(tkr_set->runtime.boot_status))
 

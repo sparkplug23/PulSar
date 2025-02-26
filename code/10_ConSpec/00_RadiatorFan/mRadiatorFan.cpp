@@ -80,7 +80,7 @@ void mRadiatorFan::Task_UseTemperatureToControlRelay()
      * Checks: 1 minute
      * Backoff: 2 minutes until it would turn off
      * */
-    pCONT_mry->CommandSet_Timer_Decounter(60*5, 0 /*Relay0*/);   
+    tkr_relay->CommandSet_Timer_Decounter(60*5, 0 /*Relay0*/);   
   }
 
   #endif
@@ -123,9 +123,9 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appendin
     JBI->Object_End();
     
     JBI->Object_Start("Fan"); // Based on relay controls
-      JBI->Add("State",                  pCONT_mry->CommandGet_Relay_Power(0));
-      JBI->Add("TimeOnSeconds",          pCONT_mry->CommandGet_SecondsRelayHasBeenOn(0));          // total time on
-      JBI->Add("TimeOnDecounterSeconds", pCONT_mry->CommandGet_SecondsToRemainOn(0)); // time to stay on
+      JBI->Add("State",                  tkr_relay->CommandGet_Relay_Power(0));
+      JBI->Add("TimeOnSeconds",          tkr_relay->CommandGet_SecondsRelayHasBeenOn(0));          // total time on
+      JBI->Add("TimeOnDecounterSeconds", tkr_relay->CommandGet_SecondsToRemainOn(0)); // time to stay on
     JBI->Object_End();
   return JBI->End();
 }

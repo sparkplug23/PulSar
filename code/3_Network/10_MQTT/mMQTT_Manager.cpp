@@ -378,6 +378,10 @@ ALOG_INF(PSTR("MqttPublishPayloadPrefixTopic_P"));
   // free(romram);                         // Free 16k heap from 64 bytes
   // MqttPublishPayload(stopic, payload, binary_length, retained);
 
+  Publish("status/debug/test", payload, false);
+
+  
+
 }
 
 void mMQTTManager::MqttPublishPrefixTopic_P(uint32_t prefix, const char* subtopic, bool retained) {
@@ -402,6 +406,21 @@ void mMQTTManager::MqttPublishPrefixTopicRulesProcess_P(uint32_t prefix, const c
   // Publish <prefix>/<device>/<RESULT or <subtopic>> default ResponseData string no retained
   //   then process rules
   MqttPublishPrefixTopicRulesProcess_P(prefix, subtopic, false);
+}
+
+
+void mMQTTManager::MqttPublishPowerBlinkState(uint32_t device) {
+  char scommand[33];
+
+  // if ((device < 1) || (device > TasmotaGlobal.devices_present)) {
+  //   device = 1;
+  // }
+  #ifdef USE_MODULE_DRIVERS_RELAY
+  tkr_sup->Response_P(PSTR("{\"%s\":\"" D_BLINK " %s\"}"), 
+    tkr_sup->GetPowerDevice(scommand, device, sizeof(scommand), tkr_set->Settings.flag_system.device_index_enable), tkr_sup->GetStateText(bitRead(tkr_relay->rt.bitpacked.blink_mask, device -1)));  // SetOption26 - Switch between POWER or POWER1
+  #endif 
+  
+  MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, S_RSLT_POWER);
 }
 
 #endif // ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS

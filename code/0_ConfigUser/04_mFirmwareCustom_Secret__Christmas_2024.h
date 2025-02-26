@@ -3220,7 +3220,7 @@
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -3660,7 +3660,7 @@
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTON__V2
+    
     /**
      * @brief 
      * Button 1: Preset iter is press, hold in back to playlist
@@ -5174,7 +5174,7 @@
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_ADC_INTERNAL
   #define USE_MODULE_SENSORS_SWITCHES
-    #define ENABLE_DEVFEATURE_SWITCHES__V2
+    
 
   /***********************************
    * SECTION: Lighting Configs

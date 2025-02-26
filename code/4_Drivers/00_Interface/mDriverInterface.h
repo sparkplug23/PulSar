@@ -53,7 +53,7 @@ class mDriverInterface :
     // sensor_t
 
     
-    void CommandEvent_Motion(uint8_t event_type);
+    void Broadcast_Event_MotionDetected(uint8_t event_type);
     
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJson_DriverStatus(uint8_t json_level = 0, bool json_appending = true);

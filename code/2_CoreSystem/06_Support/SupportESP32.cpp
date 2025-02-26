@@ -335,6 +335,14 @@ bool SupportESP32::FoundPSRAM(void) {
 
 
 
+// uint32_t SupportESP32::ESP_ResetInfoReason(void) {
+//   RESET_REASON reason = rtc_get_reset_reason(0);
+//   if (1  == reason) { return REASON_DEFAULT_RST; }       // POWERON_RESET
+//   if ((3  == reason) || (12 == reason)) { return REASON_SOFT_RESTART; }  // SW_RESET / RTC_SW_SYS_RESET and SW_CPU_RESET / RTC_SW_CPU_RESET
+//   if (5  == reason) { return REASON_DEEP_SLEEP_AWAKE; }  // DEEPSLEEP_RESET
+// //  if (3  == reason) { return REASON_EXT_SYS_RST; }       // SW_RESET / RTC_SW_SYS_RESET
+//   return -1; //no "official error code", but should work with the current code base
+// }
 
 
 

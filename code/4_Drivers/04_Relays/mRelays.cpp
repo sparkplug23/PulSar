@@ -88,6 +88,510 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
+
+
+// Updated 2025
+void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
+{
+  // power xx00 - toggle REL1 (Off) and REL3 (Off) - device 1 Off, device 2 Off
+  // power xx01 - toggle REL2 (On)  and REL3 (Off) - device 1 On,  device 2 Off
+  // power xx10 - toggle REL1 (Off) and REL4 (On)  - device 1 Off, device 2 On
+  // power xx11 - toggle REL2 (On)  and REL4 (On)  - device 1 On,  device 2 On
+  static power_t latching_power = 0;     // Power state at latching start
+
+  if (state && !tkr_set->runtime.latching_relay_pulse) {  // Set latching relay to power if previous pulse has finished
+    latching_power = lpower;
+    tkr_set->runtime.latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
+  }
+
+  for (uint32_t i = 0; i < rt.devices_present; i++) {
+    uint32_t port = (i << 1) + ((latching_power >> i) &1);
+    pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+  }
+}
+
+
+// Updated 2025
+void mRelays::SetDevicePower(power_t rpower, uint32_t source)
+{
+  if (tkr_set->runtime.power_on_delay) {
+    rt.bitpacked.power_on_delay_state = rpower;
+    return;
+  }
+
+  pCONT_sup->ShowSource(source);
+  tkr_set->runtime.last_source = source;
+
+  if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {  // All on and stay on
+    tkr_set->runtime.power = POWER_MASK >> (POWER_SIZE - rt.devices_present);
+    rpower = tkr_set->runtime.power;
+  }
+
+  if (tkr_set->Settings.flag_system.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
+    for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
+      power_t mask = 1;
+      uint32_t count = 0;
+      for (uint32_t j = 0; j < rt.devices_present; j++) {
+        if ((tkr_set->Settings.interlock[i] & mask) && (rpower & mask)) {
+          count++;
+        }
+        mask <<= 1;
+      }
+      if (count > 1) {
+        mask = ~tkr_set->Settings.interlock[i];    // Turn interlocked group off as there would be multiple relays on
+        tkr_set->runtime.power &= mask;
+        rpower &= mask;
+      }
+    }
+  }
+
+  if (rpower) {                           // Any power set
+    rt.bitpacked.last_power = rpower;
+  }
+
+  tkr_events->XdrvMailbox.index = rpower;
+  // XdrvXsnsCall(FUNC_SET_POWER);           // Signal power state
+
+  tkr_events->XdrvMailbox.index = rpower;
+  tkr_events->XdrvMailbox.payload = source;
+  if (0){//XdrvCall(FUNC_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
+    // Serviced
+  }
+#ifdef ESP8266
+  else if ((SONOFF_DUAL == tkr_set->runtime.module_type) || (CH4 == tkr_set->runtime.module_type)) {
+    Serial.write(0xA0);
+    Serial.write(0x04);
+    Serial.write(rpower &0xFF);
+    Serial.write(0xA1);
+    Serial.write('\n');
+    Serial.flush();
+  }
+  else if (EXS_RELAY == tkr_set->runtime.module_type) {
+    SetLatchingRelay(rpower, 1);
+  }
+#endif  // ESP8266
+  else {
+    uint32_t port = 0;
+    uint32_t port_next;
+    power_t bistable = 0;
+
+    #ifdef ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
+    ZeroCrossMomentStart();
+    #endif
+
+    for (uint32_t i = 0; i < rt.devices_present; i++) {
+      power_t state = rpower &1;
+
+      port_next = 1;                              // Select next relay
+      bool update = true;
+      if (bitRead(rt.bitpacked.rel_bistable, port)) {
+        if (tkr_set->Settings.flag6.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
+          if (0x80000000 == tkr_set->runtime.power_latching) {
+            tkr_set->runtime.power_latching = tkr_set->runtime.power;  // Init last known state
+          }
+          update = (bitRead(tkr_set->runtime.power_latching, port) != state);
+          if (update) {
+            bitWrite(tkr_set->runtime.power_latching, port, state);
+            bitSet(bistable, port);
+          }
+
+        } else {
+          if (!state) { port_next = 2; }          // Skip highest relay
+          port += state;                          // Relay<lowest> = Off, Relay<highest> = On
+        }
+        state = 1;                                // Set pulse
+      }
+      if (update && (i < MAX_RELAYS)) {        
+        uint16_t gpio_pin = 0;
+        if(bitRead(rt.bitpacked.rel_inverted, i))
+        { //add the gpio mpin shift back in
+          gpio_pin = GPIO_REL1_INV_ID;          
+        }else{
+          gpio_pin = GPIO_REL1_ID;
+        }
+        pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+        // pCONT_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+      }
+      port += port_next;                          // Select next relay
+      rpower >>= 1;                               // Select next power
+    }
+    
+    #ifdef ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
+    ZeroCrossMomentEnd();
+    #endif 
+
+    // Reset bistable relay here to fix non-interlock situations due to fast switching
+    if (rt.bitpacked.rel_bistable) {             // If bistable relays in the mix reset them after 40ms
+      delay(tkr_set->Settings.setoption_255[P_BISTABLE_PULSE]);   // SetOption45 - Keep energized for about 5 x operation time
+      for (uint32_t i = 0; i < port; i++) {       // Reset up to detected amount of ports
+        if (bitRead(rt.bitpacked.rel_bistable, i)) {
+          if (tkr_set->Settings.flag6.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
+            if (!bitRead(bistable, i)) {
+              continue;
+            }
+          }
+          uint16_t gpio_pin = 0;
+          if(bitRead(rt.bitpacked.rel_inverted, i))
+          { //add the gpio mpin shift back in
+            gpio_pin = GPIO_REL1_INV_ID;          
+          }else{
+            gpio_pin = GPIO_REL1_ID;
+          }
+          power_t state = rpower &1;
+          pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+          // pCONT_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
+        }
+      }
+    }
+  }
+
+}
+
+// Updated 2025
+void mRelays::RestorePower(bool publish_power, uint32_t source)
+{
+  if (tkr_set->runtime.power != rt.bitpacked.last_power) {
+    SetDevicePower(rt.bitpacked.last_power, source);
+    if (publish_power) {
+      mqtthandler_state_teleperiod.flags.SendNow = true;
+      mqtthandler_state_ifchanged.flags.SendNow = true;
+    }
+  }
+}
+
+// Updated 2025
+void mRelays::SetAllPower(uint32_t state, uint32_t source)
+{
+  // state 0 = POWER_OFF = Relay Off
+  // state 1 = POWER_ON = Relay On (turn off after tkr_set->Settings.pulse_timer * 100 mSec if enabled)
+  // state 2 = POWER_TOGGLE = Toggle relay
+  // state 5 = POWER_OFF_FORCE = Relay Off even if locked
+  // state 8 = POWER_OFF_NO_STATE = Relay Off and no publishPowerState
+  // state 9 = POWER_ON_NO_STATE = Relay On and no publishPowerState
+  // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
+  // state 16 = POWER_SHOW_STATE = Show power state
+  
+  bool publish_power = true;
+  if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
+    state &= 3;                           // POWER_OFF, POWER_ON or POWER_TOGGLE
+    publish_power = false;
+  }
+  if (((state >= POWER_OFF) && (state <= POWER_TOGGLE)) || (POWER_OFF_FORCE == state))  {
+    power_t all_on = POWER_MASK >> (POWER_SIZE - rt.devices_present);
+    switch (state) {
+    case POWER_OFF:
+      // Keep locked bits and set all other to 0
+      tkr_set->runtime.power &= tkr_set->Settings.power_lock; 
+      break;
+    case POWER_ON:
+      // Keep locked bits and set all other to 1
+      tkr_set->runtime.power = (tkr_set->runtime.power & tkr_set->Settings.power_lock) | (all_on & ~tkr_set->Settings.power_lock);
+      break;
+    case POWER_TOGGLE:
+      // Keep locked bits and toggle all other
+      tkr_set->runtime.power ^= ~tkr_set->Settings.power_lock & all_on;
+      break;
+    case POWER_OFF_FORCE:
+      // Set all off even if locked on (Used by overtemp and overcurrent)
+      tkr_set->runtime.power = 0; 
+      break;
+    }
+    SetDevicePower(tkr_set->runtime.power, source);
+  }
+
+  if (publish_power) {
+    mqtthandler_state_teleperiod.flags.SendNow = true;
+    mqtthandler_state_ifchanged.flags.SendNow = true;
+  }
+}
+
+// Updated 2025
+void mRelays::SetPowerOnState(void)
+{
+  
+  if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {
+    SetDevicePower(1, SRC_RESTART);
+  } else {
+    
+    power_t devices_mask = POWER_MASK >> (POWER_SIZE - rt.devices_present);
+    if (tkr_sup->ResetReasonPowerOn()){
+      tkr_set->runtime.power_latching = 0;   // Single pin latching relay is powered off after re-applying power
+
+      switch (tkr_set->Settings.poweronstate)
+      {
+      case POWER_ALL_OFF:
+      case POWER_ALL_OFF_PULSETIME_ON:
+        tkr_set->runtime.power = 0;
+        SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
+        break;
+      case POWER_ALL_ON:  // All on
+        tkr_set->runtime.power = devices_mask;
+        SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
+        break;
+      case POWER_ALL_SAVED_TOGGLE:
+        tkr_set->runtime.power = (tkr_set->Settings.power & devices_mask) ^ POWER_MASK;
+        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
+          SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
+        }
+        break;
+      case POWER_ALL_SAVED:
+        tkr_set->runtime.power = tkr_set->Settings.power & devices_mask;
+        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
+          SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
+        }
+        break;
+      }
+
+    } else {
+      tkr_set->runtime.power = tkr_set->Settings.power & devices_mask;
+      if (tkr_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
+        SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
+      }
+    }
+
+    //  AddLog(LOG_LEVEL_DEBUG, PSTR("PWR: PowerOnState %d restored"), tkr_set->Settings.poweronstate);
+
+    // TasIssue #526 and #909
+    uint32_t port = 0;
+    for (uint32_t i = 0; i < rt.devices_present; i++) {
+      #ifdef ESP8266
+      if (!tkr_set->Settings.flag3.no_power_feedback &&  // SetOption63 - Don't scan relay power state at restart - #5594 and #5663
+          !tkr_set->runtime.power_on_delay          // SetOption47 - Delay switching relays to reduce power surge at power on
+          #ifdef USE_SHUTTER
+          && !tkr_set->Settings.flag3.shutter_mode       // SetOption80 - Enable shutter support
+          #endif // USE_SHUTTER
+        ) {
+        if ((port < MAX_RELAYS) && PinUsed(GPIO_REL1, port)) {
+          if (bitRead(rt.bitpacked.rel_bistable, port)) {
+            port++;                              // Skip both bistable relays as always 0
+          } else {
+            bitWrite(tkr_set->runtime.power, i, digitalRead(Pin(GPIO_REL1, port)) ^ bitRead(tkr_set->runtime.rel_inverted, port));
+          }
+        }
+        port++;
+      }
+      #endif  // ESP8266
+      if (bitRead(tkr_set->runtime.power, i) || (POWER_ALL_OFF_PULSETIME_ON == tkr_set->Settings.poweronstate)) {
+        tkr_sup->SetPulseTimer(i % MAX_PULSETIMERS, tkr_set->Settings.pulse_timer[i % MAX_PULSETIMERS]);
+      }
+    }
+      
+  }
+
+  rt.bitpacked.blink_powersave = tkr_set->runtime.power;
+}
+
+
+
+void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)
+{
+// device  = Relay number 1 and up
+// state 0 = POWER_OFF = Relay Off
+// state 1 = POWER_ON = Relay On (turn off after Settings->pulse_timer * 100 mSec if enabled)
+// state 2 = POWER_TOGGLE = Toggle relay
+// state 3 = POWER_BLINK = Blink relay
+// state 4 = POWER_BLINK_STOP = Stop blinking relay
+// state 5 = POWER_OFF_FORCE = Relay off even if locked
+// state 8 = POWER_OFF_NO_STATE = Relay Off and no publishPowerState
+// state 9 = POWER_ON_NO_STATE = Relay On and no publishPowerState
+// state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
+// state 16 = POWER_SHOW_STATE = Show power state
+
+  pCONT_sup->ShowSource(source);
+
+//  if (1049 == LANGUAGE_LCID) { return; }
+
+#ifdef ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+    bool wasOn = (CommandGet_Relay_Power(device) != 0);
+#endif
+
+#ifdef USE_SONOFF_IFAN
+  if (IsModuleIfan()) {
+    tkr_set->runtime.blink_mask &= 1;       // No blinking on the fan relays
+    Settings->flag.interlock = 0;        // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
+    Settings->pulse_timer[1] = 0;        // No pulsetimers on the fan relays
+    Settings->pulse_timer[2] = 0;
+    Settings->pulse_timer[3] = 0;
+  }
+#endif  // USE_SONOFF_IFAN
+
+  bool force_power_off = false;
+  if (POWER_OFF_FORCE == state) {
+    force_power_off = true;
+    state = POWER_OFF;
+  }
+
+  bool publish_power = true;
+  if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
+    state &= 3;                          // POWER_OFF, POWER_ON or POWER_TOGGLE
+    publish_power = false;
+  }
+
+  // if ((device < 1) || (device > rt.devices_present)) { // Caused 0 and 1 commands wrong
+  //   device = 1;
+  // }
+  tkr_set->runtime.active_device = device;
+
+  if (!force_power_off && bitRead(tkr_set->Settings.power_lock, device -1)) {
+    AddLog(LOG_LEVEL_INFO, PSTR("CMD: Power%d is LOCKED"), device);
+    state = POWER_SHOW_STATE;            // Only show state. Make no change
+  }
+
+  if (state != POWER_SHOW_STATE) {
+    tkr_sup->SetPulseTimer((device -1) % MAX_PULSETIMERS, 0);
+  }
+
+  static bool interlock_mutex = false;   // Interlock power command pending
+  power_t mask = 1 << device; //(device -1);       // Device to control
+  if (state <= POWER_TOGGLE) {
+    if ((rt.bitpacked.blink_mask & mask)) {
+      rt.bitpacked.blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
+      #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+      pCONT_mqtt->MqttPublishPowerBlinkState(device);
+      #endif
+    }
+
+    if (tkr_set->Settings.flag_system.interlock &&      // CMND_INTERLOCK - Enable/disable interlock
+        !interlock_mutex &&
+        ((POWER_ON == state) || ((POWER_TOGGLE == state) && !(tkr_set->runtime.power & mask)))
+       ) {
+      interlock_mutex = true;            // Clear all but masked relay in interlock group if new set requested
+      bool perform_interlock_delay = false;
+      for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
+        if (tkr_set->Settings.interlock[i] & mask) {  // Find interlock group
+          for (uint32_t j = 0; j < rt.devices_present; j++) {
+            power_t imask = 1 << j;
+            if ((tkr_set->Settings.interlock[i] & imask) && (tkr_set->runtime.power & imask) && (mask != imask)) {
+              ExecuteCommandPower(j +1, POWER_OFF, SRC_IGNORE);
+              perform_interlock_delay = true;
+            }
+          }
+          break;                         // An interlocked relay is only present in one group so quit
+        }
+      }
+      if (perform_interlock_delay) {
+        delay(50);                       // Add some delay to make sure never have more than one relay on
+      }
+      interlock_mutex = false;
+    }
+
+#ifdef USE_DEVICE_GROUPS
+    power_t old_power = tkr_set->runtime.power;
+#endif  // USE_DEVICE_GROUPS
+    switch (state) {
+    case POWER_OFF: {
+      tkr_set->runtime.power &= (POWER_MASK ^ mask);
+      break; }
+    case POWER_ON:
+      tkr_set->runtime.power |= mask;
+      break;
+    case POWER_TOGGLE:
+      tkr_set->runtime.power ^= mask;
+      Serial.println("Toggle");
+      Serial.println(tkr_set->runtime.power,BIN);
+    }
+#ifdef USE_DEVICE_GROUPS
+    if (tkr_set->runtime.power != old_power && SRC_REMOTE != source && SRC_RETRY != source) {
+      power_t dgr_power = tkr_set->runtime.power;
+      if (Settings->flag4.multiple_device_groups) {  // SetOption88 - Enable relays in separate device groups
+        dgr_power = (dgr_power >> (device - 1)) & 1;
+      }
+      SendDeviceGroupMessage(device, DGR_MSGTYP_UPDATE, DGR_ITEM_POWER, dgr_power);
+    }
+#endif  // USE_DEVICE_GROUPS
+    SetDevicePower(tkr_set->runtime.power, source);
+#ifdef USE_DOMOTICZ
+    DomoticzUpdatePowerState(device);
+#endif  // USE_DOMOTICZ
+#ifdef USE_KNX
+    KnxUpdatePowerState(device, tkr_set->runtime.power);
+#endif  // USE_KNX
+    // if (publish_power && Settings->flag3.hass_tele_on_power) {  // SetOption59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT
+    //   MqttPublishTeleState();
+    // }
+
+    // Restart PulseTime if powered On
+    tkr_sup->SetPulseTimer((device -1) % MAX_PULSETIMERS, (((POWER_ALL_OFF_PULSETIME_ON == tkr_set->Settings.poweronstate) ? ~tkr_set->runtime.power : tkr_set->runtime.power) & mask) ? tkr_set->Settings.pulse_timer[(device -1) % MAX_PULSETIMERS] : 0);
+  }
+  else if (POWER_BLINK == state) {
+    if (!(rt.bitpacked.blink_mask & mask)) {
+      rt.bitpacked.blink_powersave = (rt.bitpacked.blink_powersave & (POWER_MASK ^ mask)) | (tkr_set->runtime.power & mask);  // Save state
+      rt.bitpacked.blink_power = (tkr_set->runtime.power >> (device -1))&1;  // Prep to Toggle
+    }
+    tkr_set->runtime.blink_timer = millis() + 100;
+    tkr_set->runtime.blink_counter = ((!tkr_set->Settings.blinkcount) ? 64000 : (tkr_set->Settings.blinkcount *2)) +1;
+    rt.bitpacked.blink_mask |= mask;    // Set device mask
+    #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+    pCONT_mqtt->MqttPublishPowerBlinkState(device);
+    #endif
+    return;
+  }
+  else if (POWER_BLINK_STOP == state) {
+    bool flag = (rt.bitpacked.blink_mask & mask);
+    rt.bitpacked.blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
+    #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+    pCONT_mqtt->MqttPublishPowerBlinkState(device);
+    #endif
+    if (flag) {
+      ExecuteCommandPower(device, (rt.bitpacked.blink_powersave >> (device -1))&1, SRC_IGNORE);  // Restore state
+    }
+    return;
+  }
+  if (publish_power) {
+    mqtthandler_state_teleperiod.flags.SendNow = true;
+    mqtthandler_state_ifchanged.flags.SendNow = true;
+  }
+
+  #ifdef ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+    // Now check if the relay transitioned from on to off.
+    bool isOff = (CommandGet_Relay_Power(device) == 0);
+    if (wasOn && isOff) {
+        ALOG_INF(PSTR("Relay %d turned from ON to OFF, resetting decounter."), device);
+        CommandSet_Timer_Decounter(0, device);
+    }
+  #endif
+  
+}
+
+
+void mRelays::StopAllPowerBlink(void)
+{
+  power_t mask;
+
+  for (uint32_t i = 1; i <= rt.devices_present; i++) {
+    mask = 1 << (i -1);
+    if (rt.bitpacked.blink_mask & mask) {
+      rt.bitpacked.blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
+      #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+      pCONT_mqtt->MqttPublishPowerBlinkState(i);
+      #endif
+      ExecuteCommandPower(i, (rt.bitpacked.blink_powersave >> (i -1))&1, SRC_IGNORE);  // Restore state
+    }
+  }
+}
+
+
+
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+//////////////// EVERYTHING BELOW HERE NEEDS UPDATING IN 2025 /////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
 #ifdef USE_MODULE_CORE_FILESYSTEM
 #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
 
@@ -183,6 +687,7 @@ void mRelays::Init(void)
 //   #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 // }
 
+
 void mRelays::EverySecond()
 {
 
@@ -194,6 +699,7 @@ void mRelays::EverySecond()
   SubTask_Relay_TimeOn(); // this function will simply check timeroff, timeron and time restriction. Other functions will set these values
 
 }
+
 
 void mRelays::SubTask_Relay_CycleTimer()
 {
@@ -247,8 +753,10 @@ void mRelays::RulesEvent_Set_Power(){
   ALOG_TST(PSTR("MATCHED RulesEvent_Set_Power"));
 
   uint8_t relay_index = tkr_rules->rules[tkr_rules->rules_active_index].command.device_id;
-
   uint8_t relay_state = tkr_rules->rules[tkr_rules->rules_active_index].command.value.data[0];
+
+  ALOG_INF(PSTR("index %d"), relay_index);
+  ALOG_INF(PSTR("state %d"), relay_state);
 
   #ifdef ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE // This probably needs moved into RulesEngine to work everywhere
   if(tkr_rules->rules[tkr_rules->rules_active_index].command.value.data[0] == STATE_NUMBER_FOLLOW_ID)
@@ -389,23 +897,6 @@ const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_
   return DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), device_id, buffer, buffer_length);
 }
 
-const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
-  
-  char onoffctr[5];
-  switch(CommandGet_Relay_Power(device_id)){
-    case 0: sprintf(onoffctr,"%s","OFF"); break;
-    case 1: sprintf(onoffctr,"%s","ON");  break;
-  }
-
-  char buffer_internal[50];
-  sprintf(buffer, "%s %s", GetRelayNamebyIDCtr(device_id, buffer_internal, sizeof(buffer_internal)), onoffctr);
-
-  ALOG_DBM( PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
-
-  return buffer;
-}
-
-
 
 int8_t mRelays::GetRelayIDbyName(const char* c){
   if(*c=='\0'){ return -1; }  
@@ -457,387 +948,6 @@ bool mRelays::IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id){
 
 
 
-
-/********************************************************************************************/
-
-void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
-{
-  // power xx00 - toggle REL1 (Off) and REL3 (Off) - device 1 Off, device 2 Off
-  // power xx01 - toggle REL2 (On)  and REL3 (Off) - device 1 On,  device 2 Off
-  // power xx10 - toggle REL1 (Off) and REL4 (On)  - device 1 Off, device 2 On
-  // power xx11 - toggle REL2 (On)  and REL4 (On)  - device 1 On,  device 2 On
-
-  if (state && !tkr_set->runtime.latching_relay_pulse) {  // Set latching relay to power if previous pulse has finished
-    rt.bitpacked.latching_power = lpower;
-    tkr_set->runtime.latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
-  }
-
-  for (uint32_t i = 0; i < rt.devices_present; i++) {
-    uint32_t port = (i << 1) + ((rt.bitpacked.latching_power >> i) &1);
-    pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
-  }
-}
-
-void mRelays::SetDevicePower(power_t rpower, uint32_t source)
-{
-
-  DEBUG_LINE;
-
-  pCONT_sup->ShowSource(source);
-  tkr_set->runtime.last_source = source;
-  DEBUG_LINE;
-  
-  ALOG_INF(PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
-
-  if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {  // All on and stay on
-    tkr_set->runtime.power = (1 << rt.devices_present);// -1;
-    rpower = tkr_set->runtime.power;
-  }
-
-  // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
-  // if (tkr_set->Settings.flag_system.interlock) {        
-  //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
-  //     power_t mask = 1;
-  //     uint32_t count = 0;
-  //     for (uint32_t j = 0; j < rt.devices_present; j++) {
-  //       if ((tkr_set->Settings.interlock[i] & mask) && (rpower & mask)) {
-  //         count++;
-  //       }
-  //       mask <<= 1;
-  //     }
-  //     if (count > 1) {
-  //       mask = ~tkr_set->Settings.interlock[i];    // Turn interlocked group off as there would be multiple relays on
-  //       power &= mask;
-  //       rpower &= mask;
-  //     }
-  //   }
-  // }
-DEBUG_LINE;
-  
-  if (rpower) {                           // Any power set
-    rt.bitpacked.last_power = rpower;
-  }
-
-  // PHASE OUT and replace with something else
-  // tkr_set->XdrvMailbox.index = rpower;
-  // pCONT->Tasker_Interface(TASK_SET_POWER);               // Signal power state
-  // tkr_set->XdrvMailbox.index = rpower;
-  // tkr_set->XdrvMailbox.payload = source;
-
-  // if (pCONT->Tasker_Interface(TASK_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
-  //   // Serviced
-  // }
-  // else if ((MODULE_SONOFF_DUAL == tkr_set->my_module_type) || (MODULE_CH4 == tkr_set->my_module_type)) {
-  //   Serial.write(0xA0);
-  //   Serial.write(0x04);
-  //   Serial.write(rpower &0xFF);
-  //   Serial.write(0xA1);
-  //   Serial.write('\n');
-  //   Serial.flush();
-  // }
-  // else if (MODULE_EXS_RELAY == tkr_set->my_module_type) {
-  //   SetLatchingRelay(rpower, 1);
-  // }
-  // else {
-
-// #ifdef USE_NETWORK_MDNS
-//     #ifdef USE_VIRTUAL_REMOTE_URL_RELAY
-
-//       char remote_url[100];
-//       // URL
-//       // sprintf(remote_url, "http://%s/json_command.json", VIRTUAL_DEVICE_MDNS_NAME);
-//       //MQTT
-//       sprintf(remote_url, "%s/set/relays", VIRTUAL_DEVICE_MDNS_NAME);
-
-//       power_t state = rpower &1;
-//       uint8_t state_level = bitRead(rel_inverted, 0) ? !state : state;
-
-//       // State  is controlled remotely, so we can only toggle, until I use HTTP_GET to remain in sync
-//       char remote_command[100];
-//       sprintf(remote_command,"{\"relay\":0,\"onoff\":2}");//,state_level);
-
-//       ALOG_INF(PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
-
-//       pCONT_mqtt->publish_device(remote_url,remote_command,false);
-
-//       // AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html);
-//       // response->addHeader("Server","ESP Async Web Server");
-//       // request->send(response);
-
-//       return; // not local control
-
-// #endif // #ifdef USE_NETWORK_MDNS
-    // #endif
-
-    uint16_t gpio_pin = 0;
-
-    for (uint32_t i = 0; i < rt.devices_present; i++) {
-      power_t state = rpower &1;
-      if (i < MAX_RELAYS) {
-
-//        AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
-
-        //tmp fix
-        if(bitRead(rt.bitpacked.rel_inverted, i))
-        { //add the gpio mpin shift back in
-          gpio_pin = GPIO_REL1_INV_ID;          
-        }else{
-          gpio_pin = GPIO_REL1_ID;
-        }
-
-        pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-
-        // pCONT_pins->DigitalWrite(GPIO_REL1_ID +i, bitRead(rel_inverted, i) ? !state : state);
-
-
-      }else{
-        AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_RELAYS "ELSE i=%d,state=%d"),i,state);
-      }
-      rpower >>= 1;
-    }
-  //}
-}
-
-void mRelays::RestorePower(bool publish_power, uint32_t source)
-{
-  if (tkr_set->runtime.power != rt.bitpacked.last_power) {
-    SetDevicePower(rt.bitpacked.last_power, source);
-    if (publish_power) {
-      mqtthandler_state_teleperiod.flags.SendNow = true;
-      mqtthandler_state_ifchanged.flags.SendNow = true;
-    }
-  }
-}
-
-
-void mRelays::SetAllPower(uint32_t state, uint32_t source)
-{
-  // state 0 = POWER_OFF = Relay Off
-  // state 1 = POWER_ON = Relay On (turn off after module_state.pulse_timer * 100 mSec if enabled)
-  // state 2 = POWER_TOGGLE = Toggle relay
-  // state 8 = POWER_OFF_NO_STATE = Relay Off and no publishPowerState
-  // state 9 = POWER_ON_NO_STATE = Relay On and no publishPowerState
-  // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
-  // state 16 = POWER_SHOW_STATE = Show power state
-
-  bool publish_power = true;
-  if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
-    state &= 3;                           // POWER_OFF, POWER_ON or POWER_TOGGLE
-    publish_power = false;
-  }
-  if ((state >= POWER_OFF) && (state <= POWER_TOGGLE)) {
-    power_t all_on = (1 << rt.devices_present);// -1;
-    switch (state) {
-    case POWER_OFF:
-      tkr_set->runtime.power = 0;
-      break;
-    case POWER_ON:
-      tkr_set->runtime.power = all_on;
-      break;
-    case POWER_TOGGLE:
-      tkr_set->runtime.power ^= all_on;                    // Complement current state
-    }
-    SetDevicePower(tkr_set->runtime.power, source);
-  }
-  if (publish_power) {
-    mqtthandler_state_teleperiod.flags.SendNow = true;
-    mqtthandler_state_ifchanged.flags.SendNow = true;
-  }
-}
-
-void mRelays::SetPowerOnState(void)
-{
-  
-  if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {
-    SetDevicePower(1, SRC_RESTART);
-  } else {
-    
-    if (
-      (pCONT_sup->ResetReason() == REASON_DEFAULT_RST) || 
-      (pCONT_sup->ResetReason() == REASON_EXT_SYS_RST)
-    ){
-
-      switch (tkr_set->Settings.poweronstate)
-      {
-      case POWER_ALL_OFF:
-      case POWER_ALL_OFF_PULSETIME_ON:
-        tkr_set->runtime.power = 0;
-        SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
-        break;
-      case POWER_ALL_ON:  // All on
-        tkr_set->runtime.power = (1 << rt.devices_present);// -1;
-        SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
-        break;
-      case POWER_ALL_SAVED_TOGGLE:
-        tkr_set->runtime.power = (tkr_set->Settings.power & ((1 << rt.devices_present) )) ^ POWER_MASK;
-        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
-          SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
-        }
-        break;
-      case POWER_ALL_SAVED:
-        tkr_set->runtime.power = tkr_set->Settings.power & ((1 << rt.devices_present) );
-        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
-          SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
-        }
-        break;
-      }
-
-    } else {
-      tkr_set->runtime.power = tkr_set->Settings.power & ((1 << rt.devices_present) );
-      if (tkr_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
-        SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
-      }
-    }
-    
-  }
-
-  rt.bitpacked.blink_powersave = tkr_set->runtime.power;
-}
-
-
-void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)  // needs renamed better, to split from get/set power
-{
-
-/**
- * Adding locking time based method in here, so if set, relays will only turn on during set windows. 
- * Note: Allow the off command without time limits
- * */
-
-// device  = Relay number 1 and up
-// state 0 = POWER_OFF = Relay Off
-// state 1 = POWER_ON = Relay On (turn off after module_state.pulse_timer * 100 mSec if enabled)
-// state 2 = POWER_TOGGLE = Toggle relay
-// state 3 = POWER_BLINK = Blink relay
-// state 4 = POWER_BLINK_STOP = Stop blinking relay
-
-  // pCONT_sup->ShowSource(source);
-
-// #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
-//   if (IsModuleIfan()) {
-//     blink_mask &= 1;                 // No blinking on the fan relays
-//     module_state.flag_system.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
-//     module_state.pulse_timer[1] = 0;     // No pulsetimers on the fan relays
-//     module_state.pulse_timer[2] = 0;
-//     module_state.pulse_timer[3] = 0;
-//   }
-// #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
-
-  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteComPow(device%d,state%d,source%d)=rt.devices_present%d"),device,state,source,rt.devices_present);
-
-  bool publish_power = true;
-  if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
-    state &= 3;                      // POWER_OFF, POWER_ON or POWER_TOGGLE
-    publish_power = false;
-  }
-
-  if (
-    // (device < 1) || 
-  (device > rt.devices_present)) {
-    device = 0;
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS DEBUG_INSERT_PAGE_BREAK "device>1\tfall back to single relay"));
-  }
-  // active_device = device;
-
-  // if (device <= MAX_PULSETIMERS) {
-  //   SetPulseTimer(device, 0);
-  // }
-  // power_t mask = 1 << (device);        // Device to control
-
-  // Indexing is now from 0!!
-  power_t mask = 1 << device;        // Device to control
-  if (state <= POWER_TOGGLE)
-  {
-    // if ((blink_mask & mask)) {
-    //   blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
-    //   MqttPublishPowerBlinkState(device);
-    // }
-    #ifdef USE_RELAY_INTERLOCKS
-    // if (module_state.flag_system.interlock &&        // CMND_INTERLOCK - Enable/disable interlock
-    //     !interlock_mutex &&
-    //     ((POWER_ON == state) || ((POWER_TOGGLE == state) && !(power & mask)))
-    //    ) {
-    //   interlock_mutex = true;                           // Clear all but masked relay in interlock group if new set requested
-    //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
-    //     if (module_state.interlock[i] & mask) {             // Find interlock group
-    //       for (uint32_t j = 0; j < rt.devices_present; j++) {
-    //         power_t imask = 1 << j;
-    //         if ((module_state.interlock[i] & imask) && (power & imask) && (mask != imask)) {
-    //           ExecuteCommandPower(j +1, POWER_OFF, SRC_IGNORE);
-    //           delay(50);                                // Add some delay to make sure never have more than one relay on
-    //         }
-    //       }
-    //       break;                                        // An interlocked relay is only present in one group so quit
-    //     }
-    //   }
-    //   interlock_mutex = false;
-    // }
-    #endif
-
-    switch (state) {
-    case POWER_OFF: {
-      tkr_set->runtime.power &= (POWER_MASK ^ mask);
-      break; }
-    case POWER_ON:
-      tkr_set->runtime.power |= mask;
-      break;
-    case POWER_TOGGLE: // STATE_NUMBER_TOGGLE_ID
-      tkr_set->runtime.power ^= mask;
-    }
-    SetDevicePower(tkr_set->runtime.power, source);
-
-    // if (device <= MAX_PULSETIMERS) {  // Restart PulseTime if powered On
-    //   SetPulseTimer(device , (((POWER_ALL_OFF_PULSETIME_ON == module_state.poweronstate) ? ~power : power) & mask) ? module_state.pulse_timer[device -1] : 0);
-    // }
-  }
-  // else if (POWER_BLINK == state) {
-  //   if (!(blink_mask & mask)) {
-  //     blink_powersave = (blink_powersave & (POWER_MASK ^ mask)) | (power & mask);  // Save state
-  //     blink_power = (power >> (device ))&1;  // Prep to Toggle
-  //   }
-  //   blink_timer = millis() + 100;
-  //   blink_counter = ((!module_state.blinkcount) ? 64000 : (module_state.blinkcount *2)) +1;
-  //   blink_mask |= mask;  // Set device mask
-  //   MqttPublishPowerBlinkState(device);
-  //   return;
-  // }
-  // else if (POWER_BLINK_STOP == state) {
-  //   bool flag = (blink_mask & mask);
-  //   blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
-  //   MqttPublishPowerBlinkState(device);
-  //   if (flag) {
-  //     ExecuteCommandPower(device, (blink_powersave >> (device ))&1, SRC_IGNORE);  // Restore state
-  //   }
-  //   return;
-  // }
-
-  if (publish_power) {
-    mqtthandler_state_teleperiod.flags.SendNow = true;
-    mqtthandler_state_ifchanged.flags.SendNow = true;
-  }
-
-  #ifdef ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
-
-  /**
-   * @brief If command is to turn off, then force reset the decounter for on time
-   * 
-   */
-  if(CommandGet_Relay_Power(device)==0)
-  {
-    ALOG_INF(PSTR("Resetting Decounter"));
-    CommandSet_Timer_Decounter(0, device);
-  }
-  #endif // ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
-
-//ALOG_TST(PSTR("mqtthandler_state_teleperiod.flags.SendNow=%d"),mqtthandler_state_teleperiod.flags.SendNow);
-
-
-}
-
-
-
-
-
-//{"PowerName":0,"Relay":{"TimeOn":5},"EnabledTime":{"Enabled":1,"OnTime":"01D12:34:56","OffTime":"12D34:56:78"}}
 
 
 void mRelays::parse_JSONCommand(JsonParserObject obj)
@@ -1040,28 +1150,10 @@ uint8_t mRelays::CommandGet_Relay_Power(uint8_t num){
   return bitRead(tkr_set->runtime.power, num);
 }
 
-
-
-/**********************************************************************************************
- *********************************************************************************************
-  Parameter: time_seconds_on
- *********************************************************************************************
- ********************************************************************************************/
-
-// void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
-//   relay_status[relay_id].timer_decounter.seconds = time_secs;
-//   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
-//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
-//   #endif
-// }
-
 uint32_t mRelays::CommandGet_SecondsRelayHasBeenOn(uint8_t relay_id) // why function, just use direct access (or place function into header)
 {
   return rt.relay_status[relay_id].time_seconds_on;
 }
-
-
 
 
 /**********************************************************************************************

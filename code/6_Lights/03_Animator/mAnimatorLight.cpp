@@ -33,6 +33,21 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
       updateInterfaces(CALL_MODE_WS_SEND); //tmp fix sending here
 
+//   if(panels)
+//   {    
+    
+//   Panel p = panel[0];
+//   ALOG_INF(PSTR(
+//     "MatrixConfig[%d]: %dx%d, StartX:%d, StartY:%d, BottomStart:%d, RightStart:%d, Vertical:%d, Serpentine:%d"),
+//     panels, p.width, p.height, p.xOffset, p.yOffset, p.bottomStart, p.rightStart, p.vertical, p.serpentine
+//   );
+// }
+
+// ALOG_INF(PSTR("maxWidth  %d\n\r"), Segment::maxWidth);
+// ALOG_INF(PSTR("maxHeight %d\n\r"), Segment::maxHeight);
+
+
+
 
       #ifdef USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
       DEBUG_PRINT(F("Matrix ledmap:"));
@@ -58,7 +73,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
     }break;
     case TASK_LOOP:     
-      EveryLoop();  
+      EveryLoop();
     break;        
     case TASK_BOOT_MESSAGE:
       BootMessage();
@@ -507,6 +522,24 @@ void mAnimatorLight::EveryLoop()
     doInitBusses = false;
     ALOG_INF(PSTR("Re-init busses"));
     
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifndef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+    // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
+    if (loadLedmap >= 0) {
+      ALOG_HGL(PSTR("Loading LED map."));
+      bool flag_deserializeMap = deserializeMap(loadLedmap);
+      if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
+      {
+        ALOG_INF(PSTR("Matrix setup"));
+        setUpMatrix();  // must be called before segment alignment checks and fixed segment ranges
+        makeAutoSegments(true);
+      }
+      loadLedmap = -1;
+    }
+    yield();
+    #endif
+    #endif
+    
     bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
     pCONT_iLight->bus_manager->removeAll();
 
@@ -620,7 +653,12 @@ void mAnimatorLight::EveryLoop()
     // serializeConfig(); // in WLED This saved everything to json memory
   }
 
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
   #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+
+  #warning "HARDCODED MATRIX SETUP to be phased out with commands"
+
   // loadLedmap = 0;
   isMatrix = true;
   
@@ -634,15 +672,18 @@ void mAnimatorLight::EveryLoop()
     SEGMENT.stopY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y;
     SEGMENT.stop = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP;
     #else
-    SEGMENT.startY = 0;
-    SEGMENT.stopY = 16;
-    SEGMENT.stop = 16;
+    // SEGMENT.startY = 0;
+    // SEGMENT.stopY = 16;
+    // SEGMENT.stop = 16;
+    // #error "dont want this happening from now on"
     #endif
 
 
     // ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
     // delay(1000);
     // #endif
+
+    #error "with dyanmic, dont be here"
 
 
 
@@ -653,6 +694,7 @@ void mAnimatorLight::EveryLoop()
     
     panels = 1;
     panel.clear();
+    ALOG_INF(PSTR("panel.clear() HERE E?????????????????????????????????????????????????????"));
     // JsonArray panels = matrix[F("panels")];
     uint8_t s = 0;
     // if (!panels.isNull()) {
@@ -677,6 +719,8 @@ void mAnimatorLight::EveryLoop()
          * 
          */
         #if defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32by8_PANEL)
+
+        #error "DONT USE ANYMORE!"
 
 
         Panel p;
@@ -705,10 +749,43 @@ void mAnimatorLight::EveryLoop()
         p.width = 32;//,       pnl["w"]);
         panel.push_back(p);
 
+        #error "HERE?else"
 
-        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__HORIZONTAL)
+        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__VERTICAL)
 
 
+        #error "HERE?else"
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 32;//,      pnl["h"]);
+        p.width = 8;//,       pnl["w"]);
+        panel.push_back(p);
+
+
+        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_8W32H)
+
+
+        // #error "HERE?else"
+        Panel p;
+        p.bottomStart = 1; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 0;//,    pnl["v"]);` // works for 16x16
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 32;//,      pnl["h"]);
+        p.width = 8;//,       pnl["w"]);
+        panel.push_back(p);
+
+
+        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_32W8H)
+
+        // #error "HERE?else"
         Panel p;
         p.bottomStart = 0; //, pnl["b"]);
         p.rightStart = 0;//,  pnl["r"]);
@@ -722,9 +799,38 @@ void mAnimatorLight::EveryLoop()
 
 
 
+        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H)
+
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 16;//,      pnl["h"]);
+        p.width = 16;//,       pnl["w"]);
+        panel.push_back(p);
+
+        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H_VERTICAL)
+
+        Panel p;
+        p.bottomStart = 0; //, pnl["b"]);
+        p.rightStart = 0;//,  pnl["r"]);
+        p.vertical = 0;//,    pnl["v"]);` // works for 16x16
+        p.serpentine = true; //,  pnl["s"]);
+        p.xOffset = 0;//,     pnl["x"]);
+        p.yOffset = 0;//,     pnl["y"]);
+        p.height = 16;//,      pnl["h"]);
+        p.width = 16;//,       pnl["w"]);
+        panel.push_back(p);
+
+
+
         #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_COLORADO_MATRIX_TREE)
 
 
+        #error "HERE?else"
         Panel p;
         p.bottomStart = 0; //, pnl["b"]);
         p.rightStart = 0;//,  pnl["r"]);
@@ -741,20 +847,21 @@ void mAnimatorLight::EveryLoop()
         #else
         // default when not overriding
 
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL
-        p.vertical = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL;//,    pnl["v"]);`
-        #else
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        #endif
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = SEGMENT.stopY;//,      pnl["h"]);
-        p.width = SEGMENT.stop;//,       pnl["w"]);
-        panel.push_back(p);
+        // #error "HERE?else"
+        // Panel p;
+        // p.bottomStart = 0; //, pnl["b"]);
+        // p.rightStart = 0;//,  pnl["r"]);
+        // #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL
+        // p.vertical = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL;//,    pnl["v"]);`
+        // #else
+        // p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+        // #endif
+        // p.serpentine = true; //,  pnl["s"]);
+        // p.xOffset = 0;//,     pnl["x"]);
+        // p.yOffset = 0;//,     pnl["y"]);
+        // p.height = SEGMENT.stopY;//,      pnl["h"]);
+        // p.width = SEGMENT.stop;//,       pnl["w"]);
+        // panel.push_back(p);
 
 
 
@@ -788,7 +895,26 @@ void mAnimatorLight::EveryLoop()
     loadLedmap = -1;
   }
   yield();
+  #else
+
+
+  // // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
+  // if (loadLedmap >= 0) {
+  //   ALOG_HGL(PSTR("Loading LED map."));
+  //   bool flag_deserializeMap = deserializeMap(loadLedmap);
+  //   if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
+  //   {
+  //     ALOG_INF(PSTR("Matrix setup"));
+  //     setUpMatrix();
+  //   }
+  //   loadLedmap = -1;
+  // }
+  // yield();
+
+
   #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+
+  #endif // enable matrix ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   
   #ifdef WLED_ENABLE_WEBSOCKETS2
   handleWs();
@@ -992,6 +1118,9 @@ void mAnimatorLight::Init(void)
   #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
   loadLedmap = 0; // To enable it to load once
   #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP_DISABLED
+  loadLedmap = 0; // To enable it to load once
+  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP_DISABLED
 
   paletteFade=0;
   paletteBlend = 0;
@@ -1748,20 +1877,50 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
  * @param effect_config 
  * @param development_stage Added to allow for effects to be added but not shown in the UI. 0 = normal, 1 = beta, 2 = alpha, 3 = dev
  */
+// void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
+// {
+
+//   if (id < effects.function.size()) {
+//     effects.function[id]     = function;
+//     effects.config[id] = effect_config;
+//     effects.development_stage[id] = development_stage;
+//     effects.id[id] = id; // since they are not likely to be sequential with different #ifdefs
+//   } else {
+//     effects.function.push_back(function);
+//     effects.config.push_back(effect_config);
+//     effects.development_stage.push_back(development_stage);
+//     effects.id.push_back(id);
+//     if (effects.count < effects.function.size()) effects.count++;
+//   }
+  
+// }
+
+/***
+  Uses std::find: This ensures we search effects.id to see if id already exists before modifying an entry.
+  Ensures id aligns with index: By locating the existing index via std::distance, we can update only the correct entry.
+  Correctly increments effects.count: Now, effects.count reflects the actual number of effects stored, preventing inconsistencies due to sparse enums.
+
+  This ensures that id is only used as an identifier, and the true vector index is correctly managed.
+ */
 void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
 {
+  // Find the index in effects.id where the given id exists
+  auto it = std::find(effects.id.begin(), effects.id.end(), id);
 
-  if (id < effects.function.size()) {
-    effects.function[id]     = function;
-    effects.config[id] = effect_config;
-    effects.development_stage[id] = development_stage;
+  if (it != effects.id.end()) {
+    // If found, update the existing entry
+    size_t index = std::distance(effects.id.begin(), it);
+    effects.function[index] = function;
+    effects.config[index] = effect_config;
+    effects.development_stage[index] = development_stage;
   } else {
+    // If not found, append a new entry
     effects.function.push_back(function);
     effects.config.push_back(effect_config);
     effects.development_stage.push_back(development_stage);
-    if (effects.count < effects.function.size()) effects.count++;
+    effects.id.push_back(id);
+    effects.count = effects.id.size();
   }
-  
 }
 
 
@@ -2295,7 +2454,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
     SEGMENT_I(segment_index).effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
   }
   SEGMENT_I(segment_index).aux0 = 0;//EFFECTS_REGION_COLOUR_SELECT_ID;
-  SEGMENT_I(segment_index).flags.animator_first_run= true; // first run, so do extra things
+  SEGMENT_I(segment_index).flags.animator_first_run = true; // first run, so do extra things
 
   ALOG_DBM(PSTR("segments[segment_index].effect_id=%d"),segments[segment_index].effect_id);
   
@@ -2320,7 +2479,7 @@ int16_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer) - 1);
     lineBuffer[sizeof(lineBuffer) - 1] = '\0'; // terminate string
 
-    ALOG_DBM(PSTR("lineBuffer %d %s"), i, lineBuffer);
+    ALOG_INF(PSTR("lineBuffer i%d id%d %s"), i, effects.id[i], lineBuffer);
 
     char* dataPtr = strchr(lineBuffer, '@');
     if (dataPtr) *dataPtr = '\0'; // replace name divider with null termination. Escape "name@data"
@@ -2331,8 +2490,9 @@ int16_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
         || (strcmp(lineBuffer, "Firefly") == 0 && strcmp(f, "Slow Glow") == 0)
 #endif
     ) {
-      ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"), f, i);
-      return i;
+      ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s i within effects vector %d"), f, i);
+      // return effects.id[i]; 
+      return i; // maybe this is wrong, it should not be returning the index of the loop, but the ID of the effect?
     }
   }
 
@@ -3109,6 +3269,7 @@ uint16_t mAnimatorLight::Segment::virtualWidth() const {
 
 uint16_t mAnimatorLight::Segment::virtualHeight() const {
   // 
+  // ALOG_INF(PSTR("height %d"), height());
   uint16_t groupLen = groupLength();
   uint16_t vHeight = ((transpose ? width() : height()) + groupLen - 1) / groupLen;
   // ALOG_INF(PSTR("virtualHeight() %d"), vHeight);
@@ -5032,7 +5193,7 @@ void mAnimatorLight::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t gro
     seg.stopY = stopY > mAnimatorLight::Segment::maxHeight ? mAnimatorLight::Segment::maxHeight : MAX(1,stopY);
 
     ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
-    delay(1000);
+    // delay(1000);
     #endif
   } else {
     if (i1 < _length) seg.start = i1;
@@ -5065,6 +5226,7 @@ void mAnimatorLight::resetSegments2() {
 }
 
 void mAnimatorLight::makeAutoSegments(bool forceReset) {
+  ALOG_INF(PSTR("makeAutoSegments(%d) %d"),forceReset, isMatrix);
   if (isMatrix) {
     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     // only create 1 2D segment
@@ -5078,6 +5240,8 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
       segments[i].grouping = 1;
       segments[i].spacing  = 0;
       _mainSegment = i;
+      ALOG_HGL(PSTR(" WE ARE HERE WITH PAUSE %d %d %d %d"), segments[i].stop, segments[i].stopY, segments[i].start, segments[i].startY);
+      delay(4000);
     }
     #endif
   } else 
@@ -5911,7 +6075,11 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
 
 
 #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col)//, bool flag_brightness_already_applied)
+void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+  ,bool flag_brightness_already_applied /*temporary fix*/
+  #endif
+)//, bool flag_brightness_already_applied)
 {
 
   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
@@ -5949,6 +6117,23 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col)//, 
   //     (W(col) * scale) >> 8   // White
   //   );
   // }
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
+  // // Apply brightness if needed
+  if (flag_brightness_already_applied==false) {
+    // uint8_t brightness = pCONT_iLight->getBriRGB_Global();//scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+    col = col.Dim(scale);
+    // Extract, scale, and repack in one step
+    // col = RGBW32(
+    //   (R(col) * scale) >> 8,  // Red
+    //   (G(col) * scale) >> 8,  // Green
+    //   (B(col) * scale) >> 8,  // Blue
+    //   (W(col) * scale) >> 8   // White
+    // );
+  }
+  #endif
 
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS

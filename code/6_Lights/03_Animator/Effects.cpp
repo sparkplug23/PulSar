@@ -3023,6 +3023,12 @@ uint16_t mAnimatorLight::LCDDisplay_displayTime(time_t t, byte color, byte color
 }
 
 
+uint16_t mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
+  // This draws numbers using the according segments as defined on top of the sketch (0 - 9)
+  for (byte i = 0; i < 7; i++) {
+    if (digits[digit][i] != 0) LCDDisplay_showSegment(i, color, pos);
+  }
+}
 uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, byte segDisplay) {
   
   // This shows the segments from top of the sketch on a given position (segDisplay).
@@ -3038,21 +3044,20 @@ uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, 
 
     pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
 
-    RgbcctColor colour = RgbcctColor();
-    colour = SEGMENT.GetPaletteColour(color_index);      
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
+
+    // RgbcctColor colour = RgbcctColor();
+    // colour = SEGMENT.GetPaletteColour(color_index);      
+
+    uint32_t colour = SEGMENT.GetPaletteColour(color_index, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel_index, colour);
+
+    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
   }
   
 }
 
 
-uint16_t mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
-  // This draws numbers using the according segments as defined on top of the sketch (0 - 9)
-  for (byte i = 0; i < 7; i++) {
-    if (digits[digit][i] != 0) LCDDisplay_showSegment(i, color, pos);
-  }
-}
 
 
 uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
@@ -3086,17 +3091,23 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
   if ( LED_BETWEEN_DIGITS_STRIPS % 2 == 0 ) {                                                                 // only SE/TE should have a even amount here (0/2 leds between digits)
 
 
-    RgbcctColor colour = RgbcctColor();
-    colour = SEGMENT.GetPaletteColour(color);
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
+    // RgbcctColor colour = RgbcctColor();
+    // colour = SEGMENT.GetPaletteColour(color);
+    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
+    uint32_t colour = SEGMENT.GetPaletteColour(color, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    SEGMENT.Set_DynamicBuffer_DesiredColour(startPos, colour);
 
     if ( dots == 2 ) 
     {
 
-      RgbcctColor colour = RgbcctColor();
-      colour = SEGMENT.GetPaletteColour(color);      
-      SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos + 1, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
+      uint32_t colour = SEGMENT.GetPaletteColour(color, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      SEGMENT.Set_DynamicBuffer_DesiredColour(startPos+1, colour);
+
+
+      // RgbcctColor colour = RgbcctColor();
+      // colour = SEGMENT.GetPaletteColour(color);      
+      // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos + 1, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
     }
   } 
@@ -3127,58 +3138,48 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
 uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01()
 {
 
-  ALOG_DBM( PSTR("_segments[%d].colour_width__used_in_effect_generate = %d"), SEGIDX, SEGMENT.colour_width__used_in_effect_generate);
-    
-  uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.length(); //allocate space for 10 test pixels
+  uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.length();
+  if (!SEGMENT.allocateColourData(dataSize)){ SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION; }
 
-  ALOG_DBM(PSTR("dataSize = %d"), dataSize);
+  // Clear all pixels to black
+  for(int i=0;i<SEGLEN;i++){  
+    SEGMENT.Set_DynamicBuffer_DesiredColour(i, RGBW32(0,0,0,0));
+  }
 
-  if (!SEGMENT.allocateColourData(dataSize))
+  uint8_t colour_spacing_between_numbers = 1; // ie for discrete palettes
+  uint8_t colour_start_index = 0;
+
+  if(mPaletteI->IsPaletteGradient(SEGMENT.palette_id))
   {
-    ALOG_ERR(PSTR("Not Enough Memory"));
-    SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION; // Default
+    uint8_t colours = mPaletteI->GetColoursInPalette(SEGMENT.palette_id);
+    colour_spacing_between_numbers = colours ? 255 / colours : 1;  //protect against divide by zero
   }
+  ALOG_INF(PSTR("colour_spacing_between_numbers = %d"), colour_spacing_between_numbers);
 
-  for(int i=0;i<SEGLEN;i++)
-  {    
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbcctColor());
-  }
-
-  uint8_t colour_offset = 1;
-  if(SEGMENT.palette_id < 83)
-    colour_offset = 50;
-
-  ALOG_DBM(PSTR("colour_offset = %d"), colour_offset);
-
-  LCDDisplay_displayTime(tkr_time->Rtc.local_time, 0, colour_offset);
+  LCDDisplay_displayTime(tkr_time->Rtc.local_time, colour_start_index, colour_spacing_between_numbers);
 
   // Get starting positions already on show
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  SEGIDX, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-    }
-  );
+  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
+    #else
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+    #endif
+  });
 
-  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
-    [this](void){
-      this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
-    }
-  );
-  #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  return USE_ANIMATOR;
 
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_01[] PROGMEM = "Clock Basic 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 
-uint16_t mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01()
-{   
+// uint16_t mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01()
+// {   
   
-  JBI->Add("lcd_display_show_number", lcd_display_show_number);
+//   JBI->Add("lcd_display_show_number", lcd_display_show_number);
   
-}
+// }
 
 
 /**************************************************************************************************************************************************************
@@ -3191,6 +3192,9 @@ uint16_t mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Ba
  * Changes pixels randomly to new colour, with slow blending
  * Requires new colour calculation each call
  * 02 trying lib method with mapping
+ * 
+ * 
+ * 
  */
 uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
 //   // So colour region does not need to change each loop to prevent colour crushing
@@ -3223,13 +3227,17 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
   // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor();}
   uint8_t segment_index=0;
 
-  for(int i=0;i<93;i++){
-    // animation_colours[i].DesiredColour = RgbcctColor();
-    // }
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
+  // for(int i=0;i<93;i++){
+  //   // animation_colours[i].DesiredColour = RgbcctColor();
+  //   // }
+  //   SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
   
-  }
+  // }
 
+  for(int i=0;i<SEGLEN;i++)
+  {  
+    SEGMENT.Set_DynamicBuffer_DesiredColour(i, RGBW32(0,0,0,0)); // reset all to black
+  }
   LCDDisplay_displayTime(tkr_time->Rtc.local_time, 0, colorOffset);
   
   // if (overlayMode == 1) LCDDisplay_colorOverlay();
@@ -3254,20 +3262,28 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
   // Get starting positions already on show
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  SEGIDX, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-    }
-  );
+  // // Call the animator to blend from previous to new
+  // SetSegment_AnimFunctionCallback(  SEGIDX, 
+  //   [this](const AnimationParam& param){ 
+  //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+  //   }
+  // );
+  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
+    #else
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+    #endif
+  });
 
-  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
-    [this](void){
-      this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
-    }
-  );
-  #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
+  // #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  // this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
+  //   [this](void){
+  //     this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
+  //   }
+  // );
+  // #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
 }
@@ -3275,12 +3291,12 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
 
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_02[] PROGMEM = "Clock Basic 02@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 
-uint16_t mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02()
-{   
+// uint16_t mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02()
+// {   
   
-  JBI->Add("lcd_display_show_number", lcd_display_show_number);
+//   JBI->Add("lcd_display_show_number", lcd_display_show_number);
   
-}
+// }
 
 
 /****
@@ -3307,12 +3323,16 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualNumber_01()
   /**
    * @brief Reset all new colours so only new sections of clock are lit
    **/
-  for(int i=0;i<SEGLEN;i++){
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
+  // for(int i=0;i<SEGLEN;i++){
+  //   SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
+  // }
+  for(int i=0;i<SEGLEN;i++)
+  {  
+    SEGMENT.Set_DynamicBuffer_DesiredColour(i, RGBW32(0,0,0,0)); // reset all to black
   }
 
 
-  uint8_t digit_count = mSupport::NumDigits(lcd_display_show_number);
+  uint8_t digit_count = NumDigits(lcd_display_show_number);
 
   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
   LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
@@ -3320,12 +3340,20 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualNumber_01()
   // Get starting positions already on show
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  SEGIDX, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-    }
-  );
+  // // Call the animator to blend from previous to new
+  // SetSegment_AnimFunctionCallback(  SEGIDX, 
+  //   [this](const AnimationParam& param){ 
+  //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+  //   }
+  // );
+  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
+    #else
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+    #endif
+  });
+
 
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALNUMBER_01[] PROGMEM = "Seven-Segment Number 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
@@ -3358,9 +3386,14 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualString_01()
   /**
    * @brief Reset all new colours so only new sections of clock are lit
    **/
-  for(int i=0;i<SEGLEN;i++){
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
+  // for(int i=0;i<SEGLEN;i++){
+  //   SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
+  // }
+  for(int i=0;i<SEGLEN;i++)
+  {  
+    SEGMENT.Set_DynamicBuffer_DesiredColour(i, RGBW32(0,0,0,0)); // reset all to black
   }
+
 
   uint8_t digit_count = strlen(lcd_display_show_string);
 
@@ -3385,12 +3418,19 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualString_01()
   // Get starting positions already on show
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  SEGIDX, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-    }
-  );
+  // // Call the animator to blend from previous to new
+  // SetSegment_AnimFunctionCallback(  SEGIDX, 
+  //   [this](const AnimationParam& param){ 
+  //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+  //   }
+  // );
+  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
+    #else
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+    #endif
+  });
 
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM = "Seven-Segment String 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;

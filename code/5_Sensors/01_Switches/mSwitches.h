@@ -182,6 +182,8 @@ class mSwitches :
     void Handler(void);
     void Loop(void);
 
+    char*  GetStateName(uint8_t state, char* buffer, uint8_t buflen);
+
 
 
     #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING

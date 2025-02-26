@@ -121,7 +121,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   char lwt_message_ondisconnect_ctr[200];
   sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, pCONT_sup->GetResetReason().c_str(), tkr_time->GetUptime().c_str());
 
-  char lwt_topic[40];
+  char lwt_topic[50];
   snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, tkr_set->Settings.system_name.device);
 
   uint8_t loglevel = LOG_LEVEL_INFO;
@@ -129,9 +129,9 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   loglevel = LOG_LEVEL_DEV_TEST;
   #endif
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel, PSTR("client_name = %s"), client_name);
-  AddLog(loglevel, PSTR("lwt_topic = %s"), lwt_topic);
-  AddLog(loglevel, PSTR("lwt_message_ondisconnect_ctr = %s"), lwt_message_ondisconnect_ctr);
+  AddLog(loglevel, PSTR("cliente = %s"), client_name);
+  AddLog(loglevel, PSTR("lwt_tpc = %s"), lwt_topic);
+  AddLog(loglevel, PSTR("lwt_msg = %s"), lwt_message_ondisconnect_ctr);
   #endif// ENABLE_LOG_LEVEL_INFO
 
   ALOG_INF(PSTR("mMQTTManager::MqttReconnect START              Connect"));

@@ -870,7 +870,7 @@ uint64_t mTime::WifiGetNtp(void)
     ntp_server_id++;
   }
 
-  ALOG_HGL(PSTR("ntp_server %s"), ntp_server);
+  ALOG_INF(PSTR("ntp_server %s"), ntp_server);
   
   #ifdef USE_MODULE_NETWORK_MQTT
   if (!pCONT_wif->WifiHostByName(ntp_server, time_server_ip)) {

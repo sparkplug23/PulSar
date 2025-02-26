@@ -386,8 +386,7 @@ class mMQTTManager :
     void MqttPublishPrefixTopicRulesProcess_P(uint32_t prefix, const char* subtopic, bool retained);
     void MqttPublishPrefixTopicRulesProcess_P(uint32_t prefix, const char* subtopic);
     #define ResponseData() data_buffer.topic.ctr
-
-
+    void MqttPublishPowerBlinkState(uint32_t device);
 
     #endif
 

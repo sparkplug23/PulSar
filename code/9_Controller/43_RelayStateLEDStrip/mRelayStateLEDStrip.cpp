@@ -118,14 +118,14 @@ void mRelayStateLEDStrip::EverySecond()
   // pSEGMENT_I(segment_index).SetPixelColor(1, RgbwwColor(0,255,0));
   // pSEGMENT_I(segment_index).SetPixelColor(2, RgbwwColor(0,0,255));
 
-  uint8_t relays_available = pCONT_mry->module_state.devices;
+  uint8_t relays_available = tkr_relay->module_state.devices;
   uint8_t pixels_in_strip = pSEGMENT_I(segment_index).length();
 
   for(uint8_t relay_id=0;relay_id<relays_available;relay_id++)
   {
     if(relay_id < pixels_in_strip)
     {
-      if(pCONT_mry->CommandGet_Relay_Power(relay_id))
+      if(tkr_relay->CommandGet_Relay_Power(relay_id))
       {
         RgbwwColor colour_on = RgbwwColor(0,50,0);
         // Toggle LED colour if timer is active, ie if relay is on but will turn itself off

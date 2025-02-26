@@ -568,6 +568,8 @@ void mSupport::ArduinoOTAInit(void)
     arduino_ota_triggered = true;
     arduino_ota_progress_dot_count = 0;
 
+    RtcSettings.boot_was_completed_ota_event = false;
+
     // Disable parts (e.g. RF receive interrupts) before starting update
     pCONT->Tasker_Interface(TASK_UPDATE_OTA_BEFORE_ON_START);
     
@@ -612,7 +614,12 @@ void mSupport::ArduinoOTAInit(void)
     }
 
     ALOG_IMP(PSTR(D_LOG_OTA "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
-    
+
+    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+    RtcSettings.boot_was_completed_ota_event = false; // Reset the flag as an error has occured
+    #endif
+
+
     if(error != OTA_BEGIN_ERROR)
       ESP.restart(); // Should only reach if the first failed
 
@@ -620,7 +627,20 @@ void mSupport::ArduinoOTAInit(void)
 
   ArduinoOTA.onEnd([this]()
   {
+    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+    RtcSettings.boot_was_completed_ota_event = true; // To enable skip of delayed WiFi start when this individual device has succesful flash
+        
+    if(ResetReasonPowerOn()) // Only if we can trust stability from a good restart
+    {
+      ALOG_INF(PSTR("Previous start was safe, so RTCSettingsSave trusted"));
+      RtcSettingsSave();
+    }
+    #endif // ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+
+    delay(150); // Allow time for the OTA success response to reach the host
+
     ALOG_IMP(PSTR(D_LOG_UPLOAD "OTA " D_SUCCESSFUL ". " D_RESTARTING));
+    Serial.flush();
     ESP.restart();
 	});
 
@@ -1046,6 +1066,14 @@ const char* mSupport::GetResetReason(char* buffer, uint8_t buflen)
   return buffer;
 }
 
+
+bool mSupport::ResetReasonPowerOn(void) {
+  uint32_t reset_reason = mSupportHardware::ESP_ResetInfoReason();
+  return ((reset_reason == REASON_DEFAULT_RST) || (reset_reason == REASON_EXT_SYS_RST));
+}
+
+
+
 char* mSupport::GetStateText(uint32_t state)
 {
   if (state >= MAX_STATE_TEXT) {
@@ -1056,22 +1084,42 @@ char* mSupport::GetStateText(uint32_t state)
 
 
 
-#ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
+char* mSupport::GetPowerDevice(char* dest, uint32_t idx, size_t size, uint32_t option)
+{
+  #ifdef USE_MODULE_DRIVERS_RELAY
+  strncpy(dest, "POWER", size);                // POWER
+  if ((tkr_relay->rt.devices_present + option) > 1) {
+    char sidx[8];
+    snprintf_P(sidx, sizeof(sidx), PSTR("%d"), idx);  // x
+    strncat(dest, sidx, size - strlen(dest) -1);      // POWERx
+  }
+  return dest;
+  #else
+  return dest;
+  #endif
+
+}
+
+char* mSupport::GetPowerDevice(char* dest, uint32_t idx, size_t size)
+{
+  return GetPowerDevice(dest, idx, size, 0);
+}
+
+
 void mSupport::SetPulseTimer(uint32_t index, uint32_t time)
 {
-  //tkr_set->pulse_timer[index] = (time > 111) ? millis() + (1000 * (time - 100)) : (time > 0) ? millis() + (100 * time) : 0L;
+  tkr_set->runtime.pulse_timer[index] = (time > 111) ? millis() + (1000 * (time - 100)) : (time > 0) ? millis() + (100 * time) : 0L;
 }
 
 uint32_t mSupport::GetPulseTimer(uint32_t index)
 {
-  // long time = TimePassedSince(tkr_set->pulse_timer[index]);
-  // if (time < 0) {
-  //   time *= -1;
-  //   return (time > 11100) ? (time / 1000) + 100 : (time > 0) ? time / 100 : 0;
-  // }
+  long time = tkr_time->TimePassedSince(tkr_set->runtime.pulse_timer[index]);
+  if (time < 0) {
+    time *= -1;
+    return (time > 11100) ? (time / 1000) + 100 : (time > 0) ? time / 100 : 0;
+  }
   return 0;
 }
-#endif
 
 
 #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
@@ -1080,6 +1128,71 @@ bool mSupport::OsWatchBlockedLoop(void)
   //return oswatch_blocked_loop;
 }
 #endif
+
+
+
+/*********************************************************************************************\
+ * Zero-cross support
+\*********************************************************************************************/
+
+//#define DEBUG_ZEROCROSS
+
+#ifdef ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
+
+void ZeroCrossMomentStart(void) {
+  if (!TasmotaGlobal.zc_interval) { return; }
+
+#ifdef DEBUG_ZEROCROSS
+  uint32_t dbg_interval = TasmotaGlobal.zc_interval;
+  uint32_t dbg_zctime = TasmotaGlobal.zc_time;
+  uint32_t dbg_starttime = micros();
+#endif
+
+  uint32_t trigger_moment = TasmotaGlobal.zc_time + TasmotaGlobal.zc_interval - TasmotaGlobal.zc_offset - TasmotaGlobal.zc_code_offset;
+  while (TimeReachedUsec(trigger_moment)) {    // Trigger moment already passed so try next
+    trigger_moment += TasmotaGlobal.zc_interval;
+  }
+  while (!TimeReachedUsec(trigger_moment)) {}  // Wait for trigger moment
+
+#ifdef DEBUG_ZEROCROSS
+  uint32_t dbg_endtime = micros();
+  AddLog(LOG_LEVEL_DEBUG, PSTR("ZCD: CodeExecTime %d, StartTime %u, EndTime %u, ZcTime %u, Interval %d"),
+    dbg_endtime - dbg_starttime, dbg_starttime, dbg_endtime, dbg_zctime, dbg_interval);
+#endif
+
+  TasmotaGlobal.zc_code_offset = micros();
+}
+
+void ZeroCrossMomentEnd(void) {
+  if (!TasmotaGlobal.zc_interval) { return; }
+  TasmotaGlobal.zc_code_offset = (micros() - TasmotaGlobal.zc_code_offset) / 2;
+
+#ifdef DEBUG_ZEROCROSS
+  AddLog(LOG_LEVEL_DEBUG, PSTR("ZCD: CodeExecTime %d"), TasmotaGlobal.zc_code_offset * 2);
+#endif
+}
+
+void IRAM_ATTR ZeroCrossIsr(void);
+void ZeroCrossIsr(void) {
+  uint32_t time = micros();
+  TasmotaGlobal.zc_interval = ((int32_t) (time - TasmotaGlobal.zc_time));
+  TasmotaGlobal.zc_time = time;
+}
+
+void ZeroCrossInit(uint32_t offset) {
+  if (PinUsed(GPIO_ZEROCROSS)) {
+    TasmotaGlobal.zc_offset = offset;
+
+    uint32_t gpio = Pin(GPIO_ZEROCROSS);
+    pinMode(gpio, INPUT_PULLUP);
+    attachInterrupt(gpio, ZeroCrossIsr, CHANGE);
+
+    AddLog(LOG_LEVEL_INFO, PSTR("ZCD: Activated"));  // Zero-cross detection activated
+  }
+}
+
+#endif // ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
+
 
 
 //Get span until single character in string
@@ -1670,12 +1783,12 @@ void mSupport::ClaimSerial(void)
 
 void mSupport::ShowSource(int source)
 {
-  // if ((source > 0) && (source < SRC_MAX)) {
-  //   char stemp1[20];
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   ALOG_INF(PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
-  //   #endif// ENABLE_LOG_LEVEL_INFO
-  // }
+  if ((source > 0) && (source < SRC_MAX)) {
+    char stemp1[20];
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    ALOG_INF(PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
+    #endif// ENABLE_LOG_LEVEL_INFO
+  }
 }
 
 
@@ -1705,20 +1818,20 @@ void mSupport::SleepDelay(uint32_t mseconds) {
 void mSupport::PerformEverySecond(void)
 {
 
-  // if (POWER_CYCLE_TIME == TasmotaGlobal.uptime) {
+  // if (POWER_CYCLE_TIME == tkr_set->runtime.uptime) {
   //   UpdateQuickPowerCycle(false);
   // }
 
   CheckResetConditions(); //If restart is ordered, of type reset, save network, erase settings, set defaults, reload network, complete restart
 
   #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-  TasmotaGlobal.uptime++;
+  tkr_set->runtime.uptime++;
 
-  if (POWER_CYCLE_TIME == TasmotaGlobal.uptime) {
+  if (POWER_CYCLE_TIME == tkr_set->runtime.uptime) {
     UpdateQuickPowerCycle(false);
   }
 
-  if (BOOT_LOOP_TIME == TasmotaGlobal.uptime) {
+  if (BOOT_LOOP_TIME == tkr_set->runtime.uptime) {
     RtcRebootReset();
 
     Settings->last_module = Settings->module;
@@ -1733,50 +1846,50 @@ void mSupport::PerformEverySecond(void)
 #endif
   }
 
-  if (TasmotaGlobal.power_on_delay) {
+  if (tkr_set->runtime.power_on_delay) {
     if (1 == Settings->param[P_POWER_ON_DELAY2]) {       // SetOption47 1
       // Allow relay power on once network is available
-      if (!TasmotaGlobal.global_state.network_down) {
-        TasmotaGlobal.power_on_delay = 0;
+      if (!tkr_set->runtime.global_state.network_down) {
+        tkr_set->runtime.power_on_delay = 0;
       }
     }
     else if (2 == Settings->param[P_POWER_ON_DELAY2]) {  // SetOption47 2
       // Allow relay power on once mqtt is available
-      if (!TasmotaGlobal.global_state.mqtt_down) {
-        TasmotaGlobal.power_on_delay = 0;
+      if (!tkr_set->runtime.global_state.mqtt_down) {
+        tkr_set->runtime.power_on_delay = 0;
       }
     }
     else {                                               // SetOption47 3..255
       // Allow relay power on after x seconds
-      TasmotaGlobal.power_on_delay--;
+      tkr_set->runtime.power_on_delay--;
     }
-    if (!TasmotaGlobal.power_on_delay && TasmotaGlobal.power_on_delay_state) {
+    if (!tkr_set->runtime.power_on_delay && tkr_set->runtime.power_on_delay_state) {
       // Set relays according to last SetDevicePower() request
-      SetDevicePower(TasmotaGlobal.power_on_delay_state, SRC_SO47);
+      SetDevicePower(tkr_set->runtime.power_on_delay_state, SRC_SO47);
     }
   }
 
-  if (TasmotaGlobal.mqtt_cmnd_blocked_reset) {
-    TasmotaGlobal.mqtt_cmnd_blocked_reset--;
-    if (!TasmotaGlobal.mqtt_cmnd_blocked_reset) {
-      TasmotaGlobal.mqtt_cmnd_blocked = 0;             // Clean up MQTT cmnd loop block
+  if (tkr_set->runtime.mqtt_cmnd_blocked_reset) {
+    tkr_set->runtime.mqtt_cmnd_blocked_reset--;
+    if (!tkr_set->runtime.mqtt_cmnd_blocked_reset) {
+      tkr_set->runtime.mqtt_cmnd_blocked = 0;             // Clean up MQTT cmnd loop block
     }
   }
 
-  if (TasmotaGlobal.seriallog_timer) {
-    TasmotaGlobal.seriallog_timer--;
-    if (!TasmotaGlobal.seriallog_timer) {
-      if (TasmotaGlobal.seriallog_level) {
+  if (tkr_set->runtime.seriallog_timer) {
+    tkr_set->runtime.seriallog_timer--;
+    if (!tkr_set->runtime.seriallog_timer) {
+      if (tkr_set->runtime.seriallog_level) {
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
       }
-      TasmotaGlobal.seriallog_level = 0;
+      tkr_set->runtime.seriallog_level = 0;
     }
   }
 
-  if (TasmotaGlobal.syslog_timer) {  // Restore syslog level
-    TasmotaGlobal.syslog_timer--;
-    if (!TasmotaGlobal.syslog_timer) {
-      TasmotaGlobal.syslog_level = Settings->syslog_level;
+  if (tkr_set->runtime.syslog_timer) {  // Restore syslog level
+    tkr_set->runtime.syslog_timer--;
+    if (!tkr_set->runtime.syslog_timer) {
+      tkr_set->runtime.syslog_level = Settings->syslog_level;
       if (Settings->syslog_level) {
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
       }
@@ -1790,22 +1903,22 @@ void mSupport::PerformEverySecond(void)
 
   ResetGlobalValues();
 
-  if ((TasmotaGlobal.init_state >= INIT_GPIOS) && PinUsed(GPIO_HEARTBEAT)) {
-    digitalWrite(Pin(GPIO_HEARTBEAT), ~TasmotaGlobal.heartbeat_inverted &1);
+  if ((tkr_set->runtime.init_state >= INIT_GPIOS) && PinUsed(GPIO_HEARTBEAT)) {
+    digitalWrite(Pin(GPIO_HEARTBEAT), ~tkr_set->runtime.heartbeat_inverted &1);
     delayMicroseconds(50);
-    digitalWrite(Pin(GPIO_HEARTBEAT), TasmotaGlobal.heartbeat_inverted);
+    digitalWrite(Pin(GPIO_HEARTBEAT), tkr_set->runtime.heartbeat_inverted);
   }
 
   // Teleperiod
-  if (Settings->tele_period || (3601 == TasmotaGlobal.tele_period)) {
-    if (TasmotaGlobal.tele_period >= 9999) {
-      if (!TasmotaGlobal.global_state.network_down) {
-        TasmotaGlobal.tele_period = 0;  // Allow teleperiod once wifi is connected
+  if (Settings->tele_period || (3601 == tkr_set->runtime.tele_period)) {
+    if (tkr_set->runtime.tele_period >= 9999) {
+      if (!tkr_set->runtime.global_state.network_down) {
+        tkr_set->runtime.tele_period = 0;  // Allow teleperiod once wifi is connected
       }
     } else {
-      TasmotaGlobal.tele_period++;
-      if (TasmotaGlobal.tele_period >= Settings->tele_period) {
-        TasmotaGlobal.tele_period = 0;
+      tkr_set->runtime.tele_period++;
+      if (tkr_set->runtime.tele_period >= Settings->tele_period) {
+        tkr_set->runtime.tele_period = 0;
 
         MqttPublishTeleState();
         MqttPublishTeleperiodSensor();
@@ -1813,9 +1926,9 @@ void mSupport::PerformEverySecond(void)
         XsnsXdrvCall(FUNC_AFTER_TELEPERIOD);
       } else {
         // Global values (Temperature, Humidity and Pressure) update every 10 seconds
-        if (!(TasmotaGlobal.tele_period % 10)) {
+        if (!(tkr_set->runtime.tele_period % 10)) {
           for (uint32_t type = 0; type < 3; type++) {
-            if (!Settings->global_sensor_index[type] || TasmotaGlobal.user_globals[type]) { continue; }
+            if (!Settings->global_sensor_index[type] || tkr_set->runtime.user_globals[type]) { continue; }
             GetSensorValues();
             break;
           }
@@ -1832,7 +1945,7 @@ void mSupport::PerformEverySecond(void)
   WifiPollNtp();
 
 #ifdef ESP32
-  if (11 == TasmotaGlobal.uptime) {  // Perform one-time ESP32 houskeeping
+  if (11 == tkr_set->runtime.uptime) {  // Perform one-time ESP32 houskeeping
     ESP_getSketchSize();             // Init sketchsize as it can take up to 2 seconds
   }
 #endif
@@ -1864,10 +1977,10 @@ void mSupport::CheckResetConditions()
 {
 
   #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-  if (TasmotaGlobal.restart_flag && CommandsReady()) {
-      if ((214 == TasmotaGlobal.restart_flag) ||          // Reset 4
-          (215 == TasmotaGlobal.restart_flag) ||          // Reset 5
-          (216 == TasmotaGlobal.restart_flag)) {          // Reset 6
+  if (tkr_set->runtime.restart_flag && CommandsReady()) {
+      if ((214 == tkr_set->runtime.restart_flag) ||          // Reset 4
+          (215 == tkr_set->runtime.restart_flag) ||          // Reset 5
+          (216 == tkr_set->runtime.restart_flag)) {          // Reset 6
         // Backup current SSIDs and Passwords
         char storage_ssid1[strlen(SettingsText(SET_STASSID1)) +1];
         strncpy(storage_ssid1, SettingsText(SET_STASSID1), sizeof(storage_ssid1));
@@ -1888,11 +2001,11 @@ void mSupport::CheckResetConditions()
         strncpy(storage_mqtttopic, SettingsText(SET_MQTT_TOPIC), sizeof(storage_mqtttopic));
         uint16_t mqtt_port = Settings->mqtt_port;
 
-//        if (216 == TasmotaGlobal.restart_flag) {
+//        if (216 == tkr_set->runtime.restart_flag) {
           // Backup mqtt host, port, client, username and password
 //        }
-        if ((215 == TasmotaGlobal.restart_flag) ||        // Reset 5
-            (216 == TasmotaGlobal.restart_flag)) {        // Reset 6
+        if ((215 == tkr_set->runtime.restart_flag) ||        // Reset 5
+            (216 == tkr_set->runtime.restart_flag)) {        // Reset 6
           SettingsErase(2);  // Erase all flash from program end to end of physical excluding optional filesystem
         }
         SettingsDefault();
@@ -1901,7 +2014,7 @@ void mSupport::CheckResetConditions()
         SettingsUpdateText(SET_STASSID2, storage_ssid2);
         SettingsUpdateText(SET_STAPWD1, storage_pass1);
         SettingsUpdateText(SET_STAPWD2, storage_pass2);
-        if (216 == TasmotaGlobal.restart_flag) {          // Reset 6
+        if (216 == tkr_set->runtime.restart_flag) {          // Reset 6
           // Restore the mqtt host, port, client, username and password
           SettingsUpdateText(SET_MQTT_HOST, storage_mqtthost);
           SettingsUpdateText(SET_MQTT_USER, storage_mqttuser);
@@ -1912,30 +2025,30 @@ void mSupport::CheckResetConditions()
 
         XdrvCall(FUNC_RESET_SETTINGS);
 
-        TasmotaGlobal.restart_flag = 3;                   // Finish backlog then Restart 1
+        tkr_set->runtime.restart_flag = 3;                   // Finish backlog then Restart 1
       }
-      else if (213 == TasmotaGlobal.restart_flag) {       // Reset 3
+      else if (213 == tkr_set->runtime.restart_flag) {       // Reset 3
         SettingsSdkErase();  // Erase flash SDK parameters
-        TasmotaGlobal.restart_flag = 2;                   // Restart 1
+        tkr_set->runtime.restart_flag = 2;                   // Restart 1
       }
-      else if (212 == TasmotaGlobal.restart_flag) {       // Reset 2
+      else if (212 == tkr_set->runtime.restart_flag) {       // Reset 2
         SettingsErase(0);    // Erase all flash from program end to end of physical flash
-        TasmotaGlobal.restart_flag = 211;                 // Reset 1
+        tkr_set->runtime.restart_flag = 211;                 // Reset 1
       }
 
-      if (211 == TasmotaGlobal.restart_flag) {            // Reset 1
+      if (211 == tkr_set->runtime.restart_flag) {            // Reset 1
         SettingsDefault();
-        TasmotaGlobal.restart_flag = 3;                   // Finish backlog then Restart 1
+        tkr_set->runtime.restart_flag = 3;                   // Finish backlog then Restart 1
       }
 
-      if (2 == TasmotaGlobal.restart_flag) {              // Restart 1
+      if (2 == tkr_set->runtime.restart_flag) {              // Restart 1
         XsnsXdrvCall(FUNC_ABOUT_TO_RESTART);
         SettingsSaveAll();
       }
 
-      TasmotaGlobal.restart_flag--;
-      if (TasmotaGlobal.restart_flag <= 0) {
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "%s"), (TasmotaGlobal.restart_halt) ? PSTR("Halted") : (TasmotaGlobal.restart_deepsleep) ? PSTR("Sleeping") : PSTR(D_RESTARTING));
+      tkr_set->runtime.restart_flag--;
+      if (tkr_set->runtime.restart_flag <= 0) {
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "%s"), (tkr_set->runtime.restart_halt) ? PSTR("Halted") : (tkr_set->runtime.restart_deepsleep) ? PSTR("Sleeping") : PSTR(D_RESTARTING));
         EspRestart();
       }
     }

@@ -28,12 +28,12 @@ uint8_t mFan::GetFanspeed(void)
 // Probably to be handled using "light_interface?"
 uint8_t mFan::GetLightState(void)
 {
-  // return pCONT_mry->CommandGet_Relay_Power(0);
+  // return tkr_relay->CommandGet_Relay_Power(0);
   return 0;
 }
 void mFan::SetLightState(uint8_t state)
 {
-  // pCONT_mry->CommandSet_Relay_Power(state);
+  // tkr_relay->CommandSet_Relay_Power(state);
 }
 
 /*********************************************************************************************/
@@ -63,7 +63,7 @@ void mFan::SetFanspeed(uint8_t fanspeed, bool sequence)
   // // }
   // for (uint32_t i = 2; i < 5; i++) {
   //   uint8_t state = (fans &1) + POWER_OFF_NO_STATE;  // Add no publishPowerState
-  //   pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4
+  //   tkr_relay->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4
   //   fans >>= 1;
   // }
 

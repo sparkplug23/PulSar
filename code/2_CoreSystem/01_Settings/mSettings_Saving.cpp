@@ -173,7 +173,7 @@ void mSettings::SettingsLoad(void)
   
   // Configure hostname 
   memset(runtime.my_hostname,0,sizeof(runtime.my_hostname));
-  sprintf(runtime.my_hostname,PSTR("%s"),tkr_set->Settings.system_name.device);
+  snprintf(runtime.my_hostname,sizeof(runtime.my_hostname),PSTR("%s"),tkr_set->Settings.system_name.device);
 
 }
 

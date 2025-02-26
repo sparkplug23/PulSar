@@ -770,12 +770,356 @@ bool mWiFi::WifiCheckIpConnected()
 
 }
 
+#ifdef ENABLE_DEVFEATURE_WIFI__CHECK_CONNECTION_2025
+
+
+/*****************************************************************************************************\
+ * IP detection revised for full IPv4 / IPv6 support
+ *
+ * In general, each interface (Wifi/Eth) can have 1x IPv4 and
+ * 2x IPv6 (Global routable address and Link-Local starting witn fe80:...)
+ *
+ * We always use an IPv4 address if one is assigned, and revert to
+ * IPv6 only on networks that are v6 only.
+ * Ethernet calls can be safely used even if the USE_ETHERNET is not enabled
+ *
+ * New APIs:
+ * - general form is:
+ *   `bool XXXGetIPYYY(IPAddress*)` returns `true` if the address exists and copies the address
+ *                                  if the pointer is non-null.
+ *   `bool XXXHasIPYYY()`           same as above but only returns `true` or `false`
+ *   `String XXXGetIPYYYStr()`      returns the IP as a `String` or empty `String` if none
+ *
+ *   `XXX` can be `Wifi` or `Eth`
+ *   `YYY` can be `` for any address, `v6` for IPv6 global address or `v6LinkLocal` for Link-local
+ *
+ * - Legacy `Wifi.localIP()` and `ETH.localIP()` always return IPv4 and nothing on IPv6 only networks
+ *
+ * - v4/v6:
+ *   `WifiGetIP`, `WifiGetIPStr`, `WifiHasIP`: get preferred v4/v6 address for Wifi
+ *   `EthernetGetIP`, `EthernetGetIPStr`, `EthernetHasIP`: get preferred v4/v6 for Ethernet
+ *
+ * - Main IP to be used dual stack v4/v6
+ *   `hasIP`, `IPGetListeningAddress`, `IPGetListeningAddressStr`: any IP to listen to for Web Server
+ *             IPv4 is always preferred, and Eth is preferred over Wifi.
+ *   `IPForUrl`: converts v4/v6 to use in URL, enclosing v6 in []
+ *
+ * - v6 only:
+ *    `WifiGetIPv6`, `WifiGetIPv6Str`, `WifiHasIPv6`
+ *    `WifiGetIPv6LinkLocal`, `WifiGetIPv6LinkLocalStr`
+ *    `EthernetGetIPv6, `EthernetHasIPv6`, `EthernetGetIPv6Str`
+ *    `EthernetGetIPv6LinkLocal`, `EthernetGetIPv6LinkLocalStr`
+ *
+ * - v4 only:
+ *    `WifiGetIPv4`, `WifiGetIPv4Str`, `WifiHasIPv4`
+ *    `EthernetGetIPv4`, `EthernetGetIPv4Str`, `EthernetHasIPv4`
+ *
+ * - DNS reporting actual values used (not the Settings):
+ *    `DNSGetIP(n)`, `DNSGetIPStr(n)` with n=`0`/`1` (same dns for Wifi and Eth)
+\*****************************************************************************************************/
+
+
+
+
+
+// Check to see if we have any routable IP address
+// IPv4 has always priority
+// Copy the value of the IP if pointer provided (optional)
+// `exclude_ap` allows to exlude AP IP address and focus only on local STA
+bool mWiFi::WifiGetIP(IPAddress *ip, bool exclude_ap) {
+  #ifdef ESP32
+    wifi_mode_t mode = WiFi.getMode();
+    if ((mode == WIFI_MODE_STA || mode == WIFI_MODE_APSTA) && (uint32_t)WiFi.localIP() != 0) {
+      if (ip != nullptr) { *ip = WiFi.localIP(); }
+      return true;
+    }
+    if (!exclude_ap && (mode == WIFI_MODE_AP || mode == WIFI_MODE_APSTA) && (uint32_t)WiFi.softAPIP() != 0) {
+      if (ip != nullptr) { *ip = WiFi.softAPIP(); }
+      return true;
+    }
+  #else
+    WiFiMode_t mode = WiFi.getMode();
+    if ((mode == WIFI_STA || mode == WIFI_AP_STA) && (uint32_t)WiFi.localIP() != 0) {
+      if (ip != nullptr) { *ip = WiFi.localIP(); }
+      return true;
+    }
+    if (!exclude_ap && (mode == WIFI_AP || mode == WIFI_AP_STA) && (uint32_t)WiFi.softAPIP() != 0) {
+      if (ip != nullptr) { *ip = WiFi.softAPIP(); }
+      return true;
+    }
+  #endif
+  #ifdef USE_IPV6
+    IPAddress lip;
+    if (WifiGetIPv6(&lip)) {
+      if (ip != nullptr) { *ip = lip; }
+      return true;
+    }
+    if (ip != nullptr) { *ip = IPAddress(); }
+  #endif // USE_IPV6
+    return false;
+  }
+  
+  bool mWiFi::WifiHasIP(void) {
+    return WifiGetIP(nullptr);
+  }
+  
+  String mWiFi::WifiGetIPStr(void)
+  {
+    IPAddress ip;
+  #ifdef USE_IPV6
+    return WifiGetIP(&ip) ? ip.toString(true) : String();
+  #else
+    return WifiGetIP(&ip) ? ip.toString() : String();
+  #endif
+  }
+  
+  // Has a routable IP, whether IPv4 or IPv6, Wifi or Ethernet
+  bool mWiFi::HasIP(void) {
+    if (WifiHasIP()) return true;
+  //#if defined(ESP32) && CONFIG_IDF_TARGET_ESP32 && defined(USE_ETHERNET)
+  #if defined(ESP32) && defined(USE_ETHERNET)
+    if (EthernetHasIP()) return true;
+  #endif
+    return false;
+  }
+
+
+
+/**
+ * @brief Causing issues with neopixel timing
+ * 
+ * 
+ * How These Counters Create a Delayed Start
+When Connected (Successful Case):
+
+The function checks:
+cpp
+Copy
+if((WL_CONNECTED == WiFi.status()) && WifiHasIP())
+On success:
+It logs the connection, sets the device state to “connected” via WifiSetState(1), and then:
+Resets the counter:
+cpp
+Copy
+connection.counter = WIFI_CHECK_SEC; // ~20 seconds
+This means that once a valid connection is achieved, the next check won’t occur for 20 seconds.
+Resets the retry counter:
+cpp
+Copy
+connection.retry = connection.retry_init;
+This gives the system a fresh retry budget for future failures.
+It also resets connection.max_retry to zero and updates router info if this is the first time connecting.
+When Not Connected (Failure Case):
+
+If the connection isn’t established, the function sets:
+cpp
+Copy
+WifiSetState(0);
+Then it determines the effective status for retry logic:
+cpp
+Copy
+connection.status = (connection.retry & 1) ? WiFi.status() : 0;
+This alternation forces the status to “0” (disconnected) every other call, which helps clear any transient states.
+The switch-case then handles various failure reasons:
+For example, if no SSID is available or if connection failed due to a wrong password, it adjusts the retry counter:
+In some cases, it halves the retry counter (e.g., connection.retry = connection.retry_init / 2) or sets it to 0.
+In the default case (idle/disconnected), if the retry counter is already 0 or exactly half the initial value, it logs an AP timeout and increments a max_retry counter.
+Retry Attempt:
+If connection.retry is still nonzero, the function will:
+Log the remaining retries.
+Depending on whether scanning is enabled:
+It might call WifiBegin() to attempt reconnection (with different parameters based on the retry count).
+It then resets the counter to 1 so that the next check occurs after 1 second:
+cpp
+Copy
+connection.counter = 1;
+And decrements connection.retry:
+cpp
+Copy
+connection.retry--;
+If no retries remain, it calls WifiConfig(), resets the counter to 1, and resets connection.retry back to its initial value.
+In Summary
+Long Delay on Success:
+When the device is connected and has an IP, the next connection check is delayed by setting connection.counter = WIFI_CHECK_SEC (typically 20 seconds). This prevents unnecessary rechecks when the connection is healthy.
+
+Rapid Checking When Disconnected:
+When not connected, the counter is forced to 1 second so that the system checks the connection status every second. However, actual reconnection attempts (via calling WifiBegin) occur only on certain retry values (e.g., when connection.retry equals connection.retry_init or half of that value).
+
+Retry Budget Governs Attempts:
+The retry counter (initialized from connection.retry_init) counts down with each failed connection attempt. If it runs out, the system falls back to configuration mode via WifiConfig().
+
+Alternating Status Check:
+The expression (connection.retry & 1) ? WiFi.status() : 0 forces a “reset” of the reported WiFi status every other call, likely to avoid sticking on a stale status and to trigger a retry.
+
+Together, these mechanisms ensure that when the device isn’t connected it checks very frequently (every second) and decrements a retry counter until a new connection attempt is triggered. When connected, it spaces out the checks, effectively “delaying” any new connection attempts. This balance helps prevent spamming the AP with connection attempts while still allowing for a rapid reconnect when needed.
+ */
+void mWiFi::WifiCheckIp(void)
+{
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
+  if (!RtcSettings.boot_was_completed_ota_event){
+    connection.counter = WIFI_CHECK_SEC;
+  }
+
+  AddLog(loglevel_with_connection_status, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
+
+
+  if((WL_CONNECTED == WiFi.status()) && WifiHasIP())
+  {
+    AddLog(loglevel_with_connection_status,  PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
+
+    WifiSetState(1);
+    connection.counter = WIFI_CHECK_SEC; //20 secs, set backoff on a good connection to recheck with longer delay
+    connection.retry = connection.retry_init;
+    connection.max_retry = 0;
+
+    if (connection.status != WL_CONNECTED) {                                        //if it was not previously connected, get router info
+      
+      ALOG_INF(PSTR(D_LOG_WIFI D_CONNECTED));
+      
+      tkr_set->Settings.ip_address[1] = (uint32_t)WiFi.gatewayIP();
+      tkr_set->Settings.ip_address[2] = (uint32_t)WiFi.subnetMask();
+      tkr_set->Settings.ip_address[3] = (uint32_t)WiFi.dnsIP();
+      
+      // Save current AP parameters for quick reconnect
+      tkr_set->Settings.wifi_channel = WiFi.channel();
+      uint8_t *bssid = WiFi.BSSID();
+      memcpy((void*) &tkr_set->Settings.wifi_bssid, (void*) bssid, sizeof(tkr_set->Settings.wifi_bssid));
+    }
+    connection.status = WL_CONNECTED;    //assert status to be connected
+  } 
+  else
+  { //not connected
+    
+    WifiSetState(0);
+    uint8_t wifi_config_tool = tkr_set->Settings.sta_config;
+    connection.status = (connection.retry &1) ? WiFi.status() : 0;  // This effectively alternates between using the actual status and forcing a “disconnected” eveyr second to result every other call. This “skip” is intended to clear out any lingering stale state from WiFi.status().
+    switch (connection.status) {
+      case WL_CONNECTED:
+        ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_NO_IP_ADDRESS));
+        connection.status = 0;
+        connection.retry = connection.retry_init;        
+        connection.fConnected = true; // added by me, should probably remove and use status
+        break;
+      case WL_NO_SSID_AVAIL:
+        ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_AP_NOT_REACHED));        
+        tkr_set->Settings.wifi_channel = 0;  // Disable stored AP
+
+        if (WIFI_WAIT == tkr_set->Settings.sta_config) {
+          ALOG_INF(PSTR(D_LOG_WIFI "1%s"),"WIFI_WAIT == tkr_set->Settings.sta_config");
+          connection.retry = connection.retry_init;
+        } else {
+          if (connection.retry > (connection.retry_init / 2)) {
+            ALOG_INF(PSTR(D_LOG_WIFI "2%s"),"ELSE WIFI_WAIT == tkr_set->Settings.sta_config retry>");
+            connection.retry = connection.retry_init / 2;
+          }
+          else if (connection.retry) {
+            ALOG_INF(PSTR(D_LOG_WIFI "3%s"),"ELSE WIFI_WAIT == tkr_set->Settings.sta_config retry else");
+            connection.retry = 0;
+          }
+        }
+        connection.fConnected = false;  // should remove
+        connection.fReconnect = true;  // should remove
+        break;
+      case WL_CONNECT_FAILED:
+        ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_WRONG_PASSWORD));
+        tkr_set->Settings.wifi_channel = 0;  // Disable stored AP
+        if (connection.retry > (connection.retry_init / 2)) {
+          connection.retry = connection.retry_init / 2;
+        }
+        else if (connection.retry) {
+          connection.retry = 0;
+        }
+        connection.fConnected = false;  // should remove
+        connection.fReconnect = true;  // should remove
+        break;
+      // case WL_IDLE_STATUS: ALOG_INF(PSTR(D_LOG_WIFI "case WL_IDLE_STATUS"));
+      // case WL_DISCONNECTED: ALOG_DBM( PSTR(D_LOG_WIFI "case WL_DISCONNECTED"));
+      default:  // WL_IDLE_STATUS and WL_DISCONNECTED
+
+        if (!connection.retry || ((connection.retry_init / 2) == connection.retry)) 
+        {
+          ALOG_INF(PSTR(D_LOG_WIFI D_CONNECT_FAILED_AP_TIMEOUT));
+          tkr_set->Settings.wifi_channel = 0;  // Disable stored AP
+          connection.max_retry++;
+          // Restart may be added here based on max_retry
+        } else {
+          if (!strlen(tkr_set->SettingsText(SET_STASSID1)) && !strlen(tkr_set->SettingsText(SET_STASSID2)))
+          {
+            tkr_set->Settings.wifi_channel = 0;  // Disable stored AP
+            wifi_config_tool = WIFI_MANAGER; // Skip empty SSIDs and start Wifi config tool
+            connection.retry = 0;
+            ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "WIFI_MANAGER"));
+          } 
+          else {
+            ALOG_INF( PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "1"));
+          }
+        }
+
+        connection.fConnected = false; // should remove
+        connection.fReconnect = true; // should remove
+
+    } // END of switch
+
+
+    if (connection.retry) 
+    {
+      
+      ALOG_INF(PSTR(D_LOG_WIFI "connection retry %d"), connection.retry_init - connection.retry);
+
+      if (tkr_set->Settings.flag_network.use_wifi_scan) // SetOption56 - Scan wifi network at restart for configured AP's
+      {
+        if (connection.retry_init == connection.retry) 
+        {
+          connection.scan_state = 1;    // Select scanned SSID
+          ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select scanned SSID"));          
+        }
+        else
+        {
+          ALOG_INF(PSTR(D_LOG_WIFI "connection.retry_init == connection.retry %d=%d"), connection.retry_init, connection.retry);
+        }
+      } else {
+        if (connection.retry_init == connection.retry) 
+        {          
+          WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, tkr_set->Settings.wifi_channel);        // Select alternate SSID
+          ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select default SSID"));          
+        }
+        if ((tkr_set->Settings.sta_config != WIFI_WAIT) && ((connection.retry_init / 2) == connection.retry)) 
+        {
+          WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, 0);        // Select alternate SSID
+          ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select alternate SSID"));          
+        }
+      }
+
+      connection.counter = 1;
+      connection.retry--; // decreases with each failed attempt
+    } 
+    else // connection.retry has reached zero, retrying a connection has failed
+    {      
+      ALOG_INF(PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
+      WifiConfig(wifi_config_tool);
+      connection.counter = 1;
+      connection.retry = connection.retry_init;
+    }
+    connection.counter = 1;             // Re-check in 1 second, when not connected, retry more often
+  }
+
+  //ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WifiSetState checkip END");
+
+
+}
+
+
+#else
+
+
+
 /**
  * @brief Causing issues with neopixel timing
  * 
  */
 void mWiFi::WifiCheckIp(void)
 {
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
 
   AddLog(loglevel_with_connection_status, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
 
@@ -987,7 +1331,7 @@ void mWiFi::WifiCheckIp(void)
 
 
 }
-
+#endif
 
 // Primary health checker
 void mWiFi::WifiCheck(uint8_t param)
@@ -1187,12 +1531,45 @@ void mWiFi::WifiConnect(void)
   // WifiSetOutputPower(); //new
   WiFi.persistent(false);     // Solve possible wifi init errors
   connection.status = 0;
-  
-  connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((mSupportHardware::ESP_getChipId() & 0xF) * 2); //ESP_getChipId function to allow esp8266/esp32
-  
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "connection.retry_init=%d"),connection.retry_init);
 
+  #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+    if (RtcSettings.boot_was_completed_ota_event)
+    {
+      connection.retry_init = 2;  // already low for OTA
+      connection.counter = 1;     // force a 1-second re-check instead of 20 seconds
+      ALOG_INF(PSTR("OTA reboot: fast connection attempt"));
+    }
+    else
+    {
+      connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((mSupportHardware::ESP_getChipId() & 0xF) * 2);
+      connection.counter = WIFI_CHECK_SEC;  // normally 20 seconds
+    }
+  #else
+    connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((mSupportHardware::ESP_getChipId() & 0xF) * 2);
+    connection.counter = WIFI_CHECK_SEC;
+  #endif
   connection.retry = connection.retry_init;
+
+
+
+  // #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+  // if(RtcSettings.boot_was_completed_ota_event)// = true;
+  // {
+  //   connection.retry_init = 2; // more than the counter below set to 1
+  //   ALOG_INF(PSTR("Trigger immediate connection"));
+  // }else{
+  //   connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((mSupportHardware::ESP_getChipId() & 0xF) * 2); //ESP_getChipId function to allow esp8266/esp32
+  // }
+  
+  
+  // #else  
+  // connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((mSupportHardware::ESP_getChipId() & 0xF) * 2); //ESP_getChipId function to allow esp8266/esp32
+  // #endif
+
+
+  // // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "connection.retry_init=%d"),connection.retry_init);
+
+  // connection.retry = connection.retry_init;
   connection.counter = 1;
 
 

@@ -38,6 +38,37 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   uint8_t segments_found = 0;
 
 
+
+  
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  /**
+   * Can be either a single matrix or multiple matrices
+   * One function will be used to parse a matrix object, here it will iter over them and append to the panels
+   **/
+  if(jtok = obj["MatrixConfig"])
+  {
+    ALOG_HGL(PSTR("MatrixConfig"));
+    if (jtok.isArray()) 
+    {
+
+      // Reset matrix settings
+      panels = 1;
+      panel.clear();
+      ALOG_INF(PSTR("panel.clear() HERE C?????????????????????????????????????????????????????"));
+      panel.reserve(max(1U,min((size_t)panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
+
+      ALOG_HGL(PSTR("MatrixConfig--------------"));
+      JsonParserArray arrobj = jtok;
+      for (auto v : arrobj) 
+      {
+        ALOG_HGL(PSTR("MatrixConfig A"));
+        subparse_MatrixConfig(v.getObject());
+      }    
+    }
+  }
+  #endif
+  
+
   for(uint8_t segment_i = 0; segment_i < MAX_NUM_SEGMENTS; segment_i++)
   {
     snprintf(buffer, sizeof(buffer), "Segment%d", segment_i);
@@ -75,6 +106,60 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 }
 
 
+void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  JsonParserToken jtok_sub = 0; 
+  int16_t tmp_id = 0;
+  char buffer[50];
+
+  Panel p;
+
+  if(jtok = obj["Width"])
+  {
+    p.width = jtok.getInt();
+  }
+  if(jtok = obj["Height"])
+  {
+    p.height = jtok.getInt();
+  }
+  if(jtok = obj["StartX"])
+  {
+    p.xOffset = jtok.getInt();
+  }
+  if(jtok = obj["StartY"])
+  {
+    p.yOffset = jtok.getInt();
+  }
+  if(jtok = obj["BottomStart"])
+  {
+    p.bottomStart = jtok.getInt();
+  }
+  if(jtok = obj["RightStart"])
+  {
+    p.rightStart = jtok.getInt();
+  }
+  if(jtok = obj["Vertical"])
+  {
+    p.vertical = jtok.getInt();
+  }
+  if(jtok = obj["Serpentine"])
+  {
+    p.serpentine = jtok.getInt();
+  }
+
+  ALOG_INF(PSTR(
+    "MatrixConfig[%d]: %dx%d, StartX:%d, StartY:%d, BottomStart:%d, RightStart:%d, Vertical:%d, Serpentine:%d"),
+    panels, p.width, p.height, p.xOffset, p.yOffset, p.bottomStart, p.rightStart, p.vertical, p.serpentine
+  );
+  
+  panel.push_back(p);
+  ALOG_INF(PSTR("panels %d" ), panel.size());
+  
+  isMatrix = true;
+
+}
 
 
 /**
@@ -354,7 +439,13 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
     if (jtok = jobj["Custom3"]) 
     {
-      SEGMENT_I(segment_index).custom3 = jtok.getInt();
+      uint8_t c3 = jtok.getInt();
+      if(c3 > 31) // only has 5 of the 8 bits
+      {
+        ALOG_ERR(PSTR("Custom3 exceeds limit 31"));
+        c3 = map(c3, 0,255, 0,31); // assume mapping needed
+      }
+      SEGMENT_I(segment_index).custom3 = c3;
       ALOG_INF(PSTR(D_LOG_PIXEL "Custom3 %d"), SEGMENT_I(segment_index).custom3 );
       data_buffer.isserviced++;
     }
