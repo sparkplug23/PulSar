@@ -49,7 +49,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  *       Set WDT to 60 seconds on esp32
  * #26 : Enabled fastboot detection, OTA fallback and WDT on ESP32 devices as default
  */
-#define FIRMWARE_VERSION_CORE     2
+#define FIRMWARE_VERSION_CORE     3
 
 /**@@@@@ Module changes
  * #02 : db18 esp32 working

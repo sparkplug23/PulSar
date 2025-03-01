@@ -405,6 +405,22 @@ enum LoggingLevels {
 #define ALOG_INF(...)
 #endif
 
+
+/**
+ * @brief  New method that allows an IF check, this enables the "if" to be removed when not enabled as debug option and hence stops the "if" branch compiling
+ 
+ * Enabled =>  
+ * if(x) AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,  __VA_ARGS__)
+ * 
+ * Disabled
+ * BLANK
+ */
+#ifdef ENABLE_LOG_LEVEL_INFO
+#define ALOG_INF_IF(x, ...) if(x) AddLog(LOG_LEVEL_INFO,  __VA_ARGS__) 
+#else
+#define ALOG_INF_IF(...)
+#endif
+
 #ifdef ENABLE_LOG_LEVEL_DEBUG
 #define ALOG_DBG(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
 #else
@@ -415,6 +431,21 @@ enum LoggingLevels {
 #define ALOG_DBM(...) AddLog(LOG_LEVEL_DEBUG_MORE,  __VA_ARGS__)
 #else
 #define ALOG_DBM(...)
+#endif
+
+/**
+ * @brief  New method that allows an IF check, this enables the "if" to be removed when not enabled as debug option and hence stops the "if" branch compiling
+ 
+ * Enabled =>  
+ * if(x) AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,  __VA_ARGS__)
+ * 
+ * Disabled
+ * BLANK
+ */
+#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+#define ALOG_DBM_IF(x, ...) if(x) AddLog(LOG_LEVEL_DEBUG_MORE,  __VA_ARGS__) 
+#else
+#define ALOG_DBM_IF(...)
 #endif
 
 #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL

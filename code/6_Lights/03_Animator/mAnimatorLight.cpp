@@ -519,30 +519,14 @@ void mAnimatorLight::EveryLoop()
     
   if (doInitBusses) 
   {
+
     doInitBusses = false;
     ALOG_INF(PSTR("Re-init busses"));
-    
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-    #ifndef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
-    // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
-    if (loadLedmap >= 0) {
-      ALOG_HGL(PSTR("Loading LED map."));
-      bool flag_deserializeMap = deserializeMap(loadLedmap);
-      if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
-      {
-        ALOG_INF(PSTR("Matrix setup"));
-        setUpMatrix();  // must be called before segment alignment checks and fixed segment ranges
-        makeAutoSegments(true);
-      }
-      loadLedmap = -1;
-    }
-    yield();
-    #endif
-    #endif
-    
+        
     bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
     pCONT_iLight->bus_manager->removeAll();
 
+    ALOG_INF(PSTR("checkSegmentAlignment()-----------------------------------------aligned %d"), aligned);
     uint32_t mem = 0;
 
     /*****************************************************************************
@@ -594,7 +578,6 @@ void mAnimatorLight::EveryLoop()
     #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
 
     DEBUG_DELAY(1000);
-
   
     /*****************************************************************************
      * Create NPB methods
@@ -628,8 +611,6 @@ void mAnimatorLight::EveryLoop()
       pCONT_iLight->busConfigs[i] = nullptr;
     }
     
-    DEBUG_DELAY(1000);
-
     finalizeInit(); // also loads default ledmap if present
 
     uint8_t bri = 128; // temporary brightness value
@@ -638,264 +619,309 @@ void mAnimatorLight::EveryLoop()
     
     if (aligned) makeAutoSegments();
     else fixInvalidSegments();
-
-    /**
-     * @brief Added by me, during 1D strips (no matrix) te customTable will be loaded from another file
-     * 
-     */
-    ALOG_HGL(PSTR("Loading 1D LED map."));
-    bool flag_deserializeMap = deserializeMap(0);
-    ALOG_HGL(PSTR("Loading 1D LED map. %s"), flag_deserializeMap ? "YES" : "NO");
     
     BusManager::setBrightness(bri); // fix re-initialised bus' brightness
+
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    /***
+     * Matrix can only be loaded after the busses have been created, and segments have been created.
+     * An easy way to do this to ensure order is perhaps have "isMatrix" not started (ie not loading panels)
+     * until this section of code runs (Which would only be called after segments have been created)
+     */
+    if(panel.size()) // if there are panels waiting to be loading
+    {
+      ALOG_INF(PSTR("PANELS: %d"), panel.size());    
+      setUpMatrix();
+      makeAutoSegments();
+      if(SEGMENT.stopY > 1000){ ALOG_ERR(PSTR("SEGMENT.stopY > 1000")); SEGMENT.stopY = 33;} // debug issue
+    }
+
+    /***
+     * Either 1D or 2D custom maps can now be loaded after busses and any 2d matrix have been started
+     */
+    if (loadLedmap >= 0) {
+      ALOG_HGL(PSTR("Loading LED map."));
+      deserializeMap(loadLedmap); // load custom LED map
+      loadLedmap = -1;
+    }
+
+    #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
+    ALOG_INF(PSTR("Segment count: %d"), getSegmentsNum());
+    ALOG_INF(PSTR("Memory used: %d"), mem);
 
     doSerializeConfig = true;
     // serializeConfig(); // in WLED This saved everything to json memory
   }
-
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-
-  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
-
-  #warning "HARDCODED MATRIX SETUP to be phased out with commands"
-
-  // loadLedmap = 0;
-  isMatrix = true;
   
-    // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-    // if (i1 < mAnimatorLight::Segment::maxWidth) seg.start = i1;
-    // seg.stop = i2 > mAnimatorLight::Segment::maxWidth ? mAnimatorLight::Segment::maxWidth : i2;
-    // if (startY < mAnimatorLight::Segment::maxHeight) seg.startY = startY;
 
-    #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP
-    SEGMENT.startY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y;
-    SEGMENT.stopY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y;
-    SEGMENT.stop = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP;
-    #else
-    // SEGMENT.startY = 0;
-    // SEGMENT.stopY = 16;
-    // SEGMENT.stop = 16;
-    // #error "dont want this happening from now on"
-    #endif
+  // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  // /***
+  //  * Matrix can only be loaded after the busses have been created, and segments have been created.
+  //  * An easy way to do this to ensure order is perhaps have "isMatrix" not started (ie not loading panels)
+  //  * until this section of code runs (Which would only be called after segments have been created)
+  //  */
+  // // if(panel.size()) // if there are panels waiting to be loading
+  // // {
+  // //   ALOG_INF(PSTR("PANELS: %d"), panel.size());    
+  // //   setUpMatrix();
+  // //   makeAutoSegments();
+  // //   if(SEGMENT.stopY > 1000){ ALOG_ERR(PSTR("SEGMENT.stopY > 1000")); } // debug issue
+  // // }
+
+  // // /***
+  // //  * Either 1D or 2D custom maps can now be loaded after busses and any 2d matrix have been started
+  // //  */
+  // // if (loadLedmap >= 0) {
+  // //   ALOG_HGL(PSTR("Loading LED map."));
+  // //   deserializeMap(loadLedmap); // load custom LED map
+  // //   loadLedmap = -1;
+  // // }
 
 
-    // ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
-    // delay(1000);
-    // #endif
+  // #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
 
-    #error "with dyanmic, dont be here"
+  // #warning "HARDCODED MATRIX SETUP to be phased out with commands"
+
+  // // loadLedmap = 0;
+  // isMatrix = true;
+  
+  //   // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  //   // if (i1 < mAnimatorLight::Segment::maxWidth) seg.start = i1;
+  //   // seg.stop = i2 > mAnimatorLight::Segment::maxWidth ? mAnimatorLight::Segment::maxWidth : i2;
+  //   // if (startY < mAnimatorLight::Segment::maxHeight) seg.startY = startY;
+
+  //   #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP
+  //   SEGMENT.startY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y;
+  //   SEGMENT.stopY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y;
+  //   SEGMENT.stop = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP;
+  //   #else
+  //   // SEGMENT.startY = 0;
+  //   // SEGMENT.stopY = 16;
+  //   // SEGMENT.stop = 16;
+  //   // #error "dont want this happening from now on"
+  //   #endif
+
+
+  //   // ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
+  //   // delay(1000);
+  //   // #endif
+
+  //   #error "with dyanmic, dont be here"
 
 
 
-  // 2D Matrix Settings
-  // JsonObject matrix = hw_led[F("matrix")];
-  // if (!matrix.isNull()) {
-  //   tkr_anim->isMatrix = true;
+  // // 2D Matrix Settings
+  // // JsonObject matrix = hw_led[F("matrix")];
+  // // if (!matrix.isNull()) {
+  // //   tkr_anim->isMatrix = true;
     
-    panels = 1;
-    panel.clear();
-    ALOG_INF(PSTR("panel.clear() HERE E?????????????????????????????????????????????????????"));
-    // JsonArray panels = matrix[F("panels")];
-    uint8_t s = 0;
-    // if (!panels.isNull()) {
-      panel.reserve(max(1U,min((size_t)panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
-      // for (JsonObject pnl : panels) {
+  //   panels = 1;
+  //   panel.clear();
+  //   ALOG_INF(PSTR("panel.clear() HERE E?????????????????????????????????????????????????????"));
+  //   // JsonArray panels = matrix[F("panels")];
+  //   uint8_t s = 0;
+  //   // if (!panels.isNull()) {
+  //     panel.reserve(max(1U,min((size_t)panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
+  //     // for (JsonObject pnl : panels) {
 
-      //   	var px = parseInt(Sf[`P${p}X`].value); //first led x
-			// var py = parseInt(Sf[`P${p}Y`].value); //first led y
-			// var pw = parseInt(Sf[`P${p}W`].value); //width
-			// var ph = parseInt(Sf[`P${p}H`].value); //height
+  //     //   	var px = parseInt(Sf[`P${p}X`].value); //first led x
+	// 		// var py = parseInt(Sf[`P${p}Y`].value); //first led y
+	// 		// var pw = parseInt(Sf[`P${p}W`].value); //width
+	// 		// var ph = parseInt(Sf[`P${p}H`].value); //height
 
-			// var pb = Sf[`P${p}B`].value == "1"; //bottom
-			// var pr = Sf[`P${p}R`].value == "1"; //right
-			// var pv = Sf[`P${p}V`].value == "1"; //vertical
-			// var ps = Sf[`P${p}S`].checked; //serpentine
+	// 		// var pb = Sf[`P${p}B`].value == "1"; //bottom
+	// 		// var pr = Sf[`P${p}R`].value == "1"; //right
+	// 		// var pv = Sf[`P${p}V`].value == "1"; //vertical
+	// 		// var ps = Sf[`P${p}S`].checked; //serpentine
 
-			// var topLeftX = px*ppL + space; //left margin
-			// var topLeftY = py*ppL + space; //top margin
+	// 		// var topLeftX = px*ppL + space; //left margin
+	// 		// var topLeftY = py*ppL + space; //top margin
 
-        /**
-         * @brief These are temporary define configs until the proper json commands are inserted for setting up matrix panels
-         * 
-         */
-        #if defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32by8_PANEL)
+  //       /**
+  //        * @brief These are temporary define configs until the proper json commands are inserted for setting up matrix panels
+  //        * 
+  //        */
+  //       #if defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32by8_PANEL)
 
-        #error "DONT USE ANYMORE!"
-
-
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 8;//,      pnl["h"]);
-        p.width = 32;//,       pnl["w"]);
-        panel.push_back(p);
+  //       #error "DONT USE ANYMORE!"
 
 
-        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_SEGMENT_TESTER)
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 8;//,      pnl["h"]);
+  //       p.width = 32;//,       pnl["w"]);
+  //       panel.push_back(p);
 
 
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 8;//,      pnl["h"]);
-        p.width = 32;//,       pnl["w"]);
-        panel.push_back(p);
-
-        #error "HERE?else"
-
-        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__VERTICAL)
+  //       #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_SEGMENT_TESTER)
 
 
-        #error "HERE?else"
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 32;//,      pnl["h"]);
-        p.width = 8;//,       pnl["w"]);
-        panel.push_back(p);
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 8;//,      pnl["h"]);
+  //       p.width = 32;//,       pnl["w"]);
+  //       panel.push_back(p);
+
+  //       #error "HERE?else"
+
+  //       #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__VERTICAL)
 
 
-        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_8W32H)
+  //       #error "HERE?else"
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 32;//,      pnl["h"]);
+  //       p.width = 8;//,       pnl["w"]);
+  //       panel.push_back(p);
 
 
-        // #error "HERE?else"
-        Panel p;
-        p.bottomStart = 1; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 0;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 32;//,      pnl["h"]);
-        p.width = 8;//,       pnl["w"]);
-        panel.push_back(p);
+  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_8W32H)
 
 
-        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_32W8H)
-
-        // #error "HERE?else"
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 8;//,      pnl["h"]);
-        p.width = 32;//,       pnl["w"]);
-        panel.push_back(p);
+  //       // #error "HERE?else"
+  //       Panel p;
+  //       p.bottomStart = 1; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 0;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 32;//,      pnl["h"]);
+  //       p.width = 8;//,       pnl["w"]);
+  //       panel.push_back(p);
 
 
+  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_32W8H)
 
-        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H)
-
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 16;//,      pnl["h"]);
-        p.width = 16;//,       pnl["w"]);
-        panel.push_back(p);
-
-        #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H_VERTICAL)
-
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 0;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 16;//,      pnl["h"]);
-        p.width = 16;//,       pnl["w"]);
-        panel.push_back(p);
+  //       // #error "HERE?else"
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 8;//,      pnl["h"]);
+  //       p.width = 32;//,       pnl["w"]);
+  //       panel.push_back(p);
 
 
 
-        #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_COLORADO_MATRIX_TREE)
+  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H)
 
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 16;//,      pnl["h"]);
+  //       p.width = 16;//,       pnl["w"]);
+  //       panel.push_back(p);
 
-        #error "HERE?else"
-        Panel p;
-        p.bottomStart = 0; //, pnl["b"]);
-        p.rightStart = 0;//,  pnl["r"]);
-        p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        p.serpentine = true; //,  pnl["s"]);
-        p.xOffset = 0;//,     pnl["x"]);
-        p.yOffset = 0;//,     pnl["y"]);
-        p.height = 8;//,      pnl["h"]);
-        p.width = 32;//,       pnl["w"]);
-        panel.push_back(p);
+  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H_VERTICAL)
 
-
-
-        #else
-        // default when not overriding
-
-        // #error "HERE?else"
-        // Panel p;
-        // p.bottomStart = 0; //, pnl["b"]);
-        // p.rightStart = 0;//,  pnl["r"]);
-        // #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL
-        // p.vertical = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL;//,    pnl["v"]);`
-        // #else
-        // p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-        // #endif
-        // p.serpentine = true; //,  pnl["s"]);
-        // p.xOffset = 0;//,     pnl["x"]);
-        // p.yOffset = 0;//,     pnl["y"]);
-        // p.height = SEGMENT.stopY;//,      pnl["h"]);
-        // p.width = SEGMENT.stop;//,       pnl["w"]);
-        // panel.push_back(p);
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 0;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 16;//,      pnl["h"]);
+  //       p.width = 16;//,       pnl["w"]);
+  //       panel.push_back(p);
 
 
 
-        #endif
+  //       #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_COLORADO_MATRIX_TREE)
+
+
+  //       #error "HERE?else"
+  //       Panel p;
+  //       p.bottomStart = 0; //, pnl["b"]);
+  //       p.rightStart = 0;//,  pnl["r"]);
+  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       p.serpentine = true; //,  pnl["s"]);
+  //       p.xOffset = 0;//,     pnl["x"]);
+  //       p.yOffset = 0;//,     pnl["y"]);
+  //       p.height = 8;//,      pnl["h"]);
+  //       p.width = 32;//,       pnl["w"]);
+  //       panel.push_back(p);
 
 
 
-      //   if (++s >= WLED_MAX_PANELS || s >= tkr_anim->panels) break; // max panels reached
-      // }
-    // } else {
-    //   // fallback
-    //   WS2812FX::Panel p;
-    //   tkr_anim->panels = 1;
-    //   p.height = p.width = 8;
-    //   p.xOffset = p.yOffset = 0;
-    //   p.options = 0;
-    //   tkr_anim->panel.push_back(p);
-    // }
-    // cannot call tkr_anim->setUpMatrix() here due to already locked JSON buffer
+  //       #else
+  //       // default when not overriding
+
+  //       // #error "HERE?else"
+  //       // Panel p;
+  //       // p.bottomStart = 0; //, pnl["b"]);
+  //       // p.rightStart = 0;//,  pnl["r"]);
+  //       // #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL
+  //       // p.vertical = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL;//,    pnl["v"]);`
+  //       // #else
+  //       // p.vertical = 1;//,    pnl["v"]);` // works for 16x16
+  //       // #endif
+  //       // p.serpentine = true; //,  pnl["s"]);
+  //       // p.xOffset = 0;//,     pnl["x"]);
+  //       // p.yOffset = 0;//,     pnl["y"]);
+  //       // p.height = SEGMENT.stopY;//,      pnl["h"]);
+  //       // p.width = SEGMENT.stop;//,       pnl["w"]);
+  //       // panel.push_back(p);
+
+
+
+  //       #endif
+
+
+
+  //     //   if (++s >= WLED_MAX_PANELS || s >= tkr_anim->panels) break; // max panels reached
+  //     // }
+  //   // } else {
+  //   //   // fallback
+  //   //   WS2812FX::Panel p;
+  //   //   tkr_anim->panels = 1;
+  //   //   p.height = p.width = 8;
+  //   //   p.xOffset = p.yOffset = 0;
+  //   //   p.options = 0;
+  //   //   tkr_anim->panel.push_back(p);
+  //   // }
+  //   // cannot call tkr_anim->setUpMatrix() here due to already locked JSON buffer
+  // // }
+
+  // // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
+  // if (loadLedmap >= 0) {
+  //   ALOG_HGL(PSTR("Loading LED map."));
+  //   bool flag_deserializeMap = deserializeMap(loadLedmap);
+  //   if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
+  //   {
+  //     ALOG_INF(PSTR("Matrix setup"));
+  //     setUpMatrix();
+  //   }
+  //   loadLedmap = -1;
   // }
+  // yield();
+  // #else
 
-  // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
-  if (loadLedmap >= 0) {
-    ALOG_HGL(PSTR("Loading LED map."));
-    bool flag_deserializeMap = deserializeMap(loadLedmap);
-    if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
-    {
-      ALOG_INF(PSTR("Matrix setup"));
-      setUpMatrix();
-    }
-    loadLedmap = -1;
-  }
-  yield();
-  #else
+  // #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_MATRIX_IMMEDIATELY
 
 
   // // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
@@ -911,10 +937,12 @@ void mAnimatorLight::EveryLoop()
   // }
   // yield();
 
+  // #endif
 
-  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
 
-  #endif // enable matrix ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  // #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
+
+  // #endif // enable matrix ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   
   #ifdef WLED_ENABLE_WEBSOCKETS2
   handleWs();
@@ -1115,13 +1143,7 @@ void mAnimatorLight::Init(void)
   tkr_web->ws->onEvent(wsEvent);
   #endif
   
-  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
   loadLedmap = 0; // To enable it to load once
-  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
-  #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP_DISABLED
-  loadLedmap = 0; // To enable it to load once
-  #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP_DISABLED
-
   paletteFade=0;
   paletteBlend = 0;
   milliampsPerLed = 5;
@@ -1842,7 +1864,14 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
   {
 
     ALOG_DBG(PSTR("Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
-    appendSegment(Segment(start_pixel, stop_pixel));
+    
+
+    char buffer[100];
+    sprintf(buffer, "Segment %d", seg_index);
+
+    Segment seg = Segment(start_pixel, stop_pixel, buffer);
+
+    appendSegment(seg);
     seg_index = getSegmentsNum()-1; // segments are added at the end of list, -1 for index of LENGTH minus 1
     ALOG_DBG(PSTR("Segment_AppendNew::new seg_index %d"), seg_index);
       
@@ -1941,7 +1970,13 @@ void mAnimatorLight::SubTask_Effects()
     // reset the segment runtime data if needed
     seg.resetIfRequired();
 
-    if (!seg.isActive()) continue;   
+    if (!seg.isActive())
+    {
+      ALOG_WRN(PSTR("LEAVING EARLY %d %d %d"), segment_current_index, seg.start, seg.stop);
+      continue;   
+    }
+
+    ALOG_DBM_IF(seg.name, PSTR("Segment if %s [%d,%d]"), seg.name, seg.start, seg.stop );
 
     // _force_update = true; // temp force it
 
@@ -2479,7 +2514,7 @@ int16_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer) - 1);
     lineBuffer[sizeof(lineBuffer) - 1] = '\0'; // terminate string
 
-    ALOG_INF(PSTR("lineBuffer i%d id%d %s"), i, effects.id[i], lineBuffer);
+    ALOG_DBM(PSTR("lineBuffer i%d id%d %s"), i, effects.id[i], lineBuffer);
 
     char* dataPtr = strchr(lineBuffer, '@');
     if (dataPtr) *dataPtr = '\0'; // replace name divider with null termination. Escape "name@data"
@@ -2657,100 +2692,149 @@ uint16_t mAnimatorLight::Segment::maxHeight = 1;
 //   return *this;
 // }
 
+// mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(const mAnimatorLight::Segment& orig) 
+// {
+//   if (this != &orig) 
+//   {
+//     // Clean destination
+//     if (name) {
+//         delete[] name;
+//         name = nullptr;
+//     }
+//     deallocateData();
+//     deallocateColourData();
+
+//     // Copy all members from the source
+//     memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
+
+//     // Reset pointers in destination (they will be reallocated if needed)
+//     name = nullptr;
+//     data = nullptr;
+//     coldata = nullptr;
+//     _dataLen = 0;
+//     _coldataLen = 0;
+
+//     // Copy allocated data
+//     if (orig.name) {
+//         name = new char[strlen(orig.name) + 1];
+//         if (name) {
+//             strcpy(name, orig.name);
+//         }
+//     }
+//     if (orig.data && orig._dataLen > 0) {
+//         if (allocateData(orig._dataLen)) {
+//             memcpy(data, orig.data, orig._dataLen);
+//         }
+//     }
+//     if (orig.coldata && orig._coldataLen > 0) {
+//           DEBUG_LINE_HERE
+//         if (allocateColourData(orig._coldataLen)) {
+//           DEBUG_LINE_HERE
+//             memcpy(coldata, orig.coldata, orig._coldataLen);
+//           DEBUG_LINE_HERE
+//         }
+//     }
+//   }
+//           DEBUG_LINE_HERE
+
+//           delay(3000);
+
+//   return *this;
+// }
+
+// // move assignment
+// mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(mAnimatorLight::Segment&& orig) noexcept {
+//     if (this != &orig) {
+//         // Free any existing resources
+//         if (name) {
+//             delete[] name;
+//             name = nullptr;
+//         }
+//         deallocateData();
+//         deallocateColourData();
+
+//         // Move all members from the source
+//         memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
+
+//         // Nullify pointers in the source object
+//         orig.name = nullptr;
+//         orig.data = nullptr;
+//         orig.coldata = nullptr;
+//         orig._dataLen = 0;
+//         orig._coldataLen = 0;
+//     }
+
+//     return *this;
+// }
+
 mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(const mAnimatorLight::Segment& orig) 
 {
-  if (this != &orig) 
-  {
-    // Clean destination
-    if (name) {
+    if (this != &orig) 
+    {
+        // Clean destination
         delete[] name;
         name = nullptr;
-    }
-    deallocateData();
-    deallocateColourData();
+        deallocateData();
+        deallocateColourData();
 
-    // Copy all members from the source
-    memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
+        // Copy all non-pointer members (excluding dynamically allocated ones)
+        start = orig.start;
+        stop = orig.stop;
+        _dataLen = orig._dataLen;
+        _coldataLen = orig._coldataLen;
 
-    // Reset pointers in destination (they will be reallocated if needed)
-    name = nullptr;
-    data = nullptr;
-    coldata = nullptr;
-    _dataLen = 0;
-    _coldataLen = 0;
-
-    // Copy allocated data
-    if (orig.name) {
-        name = new char[strlen(orig.name) + 1];
-        if (name) {
+        // Deep copy name
+        if (orig.name) {
+            name = new char[strlen(orig.name) + 1];
             strcpy(name, orig.name);
         }
-    }
-    if (orig.data && orig._dataLen > 0) {
-        if (allocateData(orig._dataLen)) {
-            memcpy(data, orig.data, orig._dataLen);
-        }
-    }
-    if (orig.coldata && orig._coldataLen > 0) {
-          DEBUG_LINE_HERE
-        if (allocateColourData(orig._coldataLen)) {
-          DEBUG_LINE_HERE
-            memcpy(coldata, orig.coldata, orig._coldataLen);
-          DEBUG_LINE_HERE
-        }
-    }
-  }
-          DEBUG_LINE_HERE
 
-          delay(3000);
+        // Deep copy data buffers
+        if (orig.data && orig._dataLen > 0) {
+            if (allocateData(orig._dataLen)) {
+                memcpy(data, orig.data, orig._dataLen);
+            }
+        }
+
+        if (orig.coldata && orig._coldataLen > 0) {
+            if (allocateColourData(orig._coldataLen)) {
+                memcpy(coldata, orig.coldata, orig._coldataLen);
+            }
+        }
+    }
+    
+    return *this;
+}
+mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(mAnimatorLight::Segment&& orig) noexcept {
+  if (this != &orig) 
+  {
+      // Free any existing resources
+      delete[] name;
+      deallocateData();
+      deallocateColourData();
+
+      // Move non-pointer members
+      start = orig.start;
+      stop = orig.stop;
+      _dataLen = orig._dataLen;
+      _coldataLen = orig._coldataLen;
+
+      // Transfer ownership of dynamically allocated members
+      name = orig.name;
+      data = orig.data;
+      coldata = orig.coldata;
+
+      // Nullify pointers in the source object to prevent double deletion
+      orig.name = nullptr;
+      orig.data = nullptr;
+      orig.coldata = nullptr;
+      orig._dataLen = 0;
+      orig._coldataLen = 0;
+  }
 
   return *this;
 }
 
-
-// move assignment
-// mAnimatorLight::Segment& mAnimatorLight::Segment::operator= (mAnimatorLight::Segment &&orig) noexcept {
-  
-      
-//   //DEBUG_PRINTLN(F("-- Moving segment --"));
-//   if (this != &orig) {
-//     if (name) delete[] name; // free old name
-//     deallocateData(); // free old runtime data
-//     if (leds && !mAnimatorLight::Segment::_globalLeds) free(leds);
-//     memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
-//     orig.name = nullptr;
-//     orig.data = nullptr;
-//     orig._dataLen = 0;
-//     orig.leds = nullptr;
-//   }
-      
-//   return *this;
-// }
-
-// move assignment
-mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(mAnimatorLight::Segment&& orig) noexcept {
-    if (this != &orig) {
-        // Free any existing resources
-        if (name) {
-            delete[] name;
-            name = nullptr;
-        }
-        deallocateData();
-        deallocateColourData();
-
-        // Move all members from the source
-        memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
-
-        // Nullify pointers in the source object
-        orig.name = nullptr;
-        orig.data = nullptr;
-        orig.coldata = nullptr;
-        orig._dataLen = 0;
-        orig._coldataLen = 0;
-    }
-
-    return *this;
-}
 
 
 bool mAnimatorLight::Segment::allocateData(size_t len) 
@@ -5226,7 +5310,7 @@ void mAnimatorLight::resetSegments2() {
 }
 
 void mAnimatorLight::makeAutoSegments(bool forceReset) {
-  ALOG_INF(PSTR("makeAutoSegments(%d) %d"),forceReset, isMatrix);
+  ALOG_INF(PSTR("makeAutoSegments(%d) %d==============================="),forceReset, isMatrix);
   if (isMatrix) {
     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     // only create 1 2D segment
@@ -5288,14 +5372,26 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
   fixInvalidSegments();
 }
 
-void mAnimatorLight::fixInvalidSegments() {
+void mAnimatorLight::fixInvalidSegments() 
+{
+  
   //make sure no segment is longer than total (sanity check)
   for (size_t i = getSegmentsNum()-1; i > 0; i--) {
+    
+    // ALOG_INF(PSTR("Fixing invalid semgents %d %d %d %d"), i, segments[i].start, segments[i].stop, _length);
     if (segments[i].start >= _length) { segments.erase(segments.begin()+i); continue; }
     if (segments[i].stop  >  _length) segments[i].stop = _length;
     // this is always called as the last step after finalizeInit(), update covered bus types
     segments[i].refreshLightCapabilities();
+
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    // Added by me to fix bad matrix setting, the order of matrix and segment creation needs fixing
+    if(segments[i].stopY > mAnimatorLight::Segment::maxHeight) segments[i].stopY = mAnimatorLight::Segment::maxHeight;
+    if(segments[i].stop  > mAnimatorLight::Segment::maxWidth)  segments[i].stop  = mAnimatorLight::Segment::maxWidth; ///fixing X length
+    #endif
+
   }
+  
 }
 
 //true if all segments align with a bus, or if a segment covers the total length
@@ -5304,7 +5400,10 @@ bool mAnimatorLight::checkSegmentAlignment() {
   for (segment &seg : segments) {
     for (uint8_t b = 0; pCONT_iLight->bus_manager->getNumBusses(); b++) {
       Bus *bus = pCONT_iLight->bus_manager->getBus(b);
-      if (seg.start == bus->getStart() && seg.stop == bus->getStart() + bus->getLength()) aligned = true;
+      if (
+        seg.start == bus->getStart() && 
+        seg.stop == bus->getStart() + bus->getLength()
+      ) aligned = true;
     }
     if (seg.start == 0 && seg.stop == _length) aligned = true;
     if (!aligned) return false;

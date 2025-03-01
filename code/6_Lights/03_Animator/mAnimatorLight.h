@@ -2762,7 +2762,7 @@ typedef struct Segment
     ANIM_FUNCTION_SIGNATURE;
     bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
 
-    Segment(uint16_t sStart=0, uint16_t sStop=30) :
+    Segment(uint16_t sStart=0, uint16_t sStop=30, const char* segment_name = nullptr) :
       start(sStart),
       stop(sStop),
       offset(0),
@@ -2798,6 +2798,12 @@ typedef struct Segment
       
       refreshLightCapabilities();
 
+      
+      if (segment_name) {
+        name = new char[strlen(segment_name) + 1];
+        strcpy(name, segment_name);
+      }
+
       aux0 = 0;
       aux1 = 0;
       aux2 = 0;
@@ -2806,6 +2812,7 @@ typedef struct Segment
       palette_container = new mPaletteLoaded(); // duplicate of above, but needed for each segment
       
     }
+
 
     Segment(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment(sStartX, sStopX) {
       startY = sStartY;
@@ -3854,8 +3861,9 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     inline void setShowCallback(show_callback cb) { _callback = cb; }
     inline void appendSegment(const Segment &seg = Segment()) {
 
-      Serial.println("DEBUG_LINE_HERE;");
+      Serial.println("Adding Segment");
        segments.push_back(seg); 
+       Serial.println("Completed Segment Push");
        
        }
 

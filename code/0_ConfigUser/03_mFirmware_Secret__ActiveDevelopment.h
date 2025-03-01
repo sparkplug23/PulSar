@@ -5361,7 +5361,7 @@ new 26GHz radar sensor
 //     #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
 //     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+//     
 //     #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
 //     #define WLED_DEBUG
 //     #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
@@ -7110,7 +7110,7 @@ new 26GHz radar sensor
   //   #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
   //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
   //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
-  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MATRIX
+  //   
   //   #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
   //   #define WLED_DEBUG
   //   #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
@@ -7468,88 +7468,88 @@ new 26GHz radar sensor
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+//   /***********************************
+//    * SECTION: System Debug Options
+//   ************************************/    
+//   // #define DISABLE_SERIAL
+//   // #define DISABLE_SERIAL0_CORE
+//   // #define DISABLE_SERIAL_LOGGING
   
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
+//   // #define ENABLE_ADVANCED_DEBUGGING
+//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+//   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
+//   // #define ENABLE_DEBUG_LINE_HERE_TRACE
+//   // #define ENABLE_DEBUG_LINE_HERE
 
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
+//   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+//   // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
 
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+//   // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
 
-  #define LOG_BUFFER_SIZE 2000
+//   #define LOG_BUFFER_SIZE 2000
 
-  /***********************************
-   * SECTION: System Configs
-  ************************************/     
+//   /***********************************
+//    * SECTION: System Configs
+//   ************************************/     
 
     
 
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+//   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+//   // #define USE_MODULE_CORE_FILESYSTEM
+//   //   #define WLED_ENABLE_FS_EDITOR
+//   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+//   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
 
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+//   // Settings saving and loading
+//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+//   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+//   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+//   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+//   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+//   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+//   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
+//   /***********************************
+//    * SECTION: Network Configs
+//   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+//   #define USE_MODULE_NETWORK_WEBSERVER
+//   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
-  /***********************************
-   * SECTION: Sensor Configs
-  ************************************/  
+//   /***********************************
+//    * SECTION: Sensor Configs
+//   ************************************/  
 
-  /***********************************
-   * SECTION: Display Configs
-  ************************************/  
+//   /***********************************
+//    * SECTION: Display Configs
+//   ************************************/  
 
-  /***********************************
-   * SECTION: Driver Configs
-  ************************************/  
+//   /***********************************
+//    * SECTION: Driver Configs
+//   ************************************/  
 
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
+//   /***********************************
+//    * SECTION: Lighting Configs
+//   ************************************/  
 
- #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+//  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
  
     
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
-    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
 
 
   #define USE_MODULE_TEMPLATE
@@ -7586,9 +7586,7 @@ new 26GHz radar sensor
         "Function":"Gradient",
         "Speed":127,
         "Intensity":127,
-        "Grouping":1
-      },
-      "Transition": {
+        "Grouping":1,
         "TimeMs": 0,
         "RateMs": 1000
       },

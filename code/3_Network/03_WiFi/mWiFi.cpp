@@ -1835,27 +1835,63 @@ bool mWiFi::WifiConfigCounter(void)
 
 #ifdef USE_DISCOVERY
 
-void mWiFi::StartMdns(void) {
-  // if (Settings.flag3.mdns_enabled) {  // SetOption55 - Control mDNS service
-      DEBUG_LINE_HERE;
-  if (!Mdns.begun) {
-    // close existing or MDNS.begin will fail
-    MDNS.end(); 
-      DEBUG_LINE_HERE;
-    // Begin with devicename
-    Mdns.begun = (uint8_t)MDNS.begin(tkr_set->Settings.system_name.device);
-    
-      DEBUG_LINE_HERE;
-    ALOG_INF( PSTR(D_LOG_MDNS "%s" " with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), tkr_set->Settings.system_name.device);
+// void mWiFi::StartMdns(void) {
+//   // if (Settings.flag3.mdns_enabled) {  // SetOption55 - Control mDNS service
+//       DEBUG_LINE_HERE;
+//   if (!Mdns.begun) {
+//     // close existing or MDNS.begin will fail
+//     MDNS.end(); 
+//       DEBUG_LINE_HERE;
 
-    #ifdef ESP32
-    // Add service to MDNS-SD
-    MDNS.addService("_http", "_tcp", 80);
-    #endif
+
+//       /***
+//        * Underscores are invalid in hostnames, so we replace them with dashes.
+//        */
+//     // Begin with devicename
+//     Mdns.begun = (uint8_t)MDNS.begin(tkr_set->Settings.system_name.device);
+    
+//       DEBUG_LINE_HERE;
+//     ALOG_INF( PSTR(D_LOG_MDNS "%s" " with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), tkr_set->Settings.system_name.device);
+
+//     #ifdef ESP32
+//     // Add service to MDNS-SD
+//     MDNS.addService("_http", "_tcp", 80);
+//     #endif
   
+//   }
+//       DEBUG_LINE_HERE;
+// }
+
+
+void mWiFi::StartMdns(void) { 
+  const char* originalName = tkr_set->Settings.system_name.device;
+  
+  // Define a temporary buffer (max 64 bytes: 63 + null terminator)
+  char hostname[64]; 
+  strncpy(hostname, originalName, 63); // Copy with max length
+  hostname[63] = '\0'; // Ensure null termination
+
+  // Replace invalid underscores with dashes
+  for (char* p = hostname; *p; ++p) {
+      if (*p == '_') *p = '-';
   }
-      DEBUG_LINE_HERE;
+
+  // Close existing session to prevent failure
+  MDNS.end(); 
+
+  // Begin with sanitized hostname
+  Mdns.begun = (uint8_t)MDNS.begin(hostname);
+  
+  ALOG_INF(PSTR(D_LOG_MDNS "%s" " with %s"), 
+      (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), hostname);
+
+  #ifdef ESP32
+  MDNS.addService("_http", "_tcp", 80); // Register service
+  #endif
 }
+
+
+
 
 
 #ifdef MQTT_HOST_DISCOVERY

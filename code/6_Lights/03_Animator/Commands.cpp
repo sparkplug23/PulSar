@@ -64,6 +64,11 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
         ALOG_HGL(PSTR("MatrixConfig A"));
         subparse_MatrixConfig(v.getObject());
       }    
+      
+      // setUpMatrix(); // will check limits
+      // makeAutoSegments(true); // nneeds to be performed later to make sure segments are correct
+      // deserializeMap();
+      ALOG_INF(PSTR("MatrixConfig Complete -- Doing now to see if this resolves conflict with segment commands erasing"));
     }
   }
   #endif
@@ -105,7 +110,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
 }
 
-
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
 {
 
@@ -160,6 +165,7 @@ void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
   isMatrix = true;
 
 }
+#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
 
 /**
