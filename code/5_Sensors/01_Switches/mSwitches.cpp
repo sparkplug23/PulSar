@@ -63,29 +63,29 @@ void mSwitches::Pre_Init(void)
      * Note: This loop checks each number, for each type within each loop (only one else may match)
      * All types of SWT1 (INV, NP etc)
      **/
-    if(pCONT_pins->PinUsed(GPIO_SWT1_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1_ID, i))
     { 
       SetSwitchUsed(i);
-      pin = pCONT_pins->GetPin(GPIO_SWT1_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_ID, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
-    if(pCONT_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
     {    
       SetSwitchUsed(i);
-      pin = pCONT_pins->GetPin(GPIO_SWT1_INV_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_INV_ID, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
-    if(pCONT_pins->PinUsed(GPIO_SWT1_NP_ID, i)) // Standard pin, active high, NO pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_NP_ID, i)) // Standard pin, active high, NO pulls
     {
       SetSwitchUsed(i);
-      pin = pCONT_pins->GetPin(GPIO_SWT1_NP_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_NP_ID, i);
       pinMode(pin, INPUT);
       PullupFlag(i);
     }else    
-    if(pCONT_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
     {    
       SetSwitchUsed(i);
-      pin = pCONT_pins->GetPin(GPIO_SWT1_INV_NP_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_INV_NP_ID, i);
       pinMode(pin, INPUT);
       PulldownFlag(i);
     }else{
@@ -244,21 +244,21 @@ void mSwitches::Probe(void)
   for (uint32_t i = 0; i < MAX_SWITCHES_SET; i++) {
     if (!bitRead(Switch.used_bitmap, i)) { continue; }
 
-    if(pCONT_pins->PinUsed(GPIO_SWT1_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1_ID, i))
     { 
-      not_activated = digitalRead(pCONT_pins->GetPin(GPIO_SWT1_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_ID, i));
     }else    
-    if(pCONT_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
     {    
-      not_activated = digitalRead(pCONT_pins->GetPin(GPIO_SWT1_INV_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_ID, i));
     }else    
-    if(pCONT_pins->PinUsed(GPIO_SWT1_ID, i)) // Standard pin, active high, NO pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_ID, i)) // Standard pin, active high, NO pulls
     {
-      not_activated = digitalRead(pCONT_pins->GetPin(GPIO_SWT1_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_ID, i));
     }else    
-    if(pCONT_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
     {    
-      not_activated = digitalRead(pCONT_pins->GetPin(GPIO_SWT1_INV_NP_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_NP_ID, i));
     } else {
       not_activated = bitRead(Switch.virtual_pin_bitmap, i);
     }

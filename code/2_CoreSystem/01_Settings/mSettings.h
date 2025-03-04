@@ -139,6 +139,7 @@ inline void releaseDataBufferLock(){};
 // Easy way to add to the counter
 #define D_MQTT_COMMAND_HANDLED_COUNT_INC data_buffer.isserviced++
 
+const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
 
 #include "2_CoreSystem/06_Support/mSupport.h"
 #include "2_CoreSystem/08_Logging/mLogging.h"
@@ -329,7 +330,7 @@ const uint8_t MAX_DS3502 = 4;               // Max number of DS3502 digitsal pot
 const uint8_t MAX_IRSEND = 16;              // Max number of IRSEND GPIOs
 const uint8_t MAX_RULE_SETS = 3;            // Max number of rule sets of size 512 characters
 const uint16_t MAX_RULE_SIZE = 512;         // Max number of characters in rules
-const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
+// const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
 const char WIFI_HOSTNAME[]  = "%s-%04d"; //!PROGMEM    // Expands to <MQTT_TOPIC>-<last 4 decimal chars of MAC address>
 const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
 const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V

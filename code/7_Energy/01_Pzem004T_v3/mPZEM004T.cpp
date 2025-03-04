@@ -101,7 +101,7 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
 void mEnergyPZEM004T::Pre_Init(void)
 {
 
-  if (pCONT_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
+  if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   {
     module_state.mode = ModuleStatus::Initialising;
   }
@@ -112,7 +112,7 @@ void mEnergyPZEM004T::Pre_Init(void)
 void mEnergyPZEM004T::Init(void)
 {
 
-  modbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
+  modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS_ID), tkr_pins->GetPin(GPIO_PZEM0XX_TX_ID));
 
   uint8_t result = modbus->Begin(9600);
 

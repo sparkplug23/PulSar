@@ -71,17 +71,17 @@ void mLEDs::Pre_Init(void)
 
     int8_t pin = -1;
 
-    if(pCONT_pins->PinUsed(GPIO_LED1_ID, ii))
+    if(tkr_pins->PinUsed(GPIO_LED1_ID, ii))
     {
       SetUsed(ii);
-      pin = pCONT_pins->GetPin(GPIO_LED1_ID, ii);
+      pin = tkr_pins->GetPin(GPIO_LED1_ID, ii);
       pinMode(pin, OUTPUT);
       digitalWrite(pin, LOW); // Default: OFF
     }else
-    if(pCONT_pins->PinUsed(GPIO_LED1_INV_ID, ii))
+    if(tkr_pins->PinUsed(GPIO_LED1_INV_ID, ii))
     {
       SetUsed(ii);
-      pin = pCONT_pins->GetPin(GPIO_LED1_INV_ID, ii);
+      pin = tkr_pins->GetPin(GPIO_LED1_INV_ID, ii);
       ALOG_INF(PSTR("%d %d %d"), GPIO_LED1_INV_ID, ii, pin);
       pinMode(pin, OUTPUT);
       digitalWrite(pin, HIGH); // Default: OFF
@@ -110,7 +110,7 @@ void mLEDs::Init(void)
   leds.resize( UsedCount() );  // Allocate space for MAX_LEDS
 
   for (uint8_t i = 0; i < UsedCount(); i++) {
-    // uint8_t pin = pCONT_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
+    // uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
     // pinMode(pin, OUTPUT);  // Set the pin as output
 
     // if (i == 0) {  // LED 1 - Blink 3 times, each blink 300ms apart, cycle every 5 seconds
@@ -166,7 +166,7 @@ void mLEDs::Refresh_LED(uint8_t led_index)
 {
 
   LedState led = leds[led_index];
-  uint8_t pin = pCONT_pins->GetPin(GPIO_LED1_ID, led_index);  // Get the corresponding pin for each LED
+  uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, led_index);  // Get the corresponding pin for each LED
 
   uint32_t currentTime = millis();
   uint32_t tElapsed = currentTime - led.lastUpdateTime;
@@ -295,7 +295,7 @@ void mLEDs::StartEffect_Pulse(uint8_t index, uint8_t pulseCount, uint16_t period
   leds[index].startTime = millis();  // Record the start time
 
   // Attach the PWM channel to the pin for the pulse mode
-  uint8_t pin = pCONT_pins->GetPin(GPIO_LED1_ID, index);
+  uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, index);
   analogAttach(pin, index);  // The PWM channel corresponds to the index of the LED
 }
 
@@ -305,7 +305,7 @@ void mLEDs::SetInvertFlag(uint8_t b) {
 }
 
 bool mLEDs::IsUsed(uint8_t index) {
-  return (pCONT_pins->PinUsed(GPIO_LED1_ID, index) || pCONT_pins->PinUsed(GPIO_LED1_INV_ID, index) || bitRead(used_bitmask, index));
+  return (tkr_pins->PinUsed(GPIO_LED1_ID, index) || tkr_pins->PinUsed(GPIO_LED1_INV_ID, index) || bitRead(used_bitmask, index));
 }
 
 void mLEDs::SetUsed(uint8_t index) {
@@ -501,8 +501,8 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Add("LED1_INV", pCONT_pins->GetPin(GPIO_LED1_INV_ID));
-    JBI->Add("LED2_INV", pCONT_pins->GetPin(GPIO_LED2_INV_ID));
+    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID));
+    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID));
 
   return JBI->End();
 

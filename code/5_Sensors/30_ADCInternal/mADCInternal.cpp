@@ -189,9 +189,9 @@ void mADCInternal::Pre_Init(){
   
 
 #ifdef ESP32
-  if(pCONT_pins->PinUsed(GPIO_ADC1_CH6_ID))
+  if(tkr_pins->PinUsed(GPIO_ADC1_CH6_ID))
   {
-    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH6_ID);
+    adc_config[settings.fSensorCount].input_pin = tkr_pins->GetPin(GPIO_ADC1_CH6_ID);
     adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
     adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_6;
     adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
@@ -202,9 +202,9 @@ void mADCInternal::Pre_Init(){
     settings.fSensorCount++;
   }
 
-  if(pCONT_pins->PinUsed(GPIO_ADC1_CH7_ID))
+  if(tkr_pins->PinUsed(GPIO_ADC1_CH7_ID))
   {
-    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH7_ID);
+    adc_config[settings.fSensorCount].input_pin = tkr_pins->GetPin(GPIO_ADC1_CH7_ID);
     adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
     adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_7;
     adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
@@ -216,9 +216,9 @@ void mADCInternal::Pre_Init(){
   }
 
   // Special pin set here
-  if(pCONT_pins->PinUsed(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID))
+  if(tkr_pins->PinUsed(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID))
   {
-    external_interrupt.trigger_pin = pCONT_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
+    external_interrupt.trigger_pin = tkr_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
     external_interrupt.flag_enabled = true;
   }
 
@@ -552,13 +552,13 @@ void mADCInternal::MQTTHandler_Init(){
 //   // sensors_active = 0;
 
 //   // // Using ++ means always the lowest index will be the active sensor, ie, PIR2 can be 0 when PIR1 is not defined
-//   // if (pCONT_pins->GetPin(GPIO_PIR_1OF2_ID] < 99) {  // not set when 255
-//   //   pin[sensors_active++] = pCONT_pins->GetPin(GPIO_PIR_1OF2_ID];
-//   //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),pCONT_pins->GetPin(GPIO_PIR_1OF2_ID]);
+//   // if (tkr_pins->GetPin(GPIO_PIR_1OF2_ID] < 99) {  // not set when 255
+//   //   pin[sensors_active++] = tkr_pins->GetPin(GPIO_PIR_1OF2_ID];
+//   //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),tkr_pins->GetPin(GPIO_PIR_1OF2_ID]);
 //   // }
-//   // if (pCONT_pins->GetPin(GPIO_PIR_2OF2_ID] < 99) {  // not set when 255
-//   //   pin[sensors_active++] = pCONT_pins->GetPin(GPIO_PIR_2OF2_ID];
-//   //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),pCONT_pins->GetPin(GPIO_PIR_2OF2_ID]);
+//   // if (tkr_pins->GetPin(GPIO_PIR_2OF2_ID] < 99) {  // not set when 255
+//   //   pin[sensors_active++] = tkr_pins->GetPin(GPIO_PIR_2OF2_ID];
+//   //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),tkr_pins->GetPin(GPIO_PIR_2OF2_ID]);
 //   // }
 
 //   // fEnableSensor = false;

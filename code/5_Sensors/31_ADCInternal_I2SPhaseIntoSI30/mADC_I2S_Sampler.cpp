@@ -96,9 +96,9 @@ void mADC_I2S_Sampler::Pre_Init(){
   settings.fEnableSensor = false;
   settings.fSensorCount = 1;
 
-  // if(pCONT_pins->PinUsed(GPIO_ADC1_CH6_ID))
+  // if(tkr_pins->PinUsed(GPIO_ADC1_CH6_ID))
   // {
-  //   adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH6_ID);
+  //   adc_config[settings.fSensorCount].input_pin = tkr_pins->GetPin(GPIO_ADC1_CH6_ID);
   //   adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
   //   adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_6;
   //   adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
@@ -110,9 +110,9 @@ void mADC_I2S_Sampler::Pre_Init(){
   // }
 
   // // Special pin set here
-  // if(pCONT_pins->PinUsed(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID))
+  // if(tkr_pins->PinUsed(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID))
   // {
-  //   external_interrupt.trigger_pin = pCONT_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
+  //   external_interrupt.trigger_pin = tkr_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
   //   external_interrupt.flag_enabled = true;
   // }
   

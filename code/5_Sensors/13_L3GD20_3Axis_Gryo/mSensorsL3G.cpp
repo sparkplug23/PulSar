@@ -75,14 +75,14 @@ void mSensorsL3G::Pre_Init(){
   settings.fSensorCount = 0;
 
   // in futre use array to store L3G type found (L3G_280_ID, L3G_180_ID) etc
-  // if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID)){
+  // if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
   // if(pCONT_sup->I2cDevice(0x76) || pCONT_sup->I2cDevice(0x77)){
 
-    // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
+    // Wire = new TwoWire();//tkr_pins->GetPin(GPIO_I2C_SCL_ID),tkr_pins->GetPin(GPIO_I2C_SDA_ID));
   
     // sensor[settings.fSensorCount].L3G = new Adafruit_L3G280();
-    // if (sensor[settings.fSensorCount].L3G->begin(0x77, pCONT_i2c->wire)) {
+    // if (sensor[settings.fSensorCount].L3G->begin(0x77, tkr_i2c->wire)) {
     //   ALOG_INF(PSTR(D_LOG_L3G "L3G280 sensor detected"));// Serial.flush();
     //   settings.fSensorCount++;
     // }else{
@@ -90,7 +90,7 @@ void mSensorsL3G::Pre_Init(){
     // }
 
 // Mine were LSM - 0x1D, L3G - 0x6B, BMP - 0x77
-    gyro = new L3G(pCONT_i2c->wire, 0);
+    gyro = new L3G(tkr_i2c->wire, 0);
 
 
   if (gyro->init())

@@ -17,6 +17,11 @@ void setup()
   Wire.begin();
   Wire.setClock(400000); // use 400 kHz I2C
 
+  pinMode(26,OUTPUT);
+  // digitalWrite(23,!digitalRead(23));
+  digitalWrite(26,HIGH);
+
+
   sensor.setTimeout(500);
   if (!sensor.init())
   {
@@ -36,6 +41,8 @@ void setup()
   // inter-measurement period). This period should be at least as long as the
   // timing budget.
   sensor.startContinuous(50);
+
+
 }
 
 void loop()

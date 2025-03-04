@@ -110,24 +110,30 @@ void mI2C::Pre_Init()
  * 
  */
 
-  tkr_set->runtime.i2c_enabled = ( pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID));
+  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID));
   if (tkr_set->runtime.i2c_enabled)
   { 
     if(wire == nullptr)
     {
       #ifdef ESP8266
       wire = new TwoWire();
-      wire->begin(pCONT_pins->GetPin(GPIO_I2C_SDA_ID), pCONT_pins->GetPin(GPIO_I2C_SCL_ID)); // no return to check status
+      wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID)); // no return to check status
       #else
       wire = new TwoWire(0);
       ALOG_DBM( PSTR("Trying to start i2c 2-wire"));
       #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-      if(wire->begin(pCONT_pins->GetPin(GPIO_I2C_SDA_ID), pCONT_pins->GetPin(GPIO_I2C_SCL_ID)))//, 100000))
+      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID)))//, 100000))
       #else
-      if(wire->begin(pCONT_pins->GetPin(GPIO_I2C_SDA_ID), pCONT_pins->GetPin(GPIO_I2C_SCL_ID), 100000))
+
+      #ifndef I2C_BUS_SPEED
+      #define I2C_BUS_SPEED 100000
+      #endif
+
+
+      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID), I2C_BUS_SPEED))//100000))
       #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
-        ALOG_DBM( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),pCONT_pins->GetPin(GPIO_I2C_SDA_ID),pCONT_pins->GetPin(GPIO_I2C_SCL_ID));
+        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA_ID),tkr_pins->GetPin(GPIO_I2C_SCL_ID));
       }
       else
       {
@@ -135,8 +141,14 @@ void mI2C::Pre_Init()
       }
       #endif
     }   
-
+    
+    #ifdef ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
+    Wire = *tkr_i2c->wire; // Forces Compatibility. This copies the instance from tkr_i2c->wire into Wire, ensuring all libraries expecting Wire can still function.
+    #endif
+    
   } // i2c_enabled
+
+  Debug_I2CScan_To_Serial();
   
 }
 
@@ -146,7 +158,7 @@ void mI2C::Pre_Init()
 void mI2C::Debug_I2CScan_To_Serial()
 {
  
-  if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+  if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID)&&tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
   {
 
     #ifdef ESP32
@@ -385,11 +397,11 @@ bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired addr
   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
 
   for (uint8_t address = 1; address <= 127; address++) {
-      // ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
+      ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) 
     {
-      ALOG_INF( PSTR("I2cDevice(%x)=true found"),addr);
+      ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
       return true;
     }else
     if (!wire->endTransmission() && (address != addr))
@@ -453,10 +465,9 @@ void mI2C::I2cSetActive(uint32_t addr, uint32_t count)
 void mI2C::I2cSetActiveFound(uint32_t addr, const char *types)
 {
   I2cSetActive(addr);
-  #ifdef ENABLE_LOG_LEVEL_INFO
   ALOG_INF(S_LOG_I2C_FOUND_AT, types, addr);
-  #endif // ENABLE_LOG_LEVEL_INFO
 }
+
 void mI2C::I2cSetActiveFound_P(uint32_t addr, const char *types)
 {
   char buffer[20];
@@ -464,14 +475,40 @@ void mI2C::I2cSetActiveFound_P(uint32_t addr, const char *types)
   I2cSetActiveFound(addr, buffer);
 }
 
+// bool mI2C::I2cActive(uint32_t addr)
+// {
+//   addr &= 0x7F;         // Max I2C address is 127
+//   if (i2c_active[addr / 32] & (1 << (addr % 32))) {
+//     return true;
+//   }
+//   return false;
+// }
 bool mI2C::I2cActive(uint32_t addr)
 {
-  addr &= 0x7F;         // Max I2C address is 127
-  if (i2c_active[addr / 32] & (1 << (addr % 32))) {
-    return true;
-  }
-  return false;
+    addr &= 0x7F;  // Ensure max I2C address is 127
+    uint32_t index = addr / 32;
+    uint32_t bit   = addr % 32;
+
+    // Debugging information
+    Serial.printf("[I2C Active] Checking addr: 0x%02X, index: %u, bit: %u\n", addr, index, bit);
+    Serial.flush();
+
+    // Ensure index does not exceed the array size
+    const uint32_t maxIndex = sizeof(i2c_active) / sizeof(i2c_active[0]) - 1;
+    if (index > maxIndex) {
+        Serial.printf("[I2C Active] ERROR: Out-of-bounds index (%u > %u)\n", index, maxIndex);
+        Serial.flush();
+        return false;
+    }
+
+    // Check if the bit is set
+    bool active = (i2c_active[index] & (1 << bit));
+    Serial.printf("[I2C Active] Result: %s\n", active ? "ACTIVE" : "INACTIVE");
+    Serial.flush();
+
+    return active;
 }
+
 
 bool mI2C::I2cSetDevice(uint32_t addr)
 {

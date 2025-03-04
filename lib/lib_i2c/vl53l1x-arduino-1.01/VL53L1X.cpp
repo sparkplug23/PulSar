@@ -33,6 +33,9 @@ void VL53L1X::setAddress(uint8_t new_addr)
 // mode.
 bool VL53L1X::init(bool io_2v8)
 {
+
+  Serial.println("VL53L1X::init"); Serial.flush();
+
   // check model ID and module type registers (values specified in datasheet)
   if (readReg16Bit(IDENTIFICATION__MODEL_ID) != 0xEACC) { return false; }
 
@@ -55,6 +58,7 @@ bool VL53L1X::init(bool io_2v8)
   {
     if (checkTimeoutExpired())
     {
+      Serial.println("VL53L1X::init TIMEOUT"); Serial.flush();
       did_timeout = true;
       return false;
     }
@@ -150,6 +154,8 @@ bool VL53L1X::init(bool io_2v8)
   // measurement is started; assumes MM1 and MM2 are disabled
   writeReg16Bit(ALGO__PART_TO_PART_RANGE_OFFSET_MM,
     readReg16Bit(MM_CONFIG__OUTER_OFFSET_MM) * 4);
+    
+  Serial.println("VL53L1X::init END"); Serial.flush();
 
   return true;
 }
@@ -161,6 +167,7 @@ void VL53L1X::writeReg(uint16_t reg, uint8_t value)
   Wire.write((reg >> 8) & 0xFF); // reg high byte
   Wire.write( reg       & 0xFF); // reg low byte
   Wire.write(value);
+  // Serial.println(value);
   last_status = Wire.endTransmission();
 }
 
@@ -217,6 +224,8 @@ uint16_t VL53L1X::readReg16Bit(uint16_t reg)
   Wire.requestFrom(address, (uint8_t)2);
   value  = (uint16_t)Wire.read() << 8; // value high byte
   value |=           Wire.read();      // value low byte
+
+  Serial.print("VL53L1X::readReg16Bit: "); Serial.println(value); Serial.flush();
 
   return value;
 }

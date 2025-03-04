@@ -216,11 +216,11 @@
 // {
 
 //   #ifdef ENABLE_HARDWARE_UART_0
-//   if(pCONT_pins->PinUsed(GPIO_HWSERIAL0_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL0_RING_BUFFER_RX_ID)) {
+//   if(tkr_pins->PinUsed(GPIO_HWSERIAL0_RING_BUFFER_TX_ID)&&tkr_pins->PinUsed(GPIO_HWSERIAL0_RING_BUFFER_RX_ID)) {
 //     settings.uart0.receive_interrupts_enable = true;
 //     settings.uart0.baud = 115200;
-//     settings.uart0.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_TX_ID);
-//     settings.uart0.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_RX_ID);
+//     settings.uart0.gpio.tx = tkr_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_TX_ID);
+//     settings.uart0.gpio.rx = tkr_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_RX_ID);
 //     // init_UART1_pins();
 //     ALOG_INF(PSTR("UART0 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart0.gpio.tx, settings.uart0.gpio.rx);
 //   }else{
@@ -229,11 +229,11 @@
 //   #endif // ENABLE_HARDWARE_UART_0
   
 //   #ifdef ENABLE_HARDWARE_UART_1
-//   if(pCONT_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_RX_ID)) {
+//   if(tkr_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_TX_ID)&&tkr_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_RX_ID)) {
 //     settings.uart1.receive_interrupts_enable = true;
 //     settings.uart1.baud = HARDWARE_UART_1_BAUD_RATE_SPEED;
-//     settings.uart1.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID);
-//     settings.uart1.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID);
+//     settings.uart1.gpio.tx = tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID);
+//     settings.uart1.gpio.rx = tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID);
 //     // init_UART1_pins();
 //     ALOG_INF(PSTR("UART1 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart1.gpio.tx, settings.uart1.gpio.rx);
 //   }else{
@@ -242,11 +242,11 @@
 //   #endif // ENABLE_HARDWARE_UART_1
 
 //   #ifdef ENABLE_HARDWARE_UART_2
-//   if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RX_ID)) {
+//   if(tkr_pins->PinUsed(GPIO_HWSERIAL2_TX_ID)&&tkr_pins->PinUsed(GPIO_HWSERIAL2_RX_ID)) {
 //     settings.uart2.receive_interrupts_enable = true;
 //     settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
-//     settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_TX_ID);
-//     settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RX_ID);
+//     settings.uart2.gpio.tx = tkr_pins->GetPin(GPIO_HWSERIAL2_TX_ID);
+//     settings.uart2.gpio.rx = tkr_pins->GetPin(GPIO_HWSERIAL2_RX_ID);
 //     settings.uart2.configured = true;
 //     // init_UART2_pins();
 //     ALOG_INF(PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
@@ -257,11 +257,11 @@
 //     settings.uart2.receive_interrupts_enable = false;
 //   }
 
-//   if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_RX_ID)) {
+//   if(tkr_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_TX_ID)&&tkr_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_RX_ID)) {
 //     settings.uart2.receive_interrupts_enable = true;
 //     settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
-//     settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
-//     settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
+//     settings.uart2.gpio.tx = tkr_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
+//     settings.uart2.gpio.rx = tkr_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
 //     // init_UART2_pins();
 //     ALOG_INF(PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
 //   }else{

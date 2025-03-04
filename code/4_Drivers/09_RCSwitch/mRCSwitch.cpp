@@ -93,20 +93,20 @@ void mRCSwitch::Pre_Init(void)
 void mRCSwitch::Init(void)
 {
 
-  if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_TX_ID)) {
-    mySwitch->enableTransmit(pCONT_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
+  if (tkr_pins->PinUsed(GPIO_RF_433MHZ_TX_ID)) {
+    mySwitch->enableTransmit(tkr_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
     settings.fEnableSensor = true;
   }
-  if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_RX_ID)) 
+  if (tkr_pins->PinUsed(GPIO_RF_433MHZ_RX_ID)) 
   {
     if (tkr_set->Settings.rf_duplicate_time < 10) {
       tkr_set->Settings.rf_duplicate_time = RF_TIME_AVOID_DUPLICATE;
     }
-    pinMode( pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID), INPUT);
+    pinMode( tkr_pins->GetPin(GPIO_RF_433MHZ_RX_ID), INPUT);
 
     mySwitch = new RCSwitch();
 
-    mySwitch->enableReceive(pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID));
+    mySwitch->enableReceive(tkr_pins->GetPin(GPIO_RF_433MHZ_RX_ID));
     // if (!tkr_set->Settings.rf_protocol_mask) {
       // tkr_set->Settings.rf_protocol_mask = (1ULL << mySwitch->getNumProtos()) -1;
       // Correctly only permits protocol 1 through

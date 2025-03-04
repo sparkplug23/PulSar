@@ -105,9 +105,9 @@ void mSDLoggerIMURadiationPattern::Pre_Init(void)
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
   
-  if(pCONT_pins->PinUsed(GPIO_ADC1_CH4_ID))
+  if(tkr_pins->PinUsed(GPIO_ADC1_CH4_ID))
   {
-    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH4_ID);
+    adc_config[settings.fSensorCount].input_pin = tkr_pins->GetPin(GPIO_ADC1_CH4_ID);
     adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
     adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_4;
     adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
@@ -118,9 +118,9 @@ void mSDLoggerIMURadiationPattern::Pre_Init(void)
     settings.fSensorCount++;
   }
 
-  if(pCONT_pins->PinUsed(GPIO_ADC1_CH7_ID))
+  if(tkr_pins->PinUsed(GPIO_ADC1_CH7_ID))
   {
-    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH7_ID);
+    adc_config[settings.fSensorCount].input_pin = tkr_pins->GetPin(GPIO_ADC1_CH7_ID);
     adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
     adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_7;
     adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;

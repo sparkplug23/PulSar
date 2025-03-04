@@ -65,7 +65,7 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
 
 void mSR04::Pre_Init(void)
 {
-  if (pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID))
+  if (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID) && tkr_pins->PinUsed(GPIO_SR04_ECHO_ID))
   {
     settings.fEnableSensor = true;
     settings.fSensorCount++;
@@ -126,14 +126,14 @@ void mSR04::Init(void)
 uint8_t mSR04::ModeDetect(void)
 {
   sr04_type = 1; // default
-  if (!pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID))
+  if (!tkr_pins->PinUsed(GPIO_SR04_ECHO_ID))
   {
     ALOG_TST(PSTR("Sr04: TModeDetect::Error"));
     return sr04_type; 
   }
 
-  int sr04_echo_pin = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);
-  int sr04_trig_pin = (pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID)) ? pCONT_pins->GetPin(GPIO_SR04_TRIG_ID) : pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);   // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
+  int sr04_echo_pin = tkr_pins->GetPin(GPIO_SR04_ECHO_ID);
+  int sr04_trig_pin = (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID)) ? tkr_pins->GetPin(GPIO_SR04_TRIG_ID) : tkr_pins->GetPin(GPIO_SR04_ECHO_ID);   // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
   sonar_serial = new TasmotaSerial(sr04_echo_pin, sr04_trig_pin, 1);
 
 
@@ -159,7 +159,7 @@ uint8_t mSR04::ModeDetect(void)
     sonar_serial = nullptr;
     ALOG_TST(PSTR(D_LOG_SR04 "Release TasmotaSerial"));
     if (-1 == sr04_trig_pin) {
-      sr04_trig_pin = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
+      sr04_trig_pin = tkr_pins->GetPin(GPIO_SR04_ECHO_ID);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
     }
     sonar = new NewPing(sr04_trig_pin, sr04_echo_pin, 100);
     

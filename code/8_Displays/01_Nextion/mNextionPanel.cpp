@@ -168,17 +168,17 @@ void mNextionPanel::Pre_Init(void)
   uint8_t serial_port = 1; // default
   uint8_t rx_pin = 0;
   uint8_t tx_pin = 0;
-  if(pCONT_pins->PinUsed(GPIO_NEXTION_RX_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX_ID))
+  if(tkr_pins->PinUsed(GPIO_NEXTION_RX_ID) && tkr_pins->PinUsed(GPIO_NEXTION_TX_ID))
   {
     serial_port = 1;
-    rx_pin = pCONT_pins->GetPin(GPIO_NEXTION_RX_ID);
-    tx_pin = pCONT_pins->GetPin(GPIO_NEXTION_TX_ID);
+    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX_ID);
+    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX_ID);
   }
-  else if(pCONT_pins->PinUsed(GPIO_NEXTION_RX2_ID) && pCONT_pins->PinUsed(GPIO_NEXTION_TX2_ID))
+  else if(tkr_pins->PinUsed(GPIO_NEXTION_RX2_ID) && tkr_pins->PinUsed(GPIO_NEXTION_TX2_ID))
   {
     serial_port = 2;
-    rx_pin = pCONT_pins->GetPin(GPIO_NEXTION_RX2_ID);
-    tx_pin = pCONT_pins->GetPin(GPIO_NEXTION_TX2_ID);
+    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX2_ID);
+    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX2_ID);
   }else{
     module_state.mode = ModuleStatus::NoGPIOConfigured;
     return;

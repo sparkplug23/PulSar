@@ -37,6 +37,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
 #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"

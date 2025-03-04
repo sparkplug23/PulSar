@@ -647,7 +647,7 @@
 // //   runtime.ubx_config_status = 0; 
 
 // //   // Check pins for serial have been defined before proceeeding
-// //   if(!(pCONT_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_RX_ID))) {
+// //   if(!(tkr_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_TX_ID)&&tkr_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_RX_ID))) {
 // //     AddLog(LOG_LEVEL_ERROR, PSTR("No gpsPort (Serial1) pins have been set"));
 // //     return;
 // //   }
@@ -664,8 +664,8 @@
 // //   {
 // //     // Begin connection
 // //     //unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms
-// //     ALOG_TST(PSTR("Baud Test %d on TX%d, RX%d"), baud_list[i], pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
-// //     gpsPort.begin(baud_list[i], SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
+// //     ALOG_TST(PSTR("Baud Test %d on TX%d, RX%d"), baud_list[i], tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
+// //     gpsPort.begin(baud_list[i], SERIAL_8N1, tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
 // //     // while(!gpsPort);
 // //     // Send default baud command
 // //     switch(D_GPS_BAUD_RATE_DEFAULT)
@@ -684,14 +684,14 @@
 // //     // Complete transmission
 // //     gpsPort.flush();
 // //     gpsPort.end();
-// //     pinMode(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), OUTPUT); digitalWrite(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), HIGH);
-// //     pinMode(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), OUTPUT); digitalWrite(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), HIGH);
+// //     pinMode(tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), OUTPUT); digitalWrite(tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), HIGH);
+// //     pinMode(tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), OUTPUT); digitalWrite(tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), HIGH);
 // //     // Allow time for the GPS to switch baud speeds
 // //     // delay(500);
 // //   }
 
 // //   // Begin at default speed to start configuring messages
-// //   gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
+// //   gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
 // //   // while(!gpsPort);
 
 // //   /**
@@ -729,7 +729,7 @@
 // //   }
 // //   gpsPort.flush();
 // //   gpsPort.end();
-// //   gpsPort.begin(D_GPS_BAUD_RATE_FAST, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
+// //   gpsPort.begin(D_GPS_BAUD_RATE_FAST, SERIAL_8N1, tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
 // //   // while(!gpsPort);
 
 // //   /**

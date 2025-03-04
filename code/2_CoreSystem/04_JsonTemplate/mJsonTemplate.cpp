@@ -132,7 +132,7 @@ DEBUG_LINE_HERE2
     #endif // ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
 
 DEBUG_LINE_HERE2
-    pCONT_pins->ModuleTemplate__ParseCJSONBuffer(buffer);
+    tkr_pins->ModuleTemplate__ParseCJSONBuffer(buffer);
 DEBUG_LINE_HERE2
     return true;
   #else 

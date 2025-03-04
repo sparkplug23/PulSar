@@ -139,9 +139,9 @@ void mInterfaceLight::Template_Load()
    */
   #ifdef ENABLE_FEATURE_LIGHTING__ENABLE_ALTERANTE_TEMPLATE_USING_GPIO_SWITCH_ONE
 
-  if(pCONT_pins->PinUsed(GPIO_SWT1_INV_ID))
+  if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID))
   {
-    if(pCONT_pins->DigitalRead(GPIO_SWT1_INV_ID)==0) // switch to LOW to activate alternate template
+    if(tkr_pins->DigitalRead(GPIO_SWT1_INV_ID)==0) // switch to LOW to activate alternate template
     {
       template_loaded = true;
           
@@ -1354,9 +1354,9 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
     mqtthandler__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
     JBI->Array_Start("PWM_Channels_Read");
     for (uint8_t i = 0; i < 5; i++) {
-      if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) 
+      if (tkr_pins->PinUsed(GPIO_PWM1_ID, i)) 
       {
-        JBI->Add(analogRead(pCONT_pins->GetPin(GPIO_PWM1_ID, i)));
+        JBI->Add(analogRead(tkr_pins->GetPin(GPIO_PWM1_ID, i)));
       }
     }
     JBI->Array_End();

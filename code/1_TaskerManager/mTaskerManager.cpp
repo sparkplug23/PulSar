@@ -480,6 +480,15 @@ uint8_t mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
   addTasker(new mUltraSonicSensor());
+  #endif  
+  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
+  addTasker(new mTOF_VL53L0X());
+  #endif
+  #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
+  addTasker(new mTOF_VL53L1X());
+  #endif
+  #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  addTasker(new mRadar_HLK_LD2410());
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
   addTasker(new mADCInternal());

@@ -122,7 +122,7 @@ void mDisplaysInterface::Pre_Init(void)
 
   if (tkr_set->Settings.display.model) {
     // tkr_set->runtime.devices_present++;
-    // if (!pCONT_pins->PinUsed(GPIO_BACKLIGHT_ID)) {
+    // if (!tkr_pins->PinUsed(GPIO_BACKLIGHT_ID)) {
     //   if (tkr_set->runtime.light_type && (4 == tkr_set->Settings.display.model)) {
     //     tkr_set->runtime.devices_present--;  // Assume PWM channel is used for backlight
     //   }

@@ -137,7 +137,7 @@ ALOG_ERR(PSTR("HERE WE ARE"));
       
       // ALOG_INF(PSTR("KEY%d %s"), pair_index, key);
 
-      gpio_function_id = pCONT_pins->GetGPIOFunctionIDbyName(key);
+      gpio_function_id = tkr_pins->GetGPIOFunctionIDbyName(key);
 
       ALOG_INF(PSTR("KEY%d>> %s GPIO_ID %d"), pair_index, key, gpio_function_id);
       

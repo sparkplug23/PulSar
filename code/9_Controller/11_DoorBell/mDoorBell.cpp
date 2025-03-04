@@ -25,16 +25,16 @@ void mDoorBell::Pre_Init(void)
 
 
 //should be rewritten to only pull from buttons/relays which are configured internally
-  if(pCONT_pins->PinUsed(GPIO_CHIME_INPUT_ID)) {  // not set when 255
-    pin_doorbell_button = pCONT_pins->GetPin(GPIO_CHIME_INPUT_ID);
+  if(tkr_pins->PinUsed(GPIO_CHIME_INPUT_ID)) {  // not set when 255
+    pin_doorbell_button = tkr_pins->GetPin(GPIO_CHIME_INPUT_ID);
     pinMode(pin_doorbell_button,INPUT_PULLUP);
   }else{
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_doorbell_button);
     //disable pir code
   }
 
-  if(pCONT_pins->PinUsed(GPIO_CHIME_RINGER_ID)) {  // not set when 255
-    pin_relay_chime = pCONT_pins->GetPin(GPIO_CHIME_RINGER_ID);
+  if(tkr_pins->PinUsed(GPIO_CHIME_RINGER_ID)) {  // not set when 255
+    pin_relay_chime = tkr_pins->GetPin(GPIO_CHIME_RINGER_ID);
     pinMode(pin_relay_chime,OUTPUT);
     digitalWrite(pin_relay_chime,HIGH); //active low
   }else{

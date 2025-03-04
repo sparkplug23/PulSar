@@ -79,22 +79,22 @@ void mSensorsDHT::Pre_Init(void){
   settings.fEnableSensor = false;
   settings.sensor_active_count = 0;
   
-  if (pCONT_pins->PinUsed(GPIO_DHT11_1OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT11_1OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT11_1OF2_ID)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT11_1OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
-  if (pCONT_pins->PinUsed(GPIO_DHT11_2OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT11_2OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT11_2OF2_ID)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT11_2OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
-  if (pCONT_pins->PinUsed(GPIO_DHT22_1OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_1OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT22_1OF2_ID)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT22_1OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
@@ -104,8 +104,8 @@ void mSensorsDHT::Pre_Init(void){
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DHT "DHT Sensor 1 not found"));
     // delay(2000);
   }
-  if (pCONT_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_2OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT22_2OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);

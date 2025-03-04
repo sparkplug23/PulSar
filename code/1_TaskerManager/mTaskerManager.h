@@ -40,6 +40,7 @@
   #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
@@ -247,7 +248,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CORE_HARDWAREPINS
   #include "2_CoreSystem/05_HardwarePins/mHardwarePins.h"
-  #define   pCONT_pins                              static_cast<mHardwarePins*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID))
+  #define   tkr_pins                              static_cast<mHardwarePins*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID))
 #endif 
 #ifdef USE_MODULE_CORE_TIME
   #include "2_CoreSystem/07_Time/mTime.h"
@@ -283,7 +284,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 // #endif
 #ifdef USE_MODULE_CORE_I2C
   #include "2_CoreSystem/31_I2C/mI2C.h"
-  #define pCONT_i2c                       static_cast<mI2C*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__I2C__ID))
+  #define tkr_i2c                       static_cast<mI2C*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__I2C__ID))
 #endif
 #ifdef USE_MODULE_CORE_SPI
   #include "2_CoreSystem/32_SPI/mSPI.h"
@@ -505,6 +506,18 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
+#endif
+#ifdef USE_MODULE_SENSORS__TOF_VL53L0X
+  #include "5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.h"
+  #define tkr_tof_vl0x                         static_cast<mTOF_VL53L0X*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__TOF_VL53L0X__ID))
+#endif
+#ifdef USE_MODULE_SENSORS__TOF_VL53L1X
+  #include "5_Sensors/27_TOF_VL53L1X/mTOF_VL53L1X.h"
+  #define tkr_tof_vl1x                         static_cast<mTOF_VL53L1X*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__TOF_VL53L1X__ID))
+#endif
+#ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #include "5_Sensors/28_Radar_HLK_LD2410/mRadar_HLK_LD2410.h"
+  #define tkr_radar_ld2410                     static_cast<mRadar_HLK_LD2410*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__RADAR_HLK_LD2410__ID))
 #endif
 #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
   #include "5_Sensors/30_ADCInternal/mADCInternal.h"

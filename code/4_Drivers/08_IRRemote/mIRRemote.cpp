@@ -105,12 +105,12 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
 void mIRRemote::Pre_Init(void)
 {
   
-  // if (pCONT_pins->PinUsed(GPIO_IRSEND_ID))
+  // if (tkr_pins->PinUsed(GPIO_IRSEND_ID))
   // {
   //   IrSendInit();
   // }
   #ifdef USE_IR_RECEIVE
-  if (pCONT_pins->PinUsed(GPIO_IRRECV_ID)) {
+  if (tkr_pins->PinUsed(GPIO_IRRECV_ID)) {
     IrReceiveInit();
   }
   #endif  // USE_IR_RECEIVE
@@ -213,7 +213,7 @@ char* Uint64toHex(uint64_t value, char *str, uint16_t bits)
 void mIRRemote::IrReceiveInit(void)
 {
   // // an IR led is at GPIO_IRRECV
-  // irrecv = new IRrecv(pCONT_pins->GetPin(GPIO_IRRECV_ID), IR_RCV_BUFFER_SIZE, IR_RCV_TIMEOUT, IR_RCV_SAVE_BUFFER);
+  // irrecv = new IRrecv(tkr_pins->GetPin(GPIO_IRRECV_ID), IR_RCV_BUFFER_SIZE, IR_RCV_TIMEOUT, IR_RCV_SAVE_BUFFER);
   // // irrecv->setUnknownThreshold(Settings->param[P_IR_UNKNOW_THRESHOLD]);
   // // IrReceiveUpdateTolerance();
   // irrecv->enableIRIn();                  // Start the receiver
@@ -1450,7 +1450,7 @@ uint8_t mIRRemote::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
     JBI->Object_Start(D_RFRECEIVED);
   
-      JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
+      JBI->Add("Pin1", tkr_pins->GetPin(GPIO_LED1_ID));
       // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
       // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
       // JBI->Add(D_RF_PULSE, rx_pkt.delay);   

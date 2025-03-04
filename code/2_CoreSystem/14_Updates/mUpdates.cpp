@@ -35,8 +35,8 @@ void mUpdates::init(void)
 void mUpdates::Pre_Init(){
 
 //change this into the fan module
-//   if(pCONT_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255
-//     pin = pCONT_pins->GetPin(GPIO_FAN_SDCARD1_ID);
+//   if(tkr_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255
+//     pin = tkr_pins->GetPin(GPIO_FAN_SDCARD1_ID);
 //     pinMode(pin, OUTPUT);
 //     settings.fEnableModule = true;
 //   }

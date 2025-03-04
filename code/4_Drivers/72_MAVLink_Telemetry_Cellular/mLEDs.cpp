@@ -30,14 +30,14 @@
 
       
 
-//       // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_INV_ID))); 
-//       // digitalWrite(pCONT_pins->GetPin(GPIO_LED2_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED2_INV_ID))); 
-//       // digitalWrite(pCONT_pins->GetPin(GPIO_LED3_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED3_INV_ID))); 
+//       // digitalWrite(tkr_pins->GetPin(GPIO_LED1_INV_ID), !digitalRead(tkr_pins->GetPin(GPIO_LED1_INV_ID))); 
+//       // digitalWrite(tkr_pins->GetPin(GPIO_LED2_INV_ID), !digitalRead(tkr_pins->GetPin(GPIO_LED2_INV_ID))); 
+//       // digitalWrite(tkr_pins->GetPin(GPIO_LED3_INV_ID), !digitalRead(tkr_pins->GetPin(GPIO_LED3_INV_ID))); 
 
 
 //       // EveryLoop();
-//       // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID),!digitalRead(pCONT_pins->GetPin(GPIO_LED1_ID)));
-//       // digitalWrite(pCONT_pins->GetPin(GPIO_LED2_ID),!digitalRead(pCONT_pins->GetPin(GPIO_LED2_ID)));
+//       // digitalWrite(tkr_pins->GetPin(GPIO_LED1_ID),!digitalRead(tkr_pins->GetPin(GPIO_LED1_ID)));
+//       // digitalWrite(tkr_pins->GetPin(GPIO_LED2_ID),!digitalRead(tkr_pins->GetPin(GPIO_LED2_ID)));
 
 //       // SetState
 //     break;
@@ -81,17 +81,17 @@
 //               ii<MAX_LEDS; 
 //               ii++
 //   ){
-//     if(pCONT_pins->PinUsed(GPIO_LED1_ID, ii))
+//     if(tkr_pins->PinUsed(GPIO_LED1_ID, ii))
 //     {
-//       leds[settings.leds_found].pin = pCONT_pins->GetPin(GPIO_LED1_ID, ii);
+//       leds[settings.leds_found].pin = tkr_pins->GetPin(GPIO_LED1_ID, ii);
 //       bitSet(inverted_bitmask, 0);
 //       pinMode(leds[settings.leds_found].pin, OUTPUT); // Note: GPIO16/D0 inversion is pulldown, not up
 //       digitalWrite(leds[settings.leds_found].pin, bitRead(inverted_bitmask, ii));
 //       if(settings.leds_found++ >= MAX_LEDS){ break; }
 //     }else
-//     if(pCONT_pins->PinUsed(GPIO_LED1_INV_ID, ii))
+//     if(tkr_pins->PinUsed(GPIO_LED1_INV_ID, ii))
 //     {
-//       leds[settings.leds_found].pin = pCONT_pins->GetPin(GPIO_LED1_INV_ID, ii);
+//       leds[settings.leds_found].pin = tkr_pins->GetPin(GPIO_LED1_INV_ID, ii);
 //       bitSet(inverted_bitmask, 1);
 //       pinMode(leds[settings.leds_found].pin, OUTPUT); // Note: GPIO16/D0 inversion is pulldown, not up
 //       digitalWrite(leds[settings.leds_found].pin, bitRead(inverted_bitmask, ii));
@@ -117,7 +117,7 @@
 //   SubTask_Status_LEDs();
 
 
-// // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_ID))); delay(200);
+// // digitalWrite(tkr_pins->GetPin(GPIO_LED1_ID), !digitalRead(tkr_pins->GetPin(GPIO_LED1_ID))); delay(200);
 
 //   // if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
 //   //   door_detect.state = IsDoorOpen();
@@ -188,12 +188,12 @@
 
 // void mLEDs::SetLedPowerIdx(uint32_t led, uint32_t state)
 // {
-// //   // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
-// //   //   if (pCONT_pins->PinUsed(GPIO_LED1_ID, 1)) {
+// //   // if (!tkr_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
+// //   //   if (tkr_pins->PinUsed(GPIO_LED1_ID, 1)) {
 // //   //     led = 1;
 // //   //   }
 // //   // }
-// //   if (pCONT_pins->PinUsed(GPIO_LED1_ID, led)) {
+// //   if (tkr_pins->PinUsed(GPIO_LED1_ID, led)) {
 // //     uint32_t mask = 1 << led;
 // //     if (state) {
 // //       state = 1;
@@ -210,11 +210,11 @@
 // // // #endif //USE_LIGHT
 
 // // #ifdef ESP8266
-// //       analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(tkr_set->inverted_bitmask, led) ? tkr_set->Settings.pwm_range - pwm : pwm);
+// //       analogWrite(tkr_pins->Pin(GPIO_LED1_ID, led), bitRead(tkr_set->inverted_bitmask, led) ? tkr_set->Settings.pwm_range - pwm : pwm);
       
 // // #endif // ESP8266
 // //     } else {
-// //       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(tkr_set->inverted_bitmask, led) ? !state : state);
+// //       tkr_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(tkr_set->inverted_bitmask, led) ? !state : state);
 // //     }
 // //   }
 // // // #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
@@ -229,7 +229,7 @@
 //   //   #ifdef ENABLE_LOG_LEVEL_INFO
 //   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
 //   //   #endif// ENABLE_LOG_LEVEL_INFO
-//   // // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
+//   // // if (!tkr_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
 //   // //   SetLedPowerIdx(0, state);
 //   // // } else {
 //   //   power_t mask = 1;
@@ -254,7 +254,7 @@
 // //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
 // //     #endif// ENABLE_LOG_LEVEL_INFO
 
-// //   uint32_t led_pin = pCONT_pins->GetPin(GPIO_LED1_ID);
+// //   uint32_t led_pin = tkr_pins->GetPin(GPIO_LED1_ID);
 // //   uint32_t led_inv = tkr_set->ledlnk_inverted;
 // //   if (99 == led_pin) {                    // Legacy - LED1 is status
 // //     SetLedPowerIdx(0, state);
@@ -334,7 +334,7 @@
 
 
 // //DEBUG_LINE_HERE;
-//   // if (tkr_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(tkr_set->blinks || tkr_set->restart_flag || tkr_set->ota_state_flag)) ) {
+//   // if (tkr_set->Settings.ledstate &1 && (tkr_pins->PinUsed(GPIO_LEDLNK_ID) || !(tkr_set->blinks || tkr_set->restart_flag || tkr_set->ota_state_flag)) ) {
 //   //   bool tstate = tkr_set->power & tkr_set->Settings.ledmask;
 //   //   // if ((MODULE_SONOFF_TOUCH == tkr_set->my_module_type) || 
 //   //   //(MODULE_SONOFF_T11 == tkr_set->my_module_type) || 
@@ -512,10 +512,10 @@
 
 //     // JBI->Object_Start(D_RFRECEIVED);
   
-//       // JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
+//       // JBI->Add("Pin1", tkr_pins->GetPin(GPIO_LED1_ID));
 
-//       JBI->Add("LED1_INV", pCONT_pins->GetPin(GPIO_LED1_INV_ID));
-//       JBI->Add("LED2_INV", pCONT_pins->GetPin(GPIO_LED2_INV_ID));
+//       JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID));
+//       JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID));
 
 //       // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
 //       // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);

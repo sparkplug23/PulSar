@@ -314,12 +314,20 @@ uint8_t VL53L0X::readReg(uint8_t reg)
 {
   uint8_t value;
 
+  // Serial.print("reg: ");
+  // Serial.println(reg, HEX);
+
   Wire.beginTransmission(address);
   Wire.write(reg);
   last_status = Wire.endTransmission();
 
+  // Serial.print("last_status: ");
+  // Serial.println(last_status);
+
   Wire.requestFrom(address, (uint8_t)1);
   value = Wire.read();
+
+  // Serial.printf("%02X value: \n\r", reg, value);
 
   return value;
 }
@@ -791,6 +799,7 @@ void VL53L0X::startContinuous(uint32_t period_ms)
   {
     // continuous back-to-back mode
     writeReg(SYSRANGE_START, 0x02); // VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK
+    Serial.println("startContinuous");
   }
 }
 
@@ -818,6 +827,7 @@ uint16_t VL53L0X::readRangeContinuousMillimeters(void)
     if (checkTimeoutExpired())
     {
       did_timeout = true;
+      Serial.println("readRangeContinuousMillimeters timeout");
       return 65535;
     }
   }
@@ -825,6 +835,8 @@ uint16_t VL53L0X::readRangeContinuousMillimeters(void)
   // assumptions: Linearity Corrective Gain is 1000 (default);
   // fractional ranging is not enabled
   uint16_t range = readReg16Bit(RESULT_RANGE_STATUS + 10);
+
+  Serial.println(range);
 
   writeReg(SYSTEM_INTERRUPT_CLEAR, 0x01);
 

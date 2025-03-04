@@ -96,13 +96,13 @@ void mBME::Pre_Init()
   for (uint8_t i = 0; i < BMP_MAX_SENSORS; i++) 
   {
     
-    if (pCONT_i2c->I2cActive(bmp_addresses[i])) 
+    if (tkr_i2c->I2cActive(bmp_addresses[i])) 
     { 
       ALOG_INF(PSTR(D_LOG_BME "Addr 0x%x not found"), bmp_addresses[i]); 
       continue; 
     }
     
-    uint8_t bmp_type = pCONT_i2c->I2cRead8(bmp_addresses[i], BMP_REGISTER_CHIPID);
+    uint8_t bmp_type = tkr_i2c->I2cRead8(bmp_addresses[i], BMP_REGISTER_CHIPID);
     if (bmp_type) {
       bmp_sensors[bmp_count].i2c_address = bmp_addresses[i];
       bmp_sensors[bmp_count].bmp_type = bmp_type;
@@ -130,13 +130,13 @@ void mBME::Pre_Init()
       }
       if (success) {
         pCONT_sup->GetTextIndexed_P(bmp_sensors[bmp_count].bmp_name, sizeof(bmp_sensors[bmp_count].bmp_name), bmp_sensors[bmp_count].bmp_model, kBmpTypes);
-        pCONT_i2c->I2cSetActiveFound(bmp_sensors[bmp_count].i2c_address, bmp_sensors[bmp_count].bmp_name);
+        tkr_i2c->I2cSetActiveFound(bmp_sensors[bmp_count].i2c_address, bmp_sensors[bmp_count].bmp_name);
         bmp_count++;
       }
     }else{
           
       #ifdef ESP32
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_i2c->wire->getErrorText(pCONT_i2c->wire->lastError()));
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), tkr_i2c->wire->getErrorText(tkr_i2c->wire->lastError()));
       #endif 
 
     }
@@ -229,16 +229,16 @@ bool mBME::Bmp180Calibration(uint8_t bmp_idx)
   }
   if (!bmp180_cal_data) { return false; }
 
-  bmp180_cal_data[bmp_idx].cal_ac1 = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC1);
-  bmp180_cal_data[bmp_idx].cal_ac2 = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC2);
-  bmp180_cal_data[bmp_idx].cal_ac3 = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC3);
-  bmp180_cal_data[bmp_idx].cal_ac4 = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC4);
-  bmp180_cal_data[bmp_idx].cal_ac5 = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC5);
-  bmp180_cal_data[bmp_idx].cal_ac6 = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC6);
-  bmp180_cal_data[bmp_idx].cal_b1  = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_VB1);
-  bmp180_cal_data[bmp_idx].cal_b2  = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_VB2);
-  bmp180_cal_data[bmp_idx].cal_mc  = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_MC);
-  bmp180_cal_data[bmp_idx].cal_md  = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_MD);
+  bmp180_cal_data[bmp_idx].cal_ac1 = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC1);
+  bmp180_cal_data[bmp_idx].cal_ac2 = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC2);
+  bmp180_cal_data[bmp_idx].cal_ac3 = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC3);
+  bmp180_cal_data[bmp_idx].cal_ac4 = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC4);
+  bmp180_cal_data[bmp_idx].cal_ac5 = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC5);
+  bmp180_cal_data[bmp_idx].cal_ac6 = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_AC6);
+  bmp180_cal_data[bmp_idx].cal_b1  = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_VB1);
+  bmp180_cal_data[bmp_idx].cal_b2  = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_VB2);
+  bmp180_cal_data[bmp_idx].cal_mc  = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_MC);
+  bmp180_cal_data[bmp_idx].cal_md  = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_MD);
 
   // Check for Errors in calibration data. Value never is 0x0000 or 0xFFFF
   if (!bmp180_cal_data[bmp_idx].cal_ac1 |
@@ -278,17 +278,17 @@ void mBME::Bmp180Read(uint8_t bmp_idx)
     return; 
   }
 
-  pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_CONTROL, BMP180_TEMPERATURE);
+  tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_CONTROL, BMP180_TEMPERATURE);
   delay(5); // 5ms conversion time
-  int ut = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_RESULT);
+  int ut = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_RESULT);
   int32_t xt1 = (ut - (int32_t)bmp180_cal_data[bmp_idx].cal_ac6) * ((int32_t)bmp180_cal_data[bmp_idx].cal_ac5) >> 15;
   int32_t xt2 = ((int32_t)bmp180_cal_data[bmp_idx].cal_mc << 11) / (xt1 + (int32_t)bmp180_cal_data[bmp_idx].cal_md);
   int32_t bmp180_b5 = xt1 + xt2;
   bmp_sensors[bmp_idx].temperature = ((bmp180_b5 + 8) >> 4) / 10.0f;
 
-  pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_CONTROL, BMP180_PRESSURE3); // Highest resolution
+  tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_CONTROL, BMP180_PRESSURE3); // Highest resolution
   delay(2 + (4 << BMP180_OSS));                                 // 26ms conversion time at ultra high resolution
-  uint32_t up = pCONT_i2c->I2cRead24(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_RESULT);
+  uint32_t up = tkr_i2c->I2cRead24(bmp_sensors[bmp_idx].i2c_address, BMP180_REG_RESULT);
   up >>= (8 - BMP180_OSS);
 
   int32_t b6 = bmp180_b5 - 4000;
@@ -335,34 +335,34 @@ bool mBME::Bmx280Calibrate(uint8_t bmp_idx)
     return false; 
   }
 
-  Bme280CalibrationData[bmp_idx].dig_T1 = pCONT_i2c->I2cRead16LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_T1);
-  Bme280CalibrationData[bmp_idx].dig_T2 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_T2);
-  Bme280CalibrationData[bmp_idx].dig_T3 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_T3);
-  Bme280CalibrationData[bmp_idx].dig_P1 = pCONT_i2c->I2cRead16LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P1);
-  Bme280CalibrationData[bmp_idx].dig_P2 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P2);
-  Bme280CalibrationData[bmp_idx].dig_P3 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P3);
-  Bme280CalibrationData[bmp_idx].dig_P4 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P4);
-  Bme280CalibrationData[bmp_idx].dig_P5 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P5);
-  Bme280CalibrationData[bmp_idx].dig_P6 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P6);
-  Bme280CalibrationData[bmp_idx].dig_P7 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P7);
-  Bme280CalibrationData[bmp_idx].dig_P8 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P8);
-  Bme280CalibrationData[bmp_idx].dig_P9 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P9);
+  Bme280CalibrationData[bmp_idx].dig_T1 = tkr_i2c->I2cRead16LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_T1);
+  Bme280CalibrationData[bmp_idx].dig_T2 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_T2);
+  Bme280CalibrationData[bmp_idx].dig_T3 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_T3);
+  Bme280CalibrationData[bmp_idx].dig_P1 = tkr_i2c->I2cRead16LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P1);
+  Bme280CalibrationData[bmp_idx].dig_P2 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P2);
+  Bme280CalibrationData[bmp_idx].dig_P3 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P3);
+  Bme280CalibrationData[bmp_idx].dig_P4 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P4);
+  Bme280CalibrationData[bmp_idx].dig_P5 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P5);
+  Bme280CalibrationData[bmp_idx].dig_P6 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P6);
+  Bme280CalibrationData[bmp_idx].dig_P7 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P7);
+  Bme280CalibrationData[bmp_idx].dig_P8 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P8);
+  Bme280CalibrationData[bmp_idx].dig_P9 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_P9);
   if (BME280_CHIPID == bmp_sensors[bmp_idx].bmp_type) 
   {  // #1051
-    Bme280CalibrationData[bmp_idx].dig_H1 = pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H1);
-    Bme280CalibrationData[bmp_idx].dig_H2 = pCONT_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H2);
-    Bme280CalibrationData[bmp_idx].dig_H3 = pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H3);
-    Bme280CalibrationData[bmp_idx].dig_H4 = (pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H4) << 4) | (pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H4 + 1) & 0xF);
-    Bme280CalibrationData[bmp_idx].dig_H5 = (pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H5 + 1) << 4) | (pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H5) >> 4);
-    Bme280CalibrationData[bmp_idx].dig_H6 = (int8_t)pCONT_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H6);
-    pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROL, 0x00);      // sleep mode since writes to config can be ignored in normal mode (Datasheet 5.4.5/6 page 27) // Set before CONTROL_meas (DS 5.4.3)
-    pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROLHUMID, 0x01); // 1x oversampling
-    pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONFIG, 0xA0);       // 1sec standby between measurements (to limit self heating), IIR filter off
-    pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROL, 0x27);      // 1x oversampling, normal mode
+    Bme280CalibrationData[bmp_idx].dig_H1 = tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H1);
+    Bme280CalibrationData[bmp_idx].dig_H2 = tkr_i2c->I2cReadS16_LE(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H2);
+    Bme280CalibrationData[bmp_idx].dig_H3 = tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H3);
+    Bme280CalibrationData[bmp_idx].dig_H4 = (tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H4) << 4) | (tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H4 + 1) & 0xF);
+    Bme280CalibrationData[bmp_idx].dig_H5 = (tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H5 + 1) << 4) | (tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H5) >> 4);
+    Bme280CalibrationData[bmp_idx].dig_H6 = (int8_t)tkr_i2c->I2cRead8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_DIG_H6);
+    tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROL, 0x00);      // sleep mode since writes to config can be ignored in normal mode (Datasheet 5.4.5/6 page 27) // Set before CONTROL_meas (DS 5.4.3)
+    tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROLHUMID, 0x01); // 1x oversampling
+    tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONFIG, 0xA0);       // 1sec standby between measurements (to limit self heating), IIR filter off
+    tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROL, 0x27);      // 1x oversampling, normal mode
   } 
   else 
   {
-    pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROL, 0xB7);      // 16x oversampling, normal mode (Adafruit)
+    tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_CONTROL, 0xB7);      // 16x oversampling, normal mode (Adafruit)
   }
 
   return true;
@@ -375,7 +375,7 @@ void mBME::Bme280Read(uint8_t bmp_idx)
     return; 
   }
 
-  int32_t adc_T = pCONT_i2c->I2cRead24(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_TEMPDATA);
+  int32_t adc_T = tkr_i2c->I2cRead24(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_TEMPDATA);
   adc_T >>= 4;
 
   int32_t vart1 = ((((adc_T >> 3) - ((int32_t)Bme280CalibrationData[bmp_idx].dig_T1 << 1))) * ((int32_t)Bme280CalibrationData[bmp_idx].dig_T2)) >> 11;
@@ -385,7 +385,7 @@ void mBME::Bme280Read(uint8_t bmp_idx)
   float T = (t_fine * 5 + 128) >> 8;
   bmp_sensors[bmp_idx].temperature = T / 100.0f;
 
-  int32_t adc_P = pCONT_i2c->I2cRead24(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_PRESSUREDATA);
+  int32_t adc_P = tkr_i2c->I2cRead24(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_PRESSUREDATA);
   adc_P >>= 4;
 
   int64_t var1 = ((int64_t)t_fine) - 128000;
@@ -406,7 +406,7 @@ void mBME::Bme280Read(uint8_t bmp_idx)
 
   if (BMP280_CHIPID == bmp_sensors[bmp_idx].bmp_type) { return; }
 
-  int32_t adc_H = pCONT_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_HUMIDDATA);
+  int32_t adc_H = tkr_i2c->I2cRead16(bmp_sensors[bmp_idx].i2c_address, BME280_REGISTER_HUMIDDATA);
 
   int32_t v_x1_u32r = (t_fine - ((int32_t)76800));
   v_x1_u32r = (((((adc_H << 14) - (((int32_t)Bme280CalibrationData[bmp_idx].dig_H4) << 20) -
@@ -434,12 +434,12 @@ void mBME::Bme68x_Delayus(uint32_t period, void *intf_ptr) {
 
 int8_t Bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
   uint8_t dev_addr = *(uint8_t*)intf_ptr;
-  return pCONT_i2c->I2cReadBuffer(dev_addr, reg_addr, reg_data, (uint16_t)len);
+  return tkr_i2c->I2cReadBuffer(dev_addr, reg_addr, reg_data, (uint16_t)len);
 }
 
 int8_t Bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
   uint8_t dev_addr = *(uint8_t*)intf_ptr;
-  return pCONT_i2c->I2cWriteBuffer(dev_addr, reg_addr, (uint8_t *)reg_data, (uint16_t)len);
+  return tkr_i2c->I2cWriteBuffer(dev_addr, reg_addr, (uint8_t *)reg_data, (uint16_t)len);
 }
 
 bool mBME::Bme680Init(uint8_t bmp_idx) {
@@ -535,7 +535,7 @@ void mBME::BMP_EnterSleep(void)
         case BMP180_CHIPID:
         case BMP280_CHIPID:
         case BME280_CHIPID:
-          pCONT_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BMP_REGISTER_RESET, BMP_CMND_RESET);
+          tkr_i2c->I2cWrite8(bmp_sensors[bmp_idx].i2c_address, BMP_REGISTER_RESET, BMP_CMND_RESET);
           break;
         default:
           break;

@@ -117,21 +117,21 @@ void mPWM::Pre_Init(void)
 {
 
   // if(
-  //   pCONT_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID) && 
-  //   pCONT_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1_ID)
+  //   tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID) && 
+  //   tkr_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1_ID)
   // ){
 
-  //   if(pCONT_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID))
+  //   if(tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID))
   //   {
-  //     pinMode(pCONT_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID), INPUT);
+  //     pinMode(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID), INPUT);
   //   }
     
   for(uint8_t i=0;i<MAX_PWM_PINS;i++)
   {
-    if(pCONT_pins->PinUsed(GPIO_PWM1_ID,i))
+    if(tkr_pins->PinUsed(GPIO_PWM1_ID,i))
     {
-      pinMode(pCONT_pins->GetPin(GPIO_PWM1_ID,i), OUTPUT);   // This should be changed to configure the analog module, and then just read/return from it
-      pwm[i].pin = pCONT_pins->GetPin(GPIO_PWM1_ID,i);
+      pinMode(tkr_pins->GetPin(GPIO_PWM1_ID,i), OUTPUT);   // This should be changed to configure the analog module, and then just read/return from it
+      pwm[i].pin = tkr_pins->GetPin(GPIO_PWM1_ID,i);
 
     }
   }
@@ -153,7 +153,7 @@ void mPWM::Init(void)
    */
   for(uint8_t i=0;i<MAX_PWM_PINS;i++)
   {
-    if(pCONT_pins->PinUsed(GPIO_PWM1_ID,i))
+    if(tkr_pins->PinUsed(GPIO_PWM1_ID,i))
     {
       pwm[i].blended_value = new LinearBlendVariable<uint16_t>(1, BLEND_DATA_MILLISECONDS);
     }
@@ -187,7 +187,7 @@ void mPWM::EveryLoop(void)
    */
   for(uint8_t i=0;i<MAX_PWM_PINS;i++)
   {
-    if(pCONT_pins->PinUsed(GPIO_PWM1_ID,i))
+    if(tkr_pins->PinUsed(GPIO_PWM1_ID,i))
     {
       analogWrite(pwm[i].pin, pwm[i].blended_value->GetValue());
     }
@@ -200,11 +200,11 @@ void mPWM::EveryLoop(void)
 void mPWM::EverySecond(void)
 {
 
-  // ldr[0].analog_reading  = analogRead(pCONT_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
-  // ldr[0].digital_reading = digitalRead(pCONT_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
+  // ldr[0].analog_reading  = analogRead(tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
+  // ldr[0].digital_reading = digitalRead(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
 
-  // ALOG_TST(PSTR("ldr[0].analog_reading =%d %d"), ldr[0].analog_reading, pCONT_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
-  // ALOG_TST(PSTR("ldr[0].digital_reading =%d %d"), ldr[0].digital_reading, pCONT_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
+  // ALOG_TST(PSTR("ldr[0].analog_reading =%d %d"), ldr[0].analog_reading, tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
+  // ALOG_TST(PSTR("ldr[0].digital_reading =%d %d"), ldr[0].digital_reading, tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
 
   // for(uint8_t i=0;i<MAX_PWM_PINS;i++)
   // {

@@ -100,7 +100,7 @@ void mBH1750::Init(void)
   for (uint32_t i = 0; i < sizeof(i2c_addresses); i++) 
   {
 
-    if (pCONT_i2c->I2cActive(i2c_addresses[i])) { continue; }
+    if (tkr_i2c->I2cActive(i2c_addresses[i])) { continue; }
 
     device_data[module_state.devices].address = i2c_addresses[i];
 
@@ -165,9 +165,9 @@ bool mBH1750::Set_Resolution_Mode(uint8_t sensor_id, uint8_t resolution_mode)
   uint8_t command = Get_Resolution_RegisterValue(resolution_mode);
   
   // Transmit the command byte to the sensor
-  pCONT_i2c->wire->beginTransmission(device_data[sensor_id].address);
-  pCONT_i2c->wire->write(command);
-  return (!pCONT_i2c->wire->endTransmission());
+  tkr_i2c->wire->beginTransmission(device_data[sensor_id].address);
+  tkr_i2c->wire->write(command);
+  return (!tkr_i2c->wire->endTransmission());
 }
 
 
@@ -177,16 +177,16 @@ bool mBH1750::Set_MeasurementTimeRegister(uint8_t sensor_id, uint8_t mtreg)
   device_data[sensor_id].mtreg = mtreg;
 
   // Transmit high bits of mtreg
-  pCONT_i2c->wire->beginTransmission(device_data[sensor_id].address);
+  tkr_i2c->wire->beginTransmission(device_data[sensor_id].address);
   uint8_t data_high = BH1750_MEASUREMENT_TIME_HIGH | ((device_data[sensor_id].mtreg >> 5) & 0x07);
-  pCONT_i2c->wire->write(data_high);
-  if (pCONT_i2c->wire->endTransmission()) { return false; }
+  tkr_i2c->wire->write(data_high);
+  if (tkr_i2c->wire->endTransmission()) { return false; }
 
   // Transmit low bits of mtreg
-  pCONT_i2c->wire->beginTransmission(device_data[sensor_id].address);
+  tkr_i2c->wire->beginTransmission(device_data[sensor_id].address);
   uint8_t data_low = BH1750_MEASUREMENT_TIME_LOW | (device_data[sensor_id].mtreg & 0x1F);
-  pCONT_i2c->wire->write(data_low);
-  if (pCONT_i2c->wire->endTransmission()) { return false; }
+  tkr_i2c->wire->write(data_low);
+  if (tkr_i2c->wire->endTransmission()) { return false; }
 
   // Reapply the resolution mode after setting the measurement time
   return Set_Resolution_Mode(sensor_id, device_data[sensor_id].resolution_mode);
@@ -199,12 +199,12 @@ bool mBH1750::Get_SensorReading(uint8_t sensor_index)
 
   if (device_data[sensor_index].valid) { device_data[sensor_index].valid--; }
 
-  if (2 != pCONT_i2c->wire->requestFrom(device_data[sensor_index].address, (uint8_t)2)) 
+  if (2 != tkr_i2c->wire->requestFrom(device_data[sensor_index].address, (uint8_t)2)) 
   { 
     return false;
   }
 
-  float level = (pCONT_i2c->wire->read() << 8) | pCONT_i2c->wire->read();
+  float level = (tkr_i2c->wire->read() << 8) | tkr_i2c->wire->read();
   float illuminance = level;
   Serial.println(level);
   illuminance /= (1.2 * (69 / (float)device_data[sensor_index].mtreg));

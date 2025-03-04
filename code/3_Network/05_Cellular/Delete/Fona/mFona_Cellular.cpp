@@ -61,8 +61,8 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case TASK_EVERY_FIVE_SECOND:{
 
-      ALOG_INF( PSTR("PS:%d"), digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) );
-      ALOG_INF( PSTR("RI:%d"), digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)) );
+      ALOG_INF( PSTR("PS:%d"), digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) );
+      ALOG_INF( PSTR("RI:%d"), digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)) );
 
       connection.rssi_dBm = CommandGet_RSSI_dBm();
 
@@ -143,14 +143,14 @@ void mFona_Cellular::Pre_Init(void)
   // Use this one for FONA 3G
   //Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
 
-  if(pCONT_pins->PinUsed(GPIO_FUNCTION__FONA_RING_INDICATOR__ID))
+  if(tkr_pins->PinUsed(GPIO_FUNCTION__FONA_RING_INDICATOR__ID))
   {
-    pinMode(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID), INPUT);
+    pinMode(tkr_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID), INPUT);
   }
 
-  if(pCONT_pins->PinUsed(GPIO_FUNCTION__FONA_POWER_KEY__ID))
+  if(tkr_pins->PinUsed(GPIO_FUNCTION__FONA_POWER_KEY__ID))
   {
-    pinMode(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_KEY__ID), OUTPUT);
+    pinMode(tkr_pins->GetPin(GPIO_FUNCTION__FONA_POWER_KEY__ID), OUTPUT);
   }
 
   connection.standy_mode_id = 0;
@@ -225,10 +225,10 @@ void mFona_Cellular::Init(void)
 
 
 
-  if(pCONT_pins->PinUsed(GPIO_FUNCTION__FONA_RING_INDICATOR__ID))
+  if(tkr_pins->PinUsed(GPIO_FUNCTION__FONA_RING_INDICATOR__ID))
   {
-    // pinMode(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID), INPUT);
-    attachInterrupt(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID), ISR_Ring_Indicator_Triggered_2, CHANGE);
+    // pinMode(tkr_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID), INPUT);
+    attachInterrupt(tkr_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID), ISR_Ring_Indicator_Triggered_2, CHANGE);
 
   }
 
@@ -1200,9 +1200,9 @@ int8_t mFona_Cellular::CommandGet_RSSI_dBm()
 bool mFona_Cellular::CommandSet_Power()
 {
   
-  ALOG_INF( PSTR("CommandSet_Power PS:%d"), digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) );
+  ALOG_INF( PSTR("CommandSet_Power PS:%d"), digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) );
 
-  if(digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) == 1)
+  if(digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) == 1)
   {
 
 
@@ -1238,7 +1238,7 @@ uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_append
 
     // JBI->Object_Start(D_RFRECEIVED);
   
-    //   JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
+    //   JBI->Add("Pin1", tkr_pins->GetPin(GPIO_LED1_ID));
     //   // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
     //   // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
     //   // JBI->Add(D_RF_PULSE, rx_pkt.delay);   
@@ -1252,13 +1252,13 @@ uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_append
 
 
     JBI->Object_Start("GPIO_State");
-      JBI->Add("Key", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_KEY__ID)));
-      JBI->Add("PS", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)));
-      JBI->Add("NS", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_NETWORK_STATUS__ID)));
-      JBI->Add("RST", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RESET__ID)));
-      // JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_UART_TX__ID)));
-      // JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_UART_RX__ID)));
-      JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)));
+      JBI->Add("Key", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_POWER_KEY__ID)));
+      JBI->Add("PS", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)));
+      JBI->Add("NS", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_NETWORK_STATUS__ID)));
+      JBI->Add("RST", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_RESET__ID)));
+      // JBI->Add("RI", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_UART_TX__ID)));
+      // JBI->Add("RI", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_UART_RX__ID)));
+      JBI->Add("RI", digitalRead(tkr_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)));
     JBI->Object_End();
   
   

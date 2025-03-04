@@ -99,7 +99,7 @@ const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
 //     int8_t gpio_pin_index_location = GetPinIndexedLocation(gpio_pin_number);
 //     if(gpio_pin_index_location>=0) // Valid pin option
 //     {
-//         pCONT_pins->pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
+//         tkr_pins->pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
 //     }
 // }
 // #else

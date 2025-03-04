@@ -159,8 +159,8 @@ void mOLED_SSD1306::InitDriver(void)
       tkr_set->Settings.display.height = 64;
     }
 
-    oled1306 = new Adafruit_SSD1306(tkr_set->Settings.display.width, tkr_set->Settings.display.height, pCONT_i2c->wire, pCONT_pins->Pin(GPIO_OLED_RESET_ID));
-    oled1306->begin(SSD1306_SWITCHCAPVCC, tkr_set->Settings.display.address[0], pCONT_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
+    oled1306 = new Adafruit_SSD1306(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire, tkr_pins->Pin(GPIO_OLED_RESET_ID));
+    oled1306->begin(SSD1306_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
     pCONT_iDisp->renderer = oled1306;
     pCONT_iDisp->renderer->DisplayInit(pCONT_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
     pCONT_iDisp->renderer->setTextColor(1,0);

@@ -453,7 +453,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       #endif // ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
 
       #ifdef ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
-      if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+      if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID)&&tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
       {
         char mqtt_data[300];
         pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));

@@ -79,7 +79,7 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
 
   JBI->Start();
     JBI->Add(PM_MODULENAME,     tkr_set->Settings.system_name.friendly);
-    JBI->Add_P(PM_FRIENDLYNAME,   pCONT_pins->ModuleName()); 
+    JBI->Add_P(PM_FRIENDLYNAME,   tkr_pins->ModuleName()); 
     JBI->Add(PM_ROOMHINT, tkr_set->Settings.room_hint);
 
     JBI->Add(PM_POWER,          tkr_set->runtime.power); 
@@ -408,15 +408,15 @@ uint8_t mTelemetry::ConstructJSON_Debug_Devices(uint8_t json_level, bool json_ap
     JBI->Add("ItemCount", count);
 
     
-    if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+    if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID)&&tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
     {
 
       #ifdef ESP32
-      JBI->Add("I2C_BusSpeed", pCONT_i2c->wire->getClock());
+      JBI->Add("I2C_BusSpeed", tkr_i2c->wire->getClock());
       #endif
 
       char mqtt_data[300];
-      pCONT_i2c->I2cScan(mqtt_data, sizeof(mqtt_data));
+      tkr_i2c->I2cScan(mqtt_data, sizeof(mqtt_data));
       // Serial.println(mqtt_data);
 
       //need to escape option to function above
@@ -512,24 +512,24 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
 
   char buffer[30];
   JBI->Start();
-  JBI->Add("flag_serial_set_tx_set",pCONT_pins-> flag_serial_set_tx_set);
+  JBI->Add("flag_serial_set_tx_set",tkr_pins-> flag_serial_set_tx_set);
     // JBI->Object_Start(PM_GPIO);
     // for(uint16_t i=0;i<sizeof(tkr_set->pin);i++){ 
-    //   if(pCONT_pins->PinUsed(i)){ // skip pins not configured
+    //   if(tkr_pins->PinUsed(i)){ // skip pins not configured
     //     sprintf_P(buffer, PSTR("TASK_%d"), i);
-    //     JBI->Add(buffer, pCONT_pins->GetPin(i));
+    //     JBI->Add(buffer, tkr_pins->GetPin(i));
     //   }
     // }
     // JBI->Object_End();
 
 
     JBI->Object_Start(PM_GPIO);
-    for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
+    for(uint16_t i=0;i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
     {
-      if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i]))
+      if(tkr_pins->PinUsed(tkr_pins->pin_attached_gpio_functions[i]))
       {
-        sprintf_P(buffer, PSTR("%s"), pCONT_pins->GetGPIOFunctionNamebyID(pCONT_pins->pin_attached_gpio_functions[i], buffer, sizeof(buffer)));
-        JBI->Add(buffer, pCONT_pins->GetPin(pCONT_pins->pin_attached_gpio_functions[i]));
+        sprintf_P(buffer, PSTR("%s"), tkr_pins->GetGPIOFunctionNamebyID(tkr_pins->pin_attached_gpio_functions[i], buffer, sizeof(buffer)));
+        JBI->Add(buffer, tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i]));
       }
     }    
     JBI->Object_End();
@@ -542,14 +542,14 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     //   gpio_pin_by_index[i]
     //   //  i
     //    );
-    //   JBI->Add(buffer, pCONT_pins->GetPin(i));
+    //   JBI->Add(buffer, tkr_pins->GetPin(i));
     // }
     // JBI->Object_End();
 
     // Debug by printing all arrays out
     JBI->Array_Start("pin_attached_gpio_functions");
-    for(int i=0; i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
-      JBI->Add(pCONT_pins->pin_attached_gpio_functions[i]);
+    for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
+      JBI->Add(tkr_pins->pin_attached_gpio_functions[i]);
     JBI->Array_End();
 
     JBI->Array_Start("user_template_io");
@@ -558,11 +558,11 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     JBI->Array_End();
 
     JBI->Array_Start("getpin");
-    for(int i=0; i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
+    for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
     {
 // DEBUG_LINE_HERE;
       JBI->Add(
-        pCONT_pins->GetPin(pCONT_pins->pin_attached_gpio_functions[i])
+        tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i])
         
         
         );
@@ -591,11 +591,11 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_a
       JBI->Add("Rules",              tkr_set->runtime.template_loading.status.rules);
     JBI->Object_End();
 
-    JBI->Add_P(PM_MODULENAME, pCONT_pins->AnyModuleName(tkr_set->Settings.module));
+    JBI->Add_P(PM_MODULENAME, tkr_pins->AnyModuleName(tkr_set->Settings.module));
     JBI->Add(PM_MODULEID,   tkr_set->Settings.module);
     JBI->Add("MyModuleType",tkr_set->runtime.my_module_type);
     myio cmodule;
-    pCONT_pins->TemplateGPIOs(&cmodule);
+    tkr_pins->TemplateGPIOs(&cmodule);
     // JBI->Array_AddArray(PM_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));
     JBI->Array_Start_P(PM_GPIO);
     for(int i=0;i<ARRAY_SIZE(cmodule.io);i++)

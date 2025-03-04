@@ -313,8 +313,8 @@ ff ff ff ff 11
 void mUserMod_01::Pre_Init(){
   
   // #ifndef ENABLE_DEVFEATURE_FANTYPE_IFAN03
-  // if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
-  //   pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
+  // if(tkr_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
+  //   pin = tkr_pins->GetPin(GPIO_FAN_PWM1_ID);
   //   pinMode(pin, OUTPUT);
   //   Serial.println("PIMODE HERE ");
   //   Serial.println(pin);

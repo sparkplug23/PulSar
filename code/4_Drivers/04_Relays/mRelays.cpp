@@ -106,7 +106,7 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
 
   for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
-    pCONT_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+    tkr_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
 }
 
@@ -209,8 +209,8 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }else{
           gpio_pin = GPIO_REL1_ID;
         }
-        pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-        // pCONT_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+        tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+        // tkr_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
       port += port_next;                          // Select next relay
       rpower >>= 1;                               // Select next power
@@ -238,8 +238,8 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
             gpio_pin = GPIO_REL1_ID;
           }
           power_t state = rpower &1;
-          pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-          // pCONT_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
+          tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+          // tkr_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
         }
       }
     }
@@ -619,16 +619,16 @@ void mRelays::Pre_Init(void){
   // Lets check each type on their own, normal, inverted etc
   for(uint8_t driver_index=0; driver_index<MAX_RELAYS; driver_index++)
   {
-    if(pCONT_pins->PinUsed(GPIO_REL1_ID, driver_index))
+    if(tkr_pins->PinUsed(GPIO_REL1_ID, driver_index))
     {
-      uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_ID, driver_index);
       pinMode(pin_number, OUTPUT);
       rt.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
     }else
-    if(pCONT_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
+    if(tkr_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
     {
-      uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV_ID, driver_index);
       pinMode(pin_number, OUTPUT);
       bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
       rt.devices_present++;

@@ -624,10 +624,10 @@ void mSDCard::init(void)
   int8_t mosi = -1;
   int8_t miso = -1;
 
-  chip_select = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO_ID);
-  clock = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK_ID);
-  mosi = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI_ID);
-  miso = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO_ID);
+  chip_select = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO_ID);
+  clock = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK_ID);
+  mosi = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI_ID);
+  miso = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO_ID);
   
   uint8_t sd_hardware_type = 0;
 

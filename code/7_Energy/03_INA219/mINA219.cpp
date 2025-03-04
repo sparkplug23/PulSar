@@ -62,13 +62,13 @@ void mEnergyINA219::Init(void)
 
   for (uint32_t i = 0; i < ARRAY_SIZE(ina219_addresses); i++) {
     uint16_t addr = ina219_addresses[i];
-    if (pCONT_i2c->I2cActive(addr)) 
+    if (tkr_i2c->I2cActive(addr)) 
     { 
       ALOG_INF(PSTR(D_LOG_INA219 "Addr 0x%x not found"), addr); 
       continue; 
     }
     if (SetCalibration(ina219_mode, addr)) {
-      pCONT_i2c->I2cSetActiveFound_P(addr, GetModuleName());
+      tkr_i2c->I2cSetActiveFound_P(addr, GetModuleName());
       // Create new sensor
       sensor.push_back(sensor_data_s());
       sensor[module_state.devices].address = addr;
@@ -141,7 +141,7 @@ void mEnergyINA219::ReadSensor()
 float mEnergyINA219::GetShuntVoltage_mV(uint16_t addr)
 {
   // raw shunt voltage (16-bit signed integer, so +-32767)
-  int16_t value = pCONT_i2c->I2cReadS16(addr, INA219_REG_SHUNTVOLTAGE);
+  int16_t value = tkr_i2c->I2cReadS16(addr, INA219_REG_SHUNTVOLTAGE);
   // //DEBUG_SENSOR_LOG("GetShuntVoltage_mV: ShReg = 0x%04X",value);
   // // convert to shunt voltage in mV (so +-327mV) (LSB=10µV=0.01mV)
   return value * 0.01;
@@ -154,7 +154,7 @@ float mEnergyINA219::GetBusVoltage_mV(uint16_t addr){
 float mEnergyINA219::GetBusVoltage_V(uint16_t addr)
 {
   // Shift 3 to the right to drop CNVR and OVF as unsigned
-  uint16_t value = pCONT_i2c->I2cRead16(addr, INA219_REG_BUSVOLTAGE) >> 3;
+  uint16_t value = tkr_i2c->I2cRead16(addr, INA219_REG_BUSVOLTAGE) >> 3;
   //ALOG_DBG( PSTR("GetBusVoltage_V: BusReg = 0x%04X"),value);
   // and multiply by LSB raw bus voltage to return bus voltage in volts (LSB=4mV=0.004V)
   return value * 0.004;
@@ -171,10 +171,10 @@ float mEnergyINA219::GetCurrent_mA(uint16_t addr)
   ina219_currentDivider_mA = 10; // Current LSB = 100uA per bit (1000/100 = 10)
   ina219_powerMultiplier_mW = 2; // Power LSB = 1mW per bit (2/1)
  
- pCONT_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
+ tkr_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
   // Now we can safely read the CURRENT register!
   // raw current value (16-bit signed integer, so +-32767)
-  float value = pCONT_i2c->I2cReadS16(addr, INA219_REG_CURRENT);
+  float value = tkr_i2c->I2cReadS16(addr, INA219_REG_CURRENT);
   value /= ina219_currentDivider_mA;
   // current value in mA, taking into account the config settings and current LSB
   return value;
@@ -191,10 +191,10 @@ float mEnergyINA219::GetPower_mW(uint16_t addr)
   ina219_currentDivider_mA = 10; // Current LSB = 100uA per bit (1000/100 = 10)
   ina219_powerMultiplier_mW = 2; // Power LSB = 1mW per bit (2/1)
  
- pCONT_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
+ tkr_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
   // Now we can safely read the CURRENT register!
   // raw current value (16-bit signed integer, so +-32767)
-  float value = pCONT_i2c->I2cReadS16(addr, INA219_REG_POWER);
+  float value = tkr_i2c->I2cReadS16(addr, INA219_REG_POWER);
   value *= ina219_powerMultiplier_mW;
   // current value in mA, taking into account the config settings and current LSB
   return value;
@@ -239,7 +239,7 @@ bool mEnergyINA219::SetCalibration(uint8_t mode, uint16_t addr)
          | INA219_CONFIG_SADCRES_12BIT_16S_8510US   // use averaging to improve accuracy
          | INA219_CONFIG_MODE_SANDBVOLT_CONTINUOUS;
   // Set Config register to take into account the settings above
-  return pCONT_i2c->I2cWrite16(addr, INA219_REG_CONFIG, config);
+  return tkr_i2c->I2cWrite16(addr, INA219_REG_CONFIG, config);
 }
 /*!
  *  @brief  Configures to INA219 to be able to measure up to 32V and 2A

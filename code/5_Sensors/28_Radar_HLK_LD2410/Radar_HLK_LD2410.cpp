@@ -358,9 +358,9 @@ bool Xsns77(uint32_t function) {
 //   // Lets check each type on their own, normal, inverted etc
 //   for(uint8_t sensor_index=0; sensor_index<MAX_KEYS; sensor_index++)
 //   {
-//     if(pCONT_pins->PinUsed(GPIO_KEY1_ID, sensor_index))
+//     if(tkr_pins->PinUsed(GPIO_KEY1_ID, sensor_index))
 //     {
-//       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_ID, sensor_index);
+//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_ID, sensor_index);
 
 //       // THIS (buttons[settings.buttons_found].pin == 16) ? INPUT_PULLDOWN_16 : INPUT_PULLUP needs moved into a function, since it differs by esp8266 and esp32?
 //       pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)); // Note: GPIO16/D0 inversion is pulldown, not up
@@ -376,32 +376,32 @@ bool Xsns77(uint32_t function) {
 //       //  state = (digitalRead(buttons[settings.buttons_found].pin) != 
 //       //  bitRead(key_inverted, button_index));
     
-//         // (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,sensor_index)) != bitRead(key_inverted, sensor_index));
+//         // (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID,sensor_index)) != bitRead(key_inverted, sensor_index));
       
       
 //       if(settings.buttons_found++ >= MAX_KEYS){ break; }
 //     }else
-//     if(pCONT_pins->PinUsed(GPIO_KEY1_INV_ID, sensor_index))
+//     if(tkr_pins->PinUsed(GPIO_KEY1_INV_ID, sensor_index))
 //     {
-//       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_INV_ID, sensor_index);
+//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_INV_ID, sensor_index);
 //       pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin));
 //       SetInvertFlag(sensor_index); 
 //       buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;
 //       buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
 //       if(settings.buttons_found++ >= MAX_KEYS){ break; }
 //     }else
-//     if(pCONT_pins->PinUsed(GPIO_KEY1_NP_ID, sensor_index))
+//     if(tkr_pins->PinUsed(GPIO_KEY1_NP_ID, sensor_index))
 //     {
-//       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_NP_ID, sensor_index);
+//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_NP_ID, sensor_index);
 //       pinMode(buttons[settings.buttons_found].pin, INPUT);
 //       SetPullupFlag(sensor_index); 
 //       buttons[settings.buttons_found].active_state_value = HIGH; 
 //       buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;  
 //       if(settings.buttons_found++ >= MAX_KEYS){ break; }
 //     }else
-//     if(pCONT_pins->PinUsed(GPIO_KEY1_INV_NP_ID, sensor_index))
+//     if(tkr_pins->PinUsed(GPIO_KEY1_INV_NP_ID, sensor_index))
 //     {
-//       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_INV_NP_ID, sensor_index);
+//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_INV_NP_ID, sensor_index);
 //       pinMode(buttons[settings.buttons_found].pin, INPUT);
 //       SetPullupFlag(sensor_index); 
 //       SetInvertFlag(sensor_index); 
@@ -416,14 +416,14 @@ bool Xsns77(uint32_t function) {
 
 //   // buttons_found = 0;
 //   // for (uint8_t i = 0; i < MAX_KEYS; i++) {
-//   //   if (pCONT_pins->PinUsed(GPIO_KEY1_ID,i)) {
+//   //   if (tkr_pins->PinUsed(GPIO_KEY1_ID,i)) {
 //   //     buttons_found++;
 //   //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
-//   //     pinMode(pCONT_pins->GetPin(GPIO_KEY1_ID,i), 
-//   //       bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
+//   //     pinMode(tkr_pins->GetPin(GPIO_KEY1_ID,i), 
+//   //       bitRead(key_no_pullup, i) ? INPUT : ((16 == tkr_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
         
 //   //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
-//   //     bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
+//   //     bitRead(key_no_pullup, i) ? INPUT : ((16 == tkr_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
 //   //     );
 //   //   }
 //   // }
@@ -489,13 +489,13 @@ bool Xsns77(uint32_t function) {
 // //     state = BUTTON_NOT_PRESSED_ID;
 // //     button_present = 0;
 
-// //     if (pCONT_pins->PinUsed(GPIO_KEY1_ID, button_index)) {
+// //     if (tkr_pins->PinUsed(GPIO_KEY1_ID, button_index)) {
 // //       button_present = 1;
-// //       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,button_index)) != bitRead(key_inverted, button_index));
+// //       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID,button_index)) != bitRead(key_inverted, button_index));
 // //     }else
-// //     if (pCONT_pins->PinUsed(GPIO_KEY1_INV_ID, button_index)) {
+// //     if (tkr_pins->PinUsed(GPIO_KEY1_INV_ID, button_index)) {
 // //       button_present = 1;
-// //       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
+// //       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
 // //     }
 
 // //     // AddLog(LOG_LEVEL_DEV_TEST, PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].last_state);
@@ -682,7 +682,7 @@ bool Xsns77(uint32_t function) {
 //     uint8_t state = BUTTON_NOT_PRESSED_ID;
 //     uint8_t button_present = 0;
 
-// //     if (pCONT_pins->PinUsed(GPIO_KEY1_ID, id)) {
+// //     if (tkr_pins->PinUsed(GPIO_KEY1_ID, id)) {
 // //       button_present = 1;
 // // // #ifdef ESP32
 // // // #ifndef CONFIG_IDF_TARGET_ESP32C3
@@ -709,17 +709,17 @@ bool Xsns77(uint32_t function) {
 // // // #endif  // not ESP32C3
 // // // #endif  // ESP32
 // //       {                                                 // Normal button
-// //         state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID, id)) != bitRead(Button.inverted_mask, id));
+// //         state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID, id)) != bitRead(Button.inverted_mask, id));
 // //       }
 // //     }
     
-//     if (pCONT_pins->PinUsed(GPIO_KEY1_ID, id)) {
+//     if (tkr_pins->PinUsed(GPIO_KEY1_ID, id)) {
 //       button_present = 1;
-//       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,id)) != bitRead(key_inverted, id));
+//       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID,id)) != bitRead(key_inverted, id));
 //     }else
-//     if (pCONT_pins->PinUsed(GPIO_KEY1_INV_ID, id)) {
+//     if (tkr_pins->PinUsed(GPIO_KEY1_INV_ID, id)) {
 //       button_present = 1;
-//       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,id)) != bitRead(key_inverted, id));
+//       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_INV_ID,id)) != bitRead(key_inverted, id));
 //     }
 
     

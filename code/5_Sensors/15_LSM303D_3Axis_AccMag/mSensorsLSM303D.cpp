@@ -80,7 +80,7 @@ void mSensorsLSM303D::Pre_Init()
   /**
    * Arm sensor (with gyro): Keep +-2 range on mag
    * */
-  sensor[0].lsm303d = new LSM303(pCONT_i2c->wire, I2C_ADDRESS_LSM303D_ARM);
+  sensor[0].lsm303d = new LSM303(tkr_i2c->wire, I2C_ADDRESS_LSM303D_ARM);
   sensor[0].lsm303d->init(LSM303::device_D, LSM303::sa0_high); //pulled high is defualt address
   ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_ARM, 0);
   sensor[0].lsm303d->enableDefault();
@@ -94,7 +94,7 @@ void mSensorsLSM303D::Pre_Init()
   /**
    * Leg sensor (withOUT gyro): Extended range of +-4
    * */
-  sensor[1].lsm303d = new LSM303(pCONT_i2c->wire, I2C_ADDRESS_LSM303D_LEG);
+  sensor[1].lsm303d = new LSM303(tkr_i2c->wire, I2C_ADDRESS_LSM303D_LEG);
   sensor[1].lsm303d->init(LSM303::device_D, LSM303::sa0_low); //pulled high is defualt address
   ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_LEG, 0);
   sensor[1].lsm303d->enableDefault();
@@ -125,7 +125,7 @@ void mSensorsLSM303D::Pre_Init()
 
 //   uint8_t addresses[] = {I2C_ADDRESS_LSM303D_1, I2C_ADDRESS_LSM303D_2};
 
-//   if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+//   if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
 //   {
 
 //     for(int i=0;i<sizeof(addresses);i++)
@@ -133,7 +133,7 @@ void mSensorsLSM303D::Pre_Init()
     
 //       if(pCONT_sup->I2cDevice(addresses[i]))
 //       {
-//         sensor[settings.fSensorCount].lsm303d = new LSM303(pCONT_i2c->wire, addresses[i]);
+//         sensor[settings.fSensorCount].lsm303d = new LSM303(tkr_i2c->wire, addresses[i]);
 //         // if(sensor[settings.fSensorCount].lsm303d->init_addressed(addresses[i]))  // should not be needed if the address is correctly within wire
 //         // if(sensor[settings.fSensorCount].lsm303d->init())  // should not be needed if the address is correctly within wire
 //         if(sensor[settings.fSensorCount].lsm303d->init(LSM303::device_D, i?LSM303::sa0_low:LSM303::sa0_high))  // should not be needed if the address is correctly within wire

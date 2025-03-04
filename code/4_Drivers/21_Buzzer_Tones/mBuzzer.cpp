@@ -41,7 +41,7 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
       // ALOG_TST(PSTR("pinMode %d"),Buzzer.pin);
       // digitalWrite(Buzzer.pin, !digitalRead(Buzzer.pin));
 
-      // ALOG_INF(PSTR("PinUsed = %d"), pCONT_pins->PinUsed(GPIO_BUZZER_ID));
+      // ALOG_INF(PSTR("PinUsed = %d"), tkr_pins->PinUsed(GPIO_BUZZER_ID));
 
 
     break;
@@ -77,16 +77,16 @@ void mBuzzer::Pre_Init(void)
 
   ALOG_INF(PSTR("mBuzzer::Pre_Init(void)"));
 
-  if (pCONT_pins->PinUsed(GPIO_BUZZER_ID)) {
-    pinMode(pCONT_pins->GetPin(GPIO_BUZZER_ID), OUTPUT);
-    Buzzer.pin = pCONT_pins->GetPin(GPIO_BUZZER_ID);
+  if (tkr_pins->PinUsed(GPIO_BUZZER_ID)) {
+    pinMode(tkr_pins->GetPin(GPIO_BUZZER_ID), OUTPUT);
+    Buzzer.pin = tkr_pins->GetPin(GPIO_BUZZER_ID);
   ALOG_INF(PSTR("mBuzzer::GPIO_BUZZER_ID(void)"));
     BuzzerSet(0);
     settings.fEnableSensor = true;
   } else
-  if (pCONT_pins->PinUsed(GPIO_BUZZER_INV_ID)) {
-    pinMode(pCONT_pins->GetPin(GPIO_BUZZER_INV_ID), OUTPUT);
-    Buzzer.pin = pCONT_pins->GetPin(GPIO_BUZZER_INV_ID);
+  if (tkr_pins->PinUsed(GPIO_BUZZER_INV_ID)) {
+    pinMode(tkr_pins->GetPin(GPIO_BUZZER_INV_ID), OUTPUT);
+    Buzzer.pin = tkr_pins->GetPin(GPIO_BUZZER_INV_ID);
   ALOG_INF(PSTR("mBuzzer::GPIO_BUZZER_INV_ID(void)"));
     Buzzer.inverted = true;
     BuzzerSet(0);
@@ -119,8 +119,8 @@ void mBuzzer::BuzzerSet(uint32_t state) {
       last_state = state;
     }
   } else {
-    ALOG_INF(PSTR("BUZ:pCONT_pins->DigitalWrite %d %d"),Buzzer.pin,state);
-    // pCONT_pins->DigitalWrite(Buzzer.pin, 0, state);     // Buzzer On/Off
+    ALOG_INF(PSTR("BUZ:tkr_pins->DigitalWrite %d %d"),Buzzer.pin,state);
+    // tkr_pins->DigitalWrite(Buzzer.pin, 0, state);     // Buzzer On/Off
     digitalWrite(Buzzer.pin, state);     // Buzzer On/Off
   }
 

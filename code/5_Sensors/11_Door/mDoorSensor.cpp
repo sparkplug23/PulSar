@@ -33,9 +33,9 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case TASK_EVERY_SECOND:
 
-      // if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+      // if(tkr_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
       // {
-      //   ALOG_TST(PSTR("DoorLockPin=%d"), digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+      //   ALOG_TST(PSTR("DoorLockPin=%d"), digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID)));
       // }
 
     break;
@@ -80,24 +80,24 @@ void mDoorSensor::Pre_Init(void){
   
   settings.fEnableSensor = false;
 
-  if(pCONT_pins->PinUsed(GPIO_DOOR_OPEN_ID)) {  // not set when 255
-    // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
-    pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
+  if(tkr_pins->PinUsed(GPIO_DOOR_OPEN_ID)) {  // not set when 255
+    // pin_open = tkr_pins->GetPin(GPIO_DOOR_OPEN_ID);
+    pinMode(tkr_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
     settings.fEnableSensor = true;
     settings.fSensorCount = 1;
   }else{
-    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),tkr_pins->GetPin(GPIO_DOOR_OPEN_ID));
     //disable pir code
   }
 
 
-  if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+  if(tkr_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
   {
-    pinMode(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID), INPUT_PULLUP);
+    pinMode(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID), INPUT_PULLUP);
     settings.fEnableSensor = true;
     settings.fSensorCount = 1;
   }else{
-    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID));
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),tkr_pins->GetPin(GPIO_DOOR_LOCK_ID));
     //disable pir code
   }
 
@@ -109,10 +109,10 @@ void mDoorSensor::Pre_Init(void){
  * @return uint8_t 
  */
 uint8_t mDoorSensor::IsDoorOpen(){
-  return (digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID))==HIGH);
+  return (digitalRead(tkr_pins->GetPin(GPIO_DOOR_OPEN_ID))==HIGH);
 }
 uint8_t mDoorSensor::IsLock_Locked(){
-  return (digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID))==LOW);
+  return (digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID))==LOW);
 }
 
 
@@ -231,15 +231,15 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
     JBI->Add(D_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
   }
 
-  JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
+  JBI->Add("DoorOpenPin", digitalRead(tkr_pins->GetPin(GPIO_DOOR_OPEN_ID)));
 
     
   JBI->Add("IsDoorOpen", IsDoorOpen());
 
 
-  if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+  if(tkr_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
   {
-    JBI->Add("DoorLockPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+    JBI->Add("DoorLockPin", digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID)));
     JBI->Add("IsLock_Locked", IsLock_Locked());
   }
 

@@ -39,10 +39,10 @@ void mShellyDimmer::init(void)
 void mShellyDimmer::Pre_Init(){
 
   if (
-    pCONT_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0_ID) && 
-    pCONT_pins->PinUsed(GPIO_SHELLY2_SHD_RESET_INV_ID) &&
-    pCONT_pins->PinUsed(GPIO_HWSERIAL0_RX_ID) && 
-    pCONT_pins->PinUsed(GPIO_HWSERIAL0_TX_ID)
+    tkr_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0_ID) && 
+    tkr_pins->PinUsed(GPIO_SHELLY2_SHD_RESET_INV_ID) &&
+    tkr_pins->PinUsed(GPIO_HWSERIAL0_RX_ID) && 
+    tkr_pins->PinUsed(GPIO_HWSERIAL0_TX_ID)
     ) {
       tkr_set->runtime.devices_present++;
     // TasmotaGlobal.light_type = LT_SERIAL1;
@@ -54,7 +54,7 @@ void mShellyDimmer::Pre_Init(){
   buffer = (uint8_t *)malloc(SHD_BUFFER_SIZE);
   if (buffer != nullptr)
   {
-    ShdSerial = new TasmotaSerial(pCONT_pins->GetPin(GPIO_HWSERIAL0_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL0_TX_ID), 2, 0, SHD_BUFFER_SIZE);
+    ShdSerial = new TasmotaSerial(tkr_pins->GetPin(GPIO_HWSERIAL0_RX_ID), tkr_pins->GetPin(GPIO_HWSERIAL0_TX_ID), 2, 0, SHD_BUFFER_SIZE);
     if (ShdSerial->begin(115200))
     {
       // hardware_serial_active = true;
@@ -637,10 +637,10 @@ void mShellyDimmer::ResetToAppMode()
     ALOG_DBG(PSTR(SHD_LOGNAME "Request co-processor reset in app mode"));
 #endif  // SHELLY_DIMMER_DEBUG
 
-  pinMode(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), OUTPUT);
-  digitalWrite(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), LOW);
-  pinMode(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), OUTPUT);
-  digitalWrite(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), LOW);
+  pinMode(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), OUTPUT);
+  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), LOW);
+  pinMode(tkr_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), OUTPUT);
+  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), LOW);
 
   delay(50);
 
@@ -648,7 +648,7 @@ void mShellyDimmer::ResetToAppMode()
   while (Serial.available())
       Serial.read();
 
-  digitalWrite(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), HIGH); // pull out of reset
+  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), HIGH); // pull out of reset
   delay(50); // wait 50ms fot the co-processor to come online
 }
 

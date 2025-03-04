@@ -189,18 +189,18 @@ void mWebCamera::WcInterrupt(uint32_t state) {
 bool WcPinUsed(void) {
   bool pin_used = true;
   for (uint32_t i = 0; i < MAX_WEBCAM_DATA; i++) {
-    if (!pCONT_pins->PinUsed(GPIO_WEBCAM_DATA1_ID, i)) {
+    if (!tkr_pins->PinUsed(GPIO_WEBCAM_DATA1_ID, i)) {
       pin_used = false;
     }
 //    if (i < MAX_WEBCAM_HSD) {
-//      if (!pCONT_pins->(GPIO_WEBCAM_HSD, i)) {
+//      if (!tkr_pins->(GPIO_WEBCAM_HSD, i)) {
 //        pin_used = false;
 //      }
 //    }
   }
-  if (!pCONT_pins->(GPIO_WEBCAM_XCLK_ID) || !pCONT_pins->(GPIO_WEBCAM_PCLK_ID) ||
-      !pCONT_pins->(GPIO_WEBCAM_VSYNC_ID) || !pCONT_pins->(GPIO_WEBCAM_HREF_ID) ||
-      ((!pCONT_pins->(GPIO_WEBCAM_SIOD_ID) || !pCONT_pins->(GPIO_WEBCAM_SIOC_ID)) && !tkr_set->i2c_enabled_2)    // preferred option is to reuse and share I2Cbus 2
+  if (!tkr_pins->(GPIO_WEBCAM_XCLK_ID) || !tkr_pins->(GPIO_WEBCAM_PCLK_ID) ||
+      !tkr_pins->(GPIO_WEBCAM_VSYNC_ID) || !tkr_pins->(GPIO_WEBCAM_HREF_ID) ||
+      ((!tkr_pins->(GPIO_WEBCAM_SIOD_ID) || !tkr_pins->(GPIO_WEBCAM_SIOC_ID)) && !tkr_set->i2c_enabled_2)    // preferred option is to reuse and share I2Cbus 2
       ) {
         pin_used = false;
   }

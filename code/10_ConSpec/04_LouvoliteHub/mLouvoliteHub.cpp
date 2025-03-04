@@ -138,10 +138,10 @@ void mLouvoliteHub::Pre_Init(void)
 void mLouvoliteHub::Init(void)
 {
   
-  if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_TX_ID))
+  if (tkr_pins->PinUsed(GPIO_RF_433MHZ_TX_ID))
   {
     transceive = new RCSwitch();
-    transceive->enableTransmit(pCONT_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
+    transceive->enableTransmit(tkr_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
     transceive->setRepeatTransmit(10);
     settings.fEnableSensor = true;
   }

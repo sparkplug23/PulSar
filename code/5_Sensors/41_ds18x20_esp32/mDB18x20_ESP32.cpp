@@ -95,10 +95,10 @@ void mDB18x20_ESP32::Pre_Init(void)
   module_state.pins_used = 0;
   for (uint8_t pins = 0; pins < MAX_DSB_PINS; pins++) 
   {
-    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
-    if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
+    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), tkr_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+    if (tkr_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
     {
-      ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
       ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), module_state.pins_used);
       module_state.pins_used++;
     }

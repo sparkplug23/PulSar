@@ -83,7 +83,10 @@ typedef enum
    * @brief Distance
    **/
   SENSOR_TYPE_PROXIMITY_ID,
-  SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID,
+  SENSOR_TYPE_DISTANCE_CM_ID,
+  SENSOR_TYPE_DISTANCE_MM_ID, 
+  SENSOR_TYPE_DISTANCE_ID,
+  
   /**
    * @brief Global Position
    **/
@@ -290,7 +293,9 @@ static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_SUN_ELEVATION_ID:          return PSTR("SunElevation");
     case SENSOR_TYPE_DOOR_POSITION_ID:          return PSTR("DoorPosition");
     case SENSOR_TYPE_DOOR_LOCKED_ID:            return PSTR("DoorLocked");    
-    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PSTR("UltraSonicDistanceCM");  
+    case SENSOR_TYPE_DISTANCE_CM_ID:            return PSTR("DistanceCM");  
+    case SENSOR_TYPE_DISTANCE_MM_ID:            return PSTR("DistanceMM");  
+    case SENSOR_TYPE_DISTANCE_ID:               return PSTR("Distance");  
     case SENSOR_TYPE_SPEED_ID:                  return PSTR("Speed");  
     case SENSOR_TYPE_LATITUDE_ID:               return PSTR("Latitude");  
     case SENSOR_TYPE_LONGITUDE_ID:              return PSTR("Longitude");  

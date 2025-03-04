@@ -82,7 +82,7 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
 
 void mOLED_SH1106::Pre_Init(void)
 {
-  if (pCONT_i2c->I2cEnabled(XI2C_04))
+  if (tkr_i2c->I2cEnabled(XI2C_04))
   { 
     settings.fEnableSensor = true;
   }
@@ -145,12 +145,12 @@ void mOLED_SH1106::InitDriver(void)
 
   if (!tkr_set->Settings.display.model)
   {
-    if (pCONT_i2c->I2cSetDevice(OLED_ADDRESS1))
+    if (tkr_i2c->I2cSetDevice(OLED_ADDRESS1))
     {
       tkr_set->Settings.display.address[0] = OLED_ADDRESS1;
       tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
     }
-    else if (pCONT_i2c->I2cSetDevice(OLED_ADDRESS2))
+    else if (tkr_i2c->I2cSetDevice(OLED_ADDRESS2))
     {
       tkr_set->Settings.display.address[0] = OLED_ADDRESS2;
       tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
@@ -161,7 +161,7 @@ void mOLED_SH1106::InitDriver(void)
   
   if(tkr_set->Settings.display.model == D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID)
   {
-    pCONT_i2c->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SH1106");
+    tkr_i2c->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SH1106");
 
     if(
       (tkr_set->Settings.display.width != 64) && 
@@ -179,8 +179,8 @@ void mOLED_SH1106::InitDriver(void)
       tkr_set->Settings.display.height = 64;
     }
 
-    oled1106 = new Adafruit_SH1106(tkr_set->Settings.display.width, tkr_set->Settings.display.height, pCONT_i2c->wire);
-    oled1106->begin(SH1106_SWITCHCAPVCC, tkr_set->Settings.display.address[0], pCONT_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
+    oled1106 = new Adafruit_SH1106(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire);
+    oled1106->begin(SH1106_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
     pCONT_iDisp->renderer = oled1106;
     pCONT_iDisp->renderer->DisplayInit(pCONT_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
     pCONT_iDisp->renderer->setTextColor(1,0);

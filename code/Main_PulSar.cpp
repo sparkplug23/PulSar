@@ -471,7 +471,7 @@ void setup(void)
   #endif
 
   // Init the GPIOs
-  pCONT_pins->GpioInit();
+  tkr_pins->GpioInit();
   // Start pins in modules
   pCONT->Tasker_Interface(TASK_PRE_INIT);
   // Init devices

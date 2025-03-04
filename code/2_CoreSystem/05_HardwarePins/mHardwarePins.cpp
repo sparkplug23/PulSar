@@ -1718,6 +1718,24 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   #endif
 
   
+  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
+  for (int i = 1; i <= 8; i++) {
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION__TOF_VL53L0X_XSHUTNUM__CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_VL53L0X_XSHUT1_ID + (i - 1);
+    }
+  }
+  #endif // USE_MODULE_SENSORS__TOF_VL53L1X
+  #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
+  for (int i = 1; i <= 8; i++) {
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION__TOF_VL53L1X_XSHUTNUM__CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_VL53L1X_XSHUT1_ID + (i - 1);
+    }
+  }
+  #endif // USE_MODULE_SENSORS__TOF_VL53L1X
+
+  
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR)==0){  return GPIO_LDR_BASIC_DIGITAL1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR)==0){   return GPIO_LDR_BASIC_ANALOG1_ID; }

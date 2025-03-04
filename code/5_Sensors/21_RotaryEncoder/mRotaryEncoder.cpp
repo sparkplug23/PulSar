@@ -353,11 +353,11 @@ void mRotaryEncoder::Pre_Init(void)
 
   int8_t pinA = -1, pinB = -1;
 
-  if (pCONT_pins->PinUsed(GPIO__ROTARY_ENCODER_A__ID) && pCONT_pins->PinUsed(GPIO__ROTARY_ENCODER_B__ID))
+  if (tkr_pins->PinUsed(GPIO__ROTARY_ENCODER_A__ID) && tkr_pins->PinUsed(GPIO__ROTARY_ENCODER_B__ID))
   {
 
-    pinA = pCONT_pins->GetPin(GPIO__ROTARY_ENCODER_A__ID);
-    pinB = pCONT_pins->GetPin(GPIO__ROTARY_ENCODER_B__ID);
+    pinA = tkr_pins->GetPin(GPIO__ROTARY_ENCODER_A__ID);
+    pinB = tkr_pins->GetPin(GPIO__ROTARY_ENCODER_B__ID);
 
     ALOG_INF( PSTR("mRotaryEncoder: A[%d] B[%d]"), pinA, pinB );
   

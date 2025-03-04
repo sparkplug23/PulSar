@@ -6,11 +6,11 @@ void mUltraSonicSensor::Pre_Init()
 { 
 
   if(
-    pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && 
-    pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID)
+    tkr_pins->PinUsed(GPIO_SR04_TRIG_ID) && 
+    tkr_pins->PinUsed(GPIO_SR04_ECHO_ID)
   ){
-    pin_trig = pCONT_pins->GetPin(GPIO_SR04_TRIG_ID);
-    pin_echo = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);
+    pin_trig = tkr_pins->GetPin(GPIO_SR04_TRIG_ID);
+    pin_echo = tkr_pins->GetPin(GPIO_SR04_ECHO_ID);
     pinMode(pin_trig, OUTPUT); // Sets the trigPin as an Output
     pinMode(pin_echo, INPUT);  // Sets the echoPin as an Input
     settings.flags.EnableSensor = true;

@@ -8,8 +8,8 @@ void mEnergyADE7953::Pre_Init(void)
     return; 
   }
 
-  if (pCONT_pins->PinUsed(GPIO_ADE7953_IRQ_ID)) {                // Irq on GPIO16 is not supported...
-    pinMode(pCONT_pins->GetPin(GPIO_ADE7953_IRQ_ID), INPUT);     // Related to resetPins() - Must be set to input
+  if (tkr_pins->PinUsed(GPIO_ADE7953_IRQ_ID)) {                // Irq on GPIO16 is not supported...
+    pinMode(tkr_pins->GetPin(GPIO_ADE7953_IRQ_ID), INPUT);     // Related to resetPins() - Must be set to input
     delay(100);                                                  // Need 100mS to init ADE7953
     if (pCONT_sup->I2cSetDevice(ADE7953_ADDR)) {
       if (HLW_PREF_PULSE == tkr_set->Settings.energy_usage.energy_power_calibration) {
@@ -106,13 +106,13 @@ void mEnergyADE7953::Write(uint16_t reg, uint32_t val)
 {
   int size = RegSize(reg);
   if (size) {
-    pCONT_i2c->wire->beginTransmission(ADE7953_ADDR);
-    pCONT_i2c->wire->write((reg >> 8) & 0xFF);
-    pCONT_i2c->wire->write(reg & 0xFF);
+    tkr_i2c->wire->beginTransmission(ADE7953_ADDR);
+    tkr_i2c->wire->write((reg >> 8) & 0xFF);
+    tkr_i2c->wire->write(reg & 0xFF);
     while (size--) {
-      pCONT_i2c->wire->write((val >> (8 * size)) & 0xFF);  // Write data, MSB first
+      tkr_i2c->wire->write((val >> (8 * size)) & 0xFF);  // Write data, MSB first
     }
-    pCONT_i2c->wire->endTransmission();
+    tkr_i2c->wire->endTransmission();
     delayMicroseconds(5);    // Bus-free time minimum 4.7us
   }
 }
@@ -123,14 +123,14 @@ int32_t mEnergyADE7953::Read(uint16_t reg)
 
   int size = RegSize(reg);
   if (size) {
-    pCONT_i2c->wire->beginTransmission(ADE7953_ADDR);
-    pCONT_i2c->wire->write((reg >> 8) & 0xFF);
-    pCONT_i2c->wire->write(reg & 0xFF);
-    pCONT_i2c->wire->endTransmission(0);
-    pCONT_i2c->wire->requestFrom(ADE7953_ADDR, size);
-    if (size <= pCONT_i2c->wire->available()) {
+    tkr_i2c->wire->beginTransmission(ADE7953_ADDR);
+    tkr_i2c->wire->write((reg >> 8) & 0xFF);
+    tkr_i2c->wire->write(reg & 0xFF);
+    tkr_i2c->wire->endTransmission(0);
+    tkr_i2c->wire->requestFrom(ADE7953_ADDR, size);
+    if (size <= tkr_i2c->wire->available()) {
       for (uint32_t i = 0; i < size; i++) {
-        response = response << 8 | pCONT_i2c->wire->read();   // receive DATA (MSB first)
+        response = response << 8 | tkr_i2c->wire->read();   // receive DATA (MSB first)
       }
     }
   }
