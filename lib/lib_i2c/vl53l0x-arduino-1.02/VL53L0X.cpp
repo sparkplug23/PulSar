@@ -836,7 +836,7 @@ uint16_t VL53L0X::readRangeContinuousMillimeters(void)
   // fractional ranging is not enabled
   uint16_t range = readReg16Bit(RESULT_RANGE_STATUS + 10);
 
-  Serial.println(range);
+  // Serial.println(range);
 
   writeReg(SYSTEM_INTERRUPT_CLEAR, 0x01);
 

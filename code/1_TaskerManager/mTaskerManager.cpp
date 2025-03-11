@@ -50,6 +50,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   uint16_t debug_idx = 0;
   #endif
+  #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
+  module_id_being_serviced = 0;
+  #endif
 
 
   for(auto& mod:pModule)
@@ -80,6 +83,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
 
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS)
     uint32_t start_millis = millis();
+    #endif
+    
+    #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
+    module_id_being_serviced = mod->GetModuleUniqueID();
     #endif
 
     
@@ -488,7 +495,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mTOF_VL53L1X());
   #endif
   #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-  addTasker(new mRadar_HLK_LD2410());
+  addTasker(new mHLK_LD2410());
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
   addTasker(new mADCInternal());

@@ -1,193 +1,149 @@
 
-// #ifndef _MBUTTON_H_
-// #define _MBUTTON_H_
+#ifndef _HLK_LD2410_H_
+#define _HLK_LD2410_H_
 
-// #define D_UNIQUE_MODULE_SENSORS_BUTTONS_ID ((5*1000)+02)
+/**********************
+ * 
+ * Cant be enabled until IDF is updated to 4.4+
+ * 
+ */
 
-// #include "1_TaskerManager/mTaskerManager.h"
+#define D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID ((5*1000)+28)
 
-// #ifdef USE_MODULE_SENSORS_BUTTONS
+#include "1_TaskerManager/mTaskerManager.h"
 
+#ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
 
+#include <TasmotaSerial.h>
 
-// #include "2_CoreSystem/02_Time/mTime.h"
-// #include "2_CoreSystem/05_Logging/mLogging.h"
+#define LD2410_BUFFER_SIZE               TM_SERIAL_BUFFER_SIZE  // 64
+#define LD2410_MAX_GATES                 8       // 0 to 8 (= 9) - DO NOT CHANGE
 
-// #include "1_TaskerManager/mTaskerManager.h"
+#define LD2410_CMND_START_CONFIGURATION  0xFF
+#define LD2410_CMND_END_CONFIGURATION    0xFE
+#define LD2410_CMND_SET_DISTANCE         0x60
+#define LD2410_CMND_READ_PARAMETERS      0x61
+#define LD2410_CMND_START_ENGINEERING    0x62
+#define LD2410_CMND_END_ENGINEERING      0x63
+#define LD2410_CMND_SET_SENSITIVITY      0x64
+#define LD2410_CMND_GET_FIRMWARE         0xA0
+#define LD2410_CMND_SET_BAUDRATE         0xA1
+#define LD2410_CMND_FACTORY_RESET        0xA2
+#define LD2410_CMND_REBOOT               0xA3
+#define LD2410_CMND_SET_BLUETOOTH        0xA4
+#define LD2410_CMND_GET_BLUETOOTH_MAC    0xA5
 
+const uint8_t LD2410_config_header[4] = {0xFD, 0xFC, 0xFB, 0xFA};
+const uint8_t LD2410_config_footer[4] = {0x04, 0x03, 0x02, 0x01};
+const uint8_t LD2410_target_header[4] = {0xF4, 0xF3, 0xF2, 0xF1};
+const uint8_t LD2410_target_footer[4] = {0xF8, 0xF7, 0xF6, 0xF5};
 
-// //#include "//2_CoreSystem/11_Languages/mLanguage.h"
-// #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
+#include "1_TaskerManager/mTaskerInterface.h"
 
-// #ifdef ESP32
-//   #include <WiFi.h>
-// #endif
-// #ifdef ESP8266
-//   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
-//   #include <ESP8266httpUpdate.h>
-// #endif
+class mHLK_LD2410 :
+  public mTaskerInterface
+{
+  public:
+    mHLK_LD2410(){};
+    void Pre_Init(void);
+    void Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void BootMessage(){};
 
-// #include "2_CoreSystem/02_Time/mTime.h"
-
-
-
-
-// // BUTTON_HOLD_PRESSED_ID
-
-// DEFINE_PGM_CTR(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR) "button_table";
-
-// /*********************************************************************************************\
-//  * Watchdog extension (https://github.com/esp8266/Arduino/issues/1532)
-// \*********************************************************************************************/
-
-// #include <Ticker.h>
-
-// #include "1_TaskerManager/mTaskerInterface.h"
-
-// class mButtons :
-//   public mTaskerInterface
-// {
-//   public:
-//     mButtons(){};
+    static constexpr const char* PM_MODULE_SENSORS__HLK_LD2410__CTR = D_MODULE_SENSORS__RADAR_HLK_LD2410__CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS__HLK_LD2410__CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID; }
     
-//     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-//     void init(void);
+    struct ClassState
+    {
+        uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+        uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-//     static const char* PM_MODULE_SENSORS_BUTTONS_CTR;
-//     static const char* PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR;
-//     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BUTTONS_CTR; }
-//     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR; }
-//     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BUTTONS_ID; }
-//     #ifdef USE_DEBUG_CLASS_SIZE
-//     uint16_t GetClassSize(){       return sizeof(mButtons);     };
-//     #endif
+    TasmotaSerial *LD2410Serial = nullptr;
 
-// // /*********************************************************************************************\
-// //  * Button support
-// // \*********************************************************************************************/
-
-// enum ButtonStates 
-// { 
-//   BUTTON_PRESSED_ID, 
-//   BUTTON_NOT_PRESSED_ID 
-// };
-
-
-
-//     struct SETTINGS{
-//       uint8_t buttons_found = 0;
-//       uint8_t fEnableSensor = false;
-
-//     }settings;
-
+    struct {
+      uint8_t *buffer;
+      uint16_t moving_distance;
+      uint16_t static_distance;
+      uint16_t detect_distance;
+      uint16_t no_one_duration;
+      uint8_t moving_sensitivity[LD2410_MAX_GATES +1];
+      uint8_t static_sensitivity[LD2410_MAX_GATES +1];
+      uint8_t max_moving_distance_gate;
+      uint8_t max_static_distance_gate;
+      uint8_t moving_energy;
+      uint8_t static_energy;
+      uint8_t step;
+      uint8_t retry;
+      uint8_t settings;
+      uint8_t byte_counter;
+      bool valid_response;
+      uint8_t set_engin_mode;
+      uint8_t web_engin_mode;
+      struct {
+        uint8_t moving_gate_energy[LD2410_MAX_GATES +1];
+        uint8_t static_gate_energy[LD2410_MAX_GATES +1];
+        uint8_t light;
+        uint8_t out_pin;
+      } engineering;
+    } LD2410;
     
-// bool ModuleEnabled();
+    void Loop();
 
 
-// #ifndef MAX_KEYS
-// #define MAX_KEYS 8                 // Max number of keys or buttons
-// #endif // MAX_KEYS
+    uint32_t ToBcd(uint32_t value);
+    void Ld1410HandleTargetData(void);
+    void Ld1410HandleConfigData(void);
+    void Ld2410Input(void);  
+    void Ld2410SendCommand(uint32_t command, uint8_t *val = nullptr, uint32_t val_len = 0);  
+    void Ld2410SetConfigMode(void);
+    void Ld2410SetMaxDistancesAndNoneDuration(uint32_t max_moving_distance_range, uint32_t max_static_distance_range, uint32_t no_one_duration);
+    void Ld2410SetGateSensitivity(uint32_t gate, uint32_t moving_sensitivity, uint32_t static_sensitivity);
+    void Ld2410SetAllSensitivity(uint32_t sensitivity);
+    void Ld2410SetBaudrate(uint32_t index);
+    void Ld2410Every100MSecond(void);
+    void Ld2410EverySecond(void);
+    void Ld2410Detect(void);
+    bool Ld2410Match(const uint8_t *header, uint32_t offset);
 
-// uint8_t GetHardwareSpecificPullMethod(uint8_t real_pin);
-
-// // unsigned long button_debounce = 0;          // Button debounce timer
-
-// struct BUTTONS{
-//   uint16_t hold_timer =0;      // Timer for button hold
-//   uint8_t window_timer = 0;//multiwindow = 0;      // Max time between button presses to record press count
-//   uint8_t press_counter = 0;//multipress = 0;       // Number of button presses within multiwindow
-  
-//   // uint8_t lastbutton_active_state = BUTTON_NOT_PRESSED_ID;  // Last button states
-//   uint8_t last_state = BUTTON_NOT_PRESSED_ID;  // Last button states
-
-
-//   uint8_t active_state_value = false; //defualt active high
-
-//   /**
-//    * @note isactive will always signify active or not
-//    * */
-//   uint8_t  isactive     = false;
-//   uint8_t  state     = BUTTON_NOT_PRESSED_ID;
-//   // uint8_t  isactive  = false;
-//   uint8_t  ischanged = false;
-//   int8_t pin = -1; // -1 is not active
-
-// }buttons[MAX_KEYS];
-
-// /**
-//  * @brief Need button event, so its stored as last event
-//  * Single/Multi/Hold
-//  * 
-//  * If the event is reported BEFORE rules_event can clear, then it can be used in the json mqtt message
-//  * 
-//  * 
-//  **/
-// // struct BUTTON_EVENT{
-// //   uint8_t type_id = INPUT_TYPE_LENGTH_ID;
-// //   uint8_t device_id = 0;
-// //   uint8_t state = 0;
-// //   uint8_t count = 0;
-// // }last_event;
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+        uint8_t count = 0;
+        // for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) {
+        //     if (bitRead(VL53L1X_detected_bitmapped, i)) {
+        //         count++;
+        //     }
+        // }
+        return count;
+    }
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+        // if(index > MAX_SENSORS-1) {value->sensor_type.push_back(0); return ;}
+        // value->timestamp = millis(); // Switches are constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
+        // value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_ID);
+        // value->data_f.push_back(vl53l1x_data[index].distance);
+        // value->sensor_id = index;
+    };
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 
-// uint8_t dual_hex_code = 0;                  // Sonoff dual input flag
-// uint8_t key_no_pullup = 0x00;                  // key no pullup flag (1 = no pullup)
-// uint8_t key_inverted = 0x00; // Must be set to 0, 8 bits wide                   // Key inverted flag (1 = inverted)
-// // uint8_t buttons_found = 0;                  // Number of buttons found flag
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
-// // timereached_t tsaved_button_debounce;
-// uint32_t tsaved_button_debounce;
-
-// uint16_t dual_button_code = 0;              // Sonoff dual received code
-
-// void SetPullupFlag(uint8_t button_bit);
-// void SetInvertFlag(uint8_t button_bit);
-// void Pre_Init(void);
-// uint8_t ButtonSerial(uint8_t serial_in_byte);
-// void ButtonHandler(void);
-// void ButtonLoop(void);
-
-// char* IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen);
-
-//     #ifdef USE_MODULE_NETWORK_WEBSERVER
-
-// void WebAppend_Root_Draw_Table();
-// void WebAppend_Root_Status_Table();
-
-//     #endif // USE_MODULE_NETWORK_WEBSERVER
-
-// bool IsButtonActive(uint8_t id);
+    #ifdef USE_MODULE_NETWORK_MQTT
+        void MQTTHandler_Init();
+        std::vector<struct handler<mHLK_LD2410>*> mqtthandler_list;    
+        struct handler<mHLK_LD2410> mqtthandler_settings;
+        struct handler<mHLK_LD2410> mqtthandler_sensor_ifchanged;
+    #endif // USE_MODULE_NETWORK_MQTT
 
 
-//     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-//     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-  
-//   #ifdef USE_MODULE_NETWORK_MQTT
-//     void MQTTHandler_Init();
-//     void MQTTHandler_Set_RefreshAll();
-//     void MQTTHandler_Set_DefaultPeriodRate();
-//     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    
-//     struct handler<mButtons> mqtthandler_settings_teleperiod;
-//     struct handler<mButtons> mqtthandler_sensor_ifchanged;
-//     struct handler<mButtons> mqtthandler_sensor_teleperiod;
-
-//     // No specialised payload therefore use system default instead of enum
-//     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    
-//     struct handler<mButtons>* mqtthandler_list[3] = {
-//       &mqtthandler_settings_teleperiod,
-//       &mqtthandler_sensor_ifchanged,
-//       &mqtthandler_sensor_teleperiod
-//     };
-//   #endif // USE_MODULE_NETWORK_MQTT
-
-
-// };
+};
 
 
 
-// #endif
+#endif
 
-// #endif  // _SONOFF_H_
-// //#endif
+#endif 

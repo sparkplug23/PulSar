@@ -15202,7 +15202,7 @@ void mAnimatorLight::LoadEffects()
   uint16_t effectCount = effects.function.size();
   uint16_t effects_in_header_length = EFFECTS_FUNCTION__LENGTH__ID;
 
-  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "AnimatorLight: Effects %d/%d"),effectCount, effects_in_header_length);  
+  ALOG_INF(PSTR(D_LOG_NEO "Effects %d/%d"), effectCount, effects_in_header_length);  
 
 }
 

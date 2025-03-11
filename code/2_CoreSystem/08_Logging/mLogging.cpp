@@ -23,6 +23,17 @@ void ErrorMessage(uint8_t error_type, const char* message)
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
 
+  #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
+  uint16_t unique_module_ids[] = { ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE }; // Single number or "1, 2, 3"  
+  // Corrected end pointer calculation
+  uint16_t* end_ptr = unique_module_ids + (sizeof(unique_module_ids) / sizeof(unique_module_ids[0]));
+  // Fixed `std::find` condition
+  if (std::find(unique_module_ids, end_ptr, tkr->module_id_being_serviced) == end_ptr) // if none found, "find" returns the end_ptr.
+  {
+    return;  // Module ID not found, exit function
+  }
+  #endif
+  
   #ifdef DEBUG_FOR_FAULT
     tkr_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
   #endif

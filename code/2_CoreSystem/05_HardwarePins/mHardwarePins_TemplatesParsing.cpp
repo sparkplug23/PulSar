@@ -72,10 +72,10 @@ ALOG_ERR(PSTR("HERE WE ARE"));
       const char* key = jtok.getStr();
       
       real_pin = GetRealPinNumberFromName(key);
-      ALOG_DBM(PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
+      ALOG_INF(PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
-      ALOG_DBM( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+      ALOG_INF( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
       
       if(index_pin>=0){
       

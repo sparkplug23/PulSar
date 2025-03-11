@@ -32,6 +32,7 @@
  * - https://www.dfrobot.com/wiki/index.php/Weather-proof_Ultrasonic_Sensor_SKU_:_SEN0207
 \*********************************************************************************************/
 
+const uint8_t MAX_SR04 = 1; // Max number of SR04 ultrasonic sensors MUST be one, unless GPIO are increased (D_GPIO_FUNCTION_SR04_ECHO2_CTR)
 
 class mSR04 :
   public mTaskerInterface
@@ -66,6 +67,18 @@ class mSR04 :
      * @return float 
      */
     float GetDistanceFromPing(uint32_t ping_value);
+
+    
+#ifndef SR04_MAX_SENSOR_DISTANCE
+#define SR04_MAX_SENSOR_DISTANCE  500
+#endif
+
+enum Sr04CommsMode { SR04_MODE_NONE,             // No hardware detected
+                     SR04_MODE_TRIGGER_ECHO,     // Mode 1 - Trigger and Echo connection
+                     SR04_MODE_SER_RECEIVER,     // Mode 2 - Serial receive only
+                     SR04_MODE_SER_TRANSCEIVER,  // Mode 3 - Serial transmit and receive
+                     SR04_NOT_DETECTED };        // Not yet detected
+
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
@@ -116,6 +129,19 @@ class mSR04 :
         uint8_t flag_distance_conversion_method = EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID;
       }conversion_settings;
     }readings;
+    
+struct {
+  float distance;
+  uint8_t valid;
+  uint8_t type = SR04_NOT_DETECTED;
+  NewPing* sonar = nullptr;
+  TasmotaSerial* sonar_serial = nullptr;
+} SR04[MAX_SR04];
+
+uint8_t sr04_sensor_count = 0;
+
+
+void Reading(uint32_t i);
 
     // doubleEMAFilter(0.025, 0.1);
     // SingleEMAFilter<float>* filter = nullptr;// doubleEMAFilter(0.025, 0.1);
@@ -132,7 +158,7 @@ class mSR04 :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       if(index > MAX_SENSORS_SR04_COUNT-1) {value->sensor_type.push_back(0); return ;}
-      value->sensor_type.push_back(SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID);
+      value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_CM_ID);
       #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
       value->data_f.push_back((float)readings.average_EMA.distance_cm);
       #else
@@ -154,10 +180,10 @@ class mSR04 :
     NewPing* sonar = nullptr;
     TasmotaSerial* sonar_serial = nullptr;
     
-    uint8_t ModeDetect(void);
+    void ModeDetect(void);
     uint16_t MiddleValue(uint16_t first, uint16_t second, uint16_t third);
-    uint16_t Mode3Distance();
-    uint16_t Mode2Distance(void);
+    uint16_t Mode3Distance(uint32_t i);
+    uint16_t Mode2Distance(uint32_t i);
     void EverySecond(void);
     void EveryMinute();
 

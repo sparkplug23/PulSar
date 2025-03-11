@@ -1,1092 +1,758 @@
-
-// #include "mButtons.h"
-
-
-// Pin	Connect To	Purpose
-// VCC	3.3V or 5V	Power (Check board specs for voltage tolerance)
-// GND	GND	Ground
-// SDA	I2C SDA (with pull-up)	Data line
-// SCL	I2C SCL (with pull-up)	Clock line
-// XSHUT (optional)	GPIO (if needed)	Pull HIGH (default), pull LOW to shut down sensor
-// GPIO1 (optional)	Interrupt-capable GPIO	Signals when measurement is ready
-
-
-
-// #ifdef USE_MODULE_SENSORS_BUTTONS
-
-// const char* mButtons::PM_MODULE_SENSORS_BUTTONS_CTR = D_MODULE_SENSORS_BUTTONS_CTR;
-// const char* mButtons::PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR = D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR;
-
-// int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
-
-//   switch(function){
-//     /************
-//      * INIT SECTION * 
-//     *******************/
-//     case FUNC_PRE_INIT:
-//       Pre_Init();
-//     break;
-//     case FUNC_INIT:
-//       // Init();
-//     break;
-//   }
-
-//   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
-//   switch(function){
-//     /************
-//      * PERIODIC SECTION * 
-//     *******************/
-//     case FUNC_LOOP: 
-//       ButtonLoop();
-//     break;
-//     case FUNC_EVERY_SECOND:
-
-// // pinMode(16, INPUT_PULLDOWN_16);
-// //     AddLog(LOG_LEVEL_DEV_TEST, PSTR("mButtons::Tasker %d"),digitalRead(16));
-
-//     break;
-//     // case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-//     //  // AddLog(LOG_LEVEL_DEV_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
-
-//     // break;
-//     /************
-//      * EVENTS SECTION * 
-//     *******************/
-//     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-//       // CommandSet_SDCard_OpenClose_Toggle();
-   
-    
-//       // Event for this
-//       if(tkr_rules->event_triggered.module_id == D_UNIQUE_MODULE_SENSORS_BUTTONS_ID)
-//       {
-   
-//         ALOG_INF(PSTR("Button State Changed1 : MQTTHandler_Sender"));
-   
-//         // Send immediately (Button type is held in event, so ConstructJson can make the correct formatted data)
-//         mqtthandler_sensor_ifchanged.flags.SendNow = true;
-//         MQTTHandler_Sender();
-   
-//       }   
-
-
-//     break;
-//     /************
-//      * MQTT SECTION * 
-//     *******************/
-//     #ifdef USE_MODULE_NETWORK_MQTT
-//     case FUNC_MQTT_HANDLERS_INIT:
-//       MQTTHandler_Init();
-//     break;
-//     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-//       MQTTHandler_Set_DefaultPeriodRate();
-//     break;
-//     case FUNC_MQTT_SENDER:
-//       MQTTHandler_Sender();
-//     break;
-//     case FUNC_MQTT_CONNECTED:
-//       MQTTHandler_Set_RefreshAll();
-//     break;
-//     #endif //USE_MODULE_NETWORK_MQTT
-//     /************
-//      * WEB SECTION * 
-//     *******************/
-//     #ifdef USE_MODULE_NETWORK_WEBSERVER
-//     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-//       WebAppend_Root_Draw_Table();
-//     break; 
-//     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-//       WebAppend_Root_Status_Table();
-//     break;     
-//     #endif // USE_MODULE_NETWORK_WEBSERVER
-//   }
-
-//   return FUNCTION_RESULT_SUCCESS_ID;
-
-// }
-
-/*
-  xsns_77_vl53l1x.ino - VL53L1X sensor support for Tasmota
-
-  Copyright (C) 2021  Theo Arends, Rui Marinho and Johann Obermeier
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-#ifdef USE_I2C
-#ifdef USE_VL53L1X
 /*********************************************************************************************\
- * VL53L1X
+ * HLK-LD2410 24GHz smart wave motion sensor
+ * 
+ * Attention!
+ * This module works with HLK-LD2410, HLK-LD2410B (md5sum-as tested), HLK-LD2410C (md5sum-as tested) devices. 
+ * The module does not support HLK-LD2410S (md5sum-as tested) and is not guaranteed to work with other devices.
+ * 
+ * 
+ * LD2410Duration 0                            - Set factory default settings
+ * LD2410Duration 1..65535                     - Set no-one duration in seconds (default 5)
+ * LD2410MovingSens 50,50,40,30,20,15,15,15,15 - Set moving distance sensitivity for up to 9 gates (at 0.75 meter interval)
+ * LD2410StaticSens 0,0,40,40,30,30,20,20,20   - Set static distance sensitivity for up to 9 gates (at 0.75 meter interval)
  *
- * Source:
+ * LD2410Get                                   - Read last sensors
+ * LD2410EngineeringStart                      - Start engineering mode
+ * LD2410EngineeringEnd                        - End engineering mode
  *
- * I2C Address: 0x29
- *********************************************************************************************
+ * Inspiration:
+ * https://community.home-assistant.io/t/mmwave-wars-one-sensor-module-to-rule-them-all/453260/2
+ * Resources:
+ * https://drive.google.com/drive/folders/1p4dhbEJA3YubyIjIIC7wwVsSo8x29Fq-?spm=a2g0o.detail.1000023.17.93465697yFwVxH
  *
- * Note: When using multiple VL53L0X, it is required to also wire the XSHUT pin of all those sensors
- * in order to let Tasmota change by software the I2C address of those and give them an unique address
- * for operation. The sensor don't save its address, so this procedure of changing its address is needed
- * to be performed every restart. The Addresses used for this are 120 (0x78) to 127 (0x7F). In the I2c
- * Standard (https://i2cdevices.org/addresses) those addresses are used by the PCA9685.
- * The base address (0x78) can be changed as a compile option with #define VL53L1X_XSHUT_ADDRESS 0xNN in
- * your user_config_override.h
- *
- * The default value of VL53LXX_MAX_SENSORS is set in the file tasmota.h
- * Changing that is backwards incompatible - Max supported devices by this driver are 8
- *********************************************************************************************
- * The following settings can be overriden
- *
- *
+ * Internal info:
+ * - After a LD2410 serial command a response takes about 10mS
+ * - After a LD2410 restart it takes at least 1000mS before commands are allowed
 \*********************************************************************************************/
+#include "Radar_HLK_LD2410.h"
 
-#define XSNS_77     77
-#define XI2C_54     54  // See I2CDEVICES.md
+#ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
 
-#include "VL53L1X.h"
+int8_t mHLK_LD2410::Tasker(uint8_t function, JsonParserObject obj){
 
-#define VL53L1X_ADDRESS 0x29
-#ifndef VL53L1X_XSHUT_ADDRESS
-#define VL53L1X_XSHUT_ADDRESS 0x78
-#endif
+  switch(function){
+    /************
+     * INIT SECTION * 
+    *******************/
+    case TASK_PRE_INIT:
+      Pre_Init();
+    break;
+    case TASK_INIT:
+      Init(); // Ld2410Detect
+    break;
+    case TASK_BOOT_MESSAGE:
+      // BootMessage();
+    break;
+  }
 
-#ifndef VL53L1X_DISTANCE_MODE
-#define VL53L1X_DISTANCE_MODE Long
-#endif
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
-VL53L1X vl53l1x_device[VL53LXX_MAX_SENSORS];
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case TASK_LOOP: 
+    // case FUNC_SLEEP_LOOP:
+      Ld2410Input();
+    break;
+    case TASK_EVERY_100_MSECOND:
+      Ld2410Every100MSecond();
+    break;
+    case TASK_EVERY_SECOND:
+      Ld2410EverySecond();
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case TASK_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init();
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
+    case TASK_MQTT_SENDER:
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+  }
 
-struct {
-  uint16_t distance = 0;
-} vl53l1x_data[VL53LXX_MAX_SENSORS];
 
-uint8_t VL53L1X_xshut = 0;
-uint8_t VL53L1X_detected = 0;
+  return FUNCTION_RESULT_SUCCESS_ID;
+
+}
+
+void mHLK_LD2410::Loop()
+{  
+  // if(mTime::TimeReached(&tSaved_ReadSensor, 50)){
+    // ReadSensor();
+  // }
+}
+
+
+/**
+ * @brief Prepares the VL53L1X sensors before initialization.
+ *
+ * This function:
+ *  - Scans for active VL53L1X sensors before initialization.
+ *  - Disables all sensors by setting **XSHUT LOW** (if applicable).
+ *  - Ensures sensors are powered off to prevent I2C conflicts during initialization.
+ *
+ * **Processing Logic:**
+ *  - Iterates through **all possible VL53L1X sensors**.
+ *  - If an XSHUT pin is detected, it is **set LOW** to disable the sensor.
+ *
+ * @note This function is always executed **before Init()**, ensuring a clean startup.
+ */
+void mHLK_LD2410::Pre_Init(void) 
+{
+  ALOG_INF(PSTR(D_LOG_HLK_LD2410 "Pre-Init"));
+
+  module_state.devices = 0;
+
+  // for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) {
+  //   if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, i)) {
+  //     ALOG_INF(PSTR(D_LOG_HLK_LD2410 "Disable%d p%d"),i,tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID,i));
+  //     pinMode(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, i), OUTPUT);
+  //     digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, 0), LOW);
+  //   }
+  // }
+
+}
+
+
+void mHLK_LD2410::Init(void) 
+{
+  ALOG_INF(PSTR(D_LOG_HLK_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
+  if (tkr_pins->PinUsed(GPIO_LD2410_RX_ID) && tkr_pins->PinUsed(GPIO_LD2410_TX_ID)) 
+  {
+    LD2410.buffer = (uint8_t*)malloc(LD2410_BUFFER_SIZE);    // Default 64
+    if (!LD2410.buffer) { return; }
+    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), 2);
+    ALOG_INF(PSTR(D_LOG_HLK_LD2410 "%d"), __LINE__ );
+    if (LD2410Serial->begin(256000)) {
+      ALOG_INF(PSTR(D_LOG_HLK_LD2410 "%d"), __LINE__ );
+      if (LD2410Serial->hardwareSerial()) {
+        tkr_sup->ClaimSerial(); 
+      }
+
+      ALOG_INF(PSTR(D_LOG_HLK_LD2410 "Serial UART%d"), LD2410Serial->getUart());
+  
+      ALOG_INF(PSTR(D_LOG_HLK_LD2410 "%d"), __LINE__ );
+      LD2410.retry = 4;
+      LD2410.step = 12;
+      module_state.devices++;
+    }
+    ALOG_INF(PSTR(D_LOG_HLK_LD2410 "%d"), __LINE__ );
+    LD2410.set_engin_mode = 0;
+    memset(&LD2410.engineering,0,sizeof(LD2410.engineering));
+  }
+
+  ALOG_INF(PSTR(D_LOG_HLK_LD2410 "%d"), __LINE__ );
+  if (module_state.devices > 0) {
+    module_state.mode = ModuleStatus::Running;
+  }
+  ALOG_HGL(PSTR("END OF INIT"));
+}
+
+
 
 /********************************************************************************************/
 
-void Vl53l1Detect(void) {
+uint32_t mHLK_LD2410::ToBcd(uint32_t value) {
+  return ((value >> 4) * 10) + (value & 0xF);
+}
 
-  uint32_t i, xshut;
-  for (i = 0, xshut = 1 ; i < VL53LXX_MAX_SENSORS ; i++, xshut <<= 1) {
-    if (PinUsed(GPIO_VL53LXX_XSHUT1, i)) {
-      pinMode(Pin(GPIO_VL53LXX_XSHUT1, i), OUTPUT);
-      digitalWrite(Pin(GPIO_VL53LXX_XSHUT1, i), 0);
-      VL53L1X_xshut |= xshut;
+/********************************************************************************************/
+
+void mHLK_LD2410::Ld1410HandleTargetData(void) {
+  uint8_t i;
+
+  if (((0x0D == LD2410.buffer[4]) && (0x55 == LD2410.buffer[17]) && (0x02 == LD2410.buffer[6]))
+      or ((0x23 == LD2410.buffer[4]) && (0x55 == LD2410.buffer[39]) && (0x01 == LD2410.buffer[6]))) {  // Add bad reception detection
+    //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22
+    // F4 F3 F2 F1 0D 00 02 AA 00 00 00 00 00 00 37 00 00 55 00 F8 F7 F6 F5 - No target
+    // F4 F3 F2 F1 0D 00 02 AA 00 45 00 3E 00 00 3A 00 00 55 00 F8 F7 F6 F5 - No target
+    // F4 F3 F2 F1 0D 00 02 AA 03 46 00 34 00 00 3C 00 00 55 00 F8 F7 F6 F5 - Movement and Stationary target
+    // F4 F3 F2 F1 0D 00 02 AA 02 54 00 00 00 00 64 00 00 55 00 F8 F7 F6 F5 - Stationary target
+    // F4 F3 F2 F1 0D 00 02 AA 02 96 00 00 00 00 36 00 00 55 00 F8 F7 F6 F5 - Stationary target
+    // F4 F3 F2 F1 0D 00 02 AA 03 2A 00 64 00 00 64 00 00 55 00 F8 F7 F6 F5 - Movement and Stationary target
+    //
+    //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44
+    // F4 F3 F2 F1 23 00 01 AA 00 1E 00 00 1E 00 0D 00 00 08 08 13 0E 07 02 05 07 03 04 05 00 00 0D 06 05 05 05 05 05 62 00 55 00 F8 F7 F6 F5
+    //
+    // F4 F3 F2 F1 23 00 01 AA 02 20 01 00 37 01 64 26 01                     
+    //  08 08 - max moving and static dist (17,18)
+    //  12 05 04 09 0C 0D 0F 04 01 - Movement energy (19-27)
+    //  00 00 1F 64 64 64 64 31 1A - Static energy (28-36)
+    //  8C - Photo sens (37)
+    //  01 - Out pin (38)
+    //                                                    55 00 F8 F7 F6 F5
+    // header     |len  |dt|hd|st|movin|me|stati|se|detec|tr|ck|trailer
+
+    LD2410.moving_distance = 0;
+    LD2410.moving_energy = 0;
+    LD2410.static_distance = 0;
+    LD2410.static_energy = 0;
+    LD2410.detect_distance = 0;
+
+    if (LD2410.buffer[8] != 0x00) {                               // Movement and/or Stationary target
+      LD2410.moving_distance = LD2410.buffer[10] << 8 | LD2410.buffer[9];
+      LD2410.moving_energy = LD2410.buffer[11];
+      LD2410.static_distance = LD2410.buffer[13] << 8 | LD2410.buffer[12];
+      LD2410.static_energy = LD2410.buffer[14];
+      LD2410.detect_distance = LD2410.buffer[16] << 8 | LD2410.buffer[15];
+
+    }
+    LD2410.web_engin_mode = LD2410.buffer[6]==1?1:0;
+    if (0x01 == LD2410.buffer[6]) { /* Engineering mode*/
+      if (LD2410.buffer[17] < 9) {
+        for (i=0; i<= LD2410.buffer[17]; i++) {
+          LD2410.engineering.moving_gate_energy[i] = LD2410.buffer[i+19];
+        }
+      }
+      if (LD2410.buffer[18] < 9) {
+        for (i=0; i<= LD2410.buffer[18]; i++) {
+          LD2410.engineering.static_gate_energy[i] = LD2410.buffer[i+28];
+        }
+      }
+      LD2410.engineering.light=LD2410.buffer[37];
+      LD2410.engineering.out_pin=LD2410.buffer[38];
+      // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2 Eng: mov: %d %d %d %d %d %d %d %d %d, st: %d %d %d %d %d %d %d %d %d, light: %d, out: %d"), 
+      //     LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
+      //     LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
+      //     LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
+      //     LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
+      //     LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
+      //     LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
+      //     LD2410.engineering.light,LD2410.engineering.out_pin);
     }
   }
+}
 
-  for (i = 0, xshut = 1 ; i < VL53LXX_MAX_SENSORS ; i++, xshut <<= 1) {
-    if (xshut & VL53L1X_xshut) {
-      digitalWrite(Pin(GPIO_VL53LXX_XSHUT1, i), 1);
-      delay(2);
+void mHLK_LD2410::Ld1410HandleConfigData(void) {
+  if (LD2410_CMND_READ_PARAMETERS == LD2410.buffer[6]) {           // 0x61
+    //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+    // FD FC FB FA 1C 00 61 01 00 00 AA 08 08 08 32 32 28 1E 14 0F 0F 0F 0F 00 00 28 28 1E 1E 14 14 14 05 00 04 03 02 01 - Default
+    // header     |len  |cw cv|ack  |hd|dd|md|sd|moving sensitivity 0..8   |static sensitivity 0..8   |timed|trailer
+    //            |   28|     |    0|  | 8| 8| 8|50 50 40 30 20 15 15 15 15| 0  0 40 40 30 30 20 20 20|    5|
+    LD2410.max_moving_distance_gate = LD2410.buffer[12];
+    LD2410.max_static_distance_gate = LD2410.buffer[13];
+    for (uint32_t i = 0; i <= LD2410_MAX_GATES; i++) {
+      LD2410.moving_sensitivity[i] = LD2410.buffer[14 +i];
+      LD2410.static_sensitivity[i] = LD2410.buffer[23 +i];
     }
-    if (!I2cSetDevice(VL53L1X_ADDRESS) && !I2cSetDevice((uint8_t)(VL53L1X_XSHUT_ADDRESS+i))) { continue; } // Detection for unconfigured OR configured sensor
-    if (vl53l1x_device[i].init()) {
-      if (VL53L1X_xshut) {
-        vl53l1x_device[i].setAddress((uint8_t)(VL53L1X_XSHUT_ADDRESS+i));
-      }
-      uint8_t addr = vl53l1x_device[i].getAddress();
-      vl53l1x_device[i].setTimeout(500);
-      vl53l1x_device[i].setDistanceMode(VL53L1X::VL53L1X_DISTANCE_MODE); // could be Short, Medium, Long
-      vl53l1x_device[i].setMeasurementTimingBudget(140000);
-      vl53l1x_device[i].startContinuous(50);
-      VL53L1X_detected |= xshut;
-
-      if (VL53L1X_xshut) {
-          I2cSetActive(addr);
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_I2C D_SENSOR " VL53L1X-%d " D_SENSOR_DETECTED " - " D_NEW_ADDRESS " 0x%02X"), i+1, addr);
-      } else {
-          I2cSetActiveFound(addr, "VL53L1X");
-      }
-    } // if init
-    if (0 == VL53L1X_xshut) break;
-  } // for
+    LD2410.no_one_duration = LD2410.buffer[33] << 8 | LD2410.buffer[32];
+  }
+  else if (LD2410_CMND_START_CONFIGURATION == LD2410.buffer[6]) {  // 0xFF
+    //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+    // FD FC FB FA 08 00 FF 01 00 00 01 00 40 00 04 03 02 01
+    // header     |len  |ty   |ack  |protv|bsize|trailer
+    //            |    8|     |    0|    1|   64|
+    LD2410.valid_response = true;
+  }
+  else if (LD2410_CMND_GET_FIRMWARE == LD2410.buffer[6]) {         // 0xA0
+    //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+    // FD FC FB FA 0C 00 A0 01 00 00 00 01 07 01 16 15 09 22 04 03 02 01
+    // header     |len  |ty|hd|ack  |ftype|major|minor      |trailer
+    //            |   12|  | 1|    0|  256|  1.7|   22091516|
+    AddLog(LOG_LEVEL_INFO, PSTR("LD2: Firmware version V%d.%02d.%02d%02d%02d%02d"),  // Firmware version V1.07.22091516
+      ToBcd(LD2410.buffer[13]), ToBcd(LD2410.buffer[12]),
+      ToBcd(LD2410.buffer[17]), ToBcd(LD2410.buffer[16]), ToBcd(LD2410.buffer[15]), ToBcd(LD2410.buffer[14]));
+  }
 }
 
-void Vl53l1Every_250MSecond(void) {
-  uint32_t i, xshut;
-  for (i = 0, xshut = 1; i < VL53LXX_MAX_SENSORS; i++, xshut <<= 1) {
-    if (xshut & VL53L1X_detected) {
-      uint16_t dist = vl53l1x_device[i].read();
-      if (!dist || dist > 4000) {
-        dist = 9999;
-      }
-      vl53l1x_data[i].distance = dist;
-    } // if detected
-    if (0 == VL53L1X_xshut) break;
-  } // for
+bool mHLK_LD2410::Ld2410Match(const uint8_t *header, uint32_t offset) {
+  for (uint32_t i = 0; i < 4; i++) {
+    if (LD2410.buffer[offset +i] != header[i]) { return false; }
+  }
+  return true;
 }
 
-#ifdef USE_DOMOTICZ
-void Vl53l1Every_Second(void) {
-  float distance = (float)vl53l1x_data[0].distance / 10;  // cm
-  DomoticzFloatSensor(DZ_ILLUMINANCE, distance);
-}
-#endif  // USE_DOMOTICZ
+void mHLK_LD2410::Ld2410Input(void) {
+/*
+  // Works with TasmotaSerial as SoftwareSerial but fails with HardwareSerial
+  uint32_t size = LD2410Serial->read(LD2410.buffer, LD2410_BUFFER_SIZE);
+  if (size) {
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2: Rcvd %*_H"), size, LD2410.buffer);
 
-void Vl53l1Show(bool json) {
-  uint32_t i, xshut;
-  for (i = 0, xshut = 1 ; i < VL53LXX_MAX_SENSORS ; i++, xshut <<= 1) {
-    char types[12] = "VL53L1X";
-    if (VL53L1X_xshut) {
-      snprintf_P(types, sizeof(types), PSTR("VL53L1X%c%d"), IndexSeparator(), i +1);
-    }
-    float distance = (float)vl53l1x_data[i].distance / 10;  // cm
-    if (xshut & VL53L1X_detected) {
-      if (json) {
-        ResponseAppend_P(PSTR(",\"%s\":{\"" D_JSON_DISTANCE "\":%1_f}"), types, &distance);
-#ifdef USE_DOMOTICZ
-        if (0 == TasmotaGlobal.tele_period) {
-          Vl53l1Every_Second();
+    bool target_header = (Ld2410Match(LD2410_target_header, 0));  // F4F3F2F1
+    bool config_header = (Ld2410Match(LD2410_config_header, 0));  // FDFCFBFA
+    if (target_header || config_header) {
+      uint32_t len = LD2410.buffer[4] +10;                        // Total packet size
+      if (size >= len) {                                          // Handle only the first entry (if there are more)
+        if (target_header) {                                      // F4F3F2F1
+          if (Ld2410Match(LD2410_target_footer, len -4)) {        // F8F7F6F5
+            Ld1410HandleTargetData();
+          }
         }
-#endif  // USE_DOMOTICZ
-#ifdef USE_WEBSERVER
-      } else {
-        WSContentSend_PD(HTTP_SNS_F_DISTANCE_CM, types, &distance);
-#endif
+        else if (config_header) {                                 // FDFCFBFA
+          if (Ld2410Match(LD2410_config_footer, len -4)) {        // 04030201
+            Ld1410HandleConfigData();
+          }
+        }
       }
-    } // if detected
-    if (0 == VL53L1X_xshut) break;
-  } // for
+    }
+  }
+*/
+
+  // Works with TasmotaSerial and HardwareSerial
+  while (LD2410Serial->available()) {
+    yield();                                                    // Fix watchdogs
+
+    LD2410.buffer[LD2410.byte_counter++] = LD2410Serial->read();
+    AddLog_Array(LOG_LEVEL_INFO, "LD2410.buffer", LD2410.buffer, LD2410_BUFFER_SIZE);
+    if (LD2410.byte_counter < 4) { continue; }                  // Need first four header bytes
+
+    uint32_t header_start = LD2410.byte_counter -4;             // Fix interrupted header transmits
+
+    // ALOG_INF(PSTR("header_start %d"), header_start);
+
+    bool target_header = (Ld2410Match(LD2410_target_header, header_start));  // F4F3F2F1
+    bool config_header = (Ld2410Match(LD2410_config_header, header_start));  // FDFCFBFA
+    if ((target_header || config_header) && (header_start != 0)) {
+      memmove(LD2410.buffer, LD2410.buffer + header_start, 4);  // Sync buffer with header
+      LD2410.byte_counter = 4;
+    }
+    if (LD2410.byte_counter < 6) { continue; }                  // Need packet size bytes
+
+    // ALOG_INF(PSTR("target_header %d"), target_header);
+    // ALOG_INF(PSTR("config_header %d"), config_header);
+  
+    target_header = (Ld2410Match(LD2410_target_header, 0));     // F4F3F2F1
+    config_header = (Ld2410Match(LD2410_config_header, 0));     // FDFCFBFA
+    if (target_header || config_header) {
+      uint32_t len = LD2410.buffer[4] +10;                      // Total packet size
+      if (len > LD2410_BUFFER_SIZE) {
+        LD2410.byte_counter = 0;                                // Invalid data
+        break;                                                  // Exit loop to satisfy yields
+      }
+      if (LD2410.byte_counter < len) { continue; }              // Need complete packet
+
+      // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2: Rcvd %*_H"), len, LD2410.buffer);
+
+      AddLog_Array(LOG_LEVEL_INFO, "LD2410.buffer", LD2410.buffer, ARRAY_SIZE(LD2410.buffer));
+
+      if (target_header) {                                      // F4F3F2F1
+
+//        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2: Rcvd %*_H"), len, LD2410.buffer);
+
+        if (Ld2410Match(LD2410_target_footer, len -4)) {        // F8F7F6F5
+          Ld1410HandleTargetData();
+        }
+      }
+      else if (config_header) {                                 // FDFCFBFA
+
+//        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2: Rcvd %*_H"), len, LD2410.buffer);
+
+        if (Ld2410Match(LD2410_config_footer, len -4)) {        // 04030201
+          Ld1410HandleConfigData();
+          #ifdef ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE // requires newer tasmota serial with espIDF4.4+
+          LD2410Serial->setReadChunkMode(0);                    // Disable chunk mode fixing Hardware Watchdogs
+          #endif
+        }
+      }
+    }
+    LD2410.byte_counter = 0;                                    // Finished or bad received footer
+    break;                                                      // Exit loop to satisfy yields
+  }
+  // If here then LD2410.byte_counter could still be partial correct for next loop
+}
+
+void mHLK_LD2410::Ld2410SendCommand(uint32_t command, uint8_t *val, uint32_t val_len) {
+  uint32_t len = val_len +12;
+  uint8_t buffer[len];
+  buffer[0] = 0xFD;
+  buffer[1] = 0xFC;
+  buffer[2] = 0xFB;
+  buffer[3] = 0xFA;
+  buffer[4] = val_len +2;
+  buffer[5] = 0x00;
+  buffer[6] = command;
+  buffer[7] = 0x00;
+  if (val) {
+    for (uint32_t i = 0; i < val_len; i++) {
+      buffer[8 +i] = val[i];
+    }
+  }
+  buffer[8 +val_len] = 0x04;
+  buffer[9 +val_len] = 0x03;
+  buffer[10 +val_len] = 0x02;
+  buffer[11 +val_len] = 0x01;
+
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2: Send %*_H"), len, buffer);
+
+  #ifdef ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE // requires newer tasmota serial with espIDF4.4+
+  LD2410Serial->setReadChunkMode(1);                            // Enable chunk mode introducing possible Hardware Watchdogs
+  #endif
+  LD2410Serial->flush();
+  LD2410Serial->write(buffer, len);
+}
+
+void mHLK_LD2410::Ld2410SetConfigMode(void) {                                // 0xFF
+  uint8_t value[2] = { 0x01, 0x00 };
+  Ld2410SendCommand(LD2410_CMND_START_CONFIGURATION, value, sizeof(value));
+}
+
+void mHLK_LD2410::Ld2410SetMaxDistancesAndNoneDuration(uint32_t max_moving_distance_range, uint32_t max_static_distance_range, uint32_t no_one_duration) {  // 0x60
+  // Distance range value can be set from 1 to 8 (distance gates of 0.75 meter)
+  // No-one duration value can be set from 1 to 65535 (seconds)
+  // 00 00 08 00 00 00 01 00 08 00 00 00 02 00 05 00 00 00
+  // motio|          8|stati|          8|durat|seconds
+  uint8_t lsb_nd = no_one_duration & 0xFF;
+  uint8_t msb_nd = (no_one_duration >> 8) & 0xFF;
+  uint8_t value[18] = { 0x00, 0x00, (uint8_t)max_moving_distance_range, 0x00, 0x00, 0x00, 0x01, 0x00, (uint8_t)max_static_distance_range, 0x00, 0x00, 0x00, 0x02, 0x00, lsb_nd, msb_nd, 0x00, 0x00 };
+  Ld2410SendCommand(LD2410_CMND_SET_DISTANCE, value, sizeof(value));
+}
+
+void mHLK_LD2410::Ld2410SetGateSensitivity(uint32_t gate, uint32_t moving_sensitivity, uint32_t static_sensitivity) {  // 0x64
+  // Sensitivity value can be set from 0 to 100 (%) for gates 0 to 8
+  // 00 00 03 00 00 00 01 00 28 00 00 00 02 00 28 00 00 00
+  // gate |          3|motio|         40|stati|         40
+  uint8_t value[18] = { 0x00, 0x00, (uint8_t)gate, 0x00, 0x00, 0x00, 0x01, 0x00, (uint8_t)moving_sensitivity, 0x00, 0x00, 0x00, 0x02, 0x00, (uint8_t)static_sensitivity, 0x00, 0x00, 0x00 };
+  Ld2410SendCommand(LD2410_CMND_SET_SENSITIVITY, value, sizeof(value));
+}
+
+void mHLK_LD2410::Ld2410SetAllSensitivity(uint32_t sensitivity) {            // 0x64
+  // Sensitivity value can be set from 0 to 100
+  // 00 00 FF FF 00 00 01 00 28 00 00 00 02 00 28 00 00 00
+  // gate |all gates  |motio|         40|stati|         40
+  uint8_t value[18] = { 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x01, 0x00, (uint8_t)sensitivity, 0x00, 0x00, 0x00, 0x02, 0x00, (uint8_t)sensitivity, 0x00, 0x00, 0x00 };
+  Ld2410SendCommand(LD2410_CMND_SET_SENSITIVITY, value, sizeof(value));
+}
+
+void mHLK_LD2410::Ld2410SetBaudrate(uint32_t index) {                        // 0xA1
+  uint8_t value[2] = { (uint8_t)index, 0x00 };
+  Ld2410SendCommand(LD2410_CMND_SET_BAUDRATE, value, sizeof(value));
+}
+
+/********************************************************************************************/
+
+void mHLK_LD2410::Ld2410Every100MSecond(void) {
+  if (LD2410.step) {
+    LD2410.step--;
+    switch (LD2410.step) {
+      // case 60: Set default settings
+      case 59:
+        Ld2410SetConfigMode();                                  // Stop running mode
+        break;
+      case 57:
+        Ld2410SendCommand(LD2410_CMND_FACTORY_RESET);
+        break;
+      case 56:
+        Ld2410SendCommand(LD2410_CMND_REBOOT);                  // Wait at least 1 second
+        break;
+      case 51:
+        LD2410.step = 12;
+        AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Settings factory reset"));
+        break;
+
+      // case 40: Save settings
+      case 39:
+        Ld2410SetConfigMode();                                  // Stop running mode
+        break;
+      case 37:
+        Ld2410SetMaxDistancesAndNoneDuration(8, 8, LD2410.no_one_duration);
+        break;
+      case 28 ... 36: {
+          uint32_t index = LD2410.step -28;
+          Ld2410SetGateSensitivity(index, LD2410.moving_sensitivity[index], LD2410.static_sensitivity[index]);
+        }
+        break;
+      case 27:
+        LD2410.step = 3;
+        AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Settings saved"));
+        break;
+/*
+      // case 24: pre-POC using 57600 bps instead of default 256000 bps
+      case 23:
+        AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Switch to 57600 bps"));
+        LD2410Serial->flush();
+        LD2410Serial->begin(256000);
+        break;
+      case 21:
+        Ld2410SetConfigMode();                                  // Stop running mode
+        break;
+      case 19:
+        Ld2410SetBaudrate(4);                                   // 57600 bps
+        break;
+      case 18:
+        Ld2410SendCommand(LD2410_CMND_REBOOT);                  // Wait at least 1 second
+        LD2410Serial->flush();
+        LD2410Serial->begin(57600);
+      break;
+*/
+      case 17:
+        Ld2410SetConfigMode();                                  // Stop running mode
+        break;
+      case 14:
+        if (0 == LD2410.set_engin_mode) {
+          Ld2410SendCommand(LD2410_CMND_END_ENGINEERING);
+        } else {
+          Ld2410SendCommand(LD2410_CMND_START_ENGINEERING);
+        }
+        LD2410.step = 2;
+        break;
+
+      // case 12: Init
+      case 5:
+        Ld2410SetConfigMode();                                  // Stop running mode
+        break;
+      case 3:
+        if (!LD2410.valid_response && LD2410.retry) {
+          LD2410.retry--;
+          if (LD2410.retry) {
+//            LD2410.step = 24;                                   // Change baudrate
+            LD2410.step = 7;                                    // Retry
+          } else {
+            LD2410.step = 0;
+            AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Not detected"));
+          }
+        } else {
+          Ld2410SendCommand(LD2410_CMND_GET_FIRMWARE);
+        }
+        break;
+      case 2:
+        Ld2410SendCommand(LD2410_CMND_READ_PARAMETERS);
+        break;
+      case 1:
+        Ld2410SendCommand(LD2410_CMND_END_CONFIGURATION);
+        break;
+    }
+  } else {
+    if (1 == LD2410.settings) {
+      LD2410.settings = 0;
+      LD2410.step = 40;
+    }
+    else if (2 == LD2410.settings) {
+      LD2410.settings = 0;
+      LD2410.step = 60;
+    }
+  }
+}
+
+void mHLK_LD2410::Ld2410EverySecond(void) {
+  // if (LD2410.moving_energy and (!Settings->flag6.ld2410_use_pin)) {
+
+  //   // Send state change to be captured by rules
+  //   // {"Time":"2022-11-26T10:48:16","Switch1":"ON","LD2410":{"Distance":[125.0,0.0,0.0],"Energy":[0,100]}}
+  //   MqttPublishSensor();
+  // }
 }
 
 /*********************************************************************************************\
- * Interface
+ * Commands
 \*********************************************************************************************/
 
-bool Xsns77(uint32_t function) {
-  if (!I2cEnabled(XI2C_54)) { return false; }
+// const char kLd2410Commands[] PROGMEM = "LD2410|"  // Prefix
+//   "Duration|MovingSens|StaticSens|Get|EngineeringEnd|EngineeringStart";
 
-  bool result = false;
+// void (* const Ld2410Command[])(void) PROGMEM = {
+//   &CmndLd2410Duration, &CmndLd2410MovingSensitivity, &CmndLd2410StaticSensitivity, &CmndLd2410last, &CmndLd2410EngineeringEnd, &CmndLd2410EngineeringStart };
 
-  if (FUNC_INIT == function) {
-    Vl53l1Detect();
-  }
-  else if (VL53L1X_detected) {
-    switch (function) {
-      case FUNC_EVERY_250_MSECOND:
-        Vl53l1Every_250MSecond();
-        break;
-#ifdef USE_DOMOTICZ
-     case FUNC_EVERY_SECOND:
-        Vl53l1Every_Second();
-        break;
-#endif  // USE_DOMOTICZ
-      case FUNC_JSON_APPEND:
-        Vl53l1Show(1);
-        break;
-#ifdef USE_WEBSERVER
-      case FUNC_WEB_SENSOR:
-        Vl53l1Show(0);
-        break;
-#endif  // USE_WEBSERVER
-    }
-  }
-  return result;
+// void Ld2410Response(void) {
+//   Response_P(PSTR("{\"LD2410\":{\"Duration\":%d,\"Moving\":{\"Gates\":%d,\"Sensitivity\":["),
+//     LD2410.no_one_duration, LD2410.max_moving_distance_gate);
+//   for (uint32_t i = 0; i <= LD2410_MAX_GATES; i++) {
+//     ResponseAppend_P(PSTR("%s%d"), (i==0)?"":",", LD2410.moving_sensitivity[i]);
+//   }
+//   ResponseAppend_P(PSTR("]},\"Static\":{\"Gates\":%d,\"Sensitivity\":["), LD2410.max_static_distance_gate);
+//   for (uint32_t i = 0; i <= LD2410_MAX_GATES; i++) {
+//     ResponseAppend_P(PSTR("%s%d"), (i==0)?"":",", LD2410.static_sensitivity[i]);
+//   }
+//   ResponseAppend_P(PSTR("]}}}"));
+// }
+
+// void CmndLd2410Duration(void) {
+//   // LD2410Duration 0  - Set default settings
+//   if (0 == XdrvMailbox.payload) {
+//     LD2410.settings = 2;
+//   }
+//   // LD2410Duration 5
+//   else if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= 65535)) {
+//     LD2410.no_one_duration = XdrvMailbox.payload;
+//     LD2410.settings = 1;
+//   }
+//   Ld2410Response();
+// }
+
+// void CmndLd2410MovingSensitivity(void) {
+//   // LD2410MovingSens 50,50,40,30,20,15,15,15,15
+//   uint32_t parm[LD2410_MAX_GATES +1] = { 0 };
+//   uint32_t count = ParseParameters(LD2410_MAX_GATES +1, parm);
+//   if (count) {
+//     for (uint32_t i = 0; i < count; i++) {
+//       if ((parm[i] >= 0) && (parm[i] <= 100)) {
+//         LD2410.moving_sensitivity[i] = parm[i];
+//       }
+//     }
+//     LD2410.settings = 1;
+//   }
+//   Ld2410Response();
+// }
+
+// void CmndLd2410StaticSensitivity(void) {
+//   // LD2410StaticSens 0,0,40,40,30,30,20,20,20
+//   uint32_t parm[LD2410_MAX_GATES +1] = { 0 };
+//   uint32_t count = ParseParameters(LD2410_MAX_GATES +1, parm);
+//   if (count) {
+//     for (uint32_t i = 0; i < count; i++) {
+//       if ((parm[i] >= 0) && (parm[i] <= 100)) {
+//         LD2410.static_sensitivity[i] = parm[i];
+//       }
+//     }
+//     LD2410.settings = 1;
+//   }
+//   Ld2410Response();
+// }
+
+// void CmndLd2410last(void) {
+//   Response_P(PSTR("{\"LD2410\":{\"Moving energy\":[%d,%d,%d,%d,%d,%d,%d,%d,%d],\"Static energy\":[%d,%d,%d,%d,%d,%d,%d,%d,%d],\"Light\":%d,\"Out_pin\":%d}}"),
+//           LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
+//           LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
+//           LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
+//           LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
+//           LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
+//           LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
+//           LD2410.engineering.light,LD2410.engineering.out_pin);
+// }
+
+// void CmndLd2410EngineeringEnd(void) {
+//     LD2410.set_engin_mode = 0;
+//     LD2410.step = 18;
+//     Response_P(PSTR("LD2410: End engineering mode"));
+// }
+
+// void CmndLd2410EngineeringStart(void) {
+//     LD2410.set_engin_mode= 1;
+//     LD2410.step = 18;
+//     Response_P(PSTR("LD2410: Start engineering mode"));
+// }
+
+// /*********************************************************************************************\
+//  * Presentation
+// \*********************************************************************************************/
+
+// #ifdef USE_WEBSERVER
+// const char HTTP_SNS_LD2410_CM[] PROGMEM =
+//   "{s}LD2410 " D_MOVING_DISTANCE "{m}%1_f " D_UNIT_CENTIMETER "{e}"
+//   "{s}LD2410 " D_STATIC_DISTANCE "{m}%1_f " D_UNIT_CENTIMETER "{e}"
+//   "{s}LD2410 " D_DETECT_DISTANCE "{m}%1_f " D_UNIT_CENTIMETER "{e}";
+// const char HTTP_SNS_LD2410_ENG[] PROGMEM =
+//   "{s}LD2410 " D_MOVING_ENERGY_T "{m}%d %d %d %d %d %d %d %d %d{e}"
+//   "{s}LD2410 " D_STATIC_ENERGY_T "{m}%d %d %d %d %d %d %d %d %d{e}"
+//   "{s}LD2410 " D_LD2410_LIGHT "{m}%d{e}"
+//   "{s}LD2410 " D_LD2410_PIN_STATE "{m}%d{e}";
+// #endif
+
+// void Ld2410Show(bool json) {
+//   float moving_distance = LD2410.moving_distance;
+//   float static_distance = LD2410.static_distance;
+//   float detect_distance = LD2410.detect_distance;
+//   if (json) {
+//     //                                                             cm   cm   cm                          %  %
+//     ResponseAppend_P(PSTR(",\"LD2410\":{\"" D_JSON_DISTANCE "\":[%1_f,%1_f,%1_f],\"" D_JSON_ENERGY "\":[%d,%d]}"),
+//       &moving_distance, &static_distance, &detect_distance, LD2410.moving_energy, LD2410.static_energy);
+// #ifdef USE_WEBSERVER
+//   } else {
+//     WSContentSend_PD(HTTP_SNS_LD2410_CM, &moving_distance, &static_distance, &detect_distance);
+//     if (LD2410.web_engin_mode == 1) {
+//       WSContentSend_PD(HTTP_SNS_LD2410_ENG, 
+//           LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
+//           LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
+//           LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
+//           LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
+//           LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
+//           LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
+//           LD2410.engineering.light,LD2410.engineering.out_pin);
+//     }
+// #endif
+//   }
+// }
+
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+uint8_t mHLK_LD2410::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_SENSOR_COUNT, module_state.devices);
+  return JsonBuilderI->End();
+
 }
 
-#endif  // USE_VL53L1X
-#endif  // USE_I2C
+uint8_t mHLK_LD2410::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
+
+  char buffer[100];
+
+  JsonBuilderI->Start();
+
+  // for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) 
+  // {
+  //   if(bitRead(VL53L1X_detected_bitmapped, i))
+  //   {
+  //     // JBI->Add(D_SENSOR, 
+  //     DLI->GetDeviceName_WithModuleUniqueID(D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID, i, buffer, sizeof(buffer));
+  //     JBI->Object_Start(buffer);
+
+  //     float distance = (vl53l1x_data[i].distance == 9999) ? NAN : (float)vl53l1x_data[i].distance / 10;  // cm
+  //     JBI->Add(D_DISTANCE, distance);
+  //     JBI->Add(D_DISTANCE "_mm", vl53l1x_data[i].distance);
+
+  //     JBI->Object_End();
+
+  //   }
+  // }
+
+  return JsonBuilderI->End();
+
+}
 
 
-// /********************************************************************************************/
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
 
-// void mButtons::SetPullupFlag(uint8_t button_bit)
-// {
-//   bitSet(key_no_pullup, button_bit);
-// }
+#ifdef USE_MODULE_NETWORK_MQTT
 
-// void mButtons::SetInvertFlag(uint8_t button_bit)
-// {
-//   bitSet(key_inverted, button_bit);
-// }
+void mHLK_LD2410::MQTTHandler_Init(){
 
-// bool mButtons::ModuleEnabled()
-// {
-//   return settings.buttons_found;
-// }
+  struct handler<mHLK_LD2410>* ptr;
 
-// /**
-//  * Esp8266 and esp32 will have different pull resistors
-//  * */
-// uint8_t mButtons::GetHardwareSpecificPullMethod(uint8_t real_pin)
-// {
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = SEC_IN_MIN; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mHLK_LD2410::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
-//   #ifdef ESP8266
-//   return (real_pin == 16) ? INPUT_PULLDOWN_16 : INPUT_PULLUP;
-//   #else //esp32
-//   return INPUT_PULLUP;
-//   #endif
-
-// }
-
-// void mButtons::Pre_Init(void)
-// {
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mHLK_LD2410::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
-//   AddLog(LOG_LEVEL_INFO, PSTR("Pre_Init"));
+} 
 
-//   // Check all possible pin options
-//   settings.buttons_found = 0;    
+#endif// USE_MODULE_NETWORK_MQTT
 
-//   // Check for special gpio types, store their settings as bitmaps then shift gpio as normal types.
 
-//   // else if ((mpin >= AGPIO(GPIO_KEY1_NP)) && (mpin < (AGPIO(GPIO_KEY1_NP) + MAX_KEYS))) {
-//   //   ButtonPullupFlag(mpin - AGPIO(GPIO_KEY1_NP));      //  0 .. 3
-//   //   mpin -= (AGPIO(GPIO_KEY1_NP) - AGPIO(GPIO_KEY1));
-//   // }
-//   // else if ((mpin >= AGPIO(GPIO_KEY1_INV)) && (mpin < (AGPIO(GPIO_KEY1_INV) + MAX_KEYS))) {
-//   //   ButtonInvertFlag(mpin - AGPIO(GPIO_KEY1_INV));     //  0 .. 3
-//   //   mpin -= (AGPIO(GPIO_KEY1_INV) - AGPIO(GPIO_KEY1));
-//   // }
-//   // else if ((mpin >= AGPIO(GPIO_KEY1_INV_NP)) && (mpin < (AGPIO(GPIO_KEY1_INV_NP) + MAX_KEYS))) {
-//   //   ButtonPullupFlag(mpin - AGPIO(GPIO_KEY1_INV_NP));  //  0 .. 3
-//   //   ButtonInvertFlag(mpin - AGPIO(GPIO_KEY1_INV_NP));  //  0 .. 3
-//   //   mpin -= (AGPIO(GPIO_KEY1_INV_NP) - AGPIO(GPIO_KEY1));
-//   // }
-
-//   // Lets check each type on their own, normal, inverted etc
-//   for(uint8_t sensor_index=0; sensor_index<MAX_KEYS; sensor_index++)
-//   {
-//     if(tkr_pins->PinUsed(GPIO_KEY1_ID, sensor_index))
-//     {
-//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_ID, sensor_index);
-
-//       // THIS (buttons[settings.buttons_found].pin == 16) ? INPUT_PULLDOWN_16 : INPUT_PULLUP needs moved into a function, since it differs by esp8266 and esp32?
-//       pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)); // Note: GPIO16/D0 inversion is pulldown, not up
-//       buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;  //if pulls up normally, then grounded is on ie low
-      
-      
-//       buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // so its not "not pressed" on first call
-//       // BUTTON_NOT_PRESSED_ID;
-      
-//       // (digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
-      
-      
-//       //  state = (digitalRead(buttons[settings.buttons_found].pin) != 
-//       //  bitRead(key_inverted, button_index));
-    
-//         // (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID,sensor_index)) != bitRead(key_inverted, sensor_index));
-      
-      
-//       if(settings.buttons_found++ >= MAX_KEYS){ break; }
-//     }else
-//     if(tkr_pins->PinUsed(GPIO_KEY1_INV_ID, sensor_index))
-//     {
-//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_INV_ID, sensor_index);
-//       pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin));
-//       SetInvertFlag(sensor_index); 
-//       buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;
-//       buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
-//       if(settings.buttons_found++ >= MAX_KEYS){ break; }
-//     }else
-//     if(tkr_pins->PinUsed(GPIO_KEY1_NP_ID, sensor_index))
-//     {
-//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_NP_ID, sensor_index);
-//       pinMode(buttons[settings.buttons_found].pin, INPUT);
-//       SetPullupFlag(sensor_index); 
-//       buttons[settings.buttons_found].active_state_value = HIGH; 
-//       buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;  
-//       if(settings.buttons_found++ >= MAX_KEYS){ break; }
-//     }else
-//     if(tkr_pins->PinUsed(GPIO_KEY1_INV_NP_ID, sensor_index))
-//     {
-//       buttons[settings.buttons_found].pin = tkr_pins->GetPin(GPIO_KEY1_INV_NP_ID, sensor_index);
-//       pinMode(buttons[settings.buttons_found].pin, INPUT);
-//       SetPullupFlag(sensor_index); 
-//       SetInvertFlag(sensor_index); 
-//       buttons[settings.buttons_found].active_state_value = LOW; 
-//       buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;          
-//       if(settings.buttons_found++ >= MAX_KEYS){ break; }
-//     }
-//   }
-
-//   tkr_set->devices_present += settings.buttons_found;
-//   if(settings.buttons_found){ settings.fEnableSensor = true; }
-
-//   // buttons_found = 0;
-//   // for (uint8_t i = 0; i < MAX_KEYS; i++) {
-//   //   if (tkr_pins->PinUsed(GPIO_KEY1_ID,i)) {
-//   //     buttons_found++;
-//   //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
-//   //     pinMode(tkr_pins->GetPin(GPIO_KEY1_ID,i), 
-//   //       bitRead(key_no_pullup, i) ? INPUT : ((16 == tkr_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
-        
-//   //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
-//   //     bitRead(key_no_pullup, i) ? INPUT : ((16 == tkr_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
-//   //     );
-//   //   }
-//   // }
-
-// }
-
-// // uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
-// // {
-// //   if (dual_hex_code) {
-// //     dual_hex_code--;
-// //     if (dual_hex_code) {
-// //       dual_button_code = (dual_button_code << 8) | serial_in_byte;
-// //       serial_in_byte = 0;
-// //     } else {
-// //       if (serial_in_byte != 0xA1) {
-// //         dual_button_code = 0;                // 0xA1 - End of Sonoff dual button code
-// //       }
-// //     }
-// //   }
-// //   if (0xA0 == serial_in_byte) {              // 0xA0 - Start of Sonoff dual button code
-// //     serial_in_byte = 0;
-// //     dual_button_code = 0;
-// //     dual_hex_code = 3;
-// //   }
-
-// //   return serial_in_byte;
-// // }
-
-// /*********************************************************************************************\
-//  * Button handler with single press only or multi-press and hold on all buttons
-// \*********************************************************************************************/
-
-// // #ifndef ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
-
-// // void mButtons::ButtonHandler(void)
-// // {
-  
-// //   if (tkr_time->uptime.seconds_nonreset < 4) // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
-// //   {
-// //     return; 
-// //   } 
-
-// //   /**
-// //    * state is pressed or not, it is ntnot the logical level
-// //    * so inversion matters
-// //    * */
-// //   uint8_t state = BUTTON_NOT_PRESSED_ID;
-// //   uint8_t button_present = 0;
-// //   uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;            // Extent hold time factor in case of iminnent Reset command
-// //   uint16_t loops_per_second = 1000 / tkr_set->Settings.button_debounce;
-// //   // char scmnd[20];
-
-// //  uint8_t maxdev = (tkr_set->devices_present > MAX_KEYS) ? MAX_KEYS : tkr_set->devices_present;
-
-// //   // AddLog(LOG_LEVEL_DEV_TEST, PSTR("maxdev=%d"),maxdev);
-
-// // //delay(1000);
-
-
-// //  for (uint8_t button_index = 0; button_index < maxdev; button_index++)
-// //  {
-   
-// //     state = BUTTON_NOT_PRESSED_ID;
-// //     button_present = 0;
-
-// //     if (tkr_pins->PinUsed(GPIO_KEY1_ID, button_index)) {
-// //       button_present = 1;
-// //       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID,button_index)) != bitRead(key_inverted, button_index));
-// //     }else
-// //     if (tkr_pins->PinUsed(GPIO_KEY1_INV_ID, button_index)) {
-// //       button_present = 1;
-// //       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
-// //     }
-
-// //     // AddLog(LOG_LEVEL_DEV_TEST, PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].last_state);
-
-// //           // AddLog(LOG_LEVEL_DEV_TEST, PSTR("state=%d:%d"),
-// //           // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
-// //           // // button_index,
-          
-// //           // state,
-// //           // buttons[button_index].last_state
-          
-// //           // );
-
-
-// //     if (button_present) {
-
-// //       buttons[button_index].isactive = state;
-      
-// //       // if (pCONT->Tasker_Interface(FUNC_BUTTON_PRESSED)) {
-// //       //   // Serviced internally    //causes state not to work right now, tasker is returning true always
-// //       // }
-// //       // else 
-// //       // {
-
-// //       // new PRESS, was not previously pressed
-// //       if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].last_state)) {
-// //         // if (tkr_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
-        
-// //           // AddLog(LOG_LEVEL_DEV_TEST, PSTR("state=%d:%d"),
-// //           // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
-// //           // // button_index,
-          
-// //           // state,
-// //           // buttons[button_index].last_state
-          
-// //           // );
-
-
-// //         // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
-// //         //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
-            
-// //         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), 
-// //                               button_index, 
-// //                               state,
-// //                               state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active"
-// //         );
-
-// //         // delay(1000);
-      
-// //         #ifdef USE_MODULE_NETWORK_MQTT
-// //         mqtthandler_sensor_ifchanged.flags.SendNow = true;
-// //         #endif // USE_MODULE_NETWORK_MQTT     
-  
-// //        // Type method
-// //             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
-// //             // tsaved_button_debounce = millis() + KEY_CHECK_TIME; // Push next read into future // move time forward by 1 second
-// //             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
-
-
-// //         // #ifdef USE_MODULE_CORE_RULES
-// //         // tkr_rules->NewEvent(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID,button_index,state);
-// //         // #endif
-// //         // pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
-
-
-// //    tkr_rules->NewEventRun(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, button_index, state); // Event has occured, save and check it            
-          
-// //           //}
-// //         // } else {
-// //         //   buttons[button_index].multipress = (multiwindow[button_index]) ? buttons[button_index].multipress +1 : 1;
-// //         //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, buttons[button_index].multipress);
-// //         //   multiwindow[button_index] = loops_per_second / 2;  // 0.5 second multi press window
-// //         // }
-// //         // blinks = 201;
-// //       }
-
-// // //held buttons
-// //       if (BUTTON_NOT_PRESSED_ID == state) {
-// //         buttons[button_index].hold_timer = 0;
-// //       } else {
-// //         buttons[button_index].hold_timer++;
-// //         if (tkr_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
-// //           if (buttons[button_index].hold_timer == loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // Button held for factor times longer
-// //             tkr_set->Settings.flag_system.button_single = 0;
-// //             // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_SETOPTION "13 0"));  // Disable single press only
-// //             // ExecuteCommand(scmnd, SRC_BUTTON);
-// //           }
-// //         } else {
-// //           if (tkr_set->Settings.flag_system.button_restrict) {               // Button restriction
-// //             if (buttons[button_index].hold_timer == loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // Button hold
-// //               buttons[button_index].multipress = 0;
-// //               // SendKey(0, button_index, 3);                // Execute Hold command via MQTT if ButtonTopic is set
-// //             }
-// //           } else {
-// //             if (buttons[button_index].hold_timer == loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // Button held for factor times longer
-// //               buttons[button_index].multipress = 0;
-// //               // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_RESET " 1"));
-// //               // Serial.println("WARNING -- Disabled \"ExecuteCommand(scmnd, SRC_BUTTON);\" command from support_button");
-// //               //ExecuteCommand(scmnd, SRC_BUTTON);
-// //             }
-// //           }
-// //         }
-// //       }
-
-// //       #ifdef ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
-// //       if (!tkr_set->Settings.flag_system.button_single) {                    // Allow multi-press
-// //         if (multiwindow[button_index]) {
-// //           multiwindow[button_index]--;
-// //         } else {
-// //           // if (!restart_flag && !buttons[button_index].holdbutton && (buttons[button_index].multipress > 0) && (buttons[button_index].multipress < MAX_BUTTON_COMMANDS +3)) {
-// //           //   bool single_press = false;
-// //           //   if (buttons[button_index].multipress < 3) {              // Single or Double press
-// //           //     if ((SONOFF_DUAL_R2 == my_module_type) || (SONOFF_DUAL == my_module_type) || (CH4 == my_module_type)) {
-// //           //       single_press = true;
-// //           //     } else  {
-// //           //       single_press = (tkr_set->Settings.flag_system.button_swap +1 == buttons[button_index].multipress);
-// //           //       buttons[button_index].multipress = 1;
-// //           //     }
-// //           //   }
-// //           //   if ((MI_DESK_LAMP == my_module_type) && (button_index == 0) && (rotary_changed)){// && (light_power_state)) {
-// //           //     rotary_changed = 0;                            // Color temp changed, no need to turn of the light
-// //           //   } else {
-// //           //     // if (single_press && SendKey(0, button_index + buttons[button_index].multipress, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
-// //           //     //   // Success
-// //           //     // } else {
-// //           //     //   if (buttons[button_index].multipress < 3) {          // Single or Double press
-// //           //     //     if (WifiState() > WIFI_RESTART) {          // WPSconfig, Smartconfig or Wifimanager active
-// //           //     //       restart_flag = 1;
-// //           //     //     } else {
-// //           //     //       //ExecuteCommandPower(button_index + buttons[button_index].multipress, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
-// //           //     //     }
-// //           //     //   } else {                                     // 3 - 7 press
-// //           //     //     if (!tkr_set->Settings.flag_system.button_restrict) {
-// //           //     //       snprintf_P(scmnd, sizeof(scmnd), kCommands[buttons[button_index].multipress -3]);
-// //           //     //       // ExecuteCommand(scmnd, SRC_BUTTON);
-// //           //     //     }
-// //           //     //   }
-// //           //     // }
-// //           //   }
-// //           //   buttons[button_index].multipress = 0;
-// //           // }
-// //         }
-// //       }
-// //       #endif // ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
-// //       // }//if serviced, single button, 4chan
-// //     } // if (button_present)
-    
-// //     buttons[button_index].last_state = state;
-// //   }
-// // }
-
-// // #endif // ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
-
-// // #ifdef ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
-
-// /*********************************************************************************************\
-//  * Button handler with single press only or multi-press and hold on all buttons
-//  *
-//  * ButtonDebounce (50) - Debounce time in mSec
-//  * SetOption1  (0)     - If set do not execute commands WifiConfig and Reset
-//  * SetOption11 (0)     - If set perform single press action on double press and reverse (on two relay devices only)
-//  * SetOption13 (0)     - If set act on single press only
-//  * SetOption73 (0)     - Decouple button from relay and send just mqtt topic
-// \*********************************************************************************************/
-
-// /**
-//  * @brief 
-//  * Button data event with structure
-//  * <length of data>,<state>,<type ie single/multi/hold><count>
-//  * 
-//  */
-
-// void mButtons::ButtonHandler(void) {
-
-
-//   if (tkr_time->uptime.seconds_nonreset < 4) { return; }                     // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
-
-//   uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;             // Extent hold time factor in case of iminnent Reset command
-//   uint16_t loops_per_second = 1000 / tkr_set->Settings.button_debounce;  // ButtonDebounce (50) - How often is the button polled? = 20 per second
-//   char scmnd[20];
-
-//   for (uint8_t id = 0; id < MAX_KEYS; id++) 
-//   {
-//     uint8_t state = BUTTON_NOT_PRESSED_ID;
-//     uint8_t button_present = 0;
-
-// //     if (tkr_pins->PinUsed(GPIO_KEY1_ID, id)) {
-// //       button_present = 1;
-// // // #ifdef ESP32
-// // // #ifndef CONFIG_IDF_TARGET_ESP32C3
-// // //       if (bitRead(Button.touch_mask, id)) {          // Touch
-// // //         uint32_t _value = touchRead(Pin(GPIO_KEY1_ID, id));
-// // //         state = NOT_PRESSED;
-// // //         if (_value != 0) {                                     // Probably read-error
-// // //           if (_value < TOUCH_BUTTON.pin_threshold) {
-// // //             if (++Button.touch_hits[id] > TOUCH_BUTTON.hit_threshold) {
-// // //               if (!bitRead(TOUCH_BUTTON.calibration, id+1)) {
-// // //                 state = PRESSED;
-// // //               }
-// // //             }
-// // //           } else {
-// // //             Button.touch_hits[id] = 0;
-// // //           }
-// // //         } else {
-// // //           Button.touch_hits[id] = 0;
-// // //         }
-// // //         if (bitRead(TOUCH_BUTTON.calibration, id+1)) {
-// // //           AddLog(LOG_LEVEL_INFO, PSTR("PLOT: %u, %u, %u,"), id+1, _value, Button.touch_hits[id]);  // Button number (1..4), value, continuous hits under threshold
-// // //         }
-// // //       } else
-// // // #endif  // not ESP32C3
-// // // #endif  // ESP32
-// //       {                                                 // Normal button
-// //         state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID, id)) != bitRead(Button.inverted_mask, id));
-// //       }
-// //     }
-    
-//     if (tkr_pins->PinUsed(GPIO_KEY1_ID, id)) {
-//       button_present = 1;
-//       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_ID,id)) != bitRead(key_inverted, id));
-//     }else
-//     if (tkr_pins->PinUsed(GPIO_KEY1_INV_ID, id)) {
-//       button_present = 1;
-//       state = (digitalRead(tkr_pins->GetPin(GPIO_KEY1_INV_ID,id)) != bitRead(key_inverted, id));
-//     }
-
-    
-//     // ALOG_INF(PSTR("state =%d"), state);
-
-
-// // #ifdef USE_ADC
-// //     else if (PinUsed(GPIO_ADC_BUTTON, id)) {
-// //       button_present = 1;
-// //       state = AdcGetButton(Pin(GPIO_ADC_BUTTON, id));
-// //     }
-// //     else if (PinUsed(GPIO_ADC_BUTTON_INV, id)) {
-// //       button_present = 1;
-// //       state = AdcGetButton(Pin(GPIO_ADC_BUTTON_INV, id));
-// //     }
-// // #endif  // USE_ADC
-
-
-//     if (button_present) 
-//     {
-
-//       /**
-//        * @brief If button state has changed
-//        **/
-//       if (
-//         (BUTTON_PRESSED_ID == state) && 
-//         (BUTTON_NOT_PRESSED_ID == buttons[id].last_state)
-//       ){
-
-//         if(tkr_set->Settings.flag_system.button_single) // SetOption13 (0) - Allow only single button press for immediate action
-//         {           
-//           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), id, state, state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active" );          
-//           // <length of data>,<state>,<type ie single/multi/hold><count>  
-//           tkr_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_PRESS_ID); // 1 press event
-//         }
-//         else
-//         {
-//           buttons[id].press_counter = (buttons[id].window_timer) ? buttons[id].press_counter +1 : 1;
-//           AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), id +1, buttons[id].press_counter);
-//           buttons[id].window_timer = loops_per_second / 2;  // 0.5 second multi press window
-//           // No immediate action here -- awaiting for multiple presses            
-//         }
-                
-
-//       } // if button state changed
-
-
-//       /**
-//        * @brief If the button is not pressed, keep the hold_timer count reset 
-//        **/
-//       if (BUTTON_NOT_PRESSED_ID == state) {
-//         buttons[id].hold_timer = 0;
-//       }
-//       /**
-//        * @brief If button is still held, then increment the hold timer and check if the timeout has been reached
-//        * This will be called every buttonloop
-//        **/
-//       else 
-//       {
-//         buttons[id].hold_timer++;
-
-//         if (tkr_set->Settings.flag_system.button_single)
-//         {           // SetOption13 (0) - Allow only single button press for immediate action
-        
-//           if (buttons[id].hold_timer == loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button held for factor times longer
-//             // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_SETOPTION "13 0"));  // Disable single press only             // ExecuteCommand(scmnd, SRC_BUTTON); 
-//           // <length of data>,<state>,<type ie single/multi/hold><count>  
-//             tkr_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // ERROR - Not sure what this section will do, long press no multi?
-//           }
-//         } 
-//         else 
-//         /**
-//          * @brief Checking for a long press
-//          **/
-//         {
-
-//           if (buttons[id].hold_timer == loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button hold
-//             buttons[id].press_counter = 0;
-          
-//             AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " "LongPress of (%d) seconds"), id, state, state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active", tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10 );            
-          
-//             // 3 = button pressed state, presses of button, type is long press?
-//             // <length of data>,<state>,<type ie single/multi/hold><count>  
-//             tkr_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID); 
-//           }
-//           // Long pressed not yet reached 
-//           else {
-//             if (tkr_set->Settings.flag_system.button_restrict) {     // SetOption1 (0) - Control button multipress
-//               if (buttons[id].hold_timer > loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_IGNORE] / 10) {
-//                 buttons[id].hold_timer = 0;     // Reset button hold counter to stay below hold trigger
-//                 buttons[id].press_counter = 0;  // Discard button press to disable functionality
-//               }
-//             } else {
-//               if ((buttons[id].hold_timer == loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10)) {  // SetOption32 (40) - Button held for factor times longer
-//                 buttons[id].press_counter = 0;
-//                 ALOG_INF(PSTR(D_LOG_BUTTONS "ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE id=%d"), id);
-//                 #ifndef ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
-//                 // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_RESET " 1"));
-//                 // ExecuteCommand(scmnd, SRC_BUTTON);                
-//                 ALOG_INF(PSTR(D_LOG_BUTTONS D_CMND_RESET " 1"));                
-//                 tkr_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // Resetting command
-//                 #endif // ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
-//               }
-//             }
-//           }
-//         } // if (tkr_set->Settings.flag_system.button_single)
-//       }
-
-//     // #ifdef ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
-//       if (!tkr_set->Settings.flag_system.button_single) {            // SetOption13 (0) - Allow multi-press
-//         if (buttons[id].window_timer) {
-//           buttons[id].window_timer--;
-//         } else {
-
-//           /**
-//            * @brief Hold timer is counting (pressed) and press count is within range
-//            * */
-//           if (
-//             !tkr_set->restart_flag && 
-//             !buttons[id].hold_timer && 
-//             (buttons[id].press_counter > 0) && (buttons[id].press_counter < 7)
-//           ){
-//             /**
-//              * @brief What to do with multiple key presses
-//              **/
-//             // <length of data>,<state>,<type ie single/multi/hold><count>  
-//             // Single or Multiple Events 
-
-//             tkr_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, buttons[id].press_counter == 1 ? INPUT_TYPE_SINGLE_PRESS_ID : INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
-
-//             buttons[id].press_counter = 0;
-//           }
-//         }
-//       }
-//       // #endif // ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
-
-//     }
-//     buttons[id].last_state = state;
-//   }
-// }
-
-// // #endif // ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
-
-
-
-
-
-// void mButtons::ButtonLoop(void)
-// {
-
-//   if (settings.buttons_found) {
-//     if(mTime::TimeReached(&tsaved_button_debounce, tkr_set->Settings.button_debounce)){
-//       ButtonHandler();
-//     }
-//   }
-
-// }
-
-
-
-// bool mButtons::IsButtonActive(uint8_t id){
-// // Needs to know what type the button is, low, high, no pullup etc
-//   if(buttons[id].isactive){ 
-//     return true;
-//   }
-//   return false;
-
-// }
-
-// char* mButtons::IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen){
-//   if(IsButtonActive(id)){
-//     snprintf_P(buffer, buflen, "%s", PM_PRESSED);
-//   }else{
-//     snprintf_P(buffer, buflen, "%s", PM_NOT_PRESSED);
-//   }
-//   return buffer;
-// }
-
-
-
-  
-// /******************************************************************************************************************
-//  * Commands
-// *******************************************************************************************************************/
-
-  
-// /******************************************************************************************************************
-//  * ConstructJson
-// *******************************************************************************************************************/
-
-// uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
-
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
-//   return JsonBuilderI->End();
-
-// }
-
-// uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
-
-//   JsonBuilderI->Start();
-//     // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
-
-//     JBI->Level_Start("ButtonPressed");
-//       JBI->Add("IsButtonActiveCtr", buttons[0].isactive);
-//     JBI->Level_End();
-
-
-//     /**
-//      * @brief New method to show type of press (short/long/multi)
-//      **/
-//     JBI->Level_Start("Event"); // asumes only one button at a time, will need nicer formatting later (arrays?)
-//       JBI->Add("ID", tkr_rules->event_triggered.device_id);
-//       // JBI->Add("func", tkr_rules->event_triggered.function_id);
-//       // JBI->Array_AddArray("data1", tkr_rules->event_triggered.value.data, tkr_rules->event_triggered.value.length);
-
-//       // [state][type][opt. count]
-//       if(tkr_rules->event_triggered.value.data[1] == INPUT_TYPE_SINGLE_PRESS_ID)
-//       {
-//         JBI->Add("type", "Single");
-//         JBI->Add("count", 1);
-//       }
-//       if(tkr_rules->event_triggered.value.data[1] == INPUT_TYPE_SINGLE_HOLD_ID)
-//       {
-//         JBI->Add("type", "Hold");
-//         JBI->Add("count", tkr_rules->event_triggered.value.data[2]);
-//       }
-//       if(tkr_rules->event_triggered.value.data[1] == INPUT_TYPE_MULTIPLE_PRESS_ID)
-//       {
-//         JBI->Add("type", "Multiple");
-//         JBI->Add("count", tkr_rules->event_triggered.value.data[2]);
-//       }
-
-//     JBI->End();
-
-
-
-//     JBI->Add("pin",    buttons[0].pin);
-//     JBI->Add("dpin",   digitalRead(buttons[0].pin));
-//     JBI->Array_Start("bit_set_invert");
-//       for(int i=0;i<MAX_KEYS;i++){ JBI->Add(bitRead(key_inverted, i)); }
-//     JBI->Array_End();
-//     JBI->Array_Start("state");
-//       for(int i=0;i<MAX_KEYS;i++){ JBI->Add(buttons[i].state); }
-//     JBI->Array_End();
-
-//   return JsonBuilderI->End();
-
-// }
-  
-// /******************************************************************************************************************
-//  * MQTT
-// *******************************************************************************************************************/
-
-// #ifdef USE_MODULE_NETWORK_MQTT
-
-// void mButtons::MQTTHandler_Init(){
-
-//   struct handler<mButtons>* ptr;
-
-//   ptr = &mqtthandler_settings_teleperiod;
-//   ptr->tSavedLastSent = millis();
-//   ptr->flags.PeriodicEnabled = true;
-//   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = SEC_IN_MIN; 
-//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   ptr->json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-//   ptr->ConstructJSON_function = &mButtons::ConstructJSON_Settings;
-
-//   ptr = &mqtthandler_sensor_teleperiod;
-//   ptr->tSavedLastSent = millis();
-//   ptr->flags.PeriodicEnabled = true;
-//   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = SEC_IN_MIN; 
-//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   ptr->json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-//   ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
-
-//   ptr = &mqtthandler_sensor_ifchanged;
-//   ptr->tSavedLastSent = millis();
-//   ptr->flags.PeriodicEnabled = true;
-//   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = 10; 
-//   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   ptr->json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-//   ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
-  
-// } //end "MQTTHandler_Init"
-
-// /**
-//  * @brief Set flag for all mqtthandlers to send
-//  * */
-// void mButtons::MQTTHandler_Set_RefreshAll()
-// {
-//   for(auto& handle:mqtthandler_list){
-//     handle->flags.SendNow = true;
-//   }
-// }
-
-// /**
-//  * @brief Update 'tRateSecs' with shared teleperiod
-//  * */
-// void mButtons::MQTTHandler_Set_DefaultPeriodRate()
-// {
-//   for(auto& handle:mqtthandler_list){
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = tkr_set->Settings.sensors.teleperiod_secs;
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = tkr_set->Settings.sensors.ifchanged_secs;
-//   }
-// }
-
-// /**
-//  * @brief MQTTHandler_Sender
-//  * */
-// void mButtons::MQTTHandler_Sender(uint8_t id)
-// {    
-//   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BUTTONS_ID, handle, id);
-//   }
-// }
-  
-// #endif// USE_MODULE_NETWORK_MQTT
-
-// /******************************************************************************************************************
-//  * WebServer
-// *******************************************************************************************************************/
-
-//     #ifdef USE_MODULE_NETWORK_WEBSERVER
-
-// void mButtons::WebAppend_Root_Draw_Table(){
-
-//   tkr_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(settings.buttons_found,"button_table", "Button");
-
-
-// }
-
-// //append to internal buffer if any root messages table
-// void mButtons::WebAppend_Root_Status_Table(){
-
-//   char buffer[20];
-
-//   JsonBuilderI->Array_Start_P(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR);// Class name
-//   for(int row=0;row<settings.buttons_found;row++){
-//     JsonBuilderI->Level_Start();
-//       JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,row);
-//       JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,IsButtonActiveCtr(row, buffer, sizeof(buffer)));//"\"%s\"", IsButtonActiveCtr(row, buffer, sizeof(buffer)));
-//       if(IsButtonActive(row)){
-//         JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#00ff00"); //make webcolours dlist in progmem!
-//       }else{
-//         JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#ff0000");
-//       }
-    
-//     JsonBuilderI->Level_End();
-//   }
-//   JsonBuilderI->Array_End();
-  
-// }
-
-//     #endif // USE_MODULE_NETWORK_WEBSERVER
-
-
-
-
-
-
-// #endif
+#endif

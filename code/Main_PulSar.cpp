@@ -476,6 +476,7 @@ void setup(void)
   pCONT->Tasker_Interface(TASK_PRE_INIT);
   // Init devices
   pCONT->Tasker_Interface(TASK_INIT);
+  ALOG_INF(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));
   // Init devices after others have been configured fully
   pCONT->Tasker_Interface(TASK_POST_INIT);
   // Run system functions 

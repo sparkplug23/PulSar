@@ -2,7 +2,7 @@
 #ifndef _TOF_VL53L1X_H_
 #define _TOF_VL53L1X_H_
 
-#define D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID ((5*1000)+26)
+#define D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID ((5*1000)+27)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -71,7 +71,7 @@ class mTOF_VL53L1X :
 
     uint8_t MAX_SENSORS = 2;
 
-    #define XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME 2 // per datasheet it is 1.2ms
+    #define XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME 10 // per datasheet it is 1.2ms
 
     VL53L1X vl53l1x_device[VL53LXX_MAX_SENSORS];
 
@@ -100,9 +100,9 @@ class mTOF_VL53L1X :
     {
         uint8_t count = 0;
         for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) {
-        if (bitRead(VL53L1X_detected_bitmapped, i)) {
-            count++;
-        }
+            if (bitRead(VL53L1X_detected_bitmapped, i)) {
+                count++;
+            }
         }
         return count;
     }

@@ -113,6 +113,11 @@
  // #define USE_DEBUG_PRINT
  // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
+//new feature to only show logs for a specific module when developing code
+  #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
+  // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE_ARRAY [1, 2]
+
+
  ///////////////////////////////////////////// Module Logs
  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
  // #define ENABLE_FREERAM_APPENDING_SERIAL
@@ -154,16 +159,16 @@
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
  
-//  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-//  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
 //  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
 // #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
-#define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
+// #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+// #define ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
+#define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
 // #define ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
 // #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
 // #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
+// #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
+
 
 // #define ENABLE_TEMPLATE_SECTION__DRIVERS__AUDIO_SPEAKER
 // #define ENABLE_TEMPLATE_SECTION__DRIVERS__AUDIO_BUZZER
@@ -179,17 +184,6 @@
  ************************************/  
 
  #define USE_MODULE_SENSORS_INTERFACE
- #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
-   #define USE_MODULE_SENSORS_INTERFACE
-     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
- #endif
- #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
-   #define USE_MODULE_SENSORS_BME
-     #define ENABLE_DEVFEATURE_BME680
- #endif
- #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-   #define USE_MODULE_SENSORS_BH1750
- #endif
  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
    #define USE_MODULE_SENSORS_INTERFACE
    #define USE_MODULE_SENSORS_PIR
@@ -198,6 +192,17 @@
  #define USE_MODULE_SENSORS_BUTTONS
    #define ENABLE_DEVFATURE_BUTTON__REMOVE_MQTT_BUTTONS
    #define SOC_TOUCH_VERSION_1
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
+   #define USE_MODULE_SENSORS_SR04
+   #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+   #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+  #endif
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+  #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #endif
+
 
  #define USE_MODULE_DRIVERS_LEDS  
 
@@ -303,16 +308,24 @@
      #endif
      #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
       "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\","
-    //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
      #endif
+     #ifdef USE_MODULE_SENSORS_SR04
+     "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
+     "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+     #endif 
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-     "\"35\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\","
+     "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-     "\"34\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-     "\"5\":\""  D_GPIO_FUNCTION_PIR_3_CTR "\","
+     "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+     #endif
+     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+     "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
+     "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
      #endif
     //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
     //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
@@ -322,9 +335,10 @@
     //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
     //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
      #endif
+     
     //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
     //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -364,10 +378,13 @@
        "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "\""
      "],"
      "\"" D_MODULE_SENSORS__TOF_VL53L0X__CTR "\":["
-       "\"" "TOF0x" "\""
+       "\"" "TOF_VL53L0X" "\""
      "],"
      "\"" D_MODULE_SENSORS__TOF_VL53L1X__CTR "\":["
-       "\"" "TOF1x" "\""
+       "\"" "TOF_VL53L1X" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_SR04_CTR "\":["
+       "\"" "SRO4" "\""
      "],"
      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""

@@ -509,15 +509,15 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   #include "5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.h"
-  #define tkr_tof_vl0x                         static_cast<mTOF_VL53L0X*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__TOF_VL53L0X__ID))
+  #define tkr_tof_vl0x                         static_cast<mTOF_VL53L0X*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__TOF_VL53L0X__ID))
 #endif
 #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
   #include "5_Sensors/27_TOF_VL53L1X/mTOF_VL53L1X.h"
-  #define tkr_tof_vl1x                         static_cast<mTOF_VL53L1X*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__TOF_VL53L1X__ID))
+  #define tkr_tof_vl1x                         static_cast<mTOF_VL53L1X*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID))
 #endif
 #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-  #include "5_Sensors/28_Radar_HLK_LD2410/mRadar_HLK_LD2410.h"
-  #define tkr_radar_ld2410                     static_cast<mRadar_HLK_LD2410*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__RADAR_HLK_LD2410__ID))
+  #include "5_Sensors/28_Radar_HLK_LD2410/Radar_HLK_LD2410.h"
+  #define tkr_radar_ld2410                     static_cast<mHLK_LD2410*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID))
 #endif
 #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
   #include "5_Sensors/30_ADCInternal/mADCInternal.h"
@@ -804,6 +804,10 @@ class mTaskerManager{
             });
         return (it != pModule.end()) ? *it : nullptr;
     }
+
+    #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
+    [[gnu::hot]] uint16_t module_id_being_serviced = 0;
+    #endif
 
 
     // Function to find a module class name by unique ID

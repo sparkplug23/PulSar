@@ -1108,6 +1108,10 @@
 #define D_GPIO_FUNCTION_SDS0X1_TX_CTR      "SDS0X1 Tx"
 #define D_GPIO_FUNCTION_SR04_ECHO_CTR      "SR04 Ech"
 #define D_GPIO_FUNCTION_SR04_TRIG_CTR      "SR04 Trig"
+
+#define D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "LD2410 RX"
+#define D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "LD2410 TX"
+
 #define D_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR      "REnc A"
 #define D_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR      "REnc B"
 #define D_GPIO_FUNCTION_NEXTION_RX_CTR     "Nextion Rx"
@@ -1349,21 +1353,21 @@
   #define D_LOG_RELAYS "RLY: "         // relays
   #define D_LOG_TIME2 "TIM2: "         // Time testing v2
   #define D_LOG_TIME "TIM: "         // Time
-  #define D_LOG_UPTIME "UPT: "         // Uptime
-  #define D_LOG_DHT "DHT: "         // Uptime
-  #define D_LOG_BME "BME: "         // Uptime
-  #define D_LOG_PZEM "PZM: "         // Uptime
-  #define D_LOG_SETTINGS "SET: "         // Uptime
-  #define D_LOG_ULTRASONIC "ULT: "         // Uptime
-  #define D_LOG_DB18 "DB8: "         // Uptime
-  #define D_LOG_HEATINGPANEL "HPL: "         // Uptime
-  #define D_LOG_HEATING "HET: "         // Uptime
+  #define D_LOG_UPTIME "UPT: "         
+  #define D_LOG_DHT "DHT: "         
+  #define D_LOG_BME "BME: "         
+  #define D_LOG_PZEM "PZM: "         
+  #define D_LOG_SETTINGS "SET: "         
+  #define D_LOG_ULTRASONIC "ULT: "         
+  #define D_LOG_DB18 "DB8: "         
+  #define D_LOG_HEATINGPANEL "HPL: "         
+  #define D_LOG_HEATING "HET: "         
   #define D_LOG_PIR "PIR: "         // PIR
   #define D_LOG_CEILINGFAN "CFN: "         // Ceiling Fan
   #define D_LOG_RESPONSE "RES: "
   #define D_LOG_CLASSLIST "CLL: "
   #define D_LOG_NEXTION "NEX: "
-  #define D_LOG_CHIME "CHM: "         // Uptime
+  #define D_LOG_CHIME "CHM: "         
   #define D_LOG_BLINDS "BLD: " 
   #define D_LOG_MEMORY "MEM: "       // 
   #define D_LOG_ASYNC "ASC: "
@@ -1379,15 +1383,15 @@
   #define D_LOG_ASYNC "ASC: "
   #define D_LOG_BH1750 "BH1: "
   #define D_LOG_BLINDS "BLD: "
-  #define D_LOG_BME "BME: "         // Uptime
+  #define D_LOG_BME "BME: "         
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CAMERA "CAM: "
   #define D_LOG_CEILINGFAN "CFN: "         // Ceiling Fan
-  #define D_LOG_CHIME "CHM: "         // Uptime
+  #define D_LOG_CHIME "CHM: "         
   #define D_LOG_CLASSLIST "CLL: "
   #define D_LOG_COMMAND "CMD: "      // Command
   #define D_LOG_CONFIG "CFG: "       // Settings
-  #define D_LOG_DB18 "DB8: "         // Uptime
+  #define D_LOG_DB18 "DB8: "         
   #define D_LOG_DEBUG "DBG: "        // Debug
   #define D_LOG_DHT "DHT: "          // DHT sensor
   #define D_LOG_DSB "DSB: "          // DS18xB20 sensor
@@ -1396,9 +1400,10 @@
   #define D_LOG_FONA "FON: "
   #define D_LOG_GARAGE "GAR: "         // relays
   #define D_LOG_GPS "GPS: "
-  #define D_LOG_HEATING "HET: "         // Uptime
-  #define D_LOG_HEATINGPANEL "HPL: "         // Uptime
+  #define D_LOG_HEATING "HET: "         
+  #define D_LOG_HEATINGPANEL "HPL: "         
   #define D_LOG_HTTP "HTP: "         // HTTP webserver
+  #define D_LOG_HLK_LD2410 "HLK: "
   #define D_LOG_I2C "I2C: "          // I2C
   #define D_LOG_INA219 "INA: "
   #define D_LOG_IRR "IRR: "          // Infra Red Received
@@ -1417,7 +1422,7 @@
   #define D_LOG_PIR "PIR: "         // PIR
   #define D_LOG_PIXEL // Neopixels
   #define D_LOG_PUBSUB "PSB: "         // PubSub
-  #define D_LOG_PZEM "PZM: "         // Uptime
+  #define D_LOG_PZEM "PZM: "         
   #define D_LOG_RELAYS "RLY: "         // relays
   #define D_LOG_RESPONSE "RES: "
   #define D_LOG_RESULT "RSL: "       // Result
@@ -1425,7 +1430,7 @@
   #define D_LOG_RULES "RUL: "
   #define D_LOG_SDCARD "SDC: "
   #define D_LOG_SERIAL "SER: "       // Serial
-  #define D_LOG_SETTINGS "SET: "         // Uptime
+  #define D_LOG_SETTINGS "SET: "         
   #define D_LOG_SHT1 "SHT: "         // SHT1x sensor
   #define D_LOG_SR04 "SR4: "
   #define D_LOG_SUBCOMMAND "SUB: " // Subcommand
@@ -1438,10 +1443,10 @@
   #define D_LOG_TOF_VL53L0X "TOFL0X: "
   #define D_LOG_TOF_VL53L1X "TOFL1X: "
   #define D_LOG_TIME2 "TIM2: "         // Time testing v2
-  #define D_LOG_ULTRASONIC "ULT: "         // Uptime
+  #define D_LOG_ULTRASONIC "ULT: "         
   #define D_LOG_UPLOAD "UPL: "       // Upload
   #define D_LOG_UPNP "UPP: "         // UPnP
-  #define D_LOG_UPTIME "UPT: "         // Uptime
+  #define D_LOG_UPTIME "UPT: "         
   #define D_LOG_WIFI "WIF: "         // Wifi
 
 #endif // ENABLE_FEATURE_LOG_PREFIXES
