@@ -252,8 +252,8 @@ class mFileSystem :
 
     #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
     String getContentType(AsyncWebServerRequest* request, String filename);
-    bool handleFileRead(AsyncWebServerRequest* request, String path);
     #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+    bool handleFileRead(AsyncWebServerRequest* request, String path);
 
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);

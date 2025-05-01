@@ -132,7 +132,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       }
     #else
 
-      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT START<<\n\r\n\r"); }
+      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r>>HIGHLIGHT START<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\r"); }
       #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
       if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
       #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
@@ -140,7 +140,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
       SERIAL_DEBUG.printf(PSTR("%s%S %s\r\n"), mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
 
-      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT END<<\n\r\n\r"); }
+      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r>>HIGHLIGHT END<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\r"); }
       #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
       if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
       #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS

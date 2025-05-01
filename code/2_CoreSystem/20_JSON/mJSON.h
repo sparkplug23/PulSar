@@ -140,7 +140,11 @@ class JsonBuilder{
     void Write_P(const char* formatP, ...);
 
     void Object_Start(const char* key);
-    void Level_Start_P(const char* keyP, ...);
+    
+    #define Level_Start_P Object_Start_P  // tmp alias for compatibility with old code
+    void Object_Start_P(const char* keyP, ...);
+
+
     void Object_Start_F(const char* keyP, ...);
     void Object_End();
 

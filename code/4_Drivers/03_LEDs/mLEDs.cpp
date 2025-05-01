@@ -296,7 +296,9 @@ void mLEDs::StartEffect_Pulse(uint8_t index, uint8_t pulseCount, uint16_t period
 
   // Attach the PWM channel to the pin for the pulse mode
   uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, index);
+  #ifdef ESP32 // tmp fix for 4chPro
   analogAttach(pin, index);  // The PWM channel corresponds to the index of the LED
+  #endif
 }
 
 

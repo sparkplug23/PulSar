@@ -21,7 +21,8 @@
 int8_t mPIR::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
-  
+
+
   switch(function){
     /************
      * INIT SECTION * 
@@ -148,6 +149,7 @@ void mPIR::ReadSensor()
     if (pin != -1) {
       // Read the current state of the pin
       bool currentState = digitalRead(pin);
+      // ALOG_INF(PSTR("currentState %d"), currentState);
 
       // Adjust the `isActive` state based on `isActiveLow`
       bool isActive;

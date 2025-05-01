@@ -17,9 +17,12 @@ typedef struct {
   uint8_t       free_003[1];               // 283
 } TRtcFastboot;
 extern TRtcFastboot RtcFastboot;
-#ifdef ESP32
+// #ifdef ESP32
+// extern RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
+// #endif  // ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
 extern RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
-#endif  // ESP32
+#endif
 
 extern const uint16_t RTC_MEM_VALID;
 extern uint32_t rtc_fastboot_crc;
@@ -58,9 +61,15 @@ typedef struct {
   uint32_t      utc_time;                  // 2FC
 } TRtcSettings;
 extern TRtcSettings RtcSettings;
-#ifdef ESP32
-extern RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
-#endif  // ESP32
+// #ifdef ESP32
+// extern RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
+// #endif  // ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+extern RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
+#endif
+
+
+
 
 extern uint32_t rtc_settings_crc;
 extern uint32_t GetRtcSettingsCrc(void);

@@ -235,7 +235,7 @@ void JsonBuilder::Array_End()
 }
 
 
-void JsonBuilder::Level_Start_P(const char* keyP, ...)
+void JsonBuilder::Object_Start_P(const char* keyP, ...)
 {
 
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }

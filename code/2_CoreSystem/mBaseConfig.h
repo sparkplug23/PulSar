@@ -43,11 +43,13 @@ With latest version, all longer term shared debug features should be added here 
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
+  #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
 #include "2_CoreSystem/mFirmwareDefaults.h" //addded feb2025
 #else
 // #error "here"
 #endif // USE_USER_MICHAEL
 
+#include "0_ConfigUser/Templates/TemplateBase__HardwareSpecific.h"
 
 /*********************************************************************************************\
  *
@@ -131,7 +133,17 @@ With latest version, all longer term shared debug features should be added here 
 // Forcing this to disable until all devices are optimised so nothing is starved of CPU 
 #define DISABLE_SLEEP
 
-#ifdef ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+#ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+#define ENABLE_FEATURE_WATCHDOG_TIMER
+#define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+#define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+// #error "ENABLE_DEVFEATURE_FASTBOOT_DETECTION is not supported on ESP32C3"
+#define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+#define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+#endif
+#endif
+#ifdef ESP8266
 #ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
@@ -140,6 +152,8 @@ With latest version, all longer term shared debug features should be added here 
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 #endif
 #endif
+
+
 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
@@ -311,9 +325,9 @@ With latest version, all longer term shared debug features should be added here 
 #define USE_MODULE_NETWORK_WIFI
 #endif // DISABLE_NETWORK
 
-#ifndef MQTT_HOST
-#define MQTT_HOST "192.168.0.70" // default
-#endif
+// #ifndef MQTT_HOST
+// #define MQTT_HOST "192.168.0.70" // default
+// #endif
 
   #define ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
 
@@ -327,10 +341,10 @@ With latest version, all longer term shared debug features should be added here 
 // #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
 
 
-// temporary, to be phased out into "MQTT_HOST"
-#ifdef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-#define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-#endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+// // temporary, to be phased out into "MQTT_HOST"
+// #ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+// #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+// #endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
@@ -477,7 +491,10 @@ With latest version, all longer term shared debug features should be added here 
 #define KEY_CHECK_TIME         1000
 #define KEY_DEBOUNCE_TIME      50                // [ButtonDebounce] Number of mSeconds button press debounce time
 #define KEY_HOLD_TIME          25                // [SetOption32] Number of 0.1 seconds to hold Button or external Pushbutton before sending HOLD message
+
+#ifndef SWITCH_DEBOUNCE_TIME
 #define SWITCH_DEBOUNCE_TIME   50                // [SwitchDebounce] Number of mSeconds switch press debounce time
+#endif
 #define SWITCH_MODE            SWITCHMODE_TOGGLE_ID            // [SwitchMode] TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE (the wall switch state)
 
 
@@ -679,6 +696,10 @@ With latest version, all longer term shared debug features should be added here 
 #define I2CDRIVERS_0_31        0xFFFFFFFF          // Enable I2CDriver0  to I2CDriver31
 #define I2CDRIVERS_32_63       0xFFFFFFFF          // Enable I2CDriver32 to I2CDriver63
 #define I2CDRIVERS_64_95       0xFFFFFFFF          // Enable I2CDriver64 to I2CDriver95
+#ifndef I2C_BUS_SPEED
+#define I2C_BUS_SPEED           100000             // I2C bus speed (100000 or 400000)
+// #define I2C_BUS_SPEED           400000             // I2C bus speed (100000 or 400000)
+#endif
 
 #define USE_PWM // NEEDED FOR H801
 

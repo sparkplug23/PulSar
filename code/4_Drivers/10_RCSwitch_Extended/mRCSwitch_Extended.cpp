@@ -35,7 +35,7 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function)
   {
@@ -274,18 +274,18 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a TASK_MQTT_INIT and group mqtt togather
+      MQTTHandler_Init();
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate(); // Load teleperiod setting into local handlers
-    break; 
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
-    #endif  
+    case TASK_MQTT_SENDER:
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
+    #endif // USE_MODULE_NETWORK_MQTT
   }
 
 }//end
@@ -692,7 +692,7 @@ uint8_t logic_level = LOW;
 
 void mRCSwitch::Pre_Init(void)
 {
-
+  module_state.mode = ModuleStatus::Initialising;
 }
 
 
@@ -726,7 +726,7 @@ void mRCSwitch::Init(void)
     mySwitch->setReceiveProtocolMask(tkr_set->Settings.rf_protocol_mask);
     #endif // ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
 
-    settings.fEnableSensor = true;
+    module_state.mode = ModuleStatus::Running;
   }
 
   if (tkr_pins->PinUsed(GPIO_RF_433MHZ_TX_ID)) 
@@ -738,7 +738,7 @@ void mRCSwitch::Init(void)
     }
 
     mySwitch->enableTransmit(tkr_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
-    settings.fEnableSensor = true;
+    module_state.mode = ModuleStatus::Running;
   }
 
 }
@@ -746,6 +746,13 @@ void mRCSwitch::Init(void)
 
 void mRCSwitch::ReceiveCheck(void) 
 {
+
+  if(tkr_time->uptime_seconds_nonreset < 10)
+  {
+    return;
+  }
+
+  // ALOG_INF(PSTR("RFR: ReceiveCheck() %d"), mySwitch->available());
 
   if (mySwitch->available())
   {
@@ -755,7 +762,7 @@ void mRCSwitch::ReceiveCheck(void)
     int protocol = mySwitch->getReceivedProtocol();
     int delay = mySwitch->getReceivedDelay();
 
-    ALOG_DBG(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
+    ALOG_INF(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
 
     uint32_t now = millis();
     if ((now - rx_pkt.received_time_millis > tkr_set->Settings.rf_duplicate_time) && (data > 0))
@@ -769,7 +776,7 @@ void mRCSwitch::ReceiveCheck(void)
       rx_pkt.bit_length = bits;
       rx_pkt.protocol = protocol;
       rx_pkt.delay = delay;
-      rx_pkt.received_utc_time = tkr_time->GetTimeShortNowU32();
+      rx_pkt.received_utc_time = tkr_time->UtcTime();
 
       /**
        * @brief Share with mqtt
@@ -1085,7 +1092,7 @@ void mRCSwitch::parse_JSONCommand(JsonParserObject obj)
 uint8_t mRCSwitch::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_COUNT, settings.fEnableSensor);
+    // JBI->Add(D_COUNT, settings.fEnableSensor);
     JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
   return JBI->End();
 
@@ -1104,7 +1111,7 @@ uint8_t mRCSwitch::ConstructJSON_State(uint8_t json_level, bool json_appending){
       JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
       JBI->Add(D_RF_PULSE, rx_pkt.delay);   
       JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
-      JBI->Add(D_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+      JBI->Add(D_TIME, tkr_time->GetTime().c_str() );
       
     
     JBI->Object_End();
@@ -1148,46 +1155,7 @@ void mRCSwitch::MQTTHandler_Init()
 
 } 
 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mRCSwitch::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mRCSwitch::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mRCSwitch::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
 #endif // USE_MODULE_NETWORK_MQTT
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-
 
 
 

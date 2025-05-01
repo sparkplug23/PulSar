@@ -26,6 +26,10 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case TASK_LOOP: 
       EveryLoop();
+      
+      #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+        Update_UnifiedFilteredReadings();
+      #endif
     break;  
     case TASK_EVERY_SECOND:{
       // Serial.println(sizeof(sensors_reading_t));
@@ -114,6 +118,31 @@ void mSensorsInterface::Init(void)
 {
   rt.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
   module_state.mode = ModuleStatus::Running;
+
+
+  #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_OILTANK_ADD
+  // AddFilteredSensor(5027, 0, 60, 120);
+  // TEMP: Filter for temperature sensor in module 5027, sensor index 0
+
+  AddFilteredSensor(tkr_tof_vl1x->GetModuleUniqueID(), 0, 60, 60, SENSOR_TYPE_DISTANCE_ID, "OilReading1min");
+  AddFilteredSensor(tkr_tof_vl1x->GetModuleUniqueID(), 0, 3600, 360, SENSOR_TYPE_DISTANCE_ID, "OilReading1Hr");
+  
+
+  // filtername, which allows for OH decoding.
+  #endif
+
+  #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_HARDCODED_ADD
+  // AddFilteredSensor(5027, 0, 60, 120);
+  // TEMP: Filter for temperature sensor in module 5027, sensor index 0
+
+
+  AddFilteredSensor(pCONT_db18->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "DB10Sec");
+  AddFilteredSensor(pCONT_db18->GetModuleUniqueID(), 0, 60, 60, SENSOR_TYPE_TEMPERATURE_ID, "DB1Min");
+  AddFilteredSensor(pCONT_bme->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "BME10Sec");
+  #endif
+
+
+
 }
 
 
@@ -233,6 +262,9 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_level, bool json_
  */
 uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
+
+  // if(tkr_time->uptime_seconds_nonreset > 30)
+  //   ALOG_INF(PSTR("ConstructJSON_Sensor()"));
 
   JBI->Start();
 
@@ -725,6 +757,126 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
   return JBI->End();
     
 }
+
+#ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+uint8_t mSensorsInterface::ConstructJSON_Unified_Filtered(uint8_t json_level, bool json_appending)
+{
+  ALOG_INF(PSTR("ConstructJSON_Unified_Filtered()"));
+
+  JBI->Start();
+
+  char buffer[100] = {0};
+
+  // Step 1: Get unique sensor types
+  std::vector<uint16_t> unique_types;
+  for (auto& entry : filtered_sensors) {
+    if (std::find(unique_types.begin(), unique_types.end(), entry.desired_type_id) == unique_types.end()) {
+      unique_types.push_back(entry.desired_type_id);
+    }
+  }
+
+  // Step 2: Loop through each type and group entries
+  for (auto type_id : unique_types)
+  {
+    bool any_sensor_added = false;
+
+    for (auto& entry : filtered_sensors)
+    {
+      if (entry.desired_type_id != type_id)
+        continue;
+
+      // Get module and latest raw value
+      sensors_reading_t val;
+      auto* module = pCONT->GetModule(entry.module_id);
+      if (!module) continue;
+
+      module->GetSensorReading(&val, entry.sensor_index);
+      if (!val.Valid()) continue;
+
+      for (size_t i = 0; i < val.sensor_type.size(); i++)
+      {
+        if (val.sensor_type[i] == type_id && i < val.data_f.size())
+        {
+          float raw_value = val.data_f[i];
+          float filtered_value = entry.filter_buffer.Mean();
+
+          // Start type-level JSON object if this is the first sensor for this type
+          if (!any_sensor_added)
+          {
+            JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
+            any_sensor_added = true;
+          }
+
+          // Sensor name → object with metadata
+          DLI->GetDeviceName_WithModuleUniqueID(entry.module_id, entry.sensor_index, buffer, sizeof(buffer));
+          JBI->Object_Start(entry.filter_name.c_str()); // "FilterName": {
+            JBI->Add("Name", buffer); // device name inside
+            JBI->Add("Raw", raw_value);
+            JBI->Add("Avg", filtered_value);
+            JBI->Add("Samples", static_cast<uint16_t>(entry.filter_buffer.GetRawData().size()));
+            JBI->Add("WindowSec", static_cast<uint16_t>(entry.window_secs));
+            JBI->Add("SamplesPerSec", (float)entry.sample_count / (float)entry.window_secs);
+          JBI->Object_End(); // }
+
+          break; // done with this sensor
+        }
+      }
+    }
+
+    if (any_sensor_added)
+    {
+      JBI->Object_End(); // Close the type block
+    }
+  }
+
+  return JBI->End();
+}
+#endif
+
+
+
+
+
+#ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+void mSensorsInterface::Update_UnifiedFilteredReadings()
+{
+    uint32_t now = millis();
+
+    for (auto& entry : filtered_sensors)
+    {
+        if (now - entry.tLastUpdate < entry.sample_interval_ms) {
+            continue; // Not time to sample this sensor yet
+        }
+
+        // Find module by unique ID
+        auto* module = pCONT->GetModule(entry.module_id);
+        if (!module) {
+            continue; // Module not found
+        }
+
+        sensors_reading_t val;
+        module->GetSensorReading(&val, entry.sensor_index);
+
+        if (!val.Valid()) {
+            continue; // Skip invalid reading
+        }
+
+        // Look for the desired sensor_type within the reading
+        for (size_t i = 0; i < val.sensor_type.size(); i++) {
+            ALOG_INF(PSTR("sensor_type[%d] = %d"), i, val.sensor_type[i]);
+
+            if (val.sensor_type[i] == entry.desired_type_id && i < val.data_f.size()) {
+                entry.filter_buffer.Add(val.data_f[i]);
+                Serial.print(val.data_f[i]); Serial.print(" ");
+                Serial.println(entry.filter_buffer.Mean());
+                entry.tLastUpdate = now;
+                break; // Only add the first match
+            }
+        }
+    }
+}
+#endif
+
 
 
 
@@ -1417,6 +1569,19 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
   mqtthandler_list.push_back(ptr);
+  
+  #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+  ptr = &mqtthandler_sensor_unified_filtered;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
+  mqtthandler_list.push_back(ptr);
+  #endif
 
   //motion events
   ptr = &mqtthandler_motion_event_ifchanged;

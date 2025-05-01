@@ -36,7 +36,7 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
       pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
       pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
@@ -65,18 +65,21 @@ void mSwitches::Pre_Init(void)
      **/
     if(tkr_pins->PinUsed(GPIO_SWT1_ID, i))
     { 
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_ID"), i);
       SetSwitchUsed(i);
       pin = tkr_pins->GetPin(GPIO_SWT1_ID, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
     if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
     {    
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV_ID"), i);
       SetSwitchUsed(i);
       pin = tkr_pins->GetPin(GPIO_SWT1_INV_ID, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
     if(tkr_pins->PinUsed(GPIO_SWT1_NP_ID, i)) // Standard pin, active high, NO pulls
     {
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_NP_ID"), i);
       SetSwitchUsed(i);
       pin = tkr_pins->GetPin(GPIO_SWT1_NP_ID, i);
       pinMode(pin, INPUT);
@@ -84,6 +87,7 @@ void mSwitches::Pre_Init(void)
     }else    
     if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
     {    
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV_NP_ID"), i);
       SetSwitchUsed(i);
       pin = tkr_pins->GetPin(GPIO_SWT1_INV_NP_ID, i);
       pinMode(pin, INPUT);
@@ -128,19 +132,21 @@ void mSwitches::Init(void) {
   {   
   
     TickerSwitch = new Ticker();
-    
-    #ifdef ESP288
-    TickerSwitch->attach_ms(
-      (ac_detect) ? SWITCH_FAST_PROBE_INTERVAL : SWITCH_PROBE_INTERVAL, 
-      [this](void){
-        this->SwitchProbe();
-      }
-    );
-    #else // esp32
+
+    #ifdef ESP32
     TickerSwitch->attach_ms(
       (ac_detect) ? SWITCH_FAST_PROBE_INTERVAL : SWITCH_PROBE_INTERVAL,
       +[](mSwitches* testInstance){ testInstance->Probe();}, this);
+      #error "ESP32 Ticker not implemented"
+    #else
+    TickerSwitch->attach_ms(
+      (ac_detect) ? SWITCH_FAST_PROBE_INTERVAL : SWITCH_PROBE_INTERVAL, 
+      [this](void){
+        this->Probe();
+      }
+    );
     #endif
+    
   }
 }
 
@@ -239,6 +245,16 @@ void mSwitches::Probe(void)
     state_filter = tkr_set->Settings.switch_debounce / SWITCH_PROBE_INTERVAL;	// 5, 10, 15
   }
 
+  /***
+   * Uncomment to enable telnet debugging for mains power device
+   */
+  // static uint8_t last_second = 255;
+  // uint8_t current_second = (millis() / 1000) % 60;  
+  // if (current_second != last_second) {
+  //   last_second = current_second;
+  //   ALOG_INF(PSTR("state_filter %d u%d"), state_filter, tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, 0)); 
+  // } 
+
 
   uint32_t not_activated;
   for (uint32_t i = 0; i < MAX_SWITCHES_SET; i++) {
@@ -251,6 +267,10 @@ void mSwitches::Probe(void)
     if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
     {    
       not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_ID, i));
+    }else  
+    if(tkr_pins->PinUsed(GPIO_SWT1_NP_ID, i)) // Active high, No pullup
+    {    
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_NP_ID, i));      
     }else    
     if(tkr_pins->PinUsed(GPIO_SWT1_ID, i)) // Standard pin, active high, NO pulls
     {
@@ -264,6 +284,16 @@ void mSwitches::Probe(void)
     }
 
     // ALOG_INF(PSTR("not_activated[%d] %d"), i, not_activated);
+    /***
+     * Uncomment to enable telnet debugging for mains power device
+     */
+    // static uint8_t last_second2 = 255;
+    // uint8_t current_second2 = (millis() / 1000) % 60;  
+    // if (current_second2 != last_second2) {
+    //   last_second2 = current_second2;
+    //   ALOG_INF(PSTR("not_activated[%d] \t\t%d%d%d"), i, not_activated, digitalRead(5), digitalRead(13));
+    // } 
+
 
     // Olimex user_switch2.c code to fix 50Hz induced pulses
     if (not_activated) {
@@ -686,7 +716,7 @@ void mSwitches::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
+  ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;

@@ -227,7 +227,7 @@ void setup(void)
       Serial.set_tx(2);
     #endif
   #endif
-  Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
+  Serial.println(F("\n\rRebooting,.." DEBUG_INSERT_PAGE_BREAK));
   #ifndef DISABLE_SERIAL_LOGGING
   #ifdef ENABLE_BUG_TRACING
   Serial.println(F("DELAYED BOOT for 5 seconds...")); Serial.flush(); delay(5000);
@@ -608,6 +608,7 @@ void LoopTasker()
 
     pCONT->Tasker_Interface(TASK_EVERY_SECOND); 
 
+    if((tkr_time->UpTime()%30)==0){                  pCONT->Tasker_Interface(TASK_EVERY_30_SECOND); }
     if((tkr_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(TASK_EVERY_MINUTE); }
     
     if(

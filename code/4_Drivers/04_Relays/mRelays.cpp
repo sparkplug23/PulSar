@@ -157,19 +157,19 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   if (0){//XdrvCall(FUNC_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
     // Serviced
   }
-#ifdef ESP8266
-  else if ((SONOFF_DUAL == tkr_set->runtime.module_type) || (CH4 == tkr_set->runtime.module_type)) {
-    Serial.write(0xA0);
-    Serial.write(0x04);
-    Serial.write(rpower &0xFF);
-    Serial.write(0xA1);
-    Serial.write('\n');
-    Serial.flush();
-  }
-  else if (EXS_RELAY == tkr_set->runtime.module_type) {
-    SetLatchingRelay(rpower, 1);
-  }
-#endif  // ESP8266
+// #ifdef ESP8266
+//   else if ((SONOFF_DUAL == tkr_set->runtime.module_type) || (CH4 == tkr_set->runtime.module_type)) {
+//     Serial.write(0xA0);
+//     Serial.write(0x04);
+//     Serial.write(rpower &0xFF);
+//     Serial.write(0xA1);
+//     Serial.write('\n');
+//     Serial.flush();
+//   }
+//   else if (EXS_RELAY == tkr_set->runtime.module_type) {
+//     SetLatchingRelay(rpower, 1);
+//   }
+// #endif  // ESP8266
   else {
     uint32_t port = 0;
     uint32_t port_next;
@@ -361,11 +361,11 @@ void mRelays::SetPowerOnState(void)
           && !tkr_set->Settings.flag3.shutter_mode       // SetOption80 - Enable shutter support
           #endif // USE_SHUTTER
         ) {
-        if ((port < MAX_RELAYS) && PinUsed(GPIO_REL1, port)) {
+        if ((port < MAX_RELAYS) && tkr_pins->PinUsed(GPIO_REL1_ID, port)) {
           if (bitRead(rt.bitpacked.rel_bistable, port)) {
             port++;                              // Skip both bistable relays as always 0
           } else {
-            bitWrite(tkr_set->runtime.power, i, digitalRead(Pin(GPIO_REL1, port)) ^ bitRead(tkr_set->runtime.rel_inverted, port));
+            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL1_ID, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
           }
         }
         port++;
@@ -893,6 +893,7 @@ const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_
     return PM_SEARCH_NOMATCH; 
   }
   DEBUG_LINE;
+  // AddLog(LOG_LEVEL_INFO,PSTR("etRelayNamebyIDCtr"));
   // return DLI->GetDeviceNameWithEnumNumber(E M_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
   return DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), device_id, buffer, buffer_length);
 }

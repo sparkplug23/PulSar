@@ -28,7 +28,8 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_EVERY_SECOND:    
       #ifdef ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
-      Serial.println(GetUptime().c_str());
+      ALOG_INF(PSTR("Uptime: %s"), GetUptime().c_str());
+      // Serial.println(GetUptime().c_str());
       #endif
       WifiPollNtp();
       uptime_seconds_nonreset++;

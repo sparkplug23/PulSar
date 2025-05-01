@@ -6,6 +6,20 @@
 
 #ifdef ESP8266
 
+extern "C" {
+  #include <user_interface.h>
+}
+
+/*********************************************************************************************\
+ * ESP8266 and ESP8285 Support
+\*********************************************************************************************/
+
+const static char kWifiPhyMode[] PROGMEM = "low rate|11b|11g|11n"; // Wi-Fi Modes
+
+// extern "C" {
+//   extern struct rst_info resetInfo;
+// }
+
 #include "stdint.h"
 
 class SupportESP8266{
@@ -13,6 +27,9 @@ class SupportESP8266{
     SupportESP8266(){};
     
     void init(void);
+
+    
+    static uint32_t ESP_ResetInfoReason(void);
 
     
     static uint32_t ESP_getChipId(void);
@@ -27,11 +44,6 @@ class SupportESP8266{
 };
 
 
-
-#endif
-
-#endif  // _SONOFF_H_
-//#endif
 
 
 
@@ -48,9 +60,9 @@ class SupportESP8266{
 // // extern struct rst_info resetInfo;
 // // }
 
-// // uint32_t ESP_ResetInfoReason(void) {
-// //   return resetInfo.reason;
-// // }
+// uint32_t ESP_ResetInfoReason(void) {
+//   return resetInfo.reason;
+// }
 
 // // String ESP_getResetReason(void) {
 // //   return ESP.getResetReason();
@@ -316,3 +328,10 @@ class SupportESP8266{
 // #endif // support_esp32
 //  * 
 //  * */
+
+
+
+#endif // ESP8266
+
+#endif  // _SONOFF_H_
+//#endif

@@ -45,7 +45,10 @@
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
+  #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
 #endif // USE_USER_MICHAEL
+
+#include "0_ConfigUser/Templates/TemplateBase__HardwareSpecific.h"
 
 #include "2_CoreSystem/06_Support/mSensorType.h"
 
@@ -374,7 +377,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
   #include "4_Drivers/20_Buzzer_Basic/mBuzzer.h"
-  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID])
+  #define pCONT_buzzer                              static_cast<mBuzzer*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_BUZZER_BASIC_ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
   #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
@@ -715,7 +718,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
   #include "10_ConSpec/12_TreadmillLogger/mTreadmillLogger.h"
-  #define pCONT_treadmill        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER__ID])
+  #define tkr_treadmill        static_cast<mTreadmillLogger*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID))
 #endif
 #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   #include "9_Controller/SDLoggerIMURadiationPattern/mSDLogger.h"

@@ -1,0 +1,286 @@
+#ifndef _TEMPLATE__HARDWARE_SPECIFIC_H
+#define _TEMPLATE__HARDWARE_SPECIFIC_H
+
+/**
+ * @brief 
+ * This file contains templates for the hardware specific modules.
+ * These are for consumer bought devices, ie sonoff and shelly
+ * No specialisation should be changed in here, all defines are in the ini file
+ */
+
+
+
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** Enable Defines *******************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+// #define DEVICE_TEMPLATE_SONOFF_IFAN03
+// #define DEVICE_TEMPLATE_SONOFF_BASIC_R2
+// #define DEVICE_TEMPLATE_SHELLY_DIMMER_V2
+// #define DEVICE_TEMPLATE_SONOFF_4CHPRO_V3
+
+
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** Device Defines *******************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+
+#ifdef DEVICE_TEMPLATE_SONOFF_IFAN03
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_CONTROLLER_SONOFF_IFAN
+    #define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"Button\""
+      "],"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"Relay1\","
+        "\"Relay2\","
+        "\"Relay3\","
+        "\"Relay4\""
+      "]"
+    "}"
+  "}";
+
+
+#endif
+
+
+
+#ifdef DEVICE_TEMPLATE_SONOFF_BASIC_R2
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  
+  #define USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 1
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR  "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+   
+  // Default Rule Defined (DefaultRule_Sonoff_Basic_R2)
+
+#endif
+
+
+#ifdef DEVICE_TEMPLATE_SHELLY_DIMMER_V2
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_CORE_RULES
+    
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "Stairs"
+  #define D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "Landing"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_CTR "\":["
+        "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\"," 
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":50"
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":100"
+      "}"
+    "}"   
+  "}";
+
+#endif
+
+
+
+#ifdef DEVICE_TEMPLATE_SONOFF_4CHPRO_V3
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_sonoff_4chpro"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Sonoff 4CH Pro"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Sonoff 4CH Pro"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+  
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_DRIVERS_LEDS
+  #define USE_MODULE_DRIVERS_RELAY
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+
+  // default key# = relay#
+  // RF Key433 using rules to match patterns then need limit to how often RF matches 
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  // {"RfReceived":{"Data":11071155,"Bits":24,"Protocol":1,"Pulse":191,"millis":83687314,"Time":"18:48:02"}} // black doorbell
+
+#endif
+
+
+#endif // _TEMPLATE__HARDWARE_SPECIFIC_H

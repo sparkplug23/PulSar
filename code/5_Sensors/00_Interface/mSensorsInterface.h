@@ -44,6 +44,7 @@ typedef struct sensorset_location_s
 #include "1_TaskerManager/mTaskerManager.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "unified/heatmap";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR)        "unified/filtered";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)                 "unified";
   
 
@@ -56,6 +57,14 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR) "event_user
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #endif // USE_MODULE_LIGHTS_INTERFACE
+
+#ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+#include "AveragingDataLib.h"
+#endif
+
+#include <algorithm>  // for std::find
+#include <vector>
+#include <stdint.h>
 
 class mSensorsInterface :
   public mTaskerInterface
@@ -118,7 +127,58 @@ class mSensorsInterface :
     char TempUnit(void);
     float ConvertPressure(float p);
     String PressureUnit(void);
+
+
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+    struct filtered_sensor_entry_t 
+    {
+      uint16_t module_id;           ///< Module unique ID
+      uint8_t sensor_index;         ///< Sensor index within the module
+      uint16_t window_secs;         ///< Averaging window in seconds
+      uint16_t sample_count;        ///< Number of samples to collect
+
+      uint32_t tLastUpdate = 0;     ///< Last millis() timestamp we sampled
+      uint32_t sample_interval_ms;  ///< Milliseconds between samples
+      uint16_t desired_type_id;  ///< The sensor type we're tracking (e.g. temperature, humidity, etc.)
+      String filter_name;  // NEW FIELD
+
+      Averaging_Data<float> filter_buffer; ///< Rolling buffer for smoothing
+
+      void Init(uint16_t module, uint8_t index, uint16_t secs, uint16_t samples, uint16_t sensor_type, const String& name)
+      {
+        module_id = module;
+        sensor_index = index;
+        window_secs = secs;
+        sample_count = samples;
+        desired_type_id = sensor_type;
+        sample_interval_ms = (secs * 1000UL) / samples;
+        filter_buffer = Averaging_Data<float>(samples);
+        filter_name = name;
+        tLastUpdate = 0;
+      }
+
+    };
+
+
+    std::vector<filtered_sensor_entry_t> filtered_sensors;
     
+    // Add this to populate from a command or at init
+    void AddFilteredSensor(uint16_t module_id, uint8_t index, uint16_t secs, uint16_t samples, uint16_t sensor_type, const String& name)
+    {
+      filtered_sensor_entry_t entry;
+      entry.Init(module_id, index, secs, samples, sensor_type, name);
+      filtered_sensors.push_back(entry);
+    }
+
+
+    void Update_UnifiedFilteredReadings();
+
+
+    // Example call in your init or setup:
+    // AddFilteredSensor(5027, 0, 60, 120);
+
+    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+        
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
@@ -148,6 +208,9 @@ class mSensorsInterface :
     uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Event_Motion(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Event_UserInput(uint8_t json_level = 0, bool json_appending = true);
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+    uint8_t ConstructJSON_Unified_Filtered(uint8_t json_level = 0, bool json_appending = true);
+    #endif
     
     /************************************************************************************************
      * SECITON: MQTT
@@ -164,9 +227,13 @@ class mSensorsInterface :
     struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged; // polling non-user interactive sensing
     struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
     struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+    struct handler<mSensorsInterface> mqtthandler_sensor_unified_filtered;
+    #endif
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     struct handler<mSensorsInterface> mqtthandler_event_input; // events triggered by user input
     #endif // USE_MODULE_NETWORK_MQTT
+
 
     /******************************************************************************************************************
      * WEBSERVER

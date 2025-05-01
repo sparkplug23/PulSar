@@ -16,18 +16,6 @@
 #include "3_Network/10_MQTT/mMQTT.h"
 #include "2_CoreSystem/07_Time/mTime.h"
 
-
-// #ifdef ESP32
-//   #include <WiFi.h>
-// #endif
-// #ifdef ESP8266
-//   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
-//   #include <ESP8266httpUpdate.h>
-// #endif
-
-
-
-
 #include <Ticker.h>
 
 enum SwitchStates { SWITCH_PRESSED_ID, SWITCH_NOT_PRESSED_ID };
@@ -63,6 +51,9 @@ DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_CTR) D_SWITCHMODE_PUSHBUTTONHOLD_CTR
 DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR) D_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR;
 DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR) D_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR;
 
+// Lowest 4 "|" are the standard power events, and are stored in the SettingsText 
+// Keep the SettingsTxt for switches there, as they are common OFF/ON/HOLD/??
+static const char kSwitchPressStates[] PROGMEM = "||||POWER_INCREMENT|POWER_INV|POWER_CLEAR|POWER_RELEASE|POWER_100||POWER_DELAYED";
 
 
 #include "1_TaskerManager/mTaskerInterface.h"
@@ -128,10 +119,7 @@ class mSwitches :
     #define SM_SECOND_PRESS       0x80
     #define POWER_NONE            99
 
-    // Lowest 4 "|" are the standard power events, and are stored in the SettingsText 
-    // Keep the SettingsTxt for switches there, as they are common OFF/ON/HOLD/??
-    const char kSwitchPressStates[81] PROGMEM = "||||POWER_INCREMENT|POWER_INV|POWER_CLEAR|POWER_RELEASE|POWER_100||POWER_DELAYED";
-
+    
     #include <Ticker.h>
 
     Ticker* TickerSwitch;

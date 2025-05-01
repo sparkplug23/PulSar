@@ -85,7 +85,7 @@ typedef enum
   SENSOR_TYPE_PROXIMITY_ID,
   SENSOR_TYPE_DISTANCE_CM_ID,
   SENSOR_TYPE_DISTANCE_MM_ID, 
-  SENSOR_TYPE_DISTANCE_ID,
+  SENSOR_TYPE_DISTANCE_ID, // The default should be metres, so all conversions must report the unified method in metres. This means CM/MM can be calculated from this value.
   
   /**
    * @brief Global Position
@@ -308,7 +308,7 @@ static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_POWER_FACTOR_ID:           return PSTR("PowerFactor");
     case SENSOR_TYPE_ENERGY_ID:                 return PSTR("Energy");
 
-    case SENSOR_TYPE_ADC_READING_ID:                 return PSTR("ADCValue");
+    case SENSOR_TYPE_ADC_READING_ID:            return PSTR("ADCValue");
 
     case SENSOR_TYPE_STATE_ACTIVE_ID:           return PSTR("State");
     // Strings

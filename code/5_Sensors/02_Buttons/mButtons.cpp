@@ -482,21 +482,21 @@ void mButtons::Handler(void) {
 
     // ALOG_INF(PSTR("button %d %d"), button_index, button);
 
-    #ifdef ESP8266
-    if (!button_index && ((SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type))) {
-      if (Button.dual_code) {
-        AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: Code %04X"), Button.dual_code);
-        button = PRESSED;
-        if (0xF500 == Button.dual_code) {                      // Button hold
-          Button.hold_timer[button_index] = (loops_per_second * tkr_set->Settings.param[P_HOLD_TIME] / 10) -1;  // SetOption32 (40)
-          hold_time_extent = 1;
-        }
-        Button.dual_code = 0;
-      } else {
-        button = NOT_PRESSED;
-      }
-    } else
-    #endif  // ESP8266
+    // #ifdef ESP8266
+    // if (!button_index && ((SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type))) {
+    //   if (Button.dual_code) {
+    //     AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: Code %04X"), Button.dual_code);
+    //     button = PRESSED;
+    //     if (0xF500 == Button.dual_code) {                      // Button hold
+    //       Button.hold_timer[button_index] = (loops_per_second * tkr_set->Settings.param[P_HOLD_TIME] / 10) -1;  // SetOption32 (40)
+    //       hold_time_extent = 1;
+    //     }
+    //     Button.dual_code = 0;
+    //   } else {
+    //     button = NOT_PRESSED;
+    //   }
+    // } else
+    // #endif  // ESP8266
 
     if (Used(button_index)) {
 
@@ -670,11 +670,11 @@ void mButtons::Handler(void) {
 
             bool single_press = false;
             if (Button.press_counter[button_index] < 3) {    // Single or Double press
-              #ifdef ESP8266
-              if ((SONOFF_DUAL_R2 == TasmotaGlobal.module_type) || (SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type)) {
-                single_press = true;
-              } else
-              #endif  // ESP8266
+              // #ifdef ESP8266
+              // if ((SONOFF_DUAL_R2 == TasmotaGlobal.module_type) || (SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type)) {
+              //   single_press = true;
+              // } else
+              // #endif  // ESP8266
               {
                 single_press = (tkr_set->Settings.flag_system.button_swap +1 == Button.press_counter[button_index]);  // SetOption11 (0)
                 if ((1 == Button.used_bitmap) && 0/* (2 == TasmotaGlobal.devices_present)*/) {  // Single Button with two devices only
@@ -762,7 +762,7 @@ char* mButtons::GetStateName(uint8_t state, uint8_t count, char* buffer, uint8_t
   {
     press_type = count-1;
   }
-  pCONT_sup->GetTextIndexed(buffer, buflen, press_type, kMultiPress);
+  pCONT_sup->GetTextIndexed_P(buffer, buflen, press_type, kMultiPress);
   return buffer;
 
 }

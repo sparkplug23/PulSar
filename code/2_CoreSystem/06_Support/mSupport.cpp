@@ -26,12 +26,33 @@
     }
     // hw_timer_t *timerwdt = NULL;
     // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
-    void WDT_Init(){
-      timerwdt = timerBegin(0, 80, true);                  //timer 0, div 80
-      timerAttachInterrupt(timerwdt, &resetModule, true);  //attach callback
-      timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  //set time in us
-      timerAlarmEnable(timerwdt);                          //enable interrupt
-    }
+    // void WDT_Init() {
+    //   timerwdt = timerBegin(0, 80, true);  // timer 0, div 80
+  
+    //   // Use LEVEL mode on ESP32-C3 (EDGE unsupported), keep EDGE for others
+    //   #if defined(CONFIG_IDF_TARGET_ESP32C3)
+    //       timerAttachInterrupt(timerwdt, &resetModule, false);
+    //   #else
+    //       timerAttachInterrupt(timerwdt, &resetModule, true);
+    //   #endif
+  
+    //   timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  // set time in us
+    //   timerAlarmEnable(timerwdt);     
+      
+      void WDT_Init() {
+        #if !defined(CONFIG_IDF_TARGET_ESP32C3)
+          timerwdt = timerBegin(0, 80, true); // Only setup watchdog timer if NOT ESP32-C3
+          timerAttachInterrupt(timerwdt, &resetModule, true);
+          timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);
+          timerAlarmEnable(timerwdt);
+        #else
+          // On ESP32-C3, skip watchdog timer init for now
+        #endif
+        }
+        
+        // enable interrupt
+    // }
+  
     void WDT_Reset(){
       // DEBUG_LINE_HERE;
       if(timerwdt==nullptr){ 

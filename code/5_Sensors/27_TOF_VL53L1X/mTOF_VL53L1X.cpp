@@ -26,6 +26,8 @@
  **********************************************************************************************
  *
  * How to install this sensor: https://www.st.com/resource/en/datasheet/vl53l1x.pdf
+ * 
+ * VIN can be either 3v or 5v, but should be 5v. Data lines remain 3v.
  *
  * If you are going to use long I2C wires read this:
  * https://hackaday.com/2017/02/08/taking-the-leap-off-board-an-introduction-to-i2c-over-long-wires/
@@ -59,10 +61,18 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case TASK_LOOP: 
-      Loop();
-    break;
     case TASK_EVERY_SECOND:
+    
+      for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) 
+      {
+        if(bitRead(VL53L1X_detected_bitmapped, i))
+        {
+          ALOG_INF(PSTR("VL53L1X[%d] Distance: %d mm"), i, data.devices[i].distance_mm);
+        }
+      }
+          
+    break;
+    case TASK_EVERY_50_MSECOND:
       ReadSensor();
     break;
     /************
@@ -76,7 +86,7 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
       pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
       pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
@@ -86,13 +96,6 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
 
   return FUNCTION_RESULT_SUCCESS_ID;
 
-}
-
-void mTOF_VL53L1X::Loop()
-{  
-  // if(mTime::TimeReached(&tSaved_ReadSensor, 50)){
-    // ReadSensor();
-  // }
 }
 
 
@@ -171,7 +174,6 @@ void mTOF_VL53L1X::Init(void)
 
   ALOG_HGL(PSTR("devices_found after filtering: %d"), devices_found);
 
-
   if (module_state.devices == 0) {
       ALOG_INF(PSTR("No VL53L1X sensors detected, skipping initialization."));
       return;
@@ -184,9 +186,15 @@ void mTOF_VL53L1X::Init(void)
   for (uint32_t i = 0; i < module_state.devices; i++, xshut_mask <<= 1) {
       bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, i);
 
+      ALOG_INF(PSTR("VL53L1X[%d] XSHUT %d"), i, use_xshut);
+
       if (use_xshut) {
           digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, i), HIGH);
           delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME); // XSHUT boot delay
+      }
+      if (!use_xshut) {
+        ALOG_INF(PSTR("Adding delay before init (no XSHUT)"));
+        delay(20);  // or 20ms if still unstable
       }
 
       // Check if the sensor responds at 0x29
@@ -197,28 +205,32 @@ void mTOF_VL53L1X::Init(void)
 
       ALOG_INF(PSTR("VL53L1X[%d] Init"), i);
 
-      if (vl53l1x_device[i].init()) {
+      if (settings.devices[i].sensor.init()) {
           ALOG_INF(PSTR("VL53L1X %d detected at 0x%02X"), i, VL53L1X_ADDRESS);
 
           // **Setup 4: Multiple Sensors, Assign Unique Addresses**
           if (module_state.devices > 1 && use_xshut) {
               uint8_t new_address = VL53L1X_XSHUT_ADDRESS + i;
-              vl53l1x_device[i].setAddress(new_address);
-              vl53l1x_data[i].address = new_address;
+              settings.devices[i].sensor.setAddress(new_address);
+              settings.devices[i].address = new_address;
               ALOG_INF(PSTR("VL53L1X %d assigned new address: 0x%02X"), i, new_address);
           } else {
-              vl53l1x_data[i].address = VL53L1X_ADDRESS;
+            settings.devices[i].address = VL53L1X_ADDRESS;
               ALOG_INF(PSTR("VL53L1X %d remains at default address (0x29)"), i);
           }
 
-          uint8_t addr = vl53l1x_device[i].getAddress();
+          uint8_t addr = settings.devices[i].sensor.getAddress();
           tkr_i2c->I2cSetActive(addr);
 
           // **Set Sensor Parameters**
-          vl53l1x_device[i].setTimeout(500);
-          vl53l1x_device[i].setDistanceMode(VL53L1X::VL53L1X_DISTANCE_MODE);
-          vl53l1x_device[i].setMeasurementTimingBudget(140000);
-          vl53l1x_device[i].startContinuous(50);
+          settings.devices[i].sensor.setTimeout(500);
+          settings.devices[i].sensor.setDistanceMode(VL53L1X::VL53L1X_DISTANCE_MODE);
+          settings.devices[i].sensor.setMeasurementTimingBudget(140000);
+          settings.devices[i].sensor.startContinuous(50);
+            
+          #ifdef USE_SENSORS_TOFVL_AVERAGING_DATA
+          data.devices[i].distance_mm_average = new Averaging_Data<uint16_t>(100); // @ 50ms reads, 20 per second, 100 is 5 seconds
+          #endif
 
           VL53L1X_detected_bitmapped |= xshut_mask;
 
@@ -257,7 +269,8 @@ void mTOF_VL53L1X::Init(void)
  *
  * @note If median filtering is disabled, the **raw distance value** is stored.
  */
-void mTOF_VL53L1X::ReadSensor(void) {
+void mTOF_VL53L1X::ReadSensor(void) 
+{
   
   #ifdef USE_DEEPSLEEP
       if (VL53L1X_standby) return;
@@ -267,31 +280,24 @@ void mTOF_VL53L1X::ReadSensor(void) {
   for (i = 0, xshut = 1; i < VL53LXX_MAX_SENSORS; i++, xshut <<= 1) {
     if (xshut & VL53L1X_detected_bitmapped) {
       
-      uint16_t dist = vl53l1x_device[i].read();
+      uint16_t dist = settings.devices[i].sensor.read();
 
       // Handle invalid distances
       if (!dist || dist > 4000) {
-          dist = 9999;
+        dist = 9999;
+        data.devices[i].valid = false;
+      }else{
+        data.devices[i].valid = true;
       }
 
-  #ifdef USE_VL_MEDIAN
-      // Store in ring buffer
-      vl53l1x_data[i].buffer[vl53l1x_data[i].index] = dist;
-      vl53l1x_data[i].index++;
-      if (vl53l1x_data[i].index >= USE_VL_MEDIAN_SIZE) {
-          vl53l1x_data[i].index = 0;
-      }
+      #ifdef USE_SENSORS_TOFVL_AVERAGING_DATA
+        data.devices[i].distance_mm_average->Add(dist);
+        data.devices[i].distance_mm = data.devices[i].distance_mm_average->Mean();
+      #else
+        data.devices[i].distance_mm = dist;
+      #endif
 
-      // Sort list and take median
-      uint16_t tbuff[USE_VL_MEDIAN_SIZE];
-      memmove(tbuff, vl53l1x_data[i].buffer, sizeof(tbuff));
-      std::sort(tbuff, tbuff + USE_VL_MEDIAN_SIZE);
-      vl53l1x_data[i].distance = tbuff[(USE_VL_MEDIAN_SIZE - 1) / 2];
-  #else
-      vl53l1x_data[i].distance = dist;
-  #endif
-
-      ALOG_INF(PSTR("VL53L1X[%d] Distance: %d mm"), i, vl53l1x_data[i].distance);
+      ALOG_DBG(PSTR("VL53L1X[%d] Distance: %d %d mm"), i, dist, data.devices[i].distance);
     } // if detected
 
     // Exit loop early if no XSHUT-based devices remain
@@ -305,13 +311,13 @@ void VL53L0EnterStandby(void) {
   if (DeepSleepEnabled()) {
     for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) {
       if (PinUsed(GPIO_VL53LXX_XSHUT1, i) || (!VL53L1X_xshut)) {
-        if (VL53L1X_data[i].ready) {
-          // VL53L1X_device[i].stopContinuous();
+        if (data.devices[i].ready) {
+          // settings.devices[i].sensor.stopContinuous();
           // Calling stopContinuous() does not lead to a stable standby state.
           // The current is approx. 300 µA, but should be much lower.
           // Restart is bumpy and sometimes blocks the startup sequence completely.
-          VL53L1X_device[i].init();
-          VL53L1X_data[i].ready = false;
+          settings.devices[i].sensor.init();
+          data.devices[i].ready = false;
         }
       }
     }
@@ -338,8 +344,8 @@ void VL53L0EnterStandby(void) {
  *
  * @return The number of detected VL53L1X sensors.
  */
- uint8_t mTOF_VL53L1X::SearchForDevices()
- {
+uint8_t mTOF_VL53L1X::SearchForDevices()
+{
    uint8_t devices = 0;
  
    for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) 
@@ -356,7 +362,7 @@ void VL53L0EnterStandby(void) {
        if (tkr_i2c->I2cDevice_IsConnected(VL53L1X_ADDRESS)) {
          ALOG_INF(PSTR("VL53L1X found at 0x29"));
  
-         vl53l1x_data[devices].address = VL53L1X_ADDRESS;
+         settings.devices[devices].address = VL53L1X_ADDRESS;
  
          devices++;
        }
@@ -365,7 +371,7 @@ void VL53L0EnterStandby(void) {
      if (tkr_i2c->I2cDevice_IsConnected(VL53L1X_XSHUT_ADDRESS+i)) {
        ALOG_INF(PSTR("VL53L1X found at %02X"),VL53L1X_XSHUT_ADDRESS+i);
        
-       vl53l1x_data[devices].address = VL53L1X_XSHUT_ADDRESS+i;
+       settings.devices[devices].address = VL53L1X_XSHUT_ADDRESS+i;
  
        devices++;
      }
@@ -401,7 +407,7 @@ void VL53L0EnterStandby(void) {
  *  - **Verifies the change** by ensuring the sensor now responds at the new address.
  *  - **Disables XSHUT** (if applicable) after the switch.
  *
- * @param device_id The index of the sensor in `vl53l1x_data[]`.
+ * @param device_id The index of the sensor in `data[]`.
  * @param new_address The new I2C address to assign to the sensor.
  * @return `true` if the address change was successful, `false` otherwise.
  */
@@ -429,14 +435,14 @@ bool mTOF_VL53L1X::SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) {
   }
 
   // **Initialize the sensor at 0x29 BEFORE changing the address**
-  if (!vl53l1x_device[device_id].init()) {
+  if (!settings.devices[device_id].sensor.init()) {
       ALOG_INF(PSTR("VL53L1X[%d] failed to initialize at 0x29"), device_id);
       return false;
   }
 
   // Set the new address
-  vl53l1x_device[device_id].setAddress(new_address);
-  vl53l1x_data[device_id].address = new_address;
+  settings.devices[device_id].sensor.setAddress(new_address);
+  settings.devices[device_id].address = new_address;
 
   // Verify address change
   if (!tkr_i2c->I2cSetDevice(new_address)) {
@@ -466,9 +472,9 @@ bool mTOF_VL53L1X::SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) {
 
 uint8_t mTOF_VL53L1X::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_SENSOR_COUNT, module_state.devices);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_SENSOR_COUNT, module_state.devices);
+  return JBI->End();
 
 }
 
@@ -476,26 +482,22 @@ uint8_t mTOF_VL53L1X::ConstructJSON_Sensor(uint8_t json_level, bool json_appendi
 
   char buffer[100];
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) 
   {
     if(bitRead(VL53L1X_detected_bitmapped, i))
     {
-      // JBI->Add(D_SENSOR, 
       DLI->GetDeviceName_WithModuleUniqueID(D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID, i, buffer, sizeof(buffer));
       JBI->Object_Start(buffer);
-
-      float distance = (vl53l1x_data[i].distance == 9999) ? NAN : (float)vl53l1x_data[i].distance / 10;  // cm
-      JBI->Add(D_DISTANCE, distance);
-      JBI->Add(D_DISTANCE "_mm", vl53l1x_data[i].distance);
-
+        float distance = (data.devices[i].distance_mm == 9999) ? NAN : (float)data.devices[i].distance_mm / 1000;  // m
+        JBI->Add(D_DISTANCE, distance);
+        JBI->Add(D_DISTANCE "_mm", data.devices[i].distance_mm);
       JBI->Object_End();
-
     }
   }
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 

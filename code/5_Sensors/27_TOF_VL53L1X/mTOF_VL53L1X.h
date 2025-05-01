@@ -2,7 +2,7 @@
 #ifndef _TOF_VL53L1X_H_
 #define _TOF_VL53L1X_H_
 
-#define D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID ((5*1000)+27)
+#define D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID 5027 // ((5*1000)+27)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -49,10 +49,19 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
+#ifdef USE_SENSORS_TOFVL_AVERAGING_DATA
+#include "AveragingDataLib.h"
+#endif
+
+
 class mTOF_VL53L1X :
   public mTaskerInterface
 {
   public:
+   /************************************************************************************************
+   * SECTION: Construct Class Base
+   ************************************************************************************************/  
+
     mTOF_VL53L1X(){};
     void Pre_Init(void);
     void Init(void);
@@ -69,20 +78,43 @@ class mTOF_VL53L1X :
         uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
     }module_state;
 
-    uint8_t MAX_SENSORS = 2;
+    /************************************************************************************************
+     * SECTION: DATA
+     *  - SETTINGS: Stored and recovered at boot (NOTE: can not contain any pointer or variable length data)
+     *  - RUNTIME:  Not persistent, requires probing sensor for valid data (NOTE: May contain pointers and vectors initiated at boot)
+     ************************************************************************************************/
+
+    struct SETTINGS
+    {   
+        struct DEVICE
+        {
+            VL53L1X sensor;
+            uint8_t address = 0;
+            uint8_t mode = 0; // 0=single-shot, 1=continuous        
+        }
+        devices[VL53LXX_MAX_SENSORS];
+    }
+    settings;
+
+    struct DATA
+    {  
+        struct DEVICE
+        {
+            uint16_t distance_mm = 0;
+            #ifdef USE_SENSORS_TOFVL_AVERAGING_DATA
+            Averaging_Data<uint16_t>* distance_mm_average = nullptr;
+            #endif
+            bool valid = false;   
+        }
+        devices[VL53LXX_MAX_SENSORS];
+    }
+    data;
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
 
     #define XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME 10 // per datasheet it is 1.2ms
-
-    VL53L1X vl53l1x_device[VL53LXX_MAX_SENSORS];
-
-    struct {
-        uint16_t distance = 0;
-        bool valid = false;
-        uint8_t address = 0;
-        uint8_t mode = 0; // 0=single-shot, 1=continuous
-    } vl53l1x_data[VL53LXX_MAX_SENSORS];
-
-    uint32_t tSaved_ReadSensor = 0;
 
     uint8_t VL53L1X_xshut_bitmapped = 0;
     uint8_t VL53L1X_detected_bitmapped = 0;
@@ -93,7 +125,9 @@ class mTOF_VL53L1X :
     
     bool SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) ;
 
-    void Loop();
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
 
     #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
@@ -108,25 +142,38 @@ class mTOF_VL53L1X :
     }
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-        if(index > MAX_SENSORS-1) {value->sensor_type.push_back(0); return ;}
-        value->timestamp = millis(); // Switches are constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
+        if(index >= module_state.devices || !data.devices[index].valid) {value->sensor_type.push_back(0); return ;}
+        value->timestamp = millis();
         value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_ID);
-        value->data_f.push_back(vl53l1x_data[index].distance);
+        float distance_m = (float)data.devices[index].distance_mm / 1000.0f; // convert to meters
+        value->data_f.push_back(distance_m);
+        value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_MM_ID);
+        value->data_f.push_back(data.devices[index].distance_mm);
         value->sensor_id = index;
     };
     #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+   
     #ifdef USE_MODULE_NETWORK_MQTT
         void MQTTHandler_Init();
         std::vector<struct handler<mTOF_VL53L1X>*> mqtthandler_list;    
         struct handler<mTOF_VL53L1X> mqtthandler_settings;
         struct handler<mTOF_VL53L1X> mqtthandler_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
-
 
 };
 

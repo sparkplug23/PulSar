@@ -457,7 +457,12 @@ rules_active_index = 0;
     if(tkr_set->Settings.module == mHardwarePins::MODULE_SONOFF_4CHPRO_ID){
       DefaultRule_Sonoff_4CHPRO();
     }else
-  #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  #endif // USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+    if(tkr_set->Settings.module == mHardwarePins::MODULE_SONOFF_BASIC_ID){
+      DefaultRule_Sonoff_Basic_R2();
+    }else
+  #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
     if(tkr_set->Settings.module == mHardwarePins::MODULE_SONOFF_IFAN03_ID){
       DefaultRule_Sonoff_iFan03();

@@ -1274,7 +1274,7 @@
   {
     "BusConfig":[
       {
-        "Pin":32,
+        "Pin":13,
         "ColourOrder":"GRB",
         "BusType":"WS2812_RGB",
         "Start":0,
@@ -1347,7 +1347,7 @@
   {
     "BusConfig":[
       {
-        "Pin":32,
+        "Pin":13,
         "ColourOrder":"GRB",
         "BusType":"WS2812_RGB",
         "Start":0,
@@ -1425,7 +1425,7 @@
   {
     "BusConfig":[
       {
-        "Pin":32,
+        "Pin":13,
         "ColourOrder":"GRB",
         "BusType":"WS2812_RGB",
         "Start":0,

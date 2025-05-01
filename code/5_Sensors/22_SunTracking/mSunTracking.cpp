@@ -82,8 +82,10 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
     }
     break;   
     case TASK_EVERY_MIDNIGHT:
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
         // Takes 144ms
         CalculateMaxMinElevationForDay(LATITUDE, LONGITUDE, tkr_time->GetUTCTime(), ALTITUDE_ABOVE_SEALEVEL); //will only need to run once a day
+        #endif
     break;
     /************
      * COMMANDS SECTION * 

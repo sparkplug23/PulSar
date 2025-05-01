@@ -1,0 +1,32 @@
+{
+  "build": {
+    "core": "esp32",
+    "extra_flags": "-DARDUINO_USB_MODE=1 -DARDUINO_USB_CDC_ON_BOOT=0 -DESP32C3",
+    "f_cpu": "160000000L",
+    "f_flash": "80000000L",
+    "flash_mode": "dio",
+    "mcu": "esp32c3",
+    "variant": "esp32c3",
+    "partitions": "partitions/esp32_partition_app2880k_fs320k.csv"
+  },
+  "connectivity": [
+    "wifi"
+  ],
+  "debug": {
+    "openocd_target": "esp32c3.cfg"
+  },
+  "frameworks": [
+    "arduino",
+    "espidf"
+  ],
+  "name": "PulSar ESP32-C3 2880k/320k Partition",
+  "upload": {
+    "flash_size": "4MB",
+    "maximum_ram_size": 327680,
+    "maximum_size": 1572864,
+    "require_upload_port": true,
+    "speed": 115200
+  },
+  "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/",
+  "vendor": "PulSar"
+}

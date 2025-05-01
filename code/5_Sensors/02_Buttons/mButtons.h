@@ -30,6 +30,10 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
+// const char kMultiPress[62] PROGMEM = "Single|Double|Triple|Quad|Penta|Hold|Hold Released|Hold Reset";
+static const char kMultiPress[] PROGMEM = "Single|Double|Triple|Quad|Penta|Hold|Hold Released|Hold Reset";
+
+
 class mButtons :
   public mTaskerInterface
 {
@@ -75,8 +79,6 @@ class mButtons :
 const uint8_t BUTTON_PROBE_INTERVAL = 10;      // Time in milliseconds between button input probe
 const uint8_t BUTTON_FAST_PROBE_INTERVAL = 2;  // Time in milliseconds between button input probe for AC detection
 const uint8_t BUTTON_AC_PERIOD = (20 + BUTTON_FAST_PROBE_INTERVAL - 1) / BUTTON_FAST_PROBE_INTERVAL;   // Duration of an AC wave in probe intervals
-
-const char kMultiPress[62] PROGMEM = "Single|Double|Triple|Quad|Penta|Hold|Hold Released|Hold Reset";
 
 Ticker* TickerButton;
 

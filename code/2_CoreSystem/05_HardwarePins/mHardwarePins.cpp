@@ -1768,27 +1768,26 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
   // Check for "SWT1" to "SWT32"
   for (int i = 1; i <= 32; i++) {
-    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_CTR, i);
-    if (strcmp_P(c, buffer) == 0) {
-      return GPIO_SWT1_ID + (i - 1);  // Return the corresponding ID (GPIO_SWT1_ID to GPIO_SWT32_ID)
-    }
-
-    // Check inverted switches "SWT1 Inv" to "SWT32 Inv"
-    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_INV_CTR, i);
-    if (strcmp_P(c, buffer) == 0) {
-      return GPIO_SWT1_INV_ID + (i - 1);  // Return the corresponding inverted switch ID
-    }
-
-    // Check non-pull switches "SWT1_NP" to "SWT32_NP"
-    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_NP_CTR, i);
-    if (strcmp_P(c, buffer) == 0) {
-      return GPIO_SWT1_NP_ID + (i - 1);  // Return the corresponding non-pull switch ID
-    }
-
-    // Check inverted non-pull switches "SWT1 Inv NP" to "SWT32 Inv NP"
     snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_INV_NP_CTR, i);
     if (strcmp_P(c, buffer) == 0) {
-      return GPIO_SWT1_INV_NP_ID + (i - 1);  // Return the corresponding inverted non-pull switch ID
+      Serial.printf("SWT1_INV_NP_CTR %s\n\r", buffer);
+      return GPIO_SWT1_INV_NP_ID + (i - 1);
+    }
+  
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_NP_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      Serial.printf("GPIO_SWT1_NP_ID %s\n\r", buffer);
+      return GPIO_SWT1_NP_ID + (i - 1);
+    }
+  
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_INV_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_SWT1_INV_ID + (i - 1);
+    }
+  
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_SWT_NUM_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_SWT1_ID + (i - 1);
     }
   }
   #endif
@@ -2128,6 +2127,7 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, ui
       snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_INV_NP_CTR, id - GPIO_SWT1_INV_NP_ID + 1);
       return buffer;
     }
+    
     #endif // USE_MODULE_SENSORS_SWITCHES
 
     #ifdef USE_MODULE_DRIVERS_LEDS

@@ -118,22 +118,28 @@ class mShellyDimmer :
 {
   private:
   public:
+
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mShellyDimmer(){};
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    
+
     static constexpr const char* PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID; }
-
     
-    void init();
-    void Pre_Init();
-    int8_t pin = -1;
-    struct SETTINGS{
-      uint8_t fEnableModule = false;
-      uint8_t fShowManualSlider = false;
-    }settings;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
 
     TasmotaSerial *ShdSerial = nullptr;
 
@@ -192,6 +198,11 @@ class mShellyDimmer :
     bool present = false;
     bool req_on = false;
 
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
     #ifdef USE_MODULE_CORE_RULES
     void RulesEvent_Set_Power();
     #endif // USE_MODULE_CORE_RULES
@@ -238,6 +249,10 @@ class mShellyDimmer :
     uint16_t CommandGet_SecondsToRemainOn();
 
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
     int8_t Tasker_Web(uint8_t function);
 
     int8_t CheckAndExecute_JSONCommands();
@@ -250,25 +265,24 @@ class mShellyDimmer :
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Status_Table();
 
-
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
-
+    
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
-    struct handler<mShellyDimmer>  mqtthandler_settings;
-    struct handler<mShellyDimmer>  mqtthandler_state_teleperiod;
-    
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    std::vector<struct handler<mShellyDimmer>*> mqtthandler_list;
+    struct handler<mShellyDimmer> mqtthandler_settings;
+    struct handler<mShellyDimmer> mqtthandler_state_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
 
-    struct handler<mShellyDimmer>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_teleperiod
-    };
+
 
 };
 

@@ -105,6 +105,9 @@ void mRelayStateLEDStrip::Init(void){
 void mRelayStateLEDStrip::EverySecond()
 {
 
+  return;
+
+
   /*
     Change strip into manual mode
   */

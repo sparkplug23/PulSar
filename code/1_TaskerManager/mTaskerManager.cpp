@@ -78,6 +78,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       #ifdef ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS
       }
       #endif
+      #ifdef ESP8266      
+      ESP.wdtFeed(); // With longer print times, to keep stable debugging we must service the watchdog
+      #endif
     #endif // ENABLE_DEBUG_FUNCTION_NAMES
     #endif // ENABLE_ADVANCED_DEBUGGING    
 
@@ -640,7 +643,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mPrinter3D());
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
-  addTasker(new mEnergyOnOLED());
+  addTasker(new mTreadmillLogger());
   #endif
   #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   addTasker(new mSDLoggerIMURadiationPattern());
@@ -693,6 +696,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
   
   switch(task){
     default:
+                                                      Serial.printf(PSTR("GetTaskName_Full: Unknown task ID %d\n\r"), task);
                                                       return PM_UNDEFINED;
     case TASK_POINTER_INIT:                           return PM_TASK_POINTER_INIT_CTR;
     case TASK_TEMPLATES__LOAD_MODULE:                 return PM_TASK_TEMPLATE_LOAD_CTR;

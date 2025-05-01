@@ -242,7 +242,13 @@ class mSunTracking :
         else
           return calc.position.azimuth;
       #else
+      
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
         return calc.position.azimuth;
+        #else
+        return 0;
+        #endif
+
       #endif
     }
 
@@ -254,7 +260,11 @@ class mSunTracking :
         else
           return calc.position.elevation;
       #else
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
         return calc.position.elevation;
+        #else
+        return 0;
+        #endif
       #endif
     }
 
@@ -266,7 +276,11 @@ class mSunTracking :
         else
           return calc.max_elevation;
       #else
-        return calc.max_elevation;
+      #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+      return calc.max_elevation;
+      #else
+      return 0;
+      #endif
       #endif
     }
 
@@ -278,7 +292,11 @@ class mSunTracking :
         else
           return calc.min_elevation;
       #else
-        return calc.pmin_elevation;
+        #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+        return calc.min_elevation;
+        #else
+        return 0;
+        #endif
       #endif
     }
 

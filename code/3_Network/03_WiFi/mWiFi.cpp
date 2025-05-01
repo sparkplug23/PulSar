@@ -84,7 +84,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
           mqtt_client = new WiFiClient();
 
-          pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          pCONT_mqtt->CreateConnection(mqtt_client, D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
           
           pCONT_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
 
@@ -1245,7 +1245,15 @@ void mWiFi::WifiCheckIp(void)
           #endif// ENABLE_LOG_LEVEL_INFO
           tkr_set->Settings.wifi_channel = 0;  // Disable stored AP
         } else {
-          if (('\0' == tkr_set->SettingsText(SET_STASSID1)) && ('\0' == tkr_set->SettingsText(SET_STASSID2))) {
+          #if __cplusplus >= 201703L  // C++17 or newer
+            if ((tkr_set->SettingsText(SET_STASSID1)[0] == '\0') &&
+                (tkr_set->SettingsText(SET_STASSID2)[0] == '\0'))
+          #else  // C++14 or older
+            if (('\0' == tkr_set->SettingsText(SET_STASSID1)[0]) &&
+                ('\0' == tkr_set->SettingsText(SET_STASSID2)[0]))
+          #endif
+          {
+            //          if (('\0' == tkr_set->SettingsText(SET_STASSID1)) && ('\0' == tkr_set->SettingsText(SET_STASSID2))) {
           tkr_set->Settings.wifi_channel = 0;  // Disable stored AP
             wifi_config_tool = WIFI_CONFIG_NO_SSID; // SHOULD BE WIFI_MANAGER   // Skip empty SSIDs and start Wifi config tool
             connection.retry = 0;
@@ -1270,6 +1278,9 @@ void mWiFi::WifiCheckIp(void)
     {
       
       ALOG_INF(PSTR(D_LOG_WIFI "connection retry %d"), connection.retry_init - connection.retry);
+      
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"), tkr_set->Settings.sta_active, tkr_set->SettingsText(SET_STASSID1 + tkr_set->Settings.sta_active));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"), tkr_set->Settings.sta_active, tkr_set->SettingsText(SET_STAPWD1 + tkr_set->Settings.sta_active));
 
       if (tkr_set->Settings.flag_network.use_wifi_scan) 
       {
@@ -1491,7 +1502,7 @@ void mWiFi::WifiCheck(uint8_t param)
           else 
           {
             DEBUG_LINE_HERE
-        Serial.println( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
+            // Serial.println( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
             WifiSetState(0);
             Mdns.begun = 0;
           }

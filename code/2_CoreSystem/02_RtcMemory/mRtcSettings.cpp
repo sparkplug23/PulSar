@@ -14,9 +14,12 @@
 
 #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 TRtcFastboot RtcFastboot;
-#ifdef ESP32
+// #ifdef ESP32
+// RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
+// #endif  // ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
 RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
-#endif  // ESP32
+#endif
 
 uint32_t rtc_fastboot_crc = 0;
 const uint16_t RTC_MEM_VALID = 0xA55A; // Value does not matter
@@ -44,7 +47,7 @@ void RtcFastboot_Save(void)
     #ifdef ESP8266
     ESP.rtcUserMemoryWrite(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));
     #endif  // ESP8266
-    #ifdef ESP32
+    #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
     RtcDataFastboot = RtcFastboot;
     #endif  // ESP32
 
@@ -73,7 +76,7 @@ void RtcFastboot_Reset(void)
  **/
 void RtcFastboot_Load(void) 
 {
-
+   
   #ifdef DEBUG_FASTBOOT
   Serial.println("RtcRebootLoad START");
   #endif
@@ -81,7 +84,7 @@ void RtcFastboot_Load(void)
   #ifdef ESP8266
     ESP.rtcUserMemoryRead(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));  // 0x280
   #endif  // ESP8266
-  #ifdef ESP32
+  #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
     RtcFastboot = RtcDataFastboot; // Set the pointer so the struct points to the data saved
   #endif  // ESP32
 
@@ -139,9 +142,12 @@ const uint16_t RTC_MEM_VALID = 0xA55A; // Value does not matter
 #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
 
 TRtcSettings RtcSettings;
-#ifdef ESP32
+// #ifdef ESP32
+// RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
+// #endif  // ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
 RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
-#endif  // ESP32
+#endif
 
 uint32_t rtc_settings_crc = 0;
 
@@ -193,7 +199,7 @@ void RtcSettingsSave(void)
 #ifdef ESP8266
     ESP.rtcUserMemoryWrite(100, (uint32_t*)&RtcSettings, sizeof(RtcSettings));
 #endif  // ESP8266
-#ifdef ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
     RtcDataSettings = RtcSettings;
 #endif  // ESP32
 
@@ -206,7 +212,7 @@ bool RtcSettingsLoad(uint32_t update) {
 #ifdef ESP8266
   ESP.rtcUserMemoryRead(100, (uint32_t*)&RtcSettings, sizeof(RtcSettings));  // 0x290
 #endif  // ESP8266
-#ifdef ESP32
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
   RtcSettings = RtcDataSettings;
 #endif  // ESP32
 

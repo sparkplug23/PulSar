@@ -148,7 +148,7 @@ void mTreadmillLogger::SubTask_UpdateOLED()
   char buffer_f[100] = {0};
   char buffer_n[100] = {0};
   
-  snprintf(buffer, sizeof(buffer), "%s", tkr_time->RtcTime.hhmmss_ctr);
+  snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetTime(DT_LOCAL_TIME).c_str());
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
 
   // #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -280,7 +280,7 @@ uint8_t mTreadmillLogger::ConstructJSON_State(uint8_t json_level, bool json_appe
 
   JBI->Start();  
 
-  JBI->Add("TrackingEnable", tkr_switch->IsSwitchActive(0) );
+  JBI->Add("TrackingEnable", tkr_switch->GetState(0) );
 
 
   JBI->Add("EstimatedSpeed", rt.estimated_speed);

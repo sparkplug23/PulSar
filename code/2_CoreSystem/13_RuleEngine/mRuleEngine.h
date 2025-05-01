@@ -221,6 +221,9 @@ uint8_t rule_count2 = 0;
     #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
     void DefaultRule_Sonoff_4CHPRO();
     #endif // USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+    #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+    void DefaultRule_Sonoff_Basic_R2();
+    #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
     #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
     void DefaultRule_Sonoff_iFan03();
     #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03

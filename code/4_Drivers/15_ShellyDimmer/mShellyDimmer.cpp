@@ -24,7 +24,7 @@
 
 // /*********************************************************************************************/
 
-void mShellyDimmer::init(void)
+void mShellyDimmer::Init(void)
 {
 
   #ifdef ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
@@ -36,7 +36,10 @@ void mShellyDimmer::init(void)
 
 }
 
-void mShellyDimmer::Pre_Init(){
+void mShellyDimmer::Pre_Init()
+{
+
+  module_state.mode = ModuleStatus::Initialising;
 
   if (
     tkr_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0_ID) && 
@@ -44,9 +47,9 @@ void mShellyDimmer::Pre_Init(){
     tkr_pins->PinUsed(GPIO_HWSERIAL0_RX_ID) && 
     tkr_pins->PinUsed(GPIO_HWSERIAL0_TX_ID)
     ) {
-      tkr_set->runtime.devices_present++;
+      // tkr_set->runtime.devices_present++;
     // TasmotaGlobal.light_type = LT_SERIAL1;
-    settings.fEnableModule = true;
+    // settings.fEnableModule = true;
   }else{
     return;
   }
@@ -72,26 +75,32 @@ void mShellyDimmer::Pre_Init(){
 
       SendSettings();
       SyncState();
+      
+      module_state.mode = ModuleStatus::Running;
     }
   }
 
 }
 
 
-int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj)
+{
+
+  int8_t function_result = 0;
 
   /************
    * INIT SECTION * 
   *******************/
-  if(function == TASK_PRE_INIT){
-    Pre_Init();
-  }else
-  if(function == TASK_INIT){
-    init();
+  switch(function){
+    case TASK_PRE_INIT:
+      Pre_Init();
+    break;
+    case TASK_INIT:
+      Init();
+    break;
   }
 
-  // Only continue in to tasker if module was configured properly
-  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -154,16 +163,16 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif // USE_MODULE_NETWORK_MQTT
   }
   
   /************
@@ -196,7 +205,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
 
 
     
-    transition.fader->SetTargetAndStartBlend(new_brightness, time_ms);
+    transition.fader->SetTargetAndStartBlend(new_brightness, transition.time_ms);
 
     // /**
     //  * @brief Also update the fader value
@@ -948,9 +957,9 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
   
   if(jtok = obj["ShellyDimmer"].getObject()["TransitionTimeSec"]){      //lets add way to set via sec/millis and automatically create new blender for it
 
-    time_ms = jtok.getInt()*1000;
+    transition.time_ms = jtok.getInt()*1000;
     
-    transition.fader->SetTargetAndStartBlend(new_brightness, time_ms);
+    transition.fader->SetTargetAndStartBlend(new_brightness, transition.time_ms);
 
   }
   // if(jtok = obj["ShellyDimmer"].getObject()["TransitionTimeSec"]){
@@ -1135,72 +1144,30 @@ void CmndShdWarmupTime(void)
 void mShellyDimmer::MQTTHandler_Init(){
 
   struct handler<mShellyDimmer>* ptr;
-    
+
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_HOUR;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
-  
   ptr = &mqtthandler_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_State;
-
-//   ptr = &mqtthandler_sensdebug_teleperiod;
-//   ptr->tSavedLastSent = 0;
-//   ptr->flags.PeriodicEnabled = true;
-//   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
-//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   ptr->json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
-//   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Debug;
+  mqtthandler_list.push_back(ptr);
 
 } 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mShellyDimmer::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mShellyDimmer::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mShellyDimmer::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

@@ -42,9 +42,12 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
 #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
+  #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
 #else
   // #error "error"
 #endif // USE_USER_MICHAEL
+
+#include "0_ConfigUser/Templates/TemplateBase__HardwareSpecific.h"
 
 /*********************************************************************************************\
  * Default global defines
@@ -275,7 +278,8 @@ This enables switching to newer firmware versions, but falling back when an issu
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
     #define MQTT_PORT     1883
     
 //   #define SETTINGS_HOLDER 1239
@@ -672,6 +676,8 @@ This enables switching to newer firmware versions, but falling back when an issu
 
 #endif // USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
 
+
+
 #ifdef USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025_NO_GPIO
   #define FIRMWARE_DEFAULT_DESCRIPTION /*USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__*/ "LATEST_LIGHTING_JANUARY_2025"
 
@@ -686,7 +692,13 @@ This enables switching to newer firmware versions, but falling back when an issu
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+  #ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.71"
+    #error "I dont want this anymore, mqtt defined in ini"
+  #endif
+
+
     #define MQTT_PORT     1883
     
 //   #define SETTINGS_HOLDER 1239

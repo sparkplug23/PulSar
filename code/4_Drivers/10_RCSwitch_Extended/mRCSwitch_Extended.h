@@ -36,45 +36,63 @@ class mRCSwitch :
 
   private:
   public:
-    mRCSwitch(){};
-    void init(void);
+    // mRCSwitch(){};
+    // void init(void);
     
+    // int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+
+    // static constexpr const char* PM_MODULE_DRIVERS_RF433_RCSWITCH_CTR = D_MODULE_DRIVERS_RF433_RCSWITCH_CTR;
+    // PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RF433_RCSWITCH_CTR; }
+    // uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID; }
+    
+    
+    // struct SETTINGS{
+    //   uint8_t fEnableSensor = false;
+    //   // uint8_t found = 0;
+    //   // uint16_t rate_measure_ms = 1000;
+    //   // // uint8_t sensor_count = 1;
+    //   // uint8_t active_sensor = 0;
+    // }settings;
+
+    
+
+
+    // 
+  
+    // 
+
+    // void Pre_Init();
+    // void Init();
+
+
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+    mRCSwitch(){};
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     static constexpr const char* PM_MODULE_DRIVERS_RF433_RCSWITCH_CTR = D_MODULE_DRIVERS_RF433_RCSWITCH_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RF433_RCSWITCH_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID; }
+        
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    #if defined(ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS) && defined(USE_MODULE_CORE_FILESYSTEM)
+    void Load_Module(bool erase = false);
+    void Save_Module(void);
+    bool Default_Module(void);
+    #endif // USE_MODULE_CORE_FILESYSTEM
     
-    
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-      // uint8_t found = 0;
-      // uint16_t rate_measure_ms = 1000;
-      // // uint8_t sensor_count = 1;
-      // uint8_t active_sensor = 0;
-    }settings;
-
-    #define D_RF_PROTOCOL "Protocol"
-    #define D_RF_BITS "Bits"
-    #define D_RF_DATA "Data"
-    #define D_RF_PULSE "Pulse"
-
-
-    #define RF_TIME_AVOID_DUPLICATE 1000  // Milliseconds
-  
-    RCSwitch *mySwitch = nullptr;//RCSwitch();
-
-    void Pre_Init();
-    void Init();
-    
-    void SubTask_SendCommand_Up();
-    void SubTask_SendCommand_Up_PreTrain();
-    void SubTask_SendCommand_Up_Block(int repeats);
-    void SubTask_SendCommand_Up_Block2(int repeats);
-
-    void ReceiveCheck(void);
-    void parse_JSONCommand(JsonParserObject obj);
-
     struct RECEIVED_PACKET
     {
       uint32_t data = 0;
@@ -85,26 +103,48 @@ class mRCSwitch :
       uint32_t received_utc_time;
     }rx_pkt;
 
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+    
+    RCSwitch *mySwitch = nullptr;
+
+    #define RF_TIME_AVOID_DUPLICATE 1000  // Milliseconds
+    #define D_RF_PROTOCOL           "Protocol"
+    #define D_RF_BITS               "Bits"
+    #define D_RF_DATA               "Data"
+    #define D_RF_PULSE              "Pulse"
+
+    void ReceiveCheck(void);
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+     void parse_JSONCommand(JsonParserObject obj);
+    
+     void SubTask_SendCommand_Up();
+     void SubTask_SendCommand_Up_PreTrain();
+     void SubTask_SendCommand_Up_Block(int repeats);
+     void SubTask_SendCommand_Up_Block2(int repeats);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     
-    void MQTTHandler_Sender();
-
+     #ifdef USE_MODULE_NETWORK_MQTT
+    void MQTTHandler_Init();
+    std::vector<struct handler<mRCSwitch>*> mqtthandler_list;
     struct handler<mRCSwitch> mqtthandler_settings;
     struct handler<mRCSwitch> mqtthandler_state_ifchanged;
-
-    //No extra handlers: ie settings and "state" only
-    
-      
-    struct handler<mRCSwitch>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
-    };
-
+    #endif // USE_MODULE_NETWORK_MQTT
 
 
 

@@ -185,63 +185,63 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_mod
   
 // }
 
-
+/**
+ * @brief Retrieves the device name for a given module and device ID combination.
+ *
+ * This function searches the `number_buffer` table for a match based on the provided
+ * `unique_module_id` and `device_id`. If a match is found, it retrieves the corresponding
+ * name from `name_buffer` using the provided `pCONT_sup->GetTextIndexed()` method.
+ *
+ * If no match is found and `flag_respond_nomatch_if_not_found` is true, it writes a fallback
+ * name ("No Match") to the buffer from PROGMEM.
+ *
+ * If the flag is false, it either uses the device ID or generates a pseudo-random fallback
+ * name based on the module name, depending on compile-time options.
+ *
+ * @param unique_module_id Unique identifier for the module (group).
+ * @param device_id        Local device ID within the module.
+ * @param buffer           Buffer to write the result into (must be allocated by caller).
+ * @param buffer_size      Size of the provided buffer.
+ * @param flag_respond_nomatch_if_not_found Whether to write a default message if no match found.
+ * @return                 Pointer to the buffer containing the resulting device name.
+ */
 const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found)
 {
+  // ALOG_INF(PSTR("GetDeviceNameWithEnumNumber(%d,%d)"), unique_module_id, device_id);
 
-  ALOG_DBM( PSTR("GetDeviceNameWithEnumNumber(%d,%d)"),unique_module_id, device_id);
-
-
-// DEBUG_LINE_HERE;
-
-// DEBUG_LINE_HERE;
-
-      // ALOG_INF( PSTR("\t\t\t\t\n\r ------------------------------------- DeviceNameList::GetDeviceNameWithEnumNumber buffer_size %d"),buffer_size);
-  //convert enum number to unqiue#pragma region 
-
-  //convert enum number to unqiue#pragma region 
-
-  // module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
-
-// DEBUG_LINE_HERE;
   int8_t found_index = -1;
-  // Check if class & id match
-  for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++)
+
+  // Search for match in number_buffer
+  for (int i = 0; i < DEVICENAMEBUFFER_NAME_INDEX_LENGTH; i++)
   {
-    
-// DEBUG_LINE_HERE;
-    // if((number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
-      
-      // ALOG_INF( PSTR("number_buffer.unique_group_ids[i]==unique_module_id)&&(number_buffer.index_ids[i]==device_id)\n\r[%d] %d==%d \t %d==%d"),i, number_buffer.unique_group_ids[i],unique_module_id,number_buffer.index_ids[i],device_id);
-      
-    
-    if((    
-      number_buffer.unique_group_ids[i]==unique_module_id)&&(number_buffer.index_ids[i]==device_id)){
+    // if ((number_buffer.unique_group_ids[i] == unique_module_id) && (number_buffer.index_ids[i] == device_id)) {
+    //   ALOG_INF(PSTR("number_buffer.unique_group_ids[i]==unique_module_id && number_buffer.index_ids[i]==device_id\n\r[%d] %d==%d \t %d==%d"),
+    //            i, number_buffer.unique_group_ids[i], unique_module_id, number_buffer.index_ids[i], device_id);
+
+    if ((number_buffer.unique_group_ids[i] == unique_module_id) &&
+        (number_buffer.index_ids[i] == device_id))
+    {
       found_index = i;
-      
-// DEBUG_LINE_HERE;
-      // ALOG_INF( PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"),i);
-      
+      // ALOG_INF(PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"), i);
       break;
     }
   }
-// DEBUG_LINE_HERE;
-  //future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
 
-  if(found_index == -1)
+  // Handle no match found
+  if (found_index == -1)
   {
-    if(flag_respond_nomatch_if_not_found)
+    if (flag_respond_nomatch_if_not_found)
     {
-      memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
-      ALOG_WRN(PSTR("DeviceName Undefined >> %s"), PM_SEARCH_NOMATCH);
+      memcpy_P(buffer, PM_SEARCH_NOMATCH, sizeof(PM_SEARCH_NOMATCH));
+      ALOG_WRN(PSTR("DeviceName Undefined >> %S"), PM_SEARCH_NOMATCH);
     }
     else
-    {  
-      #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
+    {
+#ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(unique_module_id), device_id);
-      #else
-      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));//device_id);
-      #endif
+#else
+      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));
+#endif
       ALOG_WRN(PSTR("F::GetDeviceName Undefined >> %s"), buffer);
     }
     return buffer;
@@ -249,36 +249,114 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 
   char* name_buffer2 = name_buffer.ptr;
 
-  // ALOG_INF( PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
+  // ALOG_INF(PSTR("GetDeviceNameWithEnumNumber len=%d"), strlen(buffer));
+  // ALOG_INF(PSTR("name_buffer2=%s"), name_buffer2);
+  // ALOG_INF(PSTR("found_index=%d"), found_index);
 
-// DEBUG_LINE_HERE;
-
-
-// found_index is across the entire buffer, but I also need to track found_index WITHIN the class
-
-
-  // gets first index from the array, where we start at the position the desired name is the next name
+  // Retrieve name using found index
   char* p = pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
 
-// ALOG_INF( PSTR("name_buffer2=%s"),name_buffer2);
-// ALOG_INF( PSTR("found_index=%d"),found_index);
-// ALOG_INF( PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
-// ALOG_INF( PSTR("p=%s"),p);
-  
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber &name_buffer[index]=%s"),&name_buffer[index]);
+  // ALOG_INF(PSTR("GetDeviceNameWithEnumNumber=%s"), buffer);
+  // ALOG_INF(PSTR("p=%s"), p);
 
-// DEBUG_LINE_HERE;
-  if(buffer == nullptr){
-    memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_ERROR, PSTR("F::%s ERROR >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
-    #endif // ENABLE_LOG_LEVEL_INFO
-  }
-
-// DEBUG_LINE_HERE;
   return buffer;
-  
 }
+
+// const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found)
+// {
+
+//   ALOG_INF( PSTR("GetDeviceNameWithEnumNumber(%d,%d)"),unique_module_id, device_id);
+
+
+// // DEBUG_LINE_HERE;
+
+// // DEBUG_LINE_HERE;
+
+//       // ALOG_INF( PSTR("\t\t\t\t\n\r ------------------------------------- DeviceNameList::GetDeviceNameWithEnumNumber buffer_size %d"),buffer_size);
+//   //convert enum number to unqiue#pragma region 
+
+//   //convert enum number to unqiue#pragma region 
+
+//   // module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
+
+// // DEBUG_LINE_HERE;
+//   int8_t found_index = -1;
+//   // Check if class & id match
+//   for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++)
+//   {
+    
+// // DEBUG_LINE_HERE;
+//     // if((number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
+      
+//       // ALOG_INF( PSTR("number_buffer.unique_group_ids[i]==unique_module_id)&&(number_buffer.index_ids[i]==device_id)\n\r[%d] %d==%d \t %d==%d"),i, number_buffer.unique_group_ids[i],unique_module_id,number_buffer.index_ids[i],device_id);
+      
+    
+//     if((    
+//       number_buffer.unique_group_ids[i]==unique_module_id)&&(number_buffer.index_ids[i]==device_id)){
+//       found_index = i;
+      
+// // DEBUG_LINE_HERE;
+//       // ALOG_INF( PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"),i);
+      
+//       break;
+//     }
+//   }
+// // DEBUG_LINE_HERE;
+//   //future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
+
+//   if(found_index == -1)
+//   {
+//     if(flag_respond_nomatch_if_not_found)
+//     {
+//       memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+//       ALOG_WRN(PSTR("DeviceName Undefined >> %S"), PM_SEARCH_NOMATCH);
+//     }
+//     else
+//     {  
+//       #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
+//       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(unique_module_id), device_id);
+//       #else
+//       snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));//device_id);
+//       #endif
+//       ALOG_WRN(PSTR("F::GetDeviceName Undefined >> %s"), buffer);
+//     }
+//     return buffer;
+//   }
+
+//   char* name_buffer2 = name_buffer.ptr;
+
+//   ALOG_INF( PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
+
+// // DEBUG_LINE_HERE;
+
+
+// // found_index is across the entire buffer, but I also need to track found_index WITHIN the class
+
+
+//   // gets first index from the array, where we start at the position the desired name is the next name
+//   char* p = pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
+
+// // ALOG_INF( PSTR("name_buffer2=%s"),name_buffer2);
+// // ALOG_INF( PSTR("found_index=%d"),found_index);
+// // ALOG_INF( PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
+// // ALOG_INF( PSTR("p=%s"),p);
+  
+//   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber &name_buffer[index]=%s"),&name_buffer[index]);
+
+// // DEBUG_LINE_HERE;
+//   if(buffer == nullptr){
+//     memcpy_P(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+
+//     /***
+//      * __FUNCTION__ is stored in RAM, so %s
+//      */
+//     ALOG_ERR(PSTR("F::%s ERROR >> %S"), __FUNCTION__ ,PM_SEARCH_NOMATCH);
+//   }
+
+// // DEBUG_LINE_HERE;
+//   return buffer;
+  
+// }
 
 bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* sensor_name, uint16_t* out_module_id, uint8_t* out_sensor_id) {
   //  ALOG_INF(PSTR("GetModuleAndSensorIDsByName(%s, %s)"), module_name, sensor_name);
