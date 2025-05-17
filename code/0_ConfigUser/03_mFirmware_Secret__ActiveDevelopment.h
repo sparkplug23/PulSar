@@ -22,7 +22,7 @@
 *******************************************************************************************************************************************/
 
 // #define DEVICE_DESK_SENSOR
-// #define DEVICE_TREADMILL_POWER_MONITOR
+// #define DEVICE_MEADOWS__TREADMILL_POWER_MONITOR
 // #define DEVICE_LIGHTING__LED_MATRIX_BOX_01
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__10INCH
 // #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__7INCH

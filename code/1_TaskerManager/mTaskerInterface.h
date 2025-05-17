@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "2_CoreSystem/06_Support/mSensorType.h"
+#include "JsonParser.h"
 
 /**
  * @brief 
@@ -20,6 +21,12 @@ class mTaskerInterface
     virtual int8_t Tasker(uint8_t function, JsonParserObject obj);
     virtual PGM_P GetModuleName();
     virtual uint16_t GetModuleUniqueID();
+    
+   //  virtual ~mTaskerInterface() {
+   //    Serial.printf("Destructor called on base\n");
+   //  }
+
+   virtual ~mTaskerInterface();
     
     /**
      * Get device count for each module that should be in module.settings

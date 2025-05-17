@@ -70,10 +70,18 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
           ALOG_INF(PSTR("VL53L1X[%d] Distance: %d mm"), i, data.devices[i].distance_mm);
         }
       }
+
+      ALOG_INF(PSTR("roi_set %d"), roi_set);
           
     break;
     case TASK_EVERY_50_MSECOND:
       ReadSensor();
+    break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -97,6 +105,74 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
   return FUNCTION_RESULT_SUCCESS_ID;
 
 }
+
+
+void mTOF_VL53L1X::parse_JSONCommand(JsonParserObject obj)
+{
+  ALOG_DBM(PSTR("mTOF_VL53L1X::parse_JSONCommand"));
+
+  JsonParserObject vl53 = obj["VL53L1X"];
+  if (!vl53) return;
+
+  JsonParserObject roi = vl53["ROI"];
+  if (!roi) return;
+
+  uint8_t center = 199;
+  uint8_t width = 16;
+  uint8_t height = 16;
+
+  if (roi["centre"] && roi["centre"].isNum()) center = roi["centre"].getInt();
+  if (roi["width"]  && roi["width"].isNum())  width  = roi["width"].getInt();
+  if (roi["height"] && roi["height"].isNum()) height = roi["height"].getInt();
+
+  // Assuming sensor index 0 for now — extendable with optional parameter later
+  if (!SetSensorROI(0, center, width, height)) {
+    ALOG_ERR(PSTR("Failed to set ROI"));
+  }
+}
+
+
+/**
+ * @brief Set the Region of Interest (ROI) for a VL53L1X sensor.
+ *
+ * Allows narrowing the field of view using a custom ROI window.
+ * The VL53L1X uses a 16x16 SPAD grid (SPAD index 0 to 255).
+ *
+ * @param sensor_index Index of the sensor (0 to VL53LXX_MAX_SENSORS - 1)
+ * @param center The center SPAD (default = 199 for dead center)
+ * @param width Width in SPADs (4 to 16)
+ * @param height Height in SPADs (4 to 16)
+ * @return true if set successfully
+ */
+bool mTOF_VL53L1X::SetSensorROI(uint8_t sensor_index, uint8_t center, uint8_t width, uint8_t height) {
+  if (sensor_index >= VL53LXX_MAX_SENSORS) return false;
+  if (!bitRead(VL53L1X_detected_bitmapped, sensor_index)) return false;
+  if (width < 4 || width > 16 || height < 4 || height > 16) return false;
+
+  // Calculate encoded ROI size: (height << 4) | width
+  uint8_t roi_size = ((height & 0x0F) << 4) | (width & 0x0F);
+
+  // Get I2C address of this sensor
+  uint8_t i2c_addr = settings.devices[sensor_index].address;
+
+  // Write center SPAD
+  if (!VL53L1X_writeReg(i2c_addr, VL53L1X::ROI_CONFIG__USER_ROI_CENTRE_SPAD, center)) return false;
+
+  // Write encoded ROI size
+  if (!VL53L1X_writeReg(i2c_addr, VL53L1X::ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE, roi_size)) return false;
+
+  ALOG_INF(PSTR("VL53L1X[%d] ROI set: center=%d, size=%dx%d"), sensor_index, center, width, height);
+  return true;
+}
+
+bool mTOF_VL53L1X::VL53L1X_writeReg(uint8_t i2c_addr, uint16_t reg, uint8_t value) {
+  Wire.beginTransmission(i2c_addr);
+  Wire.write((reg >> 8) & 0xFF);  // MSB
+  Wire.write(reg & 0xFF);         // LSB
+  Wire.write(value);
+  return (Wire.endTransmission() == 0);
+}
+
 
 
 /**
@@ -243,6 +319,19 @@ void mTOF_VL53L1X::Init(void)
   if (module_state.devices > 0) {
     module_state.mode = ModuleStatus::Running;
   }
+
+  // delay(1000);
+  // SetSensorROI(0, 199, 4, 4); // Forced narrow FOV for all sensors
+
+  // Assuming sensor index 0 for now — extendable with optional parameter later
+  if (!SetSensorROI(0, 199, 4, 4)) {
+    ALOG_ERR(PSTR("Failed to set ROI"));
+    roi_set = 2;
+  }else{
+    roi_set = 1;
+  }
+
+
   ALOG_HGL(PSTR("END OF INIT"));
 }
 

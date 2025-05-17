@@ -65,7 +65,9 @@ extern TRtcSettings RtcSettings;
 // extern RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
 // #endif  // ESP32
 #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+#ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 extern RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
+#endif
 #endif
 
 

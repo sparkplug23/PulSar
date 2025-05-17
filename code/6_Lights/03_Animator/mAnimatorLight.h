@@ -701,18 +701,19 @@ uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
 unsigned long countdownTime _INIT(1514764800L);
 bool countdownOverTriggered _INIT(true);
 
-//timer
-byte lastTimerMinute  _INIT(0);
-byte timerHours[]     _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-int8_t timerMinutes[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-byte timerMacro[]     _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-//weekdays to activate on, bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
-byte timerWeekday[]   _INIT_N(({ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 }));
-//upper 4 bits start, lower 4 bits end month (default 28: start month 1 and end month 12)
-byte timerMonth[]     _INIT_N(({28,28,28,28,28,28,28,28}));
-byte timerDay[]       _INIT_N(({1,1,1,1,1,1,1,1}));
-byte timerDayEnd[]		_INIT_N(({31,31,31,31,31,31,31,31}));
-bool doAdvancePlaylist _INIT(false);
+// timer
+byte lastTimerMinute = 0;
+byte timerHours[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int8_t timerMinutes[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+byte timerMacro[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+// weekdays to activate on, bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
+byte timerWeekday[10]   = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
+// upper 4 bits start, lower 4 bits end month (default 28: start month 1 and end month 12)
+byte timerMonth[8]      = { 28, 28, 28, 28, 28, 28, 28, 28 };
+byte timerDay[8]        = { 1, 1, 1, 1, 1, 1, 1, 1 };
+byte timerDayEnd[8]     = { 31, 31, 31, 31, 31, 31, 31, 31 };
+bool doAdvancePlaylist  = false;
+
 
 /*
  * color blend function, based on FastLED blend function
@@ -1125,6 +1126,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__2D__Octopus();
     uint16_t EffectAnim__2D__WavingCell();
     uint16_t EffectAnim__2D__ScrollingText();
+    uint16_t EffectAnim__2D__ScrollingText_With_Baseline();
     uint16_t EffectAnim__2D__DigitalClock();
     uint16_t EffectAnim__2D__PlasmaRotoZoom();
     #endif
@@ -1603,6 +1605,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__2D__OCTOPUS__ID,    
       EFFECTS_FUNCTION__2D__WAVING_CELL__ID,  
       EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,         
+      EFFECTS_FUNCTION__2D__SCROLLING_TEXT_WITH_BASELINE__ID,
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
       #endif
 
@@ -2672,6 +2675,8 @@ typedef struct Segment
     uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
     char *name = nullptr; // Keep, segment name to be added later by me
 
+    char* getName() { return name; } // Get the name of the segment
+
     // runtime data
     unsigned long next_time;  // millis() of next update
     uint32_t tSaved_EffectStartReferenceTime = 0;
@@ -2728,8 +2733,8 @@ typedef struct Segment
     byte* data;     // effect data pointer
     uint16_t _dataLen;
     static uint16_t _usedSegmentData;
-    // inline byte* Data(){ return data; };
-    // inline uint16_t DataLength(){ return _dataLen; };
+    inline byte* Data(){ return data; };
+    inline uint16_t DataLength(){ return _dataLen; };
     /***
      * dynamic colour byte buffer
      ***/
@@ -2851,6 +2856,23 @@ typedef struct Segment
       }
 
     };
+
+
+    void NameUpdate(const char* new_name)
+    {
+      if (name) {
+        delete[] name;
+        name = nullptr;
+      }
+
+      if (new_name) {
+        size_t len = strlen(new_name);
+        name = new char[len + 1];
+        if (name) {
+          strcpy(name, new_name);
+        }
+      }
+    }
 
 
     Segment(Segment &&orig) noexcept // move constructor

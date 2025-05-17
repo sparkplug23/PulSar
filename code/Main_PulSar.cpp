@@ -260,7 +260,13 @@ void setup(void)
   /**
    * @brief Start the Tasker_Interface module
    **/
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  Serial.printf("time %dms\n\r", millis());
   pCONT->Instance_Init();
+  DEBUG_LINE_HERE
+  Serial.printf("time %dms\n\r", millis());
+  DEBUG_LINE_HERE
   
 /********************************************************************************************
  ** LOGGING: Set boot log levels *********************************************************************
@@ -317,6 +323,19 @@ void setup(void)
     tkr_set->Settings2 = (mSettings::TSettings2*)malloc(sizeof(mSettings::TSettings2));
   }
   #endif
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
 
 /********************************************************************************************
  ** Settings ********************************************************************************
@@ -328,15 +347,22 @@ void setup(void)
     EmergencySerial_SettingsReset();
   #endif  // ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
 
+  DEBUG_LINE_HERE
   pCONT_sup->init_FirmwareVersion();
+  DEBUG_LINE_HERE
 
    //preload minimal required
+  DEBUG_LINE_HERE
   tkr_set->SettingsDefault();
   ALOG_DBG(PSTR("Loading minimal defaults"));
    // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
   ALOG_DBG(PSTR("Loading settings from saved memory"));
+  DEBUG_LINE_HERE
   tkr_set->SettingsLoad();                   // Only the system level settings are loaded here, not the module settings which should happen below
+  
+  DEBUG_LINE_HERE
   tkr_set->SettingsDelta();
+  DEBUG_LINE_HERE
   
   // sprintf(tkr_set->Settings.debug, "debug12\0");
 
@@ -634,7 +660,11 @@ void LoopTasker()
       pCONT->Tasker_Interface(TASK_EVERY_MIDNIGHT); 
     }
 
-    if(tkr_time->UpTime()==10){       pCONT->Tasker_Interface(TASK_BOOT_MESSAGE);}
+    if(tkr_time->UpTime()==10){
+      ALOG_INF(PSTR("Boot Message>>>>>>>>>>>>>>>>>>>"));
+      pCONT->Tasker_Interface(TASK_BOOT_MESSAGE);
+      ALOG_INF(PSTR("Boot Message<<<<<<<<<<<<<<<<<<<"));
+    }
 
     if(tkr_time->UpTime()==120){       pCONT->Tasker_Interface(TASK_ON_BOOT_SUCCESSFUL);}
       

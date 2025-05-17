@@ -8,7 +8,7 @@
  * 
  */
 
-#define D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID ((5*1000)+28)
+#define D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID   5028
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -53,6 +53,7 @@ class mHLK_LD2410 :
     static constexpr const char* PM_MODULE_SENSORS__HLK_LD2410__CTR = D_MODULE_SENSORS__RADAR_HLK_LD2410__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__HLK_LD2410__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID; }
+    ~mHLK_LD2410() {      Serial.printf("%S\r\n", GetModuleName());    }
     
     struct ClassState
     {

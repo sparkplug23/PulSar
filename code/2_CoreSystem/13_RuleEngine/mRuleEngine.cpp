@@ -226,6 +226,27 @@ void mRuleEngine::ShowRuleEvent_AddLog(uint8_t show_type)
 }
 
 
+void mRuleEngine::AddLog_DebugRule(EventPackage* rule)
+{
+
+  ALOG_INF(PSTR(""
+      "\n\r\n\r"
+      "Event>>\n\r"
+      "\tmodule:\t%d\n\r"
+      "\tfunction:\t%d\n\r"
+      "\tdevice_id:\t%d\n\r"
+      "\tvalue:\t\t\t[%d,%d,%d,%d,%d]\n\r"
+    ""),
+    rule->module_id, 
+    rule->function_id, 
+    rule->device_id, 
+    rule->value.data[0], rule->value.data[1], rule->value.data[2], rule->value.data[3], rule->value.data[4]
+  );
+    
+}
+
+
+
 /**
  * @brief Version 2 of triggering rules, adding the event but also include the type of function. Thie function can choose to pass that on, ignore or change the function type 
  * 
@@ -276,6 +297,8 @@ bool mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_even
   char buffer[50];
   DLI->GetDeviceName_WithModuleUniqueID( event_triggered.module_id, event_triggered.device_id, buffer, sizeof(buffer));
 
+  ALOG_INF(PSTR("Swithmoded to %d"),tkr_set->Settings.switchmode[0]);
+
 
   ALOG_INF( PSTR(D_LOG_RULES "NewEventRun_NumArg\n\r\t\t\t\tModule [%d\t%S],\n\r\t\t\t\tTask   [%d\t%S],\n\r\t\t\t\tIndex  [%d\t%s]"), 
     event_triggered.module_id,   pCONT->GetModuleName(event_triggered.module_id),
@@ -294,7 +317,7 @@ bool mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_even
       event_triggered.value.data[i] = va_arg(arg, int);
   }
   va_end(arg);
-  AddLog_Array(LOG_LEVEL_INFO, PSTR(D_LOG_RULES "data"), event_triggered.value.data, _data_length);
+  AddLog_Array(LOG_LEVEL_INFO, PSTR(D_LOG_RULES "\tdata"), event_triggered.value.data, _data_length);
 
   uint8_t task_handled = 0;
 
@@ -342,15 +365,26 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
   bool task_handled = false;
 
 
+
   // #ifdef ENABLE_LOG_LEVEL_INFO
   // ALOG_TST(PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
   // #endif // ENABLE_LOG_LEVEL_INFO
 
   //maybe need to return rule(s) handled then leave taasker_interface
 
-
+  // D_MAX_RULES
   for (int rule_index=0;rule_index<D_MAX_RULES;rule_index++)
   {
+
+    if(!rules[rule_index].flag_configured){ continue; } // Skip if not configured
+
+    ALOG_INF(PSTR(D_LOG_RULES "Rule %d........"), rule_index);
+
+    #ifdef ENABLE_DEBUGLOG_RULES_ENGINE
+    AddLog_DebugRule(&event_triggered);
+    AddLog_DebugRule(&rules[rule_index].trigger);
+    AddLog_DebugRule(&rules[rule_index].command);
+    #endif
 
     // Only run if configured and enabled
     if(rules[rule_index].flag_configured && rules[rule_index].flag_enabled)
@@ -360,7 +394,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
     if(rules[rule_index].trigger.function_id == function_input)
     {
 
-      ALOG_INF(PSTR(D_LOG_RULES "MATCHED trigger.function_input[%d] to rule[%d]"), function_input, rule_index);
+      ALOG_INF(PSTR(D_LOG_RULES "R%d: MATCHED function_input[%d]"), rule_index, function_input);
 
       rules_active_index = rule_index;
 
@@ -373,7 +407,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
       if(rules[rule_index].trigger.device_id == event_triggered.device_id)
       {
 
-        ALOG_INF( PSTR(D_LOG_RULES "MATCHED trigger.device_id[%d] to rule[%d]"), rules[rule_index].trigger.device_id,rule_index );
+        ALOG_INF( PSTR(D_LOG_RULES "R%d: MATCHED device_id[%d]"), rule_index, rules[rule_index].trigger.device_id  );
 
         // char message[50];
         // memset(message,0,sizeof(message));
@@ -387,7 +421,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
         if(rules[rule_index].trigger.module_id == event_triggered.module_id)
         {
                
-          ALOG_INF(PSTR(D_LOG_RULES "MATCHED trigger.module_id[%d] : Rule %d Triggered"), rules[rule_index].trigger.module_id, rule_index);
+          ALOG_INF(PSTR(D_LOG_RULES "R%d: MATCHED module_id[%d] : Triggered"), rule_index, rules[rule_index].trigger.module_id);
 
           // Populate any jsoncommands to be executed, this takes precident over "State" controls
           if(rules[rule_index].command.json_commands_dlist_id>0)
@@ -411,7 +445,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           {
             
             #ifdef ENABLE_LOG_LEVEL_ERROR
-                    ALOG_TST(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
+                    ALOG_INF(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
                   rules[rule_index].command.function_id, // function the previous trigger is linked to
                   rules[rule_index].command.module_id, //target module
                   true  // runnig a rule, so don't call this loop back into this function
@@ -433,7 +467,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
       else
       {
 
-        ALOG_INF( PSTR(D_LOG_RULES ".............NOMATCH trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
+        ALOG_INF( PSTR(D_LOG_RULES "R%d: FAILED match device_id[%d=|=%d]"), rule_index, rules[rule_index].trigger.device_id, event_triggered.device_id);
         
       }
 
@@ -471,12 +505,15 @@ rules_active_index = 0;
   #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
     if(tkr_set->Settings.module == mHardwarePins::MODULE_SHELLY_DIMMER2_ID){
       DefaultRule_Shelly_Dimmer2();
-    }else
+    }
   #endif // USE_MODULE_TEMPLATE_SHELLY_DIMMER2
   #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
+    #ifndef USE_MODULE_TEMPLATE_SHELLY_2P5_FORCED_DISABLED
+    else
     if(tkr_set->Settings.module == mHardwarePins::MODULE_SHELLY2P5_ID){
       DefaultRule_Shelly_2p5();
     }
+    #endif
   #endif // USE_MODULE_TEMPLATE_SHELLY_2P5
 #endif
 
@@ -543,7 +580,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
     if(jtok = jobj["Module"]){
       if(jtok.isStr()){
         // if((matched_id=pCONT->GetModule_UniqueID_byName(jtok.getStr()))>=0){
-        if((matched_id=pCONT->GetModuleID(jtok.getStr()))>0){
+        if((matched_id=pCONT->GetModuleID(jtok.getStr(), true))>0){
           event->module_id = matched_id;
           data_buffer.isserviced++;
         }

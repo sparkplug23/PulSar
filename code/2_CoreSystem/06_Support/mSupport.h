@@ -408,6 +408,7 @@ class mSupport :
     static constexpr const char* PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
+    ~mSupport() {      Serial.printf("%S\r\n", GetModuleName());    }
     
 
     void CheckResetConditions();

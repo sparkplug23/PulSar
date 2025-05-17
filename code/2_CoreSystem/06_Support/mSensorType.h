@@ -38,6 +38,16 @@
 #define SENSORS_RADS_TO_DPS                     (57.29577793F) /**< Rad/s to degrees/s  multiplier */
 #define SENSORS_GAUSS_TO_MICROTESLA             (100) /**< Gauss to micro-Tesla multiplier */
 
+#if defined(ESP_ARDUINO_VERSION)
+  #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(2, 0, 0)
+    #include <limits>
+  #endif
+#else
+  // Fallback if version macro not defined — include it anyway to be safe
+  #include <limits>
+#endif
+
+
 #define SENSOR_TYPE_INVALID_READING std::numeric_limits<float>::lowest()
 
 /**

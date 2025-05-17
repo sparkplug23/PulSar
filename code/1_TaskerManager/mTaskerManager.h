@@ -24,6 +24,9 @@
 
 #include "JsonParser.h"
 
+#include "1_TaskerManager/mTaskerInterface.h"  // MUST BE INCLUDED FIRST TET ADDED MAY2025
+
+
 #include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
@@ -768,6 +771,10 @@ class mTaskerManager{
     mTaskerManager(){};
     /* Here will be the instance stored. */
     static mTaskerManager* instance;
+
+    ~mTaskerManager(){ Serial.println("Destructor, should never reach this"); Serial.flush(); }; // Destructor
+    
+    
   public:
     // External function to get instance
     static mTaskerManager* GetInstance(){
@@ -829,19 +836,45 @@ class mTaskerManager{
     
     // Function to find a module unique ID by class name
     // From now on, no module is allowed to be called number 0 as unique ID so it can be reserved for no match
-    uint16_t GetModuleID(const char* name) const {
+    // uint16_t GetModuleID(const char* name) const {
+    //   auto it = std::find_if(pModule.begin(), pModule.end(),
+    //       [name](mTaskerInterface* module) {
+    //           // Use strcmp_P if name is stored in PROGMEM
+    //           return strcmp_P(name, module->GetModuleName()) == 0;
+    //       });
+
+    //       if (it != pModule.end()) {
+    //           return (*it)->GetModuleUniqueID();
+    //     }
+
+    //     return 0; // Return 0 or another appropriate invalid ID if the module is not found
+    // }
+    uint16_t GetModuleID(const char* name, bool caseInsensitive = false) const {
       auto it = std::find_if(pModule.begin(), pModule.end(),
-          [name](mTaskerInterface* module) {
-              // Use strcmp_P if name is stored in PROGMEM
-              return strcmp_P(name, module->GetModuleName()) == 0;
+          [name, caseInsensitive](mTaskerInterface* module) {
+              const char* namePtr = name;
+              const char* modName = module->GetModuleName();
+              char c1, c2;
+  
+              while ((c1 = *namePtr++) != 0) {
+                  c2 = pgm_read_byte(modName++);
+                  if (caseInsensitive) {
+                      c1 = tolower(c1);
+                      c2 = tolower(c2);
+                  }
+                  if (c1 != c2) return false;
+              }
+              return pgm_read_byte(modName) == 0;
           });
-
-          if (it != pModule.end()) {
-              return (*it)->GetModuleUniqueID();
-        }
-
-        return 0; // Return 0 or another appropriate invalid ID if the module is not found
-    }
+  
+      if (it != pModule.end()) {
+          return (*it)->GetModuleUniqueID();
+      }
+  
+      return 0;
+  }
+  
+  
 
 
     uint8_t Instance_Init();

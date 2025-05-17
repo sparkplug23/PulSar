@@ -119,6 +119,7 @@ class mTOF_VL53L1X :
     uint8_t VL53L1X_xshut_bitmapped = 0;
     uint8_t VL53L1X_detected_bitmapped = 0;
     bool VL53L1X_xshut_enabled = false;
+    uint8_t roi_set = 0;
     void ReadSensor();
 
     uint8_t SearchForDevices();
@@ -157,6 +158,12 @@ class mTOF_VL53L1X :
      * SECTION: Commands
      ************************************************************************************************/
     
+    void parse_JSONCommand(JsonParserObject obj);
+    bool SetSensorROI(uint8_t sensor_index, uint8_t center, uint8_t width, uint8_t height);
+    bool VL53L1X_writeReg(uint8_t i2c_addr, uint16_t reg, uint8_t value);
+
+
+
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/

@@ -390,6 +390,9 @@ With latest version, all longer term shared debug features should be added here 
 #define D_MQTT_SYNC                   "sync"
 
 
+#define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+
 // -- MQTT - TLS ----------------------------------
   // !!! TLS uses a LOT OF MEMORY so be careful to enable other options at the same time !!!
 //#define USE_MQTT_TLS                             // Use TLS for MQTT connection (+53k code, +15k mem)
@@ -495,8 +498,9 @@ With latest version, all longer term shared debug features should be added here 
 #ifndef SWITCH_DEBOUNCE_TIME
 #define SWITCH_DEBOUNCE_TIME   50                // [SwitchDebounce] Number of mSeconds switch press debounce time
 #endif
+#ifndef SWITCH_MODE
 #define SWITCH_MODE            SWITCHMODE_TOGGLE_ID            // [SwitchMode] TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE (the wall switch state)
-
+#endif
 
 #define TEMP_CONVERSION        0                 // [SetOption8] Return temperature in (0 = Celsius or 1 = Fahrenheit)
 #define PRESSURE_CONVERSION    0                 // [SetOption24] Return pressure in (0 = hPa or 1 = mmHg)

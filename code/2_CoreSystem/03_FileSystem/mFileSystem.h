@@ -125,6 +125,7 @@ class mFileSystem :
     static constexpr const char* PM_MODULE_CORE_FILESYSTEM_CTR = D_MODULE_CORE_FILESYSTEM_CTR;
     PGM_P GetModuleName(){         return PM_MODULE_CORE_FILESYSTEM_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_FILESYSTEM_ID; }
+    ~mFileSystem() {      Serial.printf("%S\r\n", GetModuleName());    }
 
     void ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
     uint32_t ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
@@ -252,8 +253,8 @@ class mFileSystem :
 
     #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
     String getContentType(AsyncWebServerRequest* request, String filename);
-    #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
     bool handleFileRead(AsyncWebServerRequest* request, String path);
+    #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);

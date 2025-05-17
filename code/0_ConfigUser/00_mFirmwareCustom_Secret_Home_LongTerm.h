@@ -5418,7 +5418,7 @@ Bathroom
   #define DEVICENAME_CTR          "ensuite_switch"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Switch: Light and Fan"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Whitehall
+  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Whitehall
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70" // Meadows for testing
     #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
     #define MQTT_PORT     1883
@@ -5426,7 +5426,7 @@ Bathroom
   #define ESP8266
 
   // #define SWITCH_DEBOUNCE_TIME 59
-  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -5434,9 +5434,11 @@ Bathroom
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   
   
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+  // #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
   // #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
   // #define DEVICE_DEFAULT_CONFIGURATION_MODE_C_SWITCHES_ARE_MOTION_DETECTION_REPORTING_ONLY_OUTPUTS_ARE_REMOTE_CONTROLLED //sidedoor and garage new method
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_D_SWITCHES_FOLLOW_OUTPUTS
+
 
   // #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
     // #define ENABLE_DRIVERS_RELAYS_TIME_LOCKS
@@ -5467,10 +5469,10 @@ Bathroom
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden"
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
-  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"  
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "OutputLight"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "OutputFan"
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "SwitchEnsuiteLeft"
+  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "SwitchEnsuiteRight"  
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -5708,6 +5710,63 @@ Bathroom
     "}"
   "}";
   #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_D_SWITCHES_FOLLOW_OUTPUTS
+
+  #define USE_MODULE_TEMPLATE_SHELLY_2P5_FORCED_DISABLED
+  #define SWITCH_MODE 1 // 1 is FOLLOW
+  #define ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 Follow = Relay0 Power Follow
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"switches\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1"  // SwitchMode of 1, is FOLLOW
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"relays\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":\"Follow\"" // 3 (or other) means follow, so copy input from trigger
+      "}"
+    "},"
+    // Switch1 Follow = Relay1 Power Follow
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"switches\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":1"  // SwitchMode of 1, is FOLLOW
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"relays\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":1,"
+        "\"State\":\"Follow\""  // 3 (or other) means follow, so copy input from trigger
+      "}"    
+    "}"
+  "}";
+  // "},"
+  //   // Button0 Single Press = Relay0 Power On for 10 seconds tester
+  //   "\"Rule2\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_CTR "\","
+  //       "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":2" // 
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"relays\","
+  //       "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //     "}"
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_D_SWITCHES_FOLLOW_OUTPUTS
 
 
 #endif // DEVICE_NAME

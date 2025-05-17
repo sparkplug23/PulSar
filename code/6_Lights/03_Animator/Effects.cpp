@@ -12157,7 +12157,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__ScrollingText()
   // DEBUG_LINE_HERE;
   char sec[5];
   int  AmPmHour = tkr_time->RtcTime.hour;// hour(localTime);
-  bool isitAM = true;
+  bool isitAM = false;
   if (useAMPM) {
     if (AmPmHour > 11) { AmPmHour -= 12; isitAM = false; }
     if (AmPmHour == 0) { AmPmHour  = 12; }
@@ -12236,6 +12236,132 @@ uint16_t mAnimatorLight::EffectAnim__2D__ScrollingText()
 }
 static const char PM_EFFECT_CONFIG__2D__SCROLLING_TEXT__INDEXING[] PROGMEM = "Scrolling Text@!,Y Offset,Trail,Font size,Rotate,Gradient,Overlay,Reverse;!,!,Gradient;!;2;ix=128,c1=0,rev=0,mi=0,rY=0,mY=0";
 
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : 
+ * @note : Converted from WLED Effects "mode_2Dscrollingtext"
+ * @note : This should probably become some kind of custom effect, but for now will be slotted in with the defaults.
+ ********************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__2D__ScrollingText_With_Baseline()
+{
+
+  if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
+
+  const int cols = SEG_W;
+  const int rows = SEG_H;
+
+  unsigned letterWidth, rotLW;
+  unsigned letterHeight, rotLH;
+  switch (map(SEGMENT.custom2, 0, 255, 1, 5)) {
+    default:
+    case 1: letterWidth = 4; letterHeight =  6; break;
+    case 2: letterWidth = 5; letterHeight =  8; break;
+    case 3: letterWidth = 6; letterHeight =  8; break;
+    case 4: letterWidth = 7; letterHeight =  9; break;
+    case 5: letterWidth = 5; letterHeight = 12; break;
+  }
+  // letters are rotated
+  if (((SEGMENT.custom3+1)>>3) % 2) {
+    rotLH = letterWidth;
+    rotLW = letterHeight;
+  } else {
+    rotLW = letterWidth;
+    rotLH = letterHeight;
+  }
+
+  char text[WLED_MAX_SEGNAME_LEN+1] = {'\0'};
+  if (SEGMENT.name) for (size_t i=0,j=0; i<strlen(SEGMENT.name); i++) if (SEGMENT.name[i]>31 && SEGMENT.name[i]<128) text[j++] = SEGMENT.name[i];
+  const bool zero = strchr(text, '0') != nullptr;
+
+  char sec[5];
+  int  AmPmHour = tkr_time->hour(localTime);
+  bool isitAM = true;
+  if (useAMPM) {
+    if (AmPmHour > 11) { AmPmHour -= 12; isitAM = false; }
+    if (AmPmHour == 0) { AmPmHour  = 12; }
+    sprintf_P(sec, PSTR(" %2s"), (isitAM ? "AM" : "PM"));
+  } else {
+    sprintf_P(sec, PSTR(":%02d"), tkr_time->second(localTime));
+  }
+
+  if (!strlen(text)) { // fallback if empty segment name: display date and time
+    sprintf_P(text, PSTR("%s %d, %d %d:%02d%s"), tkr_time->monthShortStr(tkr_time->month(localTime)), tkr_time->day(localTime), tkr_time->year(localTime), AmPmHour, tkr_time->minute(localTime), sec);
+  } else {
+    if      (!strncmp_P(text,PSTR("#DATE"),5)) sprintf_P(text, zero?PSTR("%02d.%02d.%04d"):PSTR("%d.%d.%d"),   tkr_time->day(localTime),   tkr_time->month(localTime),  tkr_time->year(localTime));
+    else if (!strncmp_P(text,PSTR("#DDMM"),5)) sprintf_P(text, zero?PSTR("%02d.%02d")     :PSTR("%d.%d"),      tkr_time->day(localTime),   tkr_time->month(localTime));
+    else if (!strncmp_P(text,PSTR("#MMDD"),5)) sprintf_P(text, zero?PSTR("%02d/%02d")     :PSTR("%d/%d"),      tkr_time->month(localTime), tkr_time->day(localTime));
+    else if (!strncmp_P(text,PSTR("#TIME"),5)) sprintf_P(text, zero?PSTR("%02d:%02d%s")   :PSTR("%2d:%02d%s"), AmPmHour,         tkr_time->minute(localTime), sec);
+    else if (!strncmp_P(text,PSTR("#HHMM"),5)) sprintf_P(text, zero?PSTR("%02d:%02d")     :PSTR("%d:%02d"),    AmPmHour,         tkr_time->minute(localTime));
+    else if (!strncmp_P(text,PSTR("#HH"),3))   sprintf_P(text, zero?PSTR("%02d")          :PSTR("%d"),         AmPmHour);
+    else if (!strncmp_P(text,PSTR("#MM"),3))   sprintf_P(text, zero?PSTR("%02d")          :PSTR("%d"),         tkr_time->minute(localTime));
+  }
+
+  const int  numberOfLetters = strlen(text);
+  int width = (numberOfLetters * rotLW);
+  int yoffset = map(SEGMENT.intensity, 0, 255, -rows/2, rows/2) + (rows-rotLH)/2;
+  if (width <= cols) {
+    // scroll vertically (e.g. ^^ Way out ^^) if it fits
+    int speed = map(SEGMENT.speed, 0, 255, 5000, 1000);
+    int frac = effect_start_time % speed + 1;
+    if (SEGMENT.intensity == 255) {
+      yoffset = (2 * frac * rows)/speed - rows;
+    } else if (SEGMENT.intensity == 0) {
+      yoffset = rows - (2 * frac * rows)/speed;
+    }
+  }
+
+  if (SEGMENT.step < effect_start_time) {
+    // calculate start offset
+    if (width > cols) {
+      if (SEGMENT.check3) {
+        if (SEGMENT.aux0 == 0) SEGMENT.aux0  = width + cols - 1;
+        else                --SEGMENT.aux0;
+      } else                ++SEGMENT.aux0 %= width + cols;
+    } else                    SEGMENT.aux0  = (cols + width)/2;
+    ++SEGMENT.aux1 &= 0xFF; // color shift
+    SEGMENT.step = effect_start_time + map(SEGMENT.speed, 0, 255, 250, 50); // shift letters every ~250ms to ~50ms
+  }
+
+  if (!SEGMENT.check2) SEGMENT.fade_out(255 - (SEGMENT.custom1>>4));  // trail
+  bool usePaletteGradient = false;
+  uint32_t col1 = SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+  uint32_t col2 = BLACK;
+  if (SEGMENT.check1) { // use gradient
+    if(SEGMENT.palette_id == 0) { // use colors for gradient
+    col1 = SEGCOLOR(0);
+    col2 = SEGCOLOR(2);
+    }
+    else usePaletteGradient = true;
+  }
+
+  for (int i = 0; i < numberOfLetters; i++) {
+    int xoffset = int(cols) - int(SEGMENT.aux0) + rotLW*i;
+    if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
+    SEGMENT.drawCharacter(text[i], xoffset, yoffset, letterWidth, letterHeight, col1, col2, map(SEGMENT.custom3, 0, 31, -2, 2), usePaletteGradient);
+  }
+
+  /***
+   * @note : This is the new part, where we draw the baseline.
+   * It is encoded in the data, will be from a mqtt command
+   */  // === Custom RGB Data Buffer Pixel Drawing ===
+  const byte* effectData = SEGMENT.Data();
+  const uint16_t dataLength = SEGMENT.DataLength();
+
+  constexpr uint8_t BYTES_PER_PIXEL = 5;
+  for (uint16_t i = 0; i + BYTES_PER_PIXEL <= dataLength; i += BYTES_PER_PIXEL) {
+    uint16_t index = (uint16_t(effectData[i]) << 8) | effectData[i + 1];
+    uint8_t r = effectData[i + 2];
+    uint8_t g = effectData[i + 3];
+    uint8_t b = effectData[i + 4];
+    SEGMENT.setPixelColor(index, r, g, b);
+    // ALOG_INF(PSTR("%d index=%d, r=%d, g=%d, b=%d"), dataLength, index, r, g, b);
+  }
+
+  return FRAMETIME;
+
+}
+static const char PM_EFFECT_CONFIG__2D__SCROLLING_TEXT_WITH_BASELINE__INDEXING[] PROGMEM = "Scrolling Text with Baseline@!,Y Offset,Trail,Font size,Rotate,Gradient,Overlay,Reverse;!,!,Gradient;!;2;ix=128,c1=0,rev=0,mi=0,rY=0,mY=0";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -15022,8 +15148,12 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__2D__FLOATING_BLOBS__INDEXING);      
     
   addEffect(EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,   
-            &mAnimatorLight::EffectAnim__2D__ScrollingText, 
-            PM_EFFECT_CONFIG__2D__SCROLLING_TEXT__INDEXING);  
+    &mAnimatorLight::EffectAnim__2D__ScrollingText, 
+    PM_EFFECT_CONFIG__2D__SCROLLING_TEXT__INDEXING);  
+
+  addEffect(EFFECTS_FUNCTION__2D__SCROLLING_TEXT_WITH_BASELINE__ID,   
+    &mAnimatorLight::EffectAnim__2D__ScrollingText_With_Baseline, 
+    PM_EFFECT_CONFIG__2D__SCROLLING_TEXT_WITH_BASELINE__INDEXING);  
 
   addEffect(EFFECTS_FUNCTION__2D__DRIFT_ROSE__ID,       
             &mAnimatorLight::EffectAnim__2D__DriftRose,     

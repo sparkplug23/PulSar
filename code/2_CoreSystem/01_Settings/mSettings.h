@@ -504,6 +504,7 @@ class mSettings :
     static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
+    ~mSettings() {      Serial.printf("%S\r\n", GetModuleName());    }
 
   #ifdef ESP8266
     #if AUTOFLASHSIZE

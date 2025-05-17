@@ -259,6 +259,14 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   }
 
 
+  if(jtok = obj["Name"])
+  {
+    SEGMENT_I(segment_index).NameUpdate(jtok.getStr());
+    ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_NAME)), SEGMENT_I(segment_index).getName() );
+    data_buffer.isserviced++;
+  }
+
+
   /*************************************************************************
    *** {"Effects":{X:Y}}
    *************************************************************************/
@@ -401,6 +409,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
       data_buffer.isserviced++;
     }
+
+
 
       
     if (jtok = jobj["Params"]) { 
@@ -561,6 +571,81 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       }
     }
   }
+
+  #ifdef ENABLE_DEVFEATURE_LIGHT__CUSTOM_PIXEL_DATA
+  if (jtok = obj["CustomPixelData"])
+  {
+    ALOG_INF(PSTR("CustomPixelData received"));
+
+    JsonParserToken jtok_sub = 0;
+
+    // --- Step 1: Parse Index array ---
+    if (!(jtok_sub = jtok.getObject()["Index"])) {
+      ALOG_ERR(PSTR("Missing 'Index' array"));
+      return;
+    }
+    JsonParserArray arr_index = jtok_sub;
+
+    uint16_t data_length = arr_index.size();
+    data_length = data_length < 255 ? data_length : 255;
+
+    ALOG_INF(PSTR("Parsed Index array, size = %d"), data_length);
+
+    uint16_t index_list[data_length];
+    uint8_t  rgb_list[data_length][3];
+
+    for (uint16_t i = 0; i < data_length; ++i) {
+      index_list[i] = arr_index[i].getInt();
+      ALOG_INF(PSTR("Index[%d] = %d"), i, index_list[i]);
+    }
+
+    // --- Step 2: Parse RGB array ---
+    if (!(jtok_sub = jtok.getObject()["RGB"])) {
+      ALOG_ERR(PSTR("Missing 'RGB' array"));
+      return;
+    }
+    JsonParserArray arr_rgb = jtok_sub;
+
+    if (arr_rgb.size() < data_length) {
+      ALOG_ERR(PSTR("RGB array too short (%d < %d); truncating"), arr_rgb.size(), data_length);
+      data_length = arr_rgb.size(); // Truncate to match available RGBs
+    }
+
+    ALOG_INF(PSTR("Parsed RGB array, size = %d"), arr_rgb.size());
+
+    for (uint16_t i = 0; i < data_length; ++i) {
+      JsonParserArray rgb = arr_rgb[i];
+      rgb_list[i][0] = rgb[0].getInt();
+      rgb_list[i][1] = rgb[1].getInt();
+      rgb_list[i][2] = rgb[2].getInt();
+      ALOG_INF(PSTR("RGB[%d] = %d,%d,%d"), i, rgb_list[i][0], rgb_list[i][1], rgb_list[i][2]);
+    }
+
+    // --- Step 3: Allocate and write data buffer ---
+    size_t total_bytes = data_length * 5;
+    ALOG_INF(PSTR("Preparing to write %d pixels (%d bytes)"), data_length, total_bytes);
+
+    if (data_length > 0 && SEGMENT.allocateData(total_bytes)) {
+      byte* buffer = SEGMENT.Data();
+      for (uint16_t i = 0; i < data_length; ++i) {
+        buffer[i*5 + 0] = index_list[i] >> 8;
+        buffer[i*5 + 1] = index_list[i] & 0xFF;
+        buffer[i*5 + 2] = rgb_list[i][0];
+        buffer[i*5 + 3] = rgb_list[i][1];
+        buffer[i*5 + 4] = rgb_list[i][2];
+      }
+      SEGMENT._dataLen = total_bytes;
+      SEGMENT.check1 = 1;
+      data_buffer.isserviced++;
+      ALOG_INF(PSTR("Successfully stored %d pixels into buffer (%d bytes)"), data_length, total_bytes);
+    } else {
+      ALOG_ERR(PSTR("CustomPixelData failed: allocation failed"));
+    }
+  }
+  #endif
+
+
+
 
   #ifdef ENABLE_DEVFEATURE_LIGHT__HEATMAP_PALETTES
 /**

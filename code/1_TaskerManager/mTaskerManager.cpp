@@ -57,6 +57,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
 
   for(auto& mod:pModule)
   {     
+    DEBUG_LINE_HERE;
               
     /****************************************************************************************************************
      * Debug: Stats
@@ -170,7 +171,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       }
   #else
       // If metrics are disabled, just run the task
+    DEBUG_LINE_HERE;
       result = mod->Tasker(task, obj);
+      DEBUG_LINE_HERE;
   #endif
 
     
@@ -211,6 +214,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       #endif
     }
     #endif
+
+    DEBUG_LINE_HERE;
  
   } // end for
 
@@ -278,6 +283,9 @@ void mTaskerManager::addTasker(mTaskerInterface* mod)
 {
   pModule.push_back(mod);
   Serial.printf("AddTasker[%d]\t%S\n\r", pModule.size(), mod->GetModuleName());
+
+  // ✅ Check heap integrity after each module is added
+  assert(heap_caps_check_integrity_all(true));  // will abort on corrupt heap
 }
 
 
@@ -311,6 +319,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_TELEMETRY
   addTasker(new mTelemetry());
   #endif 
+  #ifdef USE_MODULE_CORE_EVENTS
+  addTasker(new mEvent());
+  #endif
   #ifdef USE_MODULE_CORE_RULES
   addTasker(new mRuleEngine());
   #endif
@@ -319,9 +330,6 @@ uint8_t mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_CORE__SERIAL
   addTasker(new mSerial());
-  #endif
-  #ifdef USE_MODULE_CORE_EVENTS
-  addTasker(new mEvent());
   #endif
   #ifdef USE_MODULE_CORE_I2C
   addTasker(new mI2C());
@@ -332,6 +340,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(new mDevelopmentDebugging());
   #endif 
+  DEBUG_LINE_HERE
   /**
    * @brief Network
    **/
@@ -353,6 +362,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   addTasker(new mWebServer());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Drivers
    **/
@@ -431,6 +441,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_DRIVERS_MODEM_800L
   addTasker(new mSIM800L());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Sensors
    **/
@@ -498,7 +509,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mTOF_VL53L1X());
   #endif
   #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-  addTasker(new mHLK_LD2410());
+  // addTasker(new mHLK_LD2410());
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
   addTasker(new mADCInternal());
@@ -521,6 +532,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
   addTasker(new mBattery_Modem());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Lights
    **/
@@ -530,6 +542,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
   addTasker(new mAnimatorLight());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Energy
    **/
@@ -545,6 +558,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_ENERGY_INA219
   addTasker(new mEnergyINA219());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Displays
    **/
@@ -560,6 +574,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
   addTasker(new mOLED_SH1106());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Controller Generic
    **/
@@ -569,6 +584,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_FAN
   addTasker(new mFan());
   #endif
+  DEBUG_LINE_HERE
   // 3d printer encoder here
   #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
   addTasker(new mTankVolume());
@@ -603,6 +619,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER__ENERGY_OLED
   addTasker(new mEnergyOnOLED());
   #endif
+  DEBUG_LINE_HERE
   /**
    * @brief Controller Custom
    **/  
@@ -666,15 +683,58 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
   addTasker(new mMavlinkFlyingLEDS());
   #endif
+  DEBUG_LINE_HERE
 
-  Serial.printf(D_LOG_CLASSLIST "Loaded %d Modules\n\r",  pModule.size() );
+  // Serial.printf(D_LOG_CLASSLIST "Loaded %d Modules\n\r",  pModule.size() );
 
   #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // Causing hang up and crash on ESP32 May2025
   debug_module_time.resize(pModule.size());
+  make error
   #endif
+  DEBUG_LINE_HERE
+
+  Serial.printf("time %dms\n\r", millis());
+
+  assert(heap_caps_check_integrity_all(true));  // optional final check
+
+  Serial.printf("time %dms\n\r", millis());
+  DEBUG_LINE_HERE
+  return 0;
+  Serial.printf("time %dms\n\r", millis());
 
 };
 
+
+
+// uint8_t mTaskerManager::Instance_Init()
+// {
+
+//   // return 0;
+    
+  
+//   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
+//   addTasker(new mDevelopmentDebugging());
+//   #endif 
+
+//   Serial.printf("time %dms\n\r", millis());
+
+//   assert(heap_caps_check_integrity_all(true));  // optional final check
+
+//   Serial.printf("time %dms\n\r", millis());
+//   DEBUG_LINE_HERE
+//   Serial.printf("time %dms\n\r", millis());
+
+//   if (!heap_caps_check_integrity_all(true)) {
+//     Serial.println("HEAP CORRUPTION DETECTED!");
+//     delay(2000);
+// }
+
+// return 0;
+
+
+
+// };
 
 const char* mTaskerManager::GetTaskName(uint16_t task)
 {

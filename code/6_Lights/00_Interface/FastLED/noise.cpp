@@ -599,13 +599,8 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q
       static_cast<uint16_t>(y * freqf),
       static_cast<int>(freqf * scaley),
       time);
-    #else
-    fill_raw_2dnoise8(pData, width, height, octaves - 1, freq44, amplitude, skip + 1,
-      x * freq44,
-      freq44 * static_cast<q44>(scalex),
-      y * freq44,
-      freq44 * static_cast<q44>(scaley),
-      time);
+    #else    
+    fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, freq44 * scalex, y*freq44, freq44 * scaley, time);
     #endif
 
   } else {
@@ -707,9 +702,9 @@ void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octa
     #else
     fill_raw_2dnoise16into8(pData, width, height, octaves - 1, freq44, amplitude, skip + 1,
       x * freq44,
-      freq44 * static_cast<q44>(scalex),
+      freq44 * scalex,
       y * freq44,
-      freq44 * static_cast<q44>(scaley),
+      freq44 * scaley,
       time);
     #endif
 

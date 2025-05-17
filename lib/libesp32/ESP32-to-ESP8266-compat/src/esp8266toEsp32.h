@@ -29,7 +29,22 @@
 //
 // dummy defines
 #define SPIFFS_END (SPI_FLASH_SEC_SIZE * 200)
-#define SETTINGS_LOCATION SPIFFS_END
+
+// #ifndef SETTINGS_LOCATION
+// #define SETTINGS_LOCATION SPIFFS_END
+// #error "nere"
+// #endif
+#define SETTINGS_LOCATION 0x300000 //SPIFFS_END
+
+#ifndef SPI_FLASH_SEC_SIZE
+#define SPI_FLASH_SEC_SIZE 4096
+#endif
+
+#define STR(x) #x
+#define XSTR(x) STR(x)
+
+#warning "SETTINGS_LOCATION is " XSTR(SETTINGS_LOCATION)
+
 
 #include <Esp.h>
 

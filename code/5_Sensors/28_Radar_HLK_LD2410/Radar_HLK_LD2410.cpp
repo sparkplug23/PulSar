@@ -304,7 +304,7 @@ void mHLK_LD2410::Ld2410Input(void) {
     yield();                                                    // Fix watchdogs
 
     LD2410.buffer[LD2410.byte_counter++] = LD2410Serial->read();
-    AddLog_Array(LOG_LEVEL_INFO, "LD2410.buffer", LD2410.buffer, LD2410_BUFFER_SIZE);
+    AddLog_Array(LOG_LEVEL_DEBUG_MORE, "LD2410.buffer", LD2410.buffer, LD2410_BUFFER_SIZE);
     if (LD2410.byte_counter < 4) { continue; }                  // Need first four header bytes
 
     uint32_t header_start = LD2410.byte_counter -4;             // Fix interrupted header transmits

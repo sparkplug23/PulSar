@@ -245,7 +245,7 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
     return false;  // Setting not supported - internal error
   }
 
-  DEBUG_LINE_HERE
+  
 
   // Make a copy first in case we use source from Settings->text
   uint32_t replace_len = strlen_P(replace_me);
@@ -268,14 +268,14 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   }
   uint32_t char_len = position - Settings.text_pool;
 
-  DEBUG_LINE_HERE
+  
   uint32_t current_len = end_pos - start_pos;
   int diff = replace_len - current_len;
 
  ALOG_DBM(PSTR("TST: start %d, end %d, len %d, current %d, replace %d, diff %d"),
    start_pos, end_pos, char_len, current_len, replace_len, diff);
 
-  DEBUG_LINE_HERE
+  
   int too_long = (char_len + diff) - settings_text_size;
     ALOG_DBM(PSTR(D_LOG_CONFIG "Text test by %d char(s)"), too_long);
   if (too_long > 0) {
@@ -283,24 +283,24 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
     return false;  // Replace text too long
   }
 
-  DEBUG_LINE_HERE
+  
   if (settings_text_mutex && !SettingsUpdateFinished()) {
     settings_text_busy_count++;
   } else {
     settings_text_mutex = true;
 
-  DEBUG_LINE_HERE
+  
     if (diff != 0) {
       // Shift Settings->text up or down
       memmove_P(Settings.text_pool + start_pos + replace_len, Settings.text_pool + end_pos, char_len - end_pos);
     }
-  DEBUG_LINE_HERE
+  
     // Replace text
     memmove_P(Settings.text_pool + start_pos, replace, replace_len);
-  DEBUG_LINE_HERE
+  
     // Fill for future use
     memset(Settings.text_pool + char_len + diff, 0x00, settings_text_size - char_len - diff);
-  DEBUG_LINE_HERE
+  
 
     settings_text_mutex = false;
   }

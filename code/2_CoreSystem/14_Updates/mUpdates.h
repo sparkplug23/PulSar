@@ -21,6 +21,7 @@ class mUpdates :
     static constexpr const char* PM_MODULE_CORE_UPDATES_CTR = D_MODULE_CORE_UPDATES_CTR;    
     PGM_P GetModuleName(){         return PM_MODULE_CORE_UPDATES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_UPDATES_ID; }
+    ~mUpdates() {      Serial.printf("%S\r\n", GetModuleName());    }
 
 
     void init(void);

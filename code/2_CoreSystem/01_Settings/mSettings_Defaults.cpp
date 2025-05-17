@@ -35,6 +35,7 @@ DEBUG_LINE_HERE2
 DEBUG_LINE_HERE2
 
   // Clear module defaults  
+  DEBUG_LINE_HERE;
   pCONT->Tasker_Interface(TASK_SETTINGS_DEFAULT); // replace with below?
   DEBUG_LINE_HERE;
   
@@ -45,11 +46,14 @@ DEBUG_LINE_HERE2
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
   #endif// ENABLE_LOG_LEVEL_INFO
 
+
   DEBUG_LINE_HERE;
   // After defaults are loaded everything should immediately be saved
   SettingsSaveAll();
    
   DEBUG_LINE_HERE;
+
+  return;
     
 }
 
@@ -90,7 +94,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.unified_interface_reporting_invalid_reading_timeout_seconds = UNIFIED_INTERFACE_REPORTING_INVALID_SECONDS;
   
  
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
 
 
   /*********************************************************************************************
@@ -126,7 +130,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   #endif // USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
   
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   /*********************************************************************************************
    ******* Serial *****************************************************************************
    *********************************************************************************************/
@@ -150,17 +154,17 @@ void mSettings::SystemSettings_DefaultBody(void)
   
   SettingsUpdateText(SET_SYSLOG_HOST, PSTR(SYS_LOG_HOST));
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   /*********************************************************************************************
    ******* Networking: Wifi/Network/Cellular ***************************************************
    *********************************************************************************************/
 
   SettingsUpdateText(SET_OTAURL, PSTR(D_OTA_URL));
   
-  DEBUG_LINE_HERE
+  
 
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
-  DEBUG_LINE_HERE
+  
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
@@ -168,8 +172,8 @@ void mSettings::SystemSettings_DefaultBody(void)
   pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
   pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
   
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
-  DEBUG_LINE_HERE
+  
+  
   Settings.sta_config = WIFI_CONFIG_TOOL;
   Settings.sta_active = 0;
   SettingsUpdateText(SET_STASSID1, PSTR(STA_SSID1));
@@ -183,7 +187,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.flag_network.network_wifi = 1;
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   Settings.flag_network.timers_enable = 0;
   Settings.flag_network.use_wifi_rescan = 1;
   Settings.flag_system.stop_flash_rotate = true;
@@ -198,11 +202,11 @@ void mSettings::SystemSettings_DefaultBody(void)
   
   Settings.webserver = WEB_SERVER;
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   SettingsUpdateText(SET_WEBPWD, PSTR(WEB_PASSWORD));
   SettingsUpdateText(SET_CORS, PSTR(CORS_DOMAIN));
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   /*********************************************************************************************
    ******* Networking: MQTT ********************************************************************
    *********************************************************************************************/
@@ -220,7 +224,7 @@ void mSettings::SystemSettings_DefaultBody(void)
    ******* Param Options ***********************************************************************
    *********************************************************************************************/
   
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   Settings.setoption_255[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
   Settings.setoption_255[P_HOLD_TIME] = KEY_HOLD_TIME;  // Default 4 seconds hold time
   Settings.setoption_255[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
@@ -233,7 +237,7 @@ void mSettings::SystemSettings_DefaultBody(void)
    ******* Time ********************************************************************************
    *********************************************************************************************/
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   if (((APP_TIMEZONE > -14) && (APP_TIMEZONE < 15)) || (99 == APP_TIMEZONE)) {
     Settings.timezone = APP_TIMEZONE;
     Settings.timezone_minutes = 0;
@@ -246,7 +250,7 @@ void mSettings::SystemSettings_DefaultBody(void)
     Settings.timezone_minutes2 = abs(APP_TIMEZONE % 60);
   }
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   SettingsResetStd();
   SettingsResetDst();
 
@@ -259,7 +263,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   }
   #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
   
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  
   /*********************************************************************************************
    ******* Human Interface Devices (HID) e.g. Buttons/Switches *********************************
    *********************************************************************************************/
@@ -269,7 +273,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   #ifdef USE_MODULE_SENSORS_SWITCHES
     for (uint8_t i = 0; i < MAX_SWITCHES_SET; i++) { Settings.switchmode[i] = SWITCH_MODE; }
   #endif
-  ALOG_INF(PSTR("Settings.switch_debounce is set --- %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  // ALOG_INF(PSTR("Settings.switch_debounce is set --- %d"), Settings.switch_debounce);  
   Settings.flag_system.button_restrict = 0;
   Settings.flag_system.button_swap = 0;
   Settings.flag_system.button_single_press_only = 0; // support only single press to support faster button recognition (disable to allow multipress)
@@ -277,7 +281,7 @@ void mSettings::SystemSettings_DefaultBody(void)
 
   Settings.flag_system.mqtt_switches = 0; // false default
 
-  ALOG_INF(PSTR("switch_debounce?? %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  // ALOG_INF(PSTR("switch_debounce?? %d"), Settings.switch_debounce);  
   /*********************************************************************************************
    ******* Sensors *****************************************************************************
    *********************************************************************************************/
@@ -298,7 +302,6 @@ void mSettings::SystemSettings_DefaultBody(void)
   SettingsUpdateText(SET_STATE_TXT3, PSTR(D_TOGGLE));
   SettingsUpdateText(SET_STATE_TXT4, PSTR(D_HOLD));
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
   /*********************************************************************************************
    ******* Drivers *****************************************************************************
    *********************************************************************************************/
@@ -327,7 +330,6 @@ void mSettings::SystemSettings_DefaultBody(void)
   
   Settings.flag_system.pwm_control = 1;
 
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
   /*********************************************************************************************
    ******* Energy ******************************************************************************
    *********************************************************************************************/
@@ -380,7 +382,9 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.display.font = 1;
   Settings.display.rotate = 0;
   
-  ALOG_INF(PSTR("switch_debounce %d"), Settings.switch_debounce);  DEBUG_LINE_HERE2
+  DEBUG_LINE_HERE
+
+  return;
 }
 
 

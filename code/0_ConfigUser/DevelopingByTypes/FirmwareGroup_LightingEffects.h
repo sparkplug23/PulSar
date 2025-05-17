@@ -47,8 +47,11 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H                  // ESP32 testing 16x16 matrix
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32X8_VERTICAL                   // ESP32 testing 32x8 matrix // make this the new one
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_8W32H_TALL
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32W8H_WIDE_WEIGHT_DISPLAY
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16 H
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__22__ESP32_4CH_MATRIX_PYTHON_MANUAL_ROWS        // Using python script for left,centre,right to convert non-equal rows into a ledmap for 2D effects
+
+
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;  -- Non digital devices
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__30__ESP32_PWM_RGBCCT_5CH_RGBCCT             // Garage as lighting at night, long term tester
@@ -1338,6 +1341,117 @@
 
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32W8H_WIDE
 
+
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32W8H_WIDE_WEIGHT_DISPLAY
+
+/**
+ * @brief 
+ * 
+ * 
+ 
+ {
+  "Segment0": {
+    "Name":"Michael", 
+    "CustomPixelData": {
+      "Index": [
+        223, 224, 225, 226, 227, 228, 229, 230, 231,
+        232, 233, 234, 235, 236, 237, 238, 239, 240,
+        241, 242, 243, 244, 245, 246, 247, 248, 249,
+        250, 251, 252, 253, 254, 255
+      ],
+      "RGB": [
+        [255,255,0], [0,255,0], [0,0,255], [255,0,255], [255,255,0],
+        [255,0,0], [0,255,0], [0,0,255], [255,0,255], [255,255,0],
+        [255,0,0], [0,255,0], [0,0,255], [255,0,255], [255,255,0],
+        [255,0,0], [0,255,0], [0,0,255], [255,0,255], [255,255,0],
+        [255,0,0], [0,255,0], [0,0,255], [255,0,255], [255,255,0],
+        [255,0,0], [0,255,0], [0,0,255], [255,0,255], [255,255,0],
+        [255,0,0], [0,255,0], [0,0,255]
+      ]
+    }
+  }
+}
+
+ 
+ */
+
+  #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE_DEFAULT 
+  #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
+  #define ENABLE_DEVFEATURE_LIGHT__CUSTOM_PIXEL_DATA
+
+
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":32,
+        "Height":8,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":1,
+        "Serpentine":1,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,32,
+        0,8
+      ],
+      "ColourType":3,
+      "ColourPalette":"RGBO",
+      "SegColour0": {
+        "Hue": 180,
+        "Sat": 100,
+        "BrightnessRGB": 10,
+        "BrightnessCCT": 0,
+        "CCT_TempPercentage":0
+      },
+      "SegColour1": {
+        "Hue": 25,
+        "Sat": 100,
+        "BrightnessRGB": 20,
+        "BrightnessCCT": 100,
+        "CCT_TempPercentage":100
+      },
+      "Effects": {
+        "Function":"Scrolling Text with Baseline",
+        "Speed":6,
+        "Intensity":127,
+        "Decimate":0,
+        "Grouping":1,
+        "RateMs": 5000,
+        "Custom1":163,
+        "Custom2":127,
+        "Custom3":15,
+        "Check1":1,
+        "Check2":0,
+        "Check3":1
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 25,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32W8H_WIDE_WEIGHT_DISPLAY
 
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H
 

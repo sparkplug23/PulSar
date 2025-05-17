@@ -89,6 +89,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #endif
 #endif
 
+
 #ifndef USE_MODULE_NETWORK_WIFI
   #warning "USE_MODULE_NETWORK_WIFI" has not been defined -- NO WIFI!
 #endif
