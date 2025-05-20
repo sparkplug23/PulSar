@@ -79,6 +79,7 @@ const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
     39 
 };
 
+
 // int8_t GetPinByIndex(uint8_t index)
 // {
 //     return gpio_pin_by_index[index];
