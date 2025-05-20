@@ -94,6 +94,8 @@ int8_t mI2C::Tasker(uint8_t function, JsonParserObject obj)
 
   //   }  
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 } // END Tasker
 
 

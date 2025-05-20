@@ -54,6 +54,9 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     #endif // USE_MODULE_NETWORK_MQTT
     #endif // ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
   } // end switch
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
+  
 } // END function
 
 

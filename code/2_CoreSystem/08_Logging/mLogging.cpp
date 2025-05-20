@@ -752,6 +752,8 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 }
 
 

@@ -4,71 +4,121 @@
 /*********************************************************************************************
  * Watchdog related
 \*********************************************************************************************/
+// #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+//   #ifdef ESP8266
+//     void WDT_Init(){ ESP.wdtEnable(6000);}
+//     void WDT_Reset(){ESP.wdtFeed(); }
+//   #endif // ESP8266
+//   #ifdef ESP32
+//     #include "esp_system.h"
+//     #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
+//     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+//     #endif
+//     const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
+//     hw_timer_t *timerwdt = NULL;
+//     #ifndef ARDUINO_ISR_ATTR
+//     #define ARDUINO_ISR_ATTR IRAM_ATTR 
+//     #endif
+//     void ARDUINO_ISR_ATTR resetModule() {
+//       ets_printf("reboot resetModule\n");
+//       Serial.println("WDT REBOOTING!!"); Serial.flush();
+//       esp_restart();
+//     }
+//     // hw_timer_t *timerwdt = NULL;
+//     // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
+//     // void WDT_Init() {
+//     //   timerwdt = timerBegin(0, 80, true);  // timer 0, div 80
+  
+//     //   // Use LEVEL mode on ESP32-C3 (EDGE unsupported), keep EDGE for others
+//     //   #if defined(CONFIG_IDF_TARGET_ESP32C3)
+//     //       timerAttachInterrupt(timerwdt, &resetModule, false);
+//     //   #else
+//     //       timerAttachInterrupt(timerwdt, &resetModule, true);
+//     //   #endif
+  
+//     //   timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  // set time in us
+//     //   timerAlarmEnable(timerwdt);     
+      
+//       void WDT_Init() {
+//         #if !defined(CONFIG_IDF_TARGET_ESP32C3)
+//           timerwdt = timerBegin(0, 80, true); // Only setup watchdog timer if NOT ESP32-C3
+//           timerAttachInterrupt(timerwdt, &resetModule, true);
+//           timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);
+//           timerAlarmEnable(timerwdt);
+//         #else
+//           // On ESP32-C3, skip watchdog timer init for now
+//         #endif
+//         }
+        
+//         // enable interrupt
+//     // }
+  
+//     void WDT_Reset(){
+//       // DEBUG_LINE_HERE;
+//       if(timerwdt==nullptr){ 
+//         DEBUG_LINE_HERE; 
+//         WDT_Init(); 
+//         DEBUG_LINE_HERE;
+//       }
+//       timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
+//       DEBUG_LINE_HERE;
+//       // Serial.println("WDT_Reset");
+//     }
+//   #endif // ESP32
+// #else
+// void WDT_Init(){};
+// void WDT_Reset(){};
+// #endif // WATCHDOG_TIMER_SECTION_GUARD_H
 #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   #ifdef ESP8266
-    void WDT_Init(){ ESP.wdtEnable(6000);}
-    void WDT_Reset(){ESP.wdtFeed(); }
-  #endif // ESP8266
+    void WDT_Init(){ ESP.wdtEnable(6000); }
+    void WDT_Reset(){ ESP.wdtFeed(); }
+  #endif
+
   #ifdef ESP32
-    #include "esp_system.h"
     #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
-    #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+      #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 6000
     #endif
-    const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
-    hw_timer_t *timerwdt = NULL;
-    #ifndef ARDUINO_ISR_ATTR
-    #define ARDUINO_ISR_ATTR IRAM_ATTR 
-    #endif
-    void ARDUINO_ISR_ATTR resetModule() {
-      ets_printf("reboot resetModule\n");
-      Serial.println("WDT REBOOTING!!"); Serial.flush();
-      esp_restart();
-    }
-    // hw_timer_t *timerwdt = NULL;
-    // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
-    // void WDT_Init() {
-    //   timerwdt = timerBegin(0, 80, true);  // timer 0, div 80
-  
-    //   // Use LEVEL mode on ESP32-C3 (EDGE unsupported), keep EDGE for others
-    //   #if defined(CONFIG_IDF_TARGET_ESP32C3)
-    //       timerAttachInterrupt(timerwdt, &resetModule, false);
-    //   #else
-    //       timerAttachInterrupt(timerwdt, &resetModule, true);
-    //   #endif
-  
-    //   timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  // set time in us
-    //   timerAlarmEnable(timerwdt);     
-      
+
+    #if defined(CONFIG_IDF_TARGET_ESP32C3)
+      #include "esp_task_wdt.h"
       void WDT_Init() {
-        #if !defined(CONFIG_IDF_TARGET_ESP32C3)
-          timerwdt = timerBegin(0, 80, true); // Only setup watchdog timer if NOT ESP32-C3
-          timerAttachInterrupt(timerwdt, &resetModule, true);
-          timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);
-          timerAlarmEnable(timerwdt);
-        #else
-          // On ESP32-C3, skip watchdog timer init for now
-        #endif
-        }
-        
-        // enable interrupt
-    // }
-  
-    void WDT_Reset(){
-      // DEBUG_LINE_HERE;
-      if(timerwdt==nullptr){ 
-        DEBUG_LINE_HERE; 
-        WDT_Init(); 
-        DEBUG_LINE_HERE;
+        esp_task_wdt_init(D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS / 1000, true);  // panic = true
+        esp_task_wdt_add(NULL);  // add current task
       }
-      timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
-      DEBUG_LINE_HERE;
-      // Serial.println("WDT_Reset");
-    }
-  #endif // ESP32
+
+      void WDT_Reset() {
+        esp_task_wdt_reset();
+      }
+    #else
+      #include "esp_system.h"
+      hw_timer_t *timerwdt = NULL;
+      const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;
+
+      void IRAM_ATTR resetModule() {
+        ets_printf("reboot resetModule\n");
+        Serial.println("WDT REBOOTING!!"); Serial.flush();
+        esp_restart();
+      }
+
+      void WDT_Init() {
+        timerwdt = timerBegin(0, 80, true);
+        timerAttachInterrupt(timerwdt, &resetModule, true);
+        timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);
+        timerAlarmEnable(timerwdt);
+      }
+
+      void WDT_Reset() {
+        if (timerwdt == nullptr) WDT_Init();
+        timerWrite(timerwdt, 0);
+      }
+    #endif
+  #endif
 #else
-void WDT_Init(){};
-void WDT_Reset(){};
-#endif // WATCHDOG_TIMER_SECTION_GUARD_H
+  void WDT_Init(){}
+  void WDT_Reset(){}
+#endif
+
 
 #ifdef ESP32
   #include "rom/rtc.h"
@@ -522,6 +572,8 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       ArduinoOTAInit();
     break;
   }
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
   
 }
 

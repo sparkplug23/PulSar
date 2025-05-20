@@ -130,6 +130,8 @@ DEBUG_LINE_HERE_MILLIS
     break;
   } // END switch
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 } // END function
 
 /**

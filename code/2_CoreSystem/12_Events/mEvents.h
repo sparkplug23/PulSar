@@ -28,7 +28,9 @@ class mEvent :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_EVENTS_ID; }
 
     
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0){}
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0){ 
+      return FUNCTION_RESULT_UNKNOWN_ID; 
+    }
 
 
     std::vector<EventPackage> events;

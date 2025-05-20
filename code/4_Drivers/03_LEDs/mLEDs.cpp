@@ -17,6 +17,10 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_BOOT_MESSAGE:
       BootMessage();
     break;
+    // case TASK_EVERY_SECOND:
+    //   digitalWrite(8, !digitalRead(8)); // Blink the LED on pin 8 every second
+    //   Serial.println("LED on pin 8 toggled"); // Debug message
+    // break;
   }
 
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -54,6 +58,8 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
 
 } // END function
 

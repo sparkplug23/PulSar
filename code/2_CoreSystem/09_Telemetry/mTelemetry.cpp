@@ -81,6 +81,8 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
     #endif // USE_MODULE_NETWORK_WEBSERVER
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 }
 
 

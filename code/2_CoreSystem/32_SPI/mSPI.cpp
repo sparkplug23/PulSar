@@ -92,6 +92,8 @@ int8_t mSPI::Tasker(uint8_t function, JsonParserObject obj)
   //     break;
   //   #endif // USE_WEBSERVER
 
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
   //   }  
 
 } // END Tasker

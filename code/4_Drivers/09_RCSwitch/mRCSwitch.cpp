@@ -81,6 +81,8 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     #endif  
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 }//end
 
 

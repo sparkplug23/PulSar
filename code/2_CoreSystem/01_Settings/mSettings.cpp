@@ -96,6 +96,8 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 } 
 
 

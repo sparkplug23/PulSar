@@ -175,10 +175,40 @@ void TasmotaSerial::Esp32Begin(void) {
   } else if (m_speed == 115200) {
     // At 115200, 256 chars are ~20ms
     // Zigbee requires to keep frames together, i.e. 256 bytes max
-    uart_set_rx_full_threshold(m_uart, 256);
+    // uart_set_rx_full_threshold(m_uart, 256);
+    int threshold = 120;
+    #ifdef ESP_IDF_VERSION_MAJOR
+    if (ESP_IDF_VERSION_MAJOR < 5) {  // For older IDF, allow 256
+      threshold = 256;
+    }
+    #endif
+    uart_set_rx_full_threshold(m_uart, threshold);
   } else {
+    
+    int threshold = serial_buffer_size * 3 / 4;
+    #ifdef ESP_IDF_VERSION_MAJOR
+    if (ESP_IDF_VERSION_MAJOR < 5) {  // For older IDF, allow 256
+      threshold = threshold > 127 ? 127 : threshold;
+    }
+    #endif
+
+    /*
+    Clamp the threshold to a valid range based on UART driver constraints, which are:
+
+For UART0 and UART1, values like 127 or 120 are usually allowed.
+
+For UART2, on some ESP32s, the max allowed value is 64, sometimes even lower.
+
+We can query the FIFO length at runtime with UART_FIFO_LEN (128), but the threshold must be strictly < UART_FIFO_LEN and valid for the hardware.
+*/
+    threshold = 60; 
+
+    Serial.printf("TSR: Setting UART%d RX threshold to %d\n", m_uart, threshold);
+    
+    uart_set_rx_full_threshold(m_uart, threshold);
+
     // At even higher speeds set 75% of the buffer
-    uart_set_rx_full_threshold(m_uart, serial_buffer_size * 3 / 4);
+    // uart_set_rx_full_threshold(m_uart, serial_buffer_size * 3 / 4);
   }
   // For bitrate below 115200, set the Rx time out to 6 chars instead of the default 10
   if (m_speed < 115200) {

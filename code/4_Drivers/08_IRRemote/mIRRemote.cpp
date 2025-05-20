@@ -99,6 +99,8 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
 //   }
 //   return result;
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 } // END function
 
 

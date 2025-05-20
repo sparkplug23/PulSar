@@ -645,6 +645,8 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
 
     }  
 
+    return FUNCTION_RESULT_UNKNOWN_ID;  
+
 } // END Tasker
 
 
@@ -1061,7 +1063,9 @@ uint8_t mFileSystem::ConstructJSON_Settings(uint8_t json_level, bool json_append
   
   JBI->Start();
     JBI->Add_P("test",0);  
-  JBI->End();
+  return JBI->End();
+
+
 
 }
 

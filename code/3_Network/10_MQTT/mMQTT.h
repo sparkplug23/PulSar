@@ -457,6 +457,8 @@ class mMQTTManager :
 
       Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", host_address, _port, search_index);
 Serial.flush();
+
+return 1;
     }
 
     

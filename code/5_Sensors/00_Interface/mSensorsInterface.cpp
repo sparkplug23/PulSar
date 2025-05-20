@@ -66,6 +66,9 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //   pModule[switch_index]->Tasker(function, obj);
 
     }break;
+    case TASK_EVERY_10_SECONDS:
+      pCONT->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/

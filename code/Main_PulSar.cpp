@@ -1,3 +1,19 @@
+
+// #include <Arduino.h>
+
+// void setup(void)
+// { 
+//   Serial.begin(115200); // to be baudrate_tmp later
+//   Serial.println(F("Starting up...")); Serial.flush();  
+// }
+
+// void loop(void)
+// { 
+//   Serial.println(F("Looping...")); Serial.flush();
+//   delay(100);  
+// } 
+
+
 /**
  * @file    HomeControlSystem.cpp
  * @author  Michael Doone (michaeldoonehub@gmail.com)
@@ -125,6 +141,8 @@ void setup(void)
    **/
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Init();
+  #else
+  #warning "No WDT has been enabled, this is not recommended for production code!"
   #endif
 
   /********************************************************************************************
@@ -634,13 +652,19 @@ void LoopTasker()
 
     pCONT->Tasker_Interface(TASK_EVERY_SECOND); 
 
-    if((tkr_time->UpTime()%30)==0){                  pCONT->Tasker_Interface(TASK_EVERY_30_SECOND); }
-    if((tkr_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(TASK_EVERY_MINUTE); }
-    
     if(
       ((tkr_time->UpTime()%5)==0)&&
       (tkr_time->UpTime()>20)
     ){                                      pCONT->Tasker_Interface(TASK_EVERY_FIVE_SECOND); }
+    if(
+      ((tkr_time->UpTime()%10)==0)&&
+      (tkr_time->UpTime()>20)
+    ){                                      pCONT->Tasker_Interface(TASK_EVERY_10_SECONDS); }
+
+    if((tkr_time->UpTime()%30)==0){                  pCONT->Tasker_Interface(TASK_EVERY_30_SECOND); }
+
+    if((tkr_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(TASK_EVERY_MINUTE); }
+    
 
     if(
       ((tkr_time->UpTime()%300)==0)&&

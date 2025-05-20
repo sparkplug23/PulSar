@@ -81,6 +81,8 @@ int8_t mImmersionTankColour::Tasker(uint8_t function, JsonParserObject obj){
   return Tasker_Web(function);
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 } // END Tasker
 
 

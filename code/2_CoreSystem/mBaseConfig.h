@@ -133,7 +133,7 @@ With latest version, all longer term shared debug features should be added here 
 // Forcing this to disable until all devices are optimised so nothing is starved of CPU 
 #define DISABLE_SLEEP
 
-#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(ESP32)// && !defined(CONFIG_IDF_TARGET_ESP32C3)
 #ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
@@ -187,7 +187,7 @@ With latest version, all longer term shared debug features should be added here 
   ************************************/    
 
 
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID

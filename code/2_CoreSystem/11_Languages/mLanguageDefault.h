@@ -1403,13 +1403,13 @@
   #define D_LOG_HEATING "HET: "         
   #define D_LOG_HEATINGPANEL "HPL: "         
   #define D_LOG_HTTP "HTP: "         // HTTP webserver
-  #define D_LOG_HLK_LD2410 "HLK: "
   #define D_LOG_I2C "I2C: "          // I2C
   #define D_LOG_INA219 "INA: "
   #define D_LOG_IRR "IRR: "          // Infra Red Received
   #define D_LOG_LED "LED: "
   #define D_LOG_LIGHT "LGT: "         // Light interface
   #define D_LOG_LOG "LOG: "          // Logging
+  #define D_LOG_LD2410 "LD2: "
   #define D_LOG_MEMORY "MEM: "       // 
   #define D_LOG_MDNS "DNS: "         // mDNS
   #define D_LOG_MODULE "MOD: "       // Module

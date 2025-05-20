@@ -85,6 +85,8 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #endif // USE_MODULE_NETWORK_MQTT
   } // end switch
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
 } // END function
 
 

@@ -11,6 +11,7 @@ extern "C" {
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
+  DEBUG_LINE_HERE3
   #ifdef ENABLE_DEVFEATURE_NETWORK__BLOCK_CONNECT_PUSH_BACKOFF_LONG_AS_TEMP_SOLUTION_TO_NO_WIFI
   return 0;
   #endif
@@ -82,21 +83,31 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
         #ifdef USE_MODULE_NETWORK_MQTT
 
+        DEBUG_LINE_HERE3
+
           mqtt_client = new WiFiClient();
+          DEBUG_LINE_HERE3
 
           pCONT_mqtt->CreateConnection(mqtt_client, D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          DEBUG_LINE_HERE3
           
           pCONT_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+          DEBUG_LINE_HERE3
 
           pCONT_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+          DEBUG_LINE_HERE3
           
           // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
           
           uint8_t mac[6];           WiFi.macAddress(mac);
+          DEBUG_LINE_HERE3
           char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
+          DEBUG_LINE_HERE3
           pCONT_mqtt->brokers.back()->SetClientName(client_name);
+          DEBUG_LINE_HERE3
 
           pCONT_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
+          DEBUG_LINE_HERE3
 
         #endif // USE_MODULE_NETWORK_MQTT
       #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
@@ -105,6 +116,9 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     }
     break;
   }
+
+  DEBUG_LINE_HERE3
+  return FUNCTION_RESULT_UNKNOWN_ID;
 
 
 } // END function

@@ -172,6 +172,15 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   #else
       // If metrics are disabled, just run the task
     DEBUG_LINE_HERE;
+
+    // if (task == TASK_SETTINGS_DEFAULT || task == TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT) {
+    //   ALOG_ERR(PSTR("TASK_SETTINGS_DEFAULT or TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT called"));
+    //   return 0;
+    // }
+
+
+
+    DEBUG_LINE_HERE;
       result = mod->Tasker(task, obj);
       DEBUG_LINE_HERE;
   #endif
@@ -509,7 +518,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mTOF_VL53L1X());
   #endif
   #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-  // addTasker(new mHLK_LD2410());
+  addTasker(new mHLK_LD2410());
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
   addTasker(new mADCInternal());

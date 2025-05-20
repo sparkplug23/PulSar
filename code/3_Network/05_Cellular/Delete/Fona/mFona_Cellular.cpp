@@ -128,6 +128,8 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
 //   }
 //   return result;
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 } // END function
 
 

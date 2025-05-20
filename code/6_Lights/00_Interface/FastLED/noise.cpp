@@ -590,8 +590,7 @@ void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, 
 
 void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
   if(octaves > 1) {
-    // fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, freq44 * scalex, y*freq44, freq44 * scaley, time);
-    #if __cplusplus >= 201703L
+    #if __cplusplus >= 201703L || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(ARDUINO_ESP32C3_DEV)
     float freqf = reinterpret_cast<const uint8_t&>(freq44) / 16.0f;
     fill_raw_2dnoise8(pData, width, height, octaves - 1, freq44, amplitude, skip + 1,
       static_cast<uint16_t>(x * freqf),
@@ -600,12 +599,14 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q
       static_cast<int>(freqf * scaley),
       time);
     #else    
-    fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, freq44 * scalex, y*freq44, freq44 * scaley, time);
+    fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1,
+      x * freq44, freq44 * scalex,
+      y * freq44, freq44 * scaley,
+      time);
     #endif
 
   } else {
-    // amplitude is always 255 on the lowest level
-    amplitude=255;
+    amplitude = 255;
   }
 
   scalex *= skip;
@@ -641,7 +642,7 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, u
 void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves, q88 freq88, fract16 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   if(octaves > 1) {
 
-    #if __cplusplus >= 201703L
+    #if __cplusplus >= 201703L || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(ARDUINO_ESP32C3_DEV)
     float freqf = reinterpret_cast<const uint16_t&>(freq88) / 256.0f;
     fill_raw_2dnoise16(pData, width, height, octaves - 1, freq88, amplitude, skip,
         static_cast<uint32_t>(x * freqf),
@@ -691,7 +692,7 @@ int32_t nmax=0;
 
 void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   if(octaves > 1) {
-    #if __cplusplus >= 201703L
+    #if __cplusplus >= 201703L || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(ARDUINO_ESP32C3_DEV)
     float freqf = reinterpret_cast<const uint8_t&>(freq44) / 16.0f;
     fill_raw_2dnoise16into8(pData, width, height, octaves - 1, freq44, amplitude, skip + 1,
       static_cast<uint32_t>(x * freqf),

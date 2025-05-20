@@ -73,6 +73,8 @@ int8_t mMAVLink_Decoder_OLED::Tasker(uint8_t function, JsonParserObject obj){
     #endif  
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 }//end
 
 

@@ -90,23 +90,21 @@ class mHLK_LD2410 :
       } engineering;
     } LD2410;
     
-    void Loop();
-
 
     uint32_t ToBcd(uint32_t value);
     void Ld1410HandleTargetData(void);
     void Ld1410HandleConfigData(void);
-    void Ld2410Input(void);  
-    void Ld2410SendCommand(uint32_t command, uint8_t *val = nullptr, uint32_t val_len = 0);  
-    void Ld2410SetConfigMode(void);
-    void Ld2410SetMaxDistancesAndNoneDuration(uint32_t max_moving_distance_range, uint32_t max_static_distance_range, uint32_t no_one_duration);
-    void Ld2410SetGateSensitivity(uint32_t gate, uint32_t moving_sensitivity, uint32_t static_sensitivity);
-    void Ld2410SetAllSensitivity(uint32_t sensitivity);
-    void Ld2410SetBaudrate(uint32_t index);
-    void Ld2410Every100MSecond(void);
-    void Ld2410EverySecond(void);
-    void Ld2410Detect(void);
-    bool Ld2410Match(const uint8_t *header, uint32_t offset);
+    void PollSensor(void);  
+    void SendCommand(uint32_t command, uint8_t *val = nullptr, uint32_t val_len = 0);  
+    void SetConfigMode(void);
+    void SetMaxDistancesAndNoneDuration(uint32_t max_moving_distance_range, uint32_t max_static_distance_range, uint32_t no_one_duration);
+    void SetGateSensitivity(uint32_t gate, uint32_t moving_sensitivity, uint32_t static_sensitivity);
+    void SetAllSensitivity(uint32_t sensitivity);
+    void SetBaudrate(uint32_t index);
+    void Every100MSecond(void);
+    void Show_SensorReading(void);
+    void Detect(void);
+    bool CheckHeaderMatch(const uint8_t *header, uint32_t offset);
 
     #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
@@ -134,10 +132,10 @@ class mHLK_LD2410 :
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
     #ifdef USE_MODULE_NETWORK_MQTT
-        void MQTTHandler_Init();
-        std::vector<struct handler<mHLK_LD2410>*> mqtthandler_list;    
-        struct handler<mHLK_LD2410> mqtthandler_settings;
-        struct handler<mHLK_LD2410> mqtthandler_sensor_ifchanged;
+      void MQTTHandler_Init();
+      std::vector<struct handler<mHLK_LD2410>*> mqtthandler_list;    
+      struct handler<mHLK_LD2410> mqtthandler_settings;
+      struct handler<mHLK_LD2410> mqtthandler_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

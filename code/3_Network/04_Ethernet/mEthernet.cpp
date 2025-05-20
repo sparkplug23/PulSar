@@ -64,6 +64,8 @@ int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 
 } // END function
 

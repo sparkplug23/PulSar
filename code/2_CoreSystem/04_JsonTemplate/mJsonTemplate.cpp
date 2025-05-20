@@ -77,6 +77,8 @@ int8_t mJsonTemplate::Tasker(uint8_t function, JsonParserObject obj)
   //   break;
   //   #endif //USE_MODULE_NETWORK_MQTT
     // }  
+    
+  return FUNCTION_RESULT_UNKNOWN_ID;
 
 } // END Tasker
 
@@ -123,7 +125,7 @@ DEBUG_LINE_HERE2
     #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     #ifdef ENABLE_LOG_LEVEL_INFO
     ALOG_INF(PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
-    ALOG_DBG(PSTR("Load = \"%s\""), buffer);
+    ALOG_INF(PSTR("Load = \"%s\""), buffer);
     #endif // ENABLE_LOG_LEVEL_INFO
     #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
@@ -136,7 +138,7 @@ DEBUG_LINE_HERE2
 DEBUG_LINE_HERE2
     return true;
   #else 
-    #error "USE_MODULE_TEMPLATE not defined"
+    #warning "USE_MODULE_TEMPLATE not defined"
     return false;
   #endif // MODULE_TEMPLATE
   

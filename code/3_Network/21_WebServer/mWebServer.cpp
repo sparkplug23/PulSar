@@ -1396,7 +1396,8 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
   //   break;
   }
 
-  return 0;
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
 
 // DEBUG_LINE_HERE;
 }

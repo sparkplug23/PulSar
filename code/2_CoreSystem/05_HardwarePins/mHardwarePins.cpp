@@ -859,6 +859,8 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 }
 
 void mHardwarePins::parse_JSONCommand(JsonParserObject obj){}

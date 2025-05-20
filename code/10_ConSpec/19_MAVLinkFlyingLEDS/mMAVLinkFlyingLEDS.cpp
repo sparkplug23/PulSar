@@ -74,6 +74,8 @@ int8_t mMavlinkFlyingLEDS::Tasker(uint8_t function, JsonParserObject obj){
     #endif  
   }
 
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
 }//end
 
 
