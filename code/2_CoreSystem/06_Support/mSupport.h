@@ -105,6 +105,10 @@ struct functionhandler {
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
+#ifndef nitems
+#define nitems(_a)		(sizeof((_a)) / sizeof((_a)[0]))
+#endif
+
 
 #ifdef ESP8266
 #define AGPIO(x) (x)

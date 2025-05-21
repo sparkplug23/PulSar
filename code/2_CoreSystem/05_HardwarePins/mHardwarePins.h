@@ -819,9 +819,11 @@ class mHardwarePins :
     
         
 
+    #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
     int8_t GetPinByIndex(uint8_t index);
     int8_t GetPinIndexedLocation(uint8_t pin_number);
     bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
+    #endif
 
     bool flag_serial_set_tx_set = false;
 
@@ -903,7 +905,9 @@ class mHardwarePins :
     static const mytmplt  ModuleTemplate_GPIO_Map[] PROGMEM;
     #endif
 
-    int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
+    // int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
+    #define ConvertRealPinToIndexPin(X) X
+
     void ModuleSettings_FlashSerial();        
     void ParseModuleTemplate();
     void ModuleSettings_ShowTemplateLog();
@@ -919,7 +923,7 @@ class mHardwarePins :
 
     void GpioInitPwm(void);
     
-    bool UsuableGPIOPin(uint8_t pin);
+    // bool UsuableGPIOPin(uint8_t pin);
 
     const char* GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t buflen);
     PGM_P GetGPIOFunctionNamebyID_P(uint16_t id);
@@ -927,7 +931,7 @@ class mHardwarePins :
     bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
     bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
-
+    #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
     #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
     boolean PinUsed(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
     int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
@@ -935,10 +939,17 @@ class mHardwarePins :
     boolean PinUsed(uint32_t gpio, uint32_t index = 0);
     int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
     #endif
-
     void SetPin(uint32_t lpin, uint32_t gpio);
-
     uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
+    #endif
+    #ifdef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+    int IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+    bool PinUsed(uint32_t gpio, uint32_t index = 0);
+    uint32_t GetPin(uint32_t lpin);
+    void SetPin(uint32_t lpin, uint32_t gpio);
+    bool FlashPin(uint32_t pin);
+    #endif
+    // int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);
     void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);
@@ -964,7 +975,6 @@ class mHardwarePins :
 
 
     void ModuleTemplate__ParseCJSONBuffer(char* buffer);
-    int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
 
 
 };

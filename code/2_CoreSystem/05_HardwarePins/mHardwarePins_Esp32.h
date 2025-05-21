@@ -2,6 +2,78 @@
 
 #include <stdint.h>
 
+#ifdef ESP32
+#if CONFIG_IDF_TARGET_ESP32C2
+
+/* ****************************************
+ * ESP32C2
+ * ****************************************/
+#define MAX_GPIO_PIN       21   // Number of supported GPIO
+#define MIN_FLASH_PINS     0    // Number of flash chip pins unusable for configuration (GPIO11 to 17)
+#define MAX_USER_PINS      21   // MAX_GPIO_PIN - MIN_FLASH_PINS
+#define WEMOS_MODULE       0    // Wemos module
+
+//                                  0 1 2 3 4 5 6 7 8 91011121314151617181920
+const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOIOIOIOIOIOIOFLFLFLFLFLFLFLIORXTX";
+
+#elif CONFIG_IDF_TARGET_ESP32C3
+
+/* ****************************************
+ * ESP32C3
+ * ****************************************/
+#define MAX_GPIO_PIN       22   // Number of supported GPIO
+#define MIN_FLASH_PINS     0    // Number of flash chip pins unusable for configuration (GPIO11 to 17)
+#define MAX_USER_PINS      22   // MAX_GPIO_PIN - MIN_FLASH_PINS
+#define WEMOS_MODULE       0    // Wemos module
+
+//                                  0 1 2 3 4 5 6 7 8 9101112131415161718192021
+const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOAOIOIOIOIOIOFLFLFLFLFLFLFLIOIORXTX";
+
+#elif CONFIG_IDF_TARGET_ESP32C6
+
+/* ****************************************
+ * ESP32C6
+ * ****************************************/
+#define MAX_GPIO_PIN       31   // Number of supported GPIO
+#define MIN_FLASH_PINS     0    // Number of flash chip pins unusable for configuration (GPIO24 to 30)
+#define MAX_USER_PINS      31   // MAX_GPIO_PIN - MIN_FLASH_PINS
+#define WEMOS_MODULE       0    // Wemos module
+
+//                                  0 1 2 3 4 5 6 7 8 9101112131415161718192021222324252627282930
+const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOAOAOIOIOIOIOIOIOIOIOIOTXRXIOIOIOIOIOIOFLFLFLFLFLFLFL";
+
+#elif CONFIG_IDF_TARGET_ESP32S2
+
+/* ****************************************
+ * ESP32S2
+ * ****************************************/
+#define MAX_GPIO_PIN       47   // Number of supported GPIO
+#define MIN_FLASH_PINS     11   // Number of flash chip pins unusable for configuration (22-25 don't exist, 26-32 for SPI)
+#define MAX_USER_PINS      36   // MAX_GPIO_PIN - MIN_FLASH_PINS
+#define WEMOS_MODULE       0    // Wemos module
+
+//                                  0 1 2 3 4 5 6 7 8 910111213141516171819202122232425262728293031323334353637383940414243444546
+const char PINS_WEMOS[] PROGMEM = "IOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOIO--------FLFLFLFLFLFLFLIOIOIOIOIOIOIOIOIOIOIOIOIOI ";
+
+#elif CONFIG_IDF_TARGET_ESP32S3
+/* ****************************************
+ * ESP32S3
+ * GPIOs 0..21 + 33..48
+ * - 22..25 are not used
+ * - 26..32 are used for SPI Flash
+ * - 33..37 are used by PSRAM
+ * ****************************************/
+#define MAX_GPIO_PIN       49   // Number of supported GPIO, 0..48
+#define MIN_FLASH_PINS     11   // Number of flash chip pins unusable for configuration (22-25 don't exist, 26-32 for SPI)
+#define MAX_USER_PINS      38   // MAX_GPIO_PIN - MIN_FLASH_PINS
+#define WEMOS_MODULE       0    // Wemos module
+
+//                                  0 1 2 3 4 5 6 7 8 9101112131415161718192021222324252627282930313233343536373839404142434445464748
+const char PINS_WEMOS[] PROGMEM = "IOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOIO--------FLFLFLFLFLFLFLIOIOIOIOIOIOIOIOIOIOIOIOIOIOIOIO";
+
+#else  // not CONFIG_IDF_TARGET_ESP32C2/C3/C6 nor CONFIG_IDF_TARGET_ESP32S2 - ESP32
+
+
 /****** GPIO ESP32  **** https://randomnerdtutorials.com/esp32-pinout-reference-gpios/
  * ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  * Index   |  GPIO   | DoitDevKit|      Input      |     Output     |    Hardware                                                                   |   Notes                                                                     |   Ranking  
@@ -57,90 +129,46 @@
     The numbering helps identify the pins most suitable for general usage (rank 1) and the ones with limitations that should be considered before use (rank 2 and 3).                     
  * ******/
 
+/* ****************************************
+ * ESP32 - including Pico
+ *
+ * The initial template was 0-5 9-10 12-39
+ * New template covers 0-27 32-39
+ * However to maintain backwards compatibility, the following mapping occures
+ * Template GPIO | Phyiscal GPIO
+ *   28          |  6
+ *   29          |  7
+ *   30          |  8
+ *   31          |  11
+ * ****************************************/
+// Conversion table
+#define ESP32_TEMPLATE_TO_PHY         \
+   0,  1,  2,  3,  4,  5,             \
+   9, 10,                             \
+  12, 13, 14, 15, 16, 17, 18, 19,     \
+  20, 21, 22, 23, 24, 25, 26, 27,     \
+   6,  7,  8, 11,      /* 28-31 */    \
+  32, 33, 34, 35, 36, 37, 38, 39
 
 #define MAX_GPIO_PIN       40   // Number of supported GPIO
 #define MIN_FLASH_PINS     4    // Number of flash chip pins unusable for configuration (GPIO6, 7, 8 and 11)
 #define MAX_USER_PINS      36   // MAX_GPIO_PIN - MIN_FLASH_PINS
 #define WEMOS_MODULE       0    // Wemos module
-// #define USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+
+//                                  0 1 2 3 4 5 6 7 8 9101112131415161718192021222324252627282930313233343536373839
+const char PINS_WEMOS[] PROGMEM = "IOTXIORXIOIOFLFLFLFLFLFLIOIOIOIOIOIOIOIOIOIOIOIOIOIOIOIO--------AOAOIAIAIAIAIAIA";
+
+#endif  // ESP32/S2/C2/C3/C6 selection
+#endif  // ESP32
 
 
-// #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
-
-const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
-    0, 1, 2, 3, 4, 5,
-    // 6, 7, 8,
-    9, 10, 
-    // 11, 
-    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 
-    // 24, 
-    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 
-    // 37, 38, 
-    39 
-};
-
-
-// int8_t GetPinByIndex(uint8_t index)
-// {
-//     return gpio_pin_by_index[index];
-// }
-// int8_t GetPinIndexedLocation(uint8_t pin_number)
-// {
-//     for(uint8_t index = 0;index<MAX_USER_PINS;index++)
-//     {
-//         if(GetPinByIndex(index) == pin_number)
-//         {
-//             return index;
-//         }
-//     }
-//     return -1;
-// }
-// bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function)
-// {
-//     int8_t gpio_pin_index_location = GetPinIndexedLocation(gpio_pin_number);
-//     if(gpio_pin_index_location>=0) // Valid pin option
-//     {
-//         tkr_pins->pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
-//     }
-// }
-// #else
-
-// int8_t GetPinByIndex(uint8_t index)
-// {
-//     // If statements must be executed in accending order
-//     if(index <= 5){
-//         return index;
-//     }else
-//     if(index <= 8){
-//         return -1;      // invalid pin
-//     }else
-//     if(index <= 10){
-//         return index-3; // 3 pins skipped
-//     }else
-//     if(index <= 11){
-//         return -1;      // invalid pin
-//     }else
-//     if(index <= 23){
-//         return index-4; // 4 pins skipped
-//     }else
-//     if(index <= 24){
-//         return -1;      // invalid pin
-//     }else
-//     if(index <= 36){
-//         return index-5; // 5 pins skipped
-//     }else
-//     if(index <= 38){
-//         return -1;      // invalid pin
-//     }else
-//     if(index <= 39){
-//         return index-7; // 7 pins skipped
-//     }
-//     else{
-//         return -1;
-//     }
-// }
-
-// #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
-
-// This can also be achieved by if checks, ie if(pin in range) pin -= 5;
-// If I name the array&function the same, or with a macro, I can switch between both methods
+// const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
+//     0, 1, 2, 3, 4, 5,
+//     // 6, 7, 8,
+//     9, 10, 
+//     // 11, 
+//     12, 13, 14, 15, 16, 17, 18, 19, 
+//     20, 21, 22, 23, 24, 25, 26, 27, 
+//     // 28, 29, 30, 31, /* 28-31 */
+//     32, 33, 34, 35, 36, 37, 38, 39 
+// };

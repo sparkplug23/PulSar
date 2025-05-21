@@ -1419,6 +1419,7 @@
   #define D_LOG_OTHER "OTH: "        // Other
   #define D_LOG_OTA "OTA: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
+  #define D_LOG_PINS "PIN: "       // Settings
   #define D_LOG_PIR "PIR: "         // PIR
   #define D_LOG_PIXEL // Neopixels
   #define D_LOG_PUBSUB "PSB: "         // PubSub
