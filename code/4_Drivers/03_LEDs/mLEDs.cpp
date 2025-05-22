@@ -17,10 +17,19 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_BOOT_MESSAGE:
       BootMessage();
     break;
-    // case TASK_EVERY_SECOND:
-    //   digitalWrite(8, !digitalRead(8)); // Blink the LED on pin 8 every second
-    //   Serial.println("LED on pin 8 toggled"); // Debug message
-    // break;
+    #ifdef ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
+    case TASK_EVERY_SECOND:
+      pinMode(ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN, OUTPUT); // Set pin output
+      digitalWrite(ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN, !digitalRead(ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN)); // Blink the LED on pin 8 every second
+      Serial.printf("LED on pin %d toggled\n\r", ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN); // Debug message
+    break;
+    #endif // ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
+    #ifdef ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_LED1
+    case TASK_EVERY_SECOND:
+      digitalWrite(tkr_pins->Pin(GPIO_LED1_INV_ID), !digitalRead(tkr_pins->Pin(GPIO_LED1_INV_ID))); // Blink the LED on pin 8 every second
+      Serial.printf("LED on pin %d toggled\n\r", tkr_pins->Pin(GPIO_LED1_INV_ID)); // Debug message
+    break;
+    #endif // ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
   }
 
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -509,8 +518,8 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID));
-    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID));
+    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID,0));
+    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID,0));
 
   return JBI->End();
 

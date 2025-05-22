@@ -95,11 +95,13 @@ void mHLK_LD2410::Pre_Init(void)
 
 void mHLK_LD2410::Init(void) 
 {
-  // ALOG_INF(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
+  ALOG_INF(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
   if (tkr_pins->PinUsed(GPIO_LD2410_RX_ID) && tkr_pins->PinUsed(GPIO_LD2410_TX_ID)) 
   {
     LD2410.buffer = (uint8_t*)malloc(LD2410_BUFFER_SIZE);    // Default 64
     if (!LD2410.buffer) { return; }
+
+    ALOG_INF(PSTR(D_LOG_LD2410 "RX=%d TX=%d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
 
     LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), 2);
     

@@ -529,7 +529,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
       if(tkr_pins->PinUsed(tkr_pins->pin_attached_gpio_functions[i]))
       {
         sprintf_P(buffer, PSTR("%s"), tkr_pins->GetGPIOFunctionNamebyID(tkr_pins->pin_attached_gpio_functions[i], buffer, sizeof(buffer)));
-        JBI->Add(buffer, tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i]));
+        JBI->Add(buffer, tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i],0));
       }
     }    
     JBI->Object_End();
@@ -562,7 +562,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     {
 // DEBUG_LINE_HERE;
       JBI->Add(
-        tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i])
+        tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i],0)
         
         
         );

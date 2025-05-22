@@ -447,12 +447,12 @@ const mytmplt mHardwarePins::ModuleTemplate_GPIO_Map[] PROGMEM = {
     GPIO_USER_ID,            // 3       IO     RXD0         GPIO3, U0RXD, CLK_OUT2
     GPIO_USER_ID,            // 4       IO                  GPIO4, ADC2_CH0, TOUCH0, RTC_GPIO10, HSPIHD, HS2_DATA1, SD_DATA1, EMAC_TX_ER
     GPIO_USER_ID,            // 5       IO                  GPIO5, VSPICS0, HS1_DATA6, EMAC_RX_CLK
-                                 // 6       IO                  GPIO6, Flash CLK
-                                 // 7       IO                  GPIO7, Flash D0
-                                 // 8       IO                  GPIO8, Flash D1
+                             // 6       IO                  GPIO6, Flash CLK
+                             // 7       IO                  GPIO7, Flash D0
+                             // 8       IO                  GPIO8, Flash D1
     GPIO_USER_ID,            // 9       IO                  GPIO9, Flash D2, U1RXD
     GPIO_USER_ID,            // 10      IO                  GPIO10, Flash D3, U1TXD
-                                 // 11      IO                  GPIO11, Flash CMD
+                             // 11      IO                  GPIO11, Flash CMD
     GPIO_USER_ID,            // 12      (I)O                GPIO12, ADC2_CH5, TOUCH5, RTC_GPIO15, MTDI, HSPIQ, HS2_DATA2, SD_DATA2, EMAC_TXD3       (If driven High, flash voltage (VDD_SDIO) is 1.8V not default 3.3V. Has internal pull-down, so unconnected = Low = 3.3V. May prevent flashing and/or booting if 3.3V flash is connected and pulled high. See ESP32 datasheet for more details.)
     GPIO_USER_ID,            // 13      IO                  GPIO13, ADC2_CH4, TOUCH4, RTC_GPIO14, MTCK, HSPID, HS2_DATA3, SD_DATA3, EMAC_RX_ER
     GPIO_USER_ID,            // 14      IO                  GPIO14, ADC2_CH6, TOUCH6, RTC_GPIO16, MTMS, HSPICLK, HS2_CLK, SD_CLK, EMAC_TXD2
@@ -461,27 +461,27 @@ const mytmplt mHardwarePins::ModuleTemplate_GPIO_Map[] PROGMEM = {
     GPIO_USER_ID,            // 17      IO                  GPIO17, HS1_DATA5, U2TXD, EMAC_CLK_OUT_180
     GPIO_USER_ID,            // 18      IO                  GPIO18, VSPICLK, HS1_DATA7
     GPIO_USER_ID,            // 19      IO                  GPIO19, VSPIQ, U0CTS, EMAC_TXD0
-    0,                           // 20
+    0,                       // 20
     GPIO_USER_ID,            // 21      IO                  GPIO21, VSPIHD, EMAC_TX_EN
     GPIO_USER_ID,            // 22      IO      LED         GPIO22, VSPIWP, U0RTS, EMAC_TXD1
     GPIO_USER_ID,            // 23      IO                  GPIO23, VSPID, HS1_STROBE
-    0,                           // 24
+    0,                       // 24
     GPIO_USER_ID,            // 25      IO                  GPIO25, DAC_1, ADC2_CH8, RTC_GPIO6, EMAC_RXD0
     GPIO_USER_ID,            // 26      IO                  GPIO26, DAC_2, ADC2_CH9, RTC_GPIO7, EMAC_RXD1
     GPIO_USER_ID,            // 27      IO                  GPIO27, ADC2_CH7, TOUCH7, RTC_GPIO17, EMAC_RX_DV
-    0,                           // 28
-    0,                           // 29
-    0,                           // 30
-    0,                           // 31
+    0,                       // 28
+    0,                       // 29
+    0,                       // 30
+    0,                       // 31
     GPIO_USER_ID,            // 32      IO                  GPIO32, XTAL_32K_P (32.768 kHz crystal oscillator input), ADC1_CH4, TOUCH9, RTC_GPIO9
     GPIO_USER_ID,            // 33      IO                  GPIO33, XTAL_32K_N (32.768 kHz crystal oscillator output), ADC1_CH5, TOUCH8, RTC_GPIO8
     GPIO_USER_ID,            // 34      I   NO PULLUP       GPIO34, ADC1_CH6, RTC_GPIO4
     GPIO_USER_ID,            // 35      I   NO PULLUP       GPIO35, ADC1_CH7, RTC_GPIO5
     GPIO_USER_ID,            // 36      I   NO PULLUP       GPIO36, SENSOR_VP, ADC_H, ADC1_CH0, RTC_GPIO0
-    0,                           // 37          NO PULLUP
-    0,                           // 38          NO PULLUP
+    0,                       // 37          NO PULLUP
+    0,                       // 38          NO PULLUP
     GPIO_USER_ID,            // 39      I   NO PULLUP       GPIO39, SENSOR_VN, ADC1_CH3, ADC_H, RTC_GPIO3
-    0                            // Flag
+    0                        // Flag
   },
   #ifdef USE_MODULE_TEMPLATE_CAM_AITHINKER
   {                              // ESP32_CAM_AITHINKER - Any ESP32 device with webcam (ESP32)
@@ -840,7 +840,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   // }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    ALOG_DBM( PSTR("GetRealPinNumberFromName = %d"), pin);
+    ALOG_INF( PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP32
 
@@ -883,113 +883,202 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
 
 
 
-#ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+// #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
 
-uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think this should be returning uint32_t here? #D10APR22
-  return Pin(gpio, index);
-}
+// uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think this should be returning uint32_t here? #D10APR22
+//   return Pin(gpio, index);
+// }
 
 
-/**
- * @brief Searches for physical external pin number that a GPIO function is attached to ie "GetFunctionAttachedToPin"
- * @note The use of IRAM_ATTR means function resides in instruction RAM, so will execute faster than without IRAM_ATTR which would have to retrieve array from flash each time into ram again (slower)
- * @param gpio sensor, driver (eg Relay)
- * @param index if more than one gpio was set (eg Relay1, Relay2)
- * @return -1 if none found, or the pin number real_pin
- */
+// /**
+//  * @brief Searches for physical external pin number that a GPIO function is attached to ie "GetFunctionAttachedToPin"
+//  * @note The use of IRAM_ATTR means function resides in instruction RAM, so will execute faster than without IRAM_ATTR which would have to retrieve array from flash each time into ram again (slower)
+//  * @param gpio sensor, driver (eg Relay)
+//  * @param index if more than one gpio was set (eg Relay1, Relay2)
+//  * @return -1 if none found, or the pin number real_pin
+//  */
+// #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+// int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index, bool enable_debug)
+// #else
+// int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
+// #endif
+// {
+//   //  ALOG_TST(PSTR("mHardwarePins::Pin(uint32_t gpio, uint32_t index)(%d,%d)"),gpio,index);
+   
+
+
+//   uint16_t real_gpio = gpio + index;
+
+// // DEBUG_LINE_HERE;
+
+//   if(real_gpio == GPIO_NONE_ID)
+//   {
+    
+// // DEBUG_LINE_HERE;
+//     return -1;
+//   }
+
+//   // Get any pins with gpio attached
+//   for(uint16_t index_pin=0; index_pin<ARRAY_SIZE(pin_attached_gpio_functions); index_pin++)
+//   {
+//     #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+//     if(enable_debug)
+//     {
+//       Serial.printf("real_gpio=%d ->? gpio_functions[%d] ==  %d\n\r",
+//       real_gpio,
+//       index_pin,
+//       pin_attached_gpio_functions[index_pin]
+//       );
+//     }
+//     #endif
+//     // Function (ie func_gpio) that is attached to pin (saved in array), search for the func_gpio
+//     if(pin_attached_gpio_functions[index_pin] == real_gpio) // gpio has been used for a pin
+//     {
+//       // Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
+      
+//       #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+//       if(enable_debug)
+//       {
+//         ALOG_TST(PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
+//       }
+//       #endif
+
+//       return gpio_pin_by_index[index_pin]; // real_pin
+//     }
+//   }
+
+// // DEBUG_LINE_HERE;
+//   return -1; // No pin was assigned with GPIO  
+// }
+
+// /**
+//  * @brief Convert the real_pin number to its indexed position within pin_array
+//  * @note 
+//  * @param real_pin physical external pin number
+//  * @return index position of pin in array
+//  */
+// int8_t mHardwarePins::ConvertRealPinToIndexPin(uint8_t real_pin){
+//   for(int index_pin=0;index_pin<MAX_GPIO_PIN;index_pin++)
+//   {
+//     if(real_pin == gpio_pin_by_index[index_pin])
+//     {
+//       return index_pin;
+//     }
+//   }
+//   return -1;
+// }
+
+// /**
+//  * @brief Convert the real_pin number to its indexed position within pin_array
+//  * @note 
+//  * @param real_pin physical external pin number
+//  * @return index position of pin in array
+//  */
+// int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
+//   return gpio_pin_by_index[index_pin];
+// }
+
+// /**
+//  * @brief Returns true/false is the gpio is used on any pin
+//  * @note 
+//  * @param gpio sensor, driver (eg Relay)
+//  * @param index if more than one gpio was set (eg Relay1, Relay2)
+//  * @return true/false if GPIO is found
+//  * 
+//  * place "enable_debug" with debug flag later
+//  * 
+//  * 
+//  */
+// // #define ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+
+
+// #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+// boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index, bool enable_debug)
+// {
+//   return (Pin(gpio, index, enable_debug) >= 0);
+// }
+// #else
+// boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index)
+// {
+//   return (Pin(gpio, index) >= 0);
+// }
+// #endif
+
+// /**
+//  * @brief Assigns a pin with a GPIO
+//  * @note 
+//  * @param lpin The real_pin number GPIO#
+//  * @param gpio The actual hardware attached to the pin (eg led, relay, sensor data)
+//  * @return none
+//  */
+// void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) 
+// {
+//   // if(lpin < ARRAY_SIZE(pin_attached_gpio_functions)){
+
+//   //   ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+
+//   //   pin_attached_gpio_functions[internal_pin_index] = gpio;
+
+//   // }else{
+
+//   // }
+
+
+//   // Adjust real_pin to internal indexpin
+//   int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
+
+//   // uint8_t pin_count = ARRAY_SIZE(gpio_pin_by_index);
+//   // uint8_t
+
+//   // if((internal_pin_index < MAX_USER_PINS) && (internal_pin_index>=0))
+//   // {
+//   if(internal_pin_index != -1) // -1 means unset pin
+//   {
+
+//     ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+
+//     pin_attached_gpio_functions[internal_pin_index] = gpio;
+
+//     // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
+
+
+//   }
+//   else
+//   {
+//     ALOG_ERR( PSTR("Error SetPin %d %d<%d"), gpio, internal_pin_index, MAX_USER_PINS);
+//   }
+// }
+// #endif
+
+
 #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
-int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index, bool enable_debug)
+int IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index, bool enable_debug)
 #else
 int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
 #endif
 {
-  //  ALOG_TST(PSTR("mHardwarePins::Pin(uint32_t gpio, uint32_t index)(%d,%d)"),gpio,index);
-   
-
-
+  #ifdef ENABLE_FEATURE_HARDWAREPINS__FUNCTION_AND_INDEX_PACKED_GPIO
+  uint16_t real_gpio = gpio << 5;
+  uint16_t mask = 0xFFE0;
+  if (index < GPIO_ANY) {
+    real_gpio += index;
+    mask = 0xFFFF;
+  }
+  for (uint32_t i = 0; i < nitems(pin_attached_gpio_functions); i++) {
+    if ((pin_attached_gpio_functions[i] & mask) == real_gpio) {
+      return i;              // Pin number configured for gpio
+    }
+  }
+  #else
   uint16_t real_gpio = gpio + index;
-
-// DEBUG_LINE_HERE;
-
-  if(real_gpio == GPIO_NONE_ID)
-  {
-    
-// DEBUG_LINE_HERE;
-    return -1;
-  }
-
-  // Get any pins with gpio attached
-  for(uint16_t index_pin=0; index_pin<ARRAY_SIZE(pin_attached_gpio_functions); index_pin++)
-  {
-    #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
-    if(enable_debug)
-    {
-      Serial.printf("real_gpio=%d ->? gpio_functions[%d] ==  %d\n\r",
-      real_gpio,
-      index_pin,
-      pin_attached_gpio_functions[index_pin]
-      );
-    }
-    #endif
-    // Function (ie func_gpio) that is attached to pin (saved in array), search for the func_gpio
-    if(pin_attached_gpio_functions[index_pin] == real_gpio) // gpio has been used for a pin
-    {
-      // Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
-      
-      #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
-      if(enable_debug)
-      {
-        ALOG_TST(PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
-      }
-      #endif
-
-      return gpio_pin_by_index[index_pin]; // real_pin
+  for (uint32_t i = 0; i < nitems(pin_attached_gpio_functions); i++) {
+    if (pin_attached_gpio_functions[i] == real_gpio) {
+      return i;              // Pin number configured for gpio
     }
   }
-
-// DEBUG_LINE_HERE;
-  return -1; // No pin was assigned with GPIO  
+  #endif
+  return -1;                 // No pin used for gpio
 }
-
-/**
- * @brief Convert the real_pin number to its indexed position within pin_array
- * @note 
- * @param real_pin physical external pin number
- * @return index position of pin in array
- */
-int8_t mHardwarePins::ConvertRealPinToIndexPin(uint8_t real_pin){
-  for(int index_pin=0;index_pin<MAX_GPIO_PIN;index_pin++)
-  {
-    if(real_pin == gpio_pin_by_index[index_pin])
-    {
-      return index_pin;
-    }
-  }
-  return -1;
-}
-
-/**
- * @brief Convert the real_pin number to its indexed position within pin_array
- * @note 
- * @param real_pin physical external pin number
- * @return index position of pin in array
- */
-int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
-  return gpio_pin_by_index[index_pin];
-}
-
-/**
- * @brief Returns true/false is the gpio is used on any pin
- * @note 
- * @param gpio sensor, driver (eg Relay)
- * @param index if more than one gpio was set (eg Relay1, Relay2)
- * @return true/false if GPIO is found
- * 
- * place "enable_debug" with debug flag later
- * 
- * 
- */
-// #define ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
 
 
 #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
@@ -1004,80 +1093,14 @@ boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index)
 }
 #endif
 
-/**
- * @brief Assigns a pin with a GPIO
- * @note 
- * @param lpin The real_pin number GPIO#
- * @param gpio The actual hardware attached to the pin (eg led, relay, sensor data)
- * @return none
- */
-void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) 
-{
-  // if(lpin < ARRAY_SIZE(pin_attached_gpio_functions)){
+// uint32_t mHardwarePins::GetPin(uint32_t lpin) {
+//   if (lpin < nitems(pin_attached_gpio_functions)) {
+//     return pin_attached_gpio_functions[lpin];
+//   } else {
+//     return GPIO_NONE_ID;
+//   }
+// }
 
-  //   ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
-
-  //   pin_attached_gpio_functions[internal_pin_index] = gpio;
-
-  // }else{
-
-  // }
-
-
-  // Adjust real_pin to internal indexpin
-  int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
-
-  // uint8_t pin_count = ARRAY_SIZE(gpio_pin_by_index);
-  // uint8_t
-
-  // if((internal_pin_index < MAX_USER_PINS) && (internal_pin_index>=0))
-  // {
-  if(internal_pin_index != -1) // -1 means unset pin
-  {
-
-    ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
-
-    pin_attached_gpio_functions[internal_pin_index] = gpio;
-
-    // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
-
-
-  }
-  else
-  {
-    ALOG_ERR( PSTR("Error SetPin %d %d<%d"), gpio, internal_pin_index, MAX_USER_PINS);
-  }
-}
-#endif
-
-#ifdef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
-
-int IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index) {
-  uint16_t real_gpio = gpio << 5;
-  uint16_t mask = 0xFFE0;
-  if (index < GPIO_ANY) {
-    real_gpio += index;
-    mask = 0xFFFF;
-  }
-  for (uint32_t i = 0; i < nitems(pin_attached_gpio_functions); i++) {
-    if ((pin_attached_gpio_functions[i] & mask) == real_gpio) {
-      return i;              // Pin number configured for gpio
-    }
-  }
-  return -1;                 // No pin used for gpio
-}
-
-bool mHardwarePins::PinUsed(uint32_t gpio, uint32_t index) {
-  return (Pin(gpio, index) >= 0);
-}
-
-uint32_t mHardwarePins::GetPin(uint32_t lpin) {
-  if (lpin < nitems(pin_attached_gpio_functions)) {
-    return pin_attached_gpio_functions[lpin];
-  } else {
-    return GPIO_NONE_ID;
-  }
-}
 
 void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
   pin_attached_gpio_functions[lpin] = gpio;
@@ -1086,8 +1109,6 @@ void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
 // int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
 //   return gpio_pin_by_index[index_pin];
 // }
-
-#endif
 
 
 
@@ -1145,36 +1166,36 @@ bool mHardwarePins::DigitalRead(uint32_t gpio_pin, uint32_t index)
 // #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 
-#ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
-int8_t mHardwarePins::GetPinByIndex(uint8_t index)
-{
-  return gpio_pin_by_index[index];
-}
+// #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+// int8_t mHardwarePins::GetPinByIndex(uint8_t index)
+// {
+//   return gpio_pin_by_index[index];
+// }
 
-int8_t mHardwarePins::GetPinIndexedLocation(uint8_t pin_number)
-{
-  for(uint8_t index = 0;index<MAX_USER_PINS;index++)
-  {
-    if(GetPinByIndex(index) == pin_number)
-    {
-      return index;
-    }
-  }
-  return -1;
-}
+// int8_t mHardwarePins::GetPinIndexedLocation(uint8_t pin_number)
+// {
+//   for(uint8_t index = 0;index<MAX_USER_PINS;index++)
+//   {
+//     if(GetPinByIndex(index) == pin_number)
+//     {
+//       return index;
+//     }
+//   }
+//   return -1;
+// }
 
-bool mHardwarePins::SetPinFunction(int8_t gpio_pin_number, int8_t pin_function)
-{
-  int8_t gpio_pin_index_location = GetPinIndexedLocation(gpio_pin_number);
-  if(gpio_pin_index_location>=0) // Valid pin option
-  {
-    pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
-    return true;
-  }
-  return false;
-}
+// bool mHardwarePins::SetPinFunction(int8_t gpio_pin_number, int8_t pin_function)
+// {
+//   int8_t gpio_pin_index_location = GetPinIndexedLocation(gpio_pin_number);
+//   if(gpio_pin_index_location>=0) // Valid pin option
+//   {
+//     pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
+//     return true;
+//   }
+//   return false;
+// }
 
-#endif // ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+// #endif // ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
 // #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 uint8_t mHardwarePins::ModuleNr()

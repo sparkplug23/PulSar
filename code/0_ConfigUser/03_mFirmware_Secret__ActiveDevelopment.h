@@ -41,7 +41,7 @@
 // #define DEVICE_TESTBED__GPS_SERIAL
 // #define DEVICE_ACTIVE_DEVELOPMENT__SWITCHES_AND_BUTTONS
 // #define DEVICE_TESTBED__ROOM_SENSOR_ESP32C3_SUPERMINI
-#define DEVICE_DEVBOARD__DESK__ESP32DOIT_GPIO_HARDWARE_PINS_TESTING
+// #define DEVICE_DEVBOARD__DESK__ESP32DOIT_GPIO_HARDWARE_PINS_TESTING
 
 
 /**************************************************************************************************************************************************
@@ -7212,7 +7212,7 @@ new 26GHz radar sensor
 
 #define ESP32
 #define CONFIG_IDF_TARGET_ESP32C3
-#define ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+// #define ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
 
 
 // ///////////////////////////////////////////// Module Logs
@@ -7604,7 +7604,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 #define ENABLE_DEBUG_MANUAL_DELAYS
 
-#define ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+// #define ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
 
 
 /////////////////////////////////////////// Module Logs
@@ -7663,6 +7663,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //       #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 // #endif 
 
+  #define USE_MODULE_DRIVERS_LEDS
+
+  // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
+  #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_LED1
+
 /***********************************
 * SECTION: Lighting Configs
 ************************************/  
@@ -7696,6 +7701,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
    "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
    "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""   
    #endif
+   "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  
  "},"
  "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
  "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

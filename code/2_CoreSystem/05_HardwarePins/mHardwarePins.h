@@ -470,7 +470,7 @@ DEFINE_PGM_CTR(PM_MODULE_NAME_USERMODULE_CTR)          D_MODULE_NAME_USERMODULE_
  * @note Never add `#ifdef` into this enum, as I want all GPIO to always exist and be static for long term debug. `ifdef` should be considered around nicelist
  * @note PD = Pulled down (hardware dependant)
  */
-enum GPIO_COMPLETE_STATIC_LIST_IDS {
+enum GPIO_COMPLETE_STATIC_LIST_IDS  {
   // Default for unused
   GPIO_NONE_ID,
   GPIO_ANALOG_ID, // basic analog that any enabled modules can use on the esp8266, this will need changed to be numbers so esp8266 defaults to 1 and esp32 cna use them all
@@ -931,24 +931,24 @@ class mHardwarePins :
     bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
     bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
-    #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
-    #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
-    boolean PinUsed(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
-    int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
-    #else
-    boolean PinUsed(uint32_t gpio, uint32_t index = 0);
+    // #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+    // #ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
+    // boolean PinUsed(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
+    // int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0, bool enable_debug = false);
+    // #else
+    // boolean PinUsed(uint32_t gpio, uint32_t index = 0);
+    // int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+    // #endif
+    // void SetPin(uint32_t lpin, uint32_t gpio);
+    // uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
+    // #endif
     int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
-    #endif
-    void SetPin(uint32_t lpin, uint32_t gpio);
-    uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
-    #endif
-    #ifdef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
-    int IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+    int16_t IRAM_ATTR GetPin(uint32_t gpio, uint32_t index = 0){ return Pin(gpio, index); }
+    // inline int IRAM_ATTR GetPin(uint32_t gpio, uint32_t index = 0) { return Pin(gpio, index); }
     bool PinUsed(uint32_t gpio, uint32_t index = 0);
-    uint32_t GetPin(uint32_t lpin);
+    // uint32_t GetPin(uint32_t lpin);
     void SetPin(uint32_t lpin, uint32_t gpio);
     bool FlashPin(uint32_t pin);
-    #endif
     // int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);

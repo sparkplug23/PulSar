@@ -127,10 +127,10 @@ void mI2C::Pre_Init()
       if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID)))//, 100000))
       #else
 
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID), I2C_BUS_SPEED))
+      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID,0), tkr_pins->GetPin(GPIO_I2C_SCL_ID,0), I2C_BUS_SPEED))
       #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
-        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA_ID),tkr_pins->GetPin(GPIO_I2C_SCL_ID));
+        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA_ID,0),tkr_pins->GetPin(GPIO_I2C_SCL_ID,0));
       }
       else
       {
