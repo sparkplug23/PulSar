@@ -88,7 +88,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
           mqtt_client = new WiFiClient();
           DEBUG_LINE_HERE3
 
-          pCONT_mqtt->CreateConnection(mqtt_client, D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
           DEBUG_LINE_HERE3
           
           pCONT_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
