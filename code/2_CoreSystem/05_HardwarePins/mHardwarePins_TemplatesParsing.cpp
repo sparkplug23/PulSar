@@ -275,17 +275,17 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   }
 
   // For extensive debugging, print the source and destination before copying
-  #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_Array(LOG_LEVEL_DEV_TEST, PSTR("TemplateGPIO:src"), src,  ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
-  AddLog_Array(LOG_LEVEL_DEV_TEST, PSTR("TemplateGPIO:dst"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  // #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog_Array(LOG_LEVEL_ERROR, PSTR("TemplateGPIO:src"), src,  ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+  AddLog_Array(LOG_LEVEL_ERROR, PSTR("TemplateGPIO:dst"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+  //   #endif // ENABLE_LOG_LEVEL_COMMANDS
+  // #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   // Expand template to physical GPIO array, j=phy_GPIO, i=template_GPIO
   uint32_t j = 0;
   for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++) {    
-    //   dest[j] = src[i];    
+      dest[j] = src[i];    
     //   ALOG_DBM(PSTR("Copying %d\ti%d\tp%d\t%d\ti%d"), dest[j],j, ConvertIndexPinToRealPin(dest[i]), src[i],i);
     
     //   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
@@ -295,26 +295,28 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
     //     );
     //   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
-    //   j++;
-    // }
-
-    #ifdef ESP8266
-      if (6 == i) { j = 9; }
-      if (8 == i) { j = 12; }
-      dest[j] = src[i];
       j++;
-    #endif  // ESP8266
-    #ifdef ESP32
-    #if CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
-        dest[i] = src[i];
-    #elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
-        if (22 == i) { j = 33; }    // skip 22-32
-        dest[j] = src[i];
-        j++;
-    #else  // ESP32
-        dest[Esp32TemplateToPhy[i]] = src[i];
-    #endif  // ESP32C2/C3/C6 and S2/S3
-    #endif  // ESP32
+    // }
+    // dest[j] = src[i];  // instead of dynamic below, I will for now define in the header the map
+    // #ifdef ESP8266
+    //   if (6 == i) { j = 9; }
+    //   if (8 == i) { j = 12; }
+    //   dest[j] = src[i];
+    //   j++;
+    // #endif  // ESP8266
+    // #ifdef ESP32
+    // #if CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+    //     dest[i] = src[i];
+    // #elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+    //     if (22 == i) { j = 33; }    // skip 22-32
+    //     dest[j] = src[i];
+    //     j++;
+    // #else  // ESP32
+    //     // dest[Esp32TemplateToPhy[i]] = src[i];
+    //     // ALOG_INF(PSTR("Template slot %d → GPIO %d: function ID = %d"), i, Esp32TemplateToPhy[i], src[i]);
+    //     dest[j] = src[i];  
+    // #endif  // ESP32C2/C3/C6 and S2/S3
+    // #endif  // ESP32
   }
 
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
@@ -422,7 +424,7 @@ void mHardwarePins::GpioInit(void)
         tkr_set->runtime.my_module.io[i],
         def_gp.io[i],
         i,
-        i,        // ConvertIndexPinToRealPin(i),
+        ConvertIndexPinToRealPin(i),
         GetGPIOFunctionNamebyID_P(tkr_set->runtime.my_module.io[i])
       );
       #endif // ENABLE_LOG_LEVEL_INFO
@@ -446,7 +448,7 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t index = 0; index < ARRAY_SIZE(tkr_set->runtime.my_module.io); index++) 
   {
 
-    uint8_t real_pin = index;//ConvertIndexPinToRealPin(index);
+    uint8_t real_pin = ConvertIndexPinToRealPin(index);
 
     uint16_t gpio = tkr_set->runtime.my_module.io[index];
 
@@ -547,7 +549,7 @@ void mHardwarePins::GpioInit(void)
         }
       }
 
-      uint8_t real_pin = i;//ConvertIndexPinToRealPin(i);
+      uint8_t real_pin = ConvertIndexPinToRealPin(i);
       pinMode(real_pin, OUTPUT);
       digitalWrite(real_pin, LOW);
 
@@ -567,7 +569,7 @@ void mHardwarePins::GpioInit(void)
         }
       }
       
-      uint8_t real_pin = i;// ConvertIndexPinToRealPin(i);
+      uint8_t real_pin = ConvertIndexPinToRealPin(i);
       pinMode(real_pin, OUTPUT);
       digitalWrite(real_pin, HIGH);
 

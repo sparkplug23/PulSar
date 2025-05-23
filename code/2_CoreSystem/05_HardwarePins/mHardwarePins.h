@@ -905,8 +905,8 @@ class mHardwarePins :
     static const mytmplt  ModuleTemplate_GPIO_Map[] PROGMEM;
     #endif
 
-    // int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
-    #define ConvertRealPinToIndexPin(X) X
+    int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
+    // #define ConvertRealPinToIndexPin(X) X
 
     void ModuleSettings_FlashSerial();        
     void ParseModuleTemplate();
@@ -949,7 +949,7 @@ class mHardwarePins :
     // uint32_t GetPin(uint32_t lpin);
     void SetPin(uint32_t lpin, uint32_t gpio);
     bool FlashPin(uint32_t pin);
-    // int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
+    int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);
     void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);

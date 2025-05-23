@@ -164,6 +164,9 @@ const char PINS_WEMOS[] PROGMEM = "IOTXIORXIOIOFLFLFLFLFLFLIOIOIOIOIOIOIOIOIOIOI
 #endif  // ESP32
 
 
+const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {ESP32_TEMPLATE_TO_PHY};
+
+
 // const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
 //     0, 1, 2, 3, 4, 5,
 //     // 6, 7, 8,

@@ -807,17 +807,17 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   
   // Check for pin_array matching
   char buffer[10];
-  // for(uint8_t i=0; i<ARRAY_SIZE(gpio_pin_by_index); i++)
-  for(uint8_t i=0; i<35; i++)
+  for(uint8_t i=0; i<ARRAY_SIZE(gpio_pin_by_index); i++)
+  // for(uint8_t i=0; i<35; i++)
   {
-    // sprintf(buffer,"%d\0",gpio_pin_by_index[i]);
-    sprintf(buffer,"%d\0",i);
+    sprintf(buffer,"%d\0",gpio_pin_by_index[i]);
+    // sprintf(buffer,"%d\0",i);
     
       // ALOG_INF(PSTR("NOOOOOOOOOmatched pin %d %d %s %s"),pin,i,c,buffer);
 
     if(strcmp(c,buffer)==0)
     {
-      pin = i;//gpio_pin_by_index[i];
+      pin = gpio_pin_by_index[i];
       ALOG_DBM( PSTR("matched pin %d %d"),pin,i);
       break;
     }else{
@@ -951,22 +951,22 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
 //   return -1; // No pin was assigned with GPIO  
 // }
 
-// /**
-//  * @brief Convert the real_pin number to its indexed position within pin_array
-//  * @note 
-//  * @param real_pin physical external pin number
-//  * @return index position of pin in array
-//  */
-// int8_t mHardwarePins::ConvertRealPinToIndexPin(uint8_t real_pin){
-//   for(int index_pin=0;index_pin<MAX_GPIO_PIN;index_pin++)
-//   {
-//     if(real_pin == gpio_pin_by_index[index_pin])
-//     {
-//       return index_pin;
-//     }
-//   }
-//   return -1;
-// }
+/**
+ * @brief Convert the real_pin number to its indexed position within pin_array
+ * @note 
+ * @param real_pin physical external pin number
+ * @return index position of pin in array
+ */
+int8_t mHardwarePins::ConvertRealPinToIndexPin(uint8_t real_pin){
+  for(int index_pin=0;index_pin<MAX_GPIO_PIN;index_pin++)
+  {
+    if(real_pin == gpio_pin_by_index[index_pin])
+    {
+      return index_pin;
+    }
+  }
+  return -1;
+}
 
 // /**
 //  * @brief Convert the real_pin number to its indexed position within pin_array
@@ -1071,9 +1071,10 @@ int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
   }
   #else
   uint16_t real_gpio = gpio + index;
-  for (uint32_t i = 0; i < nitems(pin_attached_gpio_functions); i++) {
-    if (pin_attached_gpio_functions[i] == real_gpio) {
-      return i;              // Pin number configured for gpio
+  for (uint32_t index_pin = 0; index_pin < nitems(pin_attached_gpio_functions); index_pin++) {
+    if (pin_attached_gpio_functions[index_pin] == real_gpio) {
+      // ALOG_INF(PSTR("Pin(%d,%d) pin_attached[%d] == real_gpio|%d==%d"), gpio,index, index_pin, pin_attached_gpio_functions[index_pin],real_gpio);
+      return gpio_pin_by_index[index_pin];              // Pin number configured for gpio
     }
   }
   #endif
@@ -1102,13 +1103,59 @@ boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index)
 // }
 
 
-void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
-  pin_attached_gpio_functions[lpin] = gpio;
+// void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
+//   pin_attached_gpio_functions[lpin] = gpio;
+// }
+
+/**
+ * @brief Assigns a pin with a GPIO
+ * @note 
+ * @param lpin The real_pin number GPIO#
+ * @param gpio The actual hardware attached to the pin (eg led, relay, sensor data)
+ * @return none
+ */
+void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) 
+{
+  // if(lpin < ARRAY_SIZE(pin_attached_gpio_functions)){
+
+  //   ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+
+  //   pin_attached_gpio_functions[internal_pin_index] = gpio;
+
+  // }else{
+
+  // }
+
+
+  // Adjust real_pin to internal indexpin
+  int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
+
+  // uint8_t pin_count = ARRAY_SIZE(gpio_pin_by_index);
+  // uint8_t
+
+  // if((internal_pin_index < MAX_USER_PINS) && (internal_pin_index>=0))
+  // {
+  if(internal_pin_index != -1) // -1 means unset pin
+  {
+
+    ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+
+    pin_attached_gpio_functions[internal_pin_index] = gpio;
+
+    // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
+
+
+  }
+  else
+  {
+    ALOG_ERR( PSTR("Error SetPin %d %d<%d"), gpio, internal_pin_index, MAX_USER_PINS);
+  }
 }
 
-// int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
-//   return gpio_pin_by_index[index_pin];
-// }
+
+int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
+  return gpio_pin_by_index[index_pin];
+}
 
 
 
