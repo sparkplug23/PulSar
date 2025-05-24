@@ -26,6 +26,15 @@ const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOIOIOIOIOIOIOFLFLFLFLFLFLFLIORXTX";
 #define MAX_USER_PINS      22   // MAX_GPIO_PIN - MIN_FLASH_PINS
 #define WEMOS_MODULE       0    // Wemos module
 
+
+#define ESP32_TEMPLATE_TO_PHY         \
+   0,   1,  2,  3,  4,                \
+   5,   6,  7,  8,  9,                \
+   10, 11, 12, 13, 14,                \
+   15, 16, 17, 18, 19,                \
+   20, 21                             
+
+
 //                                  0 1 2 3 4 5 6 7 8 9101112131415161718192021
 const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOAOIOIOIOIOIOFLFLFLFLFLFLFLIOIORXTX";
 
@@ -67,6 +76,18 @@ const char PINS_WEMOS[] PROGMEM = "IOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOIO-
 #define MIN_FLASH_PINS     11   // Number of flash chip pins unusable for configuration (22-25 don't exist, 26-32 for SPI)
 #define MAX_USER_PINS      38   // MAX_GPIO_PIN - MIN_FLASH_PINS
 #define WEMOS_MODULE       0    // Wemos module
+
+
+#define ESP32_TEMPLATE_TO_PHY         \
+   0,  1,  2,  3,  4,                 \
+   5,  6,  7,  8,  9,                 \
+  10, 11, 12, 13, 14,                 \
+  15, 16, 17, 18, 19,                 \
+  20, 21,                             \
+  33, 34, 35, 36, 37, 38, 39, 40,     \
+  41, 42, 43, 44, 45, 46, 47, 48
+
+
 
 //                                  0 1 2 3 4 5 6 7 8 9101112131415161718192021222324252627282930313233343536373839404142434445464748
 const char PINS_WEMOS[] PROGMEM = "IOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOIO--------FLFLFLFLFLFLFLIOIOIOIOIOIOIOIOIOIOIOIOIOIOIOIO";

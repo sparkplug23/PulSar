@@ -20,6 +20,9 @@
 #ifndef ADAFRUIT_FONA_H
 #define ADAFRUIT_FONA_H
 
+
+#ifndef CONFIG_IDF_TARGET_ESP32S3
+
 #include "includes/FONAConfig.h"
 #include "includes/FONAExtIncludes.h"
 #include "includes/platform/FONAPlatform.h"
@@ -388,5 +391,7 @@ class Adafruit_FONA_LTE : public Adafruit_FONA {
   boolean HTTP_GET(const char *URI);
   boolean HTTP_POST(const char *URI, const char *body, uint8_t bodylen);
 };
+
+#endif
 
 #endif
