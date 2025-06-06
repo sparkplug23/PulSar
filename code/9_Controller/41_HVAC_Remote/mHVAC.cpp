@@ -60,13 +60,13 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
       Every_Second();
     break;
     /************
-     * FUNCTION HANDLER SECTION * 
+     * YTASK SCHEDULED * 
     *******************/
-    case TASK_FUNCTION_LAMBDA_INIT:
-      FunctionHandler_Init();
+    case YTASK_INIT:
+      YTask_Init();
     break;
-    case TASK_FUNCTION_LAMBDA_LOOP:
-      FunctionHandler_Loop();
+    case YTASK_LOOP:
+      YTask_Loop();
     break;
     /************
      * COMMANDS SECTION * 
@@ -207,7 +207,7 @@ void mHVAC::SetHeater(uint8_t device, uint8_t state){
 /**
  * Generate Messages for users to glance at via web or mqtt, timers, temps, schedules set? append the messages.
  * */
-void mHVAC::FunctionHandler_Program_Status(){
+void mHVAC::YTask_Program_Status(){
 
 return;
   memset(&heating_status,0,sizeof(heating_status));
@@ -253,7 +253,7 @@ uint8_t mHVAC::GetAnyHeatingRelay(){
 }
 
 
-void mHVAC::FunctionHandler_Relay_Status(){ 
+void mHVAC::YTask_Relay_Status(){ 
 
   for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
     if(tkr_relay->CommandGet_Relay_Power(device_id)){
@@ -264,18 +264,6 @@ void mHVAC::FunctionHandler_Relay_Status(){
   }
 
 } // END function
-
-
-// Keeps the highest importance flag
-void mHVAC::SetHighestImportance(uint8_t* importanceset, int8_t thisvalue){
-  if(thisvalue > *importanceset){
-    *importanceset = thisvalue;
-  }
-  //moved into telemetrym
-}
-
-
-
 
 
 /**

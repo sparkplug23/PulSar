@@ -18,6 +18,17 @@ const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOIOIOIOIOIOIOFLFLFLFLFLFLFLIORXTX";
 
 #elif CONFIG_IDF_TARGET_ESP32C3
 
+
+// ✅ Key Bootstrapping Pins on ESP32-C3
+// Pin	Function	Required Boot State
+// GPIO9	MTDI / Strapping pin	Low (0) for boot from flash
+// GPIO8	MTDO / Strapping pin	High (1) for 3.3V SPI flash
+// GPIO2	MTMS / Strapping pin	Typically unconnected or high
+// GPIO0	BOOT / Flash download mode	High (1) to boot normally
+
+// ⚠️ If GPIO0 is LOW at reset, the chip enters UART download mode, which could explain why it boots only when the serial port is triggered.
+
+
 /* ****************************************
  * ESP32C3
  * ****************************************/

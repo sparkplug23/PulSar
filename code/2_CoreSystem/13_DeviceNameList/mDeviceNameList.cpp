@@ -237,11 +237,11 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
     }
     else
     {
-#ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
+      #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(unique_module_id), device_id);
-#else
+      #else
       snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));
-#endif
+      #endif
       ALOG_WRN(PSTR("F::GetDeviceName Undefined >> %s"), buffer);
     }
     return buffer;

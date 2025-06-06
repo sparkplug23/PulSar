@@ -10664,7 +10664,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
   
   for (uint32_t i = SEGMENT.params_user[0]; i < SEGMENT.params_user[1]; i++)
   {
-    SEGMENT.setPixelColor(i,SEGCOLOR_U32(1));
+    // SEGMENT.setPixelColor(i,SEGCOLOR_U32(1));
   }
     
   return FRAMETIME;

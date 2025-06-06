@@ -21,7 +21,7 @@ class mInterfaceNetwork :
     static constexpr const char*    PM_MODULE__NETWORK_INTERFACE__CTR = D_MODULE__NETWORK_INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_INTERFACE__CTR; }
     uint16_t GetModuleUniqueID(){   return D_UNIQUE_MODULE__NETWORK_INTERFACE__ID; }
-    ~mInterfaceNetwork() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mInterfaceNetwork() {          }
     
     void Pre_Init();
     void Init(void);

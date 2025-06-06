@@ -105,6 +105,13 @@ void EmergencySerial_SettingsReset(void) {
 }
 #endif  // ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
 
+
+#ifdef ESP32
+// IDF5.3 fix esp_gpio_reserve used in init PSRAM. Needed by Tasmota.ino esp_gpio_revoke
+// #include "esp_private/esp_gpio_reserve.h"
+#endif  // ESP32
+extern bool psramInit();   // forward declare if needed
+
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
 /********************************************************************************************/
@@ -124,15 +131,24 @@ void setup(void)
     #ifdef CONFIG_IDF_TARGET_ESP32
     // restore GPIO16/17 if no PSRAM is found
     if (!SupportESP32::FoundPSRAM()) {
-      // test if the CPU is not pico
+      // // test if the CPU is not pico
       uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
       uint32_t pkg_version = chip_ver & 0x7;
       if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
         gpio_reset_pin(GPIO_NUM_16);
         gpio_reset_pin(GPIO_NUM_17);
       }
+      // uint32_t pkg_version = bootloader_common_get_chip_ver_pkg();
+      // if (pkg_version <= 3) {         // D0WD, S0WD, D2WD
+      //   gpio_reset_pin((gpio_num_t)CONFIG_D0WD_PSRAM_CS_IO);
+      //   gpio_reset_pin((gpio_num_t)CONFIG_D0WD_PSRAM_CLK_IO);
+      //   // IDF5.3 fix esp_gpio_reserve used in init PSRAM
+      //   esp_gpio_revoke(BIT64(CONFIG_D0WD_PSRAM_CS_IO) | BIT64(CONFIG_D0WD_PSRAM_CLK_IO));
+      // }
     }
     #endif  // CONFIG_IDF_TARGET_ESP32
+    
+psramInit();               // initialize PSRAM
   #endif  // ESP32
 
   /**
@@ -312,6 +328,12 @@ void setup(void)
 /********************************************************************************************
  ** Show PSRAM Present **********************************************************************
  ********************************************************************************************/
+// #if CONFIG_IDF_TARGET_ESP32
+//   esp_err_t psram_status = esp_psram_init();
+//   if (psram_status != ESP_OK) {
+//     AddLog(LOG_LEVEL_INFO, "PSRAM init failed: 0x%x", psram_status);
+//   }
+// #endif
 
   #ifdef ESP32
     // ALOG_INF(PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
@@ -325,6 +347,18 @@ void setup(void)
   #else // ESP32
     // ALOG_INF(PSTR("HDW: %s"), GetDeviceHardware().c_str());
   #endif // ESP32
+  #ifdef ESP32
+  AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), SupportESP32::GetDeviceHardwareRevision().c_str(),
+  SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+  // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
+#if !defined(HAS_PSRAM_FIX)
+  if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
+    AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+  }
+#endif  // HAS_PSRAM_FIX
+#else   // ESP8266
+  AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+#endif  // ESP32
   DEBUG_LINE_HERE
 
 
@@ -524,7 +558,7 @@ void setup(void)
   // Init devices after others have been configured fully
   pCONT->Tasker_Interface(TASK_POST_INIT);
   // Run system functions 
-  pCONT->Tasker_Interface(TASK_FUNCTION_LAMBDA_INIT);
+  pCONT->Tasker_Interface(YTASK_INIT);
   // Load any stored user values into module
   pCONT->Tasker_Interface(TASK_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
   
@@ -632,7 +666,7 @@ void LoopTasker()
    
   pCONT->Tasker_Interface(TASK_LOOP); DEBUG_LINE;
  
-  if(tkr_time->UpTime() > 30){ pCONT->Tasker_Interface(TASK_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
+  if(tkr_time->UpTime() > 30){ pCONT->Tasker_Interface(YTASK_LOOP); } // Only run after stable boot
  
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(TASK_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(TASK_EVERY_100_MSECOND); }  DEBUG_LINE;

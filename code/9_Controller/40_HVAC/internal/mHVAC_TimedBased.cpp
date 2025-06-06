@@ -51,7 +51,7 @@ void mHVAC::init_program_timers(void)
  * @note Runs every 1 second
  * @note This will update the `ProgramTimer` and if required switch the relay output
  * */
-void mHVAC::FunctionHandler_Programs_Timers(void){
+void mHVAC::YTask_Programs_Timers(void){
 
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {

@@ -237,6 +237,7 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_SSID, WiFi.SSID().c_str());
     JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.sta_active); // Used to debug switching in grafana
     JBI->Add(PM_RSSI, WiFi.RSSI());
+    JBI->Add("TXPower", WiFi.getTxPower()); // 0-20dBm
     // JBI->Add(PM_CONNECTCOUNT, wifi_reconnects_counter);
     JBI->Add(PM_HOSTNAME, tkr_set->runtime.my_hostname);
     JBI->Add_P(PM_TELNET_PORT, TELNET_PORT);

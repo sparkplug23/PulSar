@@ -11,8 +11,8 @@
 #include "Arduino.h"
 
 #include "fb_gfx.h"
-#include "fd_forward.h"
-#include "fr_forward.h"
+// #include "fd_forward.h"
+// #include "fr_forward.h"
 
 #define ENROLL_CONFIRM_TIMES 5
 #define FACE_ID_SAVE_NUMBER 7

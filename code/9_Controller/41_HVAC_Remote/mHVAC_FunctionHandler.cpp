@@ -24,7 +24,7 @@
 
 #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
 
-void mHVAC::FunctionHandler_Init(){
+void mHVAC::YTask_Init(){
   
   struct functionhandler<mHVAC>* ptr = nullptr;
 
@@ -35,7 +35,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Program_Status;
+  ptr->function = &mHVAC::YTask_Program_Status;
   
   ptr = &functionhandler_failsafe;
   ptr->saved_millis = millis();
@@ -44,7 +44,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_MINS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_FailSafe;
+  ptr->function = &mHVAC::YTask_FailSafe;
 
   #ifdef USE_HVAC_PROFILE_ESTIMATION  
   ptr = &functionhandler_hvac_profiles;
@@ -54,7 +54,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_HVAC_Profiles;
+  ptr->function = &mHVAC::YTask_HVAC_Profiles;
   #endif //#ifdef USE_HVAC_PROFILE_ESTIMATION
       
   ptr = &functionhandler_relay_status;
@@ -64,7 +64,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Relay_Status;
+  ptr->function = &mHVAC::YTask_Relay_Status;
 
   ptr = &functionhandler_programs_timers;
   ptr->saved_millis = millis();
@@ -77,7 +77,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   #endif
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Programs_Timers;
+  ptr->function = &mHVAC::YTask_Programs_Timers;
   
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
   ptr = &functionhandler_programs_temps;
@@ -87,7 +87,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Programs_Temps;
+  ptr->function = &mHVAC::YTask_Programs_Temps;
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
   
   ptr = &functionhandler_update_sensors;
@@ -97,15 +97,15 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_MS_ID; 
   ptr->time_val = 1000;
-  ptr->function = &mHVAC::FunctionHandler_Update_Sensors;
+  ptr->function = &mHVAC::YTask_Update_Sensors;
       
 }
 
 
-void mHVAC::FunctionHandler_Loop()
+void mHVAC::YTask_Loop()
 {  
   for(auto& handle:functionhandler_list){
-    pCONT_sup->FunctionHandler_Call(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
+    pCONT_sup->YTask_Call(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
   }
 }
 

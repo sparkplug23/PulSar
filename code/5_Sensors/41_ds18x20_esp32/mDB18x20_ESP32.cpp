@@ -106,7 +106,6 @@ void mDB18x20_ESP32::Pre_Init(void)
 
   if(module_state.pins_used)
   {
-    module_state.mode = ModuleStatus::Running;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DB18 "Running"));
   }
 
@@ -205,6 +204,12 @@ void mDB18x20_ESP32::Ds18x20Search(void)
   }
   module_state.devices = sensor_count;
   ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"),module_state.devices);
+
+
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
+  }
 
 }
 
@@ -408,6 +413,10 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
     {
 
       alias_i = sensor_vector[sensor_id].device_name_index;
+
+      // To make sure when no alias is set, ie is -1, instead set as the loop index to get the generic name
+      if(alias_i == -1) alias_i = sensor_id;
+      // ALOG_INF(PSTR(D_LOG_DSB "Sensor %d Alias %d"), sensor_id, alias_i);
   
       JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), alias_i, buffer, sizeof(buffer)));         
         JBI->Add(PM_TEMPERATURE, sensor_vector[sensor_id].reading.val);
@@ -480,7 +489,9 @@ void mDB18x20_ESP32::parse_JSONCommand(JsonParserObject obj)
    */
   if(jtok = obj[PM_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_CTR])
   {
-    
+
+    ALOG_INF(PSTR("Setting Address")); delay (2000);
+
     JsonParserArray array_group = jtok; 
     ALOG_COM(PSTR(PM_SENSORADDRESS));
 

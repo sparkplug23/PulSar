@@ -38,6 +38,11 @@ const uint8_t LD2410_config_footer[4] = {0x04, 0x03, 0x02, 0x01};
 const uint8_t LD2410_target_header[4] = {0xF4, 0xF3, 0xF2, 0xF1};
 const uint8_t LD2410_target_footer[4] = {0xF8, 0xF7, 0xF6, 0xF5};
 
+#ifndef LD2410_DEFAULT_SERIAL_NUMBER
+#define LD2410_DEFAULT_SERIAL_NUMBER 2
+#endif
+
+
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mHLK_LD2410 :
@@ -53,7 +58,7 @@ class mHLK_LD2410 :
     static constexpr const char* PM_MODULE_SENSORS__HLK_LD2410__CTR = D_MODULE_SENSORS__RADAR_HLK_LD2410__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__HLK_LD2410__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID; }
-    ~mHLK_LD2410() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mHLK_LD2410() {          }
     
     struct ClassState
     {

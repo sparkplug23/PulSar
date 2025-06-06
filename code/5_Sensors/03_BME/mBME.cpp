@@ -135,9 +135,9 @@ void mBME::Pre_Init()
       }
     }else{
           
-      #ifdef ESP32
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), tkr_i2c->wire->getErrorText(tkr_i2c->wire->lastError()));
-      #endif 
+      // #ifdef ESP32
+      // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), tkr_i2c->wire->getErrorText(tkr_i2c->wire->lastError()));
+      // #endif 
 
     }
   }

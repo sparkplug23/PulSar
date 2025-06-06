@@ -72,17 +72,17 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
       const char* key = jtok.getStr();
       
       real_pin = GetRealPinNumberFromName(key);
-      ALOG_INF(PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
+      // ALOG_INF(PSTR("KEY%d %s %d"), pair_index, key, real_pin);
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
-      ALOG_INF( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+      ALOG_INF( PSTR("KEY%d %s real_pin%d->index_pin%d"), pair_index, key, real_pin, index_pin);
       
       if(index_pin>=0){
       
         jtok.nextOne();
         const char* value = jtok.getStr();
         gpio_number = GetGPIOFunctionIDbyName(value);
-        ALOG_INF(PSTR("gpio_number=%d\n\r"), gpio_number);
+        ALOG_INF(PSTR("gpio_func=%d"), gpio_number);
 
         if(gpio_number != -1){
           // only template pins
@@ -277,7 +277,7 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   // For extensive debugging, print the source and destination before copying
   // #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_Array(LOG_LEVEL_ERROR, PSTR("TemplateGPIO:src"), src,  ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+  AddLog_Array(LOG_LEVEL_ERROR, PSTR("TemplateGPIO:srcHERE"), src,  ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
   AddLog_Array(LOG_LEVEL_ERROR, PSTR("TemplateGPIO:dst"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
   //   #endif // ENABLE_LOG_LEVEL_COMMANDS
   // #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
@@ -286,14 +286,14 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   uint32_t j = 0;
   for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++) {    
       dest[j] = src[i];    
-    //   ALOG_DBM(PSTR("Copying %d\ti%d\tp%d\t%d\ti%d"), dest[j],j, ConvertIndexPinToRealPin(dest[i]), src[i],i);
+      // ALOG_DBM(PSTR("Copying %d\ti%d\tp%d\t%d\ti%d"), dest[j],j, ConvertIndexPinToRealPin(dest[i]), src[i],i);
     
-    //   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-    //   ALOG_DBG(PSTR("Copying dest=%d[%d]\t index/real = %d/%d"), 
-    //     dest[j],j, 
-    //     i, ConvertIndexPinToRealPin(i)
-    //     );
-    //   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+      // #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+      ALOG_ERR(PSTR("Copying dest=%d[%d]\t index/real = %d/%d"), 
+        dest[j],j, 
+        i, ConvertIndexPinToRealPin(i)
+        );
+      // #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
       j++;
     // }
@@ -319,9 +319,9 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
     // #endif  // ESP32
   }
 
-  #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  AddLog_Array(LOG_LEVEL_DEV_TEST, PSTR("TemplateGPIO:dst2"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
-  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  // #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  AddLog_Array(LOG_LEVEL_ERROR, PSTR("TemplateGPIO:dst2===================================\n\t"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+  // #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
 }
 
@@ -342,7 +342,7 @@ void mHardwarePins::GpioInit(void)
    * */
   if (!ValidModule(tkr_set->Settings.module)) 
   {
-    ALOG_ERR(PSTR(D_LOG_MODULE "!ValidModule"));
+    ALOG_INF(PSTR(D_LOG_MODULE "!ValidModule"));
     uint8_t module = MODULE;
     if (!ValidModule(MODULE))
     { 
@@ -369,7 +369,7 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++) {
     if(!ValidUserGPIOFunction(tkr_set->Settings.user_template.hardware.gp.io,i))
     {
-      ALOG_DBM(PSTR(D_LOG_CONFIG "!ValidUserGPIOFunction %d"),i);
+      ALOG_INF(PSTR(D_LOG_CONFIG "!ValidUserGPIOFunction %d"),i);
       tkr_set->Settings.user_template.hardware.gp.io[i] = GPIO_USER_ID;  // Fix not supported sensor ids in template    }
     }
   }
@@ -384,8 +384,8 @@ void mHardwarePins::GpioInit(void)
 
 
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  ALOG_DBM(PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(tkr_set->Settings.module_pins.io));
-  ALOG_DBM(PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
+  ALOG_INF(PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(tkr_set->Settings.module_pins.io));
+  ALOG_INF(PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     
 
@@ -396,21 +396,21 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.module_pins.io); i++) 
   { //all pins
     
-    ALOG_DBM(PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),tkr_set->Settings.module_pins.io[i],i);
+    ALOG_INF(PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),tkr_set->Settings.module_pins.io[i],i);
 
     uint16_t gpio = tkr_set->Settings.module_pins.io[i];
 
-    ALOG_DBM(PSTR(D_LOG_CONFIG "module_pins.io[%d]=%d"),i,tkr_set->Settings.module_pins.io[i]);
+    ALOG_INF(PSTR(D_LOG_CONFIG "module_pins.io[%d]=%d"),i,tkr_set->Settings.module_pins.io[i]);
     
     // If out of range, reset to none
     if(!ValidUserGPIOFunction(tkr_set->Settings.module_pins.io,i)){
       tkr_set->Settings.module_pins.io[i] = GPIO_NONE_ID;             // Fix not supported sensor ids in module
-      ALOG_DBM(PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
+      ALOG_INF(PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
     }
     // Set any user pins 
     else if (tkr_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       tkr_set->runtime.my_module.io[i] = tkr_set->Settings.module_pins.io[i];
-      ALOG_DBM(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,tkr_set->Settings.module_pins.io[i]);
+      ALOG_INF(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,tkr_set->Settings.module_pins.io[i]);
     }
 
     // Set any pins set in template
@@ -420,12 +420,13 @@ void mHardwarePins::GpioInit(void)
       if(tkr_set->runtime.my_module.io[i] > GPIO_NONE_ID){
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
       #ifdef ENABLE_LOG_LEVEL_INFO
-      ALOG_DBM(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
+      char buffer[50];
+      ALOG_INF(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%s\""),
         tkr_set->runtime.my_module.io[i],
         def_gp.io[i],
         i,
         ConvertIndexPinToRealPin(i),
-        GetGPIOFunctionNamebyID_P(tkr_set->runtime.my_module.io[i])
+        GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
       );
       #endif // ENABLE_LOG_LEVEL_INFO
       #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
@@ -452,11 +453,11 @@ void mHardwarePins::GpioInit(void)
 
     uint16_t gpio = tkr_set->runtime.my_module.io[index];
 
-    ALOG_DBM(PSTR("DBG: %d %d %d"), index,tkr_set->Settings.module_pins.io[index], mgpio);
+    ALOG_INF(PSTR("DBG: %d %d %d"), index,tkr_set->Settings.module_pins.io[index], mgpio);
 
     mgpio = ValidPin_AdjustGPIO(index, gpio);
 
-    ALOG_DBM( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, tkr_set->Settings.module_pins.io[index], mgpio);
+    ALOG_INF( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, tkr_set->Settings.module_pins.io[index], mgpio);
 
     // Phasing section out : moving into their modules
     // if (mgpio) {    

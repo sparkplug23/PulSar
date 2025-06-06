@@ -120,8 +120,8 @@
 #include "esp_camera.h"
 #include "sensor.h"
 #include "fb_gfx.h"
-#include "fd_forward.h"
-#include "fr_forward.h"
+// #include "fd_forward.h"
+// #include "fr_forward.h"
 
 bool HttpCheckPriviledgedAccess(bool);
 // extern ESP8266WebServer *Webserver;
@@ -899,7 +899,7 @@ uint32_t mCameraOV2640::WcSetStreamserver(uint32_t flag) {
 ALOG_TST(PSTR("mCameraOV2640::WcSetStreamserver"));
 
 
-if (tkr_set->global_state.network_down) { return 0; }
+if (tkr_set->runtime.global_state.network_down) { return 0; }
 
   Wc.stream_active = 0;
 
@@ -1097,6 +1097,10 @@ uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_level, bool json_appendi
 
 void mCameraOV2640::MQTTHandler_Init(){
 
+
+  struct handler<mCameraOV2640>* ptr;
+
+
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
@@ -1131,45 +1135,45 @@ void mCameraOV2640::MQTTHandler_Init(){
 } 
 
 
-void mCameraOV2640::MQTTHandler_RefreshAll(){
+// void mCameraOV2640::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings.flags.SendNow = true;
-  // mqtthandler_animation_teleperiod.flags.SendNow = true;
-  // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
-//   mqtthandler_scene_teleperiod.flags.SendNow = true;
+//   mqtthandler_settings.flags.SendNow = true;
+//   // mqtthandler_animation_teleperiod.flags.SendNow = true;
+//   // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
+// //   mqtthandler_scene_teleperiod.flags.SendNow = true;
 
-} 
+// } 
 
 
-void mCameraOV2640::MQTTHandler_Rate(){
+// void mCameraOV2640::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  // // mqtthandler_animation_teleperiod.tRateSecs = tkr_set->pCONT_mqtt->dt.teleperiod_secs;
-  // // mqtthandler_ambilight_teleperiod.tRateSecs = tkr_set->pCONT_mqtt->dt.teleperiod_secs;
-//   mqtthandler_scene_teleperiod.tRateSecs = tkr_set->pCONT_mqtt->dt.teleperiod_secs;
+//   mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//   // // mqtthandler_animation_teleperiod.tRateSecs = tkr_set->pCONT_mqtt->dt.teleperiod_secs;
+//   // // mqtthandler_ambilight_teleperiod.tRateSecs = tkr_set->pCONT_mqtt->dt.teleperiod_secs;
+// //   mqtthandler_scene_teleperiod.tRateSecs = tkr_set->pCONT_mqtt->dt.teleperiod_secs;
   
-} //end "MQTTHandler_Rate"
+// } //end "MQTTHandler_Rate"
 
 
-void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+// void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID
-    //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
-  };
+//   uint8_t mqtthandler_list_ids[] = {
+//     MQTT_HANDLER_SETTINGS_ID
+//     //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
+//   };
   
-  struct handler<mCameraOV2640>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings
-    //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
-  };
+//   struct handler<mCameraOV2640>* mqtthandler_list_ptr[] = {
+//     &mqtthandler_settings
+//     //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
+//   };
 
-  // pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
-  //   mqtthandler_list_ptr, mqtthandler_list_ids, 
-  //   sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
-  //   mqtt_handler_id
-  // );
+//   // pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
+//   //   mqtthandler_list_ptr, mqtthandler_list_ids, 
+//   //   sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
+//   //   mqtt_handler_id
+//   // );
 
-}
+// }
 
 
 
@@ -1583,7 +1587,8 @@ void handleNotFound()
   message += "URI: ";
   message += server.uri();
   message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  // message += (server.method() == HTTP_GET2) ? "GET" : "POST";
+  message += (server.method() == 1) ? "GET" : "POST";
   message += "\nArguments: ";
   message += server.args();
   message += "\n";
@@ -1827,15 +1832,15 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-    break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
+    // case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    //   MQTTHandler_Rate();
+    // break;
+    // case TASK_MQTT_SENDER:
+    //   MQTTHandler_Sender();
+    // break;
+    // case TASK_MQTT_CONNECTED:
+    //   MQTTHandler_RefreshAll();
+    // break;
     #endif //USE_MODULE_NETWORK_MQTT
 
   }

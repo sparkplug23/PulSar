@@ -294,11 +294,39 @@ bool SupportESP32::FoundPSRAM(void) {
 #endif
 }
 
-// // new function to check whether PSRAM is present and supported (i.e. required pacthes are present)
-// bool UsePSRAM(void) {
-//   static bool can_use_psram = CanUsePSRAM();
-//   return FoundPSRAM() && can_use_psram;
-// }
+// new function to check whether PSRAM is present and supported (i.e. required pacthes are present)
+bool SupportESP32::UsePSRAM(void) {
+  static bool can_use_psram = CanUsePSRAM();
+  return FoundPSRAM() && can_use_psram;
+}
+
+
+/*
+ * ESP32 v1 and v2 needs some special patches to use PSRAM.
+ * Standard Tasmota 32 do not include those patches.
+ * If using ESP32 v1, please add: `-mfix-esp32-psram-cache-issue -lc-psram-workaround -lm-psram-workaround`
+ *
+ * This function returns true if the chip supports PSRAM natively (v3) or if the
+ * patches are present.
+ */
+bool SupportESP32::CanUsePSRAM(void) {
+  if (!FoundPSRAM()) return false;
+#ifdef HAS_PSRAM_FIX
+  return true;
+#endif
+#ifdef CONFIG_IDF_TARGET_ESP32
+  esp_chip_info_t chip_info;
+  esp_chip_info(&chip_info);
+  uint32_t chip_revision = chip_info.revision;
+  // idf5 efuse_hal_chip_revision(void)
+  if (chip_revision < 100) { chip_revision *= 100; }  // Make <idf5 idf5
+  if ((CHIP_ESP32 == chip_info.model) && (chip_revision < 300)) {
+    return false;
+  }
+#endif // CONFIG_IDF_TARGET_ESP32
+  return true;
+}
+
 
 // void *special_malloc(uint32_t size) {
 //   if (UsePSRAM()) {
@@ -345,6 +373,22 @@ bool SupportESP32::FoundPSRAM(void) {
 // }
 
 
+String SupportESP32::GetDeviceHardwareRevision(void) {
+  // ESP32-S2
+  // ESP32-D0WDQ6 v1.0
+  // ESP32-C3 v0.3
+  // ESP32-C6FH4 v0.0
+  String result = GetDeviceHardware();   // ESP32-C3
+
+  esp_chip_info_t chip_info;
+  esp_chip_info(&chip_info);
+  uint32_t chip_revision = chip_info.revision;       // 16-bit chip revision number (in format MXX; where M - wafer major version, XX - wafer minor version)
+  char revision[16];
+  snprintf_P(revision, sizeof(revision), PSTR(" v%d.%d"), chip_revision / 100, chip_revision % 100);
+  result += revision;                  // ESP32-C3 v0.3
+
+  return result;
+}
 
 #endif
 

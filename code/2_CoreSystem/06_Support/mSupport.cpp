@@ -607,6 +607,103 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 }
 
 
+
+#ifdef ESP32
+
+#ifdef ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+/*********************************************************************************************\
+ * ESP32 AutoMutex
+\*********************************************************************************************/
+
+//////////////////////////////////////////
+// automutex.
+// create a mute in your driver with:
+// void *mutex = nullptr;
+//
+// then protect any function with
+// TasAutoMutex m(&mutex, "somename");
+// - mutex is automatically initialised if not already intialised.
+// - it will be automagically released when the function is over.
+// - the same thread can take multiple times (recursive).
+// - advanced options m.give() and m.take() allow you fine control within a function.
+// - if take=false at creat, it will not be initially taken.
+// - name is used in serial log of mutex deadlock.
+// - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
+// class TasAutoMutex {
+//   SemaphoreHandle_t mutex;
+//   bool taken;
+//   int maxWait;
+//   const char *name;
+//   public:
+//     TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+//     ~TasAutoMutex();
+//     void give();
+//     void take();
+//     static void init(SemaphoreHandle_t* ptr);
+// };
+//////////////////////////////////////////
+
+mSupport::TasAutoMutex::TasAutoMutex(SemaphoreHandle_t*mutex, const char *name, int maxWait, bool take) {
+  if (mutex) {
+    if (!(*mutex)){
+      TasAutoMutex::init(mutex);
+    }
+    this->mutex = *mutex;
+    this->maxWait = maxWait;
+    this->name = name;
+    if (take) {
+      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
+//      if (!this->taken){
+//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
+//      }
+    }
+  } else {
+    this->mutex = (SemaphoreHandle_t)nullptr;
+  }
+}
+
+mSupport::TasAutoMutex::~TasAutoMutex() {
+  if (this->mutex) {
+    if (this->taken) {
+      xSemaphoreGiveRecursive(this->mutex);
+      this->taken = false;
+    }
+  }
+}
+
+void mSupport::TasAutoMutex::init(SemaphoreHandle_t* ptr) {
+  SemaphoreHandle_t mutex = xSemaphoreCreateRecursiveMutex();
+  (*ptr) = mutex;
+  // needed, else for ESP8266 as we will initialis more than once in logging
+//  (*ptr) = (void *) 1;
+}
+
+void mSupport::TasAutoMutex::give() {
+  if (this->mutex) {
+    if (this->taken) {
+      xSemaphoreGiveRecursive(this->mutex);
+      this->taken= false;
+    }
+  }
+}
+
+void mSupport::TasAutoMutex::take() {
+  if (this->mutex) {
+    if (!this->taken) {
+      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
+//      if (!this->taken){
+//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
+//      }
+    }
+  }
+}
+
+#endif  // ESP32
+
+#endif // mutex
+
+
+
 #ifdef USE_ARDUINO_OTA
 
 /*********************************************************************************************\

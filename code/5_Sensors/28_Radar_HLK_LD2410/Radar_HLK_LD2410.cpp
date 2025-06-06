@@ -92,7 +92,6 @@ void mHLK_LD2410::Pre_Init(void)
 
 }
 
-
 void mHLK_LD2410::Init(void) 
 {
   ALOG_INF(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
@@ -103,7 +102,7 @@ void mHLK_LD2410::Init(void)
 
     ALOG_INF(PSTR(D_LOG_LD2410 "RX=%d TX=%d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
 
-    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), 2);
+    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), LD2410_DEFAULT_SERIAL_NUMBER);
     
     if (LD2410Serial->begin(256000)) {
       
@@ -173,7 +172,7 @@ void mHLK_LD2410::Ld1410HandleTargetData(void) {
       LD2410.static_energy = LD2410.buffer[14];
       LD2410.detect_distance = LD2410.buffer[16] << 8 | LD2410.buffer[15];
 
-      ALOG_INF(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), LD2410.moving_distance, LD2410.moving_energy, LD2410.static_distance, LD2410.static_energy, LD2410.detect_distance);
+      ALOG_DBM(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), LD2410.moving_distance, LD2410.moving_energy, LD2410.static_distance, LD2410.static_energy, LD2410.detect_distance);
 
     }else{
       ALOG_INF(PSTR(D_LOG_LD2410 "No target"));

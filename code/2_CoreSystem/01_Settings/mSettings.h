@@ -504,7 +504,7 @@ class mSettings :
     static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
-    ~mSettings() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mSettings() {          }
 
   #ifdef ESP8266
     #if AUTOFLASHSIZE
@@ -1135,6 +1135,7 @@ struct SETTINGS {
   uint64_t      rf_protocol_mask;          // FA8
   #ifdef ESP32
   WebCamCfg     webcam_config;             // 44C
+  uint8_t       webcam_clk;                // 72F
   WebCamCfg2    webcam_config2;            // 460
   #endif
   #ifdef ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -1223,6 +1224,7 @@ struct SETTINGS {
     #ifdef ESP32
     bool i2c_enabled_2 = false;                       // I2C configured, second controller on ESP32, Wire1
     #endif
+    bool camera_initialized;                  // For esp32-webcam, to be used in discovery
     bool spi_flg = false;                       // SPI configured
     bool soft_spi_flg = false;                  // Software SPI configured
     bool ntp_force_sync = false;                // Force NTP sync

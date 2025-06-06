@@ -1498,6 +1498,7 @@ void startCameraServer()
 int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
 {
 
+    return 0;
   switch(function){
     /************
      * INIT SECTION * 

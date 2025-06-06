@@ -28,7 +28,7 @@ class mRuleEngine :
     static constexpr const char* PM_MODULE_CORE_RULES_CTR = D_MODULE_CORE_RULES_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID; }
-    ~mRuleEngine() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mRuleEngine() {          }
 
 
     struct SETTINGS{

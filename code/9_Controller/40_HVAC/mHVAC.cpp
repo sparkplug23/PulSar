@@ -58,16 +58,16 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
 
   switch(function){
     /************
-     * FUNCTION HANDLER SECTION * 
+     * YTASK SCHEDULED * 
     *******************/
-    case TASK_FUNCTION_LAMBDA_INIT:
-      FunctionHandler_Init();
+    case YTASK_INIT:
+      YTask_Init();
     break;
-    case TASK_FUNCTION_LAMBDA_LOOP:
-      FunctionHandler_Loop();  // Maybe rename into "Scheduler"
+    case YTASK_LOOP:
+      YTask_Loop();
     break;
     /************
-     * STORAGE SECTION * 
+     * STORAGE SECTION *
     *******************/  
     #ifdef USE_MODULE_CORE_FILESYSTEM
     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
@@ -82,27 +82,26 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * COMMANDS SECTION * 
     *******************/
-    case TASK_EVERY_100_MSECOND:
-      // ALOG_WRN(PSTR("100MS"));
-    break;
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
     *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
+    #endif //USE_MODULE_NETWORK_MQTT
   }  
 
 } // END Tasker
@@ -158,7 +157,7 @@ void mHVAC::Load_Module(bool erase)
  * SECTION: Scheduler: New method that takes the main "Tasker" entry point and instead performs the tasks required by this module in more detail
 *******************************************************************************************************************/
 
-void mHVAC::FunctionHandler_Init(){
+void mHVAC::YTask_Init(){
   
   struct functionhandler<mHVAC>* ptr;
 
@@ -169,7 +168,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Program_Status;
+  ptr->function = &mHVAC::YTask_Program_Status;
   functionhandler_list.push_back(ptr);
   
   #ifdef USE_HVAC_PROFILE_ESTIMATION  
@@ -180,7 +179,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_HVAC_Profiles;
+  ptr->function = &mHVAC::YTask_HVAC_Profiles;
   functionhandler_list.push_back(ptr);
   #endif //#ifdef USE_HVAC_PROFILE_ESTIMATION
       
@@ -191,7 +190,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Relay_Status;
+  ptr->function = &mHVAC::YTask_Relay_Status;
   functionhandler_list.push_back(ptr);
 
   ptr = &functionhandler_programs_timers;
@@ -205,7 +204,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   #endif
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Programs_Timers;
+  ptr->function = &mHVAC::YTask_Programs_Timers;
   functionhandler_list.push_back(ptr);
   
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
@@ -216,7 +215,7 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   ptr->time_val = 1;
-  ptr->function = &mHVAC::FunctionHandler_Programs_Temps;
+  ptr->function = &mHVAC::YTask_Programs_Temps;
   functionhandler_list.push_back(ptr);
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
   
@@ -227,16 +226,16 @@ void mHVAC::FunctionHandler_Init(){
   ptr->flags.run_always = false;
   ptr->flags.time_unit = FUNCHANDLER_TIME_MS_ID; 
   ptr->time_val = 1000;
-  ptr->function = &mHVAC::FunctionHandler_Update_Sensors;
+  ptr->function = &mHVAC::YTask_Update_Sensors;
   functionhandler_list.push_back(ptr);
       
 }
 
 
-void mHVAC::FunctionHandler_Loop()
+void mHVAC::YTask_Loop()
 {  
   for(auto& handle:functionhandler_list){
-    pCONT_sup->FunctionHandler_Call(*this, GetModuleUniqueID(), handle);
+    pCONT_sup->YTask_Call(*this, GetModuleUniqueID(), handle);
   }
 }
 
@@ -246,15 +245,6 @@ void mHVAC::FunctionHandler_Loop()
  * SECTION: Init
 *******************************************************************************************************************/
 
-
-void mHVAC::Every_Second()
-{
-// Handled 
-
-// DIGITAL_INVERT_PIN(12);
-
-
-}
 
 
 void mHVAC::Pre_Init(void){
@@ -342,7 +332,7 @@ void mHVAC::SetHeater(uint8_t device, uint8_t state){
  * @brief Read from sensors to update HVAC sensor values
  * 
  */
-void mHVAC::FunctionHandler_Update_Sensors()
+void mHVAC::YTask_Update_Sensors()
 {
 
   for(int zone_id=0; zone_id<settings.active_zones; zone_id++)
@@ -381,12 +371,6 @@ void mHVAC::FunctionHandler_Update_Sensors()
  *  - Temp eg heat to 40 for THIS time, so it heats before hand
  * */
 
-
-// void mHVAC::Pre_Init(void){
-
-//   //init_success = true; // Begins true, anything bad sets to false
-
-// }
 
 void mHVAC::init_program_scheduling(void){
 
@@ -449,9 +433,10 @@ const char* mHVAC::GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t bu
 /**
  * Generate Messages for users to glance at via web or mqtt, timers, temps, schedules set? append the messages.
  * */
-void mHVAC::FunctionHandler_Program_Status(){
+void mHVAC::YTask_Program_Status()
+{
 
-return;
+  return;
   // memset(&heating_status,0,sizeof(heating_status));
 
   // for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
@@ -495,7 +480,7 @@ uint8_t mHVAC::GetAnyHeatingRelay(){
 }
 
 
-void mHVAC::FunctionHandler_Relay_Status(){ 
+void mHVAC::YTask_Relay_Status(){ 
 
   for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
     if(tkr_relay->CommandGet_Relay_Power(device_id)){
@@ -506,18 +491,6 @@ void mHVAC::FunctionHandler_Relay_Status(){
   }
 
 } // END function
-
-
-// Keeps the highest importance flag
-void mHVAC::SetHighestImportance(uint8_t* importanceset, int8_t thisvalue){
-  if(thisvalue > *importanceset){
-    *importanceset = thisvalue;
-  }
-  //moved into telemetrym
-}
-
-
-
 
 
 /**
@@ -577,121 +550,6 @@ int8_t mHVAC::Tasker_PredictManualHeating(){
 }
 
 
-// // returns > 0 for events added
-// int8_t mHVAC::SubContructCtr_HardwareStatus(){
-
-//   //ORDER BY LEAST TO MOST IMPORTANT SO HIGHEST FLAG IS SET LAST
-//   uint8_t fNotFirstItem = 0;
-//   char buffer[100];
-//   // memset(&status_message,0,sizeof(status_message));
-
-//   // for(int device_id=0;device_id<4;device_id++){
-//   //   if(activeprograms[device_id].timers.state){
-//   //     sprintf(&status_message.ctr[status_message.len],"%s timers %s",
-//   //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
-//   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state, buffer, sizeof(buffer)));
-//   //     status_message.len = strlen(status_message.ctr);
-//   //     SetHighestImportance(&status_message.importance,activeprograms[device_id].timers.state); //med
-//   //   }
-//   //   if(fNotFirstItem){
-//   //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   // }
-
-//   // for(int device_id=0;device_id<4;device_id++){
-//   //   if(activeprograms[device_id].temps.state){ status_message.importance = 2;//med
-//   //     sprintf(&status_message.ctr[status_message.len],"%s temps %s",
-//   //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
-//   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state, buffer, sizeof(buffer)));
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   //   SetHighestImportance(&status_message.importance,activeprograms[device_id].temps.state); //med
-//   //   if(fNotFirstItem){
-//   //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   // }
-
-//   // for(int device_id=0;device_id<4;device_id++){
-//   //   if(activeprograms[device_id].relays.state){ status_message.importance = 2;//high
-//   //     sprintf(&status_message.ctr[status_message.len],"%s relays %d",
-//   //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
-//   //       // GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state, buffer, sizeof(buffer)),
-//   //       tkr_relay->relay_status[device_id].time_seconds_on
-//   //     );
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   //   SetHighestImportance(&status_message.importance,activeprograms[device_id].relays.state); //med
-//   //   if(fNotFirstItem){
-//   //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   // }
-
-//   // if(!status_message.len){
-//   //   sprintf(&status_message.ctr[status_message.len],"%s","Nothing Running");
-//   //   status_message.len = strlen(status_message.ctr);
-//   // }
-
-// }
-
-// // returns > 0 for events added
-// int8_t mHVAC::SubContructCtr_HardwareStatus_Long(){
-
-//   //ORDER BY LEAST TO MOST IMPORTANT SO HIGHEST FLAG IS SET LAST
-//   uint8_t fNotFirstItem = 0;
-
-//   // for(int device_id=0;device_id<4;device_id++){
-//   //   if(activeprograms[device_id].timers.state){
-//   //     sprintf(&status_message.ctr[status_message.len],"%s Timer %s",
-//   //       GetDeviceNameLongbyIDCtr(device_id),
-//   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state));
-//   //     status_message.len = strlen(status_message.ctr);
-//   //     SetHighestImportance(&status_message.importance,activeprograms[device_id].timers.state); //med
-//   //   }
-//   //   if(fNotFirstItem){
-//   //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   // }
-
-//   // for(int device_id=0;device_id<4;device_id++){
-//   //   if(activeprograms[device_id].temps.state){ status_message.importance = 2;//med
-//   //     sprintf(&status_message.ctr[status_message.len],"%s Temp %s",
-//   //       GetDeviceNameLongbyIDCtr(device_id),
-//   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state));
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   //   SetHighestImportance(&status_message.importance,activeprograms[device_id].temps.state); //med
-//   //   if(fNotFirstItem){
-//   //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   // }
-
-//   // for(int device_id=0;device_id<4;device_id++){
-//   //   if(activeprograms[device_id].relays.state){ status_message.importance = 2;//high
-//   //     sprintf(&status_message.ctr[status_message.len],"%s relays %s",
-//   //       GetDeviceNameLongbyIDCtr(device_id),
-//   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state));
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   //   SetHighestImportance(&status_message.importance,activeprograms[device_id].relays.state); //med
-//   //   if(fNotFirstItem){
-//   //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
-//   //     status_message.len = strlen(status_message.ctr);
-//   //   }
-//   // }
-
-//   // if(!status_message.len){
-//   //   status_message.len += sprintf(&status_message.ctr[status_message.len],"Online");
-//   // }
-
-// } //end function
-
-
-
 int mHVAC::mapHeatingTempToHueColour(int val){
    int val2 = mSupport::mapfloat(val,15.0,50.0,180,0); //float mSupport::mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
    if(val2<0){
@@ -721,75 +579,6 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 }
 
 
-
-// Send all water sensors by [temp,huebytemp(0-360),brightnessbytemp(0-100)]
-// ds:{temp:0,hue:0,bright:0},
-// us:{temp:0,hue:0,bright:0},
-// EFFECTS to be send seperate when programs change state
-
-// I should roll this into sensor interface? to allow me to get any sensor as a colour if enabled? with selection on map type. Just leave for long term 
-
-// uint8_t mHVAC::ConstructSON_PipeTempsByColours(uint8_t json_level){
-
-//   // StaticJsonDocument<800> doc;
-//   // JsonObject obj = doc.to<JsonObject>();
-//   // D_DATA_BUFFER_CLEAR();
-
-//   // uint8_t ischanged = false;
-
-//   // for(uint8_t device_id=0;device_id<8;device_id++){
-
-//   //   switch(device_id){
-//   //     case ID_DB18_DS: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.downstairs_pipe; break;
-//   //     case ID_DB18_US: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.upstairs_pipe; break;
-//   //     case ID_DB18_WB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.boiler_pipe; break;
-//   //     case ID_DB18_IH: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.immersion_heater; break;
-//   //     case ID_DB18_TT: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_top; break;
-//   //     case ID_DB18_TM: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_middle; break;
-//   //     case ID_DB18_TB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_bottom; break;
-//   //     case ID_DB18_TO: default: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_out; break;
-//   //   }
-
-//   //   if(stored_new.temp[device_id] != pCONT->mhs->watertemps.ptr->raw.val){
-//   //     stored_new.temp[device_id] = pCONT->mhs->watertemps.ptr->raw.val;
-//   //     ischanged = 1;
-//   //   }
-//   //   #ifdef DEBUG_SENDALL
-//   //     ischanged=1; //ALL
-//   //   #endif
-//   //   if(ischanged){ ischanged = 0;
-//   //     //data_buffer.payload.json_pairs++;
-//   //     JsonObject json1 = obj.createNestedObject(GetSensorNameByID(device_id));
-//   //     json1[D_TEMP] = pCONT->mhs->watertemps.ptr->raw.val;
-//   //     json1[D_HUE] = mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val);
-//   //     json1[D_BRT] = mapHeatingTempToBrightness(pCONT->mhs->watertemps.ptr->raw.val);
-
-//   //     char tmpctr[10];  memset(tmpctr,0,sizeof(tmpctr));
-//   //     RgbColor c = HsbColor(mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val)/360.0f,100/100.0f,100/100.0f);
-//   //     sprintf(tmpctr,"%02X%02X%02X",c.R,c.G,c.B);
-//   //     json1[D_RGB] = tmpctr;
-
-//   //     switch(device_id){
-//   //       case ID_DB18_DS: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_DS_ID); break;
-//   //       case ID_DB18_US: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_US_ID); break;
-//   //       case ID_DB18_WB: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_WB_ID); break;
-//   //       case ID_DB18_IH: json1[D_EFFECTS] = GetHeatingRelay(DEVICE_IH_ID); break;
-//   //       default: break; //nothing
-//   //     }
-//   //   }
-
-//   // }
-
-//   // // if(data_buffer.payload.json_pairs>0){
-//   //   data_buffer.payload.len = measureJson(obj)+1;
-//   //   serializeJson(doc,data_buffer.payload.ctr);
-//   //   ALOG_DBG(PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
-//   // // }
-
-//   return 0;// data_buffer.payload.len>3?1:0;
-
-// }
-
 /******************************************************************************************************************
  * SECTION: Commands
 *******************************************************************************************************************/
@@ -801,6 +590,8 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   char buffer[50];
   int8_t device_id = 0;
+
+  
   
   /**
    * @note device_id for which heating zone is being commanded
@@ -808,7 +599,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj[D_HVAC_DEVICE]){ 
     if(jtok.isStr()){
       if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(), GetModuleUniqueID()))>=0)
-      { // D_DEVICE
+      {
         ALOG_INF(PSTR(D_LOG_HEATING D_PARSING_MATCHED D_COMMAND_NVALUE_K(D_HVAC_DEVICE)),device_id);
       }else{
         AddLog(LOG_LEVEL_ERROR, PSTR(D_HVAC_DEVICE "device_id=%d"), device_id);
@@ -820,26 +611,21 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_HVAC_DEVICE)),device_id);
   }
 
+
   /**
    *  @note Timer Commands
    * */
-  #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
   if(jtok = obj["HVAC"].getObject()[D_TIME_ON]){ 
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
-    data_buffer.isserviced++;
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
     ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), jtok.getInt());
-    // #endif
+    data_buffer.isserviced++;
   }
 
   if(jtok = obj["HVAC"].getObject()[D_ADD_TIME_ON]){ 
     CommandSet_ProgramTimer_AddTimeOn(device_id, jtok.getInt()); 
-    data_buffer.isserviced++;
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
     ALOG_INF(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_ADD_TIME_ON)), jtok.getInt());
-    // #endif
+    data_buffer.isserviced++;
   }
-  #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
 
 
   /**
@@ -943,10 +729,6 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
     }
 
-    // #ifdef ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
-    // DEBUG_LINE_HERE;
-    // delay(5000); // to view if this is working
-    // #endif // ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
 
   }
   
@@ -1001,7 +783,7 @@ uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
   // check if zone id is valid
   // if(zone_id == -1){ return; }
 
-  return rt.zone[zone_id].program_timer_method.GetTimer_Minutes();
+  
 
   // rt.zone[zone_id].program_timer_method.StartTimer_Minutes(value);
   
@@ -1087,16 +869,6 @@ void mHVAC::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_
   // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
-
-
-
-
-// #ifdef USE_MODULE_CONTROLLER_HVAC
-
-// #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
-
-// Not adding Temp based controls in 2023 to home heating. Not until its very stable and only ever
-// via a swapped out esp32 (ie have one with timer only as back up)
 
 
 void ProgramTemperature::EverySecond(void)
@@ -1240,11 +1012,6 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
 
 
 }
-
-
-// #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
-
-// #endif
 
 
 /******************************************************************************************************************
@@ -1511,7 +1278,6 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
  * SECTION: MQTT
 *******************************************************************************************************************/
 
-
 #ifdef USE_MODULE_NETWORK_MQTT
 
 /**
@@ -1666,39 +1432,6 @@ void mHVAC::MQTTHandler_Init(){
 
 }
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mHVAC::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mHVAC::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mHVAC::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){  
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-  
 #endif // USE_MODULE_NETWORK_MQTT
 
 

@@ -74,7 +74,7 @@ void mHVAC::init_program_temps(void){
  * Change to switch cases later for easier reading
  * Next step, accept temp controls for water methods
  */
-void mHVAC::FunctionHandler_Programs_Temps(void){
+void mHVAC::YTask_Programs_Temps(void){
 
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {

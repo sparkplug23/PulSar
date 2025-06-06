@@ -39,7 +39,6 @@ class mBH1750 :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BH1750_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BH1750_ID; }
     
-
     struct ClassState
     {
       uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.

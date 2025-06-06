@@ -11,7 +11,7 @@ extern "C" {
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
   #ifdef ENABLE_DEVFEATURE_NETWORK__BLOCK_CONNECT_PUSH_BACKOFF_LONG_AS_TEMP_SOLUTION_TO_NO_WIFI
   return 0;
   #endif
@@ -117,7 +117,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
   return FUNCTION_RESULT_UNKNOWN_ID;
 
 
@@ -384,6 +384,11 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
     
     WiFi.begin(tkr_set->SettingsText(SET_STASSID1 + tkr_set->Settings.sta_active), tkr_set->SettingsText(SET_STAPWD1 + tkr_set->Settings.sta_active));
   }
+
+  #ifdef ENABLE_FEATURE_WIFI__SET_TXPOWER
+  WiFi.setTxPower(WIFI_POWER_8_5dBm);
+  ALOG_INF(PSTR(D_LOG_WIFI "TxPower=%d"), WiFi.getTxPower()); // to fix ESP32C3 antenna issues
+  #endif
   
   #ifdef ESP8266
     #ifdef ENABLE_LOG_LEVEL_INFO

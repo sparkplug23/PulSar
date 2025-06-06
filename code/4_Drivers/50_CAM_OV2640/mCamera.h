@@ -7,6 +7,8 @@
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
 
+#include <WiFi.h>
+
 
 class mCameraOV2640 :
   public mTaskerInterface
@@ -51,16 +53,16 @@ void setup_cam();
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
+    // void MQTTHandler_RefreshAll();
+    // void MQTTHandler_Rate();
     
-    void MQTTHandler_Sender();
-    struct handler<mCameraOV2640>* ptr;
+    // void MQTTHandler_Sender();
+    // struct handler<mCameraOV2640>* ptr;
     struct handler<mCameraOV2640>  mqtthandler_settings;
     struct handler<mCameraOV2640>  mqtthandler_state_ifchanged;
     struct handler<mCameraOV2640>  mqtthandler_state_teleperiod;
     
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    // const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 };
 
 #endif // USE_MODULE_DRIVERS_CAMERA_OV2640

@@ -45,7 +45,7 @@ class mPIR :
      ************************************************************************************************/
 
     #ifndef MAX_SENSOR_PIR_DEVICES
-    #define MAX_SENSOR_PIR_DEVICES 3
+    #define MAX_SENSOR_PIR_DEVICES 5
     #endif
 
     // Dynamic to reduce memory

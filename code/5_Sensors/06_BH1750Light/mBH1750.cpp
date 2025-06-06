@@ -204,17 +204,18 @@ bool mBH1750::Get_SensorReading(uint8_t sensor_index)
     return false;
   }
 
-  float level = (tkr_i2c->wire->read() << 8) | tkr_i2c->wire->read();
+  uint16_t level = (tkr_i2c->wire->read() << 8) | tkr_i2c->wire->read();
   float illuminance = level;
-  Serial.println(level);
+  
   illuminance /= (1.2 * (69 / (float)device_data[sensor_index].mtreg));
   if (1 == Get_Resolution_Mode(sensor_index)) {
     illuminance /= 2;
   }
-  device_data[sensor_index].level = level*1000;
-  device_data[sensor_index].illuminance = illuminance*1000;
+  device_data[sensor_index].level = level;
+  device_data[sensor_index].illuminance = illuminance;
 
-  ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d"), level, illuminance);
+  // ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d (%d.%d)"), level, (int)illuminance, FLOAT_N(illuminance), FLOAT_D(illuminance) );
+  ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d.%d"), level, FLOAT_N(illuminance), FLOAT_D(illuminance) );
 
   device_data[sensor_index].valid = SENSOR_MAX_MISS;
 
@@ -234,7 +235,7 @@ void mBH1750::ReadSensor(void)
     {
       ALOG_ERR( PSTR(D_LOG_BH1750 "Failed Read") );
     }else{
-      ALOG_INF(PSTR(D_LOG_BH1750 "Read Add %02X"), device_data[i].address);
+      ALOG_DBM(PSTR(D_LOG_BH1750 "Read Add %02X"), device_data[i].address);
     }
   }
 

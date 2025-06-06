@@ -16,7 +16,7 @@
  * @brief Read from sensors to update HVAC sensor values
  * 
  */
-void mHVAC::FunctionHandler_Update_Sensors()
+void mHVAC::YTask_Update_Sensors()
 {
 
   for(int zone_id=0; zone_id<settings.active_zones; zone_id++)

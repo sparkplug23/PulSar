@@ -803,6 +803,7 @@ bool mButtons::SendButton(uint32_t index, uint32_t state, uint16_t count)
   #endif
 
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  
   Tasker(TASK_MQTT_SENDER);
 
   event.waiting = false;

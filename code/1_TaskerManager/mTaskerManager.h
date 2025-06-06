@@ -44,6 +44,7 @@
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_Cameras.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
@@ -388,7 +389,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
   #include "4_Drivers/50_CAM_OV2640/mCamera.h"
-  #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
+  #define tkr_cam_ov2640                           static_cast<mCameraOV2640*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
   #include "4_Drivers/Camera_OV2640/mCameraOV2640.h"
@@ -413,6 +414,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
+#endif
+#ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
+  #include "4_Drivers/63_WebCam_Tas25/mCamera.h"
+  #define pCONT_camera                              static_cast<mCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_TAS25_ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"

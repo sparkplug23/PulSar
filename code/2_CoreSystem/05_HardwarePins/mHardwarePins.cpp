@@ -1118,7 +1118,6 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio)
 {
   // if(lpin < ARRAY_SIZE(pin_attached_gpio_functions)){
 
-  //   ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
 
   //   pin_attached_gpio_functions[internal_pin_index] = gpio;
 
@@ -1130,6 +1129,8 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio)
   // Adjust real_pin to internal indexpin
   int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
 
+  ALOG_INF( PSTR("SetPinAreal_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+
   // uint8_t pin_count = ARRAY_SIZE(gpio_pin_by_index);
   // uint8_t
 
@@ -1138,7 +1139,7 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio)
   if(internal_pin_index != -1) // -1 means unset pin
   {
 
-    ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+    ALOG_INF( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
 
     pin_attached_gpio_functions[internal_pin_index] = gpio;
 

@@ -138,7 +138,7 @@ extern "C" {
 class SupportESP32{
   public:
     SupportESP32(){};
-    String GetDeviceHardware(void);
+    static String GetDeviceHardware(void);
     
     void init(void);
 
@@ -178,10 +178,12 @@ class SupportESP32{
 // }
 
 // // new function to check whether PSRAM is present and supported (i.e. required pacthes are present)
-// bool UsePSRAM(void) {
+static bool UsePSRAM(void);// {
 //   static bool can_use_psram = CanUsePSRAM();
 //   return FoundPSRAM() && can_use_psram;
 // }
+
+static bool CanUsePSRAM(void);
 
 // void *special_malloc(uint32_t size) {
 //   if (UsePSRAM()) {
@@ -216,6 +218,7 @@ class SupportESP32{
 //   return heap_caps_calloc(num, size, UsePSRAM() ? MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT : MALLOC_CAP_32BIT);
 // }
 
+static String GetDeviceHardwareRevision(void);
 
 
 
