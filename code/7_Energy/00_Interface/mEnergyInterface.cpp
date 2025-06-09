@@ -250,7 +250,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -261,7 +261,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR;
@@ -272,7 +272,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ENERGY_UNIFIED__CTR;
@@ -299,9 +299,9 @@ void mEnergyInterface::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->GetTelePeriod();
+      handle->tRateSecs = tkr_mqtt->GetTelePeriod();
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->GetIfChangedPeriod();
+      handle->tRateSecs = tkr_mqtt->GetIfChangedPeriod();
   }
 }
 
@@ -312,7 +312,7 @@ void mEnergyInterface::MQTTHandler_Rate()
 void mEnergyInterface::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 
@@ -1101,7 +1101,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 // // 	// 	if(ready_to_send)
 // // 	// 	{			
 // //     // 	ALOG_TST(PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
-// // 	// 		pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+// // 	// 		tkr_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 // // 	// 	}
 
 // // 	// }
@@ -2027,7 +2027,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -2037,7 +2037,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -2047,7 +2047,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
 //   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
 //   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->json_level = JSON_LEVEL_IFCHANGED;
@@ -2058,7 +2058,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
@@ -2068,7 +2068,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
 //   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
 //   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2079,7 +2079,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->json_level = JSON_LEVEL_DETAILED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
@@ -2089,7 +2089,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+//   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
 //   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->json_level = JSON_LEVEL_IFCHANGED;
 //   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
@@ -2114,9 +2114,9 @@ void mEnergyInterface::MQTTHandler_Sender()
 // {
 //   for(auto& handle:mqtthandler_list){
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
 //   }
 // }
 
@@ -2126,7 +2126,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 // void mEnergyInterface::MQTTHandler_Sender()
 // {    
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+//     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 //   }
 // }
   

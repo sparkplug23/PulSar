@@ -372,14 +372,14 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
   // for(uint8_t ii=0;ii<index;ii++){
   //   sprintf(buffer+strlen(buffer), "%d,", encoded_gradient_temp_array[ii]);
   // }
-  // pCONT_mqtt->Send_Prefixed_P(PSTR("debug/1"),buffer);
+  // tkr_mqtt->Send_Prefixed_P(PSTR("debug/1"),buffer);
 
   //  memset(&buffer, 0, sizeof(buffer));
   // for(uint8_t ii=0;ii<6;ii++){
   //   sprintf(buffer+strlen(buffer), "%d,", test_temp[ii]);
   // }
-  // pCONT_mqtt->Send_Prefixed_P(PSTR("debug/2"), buffer);
-  // pCONT_mqtt->publish_device("/debug", buffer, false);
+  // tkr_mqtt->Send_Prefixed_P(PSTR("debug/2"), buffer);
+  // tkr_mqtt->publish_device("/debug", buffer, false);
 
 }
 
@@ -539,9 +539,9 @@ void mImmersionTankColour::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -551,7 +551,7 @@ void mImmersionTankColour::MQTTHandler_Rate()
 void mImmersionTankColour::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

@@ -438,6 +438,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
   addTasker(new mCamera());
   #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_2025
+  addTasker(new mCamera());
+  #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   addTasker(new mMAVLink_Decoder());
   #endif

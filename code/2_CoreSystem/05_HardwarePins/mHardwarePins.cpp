@@ -803,7 +803,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
     #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP8266
 
-  #ifdef ESP32
+  // #ifdef ESP32
   
   // Check for pin_array matching
   char buffer[10];
@@ -842,7 +842,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
     #ifdef ENABLE_LOG_LEVEL_INFO
     ALOG_INF( PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
-  #endif // ESP32
+  // #endif // ESP32
 
   return pin;
 
@@ -1421,10 +1421,13 @@ uint16_t mHardwarePins::ValidPin_AdjustGPIO(uint8_t pin, uint16_t gpio)
   }
 
 #ifdef ESP8266
-  if (((WEMOS == Settings->module) || isTuya) && !Settings->flag3.user_esp8285_enable) {  // SetOption51 - Enable ESP8285 user GPIO's
-    if ((9 == pin) || (10 == pin)) {
-      return GPIO_NONE_ID;  // Disable possible flash GPIO9 and GPIO10
-    }
+  // if (((WEMOS == Settings->module) || isTuya) && !Settings->flag3.user_esp8285_enable) {  // SetOption51 - Enable ESP8285 user GPIO's
+  //   if ((9 == pin) || (10 == pin)) {
+  //     return GPIO_NONE_ID;  // Disable possible flash GPIO9 and GPIO10
+  //   }
+  // }
+   if ((MODULE_WEMOS_ID == tkr_set->Settings.module) && (!tkr_set->Settings.flag_network.user_esp8285_enable)) {
+    if ((pin == 9) || (pin == 10)) { gpio = GPIO_NONE_ID; }  // Disable possible flash GPIO9 and GPIO10
   }
 #endif
 

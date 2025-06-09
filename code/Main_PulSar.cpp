@@ -128,6 +128,7 @@ void setup(void)
       DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
     #endif  // DISABLE_ESP32_BROWNOUT
 
+    Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
     #ifdef CONFIG_IDF_TARGET_ESP32
     // restore GPIO16/17 if no PSRAM is found
     if (!SupportESP32::FoundPSRAM()) {
@@ -148,7 +149,13 @@ void setup(void)
     }
     #endif  // CONFIG_IDF_TARGET_ESP32
     
+    #ifdef USE_MODULE_DRIVERS__CAMERA_2025
 psramInit();               // initialize PSRAM
+    
+Serial.printf("psramFound: %d\n", psramFound());
+Serial.printf("esp_spiram_is_initialized: %d\n", esp_spiram_is_initialized());
+Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
+#endif
   #endif  // ESP32
 
   /**
@@ -355,9 +362,10 @@ psramInit();               // initialize PSRAM
   if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
   }
+  DELAY_DEBUG(5000); // Allow time to read the log
 #endif  // HAS_PSRAM_FIX
 #else   // ESP8266
-  AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+  // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
 #endif  // ESP32
   DEBUG_LINE_HERE
 

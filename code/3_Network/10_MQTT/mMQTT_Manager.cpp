@@ -203,7 +203,7 @@ void mMQTTManager::Default_Module__Connection_WiFi()
 
   uint8_t idx = broker_index_next; //size with index from 0, will already give next slot
 
-  // pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID, pCONT_mqtt->dt.connection[idx].client, pCONT_mqtt->dt.connection[idx].prefixtopic);
+  // tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID, tkr_mqtt->dt.connection[idx].client, tkr_mqtt->dt.connection[idx].prefixtopic);
       
 
   // MQTTConnection* con = brokers[idx];

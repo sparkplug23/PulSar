@@ -817,12 +817,16 @@ With latest version, all longer term shared debug features should be added here 
 
 #if !defined(CAMERA_MODEL_XIAO_ESP32S3) || !defined(DISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25)
 
-// #ifndef LEDC_CHANNEL_MAX
-// #define LEDC_CHANNEL_MAX 8 // should come from esp32-hal-ledc.h
-// #endif
-// #ifndef LEDC_SPEED_MODE_MAX
-// #define LEDC_SPEED_MODE_MAX 2// should come from esp32-hal-ledc.h ledc_mode_t
-// #endif
+#if !defined(USE_MODULE_DRIVERS__CAMERA_2025)
+
+#ifndef LEDC_CHANNEL_MAX
+#define LEDC_CHANNEL_MAX 8 // should come from esp32-hal-ledc.h
+#endif
+#ifndef LEDC_SPEED_MODE_MAX
+#define LEDC_SPEED_MODE_MAX 2// should come from esp32-hal-ledc.h ledc_mode_t
+#endif
+
+#endif
 
 #endif
 

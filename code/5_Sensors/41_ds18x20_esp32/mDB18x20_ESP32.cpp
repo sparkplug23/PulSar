@@ -73,13 +73,13 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -545,7 +545,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -556,7 +556,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -567,7 +567,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -579,7 +579,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
   ptr->json_level = JSON_LEVEL_ALL;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;

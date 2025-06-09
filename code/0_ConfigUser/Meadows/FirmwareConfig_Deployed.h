@@ -708,23 +708,77 @@
    * SECTION: Lighting Configs
   ************************************/  
 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       175
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Static",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Decimate":0,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 0,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "Segment1": {
+  //     "PixelRange": [
+  //       175,
+  //       250
+  //     ],
+  //     "ColourPalette":"Warm White",
+  //     "Effects": {
+  //       "Function":"Static",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Decimate":0,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
     "BusConfig":[
       {
-        "Pin":2,
+        "Pin":4,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":250
+        "Length":42
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        175
+        42
       ],
       "ColourPalette":"Snowy 02",
       "Effects": {
@@ -735,31 +789,11 @@
         "Grouping":1,
         "RateMs": 1000
       },
-      "BrightnessRGB": 0,
-      "BrightnessCCT": 0
+      "BrightnessRGB": 100
     },
-    "Segment1": {
-      "PixelRange": [
-        175,
-        250
-      ],
-      "ColourPalette":"Warm White",
-      "Effects": {
-        "Function":"Static",
-        "Speed":127,
-        "Intensity":127,
-        "Decimate":0,
-        "Grouping":1,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
+    "BrightnessRGB": 0
   }
   )=====";
-
   
   /***********************************
    * SECTION: Template Configs
@@ -1474,7 +1508,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
   // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
   // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRASNMITTED
+  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
   // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
@@ -1482,7 +1516,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_DEBUG_LINE_HERE2
   // #define ENABLE_DEBUG_LINE_HERE_MILLIS
   
-  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRASNMITTED
+  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
   // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
 
   // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING

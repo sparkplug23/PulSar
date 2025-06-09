@@ -501,9 +501,9 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void)
     JBI->End();
 
     if(motion_detect.isactive){
-      pCONT_mqtt->publish_device("status/motion/detected",JBI->GetBufferPtr(),false);
+      tkr_mqtt->publish_device("status/motion/detected",JBI->GetBufferPtr(),false);
     }else{
-      pCONT_mqtt->publish_device("status/motion/over",JBI->GetBufferPtr(),false);
+      tkr_mqtt->publish_device("status/motion/over",JBI->GetBufferPtr(),false);
     }
 
   }
@@ -658,7 +658,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
       if(motion_detect.state!=object_detected_static.ispresent){
         ALOG_INF(PSTR(D_LOG_PIR "IF motion_detect"));
 
-        pCONT_mqtt->publish_device("status/motion/event",object_detected_static.ispresent?"Present":"Not Present",false);
+        tkr_mqtt->publish_device("status/motion/event",object_detected_static.ispresent?"Present":"Not Present",false);
         
         
         motion_detect.state = object_detected_static.ispresent;
@@ -813,7 +813,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -823,7 +823,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -833,7 +833,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 10;//pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = 10;//tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -843,7 +843,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
@@ -853,7 +853,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
@@ -873,8 +873,8 @@ void mUltraSonicSensor::MQTTHandler_RefreshAll(){
 
 void mUltraSonicSensor::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
@@ -895,7 +895,7 @@ void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_averaged_ifchanged
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_ULTRASONIC_ID,
+  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_ULTRASONIC_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

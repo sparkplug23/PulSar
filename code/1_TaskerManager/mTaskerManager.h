@@ -326,7 +326,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/10_MQTT/mMQTT.h"
-  #define pCONT_mqtt                                static_cast<mMQTTManager*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
+  #define tkr_mqtt                                static_cast<mMQTTManager*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/21_WebServer/mWebServer.h"
@@ -387,17 +387,9 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
   #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-  #include "4_Drivers/50_CAM_OV2640/mCamera.h"
-  #define tkr_cam_ov2640                           static_cast<mCameraOV2640*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID))
-#endif
-#ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
-  #include "4_Drivers/Camera_OV2640/mCameraOV2640.h"
-  #define pCONT_camera                              static_cast<mCameraOV2640*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
-  #include "4_Drivers/51_WebCam/mWebCam.h"
-  #define pCONT_camera                              static_cast<mWebCam*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID])
+#ifdef USE_MODULE_DRIVERS__CAMERA_2025
+  #include "4_Drivers/50_Camera_2025/mCamera.h"
+  #define tkr_camera                              static_cast<mCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
@@ -406,14 +398,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
   #include "4_Drivers/60_WebCam_Arduino/mWebCam.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
-#endif
-#ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
-  #include "4_Drivers/61_WebCam_Tas/mWebCam.h"
-  #define pCONT_camera                              static_cast<mWebCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_TASMOTA__ID))
-#endif
-#ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
-  #include "4_Drivers/52_WebCamera/mWebCamera.h"
-  #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
   #include "4_Drivers/63_WebCam_Tas25/mCamera.h"

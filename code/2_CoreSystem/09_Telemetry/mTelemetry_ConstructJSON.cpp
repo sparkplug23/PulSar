@@ -59,9 +59,9 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
       
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     // JBI->Object_Start(PM_MQTT);
-    //   JBI->Add(PM_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
-    //   JBI->Add(PM_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
-    //   JBI->Add(PM_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
+    //   JBI->Add(PM_SENTCOUNT,       tkr_mqtt->pubsub->stats.packets_sent_counter);
+    //   JBI->Add(PM_RECEIVEDCOUNT,   tkr_mqtt->pubsub->stats.packets_sent_counter);
+    //   JBI->Add(PM_SENTPERMINUTE,   tkr_mqtt->pubsub->stats.packets_sent_per_minute);
     // JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     
@@ -237,7 +237,9 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_SSID, WiFi.SSID().c_str());
     JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.sta_active); // Used to debug switching in grafana
     JBI->Add(PM_RSSI, WiFi.RSSI());
+    #ifdef ESP32
     JBI->Add("TXPower", WiFi.getTxPower()); // 0-20dBm
+    #endif
     // JBI->Add(PM_CONNECTCOUNT, wifi_reconnects_counter);
     JBI->Add(PM_HOSTNAME, tkr_set->runtime.my_hostname);
     JBI->Add_P(PM_TELNET_PORT, TELNET_PORT);
@@ -270,11 +272,11 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
      * 
      */
 
-    // JBI->Add("RetrySecs", pCONT_mqtt->dt.connection[0].retry);
+    // JBI->Add("RetrySecs", tkr_mqtt->dt.connection[0].retry);
 
     JBI->Object_Start(PM_REFRESH_RATES);
-      JBI->Add(PM_MQTT_REFRESH_RATE_IFCHANGED, pCONT_mqtt->dt.ifchanged_secs);
-      JBI->Add(PM_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_mqtt->dt.teleperiod_secs);
+      JBI->Add(PM_MQTT_REFRESH_RATE_IFCHANGED, tkr_mqtt->dt.ifchanged_secs);
+      JBI->Add(PM_MQTT_REFRESH_RATE_TELEPERIOD, tkr_mqtt->dt.teleperiod_secs);
     JBI->Object_End();
     
     JBI->Add(PM_MQTT_ENABLE_RESTART,   (uint8_t)0);
@@ -295,7 +297,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
     #ifdef ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
     JBI->Object_Start("Interface_Priority");
-      // JBI->Add(D_MODULE_ENERGY_INTERFACE_CTR, pCONT_mqtt->dt.connection[0].interface_reporting_priority.energy);
+      // JBI->Add(D_MODULE_ENERGY_INTERFACE_CTR, tkr_mqtt->dt.connection[0].interface_reporting_priority.energy);
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
 
@@ -306,7 +308,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
     **/
     // #ifdef USE_MODULE_NETWORK_MQTT
     JBI->Array_Start("Connection");
-    for(auto& con:pCONT_mqtt->brokers)
+    for(auto& con:tkr_mqtt->brokers)
     {      
       JBI->Object_Start();
         JBI->Add("host_address", con->host_address);
@@ -340,7 +342,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
     JBI->Array_End();
 
     JBI->Array_Start("Manager");
-    for(auto& con:pCONT_mqtt->brokers)
+    for(auto& con:tkr_mqtt->brokers)
     {
       JBI->Object_Start();
         JBI->Add("status", con->status);
@@ -561,13 +563,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     JBI->Array_Start("getpin");
     for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
     {
-// DEBUG_LINE_HERE;
-      JBI->Add(
-        tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i],0)
-        
-        
-        );
-// DEBUG_LINE_HERE;
+      JBI->Add(tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i]));
     }
     JBI->Array_End();
 

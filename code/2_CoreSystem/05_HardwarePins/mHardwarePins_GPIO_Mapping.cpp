@@ -30,9 +30,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c)
   if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR)==0){   return GPIO_UNUSED_FORCED_HIGH_ID; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR)==0){  return GPIO_UNUSED_FORCED_LOW_ID; }
   
-  #ifdef USE_MODULE_CORE__SERIAL
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
+  #ifdef USE_MODULE_CORE__SERIAL
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_TX_CTR)==0){  return GPIO_HWSERIAL1_TX_ID; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RX_CTR)==0){  return GPIO_HWSERIAL1_RX_ID; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_TX_CTR)==0){  return GPIO_HWSERIAL2_TX_ID; }
@@ -295,6 +295,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c)
   #endif
 
   // Webcam
+  #ifdef ESP32
   for (int i = 1; i <= 8; i++) {
     snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_WEBCAM_DATA_NUM_CTR, i);
     if (strcmp_P(c, buffer) == 0) {
@@ -308,7 +309,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c)
   if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_SIOD_CTR)==0){   return GPIO_WEBCAM_SIOD; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_SIOC_CTR)==0){   return GPIO_WEBCAM_SIOC; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_PWDN_CTR)==0){   return GPIO_WEBCAM_PWDN; }
-
+  #endif // ESP32
 
   #ifdef USE_MODULE_DRIVERS_SDCARD
   if(strcmp_P(c,PM_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR)==0){    return GPIO_FUNCTION_SDCARD_VSPI_CSO_ID; }
@@ -523,6 +524,7 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, ui
   #endif
   if(GPIO_HWSERIAL0_RX_ID == id)                        p = PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR;
   if(GPIO_HWSERIAL0_TX_ID == id)                        p = PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR;
+  #ifdef ESP32
   if(GPIO_HWSERIAL1_RX_ID == id)                        p = PM_GPIO_FUNCTION_HWSERIAL1_RX_CTR;
   if(GPIO_HWSERIAL1_TX_ID == id)                        p = PM_GPIO_FUNCTION_HWSERIAL1_TX_CTR;
   if(GPIO_HWSERIAL2_RX_ID == id)                        p = PM_GPIO_FUNCTION_HWSERIAL2_RX_CTR;
@@ -539,6 +541,7 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, ui
   if(GPIO_WEBCAM_SIOD == id)                        p = PM_GPIO_FUNCTION_WEBCAM_SIOD_CTR;
   if(GPIO_WEBCAM_SIOC == id)                        p = PM_GPIO_FUNCTION_WEBCAM_SIOC_CTR;
   if(GPIO_WEBCAM_PWDN == id)                        p = PM_GPIO_FUNCTION_WEBCAM_PWDN_CTR;
+  #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
   if(GPIO_FUNCTION_SDCARD_VSPI_CSO_ID == id)                        p = PM_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR;
   if(GPIO_FUNCTION_SDCARD_VSPI_CLK_ID == id)                        p = PM_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR;

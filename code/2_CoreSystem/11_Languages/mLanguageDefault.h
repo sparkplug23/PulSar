@@ -84,6 +84,7 @@
 #define D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR     "camera_tas"
 #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR "camera_multiclient"
 #define D_MODULE_DRIVERS__CAMERA_TAS25_CTR     "camera_tas25"
+#define D_MODULE_DRIVERS__CAMERA_CTR              "camera"
 #define D_MODULE_DRIVERS__TINYGSM__CTR            "tinygsm"
 #define D_MODULE__DRIVERS_MAVLINK_DECODER__CTR    "mavlink"
 #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_telemetry"

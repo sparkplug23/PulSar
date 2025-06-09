@@ -285,8 +285,8 @@ void mDoorBell::MQTTHandler_RefreshAll(){
 
 void mDoorBell::MQTTHandler_Rate(){
 
-  // mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  // mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  // mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
@@ -305,7 +305,7 @@ void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_DOORBELL_ID,
+  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_DOORBELL_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

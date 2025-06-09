@@ -231,7 +231,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       memcpy(pCONT_log->log_data, mxtime, mxtime_length);
     }
 
-    pCONT_mqtt->Publish(topic, pCONT_log->log_data);
+    tkr_mqtt->Publish(topic, pCONT_log->log_data);
   }
   #endif // ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
   
@@ -616,7 +616,7 @@ int Response_mP(const char* format, ...)     // Content send snprintf_P char dat
   ALOG_DBG(PSTR(D_LOG_RESPONSE "%s"), tkr_set->response_msg);
 //   //Send via mqtt
 //   #ifdef USE_MODULE_NETWORK_MQTT
-//   pCONT_mqtt->publish_device("status/result",tkr_set->response_msg,false);
+//   tkr_mqtt->publish_device("status/result",tkr_set->response_msg,false);
 //   #endif
   
   return 0;// len;

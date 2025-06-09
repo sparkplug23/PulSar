@@ -73,13 +73,13 @@ int8_t mTOF_VL53L0X::Tasker(uint8_t function, JsonParserObject obj){
         MQTTHandler_Init();
       break;
       case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-        pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+        tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
       break;
       case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-        // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+        // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
       break;
       case TASK_MQTT_SENDER:
-        pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+        tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
       break;
       #endif //USE_MODULE_NETWORK_MQTT
     }

@@ -68,6 +68,8 @@ ep=1000
 DEBUG_LEVEL
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+also, thought for later, maybe I want a "standby" mode for leds, ie a state I can activate that dims the lights, but getting back to the original means turning off standby mode, instead of requiring full brightness etc set again. Especially is standby is a complete different version (eg static and dim, vs bright and animated). Future idea. 
+
 ***************************************************************************************************************************************************/
 
 

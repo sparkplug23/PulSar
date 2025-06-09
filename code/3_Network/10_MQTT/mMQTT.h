@@ -24,7 +24,7 @@
   [this](AsyncWebServerRequest *request)\
     {\
       char handle_url[100] = {0};       \
-      for(auto& connection:pCONT_mqtt->brokers)\
+      for(auto& connection:tkr_mqtt->brokers)\
         for(auto& handle:mqtthandler_list)\
         { \
           connection->publish_ft(GetModuleFriendlyName(), handle->topic_type, handle->postfix_topic, handle_url, sizeof(handle_url)); \

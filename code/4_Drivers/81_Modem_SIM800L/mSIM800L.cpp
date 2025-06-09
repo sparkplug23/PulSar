@@ -142,12 +142,12 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
       ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.apn_connect_called %d"), gprs.apn_connect_called); 
       ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.reconnect_init_counts %d"), gprs.reconnect_init_counts); 
       ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.connected_seconds %d"), gprs.connected_seconds);    
-      ALOG_INF(PSTR(D_LOG_CELLULAR "mqtt downtime counter %d"), pCONT_mqtt->brokers[0]->downtime_counter);    
-      if(pCONT_mqtt->brokers.size()){ 
-        ALOG_INF(PSTR(D_LOG_CELLULAR "pubsub->connected %d"), pCONT_mqtt->brokers[0]->pubsub->connected() );        
+      ALOG_INF(PSTR(D_LOG_CELLULAR "mqtt downtime counter %d"), tkr_mqtt->brokers[0]->downtime_counter);    
+      if(tkr_mqtt->brokers.size()){ 
+        ALOG_INF(PSTR(D_LOG_CELLULAR "pubsub->connected %d"), tkr_mqtt->brokers[0]->pubsub->connected() );        
         char buffer[20];
-        mSupport::float2CString(pCONT_mqtt->brokers[0]->debug_stats.payload_publish_success_percentage*100, 6, buffer);
-        ALOG_INF(PSTR(D_LOG_CELLULAR "payload_publish_success_percentage %d/%d %s"), pCONT_mqtt->brokers[0]->debug_stats.payload_publish_sent, pCONT_mqtt->brokers[0]->debug_stats.payload_publish_missed, buffer);
+        mSupport::float2CString(tkr_mqtt->brokers[0]->debug_stats.payload_publish_success_percentage*100, 6, buffer);
+        ALOG_INF(PSTR(D_LOG_CELLULAR "payload_publish_success_percentage %d/%d %s"), tkr_mqtt->brokers[0]->debug_stats.payload_publish_sent, tkr_mqtt->brokers[0]->debug_stats.payload_publish_missed, buffer);
       }
       ALOG_INF(PSTR(D_LOG_CELLULAR "isGprsConnected %d"), modem->isGprsConnected());   
       ALOG_INF(PSTR(D_LOG_CELLULAR "Sim Connected %d"), modem->isNetworkConnected()); 
@@ -158,9 +158,9 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
 
 
       #ifdef ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS // Need to enable passing back if "send failed" to set connection status as down     
-      if(pCONT_mqtt->brokers.size())
+      if(tkr_mqtt->brokers.size())
       {
-        if(pCONT_mqtt->brokers[0]->downtime_counter > ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS) // 10 minutes, do long modem reconnect
+        if(tkr_mqtt->brokers[0]->downtime_counter > ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS) // 10 minutes, do long modem reconnect
         {
           ALOG_INF(PSTR(D_LOG_CELLULAR "MQTT Downtime limit on LTE, forcing modem restart"));
           flag_modem_initialized = false; // no response, force restart
@@ -2307,7 +2307,7 @@ bool mSIM800L::DataNetwork__StartConnection()
       {
         gsm_client = new TinyGsmClient(*modem); // Only create new if it didnt already exist
       }
-      pCONT_mqtt->CreateConnection(gsm_client, MQTT_HOST_CELLULAR, MQTT_PORT_CELLULAR, CLIENT_TYPE_CELLULAR_ID);
+      tkr_mqtt->CreateConnection(gsm_client, MQTT_HOST_CELLULAR, MQTT_PORT_CELLULAR, CLIENT_TYPE_CELLULAR_ID);
         
 
 
@@ -2516,9 +2516,9 @@ void mSIM800L::MQTTHandler_Rate()
 
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   // }
 }
 
@@ -2528,7 +2528,7 @@ void mSIM800L::MQTTHandler_Rate()
 void mSIM800L::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

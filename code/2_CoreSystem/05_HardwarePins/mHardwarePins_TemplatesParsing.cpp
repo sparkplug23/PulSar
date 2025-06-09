@@ -115,7 +115,7 @@ void mHardwarePins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   }
 
   ALOG_INF(PSTR(D_LOG_PINS "PM_GPIOC: Completed"));
-  DEBUG_DELAY(3000);
+  DELAY_DEBUG(3000);
 
   // New method that assumes the function is the key, and the pin(s) are the values
   // pins may be represented as single ints, or array of ints (e.g. Lighting pins)

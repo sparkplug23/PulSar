@@ -52,7 +52,7 @@
  * ESP32 analogWrite emulation support
 \*********************************************************************************************/
 
-#define ENABLE_DEVFEATURE_ANALOG_WRITE_EMULATION_VERSION2
+// #define ENABLE_DEVFEATURE_ANALOG_WRITE_EMULATION_VERSION2
 
 
 #ifdef ENABLE_DEVFEATURE_ANALOG_WRITE_EMULATION_VERSION2

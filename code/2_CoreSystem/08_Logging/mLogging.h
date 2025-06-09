@@ -101,9 +101,9 @@ enum LoggingLevels {
 
 // #define ENABLE_DEBUG_DELAYS
 #if defined(ENABLE_DEBUG_MANUAL_DELAYS)
-#define DEBUG_DELAY(x) delay(x)
+#define DELAY_DEBUG(x) delay(x)
 #else
-#define DEBUG_DELAY(x)
+#define DELAY_DEBUG(x)
 #endif
 
 

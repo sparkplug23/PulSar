@@ -101,7 +101,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   ALOG_HGL(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION " to \"%s:%d\""), host_address, port);
   
   connected = false;
-  retry_counter = retry_counter_start_value;// pCONT_mqtt->dt.connection[0].retry;
+  retry_counter = retry_counter_start_value;// tkr_mqtt->dt.connection[0].retry;
   tkr_set->runtime.global_state.mqtt_down = 1;
 
   if(pubsub!=nullptr)
@@ -348,7 +348,7 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
   ALOG_INF( PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
   #endif
-  #ifdef ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRASNMITTED
+  #ifdef ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
   ALOG_INF( PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
   #endif
   

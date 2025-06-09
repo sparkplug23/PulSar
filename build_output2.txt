@@ -1,0 +1,749 @@
+Processing tg_cam__wroover_01 (board: esp32dev; platform: espressif32@6.4.0; framework: arduino; platform_packages: platformio/framework-arduinoespressif32@3.20011.230801; upload_protocol: esptool; upload_port: COM90; upload_speed: 460800; board_build.flash_mode: dio; board_build.boot: qio; board_build.f_cpu: 240000000L; board_build.f_flash: 80000000L; board_build.mcu: esp32; board_build.psram: enabled; board_build.partitions: partitions/esp32_default.csv; board_build.ldscript: ; lib_ldf_mode: chain+; lib_extra_dirs: lib/lib_basic, lib/lib_network, lib/lib_custom, lib/libesp32; build_flags: -w, -include sdkconfig_wroover.h, -D DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD, -D USE_USER_MICHAEL, -D I2C_BUS_SPEED=400000, -D BOARD_HAS_PSRAM, '-DDEVICENAME_CTR="tg_cam__wroover_01"', '-DDEVICENAME_FRIENDLY_CTR="TestGroup Camera WROVER-E#Testbed"', '-DDEVICENAME_DESCRIPTION_CTR="ESP32;WROVER-E;Testbed"', '-DD_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED="192.168.3.70"', -D SETTINGS_LOCATION=0x300000, -D SETTINGS_SIZE=0x10000, -D CORE_DEBUG_LEVEL=5, -D ARDUINO_USB_CDC_ON_BOOT=1, -D ARDUINO_USB_MODE=1, -D Serial=Serial0, -D ENABLE_DEBUG_LINE_HERE3, -D ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT, -D DISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25, -D ENABLE_IMMEDIATE_BOOT_SERIAL_PRINT_WHILE, -D ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND, -D ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES; build_unflags: -Wall, -Wdeprecated-declarations; monitor_speed: 115200; upload_resetmethod: nodemcu; extra_scripts: pio/strip-floats.py, pio/name-firmware.py, pio/gzip-firmware.py, gzip_fw.py, pio/override_copy.py, pio/strip-floats.py, pio/name-firmware.py, gzip_fw.py, pio/override_copy.py)
+--------------------------------------------------------------------------------
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.4.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20011.230801 (2.0.11) 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-openocd-esp32 @ 2.1100.20220706 (11.0) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain+, Compatibility ~ soft
+Framework incompatible library U:\GitHub\PulSar\lib\lib_esp32_camera2
+Found 76 compatible libraries
+More details about "Library Compatibility Mode": https://docs.platformio.org/page/librarymanager/ldf.html#ldf-compat-mode
+Scanning dependencies...
+Dependency Graph
+|-- Ext-printf @ 1.0 (License: Unknown, Path: U:\GitHub\PulSar\lib\lib_basic\Ext-printf)
+|-- JSMN JSON parser @ 1.0 (License: Unknown, Path: U:\GitHub\PulSar\lib\lib_basic\jsmn-shadinger-1.0)
+|-- ESP32-to-ESP8266-compat @ 0.0.2 (License: Unknown, Path: U:\GitHub\PulSar\lib\libesp32\ESP32-to-ESP8266-compat)
+|   |-- WiFi @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\WiFi)
+|-- Averaging_Data @ 0.1 (License: Unknown, Path: U:\GitHub\PulSar\lib\lib_custom\DeCounter)
+|-- WiFi @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\WiFi)
+|-- ArduinoOTA @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\ArduinoOTA)
+|   |-- WiFi @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\WiFi)
+|   |-- Update @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\Update)
+|   |-- ESPmDNS @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\ESPmDNS)
+|   |   |-- WiFi @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\WiFi)
+|-- Update @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\Update)
+|-- Wire @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\Wire)
+|-- ESPmDNS @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\ESPmDNS)
+|   |-- WiFi @ 2.0.0 (License: Unknown, Path: C:\Users\micha\.platformio\packages\framework-arduinoespressif32\libraries\WiFi)
+|-- Ticker @ 1.1 (License: Unknown, Path: U:\GitHub\PulSar\lib\libesp32\Ticker)
+Building in release mode
+********* using mFirmwareCustom_Secret.h as planned ***********
+********* using mUserConfig_Secret.h as planned ***********
+********* using mFirmwareCustom_Secret.h as planned ***********
+********* using mUserConfig_Secret.h as planned ***********
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\00_RadiatorFan\mRadiatorFan.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\01_ImmersionTankColour\mImmersionTankColour.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\03_FurnaceSensor\mFurnaceSensor.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\04_LouvoliteHub\mLouvoliteHub.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\04v2_LouvoliteHub\mLouvoliteHub.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\05_SideDoorLight\mSideDoorLight.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\06_ImmersionPanel\mImmersionPanel.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\07_TempSensorOnOLED\mTempSensorOLEDBath.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\08_CellularBlackBox\mCellularBlackBox.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\09_mMAVLink_Decoder_OLED\mMAVLink_Decoder_OLED.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\10_EnergyOnOLED\mEnergyOnOLED.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\11_3DPrinterEnclosure\Printer3D.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\12_TreadmillLogger\mTreadmillLogger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\16_SDLoggerIMURadiationPattern\SDLogger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\17_SerialMeasurmentLogger\mMeasurmentLogger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\18_SerialPosLogger\mSerialPositionalLogger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\19_MAVLinkFlyingLEDS\mMAVLinkFlyingLEDS.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\20_DeskSensorsOnOLED\mDeskSensorsOnOLED.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\10_ConSpec\21_LightNeo_MotionAlerts\mLightNeo_MotionAlerts.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\1_TaskerManager\mTaskerInterface.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\1_TaskerManager\mTaskerManager.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\01_Settings\mSettings.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\01_Settings\mSettings_Defaults.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\01_Settings\mSettings_Saving.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\02_RtcMemory\mRtcSettings.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\03_FileSystem\mFileSystem.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\03_FileSystem\mFileSystem_System.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\04_JsonTemplate\mJsonTemplate.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\05_HardwarePins\mHardwarePins.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\05_HardwarePins\mHardwarePins_GPIO_Mapping.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\05_HardwarePins\mHardwarePins_TemplatesParsing.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\06_Support\BufferWriter.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\06_Support\SupportESP32.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\06_Support\SupportESP8266.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\06_Support\mSupport.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\06_Support\mSupport_CrashRecorder.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\06_Support\mSupport_command.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\07_Time\mTime.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\08_Logging\mLogging.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\09_Telemetry\mTelemetry.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\09_Telemetry\mTelemetry_ConstructJSON.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\12_Events\mEvents.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\13_DeviceNameList\mDeviceNameList.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\13_RuleEngine\mRuleEngine.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\13_RuleEngine\mRuleEngine_Defaults.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\14_Updates\mUpdates.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\15_SerialUART\mSerial.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\15b_SerialUART_PhaseInto15\mSerialUART.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\20_JSON\mJSON.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\31_I2C\mI2C.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\32_SPI\mSPI.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\2_CoreSystem\99_DevelopmentDebugging\mDevelopmentDebugging.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\00_Interface\mInterface.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\03_WiFi\mWiFi.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\04_Ethernet\mEthernet.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\05_Cellular\Delete\Fona\mFona_Cellular.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\05_Cellular\Delete\internal\Adafruit_FONA.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\05_Cellular\mCellular.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\10_MQTT\PubSubClient.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\10_MQTT\mMQTT_Connection.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\10_MQTT\mMQTT_Manager.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\21_WebServer\mWebServer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\3_Network\21_WebServer\mWebServer_Pages.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\00_Interface\mDriverInterface.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\03_LEDs\mLEDs.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\04_Relays\mRelays.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\06_PWM\mPWM.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\07_IRDevices\mIRtransceiver.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\08_IRRemote\mIRRemote.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\09_RCSwitch\mRCSwitch.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\10_RCSwitch_Extended\mRCSwitch_Extended.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\11_Motors\HBridgeL9110\mHBridge.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\12_SD\mSDCard.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\15_ShellyDimmer\mShellyDimmer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\20_Buzzer_Basic\mBuzzer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\21_Buzzer_Tones\mBuzzer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\50_CAM_OV2640\app_httpd.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\50_CAM_OV2640\internal\OV2640.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\50_CAM_OV2640\mCamera.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\50_CAM_OV2640\mCamera_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\50_CAM_OV2640\mCamera_web.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\52_WebCamera\app_httpd.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\52_WebCamera\mWebCamera.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\52_WebCamera\mWebCamera_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\52_WebCamera\mWebCamera_ConstructJSON.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\52_WebCamera\mWebCamera_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\60_WebCam_Arduino\app_httpd.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\60_WebCam_Arduino\mWebCam.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\61_WebCam_Tas\mWebCam.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\62_WebCam_MultiClient\OV2640A.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\63_WebCam_Tas25\mCamera.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\70_MAVLink_Decoder\mMAVLink_Decoder.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\db_comm.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\db_crc.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\db_esp32_comm.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\db_esp32_control.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\http_server.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\mMAVLink_Telemetry_WiFi.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\main.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\msp_ltm_serial.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\71_MAVLink_Telemetry_WiFi\tcp_server.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\72_MAVLink_Telemetry_Cellular\mLEDs.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\80_Modem_SIM7000G\mSIM7000G.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\4_Drivers\81_Modem_SIM800L\mSIM800L.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\00_Interface\mSensorsInterface.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\01_Switches\mSwitches.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\02_Buttons\mButtons.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\03_BME\mBME.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\05_DHT\mSensorsDHT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\06_BH1750Light\mBH1750.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\07_PIR\mPIR.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\11_Door\mDoorSensor.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\13_L3GD20_3Axis_Gryo\internal\L3G.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\13_L3GD20_3Axis_Gryo\mSensorsL3G.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\14_LDRBasic\mLDRBasic.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\14_LDRBasic\mLDRBasic_ConstructJSON.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\14_LDRBasic\mLDRBasic_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\15_LSM303D_3Axis_AccMag\internal\LSM303.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\15_LSM303D_3Axis_AccMag\mSensorsLSM303D.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\16_Moisture\mMoistureSensor.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\17_SR04\mSR04.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\17_SR04\mSR04_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\17_SR04\mSR04_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\18_MPU9250\mSensorsMPU9250.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\19_PulseCounter\mPulseCounter.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\20_RemoteDevice\mRemoteDevice.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\21_RotaryEncoder\mRotaryEncoder.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\21_RotaryEncoder\mRotaryEncoder_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\21_RotaryEncoder\mRotaryEncoder_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\21_RotaryEncoder\mRotaryEncoder_Web.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\22_SunTracking\mSunTracking.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\23_MoonTracking\mMoonTracking.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\25_UltraSonic\mUltraSonicSensor.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\26_TOF_VL53L0X\mTOF_VL53L0X.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\27_TOF_VL53L1X\mTOF_VL53L1X.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\28_Radar_HLK_LD2410\Radar_HLK_LD2410.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\30_ADCInternal\mADCInternal.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\31_ADCInternal_I2SPhaseIntoSI30\ADCSampler.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\31_ADCInternal_I2SPhaseIntoSI30\I2SSampler.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\31_ADCInternal_I2SPhaseIntoSI30\mADC_I2S_Sampler.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\31_ADCInternal_I2SPhaseIntoSI30\mADC_I2S_Sampler_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\40_ds18x20\mDB18x20.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\40_ds18x20\mDB18x20_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\41_ds18x20_esp32\mDB18x20_ESP32.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\50_GPS_Serial\mGPS_Old.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\50_GPS_Serial\mGPS_Serial.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\51_GPS_Modem\mGPS_Modem.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\5_Sensors\52_Battery_Modem\mBattery_Modem.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\FastLED\FastLED.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\FastLED\colorpalettes.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\FastLED\colorutils.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\FastLED\hsv2rgb.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\FastLED\lib8tion.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\FastLED\noise.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\mBusManager.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\00_Interface\mInterfaceLight.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\02_Palette\mPalette.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\2DFcn.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\DevCode.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\Effects.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\Effects_Unsorted.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\Playlist.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\Presets.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\SaveSet.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\WebUI.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\mAnimatorLight.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\math_utils.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\udp.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\6_Lights\03_Animator\xml.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\7_Energy\00_Interface\mEnergyInterface.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\7_Energy\01_Pzem004T_v3\mPZEM004T.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\7_Energy\02_ADE7953\mADE7953.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\7_Energy\03_INA219\mINA219.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\00_Interface\mDisplaysInterface.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\01_Nextion\mNextionPanel.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\02_OLED_SSD1606\mOLED_SSD1306.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\03_OLED_SH1106\mOLED_SH1106.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\03_OLED_SH1106\mOLED_SH1106_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\03_OLED_SH1106\mOLED_SH1106_ConstructJSON.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\8_Displays\03_OLED_SH1106\mOLED_SH1106_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\01_Scheduler\scheduler.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\01_Scheduler\xdrv_09_timers.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\03_Sonoff_iFan\mSonoffIFan.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\04_Fan_PWM\mFan.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\04_Fan_PWM\mFan_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\08_TankVolume\backup.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\08_TankVolume\mTankVolume.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\08_TankVolume\mTankVolume_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\08_TankVolume\mTankVolume_ConstructJSON.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\08_TankVolume\mTankVolume_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\08_TankVolume\mTankVolume_Web.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\09_Blinds\mBlinds.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\10_BucketWaterLevel\mBucketWaterLevel.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\10_BucketWaterLevel\mBucketWaterLevel_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\10_BucketWaterLevel\mBucketWaterLevel_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\11_DoorBell\mDoorBell.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\11_DoorBell\mDoorBell_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\14_GPS_SD_Logger\mGPS_SD_Logger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\14_GPS_SD_Logger\mGPS_SD_Logger_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\14_GPS_SD_Logger\mGPS_SD_Logger_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\15_SDCardLogger\mSDCardLogger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\15_SDCardLogger\mSDCardLogger_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\20_UARTGPSLogger\mUARTLogger.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\20_UARTGPSLogger\mUARTLogger_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\30_InternalClock\mInternalClock.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\30_InternalClock\mInternalClock_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\40_HVAC\internal\mHVAC_TemperatureBased.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\40_HVAC\internal\mHVAC_TimedBased.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\40_HVAC\internal\mProgramTemperature.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\40_HVAC\internal\mProgramTimer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\40_HVAC\mHVAC.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_ConstructJSONs.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_FailSafes.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_FunctionHandler.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_MQTT.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_Metrics.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_Scheduling.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_Sensors.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_TemperatureBased.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_TimedBased.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_ToBeUpdated.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mHVAC_Web.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mProgramTemperature.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\41_HVAC_Remote\mProgramTimer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\42_SensorColourBar\mSensorColourBar.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\43_RelayStateLEDStrip\mRelayStateLEDStrip.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\50_Animator_Input_Controller\mAnimatorInputController.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\50_Animator_Input_Controller\mAnimatorLight_ButtonController.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\51_Animator_Playlists\mAnimatorLight_Auto_Presets_OutsideTree.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\51_Animator_Playlists\mAnimatorLight_Auto_Presets_TestTree.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\51_Animator_Playlists\mAnimatorPlaylists.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\60_EnergyOnOLED\mEnergyOnOLED.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\99_UserMod_01\mUserMod_01.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\9_Controller\99_UserMod_01\mUserMod_01_Commands.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\src\Main_PulSar.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\bootloader.bin' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\partitions.bin' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\liba4f\Ext-printf\ext_printf.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib279\jsmn-shadinger-1.0\JsonGenerator.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\liba4f\libExt-printf.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib279\jsmn-shadinger-1.0\JsonParser.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib279\jsmn-shadinger-1.0\jsmn.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFi.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib279\libjsmn-shadinger-1.0.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiAP.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiClient.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiGeneric.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiMulti.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiSTA.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiScan.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiServer.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\WiFi\WiFiUdp.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib65c\ESP32-to-ESP8266-compat\ESP32Wifi.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib40b\libWiFi.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib65c\ESP32-to-ESP8266-compat\esp8266toEsp32.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\liba67\DeCounter\DeCounter.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib65c\libESP32-to-ESP8266-compat.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\liba67\libDeCounter.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\libda3\Update\HttpsOTAUpdate.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\libda3\Update\Updater.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib4e1\ESPmDNS\ESPmDNS.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\libda3\libUpdate.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib90d\ArduinoOTA\ArduinoOTA.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib4e1\libESPmDNS.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib90d\libArduinoOTA.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\libf8f\Wire\Wire.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib7f3\Ticker\Ticker.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\libf8f\libWire.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\Esp.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\lib7f3\libTicker.a' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\FirmwareMSC.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\FunctionalInterrupt.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\HWCDC.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\HardwareSerial.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\IPAddress.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\IPv6Address.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\MD5Builder.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\Print.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\Stream.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\StreamString.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\Tone.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\USB.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\USBCDC.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\USBMSC.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\WMath.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\WString.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\base64.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\cbuf.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-adc.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-bt.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-cpu.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-dac.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-gpio.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-i2c-slave.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-i2c.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-ledc.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-matrix.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-misc.c.o' from cache
+Using tempfile U:\GitHub\PulSar\.pioenvs\tg_cam__wroover_01\tmph5_o9yrn.tmp for command line:
+xtensa-esp32-elf-gcc -o .pioenvs/tg_cam__wroover_01/FrameworkArduino/esp32-hal-psram.c.o -c -Wno-frame-address -std=gnu99 -Wno-old-style-declaration -w -include sdkconfig_wroover.h -Os -mlongcalls -ffunction-sections -fdata-sections -Wno-error=unused-function -Wno-error=unused-variable -Wno-error=deprecated-declarations -Wno-unused-parameter -Wno-sign-compare -ggdb -freorder-blocks -Wwrite-strings -fstack-protector -fstrict-volatile-bitfields -Wno-error=unused-but-set-variable -fno-jump-tables -fno-tree-switch-conversion -MMD -DPLATFORMIO=60118 -DARDUINO_ESP32_DEV -DDEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD -DUSE_USER_MICHAEL -DI2C_BUS_SPEED=400000 -DBOARD_HAS_PSRAM -DDEVICENAME_CTR=\"tg_cam__wroover_01\" "-DDEVICENAME_FRIENDLY_CTR=\"TestGroup Camera WROVER-E#Testbed\"" -DDEVICENAME_DESCRIPTION_CTR=\"ESP32;WROVER-E;Testbed\" -DD_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED=\"192.168.3.70\" -DSETTINGS_LOCATION=0x300000 -DSETTINGS_SIZE=0x10000 -DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_CDC_ON_BOOT=1 -DARDUINO_USB_MODE=1 -DSerial=Serial0 -DENABLE_DEBUG_LINE_HERE3 -DENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT -DDISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25 -DENABLE_IMMEDIATE_BOOT_SERIAL_PRINT_WHILE -DENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND -DENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES -DHAVE_CONFIG_H -DMBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\" -DUNITY_INCLUDE_CONFIG_H -DWITH_POSIX -D_GNU_SOURCE -DIDF_VER=\"v4.4.5\" -DESP_PLATFORM -D_POSIX_READER_WRITER_LOCKS -DARDUINO_ARCH_ESP32 -DESP32 -DF_CPU=240000000L -DARDUINO=10812 -DARDUINO_VARIANT=\"esp32\" "-DARDUINO_BOARD=\"Espressif ESP32 Dev Module\"" -DARDUINO_PARTITION_esp32_default -DARDUINO_CORE_BUILD -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/port/xtensa/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/port/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/port/esp32/private_include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/heap/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/include/apps -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/include/apps/sntp -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/port/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/port/esp32/include/arch -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/platform_port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_rom/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_rom/include/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_rom/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_common/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_system/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_system/port/soc -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_system/port/public_compat -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/xtensa/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/xtensa/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/driver/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/driver/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_pm/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_ringbuf/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/efuse/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/efuse/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/vfs/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_wifi/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_event/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_netif/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_eth/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/tcpip_adapter/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_phy/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_phy/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_ipc/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/app_trace/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_timer/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mbedtls/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mbedtls/mbedtls/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mbedtls/esp_crt_bundle/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/app_update/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bootloader_support/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/nvs_flash/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/pthread/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_gdbstub/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_gdbstub/xtensa -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_gdbstub/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espcoredump/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espcoredump/include/port/xtensa -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wpa_supplicant/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wpa_supplicant/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wpa_supplicant/esp_supplicant/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/ieee802154/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/console -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/asio/asio/asio/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/asio/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/common/osi/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/include/esp32/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/common/api/include/api -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/common/btc/profile/esp/blufi/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/common/btc/profile/esp/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/host/bluedroid/api/include/api -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_common/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_common/tinycrypt/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_core -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_core/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_core/storage -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/btc/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_models/common/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_models/client/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/mesh_models/server/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/api/core/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/api/models/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/bt/esp_ble_mesh/api -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/cbor/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/unity/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/unity/unity/src -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/cmock/CMock/src -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/coap/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/coap/libcoap/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/nghttp/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/nghttp/nghttp2/lib/includes -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-tls -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-tls/esp-tls-crypto -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_adc_cal/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hid/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/tcp_transport/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_http_client/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_http_server/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_https_ota/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_https_server/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_lcd/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_lcd/interface -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/protobuf-c/protobuf-c -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/protocomm/include/common -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/protocomm/include/security -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/protocomm/include/transports -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mdns/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_local_ctrl/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/sdmmc/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_serial_slave_link/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_websocket_client/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/expat/expat/expat/lib -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/expat/port/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wear_levelling/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/fatfs/diskio -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/fatfs/vfs -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/fatfs/src -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freemodbus/freemodbus/common/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/idf_test/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/idf_test/include/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/jsmn/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/json/cJSON -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/libsodium/libsodium/src/libsodium/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/libsodium/port_include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mqtt/esp-mqtt/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/openssl/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/perfmon/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spiffs/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/ulp/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wifi_provisioning/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/rmaker_common/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_diagnostics/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/rtc_store/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_insights/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/json_parser/upstream/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/json_parser/upstream -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/json_generator/upstream -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_schedule/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp_secure_cert_mgr/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_rainmaker/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/gpio_button/button/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/qrcode/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/ws2812_led -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_littlefs/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/tool -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/typedef -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/image -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/math -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/nn -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/layer -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/detect -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp-dl/include/model_zoo -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp32-camera/driver/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp32-camera/conversions/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/dotprod/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/support/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/support/mem/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/hann/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/blackman/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/blackman_harris/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/blackman_nuttall/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/nuttall/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/windows/flat_top/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/iir/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/fir/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/add/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/sub/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/mul/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/addc/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/mulc/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/math/sqrt/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/matrix/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/fft/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/dct/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/conv/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/common/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/kalman/ekf/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/espressif__esp-dsp/modules/kalman/ekf_imu13states/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/fb_gfx/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/cores/esp32 -IC:/Users/micha/.platformio/packages/framework-arduinoespressif32/variants/esp32 C:/Users/micha/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-psram.c
+xtensa-esp32-elf-gcc @U:\GitHub\PulSar\.pioenvs\tg_cam__wroover_01\tmph5_o9yrn.tmp
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-rgb-led.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-rmt.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-sigmadelta.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-spi.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-time.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-timer.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-tinyusb.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-touch.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-uart.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\firmware_msc_fat.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\libb64\cdecode.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\libb64\cencode.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\main.cpp.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\stdlib_noniso.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\wiring_pulse.c.o' from cache
+Retrieved `.pioenvs\tg_cam__wroover_01\FrameworkArduino\wiring_shift.c.o' from cache
+C:/Users/micha/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-psram.c:127:2: error: #error "CORRECT: This file should not be included directly, please check your configuration!"
+ #error "CORRECT: This file should not be included directly, please check your configuration!"
+  ^~~~~
+*** [.pioenvs\tg_cam__wroover_01\FrameworkArduino\esp32-hal-psram.c.o] Error 1
+========================= [FAILED] Took 118.80 seconds =========================
+
+Environment                               Status    Duration
+----------------------------------------  --------  ------------
+esp_8266_customuser_example_serial        IGNORED
+esp_8266_customuser_example_ota           IGNORED
+tb_4chpro                                 IGNORED
+tb_neopixel_pinned                        IGNORED
+tb_oled_sh1106                            IGNORED
+tb_lilygo_sim7000                         IGNORED
+tb_sim7000_oled                           IGNORED
+esp_8266_testbed_shelly1_01               IGNORED
+esp_8266_testbed_shelly2_dimmer_01        IGNORED
+tb_shelly25                               IGNORED
+esp_8266_hvac_bedroom                     IGNORED
+esp_8266_h801_tester                      IGNORED
+esp_8266_desklight                        IGNORED
+esp_8266_rgbbedlight                      IGNORED
+esp_8266_h801_sunlight                    IGNORED
+esp_8266_rgbbedroomfloor                  IGNORED
+esp_32_testbed_hvac_with_energy_sens      IGNORED
+tasmota32_base                            IGNORED
+tasmota32_base-webcam                     IGNORED
+tasmota32-minimal                         IGNORED
+esp32_rgboutsidetree                      IGNORED
+wh_clockbed                               IGNORED
+wh_clock_tv                               IGNORED
+wh_rgbdis_weight                          IGNORED
+whitehall_82                              IGNORED
+whitehall_32                              IGNORED
+whitehall_32_no_part                      IGNORED
+wh_sidelight                              IGNORED
+wh_gaz4chpro                              IGNORED
+wh_gazebosensor                           IGNORED
+wh_consumerunit                           IGNORED
+wh_consumerunit_25_tester                 IGNORED
+wh_kitsen                                 IGNORED
+wh_kitchenlight1                          IGNORED
+wh_kitchenlight2                          IGNORED
+wh_kitchenlight3                          IGNORED
+wh_kitchenlight4                          IGNORED
+wh_cooker_fan                             IGNORED
+wh_rgbcooker                              IGNORED
+wh_rgbfridge                              IGNORED
+wh_rgbglassbox                            IGNORED
+wh_rgbshelf                               IGNORED
+tasmota32solo1                            IGNORED
+tas32s                                    IGNORED
+wh_utility_i4                             IGNORED
+wh_rgbutility                             IGNORED
+wh_rgblamp_cylinder                       IGNORED
+wh_utilsens                               IGNORED
+wh_immerson_cont                          IGNORED
+wh_dimland                                IGNORED
+wh_dim_garagespot                         IGNORED
+wt_portable_sensor                        IGNORED
+wh_hvac_home                              IGNORED
+wh_dhall                                  IGNORED
+wh_radfan                                 IGNORED
+wh_socket_15                              IGNORED
+wh_dimmer_tvroom                          IGNORED
+wh_tvroom_uplights                        IGNORED
+wh_floorfan1                              IGNORED
+wh_floorfan2                              IGNORED
+wh_floorfan3                              IGNORED
+wh_floorfan4                              IGNORED
+wh_floorfan5                              IGNORED
+wh_floorfan6                              IGNORED
+wh_airpurifier                            IGNORED
+wh_sonoff_number_01                       IGNORED
+wh_sonoff_number_02                       IGNORED
+wh_sonoff_number_05                       IGNORED
+wh_sonoff_number_06                       IGNORED
+wh_sonoff_number_07                       IGNORED
+wh_sonoff_number_08                       IGNORED
+wh_sonoff_number_09                       IGNORED
+wh_sonoff_number_12                       IGNORED
+wh_sonoff_number_16                       IGNORED
+wh_sonoff_number_20                       IGNORED
+wh_sonoff_number_21                       IGNORED
+wh_sonum_22                               IGNORED
+wh_sonoff_number_23                       IGNORED
+wh_sonoff_number_24                       IGNORED
+wh_sonoff_number_101                      IGNORED
+wh_sonoff_number_26                       IGNORED
+wh_sonoff_number_27                       IGNORED
+wh_sonoff_number_28                       IGNORED
+wh_hvac_broom_hairdryer                   IGNORED
+wh_ceiling_mbedroom                       IGNORED
+wh_dresser_lights                         IGNORED
+wh_hvac_masterbedroom                     IGNORED
+whitehall_masterbedroomsensor             IGNORED
+wh_mbedroom_lamp1                         IGNORED
+wh_ensuite_fan                            IGNORED
+wh_ceiling_ensuite                        IGNORED
+wh_ensuite_sensor                         IGNORED
+wh_ensuite_switch                         IGNORED
+wh_atticsensor                            IGNORED
+wh_rgbfireplace                           IGNORED
+wh_livingroom_lamp1                       IGNORED
+wh_livingroom_lamp2                       IGNORED
+wh_livingroomsensor                       IGNORED
+wh_oiltank                                IGNORED
+wh_oilfurnace                             IGNORED
+wh_garagelight                            IGNORED
+wh_ceilingfan                             IGNORED
+wh_bedroomsensor                          IGNORED
+wh_dimbrc                                 IGNORED
+wh_bathroom_sensor                        IGNORED
+wht_br_but                                IGNORED
+wht_black_stand                           IGNORED
+wht_rgbdesk                               IGNORED
+wht_bedroom_bedlight                      IGNORED
+wht_computer_u25                          IGNORED
+wht_computer_p32                          IGNORED
+wht_bedr_wardrobe                         IGNORED
+wh_mbedroom_wardrobe                      IGNORED
+wht_bedroom_desk                          IGNORED
+dev_desksensor                            IGNORED
+tb_camera_sensor                          IGNORED
+wh_dr0                                    IGNORED
+meadows_82                                IGNORED
+meadows_32                                IGNORED
+cm_office__monitor_backlight              IGNORED
+cm_office__hvac_desk                      IGNORED
+cm_office__doorframe                      IGNORED
+cm_office__ledmatrix_weight               IGNORED
+cm_kitchen__glass_box                     IGNORED
+cm_landing__glass_box                     IGNORED
+cm_bedroom__door_frame                    IGNORED
+cm_shelly_dimmer_01                       IGNORED
+cm_mbedroom__ambient_sens                 IGNORED
+cm_bathroom__immersion                    IGNORED
+cm_livingroom__samsung_tv                 IGNORED
+cm_hallway__vase_light                    IGNORED
+cm_outside__fence_string                  IGNORED
+cm_prusa_heater                           IGNORED
+cm_treadmill_power                        IGNORED
+cm_garagelight                            IGNORED
+cm_oiltank                                IGNORED
+dev_esp32doit_gpio                        IGNORED
+cm_office__433mhz_node                    IGNORED
+cm_floorfan1                              IGNORED
+cm_floorfan2                              IGNORED
+cm_socket_basic_01                        IGNORED
+cm_socket_basic_02                        IGNORED
+cm_socket_basic_03                        IGNORED
+cm_socket_basic_04                        IGNORED
+cm_socket_basic_05                        IGNORED
+cm_socket_basic_06                        IGNORED
+cm_socket_basic_07                        IGNORED
+cm_socket_basic_08                        IGNORED
+cm_socket_basic_09                        IGNORED
+ex_radio_rx                               IGNORED
+tasmota32s2                               IGNORED
+tasmota32c3                               IGNORED
+tasmota32idf4                             IGNORED
+tasmota-debug                             IGNORED
+tasmota32-debug                           IGNORED
+hacs32-debug                              IGNORED
+testbed_shelly2p5                         IGNORED
+hacs32_webcam1                            IGNORED
+hacs32_webcam2                            IGNORED
+hacs32_webcam3                            IGNORED
+hacs32_webcam4                            IGNORED
+hacs82-h801                               IGNORED
+hacs32-bedroom_pzem_tester                IGNORED
+esp_32_gpsparser_tester_polling           IGNORED
+esp_32_gpsparser_tester_interrupt         IGNORED
+esp_32_sdlogger1_tester                   IGNORED
+esp_32_uart_tester                        IGNORED
+esp_32_uart_gpsnmea_tester                IGNORED
+esp_32_uart_gpsubx_tester                 IGNORED
+esp_32_sdcard_tester                      IGNORED
+esp_32_sdcard_lipo_tester                 IGNORED
+esp_32_gps_to_sdcard_tester               IGNORED
+esp_32_measurement_system_1_tester        IGNORED
+esp_32_measurement_system_1               IGNORED
+esp_32_measurement_calib_system_1         IGNORED
+esp_32_rad_imu_sd_logger_1                IGNORED
+esp_32_testbed_ecompass_lsm303d           IGNORED
+esp_32_testbed_gps_sdcard_logger          IGNORED
+devbed_hvac_home                          IGNORED
+esp_8266_testbed_9axis_gyro               IGNORED
+esp_32_testbed_9axis_gyro_mpu9250         IGNORED
+esp_32_testbed_9axis_gyro_gy89            IGNORED
+esp_32_outsidetree_basic_01               IGNORED
+esp_32_outsidetree_basic_02               IGNORED
+esp_32_outsidetree_debug                  IGNORED
+esp_32_outsidetree_advanced_01            IGNORED
+esp_8266_devboard_segment                 IGNORED
+esp_32_bucket_water_level                 IGNORED
+esp_32_tree_segment                       IGNORED
+esp_32_outside_tree_segments              IGNORED
+esp_32_testbed_ds18xx                     IGNORED
+esp_32_testbed_bme                        IGNORED
+esp_32_testbed_fona_basic                 IGNORED
+testbed_rcswitch_normal                   IGNORED
+testbed_rcs_ext                           IGNORED
+testbed_h801_desk                         IGNORED
+testbed_crashreport_esp82                 IGNORED
+testbed_crashreport_esp32                 IGNORED
+testbed_fastboot82                        IGNORED
+esp_32_testbed_climate_sensor             IGNORED
+esp_8266_testbed_segments_roof            IGNORED
+esp_32_string_rosebud                     IGNORED
+esp_8266_testbed_segments_4pixel          IGNORED
+esp_8266_testbed_rtc_fastboot             IGNORED
+esp_8266_testbed_status_leds              IGNORED
+esp_32_testbed_segments_4pixel            IGNORED
+esp_32_testbed_matrix_3p_e131             IGNORED
+esp_32_testbed_webui_4pixel               IGNORED
+esp_8266_testbed_webui_basic_gui          IGNORED
+t_web8                                    IGNORED
+tb_webserver_esp32_jun23                  IGNORED
+tb_webserver_esp82_jun23                  IGNORED
+tb_webui_neo_esp32_jun23                  IGNORED
+tb_webui_neo2_esp32_jun23                 IGNORED
+ch_bstring                                IGNORED
+tb_primary_addlighting32                  IGNORED
+tb_neopixel_multipin                      IGNORED
+tb_multi_h801                             IGNORED
+tb_neopixel_notifications                 IGNORED
+tb_esp32_sim7000g                         IGNORED
+tb_esp32_sim7000g_v2                      IGNORED
+tb_cellular_locator_01                    IGNORED
+tb_multi_cellular_locator_01              IGNORED
+tb_multi_cellular_locator_02              IGNORED
+tb_multi_cellular_locator_03              IGNORED
+tb_multi_cellular_locator_04              IGNORED
+tb_cellular_locator_02                    IGNORED
+tb_cellular2024__gps_locator_9000G_01     IGNORED
+tb_cellular2024__gps_locator_9000G_02     IGNORED
+tb_cellular2024__gps_locator_800L_03      IGNORED
+ht_tinygsm_polling                        IGNORED
+tb_mavlink_decoder                        IGNORED
+tb_mavlink_decoder_cellular_01            IGNORED
+tb_mavlink_flightready_cellular_01        IGNORED
+tb_mavlink_telemetry_wifi                 IGNORED
+tb_esp32_buzzer                           IGNORED
+tb_esp32_sim800l                          IGNORED
+tb_seg_82                                 IGNORED
+tb_h801v2_2023                            IGNORED
+tb_rgbdev2                                IGNORED
+esp_8266_testbed_webui_segments_3pixels   IGNORED
+esp_8266_testbed_webui_4pixel             IGNORED
+esp_8266_testbed_pixel_heart              IGNORED
+esp_8266_testbed_hardware_bme             IGNORED
+esp_32_testbed_hardware_bme               IGNORED
+esp_8266_bedroom_wallclock_01             IGNORED
+esp_8266_testbed_button_longpress         IGNORED
+esp_8266_testbed_motion                   IGNORED
+esp_32_testbed_motion                     IGNORED
+esp_32_testbed_nextion_heating            IGNORED
+esp_32_testbed_nextion_display            IGNORED
+esp_32_testbed_nextion_display_web        IGNORED
+tb_nextion_7inch                          IGNORED
+nextion_kitchen                           IGNORED
+nextion_kitchen_tb                        IGNORED
+tb_nextion_treadmill_01                   IGNORED
+tb_nextion_treadmill_02                   IGNORED
+tb_nextion_10inch                         IGNORED
+esp_8266_socket_numbered_20               IGNORED
+esp_8266_socket_numbered_21               IGNORED
+esp_8266_socket_numbered_22               IGNORED
+esp_8266_testbed_h801_pwm_manual          IGNORED
+esp_82_tb_h801_sun                        IGNORED
+esp_8266_testbed_blending_variables       IGNORED
+esp_8266_testbed_4chpro                   IGNORED
+testbed_led_matrix_seg                    IGNORED
+esp_8266_shellydimmer_livingroom_ceiling  IGNORED
+tb_dimtest                                IGNORED
+tb_testbed_sr04                           IGNORED
+tb_webcam_v4                              IGNORED
+tb_webcam_arduino                         IGNORED
+tb_webcam_tasmota                         IGNORED
+tb_webcam_multiclient                     IGNORED
+devflash_esp8266_lowspace                 IGNORED
+tb_rgbclock_testclock                     IGNORED
+tg_multipin_h801_5white                   IGNORED
+tg_multipin_h801_splitrgbcct              IGNORED
+tg_multipin_e32_2neopins                  IGNORED
+tg_lgt__esp32_1pin_rgb                    IGNORED
+tg_lgt__esp32_1pin_wrgb                   IGNORED
+tg_lgt__esp32_1pin_rgbww                  IGNORED
+tg_lgt__esp32_2pin_rgb                    IGNORED
+tg_lgt__esp32_4pin_rgb                    IGNORED
+tg_lgt__esp32_8pin_rgb                    IGNORED
+tg_lgt__esp32_16pin_rgb                   IGNORED
+tg_lgt__esp32_4pin_varied_dbus            IGNORED
+tg_lgt__esp32_1pin_ring                   IGNORED
+tg_lgt__esp32_playlist_bar                IGNORED
+tg_lgt__esp32_matrix_8w32h                IGNORED
+tg_lgt__esp32_matrix_32w8h                IGNORED
+tg_lgt__esp32_matrix_16x16                IGNORED
+tg_lgt__esp32_matrix_16x16_16fx           IGNORED
+tg_lgt__esp32_7segclock                   IGNORED
+tg_lgt__02_esp32_4pin                     IGNORED
+tg_lgt__06_esp32_ws2805                   IGNORED
+tg_lgt__07_esp32_7segclock                IGNORED
+tg_lgt__09_esp32_1pin_playlists           IGNORED
+tg_lgt__11_esp32_effects_16grid           IGNORED
+tg_lgt__11_esp32_outtree_multipin         IGNORED
+tg_lgt__41_esp32_4pin_dev                 IGNORED
+tg_lgt__20_esp32_matrix_16x16             IGNORED
+tg_lgt__21_esp32_matrix_32x8              IGNORED
+tg_lgt__30_h321_rgbcct                    IGNORED
+tg_lgt__12_esp32_32bit_wrgb               IGNORED
+tg_lgt__51_esp82_1pin_noweb               IGNORED
+tg_lgt__52_h801_rgbcct                    IGNORED
+tg_lgt__54_minimal_ota_midstage           IGNORED
+tg_lgt__60_sgrp__wrgb                     IGNORED
+tg_lgt__60_sgrp__rgbww                    IGNORED
+tg_lgt__60_sgrp__rgb_pebble               IGNORED
+tg_lgt__60_sgrp__matrix16x16              IGNORED
+tg_lgt__60_sgrp__wrgb_2x                  IGNORED
+tg_lgt__60_sgrp__wrgb_4x                  IGNORED
+tg_lgt__02_esp32_4pin__1000led_tester     IGNORED
+tg_lgt__07_esp32__treadmill_tester        IGNORED
+tg_lgt__70_esp32_4pin__4output_triple     IGNORED
+tg_lighting_eff_L3                        IGNORED
+tg_lighting_eff_L4                        IGNORED
+tg_lighting_eff_L5                        IGNORED
+tg_lighting_eff_L6                        IGNORED
+tg_lighting_eff_L7                        IGNORED
+tg_lighting_eff_L8                        IGNORED
+tg_lighting_eff_L9                        IGNORED
+tg_lighting_eff_L10_7segclock             IGNORED
+tg_lighting_eff_L11                       IGNORED
+tg_lighting_eff_L12                       IGNORED
+tg_lighting_eff_L13                       IGNORED
+tg_lighting_eff_L14                       IGNORED
+tg_lighting_eff_L15                       IGNORED
+tg_lgt__03_esp32_4pin                     IGNORED
+tb_settings_storage                       IGNORED
+tb_filesystem                             IGNORED
+dev_gps_serial                            IGNORED
+wh_garage_transceiver                     IGNORED
+xmas23_snowtree                           IGNORED
+xmas23_frontsnowtree                      IGNORED
+xmas23_outside_wreath                     IGNORED
+xmas23_kitchen_shelf                      IGNORED
+xmas23_outsidetree                        IGNORED
+xmas23_outsidetree_debug                  IGNORED
+xmas23_redgive_nonetwork                  IGNORED
+xmas23_bauble4pin                         IGNORED
+xmas23_utilityshelf                       IGNORED
+tmp_lgt__hyperion_samsung_65inch          IGNORED
+holloween23_1                             IGNORED
+tmp_lgt__matSegs                          IGNORED
+hvac_desk                                 IGNORED
+tb_desk_sensor                            IGNORED
+tb_night_flight                           IGNORED
+rel_night_flight                          IGNORED
+tb_ultrasonic                             IGNORED
+dev_matrix                                IGNORED
+tg_hvac_oil_rad01                         IGNORED
+tg_pzem_socket_energy01                   IGNORED
+tg_cellular_800L_office_testbed           IGNORED
+ad_swt_and_but                            IGNORED
+ad_door_light_office                      IGNORED
+ad_motion_desk_testbed                    IGNORED
+ad_motion_24radar_testbed                 IGNORED
+ad_motion_24radar_testbedc3               IGNORED
+ad_testbed__room_sensor_c3mini            IGNORED
+ad_testbed__room_sensor_s3_xiao2          IGNORED
+ad_testbed__room_sensor_wrover_e          IGNORED
+ad_hallway_flowers                        IGNORED
+tg_cam__wroover_01                        FAILED    00:01:58.799
+xmas24__desk__timing_tester               IGNORED
+xmas24_water                              IGNORED
+xmas24__final__4x_green                   IGNORED
+xmas24__final__8x_red                     IGNORED
+xmas24__final__8x_outside_tree            IGNORED
+xmas24__final__16x_outside_tree           IGNORED
+tb_xmas24__final__16x_outside_tree        IGNORED
+xmas24__final__16x_sidedoor_tree          IGNORED
+xmas24__final__16x_snow_tree              IGNORED
+xmas24__final__4x_sidedoor_wreath         IGNORED
+xmas24__final__snow_silver                IGNORED
+xmas24_tb__outtree_x16_01                 IGNORED
+xmas24_tb__outtree_x16_02                 IGNORED
+xmas23_tb__outtree_x8_sweep               IGNORED
+tasmota32_base_april24                    IGNORED
+tb_xiao_camera                            IGNORED
+==================== 1 failed, 0 succeeded in 00:01:58.799 ====================

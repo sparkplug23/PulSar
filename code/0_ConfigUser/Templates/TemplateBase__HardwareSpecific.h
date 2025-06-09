@@ -16,7 +16,7 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// #define DEVICE_TEMPLATE_SONOFF_IFAN03
+#define DEVICE_TEMPLATE_SONOFF_IFAN03
 // #define DEVICE_TEMPLATE_SONOFF_BASIC_R2
 // #define DEVICE_TEMPLATE_SHELLY_DIMMER_V2
 // #define DEVICE_TEMPLATE_SONOFF_4CHPRO_V3

@@ -161,7 +161,7 @@ void mSettings::SystemSettings_DefaultBody(void)
 
   SettingsUpdateText(SET_OTAURL, PSTR(D_OTA_URL));
   
-  
+  tkr_set->runtime.global_state.network_down = 1;
 
   pCONT_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
   

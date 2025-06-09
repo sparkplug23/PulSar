@@ -193,7 +193,7 @@ void mHVAC::SetHeater(uint8_t device, uint8_t state){
     SetHeatingRelay(device,state);
   #else
     AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_RELAY_CONTROLS is disabled"));
-    pCONT_mqtt->Send_Prefixed_P("/debug/alert", PSTR("Heating DISABLED for testing! SetHeatingRelay(%d,%d)"), device, state);
+    tkr_mqtt->Send_Prefixed_P("/debug/alert", PSTR("Heating DISABLED for testing! SetHeatingRelay(%d,%d)"), device, state);
   #endif
 
 } // end function

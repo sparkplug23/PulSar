@@ -539,9 +539,9 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
       if(tkr_time->UpTime()>60)
       {
-        if(pCONT_mqtt->pubsub->connected())
+        if(tkr_mqtt->pubsub->connected())
         {
-          pCONT_mqtt->publish_device_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
+          tkr_mqtt->publish_device_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
         }
       }
       #endif // ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND

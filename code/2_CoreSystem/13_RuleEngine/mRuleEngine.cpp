@@ -103,13 +103,13 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
       break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -128,7 +128,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
 
   ALOG_DBG(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
 
-  // DEBUG_DELAY(5000);
+  // DELAY_DEBUG(5000);
 
   DefaultRuleForModule();
   
@@ -412,7 +412,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
         // char message[50];
         // memset(message,0,sizeof(message));
         // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
-        // pCONT_mqtt->publish_device("status/debug/rules",message,false); //reconnect message
+        // tkr_mqtt->publish_device("status/debug/rules",message,false); //reconnect message
         // ^^ Add this later as a topic so I can know when rule triggers
 
         /**
@@ -756,7 +756,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
       
       #ifdef ENABLE_LOG_LEVEL_INFO
         ALOG_HGL(PSTR("MATCHED Rule%d"),rule_index);
-        // DEBUG_DELAY(1000);
+        // DELAY_DEBUG(1000);
       #endif // ENABLE_LOG_LEVEL_INFO
 
       EventPackage* p_event = nullptr;
@@ -1171,7 +1171,7 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1182,7 +1182,7 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
