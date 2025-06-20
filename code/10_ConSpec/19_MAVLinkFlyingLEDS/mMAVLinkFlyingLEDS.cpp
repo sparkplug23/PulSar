@@ -646,8 +646,8 @@ void mMavlinkFlyingLEDS::EveryLoop()
 
   // ALOG_INF(PSTR("mav.slider_right %d rgbbri = %d %d"), mav.slider_right, rgbbri, cctbri );
 
-  pCONT_iLight->setBriRGB_Global(rgbbri);
-  pCONT_iLight->setBriCT_Global(cctbri);
+  tkr_iLight->setBriRGB_Global(rgbbri);
+  tkr_iLight->setBriCT_Global(cctbri);
 
 
   // ALOG_INF(PSTR("Throttle: %d, Hue: %d, Mode %d"), mode_pwm, hue, mode);

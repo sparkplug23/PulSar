@@ -140,7 +140,7 @@ void mAnimatorLight::SubTask_Playlist()
   static unsigned long presetCycledTime = 0;
 
   // if fileDoc is not null JSON buffer is in use so just quit
-  if (currentPlaylist < 0 || playlistEntries == nullptr || pCONT_mfile->fileDoc != nullptr) 
+  if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_mfile->fileDoc != nullptr) 
   {
     // ALOG_INF(PSTR("SubTask_Playlist return early"));    
     return;
@@ -162,7 +162,7 @@ void mAnimatorLight::SubTask_Playlist()
     // ALOG_INF(PSTR("tSaved_playlist_debug Running"));//, currentPlaylist, playlistEntryDur);
 
     presetCycledTime = millis();
-    // if (pCONT_iLight->getBri_Global() == 0 || nightlightActive) return;
+    // if (tkr_iLight->getBri_Global() == 0 || nightlightActive) return;
 
     ++playlistIndex %= playlistLen; // -1 at 1st run (limit to playlistLen)
 

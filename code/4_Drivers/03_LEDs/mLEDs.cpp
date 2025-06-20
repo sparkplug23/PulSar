@@ -2,6 +2,21 @@
 
 #ifdef USE_MODULE_DRIVERS_LEDS
 
+/****
+ * 
+ * 
+ * Status LED needs added inside this
+ * Status_Mode
+ *  - network_down (3 quick blinlks, 1 second pause)
+ *  - mqtt_down (2 quick blinks, 1 second pause)
+ *  
+ * Notice that state needs placed on top of an LED which is being used for relay on/off either way
+ * status_led optionally will show power state of primary.
+ * 
+ * 
+ * 
+ */
+
 int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
@@ -125,11 +140,11 @@ void mLEDs::Init(void)
   leds.resize( UsedCount() );  // Allocate space for MAX_LEDS
 
   for (uint8_t i = 0; i < UsedCount(); i++) {
-    // uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
-    // pinMode(pin, OUTPUT);  // Set the pin as output
+    uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
+    pinMode(pin, OUTPUT);  // Set the pin as output
 
     // if (i == 0) {  // LED 1 - Blink 3 times, each blink 300ms apart, cycle every 5 seconds
-    //   StartEffect_Blink(i, 40, 100, 1000, 60);  
+      StartEffect_Blink(i, 40, 100, 1000, 60);  
     // } else if (i == 1) {  // LED 2 - Solid ON
     //   StartEffect_Blink(i, 40, 250, 1000, 60);  
     //   // StartEffect_On(i);
@@ -406,6 +421,8 @@ uint16_t state_value = 0;
     return;
   }
 
+  ALOG_INF(PSTR("LED command found"));
+
   // All commands are inside {"LED":{X}}
   JsonParserObject jobj = jtok.getObject();
   // JsonParserToken jtok_sub = 0;
@@ -426,17 +443,17 @@ uint16_t state_value = 0;
       led_index  = jtok_sub.getInt();
     }
 
-    ALOG_INF( PSTR("relay_id = %d"), led_index );
+    ALOG_INF( PSTR(D_LOG_LED "Name = %d"), led_index );
   }
 
 
   // Primary method since v0.86.14.21
   if(jtok_sub = jobj["State"]){
     if(jtok_sub.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok_sub.getStr());
+      state = tkr_sup->GetStateNumber(jtok_sub.getStr());
     }else 
     if(jtok_sub.isNum()){
-      state  = jtok_sub.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+      state  = jtok_sub.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
     }
 
     /**

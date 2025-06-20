@@ -200,7 +200,7 @@ void mDisplaysInterface::DisplayOnOff(uint8_t on)
 // get asci float number
 uint8_t mDisplaysInterface::fatoiv(char *cp,float *res) {
   uint8_t index=0;
-  *res= pCONT_sup->CharToFloat(cp);
+  *res= tkr_sup->CharToFloat(cp);
   while (*cp) {
     if ((*cp>='0' && *cp<='9') || (*cp=='-') || (*cp=='.')) {
       cp++;
@@ -361,7 +361,7 @@ void mDisplaysInterface::SetPower(void)
 void mDisplaysInterface::SetCursor(uint8_t x, uint8_t y)
 {
   ALOG_TST(PSTR("SetCursor(%d,%d)"),x,y);
-  pCONT_iDisp->renderer->setCursor(x,y);
+  tkr_iDisp->renderer->setCursor(x,y);
 }
 
 /**
@@ -371,7 +371,7 @@ void mDisplaysInterface::SetCursor(uint8_t x, uint8_t y)
 void mDisplaysInterface::SetTextSize(uint8_t font_size)
 {
   ALOG_TST(PSTR("SetFontSize(%d)"),font_size);
-  pCONT_iDisp->renderer->setTextSize(font_size);
+  tkr_iDisp->renderer->setTextSize(font_size);
 }
 
 /**
@@ -783,7 +783,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
     // create time out options where the screen can auto clear
 
-    pCONT_iDisp->renderer->clearDisplay();
+    tkr_iDisp->renderer->clearDisplay();
 
       // CmndDisplayText(jtok.getStr());
 
@@ -1897,10 +1897,10 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
     if(jtok = obj1["Text"])
     {
       //Draw function
-      pCONT_iDisp->renderer->println(jtok.getStr());
+      tkr_iDisp->renderer->println(jtok.getStr());
     }
 
-    pCONT_iDisp->renderer->Updateframe();
+    tkr_iDisp->renderer->Updateframe();
 
   }
 

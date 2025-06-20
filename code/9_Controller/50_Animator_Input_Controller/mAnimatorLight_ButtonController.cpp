@@ -370,15 +370,15 @@
 //   {
 //     // Decrement and wrap
 //     user_input.selected.palette_id = (user_input.selected.palette_id == 0) ? sizeof(palette_options_ids)-1: user_input.selected.palette_id-1;
-//     pCONT_iLight->animation.palette_id = palette_options_ids[user_input.selected.palette_id];
-//     ALOG_INF(PSTR("BUTTON\n\r \"P-\" L[%d] \t (%d)\"%s\""), user_input.selected.palette_id, pCONT_iLight->animation.palette_id, mPaletteI->GetPaletteNameByID(pCONT_iLight->animation.palette_id, buffer, sizeof(buffer)));
+//     tkr_iLight->animation.palette_id = palette_options_ids[user_input.selected.palette_id];
+//     ALOG_INF(PSTR("BUTTON\n\r \"P-\" L[%d] \t (%d)\"%s\""), user_input.selected.palette_id, tkr_iLight->animation.palette_id, mPaletteI->GetPaletteNameByID(tkr_iLight->animation.palette_id, buffer, sizeof(buffer)));
 //   }else
 //   if(tkr_rules->event_triggered.device_id == USER_INPUT_BUTTON_1_RIGHT)
 //   {
 //     // Increment and wrap
 //     user_input.selected.palette_id = (user_input.selected.palette_id == (sizeof(palette_options_ids)-1)) ? 0: user_input.selected.palette_id+1;
-//     pCONT_iLight->animation.palette_id = palette_options_ids[user_input.selected.palette_id];
-//     ALOG_INF(PSTR("BUTTON\n\r \"P+\" L[%d] \t (%d)\"%s\""), user_input.selected.palette_id, pCONT_iLight->animation.palette_id, mPaletteI->GetPaletteNameByID(pCONT_iLight->animation.palette_id, buffer, sizeof(buffer)));
+//     tkr_iLight->animation.palette_id = palette_options_ids[user_input.selected.palette_id];
+//     ALOG_INF(PSTR("BUTTON\n\r \"P+\" L[%d] \t (%d)\"%s\""), user_input.selected.palette_id, tkr_iLight->animation.palette_id, mPaletteI->GetPaletteNameByID(tkr_iLight->animation.palette_id, buffer, sizeof(buffer)));
 //   }
 
 
@@ -388,15 +388,15 @@
 //   if(tkr_rules->event_triggered.device_id == USER_INPUT_BUTTON_2_LEFT)
 //   {
 //     user_input.selected.brightness_id = (user_input.selected.brightness_id == 0) ? sizeof(brightness_options_ids)-1: user_input.selected.brightness_id-1;
-//     pCONT_iLight->setBriRGB_Global(map(brightness_options_ids[user_input.selected.brightness_id]  ,0,100, 0,255));  
-//     ALOG_INF(PSTR("BUTTON\n\r \"B-\" L[%d] \t %d/255"), user_input.selected.brightness_id, pCONT_iLight->getBriRGB_Global());
+//     tkr_iLight->setBriRGB_Global(map(brightness_options_ids[user_input.selected.brightness_id]  ,0,100, 0,255));  
+//     ALOG_INF(PSTR("BUTTON\n\r \"B-\" L[%d] \t %d/255"), user_input.selected.brightness_id, tkr_iLight->getBriRGB_Global());
 //   }
 //   else 
 //   if(tkr_rules->event_triggered.device_id == USER_INPUT_BUTTON_2_RIGHT)
 //   {
 //     user_input.selected.brightness_id = (user_input.selected.brightness_id == (sizeof(brightness_options_ids)-1)) ? 0: user_input.selected.brightness_id+1;
-//     pCONT_iLight->setBriRGB_Global(map(brightness_options_ids[user_input.selected.brightness_id]  ,0,100, 0,255));
-//     ALOG_INF(PSTR("BUTTON\n\r \"B+\" L[%d] \t %d/255"), user_input.selected.brightness_id, pCONT_iLight->getBriRGB_Global());
+//     tkr_iLight->setBriRGB_Global(map(brightness_options_ids[user_input.selected.brightness_id]  ,0,100, 0,255));
+//     ALOG_INF(PSTR("BUTTON\n\r \"B+\" L[%d] \t %d/255"), user_input.selected.brightness_id, tkr_iLight->getBriRGB_Global());
 //   }
 
 //   /**
@@ -443,8 +443,8 @@
 //   /**
 //    * check we are in range, or shift back into range
 //    * */
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
-//   pCONT_iLight->animation_override.time_ms = 500; // Instant
+//   tkr_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation_override.time_ms = 500; // Instant
 //   tkr_set->settings_save_decounter_seconds_delayed_save = 10; // delay the saving until the lights have updated
 
 
@@ -474,8 +474,8 @@
 //    * Apply changes to id, if any, to internal parameters
 //    * This must happen independent of button presses, so loading/saving can apply the changes too
 //    * */
-//   pCONT_iLight->animation.palette_id = palette_options_ids[user_input.selected.palette_id];
-//   pCONT_iLight->setBriRGB_Global(map(brightness_options_ids[user_input.selected.brightness_id]  ,0,100, 0,255));  
+//   tkr_iLight->animation.palette_id = palette_options_ids[user_input.selected.palette_id];
+//   tkr_iLight->setBriRGB_Global(map(brightness_options_ids[user_input.selected.brightness_id]  ,0,100, 0,255));  
 //   flashersettings.function = effects_options_ids[user_input.selected.effects_id];
 //   /**
 //    * depending on mode, change the rate/time
@@ -484,36 +484,36 @@
 //   {
 //     default:
 //     case EFFECTS_FUNCTION_STATIC_PALETTE_ID:
-//       pCONT_iLight->animation.time_ms = 2000;
-//       pCONT_iLight->animation.cycle_time__rate_ms = 10000;
+//       tkr_iLight->animation.time_ms = 2000;
+//       tkr_iLight->animation.cycle_time__rate_ms = 10000;
 //       tkr_anim->SetLEDOutAmountByPercentage(100);
 //     break;
 //     case EFFECTS_FUNCTION_SEQUENTIAL_ID:
 //       /**
 //        * Only enable very fast transitions for palettes that use linear palettes eg rainbow, otherwise, use slower "fast" speed
 //        * */
-//       switch(pCONT_iLight->animation.palette_id)
+//       switch(tkr_iLight->animation.palette_id)
 //       { 
 //         case mPalette::PALETTELIST_STATIC_RAINBOW_ID:
 //         case mPalette::PALETTELIST_STATIC_RAINBOW_INVERTED_ID:
-//           pCONT_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 19,9000);
-//           pCONT_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 20,10000);
+//           tkr_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 19,9000);
+//           tkr_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 20,10000);
 //         break;
 //         default:
-//           pCONT_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 200,9000);
-//           pCONT_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 201,10000);
+//           tkr_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 200,9000);
+//           tkr_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 201,10000);
 //         break;
 //       }
 //       tkr_anim->SetLEDOutAmountByPercentage(100);
 //     break;
 //     case EFFECTS_FUNCTION_SLOW_GLOW_ID:
-//       pCONT_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 19,20000);
-//       pCONT_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 20,30000);
+//       tkr_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 19,20000);
+//       tkr_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 20,30000);
 //       tkr_anim->SetLEDOutAmountByPercentage(map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 1,35));
 //     break;
 //     case EFFECTS_FUNCTION_STEPPING_PALETTE_ID:
-//       pCONT_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 23,9000);
-//       pCONT_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 25,10000);
+//       tkr_iLight->animation.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 23,9000);
+//       tkr_iLight->animation.cycle_time__rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 25,10000);
 //       tkr_anim->SetLEDOutAmountByPercentage(100);
 //     break;
 //   }
@@ -526,10 +526,10 @@
 //     "Intensity  [Bid:%d] = %d (time/rate  %d/%d)\n\r"
 //     "Pixels Changing     = %d"),
 
-//     user_input.selected.palette_id,     mPaletteI->GetPaletteNameByID(pCONT_iLight->animation.palette_id, buffer, sizeof(buffer)),
-//     user_input.selected.brightness_id,  map(pCONT_iLight->getBriRGB_Global(), 0,255, 0,100),
+//     user_input.selected.palette_id,     mPaletteI->GetPaletteNameByID(tkr_iLight->animation.palette_id, buffer, sizeof(buffer)),
+//     user_input.selected.brightness_id,  map(tkr_iLight->getBriRGB_Global(), 0,255, 0,100),
 //     user_input.selected.effects_id,     tkr_anim->GetFlasherFunctionNamebyID(flashersettings.function, buffer2, sizeof(buffer2)),
-//     user_input.selected.intensity_id, intensity_options_ids[user_input.selected.intensity_id], pCONT_iLight->animation.time_ms, pCONT_iLight->animation.cycle_time__rate_ms,
+//     user_input.selected.intensity_id, intensity_options_ids[user_input.selected.intensity_id], tkr_iLight->animation.time_ms, tkr_iLight->animation.cycle_time__rate_ms,
 //     tkr_anim->strip_size_requiring_update
 
 //   );
@@ -537,9 +537,9 @@
 // /**
 //  * Improve animations by making sure blend time is always less then 90% of rate
 //  * */
-//   if(pCONT_iLight->animation.time_ms > (pCONT_iLight->animation.cycle_time__rate_ms*0.90))
+//   if(tkr_iLight->animation.time_ms > (tkr_iLight->animation.cycle_time__rate_ms*0.90))
 // {
-//   pCONT_iLight->animation.time_ms = pCONT_iLight->animation.cycle_time__rate_ms*0.90;
+//   tkr_iLight->animation.time_ms = tkr_iLight->animation.cycle_time__rate_ms*0.90;
 // }
   
 //   // tkr_set->Settings.animation_settings.xmas_controller_params[0] = user_input.selected.palette_id;
@@ -550,8 +550,8 @@
 //   /**
 //    * check we are in range, or shift back into range
 //    * */
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
-//   pCONT_iLight->animation_override.time_ms = 500; // Instant
+//   tkr_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation_override.time_ms = 500; // Instant
 
 //   flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID; // regenerate colours before animating
 

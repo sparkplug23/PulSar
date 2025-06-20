@@ -144,7 +144,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 // //   // if ((source > 0) && (source < SRC_MAX)) {
 // //   //   char stemp1[20];
 // //   //   ALOG_DBG(PSTR("SRC: %s from %s"), 
-// //   //   pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
+// //   //   tkr_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
 // //   // }
 // // }
 
@@ -227,7 +227,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 //   BufferWriterI->Append_P(PSTR("{t}"));
 //   for(int ii=0;ii<row_count;ii++){
 //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed(listheading, sizeof(listheading), ii, dList_titles));
+//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), tkr_sup->GetTextIndexed(listheading, sizeof(listheading), ii, dList_titles));
 //       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
 //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   }    
@@ -243,7 +243,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 //   BufferWriterI->Append_P(PSTR("{t}"));
 //   for(int ii=0;ii<row_count;ii++){
 //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
+//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
 //       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
 //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   }    
@@ -270,7 +270,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 // //   BufferWriterI->Append_P(PSTR("{t}"));
 // //   for(int ii=0;ii<row_count;ii++){
 // //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-// //       BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
+// //       BufferWriterI->Append_P(PSTR("<td>%s</td>"), tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
 // //       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
 // //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 // //   }    
@@ -844,7 +844,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
 // {
 //   // Possible hostHeader: connectivitycheck.gstatic.com or 192.168.4.1
-//   if ((WifiIsInManagerMode())){//} && !pCONT_sup->ValidIpAddress(request->hostHeader().c_str())) {
+//   if ((WifiIsInManagerMode())){//} && !tkr_sup->ValidIpAddress(request->hostHeader().c_str())) {
 //     // ALOG_DBG(PSTR(D_LOG_HTTP D_REDIRECTED));
 //     // request->sendHeader(F("Location"), String("http://") + request->client().localIP().toString(), true);
 
@@ -916,13 +916,13 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //                                               // buffer = |  [  192.168.178.86  :  80  ,  admin  :  joker  ]    POWER1 ON   |
 // //   host = strtok_r(buffer, "]", &command);     // host = |  [  192.168.178.86  :  80  ,  admin  :  joker  |, command = |    POWER1 ON   |
 // //   if (host && command) {
-// //     pCONT_sup->RemoveSpace(host);                        // host = |[192.168.178.86:80,admin:joker|
+// //     tkr_sup->RemoveSpace(host);                        // host = |[192.168.178.86:80,admin:joker|
 // //     host++;                                   // host = |192.168.178.86:80,admin:joker| - Skip [
 // //     host = strtok_r(host, ",", &user);        // host = |192.168.178.86:80|, user = |admin:joker|
 // //     String url = F("http://");                // url = |http://|
 // //     url += host;                              // url = |http://192.168.178.86:80|
 
-// //     command = pCONT_sup->Trim(command);                  // command = |POWER1 ON| or |/any/link/starting/with/a/slash.php?log=123|
+// //     command = tkr_sup->Trim(command);                  // command = |POWER1 ON| or |/any/link/starting/with/a/slash.php?log=123|
 // //     if (command[0] != '/') {
 // //       url += F("/cm?");                       // url = |http://192.168.178.86/cm?|
 // //       if (user) {
@@ -987,8 +987,8 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //   // {"webcolor":["#eeeeee","#181818","#4f4f4f","#000000","#dddddd","#008000","#222222","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
 
 // //   // char dataBufLc[strlen(dataBuf) +1];
-// //   // pCONT_sup->LowerCase(dataBufLc, dataBuf);
-// //   // pCONT_sup->RemoveSpace(dataBufLc);
+// //   // tkr_sup->LowerCase(dataBufLc, dataBuf);
+// //   // tkr_sup->RemoveSpace(dataBufLc);
 // //   // if (strlen(dataBufLc) < 9) { return false; }  // Workaround exception if empty JSON like {} - Needs checks
 
 // //   // StaticJsonDocument<450>  doc;
@@ -1001,7 +1001,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //   // // if (!obj.success()) { return false; }
 
 // //   // char parm_lc[10];
-// //   // if (obj[pCONT_sup->LowerCase(parm_lc, D_WEBCOLOR)].isNull()) {
+// //   // if (obj[tkr_sup->LowerCase(parm_lc, D_WEBCOLOR)].isNull()) {
 // //   //   for (uint8_t i = 0; i < tkr_set->COL_LAST; i++) {
 // //   //     const char* color = obj[parm_lc][i];
 // //   //     if (color != nullptr) {
@@ -1021,47 +1021,47 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // //   char command[CMDSZ];
 // //   bool serviced = true;
 
-// // //   int command_code = pCONT_sup->GetCommandCode(command, sizeof(command), tkr_events->XdrvMailbox.topic, kWebCommands);
+// // //   int command_code = tkr_sup->GetCommandCode(command, sizeof(command), tkr_events->XdrvMailbox.topic, kWebCommands);
 // // //   if (-1 == command_code) {
 // // //     serviced = false;  // Unknown command
 // // //   }
 // // //   if (CMND_WEBSERVER == command_code) {
 // // //     if ((tkr_events->XdrvMailbox.payload >= 0) && (tkr_events->XdrvMailbox.payload <= 2)) { tkr_set->Settings.webserver = tkr_events->XdrvMailbox.payload; }
 // // //     if (tkr_set->Settings.webserver) {
-// // //       pCONT_sup->Response_P(PSTR("{\"" D_WEBSERVER "\":\"" D_ACTIVE_FOR " %s " D_ON_DEVICE " %s " D_WITH_IP_ADDRESS " %s\"}"),
+// // //       tkr_sup->Response_P(PSTR("{\"" D_WEBSERVER "\":\"" D_ACTIVE_FOR " %s " D_ON_DEVICE " %s " D_WITH_IP_ADDRESS " %s\"}"),
 // // //         (2 == tkr_set->Settings.webserver) ? D_ADMIN : D_USER, tkr_set->my_hostname, WiFi.localIP().toString().c_str());
 // // //     } else {
-// // //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetStateText(0));
+// // //       tkr_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_sup->GetStateText(0));
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBPASSWORD == command_code) {
 // // //     if ((tkr_events->XdrvMailbox.data_len > 0) && (tkr_events->XdrvMailbox.data_len < sizeof(tkr_set->Settings.web_password))) {
-// // //       strlcpy(tkr_set->Settings.web_password, (SC_CLEAR == pCONT_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? "" : (SC_DEFAULT == pCONT_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? WEB_PASSWORD : tkr_events->XdrvMailbox.data, sizeof(tkr_set->Settings.web_password));
-// // //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_set->Settings.web_password);
+// // //       strlcpy(tkr_set->Settings.web_password, (SC_CLEAR == tkr_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? "" : (SC_DEFAULT == tkr_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? WEB_PASSWORD : tkr_events->XdrvMailbox.data, sizeof(tkr_set->Settings.web_password));
+// // //       tkr_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_set->Settings.web_password);
 // // //     } else {
-// // //       pCONT_sup->Response_P(S_JSON_COMMAND_ASTERIX, command);
+// // //       tkr_sup->Response_P(S_JSON_COMMAND_ASTERIX, command);
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBLOG == command_code) {
 // // //     if ((tkr_events->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (tkr_events->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { tkr_set->Settings.logging.web_level = tkr_events->XdrvMailbox.payload; }
-// // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.logging.web_level);
+// // //     tkr_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.logging.web_level);
 // // //   }
 // // //   else if (CMND_WEBREFRESH == command_code) {
 // // //     if ((tkr_events->XdrvMailbox.payload > 999) && (tkr_events->XdrvMailbox.payload <= 10000)) { tkr_set->Settings.web_refresh = tkr_events->XdrvMailbox.payload; }
-// // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.web_refresh);
+// // //     tkr_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.web_refresh);
 // // //   }
 // // //   else if (CMND_WEBSEND == command_code) {
 // // //     if (tkr_events->XdrvMailbox.data_len > 0) {
 // // //       uint8_t result = WebSend(request, tkr_events->XdrvMailbox.data);
 // // //       char stemp1[20];
-// // //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), result, kWebSendStatus));
+// // //       tkr_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), result, kWebSendStatus));
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBCOLOR == command_code) {
 // // //     if (tkr_events->XdrvMailbox.data_len > 0) {
 // // //       if (strstr(tkr_events->XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be parameter
 // // //         if ((tkr_events->XdrvMailbox.data_len > 3) && (tkr_events->XdrvMailbox.index > 0) && (tkr_events->XdrvMailbox.index <= tkr_set->COL_LAST)) {
-// // //           pCONT_sup->WebHexCode(tkr_events->XdrvMailbox.index -1, tkr_events->XdrvMailbox.data);
+// // //           tkr_sup->WebHexCode(tkr_events->XdrvMailbox.index -1, tkr_events->XdrvMailbox.data);
 // // //         }
 // // //         else if (0 == tkr_events->XdrvMailbox.payload) {
 // // //           tkr_set->SettingsDefaultWebColor();
@@ -1071,12 +1071,12 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //         JsonWebColor(tkr_events->XdrvMailbox.data);
 // // //       }
 // // //     }
-// // //     pCONT_sup->Response_P(PSTR("{\"" D_WEBCOLOR "\":["));
+// // //     tkr_sup->Response_P(PSTR("{\"" D_WEBCOLOR "\":["));
 // // //     for (uint8_t i = 0; i < tkr_set->COL_LAST; i++) {
-// // //       if (i) { pCONT_sup->ResponseAppend_P(PSTR(",")); }
-// // //       pCONT_sup->ResponseAppend_P(PSTR("\"#%06x\""), WebColor(i));
+// // //       if (i) { tkr_sup->ResponseAppend_P(PSTR(",")); }
+// // //       tkr_sup->ResponseAppend_P(PSTR("\"#%06x\""), WebColor(i));
 // // //     }
-// // //     pCONT_sup->ResponseAppend_P(PSTR("]}"));
+// // //     tkr_sup->ResponseAppend_P(PSTR("]}"));
 // // //   }
 // // // #ifdef USE_EMULATION
 // // //   else if (CMND_EMULATION == command_code) {
@@ -1102,7 +1102,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //   char *token;
 
 // // //  //ShowFreeMem(PSTR("ExecuteCommand"));
-// // //   pCONT_sup->ShowSource(source);
+// // //   tkr_sup->ShowSource(source);
 
 // // // //In the first call to the strtok() function for a given string1, the strtok() function searches for the first token in string1, 
 // // // //skipping over leading delimiters. A pointer to the first token is returned.
@@ -1440,7 +1440,7 @@ bool mWebServer::handleIfNoneMatchCacheHeader(AsyncWebServerRequest *request, in
  * @param eTagSuffix Optional. Defaults to 0. A suffix that will be added to the ETag header. This can be used to invalidate the cache for a specific page.
  */
 void mWebServer::handleStaticContent(AsyncWebServerRequest *request, const String &path, int code, const String &contentType, const uint8_t *content, size_t len, bool gzip, uint16_t eTagSuffix) {
-  if (path != "" && pCONT_mfile->handleFileRead(request, path)) return;
+  if (path != "" && tkr_mfile->handleFileRead(request, path)) return;
   if (handleIfNoneMatchCacheHeader(request, code, eTagSuffix)) return;
   AsyncWebServerResponse *response = request->beginResponse_P(code, contentType, content, len);
   if (gzip) response->addHeader(FPSTR(s_content_enc), F("gzip"));

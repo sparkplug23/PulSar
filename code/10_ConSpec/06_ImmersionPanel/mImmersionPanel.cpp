@@ -128,11 +128,11 @@ void mImmersionPanel::EverySecond()
   /*****
    * Red
   */
-  if(pCONT_hvac->zone[0].program_timer_method.IsRunning())
+  if(tkr_hvac->zone[0].program_timer_method.IsRunning())
   {
-    pCONT_led->CommandSet_LED_Power(1,0);
+    tkr_led->CommandSet_LED_Power(1,0);
   }else{
-    pCONT_led->CommandSet_LED_Power(0,0);
+    tkr_led->CommandSet_LED_Power(0,0);
   }
 
   SubTask_UpdateOLED();
@@ -141,20 +141,20 @@ void mImmersionPanel::EverySecond()
 
   // if(tkr_time->uptime_seconds_nonreset<60)
   // {
-  //   pCONT_led->CommandSet_LED_Power(1,0);
+  //   tkr_led->CommandSet_LED_Power(1,0);
   // }else
   // if(tkr_time->uptime_seconds_nonreset<120)
   // {
-  //   pCONT_led->CommandSet_LED_Power(1,1);
+  //   tkr_led->CommandSet_LED_Power(1,1);
   // }else
   // if(tkr_time->uptime_seconds_nonreset<180)
   // {
-  //   pCONT_led->CommandSet_LED_Power(1,2);
+  //   tkr_led->CommandSet_LED_Power(1,2);
   // }else
   // {
-  //   pCONT_led->CommandSet_LED_Power(0,0);
-  //   pCONT_led->CommandSet_LED_Power(0,1);
-  //   pCONT_led->CommandSet_LED_Power(0,2);
+  //   tkr_led->CommandSet_LED_Power(0,0);
+  //   tkr_led->CommandSet_LED_Power(0,1);
+  //   tkr_led->CommandSet_LED_Power(0,2);
   // }
 
 
@@ -213,19 +213,19 @@ void mImmersionPanel::SubTask_UpdateOLED()
    * */
   #ifdef USE_MODULE_CONTROLLER_HVAC
   
-  if(pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes() < 99)
+  if(tkr_hvac->zone[0].program_timer_method.GetTimer_Minutes() < 99)
   {
     snprintf(line_ctr, sizeof(line_ctr), "IM:  %02d m",
-      pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes()
+      tkr_hvac->zone[0].program_timer_method.GetTimer_Minutes()
     );
   }
   else
   {
     snprintf(line_ctr, sizeof(line_ctr), "IM: %03d m",
-      pCONT_hvac->zone[0].program_timer_method.GetTimer_Minutes()
+      tkr_hvac->zone[0].program_timer_method.GetTimer_Minutes()
     );
   }
-  pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
+  tkr_iDisp->LogBuffer_AddRow(line_ctr, 0);
   #endif // USE_MODULE_CONTROLLER_HVAC
 
 
@@ -233,11 +233,11 @@ void mImmersionPanel::SubTask_UpdateOLED()
   snprintf(buffer, sizeof(buffer), "SH: %d",
     0
   );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 1);
   snprintf(buffer, sizeof(buffer), "BA: %d",
     0
   );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 2);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 2);
   #endif //USE_MODULE_SENSORS__DS18X20_ESP32_2023
   
   
@@ -250,7 +250,7 @@ void mImmersionPanel::SubTask_UpdateOLED()
    * T HH:MM:SS
    * */
   snprintf(buffer, sizeof(buffer), "%s",tkr_time->RtcTime.hhmmss_ctr);
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
 
   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 

@@ -1238,10 +1238,10 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 //   #ifdef   DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(pCONT_iLight->HUE_N2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(340),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(120),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(tkr_iLight->HUE_N2F(0),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(340),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(120),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 42;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 44; // 2 extra pixels on centre inlay
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 23;
@@ -1253,18 +1253,18 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 //   #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
 
 //   #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HUE_N2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(tkr_iLight->HUE_N2F(8),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(330),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(50));
 
 
 // lets make the new openhab IP at meadows be 192.168.1.80 to stop conflict with 192.168.3.70 at whitehall when using VPN
@@ -3314,7 +3314,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  // #define ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS
+  // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
   // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
   // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 110
   // #define ENABLE_DEBUG_FUNCTION_NAMES

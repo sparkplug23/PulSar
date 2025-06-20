@@ -290,7 +290,7 @@ bool SupportESP32::FoundPSRAM(void) {
 #if CONFIG_IDF_TARGET_ESP32C3
   return psramFound();
 #else
-  return psramFound() && esp_spiram_is_initialized();
+  return psramFound();// && esp_spiram_is_initialized();
 #endif
 }
 
@@ -309,23 +309,39 @@ bool SupportESP32::UsePSRAM(void) {
  * This function returns true if the chip supports PSRAM natively (v3) or if the
  * patches are present.
  */
+// bool SupportESP32::CanUsePSRAM(void) {
+//   if (!FoundPSRAM()) return false;
+// #ifdef HAS_PSRAM_FIX
+//   return true;
+// #endif
+// #ifdef CONFIG_IDF_TARGET_ESP32
+//   esp_chip_info_t chip_info;
+//   esp_chip_info(&chip_info);
+//   uint32_t chip_revision = chip_info.revision;
+//   // idf5 efuse_hal_chip_revision(void)
+//   if (chip_revision < 100) { chip_revision *= 100; }  // Make <idf5 idf5
+//   if ((CHIP_ESP32 == chip_info.model) && (chip_revision < 300)) {
+//     return false;
+//   }
+// #endif // CONFIG_IDF_TARGET_ESP32
+//   return true;
+// }
 bool SupportESP32::CanUsePSRAM(void) {
   if (!FoundPSRAM()) return false;
-#ifdef HAS_PSRAM_FIX
-  return true;
-#endif
+
 #ifdef CONFIG_IDF_TARGET_ESP32
   esp_chip_info_t chip_info;
   esp_chip_info(&chip_info);
   uint32_t chip_revision = chip_info.revision;
-  // idf5 efuse_hal_chip_revision(void)
-  if (chip_revision < 100) { chip_revision *= 100; }  // Make <idf5 idf5
+  if (chip_revision < 100) { chip_revision *= 100; }
+  // Allow rev < 3 only if psram is initialized and usable
   if ((CHIP_ESP32 == chip_info.model) && (chip_revision < 300)) {
-    return false;
+    return (ESP.getFreePsram() > 0);
   }
-#endif // CONFIG_IDF_TARGET_ESP32
+#endif
   return true;
 }
+
 
 
 // void *special_malloc(uint32_t size) {

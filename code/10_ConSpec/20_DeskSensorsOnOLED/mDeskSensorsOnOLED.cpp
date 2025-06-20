@@ -178,7 +178,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   }
 
   ALOG_DBM(PSTR("buffer %d %s"), line, buffer );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+  tkr_iDisp->LogBuffer_AddRow(buffer, line++);
 
   #endif
   /*****************************
@@ -200,7 +200,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   }
 
   ALOG_DBM(PSTR("buffer %d %s"), line, buffer );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+  tkr_iDisp->LogBuffer_AddRow(buffer, line++);
 
   #endif
   /*****************************
@@ -222,7 +222,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   }
 
   ALOG_DBM(PSTR("buffer %d %s"), line, buffer );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+  tkr_iDisp->LogBuffer_AddRow(buffer, line++);
 
   #endif
   /*****************************
@@ -244,7 +244,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   }
 
   ALOG_DBM(PSTR("buffer %d %s"), line, buffer );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, line++);
+  tkr_iDisp->LogBuffer_AddRow(buffer, line++);
 
   #endif
 
@@ -298,7 +298,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
       if(line >= 0)
       {
         snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-        pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+        tkr_iDisp->LogBuffer_AddRow(buffer, line);
       }
 
     }

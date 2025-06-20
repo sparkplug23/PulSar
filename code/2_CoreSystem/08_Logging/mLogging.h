@@ -761,7 +761,7 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len, boo
 
 
 template<typename T, typename U, typename V>
-void AddLog_Array_Block(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len, V arr_width, bool use_tabs)
+void AddLog_Array_Block(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len, V arr_width = 10, bool use_tabs = false)
 {
     // Create a buffer to store the log message
     char logBuffer[512];  // Adjust the size if needed
@@ -896,6 +896,7 @@ public:
 
     static void AddLog_Static(uint8_t loglevel, PGM_P formatP, ...);
 
+    void parse_JSONCommand(JsonParserObject obj);
 
 
     enum DEBUG_OUTPUT_IDS{

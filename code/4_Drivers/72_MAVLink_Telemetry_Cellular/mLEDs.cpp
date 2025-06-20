@@ -321,7 +321,7 @@
 //   DEBUG_LINE;
 //     // Update Link LED
 //     if ((!(tkr_set->Settings.ledstate &0x08)) && ((tkr_set->Settings.ledstate &0x06) || (tkr_set->blinks > 200) || (tkr_set->blinkstate))) {
-//       pCONT_led->SetLedLink(tkr_set->blinkstate);                            // Set led on or off
+//       tkr_led->SetLedLink(tkr_set->blinkstate);                            // Set led on or off
 //     }
 
 //     // If blink has completed
@@ -387,10 +387,10 @@
 //   // Primary method since v0.86.14.21
 //   if(jtok = obj["LED"].getObject()["State"]){
 //     if(jtok.isStr()){
-//       state = pCONT_sup->GetStateNumber(jtok.getStr());
+//       state = tkr_sup->GetStateNumber(jtok.getStr());
 //     }else 
 //     if(jtok.isNum()){
-//       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//       state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 //     }
 
 //     /**
@@ -465,10 +465,10 @@
 // //   // Primary method since v0.86.14.21
 // //   if(jtok = obj["LEDState"]){
 // //     // if(jtok.isStr()){
-// //     //   state = pCONT_sup->GetStateNumber(jtok.getStr());
+// //     //   state = tkr_sup->GetStateNumber(jtok.getStr());
 // //     // }else 
 // //     // if(jtok.isNum()){
-// //       state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+// //       state_value  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 // //     // }
 
 // //     /**

@@ -298,7 +298,7 @@ public:
 localOV2640Streamer::localOV2640Streamer(SOCKET aClient, int width, int height) : CStreamer(aClient, width, height) {
   clearframe();
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR("CAM:RTSP w%d h%d"), width, height);
+  ALOG_INF(PSTR("CAM:RTSP w%d h%d"), width, height);
 #endif
 }
 void localOV2640Streamer::setframe(BufPtr ptr, int len) {
@@ -312,7 +312,7 @@ void localOV2640Streamer::clearframe() {
 void localOV2640Streamer::streamImage(uint32_t curMsec){
   if (!f_ptr) return;
   streamFrame(f_ptr, f_len, curMsec);
-  //ALOG_DBG(PSTR(D_LOG_CAMERA "RTSP Stream Frame %d"), f_len);
+  //ALOG_INF(PSTR(D_LOG_CAMERA "RTSP Stream Frame %d"), f_len);
 }
 
 typedef struct tag_wc_rtspclient {
@@ -530,7 +530,7 @@ void mCamera::WcInterrupt(uint32_t state) {
     // Re-enable interrupts
     cam_start();
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "cam_start()"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "cam_start()"));
 #endif    
     Wc.disable_cam = 0;
   } else {
@@ -538,7 +538,7 @@ void mCamera::WcInterrupt(uint32_t state) {
     Wc.disable_cam = 1;
     cam_stop();
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "cam_stop()"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "cam_stop()"));
 #endif
   }
 }
@@ -569,9 +569,22 @@ void mCamera::WcWaitEnable(){
   }
 }
 
-bool mCamera::WcPinUsed(void) {
+bool mCamera::WcPinUsed(void) 
+{
+
+  // for (uint32_t i = 0; i < GPIO_WEBCAM_DATA8-GPIO_WEBCAM_DATA1; i++)
+  // {
+  //   ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_DATA%d: %d"), i, tkr_pins->PinUsed(GPIO_WEBCAM_DATA1, i));
+  // }
+  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_XCLK: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_XCLK));
+  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_PCLK: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_PCLK));
+  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_VSYNC: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_VSYNC));
+  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_HREF: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_HREF));
+  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_SIOD: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_SIOD));
+  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_SIOC: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_SIOC));
+
   bool pin_used = true;
-  for (uint32_t i = 0; i < GPIO_WEBCAM_DATA8; i++) {
+  for (uint32_t i = 0; i < (GPIO_WEBCAM_DATA8-GPIO_WEBCAM_DATA1); i++) {
     if (!tkr_pins->PinUsed(GPIO_WEBCAM_DATA1, i)) {
       pin_used = false;
     }
@@ -583,15 +596,21 @@ bool mCamera::WcPinUsed(void) {
   }
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "i2c_enabled_2: %d"), tkr_set->runtime.i2c_enabled/*[1]*/);
+  ALOG_INF(PSTR(D_LOG_CAMERA "i2c_enabled: %d"), tkr_set->runtime.i2c_enabled/*[1]*/);
 #endif
 
-  if (!tkr_pins->PinUsed(GPIO_WEBCAM_XCLK) || !tkr_pins->PinUsed(GPIO_WEBCAM_PCLK) ||
-      !tkr_pins->PinUsed(GPIO_WEBCAM_VSYNC) || !tkr_pins->PinUsed(GPIO_WEBCAM_HREF) ||
-      ((!tkr_pins->PinUsed(GPIO_WEBCAM_SIOD) || !tkr_pins->PinUsed(GPIO_WEBCAM_SIOC)) && !tkr_set->runtime.i2c_enabled/*[1]*/)    // preferred option is to reuse and share I2Cbus 2
-      ) {
+  if (
+    !tkr_pins->PinUsed(GPIO_WEBCAM_XCLK) || 
+    !tkr_pins->PinUsed(GPIO_WEBCAM_PCLK) ||
+    !tkr_pins->PinUsed(GPIO_WEBCAM_VSYNC) || 
+    !tkr_pins->PinUsed(GPIO_WEBCAM_HREF) ||
+    ((!tkr_pins->PinUsed(GPIO_WEBCAM_SIOD) || !tkr_pins->PinUsed(GPIO_WEBCAM_SIOC)) && !tkr_set->runtime.i2c_enabled/*[1]*/)    // preferred option is to reuse and share I2Cbus 2
+  ) {
         pin_used = false;
   }
+
+
+
   return pin_used;
 }
 
@@ -627,7 +646,7 @@ void mCamera::WcFeature(int32_t value) {
       break;
   }
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "Feature: %d"), value);
+  ALOG_INF(PSTR(D_LOG_CAMERA "Feature: %d"), value);
 #endif  
 }
 
@@ -666,7 +685,7 @@ void mCamera::WcApplySettings() {
 
   WcFeature(tkr_set->Settings.webcam_config.feature);
 
-  ALOG_DBG(PSTR(D_LOG_CAMERA "Settings updated"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "Settings updated"));
 }
 
 void mCamera::WcSetDefaults(uint32_t upgrade) {
@@ -708,7 +727,7 @@ void mCamera::WcSetDefaults(uint32_t upgrade) {
   #endif
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "Defaults set"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "Defaults set"));
 #endif
   if (Wc.up) { WcApplySettings(); }
 }
@@ -721,7 +740,7 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcSetup", 200);
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "WcSetup"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "WcSetup"));
 #endif  
   // if 15, make it -1, so disableing
   if (fsiz >= FRAMESIZE_FHD) { fsiz = -1; }
@@ -729,7 +748,7 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
   if (fsiz < 0) {
     if (Wc.up){    
       esp_camera_deinit();
-      ALOG_DBG(PSTR(D_LOG_CAMERA "Deinit fsiz %d"), fsiz);
+      ALOG_INF(PSTR(D_LOG_CAMERA "Deinit fsiz %d"), fsiz);
       Wc.up = 0;
     }
     Wc.lastCamError = 0x1;
@@ -739,7 +758,7 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
   if (Wc.up) {
     esp_camera_deinit();
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "Deinit"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "Deinit"));
 #endif    
     //return Wc.up;
   }
@@ -747,9 +766,12 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
 
 //esp_log_level_set("*", ESP_LOG_VERBOSE);
 
-  camera_config_t config;
+  // camera_config_t config;
 
   memset(&config, 0, sizeof(config));
+
+    ALOG_INF(PSTR("WcPinUsed() = %d"), WcPinUsed());
+
 
   if (WcPinUsed()) {
     config.pin_d0       = tkr_pins->Pin(GPIO_WEBCAM_DATA1);        // Y2_GPIO_NUM;
@@ -777,7 +799,7 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
     config.pin_pwdn = tkr_pins->Pin(GPIO_WEBCAM_PWDN);       // PWDN_GPIO_NUM;
     config.pin_reset = tkr_pins->Pin(GPIO_WEBCAM_RESET);    // RESET_GPIO_NUM;
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "Template pin config"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "Template pin config"));
 #endif    
   } else if (Y2_GPIO_NUM != -1) {
     // Modell is set in camera_pins.h
@@ -798,18 +820,18 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "Compile flag pin config"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "Compile flag pin config"));
 #endif    
   } else {
     // no valid config found -> abort
-    ALOG_DBG(PSTR(D_LOG_CAMERA "No pin config"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "No pin config"));
     return 0;
   }
 
   // always power cycle the camera
   // this adds 400ms to start delay, but is worth it to solve random 0x105
   if (config.pin_pwdn >= 0){
-    ALOG_DBG(PSTR(D_LOG_CAMERA "pwdn pin %d"), config.pin_pwdn);
+    ALOG_INF(PSTR(D_LOG_CAMERA "pwdn pin %d"), config.pin_pwdn);
     // this is only done in driver first init
     // so first run, we should configure as they do.
     gpio_config_t conf = { 0 };
@@ -835,7 +857,7 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
   }
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG("CAM: get ledc channel");
+  ALOG_INF("CAM: get ledc channel");
 #endif
 
   int32_t ledc_channel = analogAttach(config.pin_xclk);/*added by me*/
@@ -861,10 +883,9 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
   if (Wc.camPixelFormat) pixFormat = (Wc.camPixelFormat-1);
   
   config.pixel_format = (pixformat_t)pixFormat;
-  if (config.pixel_format != PIXFORMAT_JPEG){
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+  if (config.pixel_format != PIXFORMAT_JPEG)
+  {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "Pixel format is %d, not JPEG"), config.pixel_format);
-#endif    
   }
   //;
   //esp_log_level_set("*", ESP_LOG_INFO);
@@ -872,33 +893,23 @@ uint32_t mCamera::WcSetup(int32_t fsiz) {
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG("CAM: get psram");
-#endif
+  ALOG_INF("CAM: get psram");
 
-AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", 
-  SupportESP32::FoundPSRAM(), 
-  SupportESP32::UsePSRAM());
-  AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
-    ESP.getFreeHeap(), 
-    ESP.getFreePsram());
-
-
+  AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", SupportESP32::FoundPSRAM(), SupportESP32::UsePSRAM());
+  AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", ESP.getFreeHeap(), ESP.getFreePsram());
 
   Wc.psram = SupportESP32::UsePSRAM();
   if (Wc.psram) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "PSRAM found"));
-#endif
+    ALOG_INF(PSTR(D_LOG_CAMERA "PSRAM found"));
   } else {
     config.frame_size = FRAMESIZE_VGA;
     config.jpeg_quality = 12;
     config.fb_count = 1;
     config.fb_location = CAMERA_FB_IN_DRAM;
-    ALOG_DBG(PSTR(D_LOG_CAMERA "PSRAM not found"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "PSRAM not found"));
   }
 
 
@@ -964,12 +975,15 @@ AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d",
 }
 
 
-void mCamera::WcRemoveDeadCients(){
+void mCamera::WcRemoveDeadCients()
+{
   // iterate over clients removing dead ones
   mCamera::wc_client *client = Wc.client_p;
   mCamera::wc_client **prev = &Wc.client_p;
-  while(client){
-    if (!client->active){
+  while(client)
+  {
+    if (!client->active)
+    {
       // just in case...
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcLoop", 200);
       *prev = client->p_next;
@@ -1315,7 +1329,7 @@ void mCamera::HandleImage(void) {
         pic_free(&Wc.snapshotStore);
       } else {
         Webserver->send(404,"",""); 
-        ALOG_DBG(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
+        ALOG_INF(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
         return;
       }
     } else {
@@ -1327,7 +1341,7 @@ void mCamera::HandleImage(void) {
     bnum--;
     if (!Wc.picstore[bnum].len) {
       Webserver->send(404,"",""); 
-      ALOG_DBG(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
+      ALOG_INF(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
       return;
     }
     response += itoa(Wc.picstore[bnum].len, tmp, 10);
@@ -1364,18 +1378,18 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
 
   if (ps->format != PIXFORMAT_JPEG) {
 #ifdef USE_WEBCAM_MOTION
-    ALOG_DBG(PSTR(D_LOG_CAMERA "image will be encoded from %d"), ps->format);
+    ALOG_INF(PSTR(D_LOG_CAMERA "image will be encoded from %d"), ps->format);
 
     mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleImagemotion", 2000);
     // use a malloc that we don't free to save memory creep
     // it is re-mallcoed if the frame does not fit.
-    ALOG_DBG(PSTR(D_LOG_CAMERA "%x %d %d %d"), ps->buff, ps->len, ps->width, ps->height);
+    ALOG_INF(PSTR(D_LOG_CAMERA "%x %d %d %d"), ps->buff, ps->len, ps->width, ps->height);
     conv = WcencodeToJpeg(ps->buff, ps->len, ps->width, ps->height, (int)ps->format, 80, &psout);
-    if (!conv) ALOG_DBG(PSTR(D_LOG_CAMERA "image encode failed"));
+    if (!conv) ALOG_INF(PSTR(D_LOG_CAMERA "image encode failed"));
 
     _jpg_buf_len = psout.len;
     _jpg_buf = psout.buff;
-    ALOG_DBG(PSTR(D_LOG_CAMERA "encoded %X %d (%dx%d) -> %X %d (%d)"),
+    ALOG_INF(PSTR(D_LOG_CAMERA "encoded %X %d (%dx%d) -> %X %d (%d)"),
       ps->buff, ps->len, ps->width, ps->height,
       _jpg_buf, _jpg_buf_len,
       psout.allocatedLen
@@ -1385,7 +1399,7 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
     _jpg_buf_len = ps->len;
     _jpg_buf = ps->buff;
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-    ALOG_DBG(PSTR(D_LOG_CAMERA "already jpeg %X %d (%dx%d) (%d)"),
+    ALOG_INF(PSTR(D_LOG_CAMERA "already jpeg %X %d (%dx%d) (%d)"),
       ps->buff, ps->len, ps->width, ps->height,
       ps->allocatedLen
     );
@@ -1407,7 +1421,7 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
   }
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "image could not be encoded"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "image could not be encoded"));
 #endif
   if (conv){
     pic_free(&psout);
@@ -1431,7 +1445,7 @@ void mCamera::HandleWebcamMjpegFn(int type) {
   client->client = Wc.CamServer->client();
   Wc.client_p = client;
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "Create client"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "Create client"));
 #endif
 }
 
@@ -1452,7 +1466,7 @@ void mCamera::HandleWebcamRoot(void) {
   tkr_camera->Wc.CamServer->sendHeader("Location", "/cam.mjpeg");
   tkr_camera->Wc.CamServer->send(302, "", "");
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "Root called"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "Root called"));
 #endif
 }
 
@@ -1474,8 +1488,13 @@ uint32_t mCamera::WcSetStreamserver(uint32_t flag) {
       
     Webserver = new ESP8266WebServer(82);
     // Webserver->on("/cam.jpg", HandleImage);
+    
+    tkr_web->server->on(PSTR("/wc.jpg"), HTTP_ANY, [this](AsyncWebServerRequest *request){
+      this->HandleImage();
+    });
+
     Webserver->begin();
-      ALOG_DBG(PSTR("WebServer started on port 82"));
+      ALOG_INF(PSTR("WebServer started on port 82"));
 
 
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
@@ -1491,7 +1510,7 @@ uint32_t mCamera::WcSetStreamserver(uint32_t flag) {
       Wc.CamServer->on("/stream", HandleWebcamMjpeg);
 
 
-      ALOG_DBG(PSTR(D_LOG_CAMERA "Strm init"));
+      ALOG_INF(PSTR(D_LOG_CAMERA "Strm init"));
       Wc.CamServer->begin();
     }else{
       
@@ -1506,7 +1525,7 @@ uint32_t mCamera::WcSetStreamserver(uint32_t flag) {
       Wc.CamServer->stop();
       delete Wc.CamServer;
       Wc.CamServer = NULL;
-      ALOG_DBG(PSTR(D_LOG_CAMERA "Strm exit"));
+      ALOG_INF(PSTR(D_LOG_CAMERA "Strm exit"));
     }
   }
   return 0;
@@ -1519,7 +1538,7 @@ void mCamera::WCStartOperationTask()
   if (Wc.taskRunning == 0)
   {
 
-    ALOG_DBG(PSTR(D_LOG_CAMERA "Start operations"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "Start operations"));
 
     xTaskCreatePinnedToCore(
       mCamera::WCOperationTask,    /* Function to implement the task */
@@ -1551,7 +1570,7 @@ void mCamera::WCOperationTask(void *pvParameters){
   unsigned long loopcount = 0;
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_DBG(PSTR(D_LOG_CAMERA "WCOperationTask: Start task"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "WCOperationTask: Start task"));
 #endif
   int framecount = 0;
   unsigned long laststatmillis = millis();
@@ -1592,7 +1611,7 @@ void mCamera::WCOperationTask(void *pvParameters){
         if (!wc_fb) {
           // add framecount so we show this right away if we were showing frames.
           if (!(loopcount % 100) || (statdur > 5000) || framecount){
-            ALOG_DBG(PSTR(D_LOG_CAMERA "Frame fail")); 
+            ALOG_INF(PSTR(D_LOG_CAMERA "Frame fail")); 
             laststatmillis = thismillis;
             framecount = 0;
           }
@@ -1622,7 +1641,7 @@ void mCamera::WCOperationTask(void *pvParameters){
               if (skipsWanted > 0) skipsWanted --;
             } else {
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-              ALOG_DBG(PSTR(D_LOG_CAMERA "Duplicate time in frame? diff %d intv %d"), camdiff, tkr_camera->Wc.frameIntervalsus);
+              ALOG_INF(PSTR(D_LOG_CAMERA "Duplicate time in frame? diff %d intv %d"), camdiff, tkr_camera->Wc.frameIntervalsus);
 #endif              
             }
           }
@@ -1631,7 +1650,7 @@ void mCamera::WCOperationTask(void *pvParameters){
           // every 100 frames or 5s
           if (!(loopcount % 100) || (statdur > 5000)){
             float framespersec = ((float)framecount)/(((float)(thismillis - laststatmillis))/1000.0);
-            ALOG_DBG(PSTR(D_LOG_CAMERA "avFPS %f %s FS:%d(%d) f:%u s:%u"), 
+            ALOG_INF(PSTR(D_LOG_CAMERA "avFPS %f %s FS:%d(%d) f:%u s:%u"), 
               framespersec, 
               jpeg_converted?"raw":"jpg", 
               wc_fb->len, 
@@ -1702,7 +1721,7 @@ void mCamera::WCOperationTask(void *pvParameters){
                 if (!jpeg_converted)
                 {
                   #ifdef DEBUG_DRIVERS__CAMERA_2025  
-                  ALOG_DBG(PSTR(D_LOG_CAMERA "JPEG compression failed"));
+                  ALOG_INF(PSTR(D_LOG_CAMERA "JPEG compression failed"));
                   #endif                  
                   tkr_camera->WcStats.jpegfail++;
                 }
@@ -1754,13 +1773,13 @@ void mCamera::WCOperationTask(void *pvParameters){
                     tkr_camera->Wc.picstore[bnum].height = tkr_camera->Wc.height;
 
                     #ifdef DEBUG_DRIVERS__CAMERA_2025  
-                    ALOG_DBG(PSTR(D_LOG_CAMERA "Got frame %d"), tkr_camera->Wc.lastBnum);
+                    ALOG_INF(PSTR(D_LOG_CAMERA "Got frame %d"), tkr_camera->Wc.lastBnum);
                     #endif                    
                   } 
                   else 
                   {
                     #ifdef DEBUG_DRIVERS__CAMERA_2025  
-                    ALOG_DBG(PSTR(D_LOG_CAMERA "Can't allocate picstore"));
+                    ALOG_INF(PSTR(D_LOG_CAMERA "Can't allocate picstore"));
                     #endif                    
                   }
                   tkr_camera->Wc.taskGetFrame = 0;
@@ -1792,7 +1811,7 @@ void mCamera::WCOperationTask(void *pvParameters){
                     if (!client->client.connected())
                     {
                       #ifdef DEBUG_DRIVERS__CAMERA_2025  
-                      ALOG_DBG(PSTR(D_LOG_CAMERA "Client fail"));
+                      ALOG_INF(PSTR(D_LOG_CAMERA "Client fail"));
                       #endif                      
                       client->active = 0;
                       tkr_camera->WcStats.clientfail++;
@@ -1802,7 +1821,7 @@ void mCamera::WCOperationTask(void *pvParameters){
                       client->client.setTimeout(3);
 
                       #ifdef DEBUG_DRIVERS__CAMERA_2025  
-                      ALOG_DBG(PSTR(D_LOG_CAMERA "Start stream"));
+                      ALOG_INF(PSTR(D_LOG_CAMERA "Start stream"));
                       #endif       
 
                       client->client.print("HTTP/1.1 200 OK\r\n"
@@ -1872,7 +1891,7 @@ void mCamera::WCOperationTask(void *pvParameters){
                     // if it took more than 20s to send to the client, then kill it.
                     // this was observed on wifi rescan
                     if (client_end - client_start > 20000){
-                      ALOG_DBG(PSTR(D_LOG_CAMERA "Cl timeout on send"));
+                      ALOG_INF(PSTR(D_LOG_CAMERA "Cl timeout on send"));
                       tkr_camera->WcStats.clientfail++;
                       client->client.stop();
                       client->active = 0;
@@ -1938,7 +1957,7 @@ void mCamera::WCOperationTask(void *pvParameters){
 
   // this log sometimes causes guru mediation error. Maybe because 
   // temp storage is removed before it is serviced?
-  ALOG_DBG(PSTR(D_LOG_CAMERA "Left task"));
+  ALOG_INF(PSTR(D_LOG_CAMERA "Left task"));
   tkr_camera->Wc.taskRunning = 0;
 
   // wait 1/2 second for log to be done?
@@ -1966,7 +1985,7 @@ void mCamera::WcLoop(void)
       callBerryEventDispatcher("webcam", "motion", 0, t, strlen(t));
 #endif
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-      ALOG_DBG(PSTR(D_LOG_CAMERA "Motion Triggered"));
+      ALOG_INF(PSTR(D_LOG_CAMERA "Motion Triggered"));
 #endif      
       WcMotionLog();
       wc_motion.motion_triggered = 0;
@@ -1979,7 +1998,7 @@ void mCamera::WcLoop(void)
       callBerryEventDispatcher("webcam", "framesizechange", 0, t, strlen(t));
 #endif
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-      ALOG_DBG(PSTR(D_LOG_CAMERA "Framesize Change > %d = %d"), Wc.lenDiffLimit, Wc.lenDiffTriggered);
+      ALOG_INF(PSTR(D_LOG_CAMERA "Framesize Change > %d = %d"), Wc.lenDiffLimit, Wc.lenDiffTriggered);
 #endif      
       Wc.lenDiffTrigger = 0;
 #ifdef USE_WEBCAM_MOTION
@@ -2168,7 +2187,7 @@ void mCamera::WcInit(void) {
   // previous webcam driver had only a small subset of possible config vars
   // in this case we have to only set the new variables to default values
   if(!tkr_set->Settings.webcam_config2.upgraded) {
-    ALOG_DBG(PSTR(D_LOG_CAMERA "Upg settings"));
+    ALOG_INF(PSTR(D_LOG_CAMERA "Upg settings"));
     WcSetDefaults(1);
     tkr_set->Settings.webcam_config2.upgraded = 1;
   }
@@ -2285,16 +2304,6 @@ void mCamera::BootMessage()
  * Commands
 *******************************************************************************************************************/
 
-void mCamera::parse_JSONCommand(JsonParserObject obj)
-{
-
-  JsonParserToken jtok = 0; 
-  JsonParserToken jtok_sub = 0; 
-  int8_t tmp_id = 0;
-
-
-}
-  
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/
@@ -2303,7 +2312,25 @@ uint8_t mCamera::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 
   JBI->Start();
   
-  JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID,0));
+  JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV,0));
+
+
+  JBI->Add("pin_d0", config.pin_d0);
+  JBI->Add("pin_d1", config.pin_d1);
+  JBI->Add("pin_d2", config.pin_d2);
+  JBI->Add("pin_d3", config.pin_d3);
+  JBI->Add("pin_d4", config.pin_d4);
+  JBI->Add("pin_d5", config.pin_d5);
+  JBI->Add("pin_d6", config.pin_d6);
+  JBI->Add("pin_d7", config.pin_d7);
+  JBI->Add("pin_xclk", config.pin_xclk);
+  JBI->Add("pin_pclk", config.pin_pclk);
+  JBI->Add("pin_vsync", config.pin_vsync);
+  JBI->Add("pin_href", config.pin_href);
+  JBI->Add("pin_sccb_sda", config.pin_sccb_sda);
+  JBI->Add("pin_sccb_scl", config.pin_sccb_scl);
+
+
   return JBI->End();
 
 }
@@ -2314,8 +2341,8 @@ uint8_t mCamera::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID,0));
-    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID,0));
+    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV,0));
+    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV,0));
 
   return JBI->End();
 
@@ -2375,6 +2402,10 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_BOOT_MESSAGE:
       BootMessage();
     break;
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+      return 1;
+    break;
   }
   
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -2399,6 +2430,12 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
         AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", SupportESP32::FoundPSRAM(), SupportESP32::UsePSRAM());
         AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", ESP.getFreeHeap(), ESP.getFreePsram());
       }
+      // AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d CanUsePSRAM=%d", 
+      //   SupportESP32::FoundPSRAM(), 
+      //   SupportESP32::UsePSRAM(), SupportESP32::CanUsePSRAM());
+      //   AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
+      //     ESP.getFreeHeap(), 
+      //     ESP.getFreePsram());
           
       WcUpdateStats();
     break;

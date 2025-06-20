@@ -205,13 +205,13 @@
 //     switch(row){
 //       case 0:{        
 //         char table_row[25]; memset(table_row,0,sizeof(table_row));        
-//         // sprintf(table_row,"%s&deg;%c",climate.ptr->temperature_ctr,pCONT_sup->TempUnit());
+//         // sprintf(table_row,"%s&deg;%c",climate.ptr->temperature_ctr,tkr_sup->TempUnit());
         
 //         char float_ctr[10];
 //         memset(float_ctr,0,sizeof(float_ctr));
         
 //       #ifdef USE_MODULE_SENSORS_DS18X
-//         float height = 120-pCONT_ult->GetDistanceCMReading();
+//         float height = 120-tkr_ult->GetDistanceCMReading();
 //         #else
 //         float height = 120-0;
 

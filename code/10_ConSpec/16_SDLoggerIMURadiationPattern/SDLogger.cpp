@@ -43,7 +43,7 @@ int8_t mSDLoggerIMURadiationPattern::Tasker(uint8_t function, JsonParserObject o
     *******************/
     case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
+      tkr_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
       #endif
       sequence_test = 0;
     break;
@@ -82,16 +82,16 @@ void mSDLoggerIMURadiationPattern::UpdateInternalRTCTimeWithGPSTime()
    * Only update the time IF the sdcard is not open already and being written to
    * */
   #if defined(USE_MODULE_SENSORS_GPS_SERIAL) && defined(USE_SYSTEM_SDCARD_LOGGING)
-  if(pCONT_sdcard->sdcard_status.isopened==0)
+  if(tkr_sdcard->sdcard_status.isopened==0)
   {
 
     tkr_time->SetUTCTime(
-      pCONT_gps->gps_result_stored.dateTime.year,
-      pCONT_gps->gps_result_stored.dateTime.month,
-      pCONT_gps->gps_result_stored.dateTime.day,
-      pCONT_gps->gps_result_stored.dateTime.hours,
-      pCONT_gps->gps_result_stored.dateTime.minutes,
-      pCONT_gps->gps_result_stored.dateTime.seconds
+      tkr_gps->gps_result_stored.dateTime.year,
+      tkr_gps->gps_result_stored.dateTime.month,
+      tkr_gps->gps_result_stored.dateTime.day,
+      tkr_gps->gps_result_stored.dateTime.hours,
+      tkr_gps->gps_result_stored.dateTime.minutes,
+      tkr_gps->gps_result_stored.dateTime.seconds
     );
 
   }
@@ -198,7 +198,7 @@ void mSDLoggerIMURadiationPattern::EveryLoop()
       if(digitalRead(GPIO_FUNCTION_MANUAL_ENABLE_SAMPLING_NUMBER)==0)
       {
       #endif
-        pCONT_sdcard->AppendRingBuffer(JBI->GetPtr(), JBI->GetLength());
+        tkr_sdcard->AppendRingBuffer(JBI->GetPtr(), JBI->GetLength());
       #ifdef ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
       }
       #endif
@@ -253,20 +253,20 @@ void mSDLoggerIMURadiationPattern::SubTask_UpdateOLED()
     adc_values.adc2, 
     adc_values.adc5,digitalRead(GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER)?'N':'S'
   );
-  pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
+  tkr_iDisp->LogBuffer_AddRow(line_ctr, 0);
   #endif // USE_DEVFEATURE_ADC_IN_CONTROLLER
 
   #ifdef USE_MODULE_DRIVERS_SDCARD
   snprintf(buffer, sizeof(buffer), "%c%s%s",
-    pCONT_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
-    pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID ?"OPEN!":"cd",
-    &pCONT_sdcard->writer_settings.file_name[8] //skipping "APPEND_" to get just time
+    tkr_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
+    tkr_sdcard->writer_settings.status == tkr_sdcard->FILE_STATUS_OPENED_ID ?"OPEN!":"cd",
+    &tkr_sdcard->writer_settings.file_name[8] //skipping "APPEND_" to get just time
   );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 1);
   #endif //USE_MODULE_DRIVERS_SDCARD
   
   #ifdef USE_MODULE_DRIVERS_SDCARD
-  uint32_t bytes_written = pCONT_sdcard->sdcard_status.bytes_written_to_file;
+  uint32_t bytes_written = tkr_sdcard->sdcard_status.bytes_written_to_file;
   char unit_type = 'B';
 
   if(bytes_written>50000)
@@ -275,15 +275,15 @@ void mSDLoggerIMURadiationPattern::SubTask_UpdateOLED()
     unit_type = 'k';
   }
 
-      pCONT_LSM303D->CalculateOrientation(
-        pCONT_LSM303D->sensor[0].lsm303d->a.x, pCONT_LSM303D->sensor[0].lsm303d->a.y, pCONT_LSM303D->sensor[0].lsm303d->a.z, 
-        pCONT_LSM303D->sensor[0].lsm303d->m.x, pCONT_LSM303D->sensor[0].lsm303d->m.y, pCONT_LSM303D->sensor[0].lsm303d->m.z, 
+      tkr_LSM303D->CalculateOrientation(
+        tkr_LSM303D->sensor[0].lsm303d->a.x, tkr_LSM303D->sensor[0].lsm303d->a.y, tkr_LSM303D->sensor[0].lsm303d->a.z, 
+        tkr_LSM303D->sensor[0].lsm303d->m.x, tkr_LSM303D->sensor[0].lsm303d->m.y, tkr_LSM303D->sensor[0].lsm303d->m.z, 
         &heading, &roll, &pitch
       );
 
   snprintf(buffer, sizeof(buffer), "%d %c H%d",bytes_written,unit_type, (int)heading);
   
-  pCONT_iDisp->LogBuffer_AddRow(buffer,2);
+  tkr_iDisp->LogBuffer_AddRow(buffer,2);
   #endif // USE_MODULE_DRIVERS_SDCARD
 
   /**
@@ -291,15 +291,15 @@ void mSDLoggerIMURadiationPattern::SubTask_UpdateOLED()
    * */
   #ifdef USE_MODULE_SENSORS_LSM303D
 
-// pCONT_LSM303D->sensor[0].lsm303d
+// tkr_LSM303D->sensor[0].lsm303d
 //   heading
 
 
   snprintf(buffer, sizeof(buffer), "R%d P:%d", (int)roll, (int)pitch);
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
   #else // USE_MODULE_SENSORS_LSM303D
   snprintf(buffer, sizeof(buffer), "LSM303D d/c");
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
   #endif // USE_MODULE_SENSORS_LSM303D
 
   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -359,24 +359,24 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
     JBI->Object_Start("IA"); // 9 axis gyro
 
       #ifdef USE_MODULE_SENSORS_LSM303D
-      pCONT_LSM303D->sensor[0].lsm303d->read();
+      tkr_LSM303D->sensor[0].lsm303d->read();
       JBI->Object_Start("M");
-        JBI->Add("x", pCONT_LSM303D->sensor[0].lsm303d->m.x);
-        JBI->Add("y", pCONT_LSM303D->sensor[0].lsm303d->m.y);
-        JBI->Add("z", pCONT_LSM303D->sensor[0].lsm303d->m.z);
+        JBI->Add("x", tkr_LSM303D->sensor[0].lsm303d->m.x);
+        JBI->Add("y", tkr_LSM303D->sensor[0].lsm303d->m.y);
+        JBI->Add("z", tkr_LSM303D->sensor[0].lsm303d->m.z);
       JBI->Object_End();
       JBI->Object_Start("A");
-        JBI->Add("x", pCONT_LSM303D->sensor[0].lsm303d->a.x);
-        JBI->Add("y", pCONT_LSM303D->sensor[0].lsm303d->a.y);
-        JBI->Add("z", pCONT_LSM303D->sensor[0].lsm303d->a.z);
+        JBI->Add("x", tkr_LSM303D->sensor[0].lsm303d->a.x);
+        JBI->Add("y", tkr_LSM303D->sensor[0].lsm303d->a.y);
+        JBI->Add("z", tkr_LSM303D->sensor[0].lsm303d->a.z);
       JBI->Object_End();
       
       float heading;
       float roll;
       float pitch;
-      pCONT_LSM303D->CalculateOrientation(
-        pCONT_LSM303D->sensor[0].lsm303d->a.x, pCONT_LSM303D->sensor[0].lsm303d->a.y, pCONT_LSM303D->sensor[0].lsm303d->a.z, 
-        pCONT_LSM303D->sensor[0].lsm303d->m.x, pCONT_LSM303D->sensor[0].lsm303d->m.y, pCONT_LSM303D->sensor[0].lsm303d->m.z, 
+      tkr_LSM303D->CalculateOrientation(
+        tkr_LSM303D->sensor[0].lsm303d->a.x, tkr_LSM303D->sensor[0].lsm303d->a.y, tkr_LSM303D->sensor[0].lsm303d->a.z, 
+        tkr_LSM303D->sensor[0].lsm303d->m.x, tkr_LSM303D->sensor[0].lsm303d->m.y, tkr_LSM303D->sensor[0].lsm303d->m.z, 
         &heading, &roll, &pitch
       );
 
@@ -388,11 +388,11 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
 
       #endif
       #ifdef USE_MODULE_SENSORS_L3G
-      pCONT_L3G->gyro->read();
+      tkr_L3G->gyro->read();
       JBI->Object_Start("G");
-        JBI->Add("x", pCONT_L3G->gyro->g.x);
-        JBI->Add("y", pCONT_L3G->gyro->g.y);
-        JBI->Add("z", pCONT_L3G->gyro->g.z);
+        JBI->Add("x", tkr_L3G->gyro->g.x);
+        JBI->Add("y", tkr_L3G->gyro->g.y);
+        JBI->Add("z", tkr_L3G->gyro->g.z);
       JBI->Object_End();
       #endif
     
@@ -401,21 +401,21 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
     
     JBI->Object_Start("IL"); // 6 axis -- leg
       #ifdef USE_MODULE_SENSORS_LSM303D
-      pCONT_LSM303D->sensor[1].lsm303d->read();
+      tkr_LSM303D->sensor[1].lsm303d->read();
       JBI->Object_Start("M");
-        JBI->Add("x", pCONT_LSM303D->sensor[1].lsm303d->m.x);
-        JBI->Add("y", pCONT_LSM303D->sensor[1].lsm303d->m.y);
-        JBI->Add("z", pCONT_LSM303D->sensor[1].lsm303d->m.z);
+        JBI->Add("x", tkr_LSM303D->sensor[1].lsm303d->m.x);
+        JBI->Add("y", tkr_LSM303D->sensor[1].lsm303d->m.y);
+        JBI->Add("z", tkr_LSM303D->sensor[1].lsm303d->m.z);
       JBI->Object_End();
       JBI->Object_Start("A");
-        JBI->Add("x", pCONT_LSM303D->sensor[1].lsm303d->a.x);
-        JBI->Add("y", pCONT_LSM303D->sensor[1].lsm303d->a.y);
-        JBI->Add("z", pCONT_LSM303D->sensor[1].lsm303d->a.z);
+        JBI->Add("x", tkr_LSM303D->sensor[1].lsm303d->a.x);
+        JBI->Add("y", tkr_LSM303D->sensor[1].lsm303d->a.y);
+        JBI->Add("z", tkr_LSM303D->sensor[1].lsm303d->a.z);
       JBI->Object_End();
       
-      pCONT_LSM303D->CalculateOrientation(
-        pCONT_LSM303D->sensor[1].lsm303d->a.x, pCONT_LSM303D->sensor[1].lsm303d->a.y, pCONT_LSM303D->sensor[1].lsm303d->a.z, 
-        pCONT_LSM303D->sensor[1].lsm303d->m.x, pCONT_LSM303D->sensor[1].lsm303d->m.y, pCONT_LSM303D->sensor[1].lsm303d->m.z, 
+      tkr_LSM303D->CalculateOrientation(
+        tkr_LSM303D->sensor[1].lsm303d->a.x, tkr_LSM303D->sensor[1].lsm303d->a.y, tkr_LSM303D->sensor[1].lsm303d->a.z, 
+        tkr_LSM303D->sensor[1].lsm303d->m.x, tkr_LSM303D->sensor[1].lsm303d->m.y, tkr_LSM303D->sensor[1].lsm303d->m.z, 
         &heading, &roll, &pitch
       );
 
@@ -562,10 +562,10 @@ void mSDLoggerIMURadiationPattern::parse_JSONCommand(JsonParserObject obj)
 //   // Primary method since v0.86.14.21
 //   if(jtok = obj[PM_POWER_STATE]){
 //     if(jtok.isStr()){
-//       state = pCONT_sup->GetStateNumber(jtok.getStr());
+//       state = tkr_sup->GetStateNumber(jtok.getStr());
 //     }else 
 //     if(jtok.isNum()){
-//       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//       state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 //     }
 
 // 		//state needs checked for flipped
@@ -578,10 +578,10 @@ void mSDLoggerIMURadiationPattern::parse_JSONCommand(JsonParserObject obj)
 //   // PHASE OUT by version 0.87
 //   if(jtok = obj[PM_ONOFF]){
 //     if(jtok.isStr()){
-//       state = pCONT_sup->GetStateNumber(jtok.getStr());
+//       state = tkr_sup->GetStateNumber(jtok.getStr());
 //     }else 
 //     if(jtok.isNum()){
-//       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//       state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 //     }
 //   }
 

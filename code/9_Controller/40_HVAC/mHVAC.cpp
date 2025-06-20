@@ -120,7 +120,7 @@ void mHVAC::Save_Module()
   ALOG_INF(PSTR("%d Save_Module  %d"), 3, rt.zone[3].program_timer_method.GetTimer_Seconds());
 
 
-  pCONT_mfile->ByteFile_Save("/hvac" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Save("/hvac" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 
 }
 void mHVAC::Load_Module(bool erase)
@@ -140,7 +140,7 @@ void mHVAC::Load_Module(bool erase)
   ALOG_INF(PSTR("%d relay %d"), 2, rt.zone[2].program_timer_method.GetTimer_Seconds());
   ALOG_INF(PSTR("%d relay %d"), 3, rt.zone[3].program_timer_method.GetTimer_Seconds());
 
-  pCONT_mfile->ByteFile_Load("/hvac" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Load("/hvac" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 
   ALOG_INF(PSTR("%d Load_Module %d"), 0, rt.zone[0].program_timer_method.GetTimer_Seconds());
   ALOG_INF(PSTR("%d Load_Module %d"), 1, rt.zone[1].program_timer_method.GetTimer_Seconds());
@@ -235,7 +235,7 @@ void mHVAC::YTask_Init(){
 void mHVAC::YTask_Loop()
 {  
   for(auto& handle:functionhandler_list){
-    pCONT_sup->YTask_Call(*this, GetModuleUniqueID(), handle);
+    tkr_sup->YTask_Call(*this, GetModuleUniqueID(), handle);
   }
 }
 

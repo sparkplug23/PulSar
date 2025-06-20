@@ -23,7 +23,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
         // Copy Settings as Last Known Good if no changes have been saved since 30 minutes
         if (!runtime.settings_lkg && (tkr_time->UtcTime() > START_VALID_UTC_TIME) && (Settings.cfg_timestamp < tkr_time->UtcTime() - (3 * 60))) 
         {
-          pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (const uint8_t*)&Settings, sizeof(SETTINGS));
+          tkr_mfile->TfsSaveFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (const uint8_t*)&Settings, sizeof(SETTINGS));
           runtime.settings_lkg = true;
         }
         else
@@ -456,7 +456,7 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
   #ifdef USE_MODULE_NETWORK_WIFI   
   if(value == 1)
   {
-    pCONT_wif->EspRestart();
+    tkr_wifi->EspRestart();
   }
   else
   if(value == 2)
@@ -477,7 +477,7 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
     tkr_set->TestSettings_ShowLocal_Header();
     tkr_set->TestSettingsLoad();
 
-    pCONT_wif->EspRestart();
+    tkr_wifi->EspRestart();
 
   }  
   #endif // ifdef USE_MODULE_NETWORK_WIFI

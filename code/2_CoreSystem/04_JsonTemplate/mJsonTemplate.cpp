@@ -130,7 +130,7 @@ DEBUG_LINE_HERE2
     #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
     #ifdef ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
-    ALOG_INF( PSTR("mHardwarePins::ReadModuleTemplateFromProgmem [%d bytes] = \"%s\""), progmem_size, buffer);
+    ALOG_INF( PSTR("mPins::ReadModuleTemplateFromProgmem [%d bytes] = \"%s\""), progmem_size, buffer);
     #endif // ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
 
 DEBUG_LINE_HERE2

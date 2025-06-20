@@ -1315,14 +1315,14 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg)
   BaseType_t dummyval;
 
   // use start and end of array "~~" so matlab can search and repair the json
-      xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
-      xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
-      // xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
+      xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
+      xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
+      // xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
       // if(tkr_Serial->special_json_part_of_gps_buflen)
       // {
-      //   xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle,  tkr_Serial->special_json_part_of_gps_buffer,  tkr_Serial->special_json_part_of_gps_buflen, &dummyval);
+      //   xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle,  tkr_Serial->special_json_part_of_gps_buffer,  tkr_Serial->special_json_part_of_gps_buflen, &dummyval);
       // }
-      // xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
+      // xRingbufferSend(tkr_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
 // }
 
       // /**

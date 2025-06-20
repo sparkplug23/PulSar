@@ -20,11 +20,11 @@ uint16_t mSerialUART::GetReceiveBuffer2(char* output_buf, uint16_t output_len, c
       // //Receive an item from no-split ring buffer
       size_t item_size;
       // Wait at most 1ms to read from buffer
-      char*  item = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100));
+      char*  item = (char *)xRingbufferReceive(tkr_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100));
 
       //Check received item
       if (item != NULL) {
-        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
         //Print item
         // for(int i = 0; i < item_size; i++) {
         //   Serial.printf("%c", item[i]);          
@@ -43,8 +43,8 @@ uint16_t mSerialUART::GetReceiveBuffer2(char* output_buf, uint16_t output_len, c
 // if(flag_clear_buffer_after_read)
 // {
         //Return Item
-        vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
-        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        vRingbufferReturnItem(tkr_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
+        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
 // }
       } 
       // else {
@@ -68,11 +68,11 @@ uint16_t mSerialUART::GetReceiveBufferPartial2(char* output_buf, uint16_t output
       // //Receive an item from no-split ring buffer
       size_t item_size;
       // Wait at most 1ms to read from buffer
-      char*  item = (char *)xRingbufferReceiveUpTo(pCONT_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100), output_len);
+      char*  item = (char *)xRingbufferReceiveUpTo(tkr_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100), output_len);
 
       //Check received item
       if (item != NULL) {
-        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
         //Print item
         // for(int i = 0; i < item_size; i++) {
         //   Serial.printf("%c", item[i]);          
@@ -91,8 +91,8 @@ uint16_t mSerialUART::GetReceiveBufferPartial2(char* output_buf, uint16_t output
 // if(flag_clear_buffer_after_read)
 // {
         //Return Item
-        vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
-        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        vRingbufferReturnItem(tkr_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
+        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
 // }
       } 
       // else {
@@ -119,11 +119,11 @@ uint16_t mSerialUART::GetReceiveBuffer1(char* output_buf, uint16_t output_len, c
       // //Receive an item from no-split ring buffer
       size_t item_size;
       // Wait at most 1ms to read from buffer
-      char*  item = (char *)xRingbufferReceive(pCONT_uart->settings.uart1.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100));
+      char*  item = (char *)xRingbufferReceive(tkr_uart->settings.uart1.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100));
 
       //Check received item
       if (item != NULL) {
-        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        // ALOG_TST(PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
         //Print item
         // for(int i = 0; i < item_size; i++) {
         //   Serial.printf("%c", item[i]);          
@@ -142,8 +142,8 @@ uint16_t mSerialUART::GetReceiveBuffer1(char* output_buf, uint16_t output_len, c
 // if(flag_clear_buffer_after_read)
 // {
         //Return Item
-        vRingbufferReturnItem(pCONT_uart->settings.uart1.ringbuffer_handle, (void *)item); // Free memory
-        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        vRingbufferReturnItem(tkr_uart->settings.uart1.ringbuffer_handle, (void *)item); // Free memory
+        // ALOG_TST(PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
 // }
       } 
       // else {
@@ -823,7 +823,7 @@ gpio_pad_select_gpio(BLINK_GPIO);
 
     init_UART0();
     init_UART1();
-    // pCONT_uart- init_UART2();
+    // tkr_uart- init_UART2();
 
 
 //  uart_config_t uart_config = {
@@ -1278,18 +1278,18 @@ void UART_Loop(){
 //     // xRingbufferPrintInfo(uart2_settings.ringbuffer_handle);
 //     // //Receive an item from no-split ring buffer
 //     size_t item_size;
-//     char*  item = (char *)xRingbufferReceive(pCONT_uart->uart2_settings.ringbuffer_handle, &item_size, pdMS_TO_TICKS(1000));
+//     char*  item = (char *)xRingbufferReceive(tkr_uart->uart2_settings.ringbuffer_handle, &item_size, pdMS_TO_TICKS(1000));
 
 //     //Check received item
 //     if (item != NULL) {
-//       Serial.printf("UART2:>%d %d sizeB=%d\n\r",item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->uart2_settings.ringbuffer_handle));
+//       Serial.printf("UART2:>%d %d sizeB=%d\n\r",item_size,millis(),xRingbufferGetCurFreeSize(tkr_uart->uart2_settings.ringbuffer_handle));
 //       //Print item
 //       for (int i = 0; i < item_size; i++) {
 //           Serial.printf("%c", item[i]);
 //       }
 //       //Return Item
-//       vRingbufferReturnItem(pCONT_uart->uart2_settings.ringbuffer_handle, (void *)item);
-//       Serial.printf("\n\r sizeA=%d\n\r",xRingbufferGetCurFreeSize(pCONT_uart->uart2_settings.ringbuffer_handle));
+//       vRingbufferReturnItem(tkr_uart->uart2_settings.ringbuffer_handle, (void *)item);
+//       Serial.printf("\n\r sizeA=%d\n\r",xRingbufferGetCurFreeSize(tkr_uart->uart2_settings.ringbuffer_handle));
 //     } else {
 //       //Failed to receive item
 //       Serial.printf("Failed to receive item\n");

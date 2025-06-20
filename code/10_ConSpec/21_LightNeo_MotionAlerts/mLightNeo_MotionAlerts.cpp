@@ -106,13 +106,13 @@ int8_t mLightNeo_MotionAlerts::Tasker(uint8_t function, JsonParserObject obj)
 void mLightNeo_MotionAlerts::Save_Module()
 {
   ALOG_INF(PSTR(D_LOG_RELAYS "Save_Module"));
-  pCONT_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 void mLightNeo_MotionAlerts::Load_Module(bool erase)
 {
   ALOG_INF(PSTR(D_LOG_RELAYS "Load_Module"));
-  pCONT_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS

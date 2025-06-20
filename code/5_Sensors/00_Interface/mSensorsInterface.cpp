@@ -33,10 +33,10 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     break;  
     case TASK_EVERY_SECOND:{
       // Serial.println(sizeof(sensors_reading_t));
-      // Serial.println(pCONT_db18->GetSensorReading());
-      // Serial.println(pCONT_dht->GetSensorReading());
-      // Serial.println(pCONT_db18->test123());
-      // Serial.println(pCONT_dht->test123());
+      // Serial.println(tkr_db18->GetSensorReading());
+      // Serial.println(tkr_dht->GetSensorReading());
+      // Serial.println(tkr_db18->test123());
+      // Serial.println(tkr_dht->test123());
 
       // Make nicer later with json command to enable and time period to show
       if(rt.tTicker_Splash_Sensors_To_Logs-- == 1)
@@ -139,9 +139,9 @@ void mSensorsInterface::Init(void)
   // TEMP: Filter for temperature sensor in module 5027, sensor index 0
 
 
-  AddFilteredSensor(pCONT_db18->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "DB10Sec");
-  AddFilteredSensor(pCONT_db18->GetModuleUniqueID(), 0, 60, 60, SENSOR_TYPE_TEMPERATURE_ID, "DB1Min");
-  AddFilteredSensor(pCONT_bme->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "BME10Sec");
+  AddFilteredSensor(tkr_db18->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "DB10Sec");
+  AddFilteredSensor(tkr_db18->GetModuleUniqueID(), 0, 60, 60, SENSOR_TYPE_TEMPERATURE_ID, "DB1Min");
+  AddFilteredSensor(tkr_bme->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "BME10Sec");
   #endif
 
 
@@ -168,11 +168,11 @@ RgbwwColor mSensorsInterface::GetColourValueUsingMaps_ForUnifiedSensor(float tem
 
   if(flag_unified_sensor_colour_heatmap_type==1) //adjusted
   {
-    return pCONT_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
+    return tkr_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
   }
   else //full colour-
   {
-    return pCONT_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
+    return tkr_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
   }
 
 }
@@ -526,7 +526,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
 //               // Convert into colour
 //               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-//               RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
+//               RgbColor colour  = tkr_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
 
 //               JBI->Add_FV(
 //                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
@@ -669,7 +669,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
 //               // Convert into colour
 //               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-//               RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
+//               RgbColor colour  = tkr_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
 
 //               JBI->Add_FV(
 //                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
@@ -949,7 +949,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
               // val.sensor_id is used to since the order of devicename list may not match in accending order
               // DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
 
-              // sensor_data = pCONT_debug->debug_data.input_float1;//map(pCONT_debug->debug_data.input_float1, 0,59, 0,70);
+              // sensor_data = tkr_debug->debug_data.input_float1;//map(tkr_debug->debug_data.input_float1, 0,59, 0,70);
 
               // Convert into colour
               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
@@ -1463,16 +1463,16 @@ uint8_t mSensorsInterface::ConstructJSON_Event_Motion(uint8_t json_level, bool j
    * @brief Motion Event : PIR module
    **/
   #ifdef USE_MODULE_SENSORS_PIR
-  if(tkr_rules->event_triggered.module_id == pCONT_motion->GetModuleUniqueID())
+  if(tkr_rules->event_triggered.module_id == tkr_motion->GetModuleUniqueID())
   {
     uint16_t device_id   = tkr_rules->event_triggered.device_id;
     uint16_t state_id = tkr_rules->event_triggered.value.data[0];  
 
-    JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( pCONT_motion->GetModuleUniqueID(), device_id, buffer, sizeof(buffer))); 
+    JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( tkr_motion->GetModuleUniqueID(), device_id, buffer, sizeof(buffer))); 
     JBI->Add("Time", tkr_time->GetTimeStr(tkr_time->Rtc.local_time).c_str());
     JBI->Add("UTCTime", tkr_time->Rtc.local_time);
     JBI->Add(D_EVENT, state_id ? "detected": "over");
-    JBI->Add("Sensor", pCONT_motion->GetModuleName());
+    JBI->Add("Sensor", tkr_motion->GetModuleName());
 
   }
   #endif // USE_MODULE_SENSORS_PIR

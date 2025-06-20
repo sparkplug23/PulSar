@@ -55,7 +55,7 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appendin
     JBI->Add("Total", tank.volume_litres);
     JBI->Add("Usuable", tank.volume_litres_usable);
     JBI->Add("NotUsuable", tank.volume_litres_notusable);
-    JBI->Add("OilHeight_cm", tank.height_of_tank_cm - pCONT_sr04->readings.average_EMA.distance_cm);
+    JBI->Add("OilHeight_cm", tank.height_of_tank_cm - tkr_sr04->readings.average_EMA.distance_cm);
 
     JBI->Object_End();
 
@@ -127,11 +127,11 @@ uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_appendi
   
 
 //   // #ifdef USE_MODULE_SENSORS_DS18X
-//   // for(int i=0;i<pCONT_db18->db18_sensors_active;i++){
-//   //   if((pCONT_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
-//   //     JsonObject sensorobj = root.createNestedObject(pCONT_db18->db18_sensor[i].name.ctr);
-//   //     sensorobj["temp", pCONT_db18->db18_sensor[i].reading.val;
-//   //     sensorobj["isvalid"]= pCONT_db18->db18_sensor[i].reading.isvalid;
+//   // for(int i=0;i<tkr_db18->db18_sensors_active;i++){
+//   //   if((tkr_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
+//   //     JsonObject sensorobj = root.createNestedObject(tkr_db18->db18_sensor[i].name.ctr);
+//   //     sensorobj["temp", tkr_db18->db18_sensor[i].reading.val;
+//   //     sensorobj["isvalid"]= tkr_db18->db18_sensor[i].reading.isvalid;
 //   //   }
 //   // }
 //   // #endif

@@ -314,7 +314,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mJsonTemplate());
   #endif
   #ifdef USE_MODULE_CORE_HARDWAREPINS
-  addTasker(new mHardwarePins());
+  addTasker(new mPins());
   #endif 
   #ifdef USE_MODULE_CORE_SUPPORT
   addTasker(new mSupport());

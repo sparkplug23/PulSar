@@ -3,6 +3,45 @@
 #ifdef USE_MODULE_DRIVERS__CAMERA_2025
 
 
+void mCamera::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  JsonParserToken jtok_sub = 0; 
+  int8_t tmp_id = 0;
+
+  if(jtok = obj["Cam"].getObject()["Init"])
+  {
+    Init();
+  }
+  if(jtok = obj["Cam"].getObject()["psramInit"])
+  {
+    psramInit();               // initialize PSRAM
+        
+    ALOG_INF(PSTR("psramFound: %d\n"), psramFound());
+    ALOG_INF(PSTR("esp_spiram_is_initialized: %d\n"), esp_spiram_is_initialized());
+    ALOG_INF(PSTR("Free PSRAM: %u\n"), ESP.getFreePsram());
+  }
+
+  JsonParserObject jobj = 0; 
+  
+  if(!(jobj = obj["Cam"].getObject()))
+  {
+    return;
+  }
+
+  if(jtok = jobj["Resolution"])
+  {
+    ALOG_INF(PSTR(D_LOG_CAMERA "Resolution %d"), jtok.getInt());
+    CmndWebcamResolution(jtok.getInt());
+  }
+  if(jtok = jobj["Mirror"])
+  {
+    ALOG_INF(PSTR(D_LOG_CAMERA "Mirror %d"), jtok.getInt());
+    CmndWebcamMirror(jtok.getBool());
+  }
+}
+  
 // /*********************************************************************************************\
 //  * Commands
 // \*********************************************************************************************/
@@ -364,30 +403,30 @@
 //   ResponseCmndStateText(tkr_set->Settings.webcam_config.stream);
 // }
 
-// void CmndWebcamResolution(void) {
-//   if ((XdrvMailbox.payload >= -1) && (XdrvMailbox.payload < FRAMESIZE_FHD)) {
-//     int reinit = 0;
-//     // if changinf from or to disabled, then force re-init.
-//     if (tkr_set->Settings.webcam_config.resolution == 15 || XdrvMailbox.payload == -1){
-//       reinit = 1;  
-//     }
-//     tkr_set->Settings.webcam_config.resolution = XdrvMailbox.payload;
-//     if (reinit) {
-//       WcSetup(tkr_set->Settings.webcam_config.resolution);
-//     } else {
-//       WcSetOptions(0, tkr_set->Settings.webcam_config.resolution);
-//     }
-//   }
-//   ResponseCmndNumber(tkr_set->Settings.webcam_config.resolution);
-// }
 
-// void CmndWebcamMirror(void) {
+void mCamera::CmndWebcamResolution(uint8_t resolution) 
+{
+
+    int8_t reinit = 0;
+    
+    tkr_set->Settings.webcam_config.resolution = resolution;
+    if (reinit) {
+      WcSetup(tkr_set->Settings.webcam_config.resolution);
+    } else {
+      WcSetOptions(0, tkr_set->Settings.webcam_config.resolution);
+    }
+    
+    
+}
+
+void mCamera::CmndWebcamMirror(bool mirror) 
+{
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 1)) {
-//     tkr_set->Settings.webcam_config.mirror = XdrvMailbox.payload;
-//     WcSetOptions(3, tkr_set->Settings.webcam_config.mirror);
+    tkr_set->Settings.webcam_config.mirror = mirror;
+    WcSetOptions(3, tkr_set->Settings.webcam_config.mirror);
 //   }
 //   ResponseCmndStateText(tkr_set->Settings.webcam_config.mirror);
-// }
+}
 
 // void CmndWebcamFlip(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 1)) {

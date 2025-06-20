@@ -120,7 +120,7 @@ void mEnergyPZEM004T::Init(void)
 
   if (result) {
     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
-    pCONT_sup->ClaimSerial();    
+    tkr_sup->ClaimSerial();    
     module_state.mode = ModuleStatus::Initialising;
   } else {
     module_state.mode = ModuleStatus::NoGPIOConfigured;

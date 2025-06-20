@@ -92,7 +92,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_JSON_COMMAND_ID:
     
-      if(!update_in_progress && !pCONT_sup->arduino_ota_triggered)
+      if(!update_in_progress && !tkr_sup->arduino_ota_triggered)
         parse_JSONCommand(obj);
 
     break;
@@ -775,7 +775,7 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
     // ALOG_INF(PSTR("MATCHED %s"),pos_start_of_token);
     pos_start_of_response_field = pos_start_of_token+3; // Only 3, since "h" is not part of the output command
 
-    hue_input = pCONT_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
+    hue_input = tkr_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
 
     float r,g,b;
     
@@ -800,7 +800,7 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
     // ALOG_INF(PSTR("MATCHED %s"),pos_start_of_token);
     pos_start_of_response_field = pos_start_of_token+3; // Only 3, since "h" is not part of the output command
 
-    // hue_input = pCONT_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
+    // hue_input = tkr_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
 
     
     // ALOG_INF(PSTR("pos_start_of_response_field = %s"), pos_start_of_response_field);
@@ -1622,7 +1622,7 @@ void mNextionPanel::nextionProcessInput()
 //       if (rebootOnp0b1 && (nextionPage == "0") && (nextionButtonID == "1"))
 //       {
 //         debugPrintln(String(F("HMI IN: p[0].b[1] pressed during HASPone configuration, rebooting.")));
-//         pCONT_wif->EspRestart();
+//         tkr_wifi->EspRestart();
 //       }
 //     }
 //     else if (nextionButtonAction == 0x00)
@@ -2041,7 +2041,7 @@ void mNextionPanel::EverySecond_SendScreenInfo(){
   //   tkr_mqtt->pubsub->connected() ? 'M' : 'm',
   //   fOpenHABDataStreamActive ? 'O' : 'o',
   //   0
-  //   // pCONT_wif->WifiGetRssiAsQuality(WiFi.RSSI())
+  //   // tkr_wifi->WifiGetRssiAsQuality(WiFi.RSSI())
   // );
 
   // Serial.println(health_ctr);
@@ -2461,7 +2461,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
   // if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
   // { // Our timer expired so reset
   //   ALOG_INF(PSTR("LCDOTA: ERROR: LCD upload timeout.  Restarting."));
-  //   pCONT_wif->EspRestart();
+  //   tkr_wifi->EspRestart();
   // }
   // else if (upload.status == UPLOAD_FILE_START)
   
@@ -2509,7 +2509,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
       ALOG_INF(PSTR("LCDOTA: LCD upload command FAILED."));
 
       delay(5000);
-      pCONT_wif->EspRestart();
+      tkr_wifi->EspRestart();
     }
 
     lcdOtaTimer = millis();
@@ -2626,7 +2626,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
         request->redirect("/lcdOtaSuccess"); 
         // delay(10);
-        // pCONT_wif->EspRestart();
+        // tkr_wifi->EspRestart();
         success = true;
       ALOG_INF(PSTR("update_in_progress CLEARED"));
         update_in_progress = false;
@@ -2636,7 +2636,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
         ALOG_INF(PSTR("LCDOTA: Failure"));
         request->redirect("/lcdOtaFailure"); 
         // delay(10);
-        // pCONT_wif->EspRestart();
+        // tkr_wifi->EspRestart();
       }
     }
     lcdOtaTimer = millis();
@@ -2662,7 +2662,7 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
         ALOG_INF(PSTR("LCDOTA: Failure"));
         request->redirect("/lcdOtaFailure");
       }
-      pCONT_wif->EspRestart(); // Change later to schedule a restart
+      tkr_wifi->EspRestart(); // Change later to schedule a restart
     }
   }
 
@@ -2838,7 +2838,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
       else
       {
         ALOG_INF(PSTR("LCDOTA: LCD upload command FAILED.  Restarting device."));
-        pCONT_wif->EspRestart();
+        tkr_wifi->EspRestart();
       }
       ALOG_INF(PSTR("LCDOTA: Starting update"));
       lcdOtaTimer = millis();
@@ -2881,7 +2881,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
             {
               ALOG_ERR(PSTR(D_LOG_NEXTION "LCDOTA: Part %d FAILED, %d%% complete"), lcdOtaPartNum, lcdOtaPercentComplete);
               delay(2000); // extra delay while the LCD does its thing
-              pCONT_wif->EspRestart();
+              tkr_wifi->EspRestart();
             }
           }
           else
@@ -2897,7 +2897,7 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
         if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
         { // Our timer expired so reset
           ALOG_INF(PSTR("LCDOTA: ERROR: LCD upload timeout. Restarting."));
-          pCONT_wif->EspRestart();
+          tkr_wifi->EspRestart();
         }
       }
       lcdOtaPartNum++;
@@ -2912,19 +2912,19 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
           // request->handleClient();
           yield();
         }
-        pCONT_wif->EspRestart();
+        tkr_wifi->EspRestart();
       }
       else
       {
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Failure, lcdOtaTransferred: %d lcdOtaFileSize: %d"), lcdOtaTransferred, lcdOtaFileSize);
-        pCONT_wif->EspRestart();
+        tkr_wifi->EspRestart();
       }
     }
   }
   else
   {
     ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: HTTP GET failed, error code %s"), lcdOtaHttp.errorToString(lcdOtaHttpReturn));
-    pCONT_wif->EspRestart();
+    tkr_wifi->EspRestart();
   }
   lcdOtaHttp.end();
 }

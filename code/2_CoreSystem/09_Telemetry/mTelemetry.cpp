@@ -66,6 +66,9 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      #ifdef ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
+      mqtthandler_health.tRateSecs = 1; 
+      #endif
     break;
     case TASK_MQTT_SENDER:
       tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
@@ -123,7 +126,7 @@ void mTelemetry::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->flags.retain = true;
-  #if defined(ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS) || defined(ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS)
+  #if defined(ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS) || defined(ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND)
   ptr->tRateSecs = 1; 
   #else
   ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 

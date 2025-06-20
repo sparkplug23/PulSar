@@ -211,7 +211,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
                                     WEB_HANDLE_BUTTON_NAME_TIMER_SET,
                                     button_handle_ctr, 
                                     program_timers[device_id].mapped_defaults[button_id],                                       
-                                    pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_timers_title),""
+                                    tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_timers_title),""
                                   );
     }
     BufferWriterI->Append_P("</tr>");
@@ -327,7 +327,7 @@ char buffer[30];
                                     "buttonh " WEB_HANDLE_BUTTON_NAME_TIMER_SET,
                                     button_handle_ctr, 
                                     program_timers[device_id].mapped_defaults[button_id],                                       
-                                    pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_timers_title),""
+                                    tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_timers_title),""
                                   );
     }
     BufferWriterI->Append_P("</tr>");
@@ -343,7 +343,7 @@ char buffer[30];
                                       "buttonh " WEB_HANDLE_BUTTON_NAME_TEMP_SET,
                                       button_handle_ctr, 
                                       program_temps[device_id].temp.mapped_defaults[button_id],                                       
-                                      pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_temps_title),""
+                                      tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_temps_title),""
                                     );
       }
       BufferWriterI->Append_P("</tr>{t2}");

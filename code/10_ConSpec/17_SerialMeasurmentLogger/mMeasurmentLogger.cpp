@@ -45,10 +45,10 @@
 //     *******************/
 //     case TASK_EVENT_INPUT_STATE_CHANGED_ID:
 //       #ifdef USE_MODULE_DRIVERS_SDCARD
-//       pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
+//       tkr_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
 //       #endif
 //       // sequence_test = 0;
-//       //pCONT_gps->sequence_test_global = 0;
+//       //tkr_gps->sequence_test_global = 0;
 //     break;
 //     /************
 //      * MQTT SECTION * 
@@ -187,7 +187,7 @@
 
 //     // uint32_t start = millis();
 //     ConstructJSON_SDCard_Calibration_Frame();
-//     pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+//     tkr_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
 //     // Serial.printf("deltaF=%d\n\r", millis()-start);
 
@@ -249,23 +249,23 @@
 //    * */
   
 //   snprintf(buffer, sizeof(buffer), "%04d %04d",adc_values.pic32.adc2,adc_values.pic32.adc5);
-//   pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
+//   tkr_iDisp->LogBuffer_AddRow(buffer, 0);
 //   snprintf(buffer, sizeof(buffer), "%04d %04d",adc_values.esp32.adc2,adc_values.esp32.adc5);
-//   pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
+//   tkr_iDisp->LogBuffer_AddRow(buffer, 1);
 
 
 
 //   #ifdef USE_MODULE_DRIVERS_SDCARD
 //   snprintf(buffer, sizeof(buffer), "%c%s%s",
-//     pCONT_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
-//     pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID ?"OPEN!":"cd",
-//     &pCONT_sdcard->writer_settings.file_name[12] //skipping "APPEND_RP0_" to get just time
+//     tkr_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
+//     tkr_sdcard->writer_settings.status == tkr_sdcard->FILE_STATUS_OPENED_ID ?"OPEN!":"cd",
+//     &tkr_sdcard->writer_settings.file_name[12] //skipping "APPEND_RP0_" to get just time
 //   );
-//   pCONT_iDisp->LogBuffer_AddRow(buffer, 2);
+//   tkr_iDisp->LogBuffer_AddRow(buffer, 2);
 //   #endif //USE_MODULE_DRIVERS_SDCARD
   
 //   #ifdef USE_MODULE_DRIVERS_SDCARD
-//   uint32_t bytes_written = pCONT_sdcard->sdcard_status.bytes_written_to_file;
+//   uint32_t bytes_written = tkr_sdcard->sdcard_status.bytes_written_to_file;
 //   char unit_type = 'B';
 
 //   if(bytes_written>50000)
@@ -282,7 +282,7 @@
 //   //  * */  
 //   // );
 
-//   pCONT_iDisp->LogBuffer_AddRow(buffer,3);
+//   tkr_iDisp->LogBuffer_AddRow(buffer,3);
 //   #endif // USE_MODULE_DRIVERS_SDCARD
 
 //   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306

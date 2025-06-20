@@ -121,7 +121,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
     return;
   }
 
-  pCONT_sup->ShowSource(source);
+  tkr_sup->ShowSource(source);
   tkr_set->runtime.last_source = source;
 
   if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {  // All on and stay on
@@ -399,7 +399,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
 // state 16 = POWER_SHOW_STATE = Show power state
 
-  pCONT_sup->ShowSource(source);
+  tkr_sup->ShowSource(source);
 
 //  if (1049 == LANGUAGE_LCID) { return; }
 
@@ -600,13 +600,13 @@ void mRelays::StopAllPowerBlink(void)
 void mRelays::Save_Module()
 {
   ALOG_INF(PSTR(D_LOG_RELAYS "Save_Module"));
-  pCONT_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 void mRelays::Load_Module(bool erase)
 {
   ALOG_INF(PSTR(D_LOG_RELAYS "Load_Module"));
-  pCONT_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
@@ -978,10 +978,10 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj[PM_POWER_STATE]){
     if(jtok.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok.getStr());
+      state = tkr_sup->GetStateNumber(jtok.getStr());
     }else 
     if(jtok.isNum()){
-      state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+      state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
     }
 
     /**

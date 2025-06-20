@@ -188,7 +188,7 @@
 
 // #define SET_BUFFER_AS_GLOBAL_OR_LOCAL(X,Y) \
 //           if(Y == nullptr){ \
-//             X = pCONT_sup->global_buffer; \
+//             X = tkr_sup->global_buffer; \
 //           }else{ \
 //             X = Y; \
 //           }

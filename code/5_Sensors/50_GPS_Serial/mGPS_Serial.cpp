@@ -233,7 +233,7 @@ public:
 
       if(state == RUNNING)
       {
-        pCONT_gps->rt.valid_timeout_seconds = 3;
+        tkr_gps->rt.valid_timeout_seconds = 3;
       }
 
       return (state == RUNNING);
@@ -509,7 +509,7 @@ void mGPS_Serial::ReadGPSStream()
 
 
 //       // BufferWriterI->Clear();
-//       uint16_t bytes_to_read = pCONT_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+//       uint16_t bytes_to_read = tkr_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
 //       // if(strlen(BufferWriterI->GetPtr())==0){
 //       //   ALOG_TST(PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
 //       // }
@@ -556,7 +556,7 @@ void mGPS_Serial::ReadGPSStream()
 //           my_gps_vals.dateTime_ms = fix_valid.dateTime_ms();
 
 
-//           pCONT_uart->special_json_part_of_gps_buflen = sprintf( pCONT_uart->special_json_part_of_gps_buffer,
+//           tkr_uart->special_json_part_of_gps_buflen = sprintf( tkr_uart->special_json_part_of_gps_buffer,
 //             "B]],\"G\":[%d,%d,%d,%d,%d,%d,%d,%d]}@", 
 //             my_gps_vals.lat,
 //             my_gps_vals.lon,
@@ -930,7 +930,7 @@ void mGPS_Serial::Init(void)
 
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
   // Finsihed with manual control, start ISRs
-  pCONT_uart->flag_init_buffers_and_start_isrs = true;
+  tkr_uart->flag_init_buffers_and_start_isrs = true;
   #endif
 
   DEBUG_LINE_HERE;

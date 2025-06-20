@@ -65,17 +65,17 @@
 //           JBI->Add("fc", tkr_time->uptime_seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
 //         break;
 //         case 1:{        
-//           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
+//           int8_t wifi_perc = tkr_wifi->GetRSSPercentage();
 //           char colour_ctr[7];
 //           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
 //           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
 //           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-//           JBI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
+//           JBI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,tkr_wifi->GetRSSdBm());
 //           JBI->Add("fc", colour_ctr);    
 //         }break;
 //         case 2:
 //           JBI->Add("ihr",tkr_set->runtime.firmware_version.current.name_ctr);
-//           JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+//           JBI->Add("fc", tkr_sup->GetVersionColour(buffer));    
 
 //         break;
 //         case 3:
@@ -85,7 +85,7 @@
 //                 F(__DATE__), 
 //                 F(__TIME__), 
 //                 tkr_set->runtime.boot_status.module_template_used ? "Y" : "N", 
-//                 pCONT_sup->activity.cycles_per_sec
+//                 tkr_sup->activity.cycles_per_sec
 //             );
 //         break;
 //       } //end switch 
@@ -96,7 +96,7 @@
   
 //   // JBI->Array_Start("debug_line");// Class name
 //   //   JBI->Object_Start();
-//   //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), tkr_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), tkr_set->runtime.boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+//   //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), tkr_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), tkr_set->runtime.boot_status.module_template_used ? "Y" : "N", tkr_sup->activity.cycles_per_sec);
 //   //   JBI->Object_End();
 //   // JBI->Array_End();
 //   JBI->End();
@@ -126,27 +126,27 @@
 //           JBI->Add("fc", tkr_time->uptime_seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
 //         break;
 //         case 1:{        
-//           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
+//           int8_t wifi_perc = tkr_wifi->GetRSSPercentage();
 //           char colour_ctr[7];
 //           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
 //           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
 //           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-//           JBI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
+//           JBI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,tkr_wifi->GetRSSdBm());
 //           JBI->Add("fc", colour_ctr);   
 //         }break;
 //         case 2:
 //           JBI->Add("ihr",tkr_set->runtime.firmware_version.current.name_ctr);
-//           JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+//           JBI->Add("fc", tkr_sup->GetVersionColour(buffer));    
 //         break;
 //         case 3:
 //           JBI->Add_FV("ih",PSTR("\"Boot: %dc PT(%s)\""), tkr_set->Settings.bootcount, tkr_set->runtime.boot_status.module_template_used ? "Y" : "N");
 //         break;
 //         case 4:
 //           JBI->Add_FV("ih",PSTR("\"Firmware: %s %s|%s\""), tkr_set->runtime.firmware_version.current.name_ctr, F(__DATE__), F(__TIME__));
-//           JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+//           JBI->Add("fc", tkr_sup->GetVersionColour(buffer));    
 //         break;
 //         case 5:
-//           JBI->Add_FV("ih",PSTR("\"Runtime: LPS(%d Hz | %d ms) FreeHeap:%d\""), pCONT_sup->activity.cycles_per_sec, 1000/pCONT_sup->activity.cycles_per_sec, ESP.getFreeHeap());
+//           JBI->Add_FV("ih",PSTR("\"Runtime: LPS(%d Hz | %d ms) FreeHeap:%d\""), tkr_sup->activity.cycles_per_sec, 1000/tkr_sup->activity.cycles_per_sec, ESP.getFreeHeap());
 //         break;
 //         case 6:
 //           JBI->Add_FV("ih",PSTR("\"Templates: M%d R%d L%d D%d\""), 0, 0, 0, 0);
@@ -159,7 +159,7 @@
   
 //   // JBI->Array_Start("debug_line");// Class name
 //   //   JBI->Object_Start();
-//   //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), tkr_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), tkr_set->runtime.boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+//   //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), tkr_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), tkr_set->runtime.boot_status.module_template_used ? "Y" : "N", tkr_sup->activity.cycles_per_sec);
 //   //   JBI->Object_End();
 //   // JBI->Array_End();
 //   JBI->End();
@@ -325,7 +325,7 @@
 //   // JBI->Array_Start("row_version_data");// Class name
 //   //   JBI->Object_Start();
 //   //     JBI->Add("ihr",tkr_set->runtime.firmware_version.current.name_ctr);
-//   //     JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));           
+//   //     JBI->Add("fc", tkr_sup->GetVersionColour(buffer));           
 //   //   JBI->Object_End();
 //   // JBI->Array_End();
 
@@ -523,7 +523,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
     do {
       char* tmp;
       size_t len;
-      pCONT_log->GetLog(counter, &tmp, &len);
+      tkr_log->GetLog(counter, &tmp, &len);
       if (len) { //if there is new log data
       // and is not larger than buffer
         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
@@ -684,7 +684,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //           if (-1 == indices[i]) { continue; }  // skip dups
 // //           ALOG_DBG(PSTR(D_LOG_WIFI D_SSID " %s, " D_BSSID " %s, " D_CHANNEL " %d, " D_RSSI " %d"), WiFi.SSID(indices[i]).c_str(), WiFi.BSSIDstr(indices[i]).c_str(), WiFi.channel(indices[i]), WiFi.RSSI(indices[i]));
           
-// //           int quality = pCONT_wif->WifiGetRssiAsQuality(WiFi.RSSI(indices[i]));
+// //           int quality = tkr_wifi->WifiGetRssiAsQuality(WiFi.RSSI(indices[i]));
 // //           int rss = WiFi.RSSI(indices[i]);
 
 // //           if (minimum_signal_quality == -1 || minimum_signal_quality < quality) {
@@ -772,13 +772,13 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // for (uint8_t idx = 0; idx < 3; idx++) {
 //   //   uint8_t llevel = (0==idx)?tkr_set->Settings.logging.serial_level:(1==idx)?tkr_set->Settings.logging.web_level:tkr_set->Settings.syslog_level;
 //   //   WSBufferAppend_P(response, PSTR("<p><b>%s</b> (%s)<br/><select id='l%d' name='l%d'>"),
-//   //     pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), idx, kLoggingOptions),
-//   //     pCONT_sup->GetTextIndexed_P(stemp2, sizeof(stemp2), dlevel[idx], kLoggingLevels),
+//   //     tkr_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), idx, kLoggingOptions),
+//   //     tkr_sup->GetTextIndexed_P(stemp2, sizeof(stemp2), dlevel[idx], kLoggingLevels),
 //   //     idx, idx);
 //   //   for (uint8_t i = LOG_LEVEL_NONE; i < LOG_LEVEL_ALL; i++) {
 //   //     WSBufferAppend_P(response, PSTR("<option%s value='%d'>%d %s</option>"),
 //   //       (i == llevel) ? " selected" : "", i, i,
-//   //       pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), i, kLoggingLevels));
+//   //       tkr_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), i, kLoggingLevels));
 //   //   }
 //   //   WSBufferAppend_P(response, PSTR("</select></p>"));
 //   // }
@@ -830,7 +830,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   WSStartAppend_P(request, S_CONFIGURE_OTHER);
 // //   WSContentSendStyle(request);
 
-// //   pCONT_sup->TemplateJson(); 
+// //   tkr_sup->TemplateJson(); 
 // //   char stemp[strlen(data_buffer.payload.ctr) +1];
 // //   strlcpy(stemp, data_buffer.payload.ctr, sizeof(stemp));  // Get JSON template
 // //   WSBufferAppend_P(response, HTTP_FORM_OTHER, stemp, (USER_MODULE == tkr_set->Settings.module) ? " checked disabled" : "", (tkr_set->Settings.flag_system.mqtt_enabled) ? " checked" : "");
@@ -853,7 +853,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //     WSBufferAppend_P(response, PSTR("<input id='r%d' name='b2' type='radio' value='%d'%s><b>%s</b> %s<br/>"),  // Different id only used for labels
 // //       i, i,
 // //       (i == tkr_set->Settings.flag_power.emulation) ? " checked" : "",
-// //       pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), i, kEmulationOptions),
+// //       tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), i, kEmulationOptions),
 // //       (i == EMUL_NONE) ? "" : (i == EMUL_WEMO) ? D_SINGLE_DEVICE : D_MULTI_DEVICE);
 // //   }
 // //   WSBufferAppend_P(response, PSTR("</p></fieldset>"));
@@ -877,7 +877,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   WebGetArg(request,"b2", tmp, sizeof(tmp));
 // //   tkr_set->Settings.flag_power.emulation = (!strlen(tmp)) ? 0 : atoi(tmp);
 // // #endif  // USE_EMULATION
-// //   snprintf_P(tkr_set->log_data, sizeof(tkr_set->log_data), PSTR(D_LOG_OTHER D_MQTT_ENABLE " %s, " D_EMULATION " %d, " D_FRIENDLYNAME), pCONT_sup->GetStateText(tkr_set->Settings.flag_system.mqtt_enabled), tkr_set->Settings.flag_power.emulation);
+// //   snprintf_P(tkr_set->log_data, sizeof(tkr_set->log_data), PSTR(D_LOG_OTHER D_MQTT_ENABLE " %s, " D_EMULATION " %d, " D_FRIENDLYNAME), tkr_sup->GetStateText(tkr_set->Settings.flag_system.mqtt_enabled), tkr_set->Settings.flag_power.emulation);
 // //   for (uint8_t i = 0; i < MAX_FRIENDLYNAMES; i++) {
 // //     snprintf_P(webindex, sizeof(webindex), PSTR("a%d"), i);
 // //     WebGetArg(request, webindex, tmp, sizeof(tmp));
@@ -915,7 +915,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
 // //   char attachment[100];
 // //   char friendlyname[sizeof(tkr_set->Settings.system_name.friendly)];
-// //   snprintf_P(attachment, sizeof(attachment), PSTR("attachment; filename=Config_%s_%s.dmp"), pCONT_sup->NoAlNumToUnderscore(friendlyname, tkr_set->Settings.system_name.friendly), tkr_set->my_version);
+// //   snprintf_P(attachment, sizeof(attachment), PSTR("attachment; filename=Config_%s_%s.dmp"), tkr_sup->NoAlNumToUnderscore(friendlyname, tkr_set->Settings.system_name.friendly), tkr_set->my_version);
 // //   //request->sendHeader(F("Content-Disposition"), attachment);// asyncedit
 
 // //   WSSend(200, CT_STREAM, "");
@@ -972,7 +972,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   ALOG_DBG(S_LOG_HTTP, S_RESET_CONFIGURATION);
 //     #endif// ENABLE_LOG_LEVEL_INFO
 
-//   pCONT_wif->EspRestart();
+//   tkr_wifi->EspRestart();
 
 // }
 
@@ -1044,7 +1044,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //  WSContentBegin(request, 200, CT_PLAIN);
 //   //   for (uint8_t i = 0; i < sizeof(ModuleList_IDs); i++) {  // "}2'%d'>%s (%d)}3" - "}2'0'>Sonoff Basic (1)}3"
 //   //     uint8_t midx = pgm_read_byte(ModuleList_IDs + i);
-//   //     WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, midx, pCONT_sup->AnyModuleName(midx).c_str(), midx +1);
+//   //     WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, midx, tkr_sup->AnyModuleName(midx).c_str(), midx +1);
 //   //   }
 //   //   WSContentEnd(request);
 //   //   return;
@@ -1056,12 +1056,12 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //   uint8_t module_save = tkr_set->Settings.module;
 //   //   tkr_set->Settings.module = module;
 //   //   myio cmodule;
-//   //   pCONT_sup->TemplateGPIOs(&cmodule);
-//   //   gpio_flag flag = pCONT_sup->ModuleFlag();
+//   //   tkr_sup->TemplateGPIOs(&cmodule);
+//   //   gpio_flag flag = tkr_sup->ModuleFlag();
 //   //   tkr_set->Settings.module = module_save;
 
 //   //  WSContentBegin(request, 200, CT_PLAIN);
-//   //   WSBufferAppend_P(response, PSTR("%s}1"), pCONT_sup->AnyModuleName(module).c_str());  // NAME: Generic
+//   //   WSBufferAppend_P(response, PSTR("%s}1"), tkr_sup->AnyModuleName(module).c_str());  // NAME: Generic
 //   //   for (uint8_t i = 0; i < sizeof(kGpioNiceList); i++) {   // GPIO: }2'0'>None (0)}3}2'17'>Button1 (17)}3...
 
 //   //     if (1 == i) {
@@ -1069,7 +1069,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //     }
 
 //   //     uint8_t midx = pgm_read_byte(kGpioNiceList + i);
-//   //     WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, midx, pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), midx, kSensorNames), midx);
+//   //     WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, midx, tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), midx, kSensorNames), midx);
 //   //   }
 
 //   //   WSBufferAppend_P(response, PSTR("}1"));                                   // Field separator
@@ -1157,7 +1157,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // char stemp[20];  // Sensor name
 //   // uint8_t midx;
 //   // myio cmodule;
-//   // pCONT_sup->TemplateGPIOs(&cmodule);
+//   // tkr_sup->TemplateGPIOs(&cmodule);
 
 //   // if (pWebServer->hasParam("m")) {
 //   //  WSContentBegin(request, 200, CT_PLAIN);
@@ -1173,7 +1173,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //     //ALOG_TST(PSTR(D_LOG_HTTP "hasParam(\"m\"),i=%d,midx=%d,vidx=%d"),i,midx,vidx);
 //   //     WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, 
 //   //       midx, 
-//   //       pCONT_sup->AnyModuleName(midx).c_str(), 
+//   //       tkr_sup->AnyModuleName(midx).c_str(), 
 //   //       vidx
 //   //     );
 //   //   }
@@ -1188,15 +1188,15 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //  WSContentBegin(request, 200, CT_PLAIN);
 //   //   for (uint8_t j = 0; j < sizeof(kGpioNiceList); j++) {
 //   //     midx = pgm_read_byte(kGpioNiceList + j);
-//   //     if (!pCONT_sup->GetUsedInModule(midx, cmodule.io)) {
+//   //     if (!tkr_sup->GetUsedInModule(midx, cmodule.io)) {
 //   //       WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, 
 //   //                       midx, 
-//   //                       pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), midx, kSensorNames), 
+//   //                       tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), midx, kSensorNames), 
 //   //                       midx
 //   //                     );
 
 //   //     // ALOG_TST(PSTR(D_LOG_HTTP "GetTextIndexed_P=%s,midx=%d,j=%d"),
-//   //     // pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), midx, kSensorNames),midx,j);
+//   //     // tkr_sup->GetTextIndexed_P(stemp, sizeof(stemp), midx, kSensorNames),midx,j);
         
 //   //     }
 //   //   }
@@ -1213,23 +1213,23 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // WSBufferAppend_P(response, HTTP_SCRIPT_MODULE_TEMPLATE);
 //   // WSBufferAppend_P(response, HTTP_SCRIPT_MODULE1, tkr_set->Settings.module);
 //   // for (uint8_t i = 0; i < sizeof(cmodule); i++) {
-//   //   if (pCONT_sup->ValidGPIO(i, cmodule.io[i])) {
+//   //   if (tkr_sup->ValidGPIO(i, cmodule.io[i])) {
 //   //     WSBufferAppend_P(response, PSTR("sk(%d,%d);"), tkr_set->my_module.io[i], i);  // g0 - g16
 //   //   }
 //   // }
 //   // WSBufferAppend_P(response, HTTP_SCRIPT_MODULE2);
 //   // WSContentSendStyle(request);
   
-//   // // ALOG_TST(PSTR(D_LOG_HTTP "AnyModuleName=%s,%d,%d"),pCONT_sup->AnyModuleName(MODULE).c_str(),MODULE,sizeof(cmodule));
+//   // // ALOG_TST(PSTR(D_LOG_HTTP "AnyModuleName=%s,%d,%d"),tkr_sup->AnyModuleName(MODULE).c_str(),MODULE,sizeof(cmodule));
 
 //   // uint8_t show_pin_names = false;
 //   // if((tkr_set->Settings.module==MODULE_WEMOS)||(tkr_set->Settings.module==MODULE_NODEMCU)){
 //   //   show_pin_names = true;
 //   // }
 
-//   // WSBufferAppend_P(response, HTTP_FORM_MODULE, pCONT_sup->AnyModuleName(tkr_set->Settings.module).c_str());
+//   // WSBufferAppend_P(response, HTTP_FORM_MODULE, tkr_sup->AnyModuleName(tkr_set->Settings.module).c_str());
 //   // for (uint8_t i = 0; i < sizeof(cmodule); i++) {
-//   //   if (pCONT_sup->ValidGPIO(i, cmodule.io[i])) {
+//   //   if (tkr_sup->ValidGPIO(i, cmodule.io[i])) {
 //   //     snprintf_P(stemp, 3, PINS_WEMOS +i*2);
 //   //     char sesp8285[40];
 //   //     snprintf_P(sesp8285, sizeof(sesp8285), PSTR("<font color='#%06x'>ESP8285</font>"), WebColor(tkr_set->COL_TEXT_WARNING));
@@ -1265,15 +1265,15 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // uint8_t new_module = (!strlen(tmp)) ? MODULE : atoi(tmp);
 //   // tkr_set->Settings.last_module = tkr_set->Settings.module;
 //   // tkr_set->Settings.module = new_module;
-//   // pCONT_sup->SetModuleType();
+//   // tkr_sup->SetModuleType();
 //   // myio cmodule;
-//   // pCONT_sup->TemplateGPIOs(&cmodule);
+//   // tkr_sup->TemplateGPIOs(&cmodule);
 //   // String gpios = "";
 //   // for (uint8_t i = 0; i < sizeof(cmodule); i++) {
 //   //   if (tkr_set->Settings.last_module != new_module) {
 //   //     tkr_set->Settings.module_pins.io[i] = GPIO_NONE;
 //   //   } else {
-//   //     if (pCONT_sup->ValidGPIO(i, cmodule.io[i])) {
+//   //     if (tkr_sup->ValidGPIO(i, cmodule.io[i])) {
 //   //       snprintf_P(webindex, sizeof(webindex), PSTR("g%d"), i);
 //   //       WebGetArg(webindex, tmp, sizeof(tmp));
 //   //       tkr_set->Settings.module_pins.io[i] = (!strlen(tmp)) ? 0 : atoi(tmp);
@@ -1281,7 +1281,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //     }
 //   //   }
 //   // }
-//   // ALOG_INF(PSTR(D_LOG_MODULE "%s " D_MODULE "%s"), pCONT_sup->ModuleName().c_str(), gpios.c_str());
+//   // ALOG_INF(PSTR(D_LOG_MODULE "%s " D_MODULE "%s"), tkr_sup->ModuleName().c_str(), gpios.c_str());
 // }
 
 
@@ -1465,7 +1465,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // char command[sizeof(tkr_set->Settings.ota_url) + 10];  // OtaUrl
 
 //   // ALOG_DBG(PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
-//   // pCONT_wif->WifiConfigCounter();
+//   // tkr_wifi->WifiConfigCounter();
 
 //   // char otaurl[sizeof(tkr_set->Settings.ota_url)];
 //   // WebGetArg(request,"o", otaurl, sizeof(otaurl));
@@ -1494,7 +1494,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
 // //   char error[100];
 
-// //   pCONT_wif->WifiConfigCounter();
+// //   tkr_wifi->WifiConfigCounter();
 // //   tkr_set->restart_flag = 0;
 // //   //MqttRetryCounter(0);
 
@@ -1512,7 +1512,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // // #else
 // //     if (upload_error < 10) {
 // // #endif
-// //       pCONT_sup->GetTextIndexed_P(error, sizeof(error), upload_error -1, kUploadErrors);
+// //       tkr_sup->GetTextIndexed_P(error, sizeof(error), upload_error -1, kUploadErrors);
 // //     } else {
 // //       snprintf_P(error, sizeof(error), PSTR(D_UPLOAD_ERROR_CODE " %d"), upload_error);
 // //     }
@@ -1850,14 +1850,14 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   if (title_index <= BUTTON_RESET_CONFIGURATION) {
 //     char confirm[64];
 //     BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='buttonh bred'>%s</button></form></p>"),
-//       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
-//       pCONT_sup->GetTextIndexed_P(confirm, sizeof(confirm), title_index, kButtonConfirm),
+//       tkr_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
+//       tkr_sup->GetTextIndexed_P(confirm, sizeof(confirm), title_index, kButtonConfirm),
 //       (!title_index) ? "rst" : "non",
-//       pCONT_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
+//       tkr_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
 //   } else {
 //     BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='buttonh'>%s</button></form></p>"),
-//       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
-//       pCONT_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
+//       tkr_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
+//       tkr_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
 //   }
 // }
 
@@ -2093,7 +2093,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   // // #endif
 // //   // AppendBuffer_PI2(PSTR("}1" D_BOOT_COUNT "}2%d"), tkr_set->Settings.bootcount);
 // //   // #ifdef ESP8266
-// //   //   AppendBuffer_PI2(PSTR("}1" D_RESTART_REASON "}2%s"), pCONT_sup->GetResetReason().c_str());
+// //   //   AppendBuffer_PI2(PSTR("}1" D_RESTART_REASON "}2%s"), tkr_sup->GetResetReason().c_str());
 // //   // #endif
 // //   // // uint8_t maxfn = 1;//(tkr_set->devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : tkr_set->devices_present;
 // //   // // //if (SONOFF_IFAN02 == tkr_set->my_module_type) { maxfn = 1; }
@@ -2105,8 +2105,8 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   // // Show SSID direct for testing
 // //   // AppendBuffer_PI2(PSTR("}1" "SSID (RSS)" "}2%s (%d dBm)"), WiFi.SSID().c_str(), WiFi.RSSI());
     
-// //   // AppendBuffer_PI2(PSTR("}1" D_AP "%d " D_SSID " (" D_RSSI ")}2%s (%d%%)"), tkr_set->Settings.sta_active +1, tkr_set->Settings.sta_ssid[tkr_set->Settings.sta_active], pCONT_wif->WifiGetRssiAsQuality(WiFi.RSSI()));
-// //   // AppendBuffer_PI2(PSTR("}1" D_HOSTNAME "}2%s%s"), tkr_set->my_hostname, (pCONT_wif->mdns_begun) ? ".local" : "");
+// //   // AppendBuffer_PI2(PSTR("}1" D_AP "%d " D_SSID " (" D_RSSI ")}2%s (%d%%)"), tkr_set->Settings.sta_active +1, tkr_set->Settings.sta_ssid[tkr_set->Settings.sta_active], tkr_wifi->WifiGetRssiAsQuality(WiFi.RSSI()));
+// //   // AppendBuffer_PI2(PSTR("}1" D_HOSTNAME "}2%s%s"), tkr_set->my_hostname, (tkr_wifi->mdns_begun) ? ".local" : "");
 // //   // if (static_cast<uint32_t>(WiFi.localIP()) != 0) {
 // //   //   AppendBuffer_PI2(PSTR("}1" D_IP_ADDRESS "}2%s"), WiFi.localIP().toString().c_str());
 // //   //   AppendBuffer_PI2(PSTR("}1" D_GATEWAY "}2%s"), IPAddress(tkr_set->Settings.ip_address[1]).toString().c_str());

@@ -112,7 +112,7 @@ void mSettings::SystemSettings_DefaultBody(void)
 
   #endif
   // ModuleDefault(WEMOS);  // to do
-  for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) { Settings.module_pins.io[i] = GPIO_NONE_ID; }
+  for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) { Settings.module_pins.io[i] = GPIO_NONE; }
   SettingsUpdateText(SET_FRIENDLYNAME1, PSTR(DEVICENAME_FRIENDLY_CTR)); // Init
 
   #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
@@ -149,7 +149,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.logging.sys_level = SYS_LOG_LEVEL;
   Settings.logging.web_level = WEB_LOG_LEVEL;
   Settings.logging.telnet_level = TELNET_LOG_LEVEL;
-  Settings.logging.mqtt_level = LOG_LEVEL_IMPORTANT;
+  Settings.logging.mqtt_level = LOG_LEVEL_INFO;//IMPORTANT;
   Settings.logging.time_isshort = LOGTIME_DEFAULT_FORMAT;
   
   SettingsUpdateText(SET_SYSLOG_HOST, PSTR(SYS_LOG_HOST));
@@ -163,16 +163,14 @@ void mSettings::SystemSettings_DefaultBody(void)
   
   tkr_set->runtime.global_state.network_down = 1;
 
-  pCONT_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
+  tkr_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
   
-  pCONT_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
-  pCONT_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
-  pCONT_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
-  pCONT_sup->ParseIPv4(&Settings.ipv4_address[4], PSTR(WIFI_DNS2));
-  pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
-  pCONT_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
-  
-  
+  tkr_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
+  tkr_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
+  tkr_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
+  tkr_sup->ParseIPv4(&Settings.ipv4_address[4], PSTR(WIFI_DNS2));
+  tkr_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
+  tkr_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
   
   Settings.sta_config = WIFI_CONFIG_TOOL;
   Settings.sta_active = 0;
@@ -186,7 +184,6 @@ void mSettings::SystemSettings_DefaultBody(void)
 
   Settings.flag_network.network_wifi = 1;
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
-
   
   Settings.flag_network.timers_enable = 0;
   Settings.flag_network.use_wifi_rescan = 1;
@@ -259,7 +256,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   SettingsUpdateText(SET_NTPSERVER2, PSTR(NTP_SERVER2));
   SettingsUpdateText(SET_NTPSERVER3, PSTR(NTP_SERVER3));
   for (uint32_t i = 0; i < MAX_NTP_SERVERS; i++) {
-    SettingsUpdateText(SET_NTPSERVER1 +i, pCONT_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 +i)));
+    SettingsUpdateText(SET_NTPSERVER1 +i, tkr_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 +i)));
   }
   #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
   

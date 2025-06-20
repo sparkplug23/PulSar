@@ -77,7 +77,7 @@ void mSensorsL3G::Pre_Init(){
   // in futre use array to store L3G type found (L3G_280_ID, L3G_180_ID) etc
   // if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
-  // if(pCONT_sup->I2cDevice(0x76) || pCONT_sup->I2cDevice(0x77)){
+  // if(tkr_sup->I2cDevice(0x76) || tkr_sup->I2cDevice(0x77)){
 
     // Wire = new TwoWire();//tkr_pins->GetPin(GPIO_I2C_SCL_ID),tkr_pins->GetPin(GPIO_I2C_SDA_ID));
   

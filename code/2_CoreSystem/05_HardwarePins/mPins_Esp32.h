@@ -193,11 +193,43 @@ const char PINS_WEMOS[] PROGMEM = "IOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOAOIO-
 const char PINS_WEMOS[] PROGMEM = "IOTXIORXIOIOFLFLFLFLFLFLIOIOIOIOIOIOIOIOIOIOIOIOIOIOIOIO--------AOAOIAIAIAIAIAIA";
 
 #endif  // ESP32/S2/C2/C3/C6 selection
-#endif  // ESP32
-
 
 const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {ESP32_TEMPLATE_TO_PHY};
 
+
+
+// ESP32?
+typedef struct MYIO {
+   uint16_t      io[MAX_GPIO_PIN];
+ } myio;                         // 18 * 2 = 36 bytes / 40 * 2 = 80 bytes
+ 
+ typedef struct MYCFGIO {
+   uint16_t      io[MAX_USER_PINS];// = {GPIO_NONE_ID};
+ } mycfgio                      // 14 * 2 = 28 bytes / 36 * 2 = 72 bytes
+ 
+ 
+ typedef union {
+   uint8_t data;
+   struct {
+     uint8_t adc0 : 1;             // Allow ADC0 when define USE_ADC_VCC is disabled
+     uint8_t adc0_temp : 1;        // Allow ADC0 as Temperature sensor when define USE_ADC_VCC is disabled
+     uint8_t spare02 : 1;
+     uint8_t spare03 : 1;
+     uint8_t spare04 : 1;
+     uint8_t spare05 : 1;
+     uint8_t spare06 : 1;
+     uint8_t spare07 : 1;
+   };
+ } gpio_flag;
+ 
+ 
+ typedef struct MYTMPLT {
+   mycfgio      gp;
+   gpio_flag    flag;
+ } mytmplt;
+
+ 
+#endif  // ESP32
 
 // const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
 //     0, 1, 2, 3, 4, 5,

@@ -129,6 +129,7 @@ void setup(void)
     #endif  // DISABLE_ESP32_BROWNOUT
 
     Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
+    Serial.setDebugOutput(true);
     #ifdef CONFIG_IDF_TARGET_ESP32
     // restore GPIO16/17 if no PSRAM is found
     if (!SupportESP32::FoundPSRAM()) {
@@ -239,7 +240,7 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
   #ifdef ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
   Serial.flush();
   delay(1000);
-  pCONT_sup->CmndCrash();
+  tkr_sup->CmndCrash();
   #endif  // ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
 /********************************************************************************************
@@ -317,6 +318,7 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;
 
   DEBUG_LINE_HERE
+  DEBUG_LINE_HERE3
   
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
@@ -325,12 +327,33 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
   ALOG_DBM(PSTR("AddLog Started"));
 
   DEBUG_LINE_HERE
+  DEBUG_LINE_HERE3
 
-/********************************************************************************************
- ** Splash boot reason ***************************************************************************
- ********************************************************************************************/
+  #ifdef ENABLE_DEBUGFEATURE_LOGGING__ENABLE_TELNET_IMMEDIATE_WITH_WAIT
+  ALOG_INF(PSTR("Early Wifi connection attempt (up to 20 seconds delay)"));
+  // WiFi.begin(STA_SSID1,STA_PASS1);
+  // for (int i = 0; i < 20; ++i) {   // Retry for ~20 seconds
+  //   delay(1000);
+  //   if ((WiFi.status() == WL_CONNECTED) && WiFi.localIP()){
+  //     tkr_log->StartTelnetServer();
+  //     if(tkr_log->telnet_started){      tkr_log->handleTelnet();    }
+  //     delay(2000);
+  //     ALOG_INF(PSTR("Attempt %d: Successful"), i); 
+  //     break;
+  //   }
+  //   delay(1000);
+  // }
+  #endif
 
+  /********************************************************************************************
+   ** Splash boot reason ***************************************************************************
+  ********************************************************************************************/
+
+  DEBUG_LINE_HERE3
+  
   ALOG_INF(PSTR("ResetReason=%d"), ResetReason_g());
+  
+  DEBUG_LINE_HERE3
 
 /********************************************************************************************
  ** Show PSRAM Present **********************************************************************
@@ -354,20 +377,26 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
   #else // ESP32
     // ALOG_INF(PSTR("HDW: %s"), GetDeviceHardware().c_str());
   #endif // ESP32
+  DEBUG_LINE_HERE3
   #ifdef ESP32
+  DEBUG_LINE_HERE3
   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), SupportESP32::GetDeviceHardwareRevision().c_str(),
   SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+  DEBUG_LINE_HERE3
   // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
 #if !defined(HAS_PSRAM_FIX)
+DEBUG_LINE_HERE3
   if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
+    DEBUG_LINE_HERE3
     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
   }
-  DELAY_DEBUG(5000); // Allow time to read the log
+  DEBUG_LINE_HERE3
+  // DELAY_DEBUG(5000); // Allow time to read the log
 #endif  // HAS_PSRAM_FIX
 #else   // ESP8266
   // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
 #endif  // ESP32
-  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE3
 
 
 /********************************************************************************************
@@ -375,7 +404,7 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
  ********************************************************************************************/
 
   #ifdef USE_MODULE_CORE_FILESYSTEM
-    pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
+    tkr_mfile->UfsInit();  // xdrv_50_filesystem.ino
   #endif
 
   #ifdef ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
@@ -408,7 +437,7 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
   #endif  // ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
 
   DEBUG_LINE_HERE
-  pCONT_sup->init_FirmwareVersion();
+  tkr_sup->init_FirmwareVersion();
   DEBUG_LINE_HERE
 
    //preload minimal required
@@ -586,7 +615,7 @@ Serial.printf("Free PSRAM: %u\n", ESP.getFreePsram());
 
   #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-    pCONT_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
+    tkr_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
   #endif
   #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
@@ -668,7 +697,7 @@ void LoopTasker()
   // Serial.println("LOOP STARTED"); Serial.flush();
 
   #ifdef USE_ARDUINO_OTA
-    pCONT_sup->ArduinoOtaLoop();
+    tkr_sup->ArduinoOtaLoop();
   #endif
   // Serial.println("ArduinoOtaLoop passed STARTED"); Serial.flush();
    
@@ -676,10 +705,10 @@ void LoopTasker()
  
   if(tkr_time->UpTime() > 30){ pCONT->Tasker_Interface(YTASK_LOOP); } // Only run after stable boot
  
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(TASK_EVERY_50_MSECOND);  }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(TASK_EVERY_100_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(TASK_EVERY_250_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000))
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(TASK_EVERY_50_MSECOND);  }  DEBUG_LINE;
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(TASK_EVERY_100_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(TASK_EVERY_250_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop1Sec   ,1000))
   {
 
     /**Since this only gets checked every second, we can use the uptime ticking to make sure it runs just once*/
@@ -780,23 +809,23 @@ void LoopTasker()
 #ifdef ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
 void SmartLoopDelay()
 {
-  pCONT_sup->SleepDelay(20);
+  tkr_sup->SleepDelay(20);
 
   // #ifndef DISABLE_SLEEP
   // if(tkr_set->Settings.enable_sleep){
   //   if (tkr_set->Settings.flag_network.sleep_normal) {
-  //     pCONT_sup->SleepDelay(tkr_set->runtime.sleep);
+  //     tkr_sup->SleepDelay(tkr_set->runtime.sleep);
   //   } else {
   //     // Loop time < sleep length of time
-  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)tkr_set->runtime.sleep) {
+  //     if (tkr_sup->loop_runtime_millis < (uint32_t)tkr_set->runtime.sleep) {
   //       //delay by loop time
-  //       pCONT_sup->SleepDelay((uint32_t)tkr_set->runtime.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+  //       tkr_sup->SleepDelay((uint32_t)tkr_set->runtime.sleep - tkr_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
   //     } else {
 
   //       // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect 
   //       // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
   //       if (tkr_set->global_state.wifi_down) {
-  //         pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2);
+  //         tkr_sup->SleepDelay(tkr_sup->loop_runtime_millis /2);
   //       }
 
   //     }
@@ -811,8 +840,8 @@ void SmartLoopDelay()
 
 void loop(void)
 {
-  pCONT_sup->activity.loop_counter++;
-  pCONT_sup->loop_start_millis = millis();
+  tkr_sup->activity.loop_counter++;
+  tkr_sup->loop_start_millis = millis();
   
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
@@ -820,30 +849,30 @@ void loop(void)
   
   LoopTasker();
   
-  pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
+  tkr_sup->loop_runtime_millis = millis() - tkr_sup->loop_start_millis;
 
   if(mTime::TimeReached(&tkr_set->runtime.tSavedUpdateLoopStatistics, 1000)){
-    pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
+    tkr_sup->activity.cycles_per_sec = tkr_sup->activity.loop_counter; 
     #ifdef ENABLE_DEBUGFEATURE__SPLASH__LOOPS_PER_SECOND
-    ALOG_INF(PSTR("LOOPSEC = \t\t\t\tLPS=%d, LoopTime=%d"), pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+    ALOG_INF(PSTR("LOOPSEC = \t\t\t\tLPS=%d, LoopTime=%d"), tkr_sup->activity.cycles_per_sec, tkr_sup->loop_runtime_millis);
     #endif
-    pCONT_sup->activity.loop_counter=0;
+    tkr_sup->activity.loop_counter=0;
   }
 
-  // if(pCONT_sup->loop_runtime_millis > 500)
+  // if(tkr_sup->loop_runtime_millis > 500)
   // {
-  //   ALOG_ERR(PSTR("LONG_LOOP ============= %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+  //   ALOG_ERR(PSTR("LONG_LOOP ============= %d %d %d"), tkr_sup->activity.loop_counter, tkr_sup->activity.cycles_per_sec, tkr_sup->loop_runtime_millis);
   // }
 
   #ifdef ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
   SmartLoopDelay();
   #endif
 
-  if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; } // We cannot divide by 0
-  pCONT_sup->loop_delay_temp = tkr_set->runtime.sleep; 
-  if (!pCONT_sup->loop_delay_temp) { pCONT_sup->loop_delay_temp++; }              // We cannot divide by 0
-  pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)
-  pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay_temp;
-  tkr_set->runtime.loop_load_avg = tkr_set->runtime.loop_load_avg - (tkr_set->runtime.loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
+  if (!tkr_sup->loop_runtime_millis) { tkr_sup->loop_runtime_millis++; } // We cannot divide by 0
+  tkr_sup->loop_delay_temp = tkr_set->runtime.sleep; 
+  if (!tkr_sup->loop_delay_temp) { tkr_sup->loop_delay_temp++; }              // We cannot divide by 0
+  tkr_sup->loops_per_second = 1000 / tkr_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)
+  tkr_sup->this_cycle_ratio = 100 * tkr_sup->loop_runtime_millis / tkr_sup->loop_delay_temp;
+  tkr_set->runtime.loop_load_avg = tkr_set->runtime.loop_load_avg - (tkr_set->runtime.loop_load_avg / tkr_sup->loops_per_second) + (tkr_sup->this_cycle_ratio / tkr_sup->loops_per_second); // Take away one loop average away and add the new one
 
 }

@@ -136,6 +136,7 @@ struct PICSTORE {
   int allocatedLen; // -1 or 0 indicates failure to allocate
 };
 
+camera_config_t config;
 
 struct {
   uint32_t loopcounter;
@@ -313,6 +314,11 @@ ESP8266WebServer *Webserver;
      ************************************************************************************************/
     
     void parse_JSONCommand(JsonParserObject obj);
+
+
+    void CmndWebcamResolution(uint8_t resolution);
+    void CmndWebcamMirror(bool mirror)
+
 
     /************************************************************************************************
      * SECTION: Construct Messages

@@ -121,43 +121,43 @@ void mCellularBlackBox::SubTask_UpdateOLED()
   char buffer_f[100] = {0};
   char buffer_n[100] = {0};
   
-  pCONT_iDisp->renderer->setTextSize(1);
+  tkr_iDisp->renderer->setTextSize(1);
 
 
 
   char convf_lat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
+  mSupport::float2CString(tkr_gps->location.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
 
   char convf_lon[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
+  mSupport::float2CString(tkr_gps->location.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
 
   char convf_altitude[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.altitude,1,convf_altitude);
+  mSupport::float2CString(tkr_gps->location.altitude,1,convf_altitude);
   char convf_speed_kph[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.speed,1,convf_speed_kph);
+  mSupport::float2CString(tkr_gps->location.speed,1,convf_speed_kph);
   char convf_speed_mph[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.speed*0.621371,1,convf_speed_mph);
+  mSupport::float2CString(tkr_gps->location.speed*0.621371,1,convf_speed_mph);
 
 
   char convf_accuracy[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.accuracy,1,convf_accuracy);
+  mSupport::float2CString(tkr_gps->location.accuracy,1,convf_accuracy);
   char convf_usat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.usat,0,convf_usat);
+  mSupport::float2CString(tkr_gps->location.usat,0,convf_usat);
   char convf_vsat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.vsat,0,convf_vsat);
+  mSupport::float2CString(tkr_gps->location.vsat,0,convf_vsat);
 
   char convf_gprs_upsecs[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
+  mSupport::float2CString(tkr_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
 
   char convf_batt_mv[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->modem_status.battery.volts_mv,0,convf_batt_mv);
+  mSupport::float2CString(tkr_cell->modem_status.battery.volts_mv,0,convf_batt_mv);
   char convf_batt_per[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->modem_status.battery.percentage,0,convf_batt_per);
+  mSupport::float2CString(tkr_cell->modem_status.battery.percentage,0,convf_batt_per);
 
   uint16_t gps_seconds_updated = 0;
-  uint32_t gps_millis_updated = abs(millis()-pCONT_gps->readings.update_seconds);
+  uint32_t gps_millis_updated = abs(millis()-tkr_gps->readings.update_seconds);
   gps_millis_updated /= 1000;
-  uint32_t gprs_millis_updated = abs(millis()-pCONT_cell->gprs.last_comms_millis_updated);
+  uint32_t gprs_millis_updated = abs(millis()-tkr_cell->gprs.last_comms_millis_updated);
   gprs_millis_updated /= 1000;
  
   
@@ -166,22 +166,22 @@ void mCellularBlackBox::SubTask_UpdateOLED()
    * 
    */
 
-  // rintf(buffer, sizeof(buffer), "123456789123456789123"); pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
-  snprintf(buffer, sizeof(buffer), "Lat %s", convf_lat); pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
-  snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
-  snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); pCONT_iDisp->LogBuffer_AddRow(buffer, 2);  
-  snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); pCONT_iDisp->LogBuffer_AddRow(buffer, 3);  
-  snprintf(buffer, sizeof(buffer), "GPRS u%s secs", convf_gprs_upsecs);  pCONT_iDisp->LogBuffer_AddRow(buffer, 4);
-  snprintf(buffer, sizeof(buffer), "Bat %s mv, %s%%", convf_batt_mv, convf_batt_per);  pCONT_iDisp->LogBuffer_AddRow(buffer, 5);
-  snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", pCONT_gps->location.hour, pCONT_gps->location.minute, pCONT_gps->location.second);  pCONT_iDisp->LogBuffer_AddRow(buffer, 6);
+  // rintf(buffer, sizeof(buffer), "123456789123456789123"); tkr_iDisp->LogBuffer_AddRow(buffer, 0);
+  snprintf(buffer, sizeof(buffer), "Lat %s", convf_lat); tkr_iDisp->LogBuffer_AddRow(buffer, 0);
+  snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); tkr_iDisp->LogBuffer_AddRow(buffer, 1);
+  snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); tkr_iDisp->LogBuffer_AddRow(buffer, 2);  
+  snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); tkr_iDisp->LogBuffer_AddRow(buffer, 3);  
+  snprintf(buffer, sizeof(buffer), "GPRS u%s secs", convf_gprs_upsecs);  tkr_iDisp->LogBuffer_AddRow(buffer, 4);
+  snprintf(buffer, sizeof(buffer), "Bat %s mv, %s%%", convf_batt_mv, convf_batt_per);  tkr_iDisp->LogBuffer_AddRow(buffer, 5);
+  snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", tkr_gps->location.hour, tkr_gps->location.minute, tkr_gps->location.second);  tkr_iDisp->LogBuffer_AddRow(buffer, 6);
   
   if(
     (gps_millis_updated<10)&&
     (gprs_millis_updated<10)
   ){
-    snprintf(buffer, sizeof(buffer), "OH %s  %s", display_message.line7, "GOOD");  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
+    snprintf(buffer, sizeof(buffer), "OH %s  %s", display_message.line7, "GOOD");  tkr_iDisp->LogBuffer_AddRow(buffer, 7);
   }else{
-    snprintf(buffer, sizeof(buffer), "OH %s  m%d sec", display_message.line7, gps_millis_updated);  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
+    snprintf(buffer, sizeof(buffer), "OH %s  m%d sec", display_message.line7, gps_millis_updated);  tkr_iDisp->LogBuffer_AddRow(buffer, 7);
   }
 
 

@@ -39,7 +39,8 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_Cameras.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
+  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_Cameras.h"  
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
@@ -352,6 +353,9 @@ With latest version, all longer term shared debug features should be added here 
 
 
 
+#ifndef MQTT_HOST
+#define MQTT_HOST "192.168.3.70"
+#endif
 #ifndef MQTT_PORT
 #define MQTT_PORT 1883 // default
 #endif

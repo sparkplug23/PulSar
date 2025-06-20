@@ -923,7 +923,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBu
       case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID: {
           
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-        float azimuth = pCONT_solar->Get_Azimuth();
+        float azimuth = tkr_solar->Get_Azimuth();
         #else
         float azimuth = 0;
         #endif
@@ -936,9 +936,9 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBu
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID: {
         
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-        float elevation = pCONT_solar->Get_Elevation();
-        float el_min = pCONT_solar->Get_Elevation_Min();
-        float el_max = pCONT_solar->Get_Elevation_Max();
+        float elevation = tkr_solar->Get_Elevation();
+        float el_min = tkr_solar->Get_Elevation_Min();
+        float el_max = tkr_solar->Get_Elevation_Max();
         #else
         float elevation = 0;
         float el_min = -30;
@@ -1153,7 +1153,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       case PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID: {
           
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-        float azimuth = pCONT_solar->Get_Azimuth();
+        float azimuth = tkr_solar->Get_Azimuth();
         #else
         float azimuth = 0;
         #endif
@@ -1171,9 +1171,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID: {
         
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-        float elevation = pCONT_solar->Get_Elevation();
-        float el_min = pCONT_solar->Get_Elevation_Min();
-        float el_max = pCONT_solar->Get_Elevation_Max();
+        float elevation = tkr_solar->Get_Elevation();
+        float el_min = tkr_solar->Get_Elevation_Min();
+        float el_max = tkr_solar->Get_Elevation_Max();
         #else
         float elevation = 0;
         float el_min = -30;
@@ -1304,7 +1304,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
         // Get the current solar elevation
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-        float elevation = pCONT_solar->Get_Elevation();
+        float elevation = tkr_solar->Get_Elevation();
         #else
         float elevation = 0;
         #endif
@@ -1398,7 +1398,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
         uint16_t rescaled_palette_index;
 
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-        if(pCONT_solar->Valid())
+        if(tkr_solar->Valid())
         {
           flag_request_is_for_full_visual_output = true;
         }
@@ -1419,9 +1419,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           // Running mode: Apply zoom based on elevation    
 
           #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = pCONT_solar->Get_Elevation();
-          float el_min = pCONT_solar->Get_Elevation_Min();
-          float el_max = pCONT_solar->Get_Elevation_Max();
+          float elevation = tkr_solar->Get_Elevation();
+          float el_min = tkr_solar->Get_Elevation_Min();
+          float el_max = tkr_solar->Get_Elevation_Max();
           // Serial.print(elevation); Serial.print("|"); Serial.print(el_min); Serial.print("|"); Serial.println(el_max);
           #else
           float elevation = 0;

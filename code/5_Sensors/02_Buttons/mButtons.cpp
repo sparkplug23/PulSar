@@ -762,7 +762,7 @@ char* mButtons::GetStateName(uint8_t state, uint8_t count, char* buffer, uint8_t
   {
     press_type = count-1;
   }
-  pCONT_sup->GetTextIndexed_P(buffer, buflen, press_type, kMultiPress);
+  tkr_sup->GetTextIndexed_P(buffer, buflen, press_type, kMultiPress);
   return buffer;
 
 }

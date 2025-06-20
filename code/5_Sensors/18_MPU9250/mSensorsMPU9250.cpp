@@ -87,7 +87,7 @@ void mSensorsMPU9250::Pre_Init(){
 
   // char mqtt_data[300];
 
-  // pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+  // tkr_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
 
   // Serial.println(mqtt_data);
 
@@ -100,7 +100,7 @@ void mSensorsMPU9250::Pre_Init(){
   // in futre use array to store bme type found (BME_280_ID, BME_180_ID) etc
   // if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
-  if(pCONT_sup->I2cDevice(I2C_ADDRESS_MPU9250)){
+  if(tkr_sup->I2cDevice(I2C_ADDRESS_MPU9250)){
 
     // Wire = new TwoWire();//tkr_pins->GetPin(GPIO_I2C_SCL_ID),tkr_pins->GetPin(GPIO_I2C_SDA_ID));
 
@@ -298,7 +298,7 @@ uint32_t tSaved = millis();
 //         sensor[sensor_id].temperature = sensor[sensor_id].bme->readTemperature();
 //         sensor[sensor_id].humidity =    sensor[sensor_id].bme->readHumidity();
 //         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
-//         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
+//         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(tkr_iSensors->settings.sealevel_pressure);
 
 //         ALOG_DBG(     PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
 //         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);

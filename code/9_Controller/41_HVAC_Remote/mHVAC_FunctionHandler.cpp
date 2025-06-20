@@ -105,7 +105,7 @@ void mHVAC::YTask_Init(){
 void mHVAC::YTask_Loop()
 {  
   for(auto& handle:functionhandler_list){
-    pCONT_sup->YTask_Call(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
+    tkr_sup->YTask_Call(*this, EM_MODULE_CONTROLLER__HVAC__ID, handle);
   }
 }
 

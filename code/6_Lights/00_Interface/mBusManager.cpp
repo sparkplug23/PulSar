@@ -943,7 +943,7 @@ Serial.printf("numPins %d\n", numPins);
 
   for(uint8_t ii=0;ii<numPins;ii++)
   {
-    colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, tkr_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
+    colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, tkr_set->Settings.pwm_range, tkr_iLight->pwm_min, tkr_iLight->pwm_max) : 0; 
     pwm_value = bitRead(tkr_set->runtime.pwm_inverted, ii) ? tkr_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28

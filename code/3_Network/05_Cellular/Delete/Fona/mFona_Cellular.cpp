@@ -165,7 +165,7 @@ void mFona_Cellular::Pre_Init(void)
  **/
 void IRAM_ATTR ISR_Ring_Indicator_Triggered_2()
 {
-  pCONT_fona->connection.flag_ring_indicator = true;
+  tkr_fona->connection.flag_ring_indicator = true;
 }
 
 
@@ -250,9 +250,9 @@ void mFona_Cellular::ISR_Ring_Indicator_Triggered()
 void mFona_Cellular::EveryLoop()
 {
 
-  if(pCONT_fona->connection.flag_ring_indicator)
+  if(tkr_fona->connection.flag_ring_indicator)
   {
-    // ALOG_INF(PSTR("pCONT_fona->connection.flag_ring_indicator SET"));
+    // ALOG_INF(PSTR("tkr_fona->connection.flag_ring_indicator SET"));
   }
 
   /**

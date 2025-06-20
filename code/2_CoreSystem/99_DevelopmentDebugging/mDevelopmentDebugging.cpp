@@ -24,6 +24,7 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
   switch(function){
     case TASK_INIT:
       //
+      Init_DebugPin();
 
       #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
       // pCONT->monitor_task.push_back(TASK_LOOP);           // Add TASK_LOOP to the monitor list
@@ -37,6 +38,32 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
   switch(function){
     
     case TASK_LOOP: {
+      
+      #ifdef ENABLE_DEBUGFEATURE_SET_PINS_MANUAL_STATES
+  
+      uint16_t pin = 0;
+
+      // pin = 4;  pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 16; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 17; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 18; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 19; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 21; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 22; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 23; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+
+      // pin = 2;  pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 13; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 14; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 27; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 26; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 25; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 33; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+      // pin = 32; pinMode(pin, OUTPUT); digitalWrite(pin, HIGH);
+
+
+
+      #endif // ENABLE_DEBUGFEATURE_SET_PINS_MANUAL_STATES
       
     }break;
     case TASK_EVERY_SECOND:{
@@ -53,12 +80,12 @@ AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d",
 
 
       #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
-        ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
+        ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, tkr_sup->activity.cycles_per_sec);
         ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_FREEHEAP, ESP.getFreeHeap());
       #endif // ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
-      // ALOG_INF( PSTR("loops_per_second %d"), pCONT_sup->loops_per_second);
-      // ALOG_INF( PSTR("this_cycle_ratio %d"), pCONT_sup->this_cycle_ratio);
+      // ALOG_INF( PSTR("loops_per_second %d"), tkr_sup->loops_per_second);
+      // ALOG_INF( PSTR("this_cycle_ratio %d"), tkr_sup->this_cycle_ratio);
       // ALOG_INF( PSTR("loop_load_avg %d"), tkr_set->loop_load_avg);
 
       #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
@@ -92,6 +119,66 @@ AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d",
 
 }//end
 
+
+void mDevelopmentDebugging::Init_DebugPin()
+{
+  
+  #ifdef DEBUG_PIN1_GPIO
+    DEBUG_PIN1_INIT();
+  #endif
+  #ifdef DEBUG_PIN2_GPIO
+    DEBUG_PIN2_INIT();
+  #endif
+  #ifdef DEBUG_PIN3_GPIO
+    DEBUG_PIN3_INIT();
+  #endif
+  #ifdef DEBUG_PIN4_GPIO
+    DEBUG_PIN4_INIT();
+  #endif
+  #ifdef DEBUG_PIN5_GPIO
+    DEBUG_PIN5_INIT();
+  #endif
+  #ifdef DEBUG_PIN6_GPIO
+    DEBUG_PIN6_INIT();
+  #endif
+  #ifdef DEBUG_PIN7_GPIO
+    DEBUG_PIN7_INIT();
+  #endif
+  #ifdef DEBUG_PIN8_GPIO
+    DEBUG_PIN8_INIT();
+  #endif
+
+
+  #ifdef USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
+
+  DEBUG_PIN1_SET(1);
+  DEBUG_PIN2_SET(1);
+  DEBUG_PIN3_SET(1);
+  DEBUG_PIN4_SET(1);
+  DEBUG_PIN5_SET(1);
+  DEBUG_PIN6_SET(1);
+  DEBUG_PIN7_SET(1);
+  DEBUG_PIN8_SET(1);
+
+  DEBUG_PIN1_SET(0);
+  delay(100);
+  DEBUG_PIN2_SET(0);
+  delay(100);
+  DEBUG_PIN3_SET(0);
+  delay(100);
+  DEBUG_PIN4_SET(0);
+  delay(100);
+  DEBUG_PIN5_SET(0);
+  delay(100);
+  DEBUG_PIN6_SET(0);
+  delay(100);
+  DEBUG_PIN7_SET(0);
+  delay(100);
+  DEBUG_PIN8_SET(0);
+  
+  #endif // USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
+
+}
 
 void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
 {

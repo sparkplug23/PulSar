@@ -235,9 +235,9 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres()
       #ifdef USE_MODULE_SENSORS_DS18X
       int tempsensorid = -1;
       float ambient_temperature;
-      if((tempsensorid=tkr_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t) /*EM_MODULE_SENSORS_DB18S20_ID*/ pCONT_db18->GetModuleUniqueID()))>=0){
-          if(pCONT_db18->sensor[tempsensorid].reading.isvalid){
-          ambient_temperature = pCONT_db18->sensor[tempsensorid].reading.val;
+      if((tempsensorid=tkr_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t) /*EM_MODULE_SENSORS_DB18S20_ID*/ tkr_db18->GetModuleUniqueID()))>=0){
+          if(tkr_db18->sensor[tempsensorid].reading.isvalid){
+          ambient_temperature = tkr_db18->sensor[tempsensorid].reading.val;
           
         AddLog(LOG_LEVEL_ERROR, PSTR("ambient_temperature=%d"),(int)ambient_temperature);
           // Reduce frequency of updates to stop data jumps

@@ -163,7 +163,7 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_mod
 
 // // DEBUG_LINE_HERE;
 //   // gets first index from the array, where we start at the position the desired name is the next name
-//   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
+//   tkr_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
 
 // // DEBUG_LINE_HERE;
 //   #ifdef ENABLE_LOG_LEVEL_INFO
@@ -190,7 +190,7 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_mod
  *
  * This function searches the `number_buffer` table for a match based on the provided
  * `unique_module_id` and `device_id`. If a match is found, it retrieves the corresponding
- * name from `name_buffer` using the provided `pCONT_sup->GetTextIndexed()` method.
+ * name from `name_buffer` using the provided `tkr_sup->GetTextIndexed()` method.
  *
  * If no match is found and `flag_respond_nomatch_if_not_found` is true, it writes a fallback
  * name ("No Match") to the buffer from PROGMEM.
@@ -254,7 +254,7 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
   // ALOG_INF(PSTR("found_index=%d"), found_index);
 
   // Retrieve name using found index
-  char* p = pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
+  char* p = tkr_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
 
   // ALOG_INF(PSTR("GetDeviceNameWithEnumNumber=%s"), buffer);
   // ALOG_INF(PSTR("p=%s"), p);
@@ -334,7 +334,7 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 
 
 //   // gets first index from the array, where we start at the position the desired name is the next name
-//   char* p = pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
+//   char* p = tkr_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
 
 // // ALOG_INF( PSTR("name_buffer2=%s"),name_buffer2);
 // // ALOG_INF( PSTR("found_index=%d"),found_index);
@@ -371,7 +371,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* 
     // Iterate over the buffer to find the matching module name and sensor name
     for (int i = 0; i < DLI->GetLengthIndexUsed(); i++) {
         const char* current_module_name = pCONT->GetModuleName(number_buffer.unique_group_ids[i]);
-        const char* current_sensor_name = pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), i, name_buffer.ptr);
+        const char* current_sensor_name = tkr_sup->GetTextIndexed(buffer, sizeof(buffer), i, name_buffer.ptr);
 
         // ALOG_INF(PSTR("GetModuleAndSensorIDs %s %s"), current_module_name, current_sensor_name);
 
@@ -407,7 +407,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* senso
     // Check if the provided module ID and sensor name match any in the buffers
     for(int i = 0; i < DEVICENAMEBUFFER_NAME_INDEX_LENGTH; i++) {
         uint16_t current_module_id = number_buffer.unique_group_ids[i];
-        const char* current_sensor_name = pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), number_buffer.index_ids[i], name_buffer.ptr);
+        const char* current_sensor_name = tkr_sup->GetTextIndexed(buffer, sizeof(buffer), number_buffer.index_ids[i], name_buffer.ptr);
 
         if (current_sensor_name) {
             if (current_module_id == module_id && strcmp(current_sensor_name, sensor_name) == 0) {
@@ -498,7 +498,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* senso
 //   #endif // ENABLE_LOG_LEVEL_INFO
 
 //   // gets first index from the array, where we start at the position the desired name is the next name
-//   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
+//   tkr_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
 
 //   #ifdef ENABLE_LOG_LEVEL_INFO
 //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
@@ -521,7 +521,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* senso
 // search for name within devicebuffer, return its class/device id's
 // int8_t mSettings::GetDeviceIDbyName(int8_t* unique_module_id, int8_t* device_id, char* name_tofind){
 
-//   // pCONT_sup->GetText
+//   // tkr_sup->GetText
 
 
 // uint8_t GetDevice_

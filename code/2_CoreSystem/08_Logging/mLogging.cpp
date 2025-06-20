@@ -22,7 +22,7 @@ void ErrorMessage(uint8_t error_type, const char* message)
 
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
-
+  // DEBUG_LINE_HERE3
   #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
   uint16_t unique_module_ids[] = { ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE }; // Single number or "1, 2, 3"  
   // Corrected end pointer calculation
@@ -62,12 +62,13 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       return;
     }
   }
+  
 
   // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
 
   va_list arg;
   va_start(arg, formatP);
-  vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
+  vsnprintf_P(tkr_log->log_data, sizeof(tkr_log->log_data), formatP, arg);
   va_end(arg);
 
   char mxtime[25];  // "13:45:21 " //9
@@ -108,9 +109,9 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   bool isconnected = false;
   #ifdef USE_MODULE_NETWORK_WIFI
-  isconnected = pCONT_wif->connection.fConnected;
+  isconnected = tkr_wifi->connection.fConnected;
   #endif
-
+  
   #ifndef DISABLE_SERIAL_LOGGING
   // LOG : SERIAL
   if (loglevel <= tkr_set->Settings.logging.serial_level) 
@@ -122,8 +123,8 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         ESP.getFreeHeap(), // 4 * (sp - g_pcont->stack), 
         isconnected ? 'Y' : 'N',
         tkr_time->GetUptime().c_str(),
-        pCONT_log->GetLogLevelNamebyID(loglevel),
-        pCONT_log->log_data
+        tkr_log->GetLogLevelNamebyID(loglevel),
+        tkr_log->log_data
       );
       
       if(loglevel == LOG_LEVEL_DEBUG_LOWLEVEL)
@@ -138,7 +139,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
 
 
-      SERIAL_DEBUG.printf(PSTR("%s%S %s\r\n"), mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
+      SERIAL_DEBUG.printf(PSTR("%s%S %s\r\n"), mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
 
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r>>HIGHLIGHT END<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\r"); }
       #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
@@ -165,16 +166,16 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   #ifdef ENABLE_SERIAL_FLUSH
     SERIAL_DEBUG.flush(); 
   #endif 
-
+  
   // LOG : TELNET
   if (loglevel <= tkr_set->Settings.logging.telnet_level) 
   {    
-    if(pCONT_log->Telnet)
+    if(tkr_log->Telnet)
     {
-      pCONT_log->Telnet.printf( "%s%S %s\r\n", mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
+      tkr_log->Telnet.printf( "%s%S %s\r\n", mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
     }
   }
-
+  // DEBUG_LINE_HERE3
   // LOG : WEBSERVER
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   // if(tkr_web->fConsole_active && !tkr_web->fConsole_history){ //only append values when active, however, this stops history
@@ -188,13 +189,13 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   //     {
   //       char* it = web_log;
   //       it++;                                  // Skip web_log_index
-  //       it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
+  //       it += tkr_sup->strchrspn(it, '\1'); // Skip log line
   //       it++;                                  // Skip delimiting "\1"
   //       // circle uffer
   //       memmove(web_log, it, WEB_LOG_SIZE -(it-web_log));  // Move buffer forward to remove oldest log line
   //     }
   //     // creates line formatted with \1 meaning EOL
-  //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%S %s\1"), web_log, web_log_index++, mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), log_data);
+  //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%S %s\1"), web_log, web_log_index++, mxtime, tkr_log->GetLogLevelNamebyID(loglevel), log_data);
   //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
   //   }
@@ -214,27 +215,19 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
    * 
    */
   #ifdef ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
+  DEBUG_LINE_HERE3
   if (loglevel <= tkr_set->Settings.logging.mqtt_level) 
   {    
-    char topic[100];
-    snprintf_P(topic, sizeof(topic), "logging/message/%S", pCONT_log->GetLogLevelNamebyID(loglevel));
-
-    // Calculate the length of the timestamp, including the space
-    size_t mxtime_length = strlen(mxtime);
-    // Calculate the length of the current log data
-    size_t log_data_length = strlen(pCONT_log->log_data);
-    // Ensure there's enough space in log_data to perform the shift
-    if (mxtime_length + log_data_length < sizeof(pCONT_log->log_data)) {
-      // Shift the current log data to the right to make space for the timestamp
-      memmove(pCONT_log->log_data + mxtime_length, pCONT_log->log_data, log_data_length + 1); // +1 to move the null terminator as well
-      // Copy the timestamp to the beginning of log_data
-      memcpy(pCONT_log->log_data, mxtime, mxtime_length);
-    }
-
-    tkr_mqtt->Publish(topic, pCONT_log->log_data);
+    DEBUG_LINE_HERE3
+    char topic[100] = {0};
+    snprintf_P(topic, sizeof(topic), "logging/message/%S", tkr_log->GetLogLevelNamebyID(loglevel));
+    if(tkr_time->uptime_seconds_nonreset>60)
+      tkr_mqtt->Publish(topic, tkr_log->log_data);
+    DEBUG_LINE_HERE3
   }
   #endif // ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
   
+  DEBUG_LINE_HERE3
 }
 
 
@@ -273,7 +266,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
   va_list arg;
   va_start(arg, formatP);
-  vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
+  vsnprintf_P(tkr_log->log_data, sizeof(tkr_log->log_data), formatP, arg);
   va_end(arg);
 
   //AddLogAddLog(loglevel);
@@ -305,7 +298,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
   // Overrides
   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //pCONT_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
+  //tkr_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
   //tkr_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG;
   //tkr_set->Settings.logging.web_level = LOG_LEVEL_INFO;
 
@@ -313,32 +306,32 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   if (loglevel <= tkr_set->Settings.logging.serial_level) {
     SERIAL_DEBUG.printf("%s%S %s\r\n", 
     mxtime,
-    pCONT_log->GetLogLevelNamebyID(loglevel),  
-    pCONT_log->log_data);
+    tkr_log->GetLogLevelNamebyID(loglevel),  
+    tkr_log->log_data);
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // SERIAL_DEBUG.flush();
   }
 
   // LOG : TELNET
   // if (loglevel <= tkr_set->Settings.telnetlog_level) {
-  //   if((pCONT_log!=NULL)&&(pCONT_log->server!=NULL)){
-  //     if(!pCONT_log->client.connected()) {
-  //       pCONT_log->client = pCONT_log->server->available();
+  //   if((tkr_log!=NULL)&&(tkr_log->server!=NULL)){
+  //     if(!tkr_log->client.connected()) {
+  //       tkr_log->client = tkr_log->server->available();
   //     }
-  //     if(pCONT_log->client.connected()) {
-  //       pCONT_log->client.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
+  //     if(tkr_log->client.connected()) {
+  //       tkr_log->client.printf("%s%s %s\r\n", mxtime,tkr_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
   //     }
   //   }
   // }
-  if(pCONT_log->Telnet){
-    //   if(!pCONT_log->client.connected()) {
+  if(tkr_log->Telnet){
+    //   if(!tkr_log->client.connected()) {
       
-    //     pCONT_log->client = pCONT_log->server->available();
+    //     tkr_log->client = tkr_log->server->available();
     //   }
     
-  pCONT_log->Telnet.println("uptime: ");
-    //   if(pCONT_log->client.connected()) {
-    //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
+  tkr_log->Telnet.println("uptime: ");
+    //   if(tkr_log->client.connected()) {
+    //     tkr_log->client.printf("%s%s %s\r\n", mxtime, tkr_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
     //   }
     // }
     }
@@ -348,22 +341,22 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   if (tkr_set->Settings.webserver && (loglevel <= tkr_set->Settings.logging.web_level)) {
     // Delimited, zero-terminated buffer of log lines.
     // Each entry has this format: [index][log data]['\1']
-    if (!pCONT_log->web_log_index) pCONT_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+    if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
-    while (pCONT_log->web_log_index == pCONT_log->web_log[0] ||  // If log already holds the next index, remove it
-           strlen(pCONT_log->web_log) + strlen(pCONT_log->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
+    while (tkr_log->web_log_index == tkr_log->web_log[0] ||  // If log already holds the next index, remove it
+           strlen(tkr_log->web_log) + strlen(tkr_log->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
     {
-      char* it = pCONT_log->web_log;
+      char* it = tkr_log->web_log;
       it++;                                  // Skip web_log_index
-      it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
+      it += tkr_sup->strchrspn(it, '\1'); // Skip log line
       it++;                                  // Skip delimiting "\1"
-      memmove(pCONT_log->web_log, it, WEB_LOG_SIZE -(it-pCONT_log->web_log));  // Move buffer forward to remove oldest log line
+      memmove(tkr_log->web_log, it, WEB_LOG_SIZE -(it-tkr_log->web_log));  // Move buffer forward to remove oldest log line
     }
 
     // creates line formatted with \1 meaning EOL
-    snprintf_P(pCONT_log->web_log, sizeof(pCONT_log->web_log), PSTR("%s%c%s%S %s\1"), pCONT_log->web_log, 
-    pCONT_log->web_log_index++, mxtime, pCONT_log->GetLogLevelNamebyID(loglevel), pCONT_log->log_data);
-    if (!pCONT_log->web_log_index) pCONT_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+    snprintf_P(tkr_log->web_log, sizeof(tkr_log->web_log), PSTR("%s%c%s%S %s\1"), tkr_log->web_log, 
+    tkr_log->web_log_index++, mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
+    if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
   
   // SERIAL_DEBUG.printf("WEBLOG");
   // SERIAL_DEBUG.printf(web_log_index);
@@ -401,7 +394,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 //   if (loglevel <= tkr_set->Settings.logging.serial_level) {
 //     SERIAL_DEBUG.printf("%s%s %s\r\n", 
 //       mxtime,
-//       pCONT_log->GetLogLevelNamebyID(loglevel, level_buffer),  
+//       tkr_log->GetLogLevelNamebyID(loglevel, level_buffer),  
 //       log_data
 //     );
 //   }
@@ -466,7 +459,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
     do {
       uint8_t cur_idx = *it;
       it++;
-      size_t tmp = pCONT_sup->strchrspn(it, '\1');
+      size_t tmp = tkr_sup->strchrspn(it, '\1');
       tmp++;                             // Skip terminating '\1'
       if (cur_idx == idx) {              // Found the requested entry
         len = tmp;
@@ -747,6 +740,14 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
   // }
 
     break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+
+
     case TASK_WIFI_CONNECTED:
       StartTelnetServer();
     break;
@@ -757,7 +758,27 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
 }
 
 
+void mLogging::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken tok;
+
+  JsonParserObject jobj = obj[GetModuleName()];
+
+  if(!jobj) return; // Only allow commands for this module
+
+  if(tok = jobj["TelnetLevel"])
+  {
+    // AddLog(LOG_LEVEL_INFO,PSTR("TelnetLevel %d->%d"),tkr_set->Settings.logging.telnet_level,tok.getInt());
+    tkr_set->Settings.logging.telnet_level = tok.getInt();
+  }
+  
+
+}
+
 void mLogging::init(void)
 {
   
 }
+
+

@@ -131,7 +131,7 @@ void mSensorsLSM303D::Pre_Init()
 //     for(int i=0;i<sizeof(addresses);i++)
 //     {
     
-//       if(pCONT_sup->I2cDevice(addresses[i]))
+//       if(tkr_sup->I2cDevice(addresses[i]))
 //       {
 //         sensor[settings.fSensorCount].lsm303d = new LSM303(tkr_i2c->wire, addresses[i]);
 //         // if(sensor[settings.fSensorCount].lsm303d->init_addressed(addresses[i]))  // should not be needed if the address is correctly within wire

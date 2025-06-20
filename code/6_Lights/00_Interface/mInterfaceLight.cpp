@@ -359,7 +359,7 @@ void mInterfaceLight::Save_Module()
     char message[7] = "hello\0";
   }test;
 
-  pCONT_mfile->ByteFile_Save(filename_byte, (uint8_t*)&test, sizeof(TEST));
+  tkr_mfile->ByteFile_Save(filename_byte, (uint8_t*)&test, sizeof(TEST));
 
 
   /********************************************************************
@@ -411,7 +411,7 @@ void mInterfaceLight::Save_Module()
   char filename_json[50];
   snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleName());
 
-  pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
+  tkr_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
 
   JBI->ReleaseLock();
 
@@ -1159,7 +1159,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   {
     int8_t state = 0;
     if(jtok.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok.getStr());
+      state = tkr_sup->GetStateNumber(jtok.getStr());
     }else
     if(jtok.isNum()){
       state = jtok.getInt(); 

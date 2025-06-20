@@ -1213,6 +1213,9 @@
 #define D_GPIO_FUNCTION_ADE7953_IRQ_CTR "ADE7953_IRQ"
 #define D_GPIO_FUNCTION_ANALOG_CTR "Analog"
 
+#define D_GPIO_FUNCTION_SHELLY2_SHD_BOOT0_CTR "SHD Boot"
+#define D_GPIO_FUNCTION_SHELLY2_SHD_RESET_INV_CTR "SHD Reset"
+
 
 #define D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR "HWSerial1 RingBuffer Rx"
 #define D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR "HWSerial1 RingBuffer Tx"
@@ -2270,6 +2273,10 @@
   #define            D_MODULE_NAME_SONOFF_4CHPRO_CTR       "Sonoff 4CHPRO"
   #define            D_MODULE_NAME_SONOFF_IFAN03_CTR       "Sonoff IFAN03"
 
+  #define D_MODULE_NAME__ESP32_DEVKIT__CTR "ESP32-DevKit"
+  #define D_MODULE_NAME_CAM_AITHINKER_CTR          "Webcam AIThinker"
+  #define D__MODULE_TEMPLATE__CAMERA_FREENOVE_WROOVER__CTR          "Webcam FreenoveWroover"
+  #define D__MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE__CTR "Webcam SeedXiao"
 
 /********************************************************************************************/
 

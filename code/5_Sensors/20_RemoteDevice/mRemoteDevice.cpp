@@ -235,10 +235,10 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   // }
   //   for(int dht_id=0;dht_id<2;dht_id++){
   //   JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
-  //     JBI->Add(D_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
-  //     JBI->Add(D_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
-  //     JBI->Add(D_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
-  //     JBI->Add(D_ISCHANGED, pCONT_dht->sensor[dht_id].instant.ischanged);
+  //     JBI->Add(D_TEMPERATURE, tkr_dht->sensor[dht_id].instant.temperature);
+  //     JBI->Add(D_HUMIDITY, tkr_dht->sensor[dht_id].instant.humidity);
+  //     JBI->Add(D_ISVALID, tkr_dht->sensor[dht_id].instant.isvalid);
+  //     JBI->Add(D_ISCHANGED, tkr_dht->sensor[dht_id].instant.ischanged);
   //     // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;
   //     // json1[D_SECS] = (int)abs(tkr_time->uptime_seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
   //     // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE

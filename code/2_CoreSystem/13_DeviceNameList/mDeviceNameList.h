@@ -241,7 +241,7 @@ class DeviceNameList{
 //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
 //     #endif // ENABLE_LOG_LEVEL_INFO
 //   // gets first index from the array, where we start at the position the desired name is the next name
-//   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer);
+//   tkr_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer);
 //     #ifdef ENABLE_LOG_LEVEL_INFO
 //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
 //     #endif // ENABLE_LOG_LEVEL_INFO
@@ -262,7 +262,7 @@ class DeviceNameList{
 // // search for name within devicebuffer, return its class/device id's
 // // int8_t mSettings::GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind){
 
-// //   // pCONT_sup->GetText
+// //   // tkr_sup->GetText
 
 
 // // uint8_t GetDevice_
@@ -516,7 +516,7 @@ class DeviceNameList{
 //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
 //     #endif // ENABLE_LOG_LEVEL_INFO
 //   // gets first index from the array, where we start at the position the desired name is the next name
-//   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer);
+//   tkr_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer);
 //     #ifdef ENABLE_LOG_LEVEL_INFO
 //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
 //     #endif // ENABLE_LOG_LEVEL_INFO
@@ -537,7 +537,7 @@ class DeviceNameList{
 // // search for name within devicebuffer, return its class/device id's
 // // int8_t mSettings::GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind){
 
-// //   // pCONT_sup->GetText
+// //   // tkr_sup->GetText
 
 
 // // uint8_t GetDevice_

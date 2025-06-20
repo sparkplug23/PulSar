@@ -1405,10 +1405,10 @@ uint16_t state_value = 0;
   // Primary method since v0.86.14.21
   if(jtok = obj["LEDState"]){
     // if(jtok.isStr()){
-    //   state = pCONT_sup->GetStateNumber(jtok.getStr());
+    //   state = tkr_sup->GetStateNumber(jtok.getStr());
     // }else 
     // if(jtok.isNum()){
-      state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+      state_value  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
     // }
 
     /**

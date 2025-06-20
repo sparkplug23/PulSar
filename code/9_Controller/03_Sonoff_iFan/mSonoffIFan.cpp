@@ -102,7 +102,7 @@ void mSonoffIFan::RulesEvent_Set_Speed()
       current_speed = 0;
     }
     #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-      pCONT_buzzer->BuzzerBeep(current_speed);
+      tkr_buzzer->BuzzerBeep(current_speed);
     #endif
     ALOG_TST(PSTR("MATCHED Increment %d"),current_speed);
   }

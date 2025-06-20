@@ -877,7 +877,7 @@ uint64_t mTime::WifiGetNtp(void)
   ALOG_INF(PSTR("ntp_server %s"), ntp_server);
   
   #ifdef USE_MODULE_NETWORK_MQTT
-  if (!pCONT_wif->WifiHostByName(ntp_server, time_server_ip)) {
+  if (!tkr_wifi->WifiHostByName(ntp_server, time_server_ip)) {
     ntp_server_id++;
     ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
     return 0;
@@ -1178,7 +1178,7 @@ uint32_t mTime::JulianDate(const datetime_t &now) {
 // Force value in the 0..pi2 range
 float mTime::InPi(float x)
 {
-  return pCONT_sup->ModulusRangef(x, 0.0f, pi2);
+  return tkr_sup->ModulusRangef(x, 0.0f, pi2);
 }
 
 // Time formula
@@ -1196,8 +1196,8 @@ float mTime::TimeFormula(float *declination_of_sun, uint32_t Tdays) {
   if (L > pi) RA += pi;
   RA = RA * (24.0f/pi2);
   *declination_of_sun = asinf(sin_eps * sinf(L));
-  RA_Mean = pCONT_sup->ModulusRangef(RA_Mean, 0.0f, 24.0f);
-  float dRA = pCONT_sup->ModulusRangef(RA_Mean - RA, -12.0f, 12.0f);
+  RA_Mean = tkr_sup->ModulusRangef(RA_Mean, 0.0f, 24.0f);
+  float dRA = tkr_sup->ModulusRangef(RA_Mean - RA, -12.0f, 12.0f);
   dRA = dRA * 1.0027379f;
   return dRA;
 }
@@ -1238,12 +1238,12 @@ void mTime::DuskTillDawn(uint8_t *hour_up,uint8_t *minute_up, uint8_t *hour_down
   float downfall_world_time = downfall_local_time - lon / 15.0f;
 
   float rise = rise_world_time + timezone + (1/120.0f);         // In hours, with rounding to nearest minute (1/60 * .5)
-  rise = pCONT_sup->ModulusRangef(rise, 0.0f, 24.0f);        // force 0 <= x < 24.0
+  rise = tkr_sup->ModulusRangef(rise, 0.0f, 24.0f);        // force 0 <= x < 24.0
   int rise_hours = (int)rise;
   int rise_minutes = (int)(60.0f * fmodf(rise, 1.0f));
 
   float downfall = downfall_world_time + timezone;
-  downfall = pCONT_sup->ModulusRangef(downfall, 0.0f, 24.0f);
+  downfall = tkr_sup->ModulusRangef(downfall, 0.0f, 24.0f);
   int downfall_hours = (int)downfall;
   int downfall_minutes = (int)(60.0f * fmodf(downfall, 1.0f));
 

@@ -273,14 +273,14 @@ void mPulseCounter::WebAppend_Root_Status_Table_Draw(){
   // for(int ii=0;ii<fSensorCount;ii++){ //add number in name? List needed? also hold user defined name?
     
   //     char name_buffer_tmp[25];
-  //     pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
+  //     tkr_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
 
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Temperature %s</td>"), "22",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Temperature %s</td>"), "22",name_buffer_tmp);//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
   //     tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
   //     tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
   // }
@@ -303,9 +303,9 @@ void mPulseCounter::WebAppend_Root_Status_Table_Data(){
   //       char table_row[25]; memset(table_row,0,sizeof(table_row));       
 
   //       char value_ctr[8];
-  //       pCONT_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
+  //       tkr_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
 
-  //       sprintf(table_row,"%s&deg;%c",value_ctr,pCONT_sup->TempUnit());
+  //       sprintf(table_row,"%s&deg;%c",value_ctr,tkr_sup->TempUnit());
         
   //       if(sensor[sensor_counter].instant.temperature<=25){
   //         sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
@@ -327,7 +327,7 @@ void mPulseCounter::WebAppend_Root_Status_Table_Data(){
   //       char table_row[25]; memset(table_row,0,sizeof(table_row));        
         
   //       char value_ctr[8];
-  //       pCONT_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
+  //       tkr_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
 
   //       sprintf(table_row,"%s %%",value_ctr);
         
@@ -416,7 +416,7 @@ for(uint8_t sensor_id=0;sensor_id<fSensorCount;sensor_id++){
 
   
   char name_buffer_tmp[25];
-  pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), sensor_id, name_buffer);
+  tkr_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), sensor_id, name_buffer);
 
   
 

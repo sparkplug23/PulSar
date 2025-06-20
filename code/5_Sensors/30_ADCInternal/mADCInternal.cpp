@@ -99,12 +99,12 @@ uint16_t IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
 void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
 {
   DEBUG_ADC_ISR_EVENT_SET(LOW);
-  pCONT_adc_internal->external_interrupt.flag_pin_active = true;
+  tkr_adc_internal->external_interrupt.flag_pin_active = true;
 
   /**
    * Capture both adc pins for 5 samples (no delay)
    * */
-  mADCInternal::ISR_DUAL_CAPTURE* adc_p = &pCONT_adc_internal->isr_capture;
+  mADCInternal::ISR_DUAL_CAPTURE* adc_p = &tkr_adc_internal->isr_capture;
 
   if(adc_p->within_buffer_iter_counter < 40)
   {

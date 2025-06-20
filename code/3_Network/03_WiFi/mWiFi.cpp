@@ -88,7 +88,12 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
           mqtt_client = new WiFiClient();
           DEBUG_LINE_HERE3
 
-          tkr_mqtt->CreateConnection(mqtt_client, D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          #ifndef MQTT_HOST
+          #define MQTT_HOST D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+          #warning "D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED needs removed"
+          #endif // MQTT_HOST
+
+          tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
           DEBUG_LINE_HERE3
           
           tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
@@ -1754,7 +1759,7 @@ void mWiFi::EspRestart(void)
   // delay(100);                 // Allow time for message xfer - disabled v6.1.0b
   // //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
   // WifiDisconnect();
-  // //pCONT_sup->CrashDumpClear();
+  // //tkr_sup->CrashDumpClear();
   // ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
   // #ifdef ESP8266
   //   ESP.reset();

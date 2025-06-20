@@ -261,7 +261,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
     {
       case DS18S20_CHIPID: {
         int16_t tempS = (((data[1] << 8) | (data[0] & 0xFE)) << 3) | ((0x10 - data[6]) & 0x0F);
-        t = pCONT_iSensors->ConvertTemp(tempS * 0.0625f - 0.250f);
+        t = tkr_iSensors->ConvertTemp(tempS * 0.0625f - 0.250f);
         #ifdef W1_PARASITE_POWER
         sensor_vector[index].temperature = t;
         #endif
@@ -275,7 +275,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
           temp12 = (~temp12) +1;
           sign = -1;
         }
-        t = pCONT_iSensors->ConvertTemp(sign * temp12 * 0.0625f);  // Divide by 16
+        t = tkr_iSensors->ConvertTemp(sign * temp12 * 0.0625f);  // Divide by 16
         #ifdef W1_PARASITE_POWER
         sensor_vector[index].temperature = t;
         #endif
@@ -284,7 +284,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
       case MAX31850_CHIPID: 
       {
         int16_t temp14 = (data[1] << 8) + (data[0] & 0xFC);
-        t = pCONT_iSensors->ConvertTemp(temp14 * 0.0625f);         // Divide by 16
+        t = tkr_iSensors->ConvertTemp(temp14 * 0.0625f);         // Divide by 16
         #ifdef W1_PARASITE_POWER
         sensor_vector[index].temperature = t;
         #endif

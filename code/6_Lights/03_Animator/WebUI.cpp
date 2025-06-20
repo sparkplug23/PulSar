@@ -53,7 +53,7 @@ bool mAnimatorLight::requestJSONBufferLock(uint16_t module)
   // DEBUG_PRINT(jsonBufferLock);
   // DEBUG_PRINTLN(")");
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  pCONT_mfile->fileDoc = &doc;  // used for applying presets (presets.cpp)
+  tkr_mfile->fileDoc = &doc;  // used for applying presets (presets.cpp)
   doc.clear();
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
   return true;
@@ -65,7 +65,7 @@ void mAnimatorLight::releaseJSONBufferLock()
   // DEBUG_PRINT(jsonBufferLock);
   // DEBUG_PRINTLN(")");
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  pCONT_mfile->fileDoc = nullptr;
+  tkr_mfile->fileDoc = nullptr;
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
   jsonBufferLock = 0;
 }
@@ -160,12 +160,12 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
 void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includeBri, bool segmentBounds, bool selectedSegmentsOnly)
 {
   if (includeBri) {
-    root["on"] = pCONT_iLight->_briRGB_Global > 0;
-    root["bri"] = pCONT_iLight->_briRGB_Global;
+    root["on"] = tkr_iLight->_briRGB_Global > 0;
+    root["bri"] = tkr_iLight->_briRGB_Global;
   }
 
   if (!forPreset) {
-    if (pCONT_mfile->errorFlag) {root[F("error")] = pCONT_mfile->errorFlag; pCONT_mfile->errorFlag = ERR_NONE;} //prevent error message to persist on screen
+    if (tkr_mfile->errorFlag) {root[F("error")] = tkr_mfile->errorFlag; tkr_mfile->errorFlag = ERR_NONE;} //prevent error message to persist on screen
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;    
     
@@ -408,26 +408,26 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   netDebugEnabled = root[F("debug")] | netDebugEnabled;
   #endif
 
-  bool onBefore = pCONT_iLight->_briRGB_Global ; //bri
-  if(getVal(root["bri"], &pCONT_iLight->_briRGB_Global))
+  bool onBefore = tkr_iLight->_briRGB_Global ; //bri
+  if(getVal(root["bri"], &tkr_iLight->_briRGB_Global))
   {
     //if it was updated, tmp update this bus
-    pCONT_iLight->bus_manager->setBrightness( pCONT_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
+    tkr_iLight->bus_manager->setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
   }
 
 
-  getVal(root["cBri"], &pCONT_iLight->_briRGB_Global);
-  getVal(root["wBri"], &pCONT_iLight->_briCT_Global);
+  getVal(root["cBri"], &tkr_iLight->_briRGB_Global);
+  getVal(root["wBri"], &tkr_iLight->_briCT_Global);
 
 
-  bool on = root["on"] | (pCONT_iLight->_briRGB_Global > 0);
-  if (!on != !pCONT_iLight->_briRGB_Global) toggleOnOff();
+  bool on = root["on"] | (tkr_iLight->_briRGB_Global > 0);
+  if (!on != !tkr_iLight->_briRGB_Global) toggleOnOff();
 
   if (root["on"].is<const char*>() && root["on"].as<const char*>()[0] == 't') {
-    if (onBefore || !pCONT_iLight->_briRGB_Global) toggleOnOff(); // do not toggle off again if just turned on by bri (makes e.g. "{"on":"t","bri":32}" work)
+    if (onBefore || !tkr_iLight->_briRGB_Global) toggleOnOff(); // do not toggle off again if just turned on by bri (makes e.g. "{"on":"t","bri":32}" work)
   }
 
-  if (pCONT_iLight->_briRGB_Global && !onBefore) { // unfreeze all segments when turning on
+  if (tkr_iLight->_briRGB_Global && !onBefore) { // unfreeze all segments when turning on
     for (size_t s=0; s < getSegmentsNum(); s++) {
       getSegment(s).freeze = false;
     }
@@ -742,13 +742,13 @@ bool mAnimatorLight::colorFromHexString(byte* rgb, const char* in) {
 
 void mAnimatorLight::toggleOnOff()
 {
-  if (pCONT_iLight->_briRGB_Global == 0)
+  if (tkr_iLight->_briRGB_Global == 0)
   {
-    pCONT_iLight->_briRGB_Global = briLast;
+    tkr_iLight->_briRGB_Global = briLast;
   } else
   {
-    briLast = pCONT_iLight->_briRGB_Global;
-    pCONT_iLight->_briRGB_Global = 0;
+    briLast = tkr_iLight->_briRGB_Global;
+    tkr_iLight->_briRGB_Global = 0;
   }
   stateChanged = true;
 }
@@ -779,7 +779,7 @@ void mAnimatorLight::realtimeLock(uint32_t timeoutMs, byte md)
     // clear strip/segment
     for (size_t i = start; i < stop; i++) setPixelColor(i,BLACK);
     // if WLED was off and using main segment only, freeze non-main segments so they stay off
-    if (useMainSegmentOnly && pCONT_iLight->_briRGB_Global == 0) {
+    if (useMainSegmentOnly && tkr_iLight->_briRGB_Global == 0) {
       for (size_t s=0; s < getSegmentsNum(); s++) {
         getSegment(s).freeze = true;
       }
@@ -803,7 +803,7 @@ void mAnimatorLight::realtimeLock(uint32_t timeoutMs, byte md)
 void mAnimatorLight::exitRealtime() {
   if (!realtimeMode) return;
   if (realtimeOverride == REALTIME_OVERRIDE_ONCE) realtimeOverride = REALTIME_OVERRIDE_NONE;
-  setBrightness(scaledBri(pCONT_iLight->_briRGB_Global), true);
+  setBrightness(scaledBri(tkr_iLight->_briRGB_Global), true);
   realtimeTimeout = 0; // cancel realtime mode immediately
   realtimeMode = REALTIME_MODE_INACTIVE; // inform UI immediately
   realtimeIP[0] = 0;
@@ -935,7 +935,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 
   if (fromFS || !ins.isNull()) {
     uint8_t s = 0;  // bus iterator
-    if (fromFS) pCONT_iLight->bus_manager->removeAll(); // can't safely manipulate busses directly in network callback
+    if (fromFS) tkr_iLight->bus_manager->removeAll(); // can't safely manipulate busses directly in network callback
     uint32_t mem = 0;
     bool busesChanged = false;
     for (JsonObject elm : ins) {
@@ -966,8 +966,8 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
       //   mem += BusManager::memUsage(bc);
       //   if (mem <= MAX_LED_MEMORY) if (busses.add(bc) == -1) break;  // finalization will be done in WLED::beginStrip()
       // } else {
-      //   if (pCONT_iLight->busConfigs[s] != nullptr) delete pCONT_iLight->busConfigs[s];
-      //   pCONT_iLight->busConfigs[s] = new mInterfaceLight::BusConfig(ledType, pins, start, length, colorOrder, reversed, skipFirst, AWmode);
+      //   if (tkr_iLight->busConfigs[s] != nullptr) delete tkr_iLight->busConfigs[s];
+      //   tkr_iLight->busConfigs[s] = new mInterfaceLight::BusConfig(ledType, pins, start, length, colorOrder, reversed, skipFirst, AWmode);
       //   busesChanged = true;
       // }
       s++;
@@ -975,7 +975,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
     doInitBusses = busesChanged;
     // finalization done in beginStrip()
   }
-  if (hw_led["rev"]) pCONT_iLight->bus_manager->getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
+  if (hw_led["rev"]) tkr_iLight->bus_manager->getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
 
   // read color order map configuration
   JsonArray hw_com = hw[F("com")];
@@ -990,7 +990,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
       // com.add(start, len, colorOrder);
       s++;
     }
-    pCONT_iLight->bus_manager->updateColorOrderMap(com);
+    tkr_iLight->bus_manager->updateColorOrderMap(com);
   }
 
   CJSON(irEnabled, hw["ir"]["type"]);
@@ -1024,7 +1024,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   JsonObject def = doc["def"];
   CJSON(bootPreset, def["ps"]);
   CJSON(turnOnAtBoot, def["on"]); // true
-  CJSON(pCONT_iLight->_briRGB_Global, def["bri"]); // 128
+  CJSON(tkr_iLight->_briRGB_Global, def["bri"]); // 128
 
   JsonObject interfaces = doc["if"];
 
@@ -1622,7 +1622,7 @@ bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path)
 
 void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
 {
-  if (pCONT_mfile->handleFileRead(request, "/index.htm"))
+  if (tkr_mfile->handleFileRead(request, "/index.htm"))
   {
     return;
   }
@@ -2865,7 +2865,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
 
     return;
   }
-  else if (url.indexOf("cfg") > 0 && pCONT_mfile->handleFileRead(request, "/cfg.json")) {
+  else if (url.indexOf("cfg") > 0 && tkr_mfile->handleFileRead(request, "/cfg.json")) {
     return;
   }
   else if (url.length() > 6) { //not just /json
@@ -3195,7 +3195,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
   static const char _skin_css[] PROGMEM = "/skin.css";
   tkr_web->server->on(_skin_css, HTTP_GET, [](AsyncWebServerRequest *request){
-    if (pCONT_mfile->handleFileRead(request, FPSTR(_skin_css))) return;
+    if (tkr_mfile->handleFileRead(request, FPSTR(_skin_css))) return;
     AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
     request->send(response);
   });

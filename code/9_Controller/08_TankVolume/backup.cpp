@@ -37,21 +37,21 @@
 
 
 // float mTankVolumeUltrasonic::GetDistanceCMReading(void){
-//   return pCONT_ult->ultrasonic.duration*(0.034/2);
+//   return tkr_ult->ultrasonic.duration*(0.034/2);
 // }
 // float mTankVolumeUltrasonic::GetDistanceMMReading(void){
-//   return pCONT_ult->ultrasonic.duration*(0.34/2);
+//   return tkr_ult->ultrasonic.duration*(0.34/2);
 // }
 // float mTankVolumeUltrasonic::GetOilHeightCMReading(void){
-//   float distance_mm= (float)pCONT_ult->ultrasonic.duration*(0.034/2);
+//   float distance_mm= (float)tkr_ult->ultrasonic.duration*(0.034/2);
 //   return (TANK_HEIGHT_CM-distance_mm);
 // }
 // float mTankVolumeUltrasonic::GetOilHeightMMReading(void){
-//   float distance_mm= (float)pCONT_ult->ultrasonic.duration*(0.34/2);
+//   float distance_mm= (float)tkr_ult->ultrasonic.duration*(0.34/2);
 //   return (TANK_HEIGHT_MM-distance_mm);
 // }
 // float mTankVolumeUltrasonic::GetOilHeightMMReadingAdjustedFromTemp(void){
-//   float distance_mm= (float)pCONT_ult->GetDistanceMMReadingAdjustedForTemp();
+//   float distance_mm= (float)tkr_ult->GetDistanceMMReadingAdjustedForTemp();
 //   return (TANK_HEIGHT_MM-distance_mm);
 // }
 // float mTankVolumeUltrasonic::GetOilHeightCMReading(int duration){
@@ -84,24 +84,24 @@
   
 //   // instant
 //   oiltank.ptr = &oiltank.instant;
-//   oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(pCONT_ult->averaged.instant.final.distance_mm);
-//   oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(pCONT_ult->averaged.instant.final.distance_cm);
+//   oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(tkr_ult->averaged.instant.final.distance_mm);
+//   oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(tkr_ult->averaged.instant.final.distance_cm);
 //   oiltank.ptr->ischanged = true;
 //   oiltank.ptr->isvalid = true;
 //   oiltank.ptr->captured.tLastChanged = millis();
 
 //   // 1 minute
 //   oiltank.ptr = &oiltank.smooth_1m;
-//   oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1m.final.distance_mm);
-//   oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1m.final.distance_cm);
+//   oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1m.final.distance_mm);
+//   oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1m.final.distance_cm);
 //   oiltank.ptr->ischanged = true;
 //   oiltank.ptr->isvalid = true;
 //   oiltank.ptr->captured.tLastChanged = millis();
 
 //   // 1 hour
 //   oiltank.ptr = &oiltank.smooth_1hr;
-//   oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1hr.final.distance_mm);
-//   oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1hr.final.distance_cm);
+//   oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1hr.final.distance_mm);
+//   oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1hr.final.distance_cm);
 //   oiltank.ptr->ischanged = true;
 //   oiltank.ptr->isvalid = true;
 //   oiltank.ptr->captured.tLastChanged = millis();
@@ -111,9 +111,9 @@
 
 // void mTankVolumeUltrasonic::SubTask_CopyAveragedSensorValues(){
 
-//   oiltank.instant.ultrasonic_readings.distance_cm = pCONT_ult->averaged.instant.final.distance_cm;
-//   oiltank.smooth_1m.ultrasonic_readings.distance_cm = pCONT_ult->averaged.smooth_1m.final.distance_cm;
-//   oiltank.smooth_1hr.ultrasonic_readings.distance_cm = pCONT_ult->averaged.smooth_1hr.final.distance_cm;
+//   oiltank.instant.ultrasonic_readings.distance_cm = tkr_ult->averaged.instant.final.distance_cm;
+//   oiltank.smooth_1m.ultrasonic_readings.distance_cm = tkr_ult->averaged.smooth_1m.final.distance_cm;
+//   oiltank.smooth_1hr.ultrasonic_readings.distance_cm = tkr_ult->averaged.smooth_1hr.final.distance_cm;
 
 // }
 
@@ -281,10 +281,10 @@
 // void mTankVolumeUltrasonic::init_ultrasonic_sensor_parameters(){
 
 // // #ifdef USE_MODULE_SENSORS_DS18X
-//   // pCONT_ult->ultrasonic.settings.measure_rate_ms = 2000;
-//   // pCONT_ult->ultrasonic.settings.blocking_time_ms = 1000;
-//   // pCONT_ult->ultrasonic.settings.duration_limit_max = 10000;
-//   // pCONT_ult->ultrasonic.settings.duration_limit_min = 4000;
+//   // tkr_ult->ultrasonic.settings.measure_rate_ms = 2000;
+//   // tkr_ult->ultrasonic.settings.blocking_time_ms = 1000;
+//   // tkr_ult->ultrasonic.settings.duration_limit_max = 10000;
+//   // tkr_ult->ultrasonic.settings.duration_limit_min = 4000;
 // // #endif
 
 // }
@@ -309,7 +309,7 @@
 //     case TASK_LOOP: 
 
 //       #ifdef USE_MODULE_SENSORS_DS18X
-//       if(pCONT_ult->ultrasonic.isvalid&&fUpdateCalculations){ fUpdateCalculations = false;
+//       if(tkr_ult->ultrasonic.isvalid&&fUpdateCalculations){ fUpdateCalculations = false;
 //         //AddLog(LOG_LEVEL_DEV_TEST,PSTR("OilFurnace::isvalid"));
 //         SubTask_CopyAveragedSensorValues();
 //         SubTask_UltraSonicAverageToOilTank();
@@ -404,7 +404,7 @@
 //   //   // }break;
 //   //   case TASK_WEB_ADD_ROOT_TABLE_ROWS:
 //   //     // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//   //     //   BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+//   //     //   BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
 //   //     //   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_oil","?");   
 //   //     // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   //   break; 
@@ -633,13 +633,13 @@
 // //     switch(row){
 // //       case 0:{        
 // //         char table_row[25]; memset(table_row,0,sizeof(table_row));        
-// //         // sprintf(table_row,"%s&deg;%c",climate.ptr->temperature_ctr,pCONT_sup->TempUnit());
+// //         // sprintf(table_row,"%s&deg;%c",climate.ptr->temperature_ctr,tkr_sup->TempUnit());
         
 // //         char float_ctr[10];
 // //         memset(float_ctr,0,sizeof(float_ctr));
         
 // //       #ifdef USE_MODULE_SENSORS_DS18X
-// //         float height = 120-pCONT_ult->GetDistanceCMReading();
+// //         float height = 120-tkr_ult->GetDistanceCMReading();
 // //         #else
 // //         float height = 120-0;
 
@@ -794,11 +794,11 @@
   
 
 // //   // #ifdef USE_MODULE_SENSORS_DS18X
-// //   // for(int i=0;i<pCONT_db18->db18_sensors_active;i++){
-// //   //   if((pCONT_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
-// //   //     JsonObject sensorobj = root.createNestedObject(pCONT_db18->db18_sensor[i].name.ctr);
-// //   //     sensorobj["temp", pCONT_db18->db18_sensor[i].reading.val;
-// //   //     sensorobj["isvalid"]= pCONT_db18->db18_sensor[i].reading.isvalid;
+// //   // for(int i=0;i<tkr_db18->db18_sensors_active;i++){
+// //   //   if((tkr_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
+// //   //     JsonObject sensorobj = root.createNestedObject(tkr_db18->db18_sensor[i].name.ctr);
+// //   //     sensorobj["temp", tkr_db18->db18_sensor[i].reading.val;
+// //   //     sensorobj["isvalid"]= tkr_db18->db18_sensor[i].reading.isvalid;
 // //   //   }
 // //   // }
 // //   // #endif
