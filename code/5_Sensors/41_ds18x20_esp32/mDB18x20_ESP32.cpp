@@ -73,13 +73,13 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -106,7 +106,6 @@ void mDB18x20_ESP32::Pre_Init(void)
 
   if(module_state.pins_used)
   {
-    module_state.mode = ModuleStatus::Running;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DB18 "Running"));
   }
 
@@ -206,6 +205,12 @@ void mDB18x20_ESP32::Ds18x20Search(void)
   module_state.devices = sensor_count;
   ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"),module_state.devices);
 
+
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
+  }
+
 }
 
 
@@ -256,7 +261,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
     {
       case DS18S20_CHIPID: {
         int16_t tempS = (((data[1] << 8) | (data[0] & 0xFE)) << 3) | ((0x10 - data[6]) & 0x0F);
-        t = pCONT_iSensors->ConvertTemp(tempS * 0.0625f - 0.250f);
+        t = tkr_iSensors->ConvertTemp(tempS * 0.0625f - 0.250f);
         #ifdef W1_PARASITE_POWER
         sensor_vector[index].temperature = t;
         #endif
@@ -270,7 +275,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
           temp12 = (~temp12) +1;
           sign = -1;
         }
-        t = pCONT_iSensors->ConvertTemp(sign * temp12 * 0.0625f);  // Divide by 16
+        t = tkr_iSensors->ConvertTemp(sign * temp12 * 0.0625f);  // Divide by 16
         #ifdef W1_PARASITE_POWER
         sensor_vector[index].temperature = t;
         #endif
@@ -279,7 +284,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
       case MAX31850_CHIPID: 
       {
         int16_t temp14 = (data[1] << 8) + (data[0] & 0xFC);
-        t = pCONT_iSensors->ConvertTemp(temp14 * 0.0625f);         // Divide by 16
+        t = tkr_iSensors->ConvertTemp(temp14 * 0.0625f);         // Divide by 16
         #ifdef W1_PARASITE_POWER
         sensor_vector[index].temperature = t;
         #endif
@@ -408,6 +413,10 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
     {
 
       alias_i = sensor_vector[sensor_id].device_name_index;
+
+      // To make sure when no alias is set, ie is -1, instead set as the loop index to get the generic name
+      if(alias_i == -1) alias_i = sensor_id;
+      // ALOG_INF(PSTR(D_LOG_DSB "Sensor %d Alias %d"), sensor_id, alias_i);
   
       JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), alias_i, buffer, sizeof(buffer)));         
         JBI->Add(PM_TEMPERATURE, sensor_vector[sensor_id].reading.val);
@@ -480,7 +489,9 @@ void mDB18x20_ESP32::parse_JSONCommand(JsonParserObject obj)
    */
   if(jtok = obj[PM_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_CTR])
   {
-    
+
+    ALOG_INF(PSTR("Setting Address")); delay (2000);
+
     JsonParserArray array_group = jtok; 
     ALOG_COM(PSTR(PM_SENSORADDRESS));
 
@@ -534,7 +545,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -545,7 +556,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -556,7 +567,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -568,7 +579,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod_SubModule(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
   ptr->json_level = JSON_LEVEL_ALL;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;

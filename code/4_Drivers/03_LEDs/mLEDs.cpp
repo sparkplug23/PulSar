@@ -2,6 +2,21 @@
 
 #ifdef USE_MODULE_DRIVERS_LEDS
 
+/****
+ * 
+ * 
+ * Status LED needs added inside this
+ * Status_Mode
+ *  - network_down (3 quick blinlks, 1 second pause)
+ *  - mqtt_down (2 quick blinks, 1 second pause)
+ *  
+ * Notice that state needs placed on top of an LED which is being used for relay on/off either way
+ * status_led optionally will show power state of primary.
+ * 
+ * 
+ * 
+ */
+
 int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
@@ -17,10 +32,19 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_BOOT_MESSAGE:
       BootMessage();
     break;
-    // case TASK_EVERY_SECOND:
-    //   digitalWrite(8, !digitalRead(8)); // Blink the LED on pin 8 every second
-    //   Serial.println("LED on pin 8 toggled"); // Debug message
-    // break;
+    #ifdef ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
+    case TASK_EVERY_SECOND:
+      pinMode(ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN, OUTPUT); // Set pin output
+      digitalWrite(ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN, !digitalRead(ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN)); // Blink the LED on pin 8 every second
+      Serial.printf("LED on pin %d toggled\n\r", ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN); // Debug message
+    break;
+    #endif // ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
+    #ifdef ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_LED1
+    case TASK_EVERY_SECOND:
+      digitalWrite(tkr_pins->Pin(GPIO_LED1_INV_ID), !digitalRead(tkr_pins->Pin(GPIO_LED1_INV_ID))); // Blink the LED on pin 8 every second
+      Serial.printf("LED on pin %d toggled\n\r", tkr_pins->Pin(GPIO_LED1_INV_ID)); // Debug message
+    break;
+    #endif // ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
   }
 
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -48,13 +72,13 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -116,11 +140,11 @@ void mLEDs::Init(void)
   leds.resize( UsedCount() );  // Allocate space for MAX_LEDS
 
   for (uint8_t i = 0; i < UsedCount(); i++) {
-    // uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
-    // pinMode(pin, OUTPUT);  // Set the pin as output
+    uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
+    pinMode(pin, OUTPUT);  // Set the pin as output
 
     // if (i == 0) {  // LED 1 - Blink 3 times, each blink 300ms apart, cycle every 5 seconds
-    //   StartEffect_Blink(i, 40, 100, 1000, 60);  
+      StartEffect_Blink(i, 40, 100, 1000, 60);  
     // } else if (i == 1) {  // LED 2 - Solid ON
     //   StartEffect_Blink(i, 40, 250, 1000, 60);  
     //   // StartEffect_On(i);
@@ -397,6 +421,8 @@ uint16_t state_value = 0;
     return;
   }
 
+  ALOG_INF(PSTR("LED command found"));
+
   // All commands are inside {"LED":{X}}
   JsonParserObject jobj = jtok.getObject();
   // JsonParserToken jtok_sub = 0;
@@ -417,17 +443,17 @@ uint16_t state_value = 0;
       led_index  = jtok_sub.getInt();
     }
 
-    ALOG_INF( PSTR("relay_id = %d"), led_index );
+    ALOG_INF( PSTR(D_LOG_LED "Name = %d"), led_index );
   }
 
 
   // Primary method since v0.86.14.21
   if(jtok_sub = jobj["State"]){
     if(jtok_sub.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok_sub.getStr());
+      state = tkr_sup->GetStateNumber(jtok_sub.getStr());
     }else 
     if(jtok_sub.isNum()){
-      state  = jtok_sub.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+      state  = jtok_sub.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
     }
 
     /**
@@ -509,8 +535,8 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID));
-    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID));
+    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID,0));
+    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID,0));
 
   return JBI->End();
 
@@ -531,7 +557,7 @@ void mLEDs::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -542,7 +568,7 @@ void mLEDs::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;

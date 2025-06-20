@@ -51,7 +51,7 @@ int8_t mGPS_SD_Logger::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
+      tkr_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
       #endif
       sequence_test = 0;
     break;
@@ -117,7 +117,7 @@ void mGPS_SD_Logger::SubTask_Generate_GPS_Json_SDCard_Stream()
    * Append to sdcard stream
    * */
   #ifdef USE_MODULE_DRIVERS_SDCARD
-    pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+    tkr_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
   #else
     // ALOG_TST(PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
   #endif //USE_MODULE_DRIVERS_SDCARD
@@ -166,16 +166,16 @@ void mGPS_SD_Logger::SubTask_UpdateOLED_Detailed_GPS()
 
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
 
-  snprintf(line_ctr, sizeof(line_ctr), "%d", pCONT_gps->gps_result_stored.latitudeL());
-  pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
-  snprintf(line_ctr, sizeof(line_ctr), "%d", pCONT_gps->gps_result_stored.longitudeL());
-  pCONT_iDisp->LogBuffer_AddRow(line_ctr, 1);
-  // snprintf(line_ctr, sizeof(line_ctr), "%f", pCONT_gps->gps_result_stored.latitude());
-  // pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
-  // snprintf(line_ctr, sizeof(line_ctr), "%f", pCONT_gps->gps_result_stored.longitude());
-  // pCONT_iDisp->LogBuffer_AddRow(line_ctr, 1);
+  snprintf(line_ctr, sizeof(line_ctr), "%d", tkr_gps->gps_result_stored.latitudeL());
+  tkr_iDisp->LogBuffer_AddRow(line_ctr, 0);
+  snprintf(line_ctr, sizeof(line_ctr), "%d", tkr_gps->gps_result_stored.longitudeL());
+  tkr_iDisp->LogBuffer_AddRow(line_ctr, 1);
+  // snprintf(line_ctr, sizeof(line_ctr), "%f", tkr_gps->gps_result_stored.latitude());
+  // tkr_iDisp->LogBuffer_AddRow(line_ctr, 0);
+  // snprintf(line_ctr, sizeof(line_ctr), "%f", tkr_gps->gps_result_stored.longitude());
+  // tkr_iDisp->LogBuffer_AddRow(line_ctr, 1);
   
-  uint32_t bytes_written = pCONT_sdcard->sdcard_status.bytes_written_to_file;
+  uint32_t bytes_written = tkr_sdcard->sdcard_status.bytes_written_to_file;
   char unit_type = 'B';
   if(bytes_written>50000){
     bytes_written /= 1000; //into kB
@@ -184,16 +184,16 @@ void mGPS_SD_Logger::SubTask_UpdateOLED_Detailed_GPS()
   snprintf(buffer, sizeof(buffer), "%d %c s%d",
     bytes_written,
     unit_type,
-    pCONT_gps->gps_result_stored.satellites
+    tkr_gps->gps_result_stored.satellites
   );
-  pCONT_iDisp->LogBuffer_AddRow(buffer,2);
+  tkr_iDisp->LogBuffer_AddRow(buffer,2);
 
   snprintf(buffer, sizeof(buffer), "%c%s%s",
-    pCONT_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
-    pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID ?"OPEN!":"cd",
-    &pCONT_sdcard->writer_settings.file_name[8] //skipping "APPEND_" to get just time
+    tkr_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
+    tkr_sdcard->writer_settings.status == tkr_sdcard->FILE_STATUS_OPENED_ID ?"OPEN!":"cd",
+    &tkr_sdcard->writer_settings.file_name[8] //skipping "APPEND_" to get just time
   );
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
 
   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 
@@ -251,25 +251,25 @@ uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool 
   // GPS data
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   JBI->Object_Start("G");
-    JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
-    JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
-    JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); //above mean sea level, in cm 
-    JBI->Add("sd", pCONT_gps->gps_result_stored.speed());
-    JBI->Add("hd", pCONT_gps->gps_result_stored.heading_cd());
-    JBI->Add("gh", pCONT_gps->gps_result_stored.geoidHeight_cm()); // Height of the geoid above the WGS84 ellipsoid
-    JBI->Add("s",  pCONT_gps->gps_result_stored.satellites);
+    JBI->Add("la", tkr_gps->gps_result_stored.latitudeL()); 
+    JBI->Add("lg", tkr_gps->gps_result_stored.longitudeL()); 
+    JBI->Add("at", tkr_gps->gps_result_stored.altitude_cm()); //above mean sea level, in cm 
+    JBI->Add("sd", tkr_gps->gps_result_stored.speed());
+    JBI->Add("hd", tkr_gps->gps_result_stored.heading_cd());
+    JBI->Add("gh", tkr_gps->gps_result_stored.geoidHeight_cm()); // Height of the geoid above the WGS84 ellipsoid
+    JBI->Add("s",  tkr_gps->gps_result_stored.satellites);
 
     uint32_t timeofday_seconds = 
-      (pCONT_gps->gps_result_stored.dateTime.hours*3600) +
-      (pCONT_gps->gps_result_stored.dateTime.minutes*60) +
-      (pCONT_gps->gps_result_stored.dateTime.seconds*1000);
+      (tkr_gps->gps_result_stored.dateTime.hours*3600) +
+      (tkr_gps->gps_result_stored.dateTime.minutes*60) +
+      (tkr_gps->gps_result_stored.dateTime.seconds*1000);
 
     uint32_t tod_millis = 
       (timeofday_seconds*1000) + 
-      pCONT_gps->gps_result_stored.dateTime_ms();
+      tkr_gps->gps_result_stored.dateTime_ms();
 
     JBI->Add("tms",  tod_millis);
-    JBI->Add_FV("t",  "\"%02d:%02d:%02d-%03d\"", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
+    JBI->Add_FV("t",  "\"%02d:%02d:%02d-%03d\"", tkr_gps->gps_result_stored.dateTime.hours, tkr_gps->gps_result_stored.dateTime.minutes, tkr_gps->gps_result_stored.dateTime.seconds, tkr_gps->gps_result_stored.dateTime_ms());
   JBI->Object_End();
   #endif // USE_MODULE_SENSORS_GPS_SERIAL
   

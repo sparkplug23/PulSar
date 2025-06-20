@@ -38,7 +38,7 @@ class mTelemetry :
     static constexpr const char* PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
-    ~mTelemetry() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mTelemetry() {          }
    
     uint8_t ConstructJSON_LWT_Online(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Health(uint8_t json_method = 0, bool json_appending = true);

@@ -1008,8 +1008,8 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // } effect_config;
 
 
-//   // star* stars = reinterpret_cast<star*>(pCONT_iLight->effects_data_buffer);
-//   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(pCONT_iLight->effects_data_buffer);
+//   // star* stars = reinterpret_cast<star*>(tkr_iLight->effects_data_buffer);
+//   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(tkr_iLight->effects_data_buffer);
 //   //should be memcpy be used to insure size if not exceeded? or sizeof check? pointer is faster
 
 
@@ -1022,12 +1022,12 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //       // if(effect_config2->active_palette_id++>mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID){
 //       //   effect_config2->active_palette_id = mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID;
 //       // }
-//       if(pCONT_iLight->animation.palette_id++>=mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID){
-//         pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID;
+//       if(tkr_iLight->animation.palette_id++>=mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID){
+//         tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID;
 //       }
 
 
-// AddLog(LOG_LEVEL_DEV_TEST,PSTR("pCONT_iLight->animation.palette_id=%d"),pCONT_iLight->animation.palette_id);
+// AddLog(LOG_LEVEL_DEV_TEST,PSTR("tkr_iLight->animation.palette_id=%d"),tkr_iLight->animation.palette_id);
 
 
 //       UpdateDesiredColourFromPaletteSelected();
@@ -1055,7 +1055,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // {   
 //   // Need to make rgbcct pixels possible in the future, with dynamic animation_state
 
-//    for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//    for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
 //         animation_colours[pixel].StartingColor,
 //         animation_colours[pixel].DesiredColour,
@@ -1138,21 +1138,21 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // } effect_config;
 
 
-//   // star* stars = reinterpret_cast<star*>(pCONT_iLight->effects_data_buffer);
-//   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(pCONT_iLight->effects_data_buffer);
+//   // star* stars = reinterpret_cast<star*>(tkr_iLight->effects_data_buffer);
+//   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(tkr_iLight->effects_data_buffer);
 //   //should be memcpy be used to insure size if not exceeded? or sizeof check? pointer is faster
 
-//   AddLog(LOG_LEVEL_DEV_TEST,PSTR("pCONT_iLight->animation.palette_id=%d"),pCONT_iLight->animation.palette_id);
+//   AddLog(LOG_LEVEL_DEV_TEST,PSTR("tkr_iLight->animation.palette_id=%d"),tkr_iLight->animation.palette_id);
 
-//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+//   tkr_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 
-//   pCONT_iLight->settings.light_size_count = 100;
+//   tkr_iLight->settings.light_size_count = 100;
   
 //   // Get all the current state
-//   // for(unsigned index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+//   // for(unsigned index=0; index<tkr_iLight->settings.light_size_count; index++ ){
 //   //   animation_colours[index].DesiredColour = SEGMENT.GetPixelColor(index);
 //   // }
-//     for(unsigned index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+//     for(unsigned index=0; index<tkr_iLight->settings.light_size_count; index++ ){
 //     animation_colours[index].DesiredColour = RgbcctColor();//,0,30,0,0);//,0,10,0,0);
 //   }
 
@@ -1354,15 +1354,15 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //         // randomly blank most of them out again
 //         // uint8_t colour_or_black = 0;
-//         // uint16_t pixels_to_update = pCONT_iLight->animation.transition.pixels_to_update_as_number;
-//         // // pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage);
+//         // uint16_t pixels_to_update = tkr_iLight->animation.transition.pixels_to_update_as_number;
+//         // // tkr_iLight->GetPixelsToUpdateAsNumberFromPercentage(tkr_iLight->animation.transition.pixels_to_update_as_percentage);
 //         // Serial.printf("pixels_to_clear=%d\n\r",pixels_to_update);
 //         // for(unsigned index=0; index<pixels_to_update; index++ ){
-//         //   random_pixel_index = random(0,pCONT_iLight->settings.light_size_count);
+//         //   random_pixel_index = random(0,tkr_iLight->settings.light_size_count);
 //         //   colour_or_black = random(0,1);
 
 //         //   // // Check if pixels is already on, if so, make dark
-//         //   // if(pCONT_iLight->RgbColorto32bit(SEGMENT.GetPixelColor(random_pixel_index))>0){
+//         //   // if(tkr_iLight->RgbColorto32bit(SEGMENT.GetPixelColor(random_pixel_index))>0){
 //         //   //   animation_colours[random_pixel_index].DesiredColour = RgbColor(0,0,0);
 //         //   // }else
 //         //   // // Previously off, pick new state
@@ -1372,8 +1372,8 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //         //     }else{
 //         //       uint8_t desired_pixel = random(0,pixels-1);
 //         //       colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);  
-//         //       // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//         //       //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,pCONT_iLight->getBriRGB());
+//         //       // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
+//         //       //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,tkr_iLight->getBriRGB());
 //         //       // }
 //         //       animation_colours[random_pixel_index].DesiredColour =  colour_random;//RgbColor(0,0,255);//
 //         //    }
@@ -1407,7 +1407,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // {   
 //   // Need to make rgbcct pixels possible in the future, with dynamic animation_state
 
-//    for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//    for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
 //         animation_colours[pixel].StartingColor,
 //         animation_colours[pixel].DesiredColour,
@@ -1454,10 +1454,10 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    /**
 //     * Setting that an mqtt debug exists
 //     * */
-//    pCONT_iLight->animation.debug_mqtt_response_available = 1;
+//    tkr_iLight->animation.debug_mqtt_response_available = 1;
 
 //   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-//   if(pCONT_iLight->animation.debug_mqtt_response_available && pCONT_iLight->animation.flags.animator_first_run)
+//   if(tkr_iLight->animation.debug_mqtt_response_available && tkr_iLight->animation.flags.animator_first_run)
 //   {
 //     this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
 //       [this](void){
@@ -1473,10 +1473,10 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 //   // delay(5000);
 
-//   // pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   // tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //   // Set palette pointer
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 
 //   /**
@@ -1486,12 +1486,12 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
-//   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
+//   bool sun_is_ascending = true;//tkr_solar->solar_position_testing.direction.is_ascending;
 //   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
 
 //   // delay(1000);
@@ -1504,7 +1504,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   /**
 //    * Get total pixels in palette
 //    * */
-//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(pCONT_iLight->animation.palette_id);
+//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(tkr_iLight->animation.palette_id);
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
@@ -1647,7 +1647,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    * Load new colour into animation
 //    * */
 
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation.flags.fForceUpdate = true;
 
 //   animation_colours_rgbcct.DesiredColour  = c_blended;
 
@@ -1676,7 +1676,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   this->setAnimFunctionCallback([this](const AnimationParam& param){
 //       this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
-//   pCONT_iLight->animation.flags.animator_first_run = false; // process completed, so lets not redo things above
+//   tkr_iLight->animation.flags.animator_first_run = false; // process completed, so lets not redo things above
    
 // }
 
@@ -1685,7 +1685,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // void mAnimatorLight::ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01()
 // {   
 // // Serial.println("AnimationProcess_Generic_AnimationColour_LinearBlend");
-//   // for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//   // for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //   //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
 //   //       animation_colours[pixel].StartingColor,
 //   //       animation_colours[pixel].DesiredColour,
@@ -1775,27 +1775,27 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
 
 
-//   // star* stars = reinterpret_cast<star*>(pCONT_iLight->effects_data_buffer);
-//   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(pCONT_iLight->effects_data_buffer);
+//   // star* stars = reinterpret_cast<star*>(tkr_iLight->effects_data_buffer);
+//   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(tkr_iLight->effects_data_buffer);
 //   //should be memcpy be used to insure size if not exceeded? or sizeof check? pointer is faster
 
-//   AddLog(LOG_LEVEL_DEV_TEST,PSTR("pCONT_iLight->animation.palette_id=%d"),pCONT_iLight->animation.palette_id);
+//   AddLog(LOG_LEVEL_DEV_TEST,PSTR("tkr_iLight->animation.palette_id=%d"),tkr_iLight->animation.palette_id);
 
 
-//   // pCONT_iLight->settings.light_size_count = 1;
+//   // tkr_iLight->settings.light_size_count = 1;
   
 //   // Get all the current state
-//   // for(unsigned index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+//   // for(unsigned index=0; index<tkr_iLight->settings.light_size_count; index++ ){
 //   //   animation_colours[index].DesiredColour = SEGMENT.GetPixelColor(index);
 //   // }
-//   //   for(unsigned index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+//   //   for(unsigned index=0; index<tkr_iLight->settings.light_size_count; index++ ){
 //   //   animation_colours[index].DesiredColour = RgbcctColor(9,255,0,0,0);//,0,30,0,0);//,0,10,0,0);
 //   // }
 
@@ -1812,11 +1812,11 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //      * */
 //     // Mapping elevation to CCT percentage
 
-//     // pCONT_iLight->CommandSet_ActiveSolidPalette_ColourTemp_Percentage(percentage_cct);
+//     // tkr_iLight->CommandSet_ActiveSolidPalette_ColourTemp_Percentage(percentage_cct);
 
 //   }else{
     
-//     for(unsigned index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+//     for(unsigned index=0; index<tkr_iLight->settings.light_size_count; index++ ){
 //       animation_colours[index].DesiredColour = RgbcctColor(0,0,255,0,0);//,0,30,0,0);//,0,10,0,0);
 //     }
 //   }
@@ -1855,7 +1855,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     // Convert elevation into percentage
 //     uint8_t elev_perc = map(sun_elevation,-10,25,0,100);
 //     // Convert percentage into cct
-//     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMin(),pCONT_iLight->get_CTRangeMax());
+//     uint16_t cct_val = mapvalue(elev_perc, 0,100, tkr_iLight->get_CTRangeMin(),tkr_iLight->get_CTRangeMax());
 //     // Set the colour temp
 //     SEGMENT.rgbcct_controller->setCCT(cct_val);
 
@@ -2067,15 +2067,15 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //         // randomly blank most of them out again
 //         // uint8_t colour_or_black = 0;
-//         // uint16_t pixels_to_update = pCONT_iLight->animation.transition.pixels_to_update_as_number;
-//         // // pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage);
+//         // uint16_t pixels_to_update = tkr_iLight->animation.transition.pixels_to_update_as_number;
+//         // // tkr_iLight->GetPixelsToUpdateAsNumberFromPercentage(tkr_iLight->animation.transition.pixels_to_update_as_percentage);
 //         // Serial.printf("pixels_to_clear=%d\n\r",pixels_to_update);
 //         // for(unsigned index=0; index<pixels_to_update; index++ ){
-//         //   random_pixel_index = random(0,pCONT_iLight->settings.light_size_count);
+//         //   random_pixel_index = random(0,tkr_iLight->settings.light_size_count);
 //         //   colour_or_black = random(0,1);
 
 //         //   // // Check if pixels is already on, if so, make dark
-//         //   // if(pCONT_iLight->RgbColorto32bit(SEGMENT.GetPixelColor(random_pixel_index))>0){
+//         //   // if(tkr_iLight->RgbColorto32bit(SEGMENT.GetPixelColor(random_pixel_index))>0){
 //         //   //   animation_colours[random_pixel_index].DesiredColour = RgbColor(0,0,0);
 //         //   // }else
 //         //   // // Previously off, pick new state
@@ -2085,28 +2085,28 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //         //     }else{
 //         //       uint8_t desired_pixel = random(0,pixels-1);
 //         //       colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);  
-//         //       //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,pCONT_iLight->getBriRGB());
+//         //       //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,tkr_iLight->getBriRGB());
 //         //       animation_colours[random_pixel_index].DesiredColour =  colour_random;//RgbColor(0,0,255);//
 //         //    }
 //         //   // }
 //         // }
 
-// pCONT_iLight->animation.palette_id = 10;
+// tkr_iLight->animation.palette_id = 10;
 
 //  // ALOG_TST(PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
 //   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
+//   if(!tkr_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
-//       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+//       tkr_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
+//       tkr_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
 
@@ -2174,7 +2174,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
  
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   // AddLog(LOG_LEVEL_DEV_TEST,PSTR("pCONT_iLight->animation.palette_id=%d"),pCONT_iLight->animation.palette_id);
+//   // AddLog(LOG_LEVEL_DEV_TEST,PSTR("tkr_iLight->animation.palette_id=%d"),tkr_iLight->animation.palette_id);
 
 // /**
 //  * 
@@ -2182,7 +2182,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //  * */
 
 
-//   // pCONT_iLight->CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(10);
+//   // tkr_iLight->CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(10);
 
 //   /**
 //    * Solar data to use, defined here for testing or simulations
@@ -2190,9 +2190,9 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
   
@@ -2210,7 +2210,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   // Add yellow to red hue, with max to lowering rgbbrightness
 //   if(sun_elevation>10)
 //   {
-//     pCONT_iLight->rgbcct_controller.setRGB(0,255,0);    
+//     tkr_iLight->rgbcct_controller.setRGB(0,255,0);    
 
 //   }else
 //   if(
@@ -2219,7 +2219,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     )
 //   {
 //     HsbColor hsb = HsbColor(RgbColor(0));
-//     hsb.H = pCONT_iLight->HUE_N2F(mapvalue(sun_elevation,10,-5,35,0)); // yellow to red
+//     hsb.H = tkr_iLight->HUE_N2F(mapvalue(sun_elevation,10,-5,35,0)); // yellow to red
 //     hsb.S = 1;
 
 //     /**
@@ -2228,14 +2228,14 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     hsb.B = mapvalue(sun_elevation,10,-5,0.0f,1.0f);
 
 //     uint8_t brightness_255 = map(sun_elevation,10,-5,0,255);
-//     pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 
-//     pCONT_iLight->rgbcct_controller.setHsbColor(hsb);
+//     tkr_iLight->rgbcct_controller.setHsbColor(hsb);
 
 //     // uint8_t blue =  map(sun_elevation,-50,-5,255,0);
 
-//     // pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
+//     // tkr_iLight->rgbcct_controller.setRGB(0,0,blue);
 
 //     // AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, blue=%d"), (int)sun_elevation, blue);
 
@@ -2243,7 +2243,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //     // uint8_t brightness_255 = map(sun_elevation,-50,-5,255,0);
 
-//     // pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     // tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 //   }else
 //   // Just below hoeizon, sky blue to night blue
@@ -2257,7 +2257,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     // hsb.H = map(sun_elevation,-50,10,255,0)
 
 //     HsbColor hsb = HsbColor(RgbColor(0));
-//     hsb.H =  pCONT_iLight->HUE_N2F(mapvalue(sun_elevation,-5,-10,180,240)); // yellow to red
+//     hsb.H =  tkr_iLight->HUE_N2F(mapvalue(sun_elevation,-5,-10,180,240)); // yellow to red
 //     hsb.S = 1;
 
 //     /**
@@ -2266,14 +2266,14 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     hsb.B = mapvalue(sun_elevation,-5,-10,1.0f,1.0f);
 
 //     uint8_t brightness_255 = map(sun_elevation,-5,-10,255,200);
-//     pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 
-//     pCONT_iLight->rgbcct_controller.setHsbColor(hsb);
+//     tkr_iLight->rgbcct_controller.setHsbColor(hsb);
 
 //     // uint8_t blue =  map(sun_elevation,-50,-5,255,0);
 
-//     // pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
+//     // tkr_iLight->rgbcct_controller.setRGB(0,0,blue);
 
 //     // AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, blue=%d"), (int)sun_elevation, blue);
 
@@ -2281,7 +2281,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //     // uint8_t brightness_255 = map(sun_elevation,-50,-5,255,0);
 
-//     // pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     // tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 //   }else
 //   // "night" blue, slowing fade to low brightness
@@ -2291,7 +2291,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     )
 //   {
 //     HsbColor hsb = HsbColor(RgbColor(0));
-//     hsb.H = pCONT_iLight->HUE_N2F(240); // yellow to red
+//     hsb.H = tkr_iLight->HUE_N2F(240); // yellow to red
 //     hsb.S = 1;
 
 //     /**
@@ -2300,15 +2300,15 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     hsb.B = mapvalue(sun_elevation,-5,-50,1.0f,0.0f);
 
 
-//     pCONT_iLight->rgbcct_controller.setHsbColor(hsb);
+//     tkr_iLight->rgbcct_controller.setHsbColor(hsb);
 
 //     uint8_t brightness_255 = map(sun_elevation,-5,-50,255,1);
-//     pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 
 //     // uint8_t blue =  map(sun_elevation,-50,-5,255,0);
 
-//     // pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
+//     // tkr_iLight->rgbcct_controller.setRGB(0,0,blue);
 
 //     // AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, blue=%d"), (int)sun_elevation, blue);
 
@@ -2316,7 +2316,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //     // uint8_t brightness_255 = map(sun_elevation,-50,-5,255,0);
 
-//     // pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     // tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 //   }
   
@@ -2328,7 +2328,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   //   uint8_t blue =  map(sun_elevation,-50,10,255,0);
 
-//   //   pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
+//   //   tkr_iLight->rgbcct_controller.setRGB(0,0,blue);
 
 //   //   // ALOG_INF(PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
@@ -2337,7 +2337,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   //   // uint8_t brightness_255 = map(sun_elevation,-50,10,255,0);
 
-//   //   // pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//   //   // tkr_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
 //   // }
 //   // else
@@ -2345,12 +2345,12 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   //   (sun_elevation>5)
 //   //   )
 //   // {
-//   //   pCONT_iLight->rgbcct_controller.setRGB(1,0,0);    
+//   //   tkr_iLight->rgbcct_controller.setRGB(1,0,0);    
 //   // }
 //   else
 //   {
 //     //unknown, therfore turn off
-//     pCONT_iLight->rgbcct_controller.setRGB(0,0,0);
+//     tkr_iLight->rgbcct_controller.setRGB(0,0,0);
 //   }
 
 
@@ -2364,10 +2364,10 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   {
 
 //     // Set the colour temp
-//     pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMin()); // set as daywhite
+//     tkr_iLight->rgbcct_controller.setCCT(tkr_iLight->get_CTRangeMin()); // set as daywhite
 
 //     uint8_t brightness_255 = 0;//map(sun_elevation,-10,25,0,255);
-//     pCONT_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
+//     tkr_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
 
 //   }else
 //   if(
@@ -2379,15 +2379,15 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     // Convert elevation into percentage
 //     uint8_t elev_perc = map(sun_elevation,10,20,0,100);
 //     // Convert percentage into cct
-//     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMin(),pCONT_iLight->get_CTRangeMax());
+//     uint16_t cct_val = mapvalue(elev_perc, 0,100, tkr_iLight->get_CTRangeMin(),tkr_iLight->get_CTRangeMax());
 //     // Set the colour temp
-//     pCONT_iLight->rgbcct_controller.setCCT(cct_val);
+//     tkr_iLight->rgbcct_controller.setCCT(cct_val);
 
     
-//     AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, elev_perc=%d, cct_val=%d, cct=%d"), (int)sun_elevation, elev_perc, cct_val, pCONT_iLight->rgbcct_controller.getCCT());
+//     AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, elev_perc=%d, cct_val=%d, cct=%d"), (int)sun_elevation, elev_perc, cct_val, tkr_iLight->rgbcct_controller.getCCT());
 
 //     uint8_t brightness_255 = map(sun_elevation,10,20,100,255);
-//     pCONT_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
+//     tkr_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
 
 //   }else
 //   if(
@@ -2399,15 +2399,15 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //     // Convert elevation into percentage
 //     uint8_t elev_perc = 0;//map(sun_elevation,-5,10,0,100);
 //     // Convert percentage into cct
-//     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMin(),pCONT_iLight->get_CTRangeMax());
+//     uint16_t cct_val = mapvalue(elev_perc, 0,100, tkr_iLight->get_CTRangeMin(),tkr_iLight->get_CTRangeMax());
 //     // Set the colour temp
-//     pCONT_iLight->rgbcct_controller.setCCT(cct_val);
+//     tkr_iLight->rgbcct_controller.setCCT(cct_val);
 
     
-//     AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, elev_perc=%d, cct_val=%d, cct=%d"), (int)sun_elevation, elev_perc, cct_val, pCONT_iLight->rgbcct_controller.getCCT());
+//     AddLog(LOG_LEVEL_DEV_TEST,PSTR("sun_elevation=%d, elev_perc=%d, cct_val=%d, cct=%d"), (int)sun_elevation, elev_perc, cct_val, tkr_iLight->rgbcct_controller.getCCT());
 
 //     uint8_t brightness_255 = map(sun_elevation,-5,10,0,100);
-//     pCONT_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
+//     tkr_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
 
 //   }else
 //   if(
@@ -2416,10 +2416,10 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   {
 
 //     // Set the colour temp
-//     pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMax()); // set as daywhite
+//     tkr_iLight->rgbcct_controller.setCCT(tkr_iLight->get_CTRangeMax()); // set as daywhite
 
 //     // uint8_t brightness_255 = map(sun_elevation,-10,25,0,255);
-//     // pCONT_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
+//     // tkr_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
 
 //   }
   
@@ -2427,30 +2427,30 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 
 
-// //  pCONT_iLight->rgbcct_controller.setCCT(0); // set as daywhite
+// //  tkr_iLight->rgbcct_controller.setCCT(0); // set as daywhite
 
   
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation.flags.fForceUpdate = true;
 
 
 
 
-//   pCONT_iLight->animation.palette_id = 10;
+//   tkr_iLight->animation.palette_id = 10;
 
 //  // ALOG_TST(PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
 //   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
+//   if(!tkr_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
-//       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+//       tkr_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
+//       tkr_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
 
@@ -2521,13 +2521,13 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
  
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //  // ALOG_TST(PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
-//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
+//   tkr_iLight->animation.flags.brightness_applied_during_colour_generation = false;
 
 
 
@@ -2537,12 +2537,12 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
-//   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
+//   bool sun_is_ascending = true;//tkr_solar->solar_position_testing.direction.is_ascending;
 
 //   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
 //   /**
@@ -2919,17 +2919,17 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   // delay(100);
 
   
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation.flags.fForceUpdate = true;
 
 //   animation_colours_rgbcct.DesiredColour  = c_blended;//mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
 //   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
+//   if(!tkr_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
-//       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+//       tkr_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
+//       tkr_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
   
@@ -2973,10 +2973,10 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
  
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   // pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   // tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //   // Set palette pointer
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 
 //   /**
 //    * Solar data to use, defined here for testing or simulations
@@ -2984,12 +2984,12 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
-//   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
+//   bool sun_is_ascending = true;//tkr_solar->solar_position_testing.direction.is_ascending;
 //   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
 
 //   /**
@@ -3000,7 +3000,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //   /**
 //    * Get total pixels in palette
 //    * */
-//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(pCONT_iLight->animation.palette_id);
+//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(tkr_iLight->animation.palette_id);
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
@@ -3143,18 +3143,18 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    * Load new colour into animation
 //    * */
 
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation.flags.fForceUpdate = true;
 
 //   animation_colours_rgbcct.DesiredColour  = c_blended;
 
 //   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+//   if(!tkr_iLight->rgbcct_controller.getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
-//       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+//       tkr_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
+//       tkr_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
 
@@ -3201,13 +3201,13 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    switch(flashersettings.region){
 //     case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
 //       AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
-//       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+//       tkr_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 //       // if(flashersettings.flags.enable_endingcolour_as_alternate){
 //       //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
 //       //   UpdateDesiredColourWithSingleColour(RgbcctColor());
 //       // }
 
-//       pCONT_iLight->rgbcct_controller.setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
+//       tkr_iLight->rgbcct_controller.setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
 
 
 //       UpdateDesiredColourFromPaletteSelected();
@@ -3227,12 +3227,12 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
     
 //         // UpdateStartingColourWithGetPixel();
 
-//         // uint16_t index_random = random(0,pCONT_iLight->settings.light_size_count);
+//         // uint16_t index_random = random(0,tkr_iLight->settings.light_size_count);
 
 //         // HsbColor hsb = SEGMENT.GetPixelColor(index_random);
 
-//         // if(hsb.B < pCONT_iLight->BrtN2F(flashersettings.brightness_max)){
-//         //   hsb.B = pCONT_iLight->BrtN2F(flashersettings.brightness_max);
+//         // if(hsb.B < tkr_iLight->BrtN2F(flashersettings.brightness_max)){
+//         //   hsb.B = tkr_iLight->BrtN2F(flashersettings.brightness_max);
 //         //   animation_colours[index_random].DesiredColour = hsb;
 //         // }
 
@@ -3252,10 +3252,10 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   // As integer so the if statement checks will not fail due to rounding errors
 //   // uint8_t progress_percentage = param.progress*100; 
-//   // uint8_t brightness_as_percentage = map(pCONT_iLight->getBriRGB(), 0,255, 0,100);
-//   // uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+//   // uint8_t brightness_as_percentage = map(tkr_iLight->getBriRGB(), 0,255, 0,100);
+//   // uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,tkr_iLight->settings.light_size_count);
 
-//   //       uint16_t index_random = random(0,pCONT_iLight->settings.light_size_count);
+//   //       uint16_t index_random = random(0,tkr_iLight->settings.light_size_count);
 
 //   // /*
 //   // 0-10    20-30   40-50   60-70    80-90      //coloured
@@ -3269,8 +3269,8 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   //       HsbColor hsb = SEGMENT.GetPixelColor(index_random);
 
-//   //       if(hsb.B < pCONT_iLight->BrtN2F(flashersettings.brightness_max)){
-//   //         hsb.B = pCONT_iLight->BrtN2F(flashersettings.brightness_max);
+//   //       if(hsb.B < tkr_iLight->BrtN2F(flashersettings.brightness_max)){
+//   //         hsb.B = tkr_iLight->BrtN2F(flashersettings.brightness_max);
 //   //         // animation_colours[index_random].DesiredColour = hsb;
 //   //       }
 
@@ -3280,14 +3280,14 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   //       // for (uint16_t ii = 0; ii < random_amount; ii++){
 //   //       //   SEGMENT.setPixelColor(
-//   //       //     random(0,pCONT_iLight->settings.light_size_count), 
-//   //       //     HsbColor(pCONT_iLight->HUE_N2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
+//   //       //     random(0,tkr_iLight->settings.light_size_count), 
+//   //       //     HsbColor(tkr_iLight->HUE_N2F(30),tkr_iLight->SatN2F(90),tkr_iLight->BrtN2F(random(0,brightness_as_percentage)))
 //   //       //   );
 //   //       // }
 //   //     break;
 //   //     case 0:
 //   //     case 100:
-//   //       for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//   //       for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //   //         SEGMENT.setPixelColor(pixel, animation_colours[pixel].DesiredColour);
 //   //       }
 //   //     break;
@@ -3297,7 +3297,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 
 //    RgbTypeColor updatedColor;
-//   for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//   for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //     updatedColor = RgbTypeColor::LinearBlend(
 //         animation_colours[pixel].StartingColor,
 //         animation_colours[pixel].DesiredColour,
@@ -3335,9 +3335,9 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
  
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05"));
 
-//   pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_VARIABLE_SEGMENT_COLOUR_01_ID;
+//   tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_VARIABLE_SEGMENT_COLOUR_01_ID;
 
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
 
@@ -3345,41 +3345,41 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
 //   if(sun_elevation < -20)
 //   {
-//     pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMax());      
+//     tkr_iLight->rgbcct_controller.setCCT(tkr_iLight->get_CTRangeMax());      
 //   }else
 //   if(sun_elevation > 20)
 //   {
-//     pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMin());      
+//     tkr_iLight->rgbcct_controller.setCCT(tkr_iLight->get_CTRangeMin());      
 //   }else{
 //     // Convert elevation into percentage
 //     uint8_t elev_perc = map(sun_elevation,-20,20,0,100);
 //     // Convert percentage into cct
-//     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMax(),pCONT_iLight->get_CTRangeMin());
+//     uint16_t cct_val = mapvalue(elev_perc, 0,100, tkr_iLight->get_CTRangeMax(),tkr_iLight->get_CTRangeMin());
  
 //     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "cct_val=%d"),cct_val);
 //     // Set the colour temp
-//     pCONT_iLight->rgbcct_controller.setCCT(cct_val);    
+//     tkr_iLight->rgbcct_controller.setCCT(cct_val);    
 //   }
 
-//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
+//   tkr_iLight->animation.flags.brightness_applied_during_colour_generation = false;
 //   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
-//   pCONT_iLight->animation.flags.fForceUpdate = true;
+//   tkr_iLight->animation.flags.fForceUpdate = true;
 
 //   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+//   if(!tkr_iLight->rgbcct_controller.getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
-//       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+//       tkr_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
+//       tkr_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
 
@@ -3430,8 +3430,8 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   // As integer so the if statement checks will not fail due to rounding errors
 //   uint8_t progress_percentage = param.progress*100; 
-//   uint8_t brightness_as_percentage = map(pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(), 0,255, 0,100);
-//   uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+//   uint8_t brightness_as_percentage = map(tkr_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(), 0,255, 0,100);
+//   uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,tkr_iLight->settings.light_size_count);
 
 //   /*
 //   0-10    20-30   40-50   60-70    80-90      //coloured
@@ -3447,8 +3447,8 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //       case 90:
 //         for (uint16_t ii = 0; ii < random_amount; ii++){
 //           SEGMENT.setPixelColor(
-//             random(0,pCONT_iLight->settings.light_size_count), 
-//             HsbColor(pCONT_iLight->HUE_N2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
+//             random(0,tkr_iLight->settings.light_size_count), 
+//             HsbColor(tkr_iLight->HUE_N2F(30),tkr_iLight->SatN2F(90),tkr_iLight->BrtN2F(random(0,brightness_as_percentage)))
 //           );
 //         }
 //       break;
@@ -3457,7 +3457,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //       case 40:
 //       case 60:
 //       case 80: //go back to coloured
-//         for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//         for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //           SEGMENT.setPixelColor(pixel, animation_colours[pixel].DesiredColour);
 //         }
 //       break;
@@ -3516,18 +3516,18 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 
 //   // As integer so the if statement checks will not fail due to rounding errors
 //   uint8_t progress_percentage = param.progress*100; 
-//   // uint8_t brightness_as_percentage = map(pCONT_iLight->getBriRGB(), 0,255, 0,100);
-//   uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+//   // uint8_t brightness_as_percentage = map(tkr_iLight->getBriRGB(), 0,255, 0,100);
+//   uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,tkr_iLight->settings.light_size_count);
 //   RgbTypeColor flash_colour = RgbTypeColor(0);
 //   uint8_t desired_pixel = 0;
 //   int16_t pixel_position = -1;
 //   uint8_t flashed_brightness = 0; // use set brightness or flash brighter as option
   
 //   // Update pointer of struct
-//   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   mPaletteI->SetPaletteListPtrFromID(tkr_iLight->animation.palette_id);
 
   
-//   // for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//   // for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //   //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
 //   //       animation_colours[pixel].StartingColor,
 //   //       animation_colours[pixel].DesiredColour,
@@ -3555,7 +3555,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //           flash_colour = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel,&pixel_position);
 //           flash_colour = RgbcctColor::ApplyBrightnesstoRgbcctColour(flash_colour,flashed_brightness);
 //           SEGMENT.setPixelColor(
-//             random(0,pCONT_iLight->settings.light_size_count), 
+//             random(0,tkr_iLight->settings.light_size_count), 
 //             flash_colour
 //           );
 //         }
@@ -3565,7 +3565,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //       case 40:
 //       case 60:
 //       case 80: //go back to coloured
-//         for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+//         for (uint16_t pixel = 0; pixel < tkr_iLight->settings.light_size_count; pixel++){
 //           SEGMENT.setPixelColor(pixel, animation_colours[pixel].DesiredColour);
 //         }
 //       break;

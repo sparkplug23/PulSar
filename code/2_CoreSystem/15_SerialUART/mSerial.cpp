@@ -1315,14 +1315,14 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg)
   BaseType_t dummyval;
 
   // use start and end of array "~~" so matlab can search and repair the json
-      xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
-      xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
-      // xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
+      xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
+      xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
+      // xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
       // if(tkr_Serial->special_json_part_of_gps_buflen)
       // {
-      //   xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle,  tkr_Serial->special_json_part_of_gps_buffer,  tkr_Serial->special_json_part_of_gps_buflen, &dummyval);
+      //   xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle,  tkr_Serial->special_json_part_of_gps_buffer,  tkr_Serial->special_json_part_of_gps_buflen, &dummyval);
       // }
-      // xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
+      // xRingbufferSend(tkr_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
 // }
 
       // /**
@@ -1691,7 +1691,7 @@ void mSerial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1703,7 +1703,7 @@ void mSerial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR;
@@ -1730,9 +1730,9 @@ void mSerial::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -1742,7 +1742,7 @@ void mSerial::MQTTHandler_Rate()
 void mSerial::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

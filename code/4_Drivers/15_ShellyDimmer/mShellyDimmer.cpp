@@ -42,10 +42,10 @@ void mShellyDimmer::Pre_Init()
   module_state.mode = ModuleStatus::Initialising;
 
   if (
-    tkr_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0_ID) && 
-    tkr_pins->PinUsed(GPIO_SHELLY2_SHD_RESET_INV_ID) &&
-    tkr_pins->PinUsed(GPIO_HWSERIAL0_RX_ID) && 
-    tkr_pins->PinUsed(GPIO_HWSERIAL0_TX_ID)
+    tkr_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0) && 
+    tkr_pins->PinUsed(GPIO_SHELLY2_SHD_RESET_INV) &&
+    tkr_pins->PinUsed(GPIO_HWSERIAL0_RX) && 
+    tkr_pins->PinUsed(GPIO_HWSERIAL0_TX)
     ) {
       // tkr_set->runtime.devices_present++;
     // TasmotaGlobal.light_type = LT_SERIAL1;
@@ -57,13 +57,13 @@ void mShellyDimmer::Pre_Init()
   buffer = (uint8_t *)malloc(SHD_BUFFER_SIZE);
   if (buffer != nullptr)
   {
-    ShdSerial = new TasmotaSerial(tkr_pins->GetPin(GPIO_HWSERIAL0_RX_ID), tkr_pins->GetPin(GPIO_HWSERIAL0_TX_ID), 2, 0, SHD_BUFFER_SIZE);
+    ShdSerial = new TasmotaSerial(tkr_pins->GetPin(GPIO_HWSERIAL0_RX), tkr_pins->GetPin(GPIO_HWSERIAL0_TX), 2, 0, SHD_BUFFER_SIZE);
     if (ShdSerial->begin(115200))
     {
       // hardware_serial_active = true;
 
       if (ShdSerial->hardwareSerial())
-        pCONT_sup->ClaimSerial();
+        tkr_sup->ClaimSerial();
 
       ShdSerial->flush();
 
@@ -164,13 +164,13 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif // USE_MODULE_NETWORK_MQTT
   }
@@ -648,10 +648,10 @@ void mShellyDimmer::ResetToAppMode()
     ALOG_DBG(PSTR(SHD_LOGNAME "Request co-processor reset in app mode"));
 #endif  // SHELLY_DIMMER_DEBUG
 
-  pinMode(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), OUTPUT);
-  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), LOW);
-  pinMode(tkr_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), OUTPUT);
-  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), LOW);
+  pinMode(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV), OUTPUT);
+  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV), LOW);
+  pinMode(tkr_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0), OUTPUT);
+  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0), LOW);
 
   delay(50);
 
@@ -659,7 +659,7 @@ void mShellyDimmer::ResetToAppMode()
   while (Serial.available())
       Serial.read();
 
-  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), HIGH); // pull out of reset
+  digitalWrite(tkr_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV), HIGH); // pull out of reset
   delay(50); // wait 50ms fot the co-processor to come online
 }
 
@@ -1151,7 +1151,7 @@ void mShellyDimmer::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1162,7 +1162,7 @@ void mShellyDimmer::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;

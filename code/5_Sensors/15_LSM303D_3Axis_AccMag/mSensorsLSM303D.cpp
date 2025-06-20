@@ -131,7 +131,7 @@ void mSensorsLSM303D::Pre_Init()
 //     for(int i=0;i<sizeof(addresses);i++)
 //     {
     
-//       if(pCONT_sup->I2cDevice(addresses[i]))
+//       if(tkr_sup->I2cDevice(addresses[i]))
 //       {
 //         sensor[settings.fSensorCount].lsm303d = new LSM303(tkr_i2c->wire, addresses[i]);
 //         // if(sensor[settings.fSensorCount].lsm303d->init_addressed(addresses[i]))  // should not be needed if the address is correctly within wire
@@ -687,7 +687,7 @@ void mSensorsLSM303D::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -697,7 +697,7 @@ void mSensorsLSM303D::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -707,7 +707,7 @@ void mSensorsLSM303D::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = 1;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -734,9 +734,9 @@ void mSensorsLSM303D::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     // if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-    //   handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+    //   handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -746,7 +746,7 @@ void mSensorsLSM303D::MQTTHandler_Rate()
 void mSensorsLSM303D::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

@@ -119,7 +119,7 @@ void mMAVLink_Decoder_OLED::SubTask_UpdateOLED()
   
   tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
 
-  pCONT_iDisp->renderer->setTextSize(1);
+  tkr_iDisp->renderer->setTextSize(1);
 
   page_settings.seconds_decounter--;
   if(page_settings.seconds_decounter==0)
@@ -153,28 +153,28 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
 
   #ifdef USE_MODULE_SENSORS_GPS_MODEM
   char convf_lat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
+  mSupport::float2CString(tkr_gps->location.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
   char convf_lon[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
+  mSupport::float2CString(tkr_gps->location.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
 
   char convf_altitude[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.altitude,1,convf_altitude);
+  mSupport::float2CString(tkr_gps->location.altitude,1,convf_altitude);
   char convf_speed_kph[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.speed,1,convf_speed_kph);
+  mSupport::float2CString(tkr_gps->location.speed,1,convf_speed_kph);
   char convf_speed_mph[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.speed*0.621371,1,convf_speed_mph);
+  mSupport::float2CString(tkr_gps->location.speed*0.621371,1,convf_speed_mph);
 
 
   char convf_accuracy[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.accuracy,1,convf_accuracy);
+  mSupport::float2CString(tkr_gps->location.accuracy,1,convf_accuracy);
   char convf_usat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.usat,0,convf_usat);
+  mSupport::float2CString(tkr_gps->location.usat,0,convf_usat);
   char convf_vsat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_gps->location.vsat,0,convf_vsat);
+  mSupport::float2CString(tkr_gps->location.vsat,0,convf_vsat);
 
   
   uint16_t gps_seconds_updated = 0;
-  uint32_t gps_millis_updated = abs(millis()-pCONT_gps->readings.update_seconds);
+  uint32_t gps_millis_updated = abs(millis()-tkr_gps->readings.update_seconds);
   gps_millis_updated /= 1000;
 
 
@@ -182,14 +182,14 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
 
   #ifdef USE_MODULE_NETWORK_CELLULAR
   char convf_gprs_upsecs[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
+  mSupport::float2CString(tkr_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
 
   char convf_batt_mv[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->modem_status.battery.volts_mv,0,convf_batt_mv);
+  mSupport::float2CString(tkr_cell->modem_status.battery.volts_mv,0,convf_batt_mv);
   char convf_batt_per[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->modem_status.battery.percentage,0,convf_batt_per);
+  mSupport::float2CString(tkr_cell->modem_status.battery.percentage,0,convf_batt_per);
 
-  uint32_t gprs_millis_updated = abs(millis()-pCONT_cell->gprs.last_comms_millis_updated);
+  uint32_t gprs_millis_updated = abs(millis()-tkr_cell->gprs.last_comms_millis_updated);
   gprs_millis_updated /= 1000;
   #endif // USE_MODULE_NETWORK_CELLULAR
  
@@ -199,22 +199,22 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
    * 
    */
 
-  // rintf(buffer, sizeof(buffer), "123456789123456789123"); pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
-  snprintf(buffer, sizeof(buffer), "Lat %s C", convf_lat); pCONT_iDisp->LogBuffer_AddRow(buffer, 0); //cellular/connection page
-  snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
-  snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); pCONT_iDisp->LogBuffer_AddRow(buffer, 2);  
-  snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); pCONT_iDisp->LogBuffer_AddRow(buffer, 3);  
-  snprintf(buffer, sizeof(buffer), "GPRS u%s secs %d dBm", convf_gprs_upsecs, int(pCONT_cell->gprs.signal_quality_rssi_dbm));  pCONT_iDisp->LogBuffer_AddRow(buffer, 4);
-  snprintf(buffer, sizeof(buffer), "Bat %s mv, %s%%", convf_batt_mv, convf_batt_per);  pCONT_iDisp->LogBuffer_AddRow(buffer, 5);
-  snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", pCONT_gps->location.hour, pCONT_gps->location.minute, pCONT_gps->location.second);  pCONT_iDisp->LogBuffer_AddRow(buffer, 6);
+  // rintf(buffer, sizeof(buffer), "123456789123456789123"); tkr_iDisp->LogBuffer_AddRow(buffer, 0);
+  snprintf(buffer, sizeof(buffer), "Lat %s C", convf_lat); tkr_iDisp->LogBuffer_AddRow(buffer, 0); //cellular/connection page
+  snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); tkr_iDisp->LogBuffer_AddRow(buffer, 1);
+  snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); tkr_iDisp->LogBuffer_AddRow(buffer, 2);  
+  snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); tkr_iDisp->LogBuffer_AddRow(buffer, 3);  
+  snprintf(buffer, sizeof(buffer), "GPRS u%s secs %d dBm", convf_gprs_upsecs, int(tkr_cell->gprs.signal_quality_rssi_dbm));  tkr_iDisp->LogBuffer_AddRow(buffer, 4);
+  snprintf(buffer, sizeof(buffer), "Bat %s mv, %s%%", convf_batt_mv, convf_batt_per);  tkr_iDisp->LogBuffer_AddRow(buffer, 5);
+  snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", tkr_gps->location.hour, tkr_gps->location.minute, tkr_gps->location.second);  tkr_iDisp->LogBuffer_AddRow(buffer, 6);
   
   if(
     (gps_millis_updated<10)&&
     (gprs_millis_updated<10)
   ){
-    snprintf(buffer, sizeof(buffer), "OH %s  %s", display_message.line7, "GOOD");  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
+    snprintf(buffer, sizeof(buffer), "OH %s  %s", display_message.line7, "GOOD");  tkr_iDisp->LogBuffer_AddRow(buffer, 7);
   }else{
-    snprintf(buffer, sizeof(buffer), "OH %s  m%d sec", display_message.line7, gps_millis_updated);  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
+    snprintf(buffer, sizeof(buffer), "OH %s  m%d sec", display_message.line7, gps_millis_updated);  tkr_iDisp->LogBuffer_AddRow(buffer, 7);
   }
 
   #endif // USE_MODULE_SENSORS_GPS_MODEM
@@ -231,38 +231,38 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
   #if defined(USE_MODULE_NETWORK_CELLULAR) && defined(USE_MODULE__DRIVERS_MAVLINK_DECODER)
 
   char convf_lat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.lat)/10000000,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
+  mSupport::float2CString(float(tkr_mavlink->pkt.gps_raw_int.data.lat)/10000000,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
 
   char convf_lon[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.lon)/10000000,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
+  mSupport::float2CString(float(tkr_mavlink->pkt.gps_raw_int.data.lon)/10000000,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
 
   char convf_altitude[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.alt)/1000,1,convf_altitude);
+  mSupport::float2CString(float(tkr_mavlink->pkt.gps_raw_int.data.alt)/1000,1,convf_altitude);
   char convf_speed_kph[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.vel)/1000,1,convf_speed_kph);
+  mSupport::float2CString(float(tkr_mavlink->pkt.gps_raw_int.data.vel)/1000,1,convf_speed_kph);
   char convf_speed_mph[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.vel)/1000*0.621371,1,convf_speed_mph);
+  mSupport::float2CString(float(tkr_mavlink->pkt.gps_raw_int.data.vel)/1000*0.621371,1,convf_speed_mph);
 
 
   char convf_accuracy[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.h_acc,1,convf_accuracy);
+  mSupport::float2CString(tkr_mavlink->pkt.gps_raw_int.data.h_acc,1,convf_accuracy);
   char convf_usat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.fix_type,0,convf_usat);
+  mSupport::float2CString(tkr_mavlink->pkt.gps_raw_int.data.fix_type,0,convf_usat);
   char convf_vsat[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.satellites_visible,0,convf_vsat);
+  mSupport::float2CString(tkr_mavlink->pkt.gps_raw_int.data.satellites_visible,0,convf_vsat);
 
   char convf_gprs_upsecs[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
+  mSupport::float2CString(tkr_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
 
   char convf_batt_mv[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_mavlink->pkt.sys_status.data.voltage_battery,0,convf_batt_mv);
+  mSupport::float2CString(tkr_mavlink->pkt.sys_status.data.voltage_battery,0,convf_batt_mv);
   char convf_batt_per[TBUFFER_SIZE_FLOAT];
-  mSupport::float2CString(pCONT_mavlink->pkt.sys_status.data.battery_remaining,0,convf_batt_per);
+  mSupport::float2CString(tkr_mavlink->pkt.sys_status.data.battery_remaining,0,convf_batt_per);
 
   uint16_t gps_seconds_updated = 0;
-  uint32_t gps_millis_updated = abs(millis()-pCONT_gps->readings.update_seconds);
+  uint32_t gps_millis_updated = abs(millis()-tkr_gps->readings.update_seconds);
   gps_millis_updated /= 1000;
-  uint32_t gprs_millis_updated = abs(millis()-pCONT_cell->gprs.last_comms_millis_updated);
+  uint32_t gprs_millis_updated = abs(millis()-tkr_cell->gprs.last_comms_millis_updated);
   gprs_millis_updated /= 1000;
  
   
@@ -271,16 +271,16 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
    * 
    */
 
-  // rintf(buffer, sizeof(buffer), "123456789123456789123"); pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
-  snprintf(buffer, sizeof(buffer), "Lat %s M", convf_lat); pCONT_iDisp->LogBuffer_AddRow(buffer, 0); //mavlink page
-  snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
-  snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); pCONT_iDisp->LogBuffer_AddRow(buffer, 2);  
-  snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); pCONT_iDisp->LogBuffer_AddRow(buffer, 3);  
-  snprintf(buffer, sizeof(buffer), "GPRS u%s secs", convf_gprs_upsecs);  pCONT_iDisp->LogBuffer_AddRow(buffer, 4);
-  snprintf(buffer, sizeof(buffer), "UAV Batt %s V, %s%%", convf_batt_mv, convf_batt_per);  pCONT_iDisp->LogBuffer_AddRow(buffer, 5);
-  snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", pCONT_gps->location.hour, pCONT_gps->location.minute, pCONT_gps->location.second);  pCONT_iDisp->LogBuffer_AddRow(buffer, 6);
+  // rintf(buffer, sizeof(buffer), "123456789123456789123"); tkr_iDisp->LogBuffer_AddRow(buffer, 0);
+  snprintf(buffer, sizeof(buffer), "Lat %s M", convf_lat); tkr_iDisp->LogBuffer_AddRow(buffer, 0); //mavlink page
+  snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); tkr_iDisp->LogBuffer_AddRow(buffer, 1);
+  snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); tkr_iDisp->LogBuffer_AddRow(buffer, 2);  
+  snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); tkr_iDisp->LogBuffer_AddRow(buffer, 3);  
+  snprintf(buffer, sizeof(buffer), "GPRS u%s secs", convf_gprs_upsecs);  tkr_iDisp->LogBuffer_AddRow(buffer, 4);
+  snprintf(buffer, sizeof(buffer), "UAV Batt %s V, %s%%", convf_batt_mv, convf_batt_per);  tkr_iDisp->LogBuffer_AddRow(buffer, 5);
+  snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", tkr_gps->location.hour, tkr_gps->location.minute, tkr_gps->location.second);  tkr_iDisp->LogBuffer_AddRow(buffer, 6);
   
-  snprintf(buffer, sizeof(buffer), "%s", pCONT_mavlink->pkt.statustext.data.text);  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
+  snprintf(buffer, sizeof(buffer), "%s", tkr_mavlink->pkt.statustext.data.text);  tkr_iDisp->LogBuffer_AddRow(buffer, 7);
   
   #endif // USE_MODULE_NETWORK_CELLULAR
   
@@ -384,9 +384,9 @@ void mMAVLink_Decoder_OLED::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -396,7 +396,7 @@ void mMAVLink_Decoder_OLED::MQTTHandler_Rate()
 void mMAVLink_Decoder_OLED::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

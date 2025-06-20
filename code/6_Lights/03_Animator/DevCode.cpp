@@ -6,49 +6,49 @@
 
 void mAnimatorLight::TestCode_AddBus1()
 {
-  // pCONT_iLight->busConfigs
+  // tkr_iLight->busConfigs
   uint8_t bus_index = 0;
 
   uint8_t defPin[] = {4};
   uint16_t start = 0;
   uint16_t length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
   bus_index++;
 
   defPin[0] = 13;
   start = 10;
   length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
   bus_index++;
 
   defPin[0] = 14;
   start = 20;
   length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
   bus_index++;
 
   defPin[0] = 27;
   start = 30;
   length = 10;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_SK6812_RGBW, defPin, start, length);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_SK6812_RGBW, defPin, start, length);    
   bus_index++;
 
   uint8_t defPin_pwm[] = {16, 17, 5, 21, 22};
   start = 41;
   length = 1;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_5CH, defPin_pwm, start, length);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_5CH, defPin_pwm, start, length);    
   bus_index++;
 
   // uint8_t defPin_pwm2[] = {23};
   // start = 42;
   // length = 1;
-  // if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  // pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_1CH, defPin_pwm2, start, length, DEFAULT_LED_COLOR_ORDER);    
+  // if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  // tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_1CH, defPin_pwm2, start, length, DEFAULT_LED_COLOR_ORDER);    
   // bus_index++;
 
   //13,14,27,4
@@ -70,7 +70,7 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
 
 
 
-  // pCONT_iLight->busConfigs
+  // tkr_iLight->busConfigs
   uint8_t bus_index = 0;
 
   uint8_t colord = {COLOUR_ORDER_INIT_DISABLED};
@@ -82,8 +82,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   uint8_t defPin[] = {4};
   uint16_t start = 0;
   uint16_t length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -91,8 +91,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {16};
   start = 100;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -100,8 +100,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {17};
   start = 200;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -109,8 +109,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {18};
   start = 300;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -118,8 +118,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {19};
   start = 400;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -127,8 +127,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {21};
   start = 500;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -136,8 +136,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {22};
   start = 600;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -145,8 +145,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {23};
   start = 700;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -154,8 +154,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {2};
   start = 800;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -163,8 +163,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {13};
   start = 900;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -177,8 +177,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {14};
   start = 1000;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -186,8 +186,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {27};
   start = 1100;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -195,8 +195,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {26};
   start = 1200;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -204,8 +204,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {25};
   start = 1300;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -213,8 +213,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   defPin[0] = {33};
   start = 1400;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
@@ -223,8 +223,8 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
 
   start = 1500;
   length = 100;
-  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
-  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
+  if (tkr_iLight->busConfigs[bus_index] != nullptr) delete tkr_iLight->busConfigs[bus_index];
+  tkr_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length, colord);    
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);

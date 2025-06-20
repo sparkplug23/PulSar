@@ -131,7 +131,7 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
    * @brief Add each sensor on new line
    */
    
-  uint8_t sensors_available = 4;//pCONT_db18->GetSensorCount();
+  uint8_t sensors_available = 4;//tkr_db18->GetSensorCount();
 
   int8_t line = -1;
 
@@ -140,12 +140,12 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
     line = -1;
     sensors_reading_t val;
     #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-    pCONT_pzem->GetSensorReading(&val, sensor_id);
+    tkr_pzem->GetSensorReading(&val, sensor_id);
     if(val.Valid())
     {
 
       sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+      DLI->GetDeviceName_WithModuleUniqueID( tkr_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
       /**
        * @brief Check for name and replace with OLED friendly short name
@@ -180,7 +180,7 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
       if(line >= 0)
       {
         snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-        pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+        tkr_iDisp->LogBuffer_AddRow(buffer, line);
       }
 
     }
@@ -193,7 +193,7 @@ ALOG_INF(PSTR("SubTask_UpdateOLED"));
     memset(buffer_n, 0, sizeof(buffer_n));
     sprintf(buffer_n, "%s", "PZEM d/c");
     line = 0;
-    pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+    tkr_iDisp->LogBuffer_AddRow(buffer, line);
 
   }
 
@@ -295,9 +295,9 @@ void mEnergyOLED::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -307,7 +307,7 @@ void mEnergyOLED::MQTTHandler_Rate()
 void mEnergyOLED::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

@@ -321,7 +321,7 @@
 //   DEBUG_LINE;
 //     // Update Link LED
 //     if ((!(tkr_set->Settings.ledstate &0x08)) && ((tkr_set->Settings.ledstate &0x06) || (tkr_set->blinks > 200) || (tkr_set->blinkstate))) {
-//       pCONT_led->SetLedLink(tkr_set->blinkstate);                            // Set led on or off
+//       tkr_led->SetLedLink(tkr_set->blinkstate);                            // Set led on or off
 //     }
 
 //     // If blink has completed
@@ -387,10 +387,10 @@
 //   // Primary method since v0.86.14.21
 //   if(jtok = obj["LED"].getObject()["State"]){
 //     if(jtok.isStr()){
-//       state = pCONT_sup->GetStateNumber(jtok.getStr());
+//       state = tkr_sup->GetStateNumber(jtok.getStr());
 //     }else 
 //     if(jtok.isNum()){
-//       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//       state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 //     }
 
 //     /**
@@ -465,10 +465,10 @@
 // //   // Primary method since v0.86.14.21
 // //   if(jtok = obj["LEDState"]){
 // //     // if(jtok.isStr()){
-// //     //   state = pCONT_sup->GetStateNumber(jtok.getStr());
+// //     //   state = tkr_sup->GetStateNumber(jtok.getStr());
 // //     // }else 
 // //     // if(jtok.isNum()){
-// //       state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+// //       state_value  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 // //     // }
 
 // //     /**
@@ -585,9 +585,9 @@
 // {
 //   for(auto& handle:mqtthandler_list){
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
 //   }
 // }
 
@@ -597,7 +597,7 @@
 // void mLEDs::MQTTHandler_Sender()
 // {
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+//     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 //   }
 // }
 

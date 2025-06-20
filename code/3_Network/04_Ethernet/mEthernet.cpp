@@ -54,10 +54,10 @@ int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj){
         StartMdns();
       #endif  // USE_NETWORK_MDNS
 
-      if(pCONT_mqtt->connection_maintainer.mqtt_client_type == mMQTTManager::CLIENT_TYPE_ETHERNET_ID)
+      if(tkr_mqtt->connection_maintainer.mqtt_client_type == mMQTTManager::CLIENT_TYPE_ETHERNET_ID)
       {
         mqtt_client = new WiFiClient();
-        pCONT_mqtt->SetPubSubClient(mqtt_client);
+        tkr_mqtt->SetPubSubClient(mqtt_client);
   DEBUG_LINE_HERE;
       }
 

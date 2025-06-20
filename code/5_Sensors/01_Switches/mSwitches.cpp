@@ -33,13 +33,13 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init(); 
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -63,33 +63,33 @@ void mSwitches::Pre_Init(void)
      * Note: This loop checks each number, for each type within each loop (only one else may match)
      * All types of SWT1 (INV, NP etc)
      **/
-    if(tkr_pins->PinUsed(GPIO_SWT1_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1, i))
     { 
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_ID"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV, i)) // Inverted pin, active low, with pulls
     {    
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV_ID"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_INV_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_INV, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_NP_ID, i)) // Standard pin, active high, NO pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_NP, i)) // Standard pin, active high, NO pulls
     {
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_NP_ID"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_NP"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_NP_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_NP, i);
       pinMode(pin, INPUT);
       PullupFlag(i);
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP, i))
     {    
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV_NP_ID"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV_NP"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_INV_NP_ID, i);
+      pin = tkr_pins->GetPin(GPIO_SWT1_INV_NP, i);
       pinMode(pin, INPUT);
       PulldownFlag(i);
     }else{
@@ -252,7 +252,7 @@ void mSwitches::Probe(void)
   // uint8_t current_second = (millis() / 1000) % 60;  
   // if (current_second != last_second) {
   //   last_second = current_second;
-  //   ALOG_INF(PSTR("state_filter %d u%d"), state_filter, tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, 0)); 
+  //   ALOG_INF(PSTR("state_filter %d u%d"), state_filter, tkr_pins->PinUsed(GPIO_SWT1_INV_NP, 0)); 
   // } 
 
 
@@ -260,25 +260,25 @@ void mSwitches::Probe(void)
   for (uint32_t i = 0; i < MAX_SWITCHES_SET; i++) {
     if (!bitRead(Switch.used_bitmap, i)) { continue; }
 
-    if(tkr_pins->PinUsed(GPIO_SWT1_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1, i))
     { 
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1, i));
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV_ID, i)) // Inverted pin, active low, with pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV, i)) // Inverted pin, active low, with pulls
     {    
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV, i));
     }else  
-    if(tkr_pins->PinUsed(GPIO_SWT1_NP_ID, i)) // Active high, No pullup
+    if(tkr_pins->PinUsed(GPIO_SWT1_NP, i)) // Active high, No pullup
     {    
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_NP_ID, i));      
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_NP, i));      
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_ID, i)) // Standard pin, active high, NO pulls
+    if(tkr_pins->PinUsed(GPIO_SWT1, i)) // Standard pin, active high, NO pulls
     {
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1, i));
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP_ID, i))
+    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP, i))
     {    
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_NP_ID, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_NP, i));
     } else {
       not_activated = bitRead(Switch.virtual_pin_bitmap, i);
     }
@@ -695,7 +695,7 @@ char* mSwitches::GetStateName(uint8_t state, char* buffer, uint8_t buflen)
     Serial.println(name);
     snprintf(buffer, buflen, name);
   } else {
-    pCONT_sup->GetTextIndexed(buffer, buflen, state, kSwitchPressStates);
+    tkr_sup->GetTextIndexed(buffer, buflen, state, kSwitchPressStates);
   }
   return buffer;
 

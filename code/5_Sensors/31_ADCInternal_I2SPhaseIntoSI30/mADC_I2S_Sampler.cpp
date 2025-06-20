@@ -60,7 +60,7 @@ int8_t mADC_I2S_Sampler::Tasker(uint8_t function, JsonParserObject obj)
     break;   
     case TASK_EVERY_SECOND:
     {
-        // Serial.println(pCONT_adc_internal->adc_reading_1);
+        // Serial.println(tkr_adc_internal->adc_reading_1);
 
     }
     break;
@@ -129,11 +129,11 @@ void mADC_I2S_Sampler::Pre_Init(){
 
 void IRAM_ATTR ISR_External_Pin_RXON_Sampling_Timeslot_Event_Trigger()
 {
-  // pCONT_serial_pos_log->sync_frame_data.flag_pin_active = true;
-  // // pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
+  // tkr_serial_pos_log->sync_frame_data.flag_pin_active = true;
+  // // tkr_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
   // if(digitalRead(GPIO_SYNC_FRAME_ISR_PIN)==LOW)
   // {
-  //   pCONT_serial_pos_log->sync_frame_data.flag_started = true;
+  //   tkr_serial_pos_log->sync_frame_data.flag_started = true;
 
     // Serial.println("ISR_External_Pin_Sync_Frame_Status_Event_Trigger");
 
@@ -141,7 +141,7 @@ void IRAM_ATTR ISR_External_Pin_RXON_Sampling_Timeslot_Event_Trigger()
      * Swap between ringbuffers for internal-ADC
      * */
     #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
-    // pCONT_adc_internal->adcSampler1->
+    // tkr_adc_internal->adcSampler1->
     // SwapReaderWritersRingbuffers();   
 
     //extern_flag_swap_ringbuffers_before_writting_is2_data = true;
@@ -155,31 +155,31 @@ void IRAM_ATTR ISR_External_Pin_RXON_Sampling_Timeslot_Event_Trigger()
     #endif
 
     
-    // pCONT_serial_pos_log->rxon_counter++;
-    // pCONT_adc_internal->adcSampler1->item_id_counter++;
-    // Serial.printf("rxon_counter=%d\n\r",pCONT_serial_pos_log->rxon_counter);
+    // tkr_serial_pos_log->rxon_counter++;
+    // tkr_adc_internal->adcSampler1->item_id_counter++;
+    // Serial.printf("rxon_counter=%d\n\r",tkr_serial_pos_log->rxon_counter);
       
   //   /**
   //    * Swap between ringbuffers for internal-ADC
   //    * */
-  //   pCONT_adc_internal->SwapReaderWritersRingbuffers();    
+  //   tkr_adc_internal->SwapReaderWritersRingbuffers();    
 
   //   #ifdef ENABLE_ESP32_ADC_SAMPLING
   //   /**
   //    * toggle to the other buffer to be writting into, the read will check which is not active
   //    * */
-  //   pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index ^= 1; // Reset ADC syncframe index
+  //   tkr_adc_internal->isr_capture.active_buffer_to_write_to_index ^= 1; // Reset ADC syncframe index
   //   /**
   //    * Use new buffer set here, to reset its counter
   //    * The other buffer not being written into, the counter values here wont be reset until the next ISR, allowing it to be checked for length of data on previous frame
   //    * */
-  //     pCONT_adc_internal->isr_capture.within_buffer_iter_counter = 0;
+  //     tkr_adc_internal->isr_capture.within_buffer_iter_counter = 0;
   //   #endif // ENABLE_ESP32_ADC_SAMPLING
 
   // }
   // else
   // {
-  //   pCONT_serial_pos_log->sync_frame_data.flag_ended = true;
+  //   tkr_serial_pos_log->sync_frame_data.flag_ended = true;
   // }
 }
 #endif // ENABLE_INTERRUPT_ON_CHANGE_PIN35_FOR_RXON_SAMPLING_TIMESLOT
@@ -255,16 +255,16 @@ void mADC_I2S_Sampler::Init(void){
 // void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
 // {
 //   DEBUG_ADC_ISR_EVENT_SET(LOW);
-//   pCONT_adc_internal->external_interrupt.flag_pin_active = true;
+//   tkr_adc_internal->external_interrupt.flag_pin_active = true;
 
 //   /**
 //    * Capture both adc pins for 5 samples (no delay)
 //    * */
-//   mADC_I2S_Sampler::ISR_DUAL_CAPTURE* adc_p = &pCONT_adc_internal->isr_capture;
+//   mADC_I2S_Sampler::ISR_DUAL_CAPTURE* adc_p = &tkr_adc_internal->isr_capture;
 
 //   if(adc_p->within_buffer_iter_counter < 40)
 //   {
-//     adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch6[adc_p->within_buffer_iter_counter] = pCONT_adc_internal->adc1_read_dma_value_1();//adc1_get_raw_ram(ADC1_CHANNEL_6);
+//     adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch6[adc_p->within_buffer_iter_counter] = tkr_adc_internal->adc1_read_dma_value_1();//adc1_get_raw_ram(ADC1_CHANNEL_6);
 //     // adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch7[adc_p->within_buffer_iter_counter] = adc1_read_dma_value_1();//adc1_get_raw_ram(ADC1_CHANNEL_7);
 //     adc_p->within_buffer_iter_counter++;
 //   }

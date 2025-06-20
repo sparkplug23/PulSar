@@ -398,9 +398,9 @@ void mSensorsDHT::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -410,7 +410,7 @@ void mSensorsDHT::MQTTHandler_Rate()
 void mSensorsDHT::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
   
@@ -428,7 +428,7 @@ void mSensorsDHT::MQTTHandler_Sender()
 //   for(int ii=0;ii<settings.sensor_active_count;ii++){ //add number in name? List needed? also hold user defined name?
     
 //       char name_buffer_tmp[25];
-//       // pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
+//       // tkr_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
 
 //       DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, name_buffer_tmp, sizeof(name_buffer_tmp));
 
@@ -436,13 +436,13 @@ void mSensorsDHT::MQTTHandler_Sender()
 
 
 //     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       JBI->Append_P(PSTR("<td>DHT%s %s %s</td>"), "22",multiline_enabled?"Temperature":"Climate",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+//       JBI->Append_P(PSTR("<td>DHT%s %s %s</td>"), "22",multiline_enabled?"Temperature":"Climate",name_buffer_tmp);//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
 //       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
       
 //     if(multiline_enabled){
 //       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//         JBI->Append_P(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+//         JBI->Append_P(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
 //     }
 //     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
 //     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
@@ -472,9 +472,9 @@ void mSensorsDHT::MQTTHandler_Sender()
 //         char table_row[25]; memset(table_row,0,sizeof(table_row));       
 
 //         char value_ctr[8];
-//         pCONT_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
+//         tkr_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
 
-//         sprintf(table_row,"%s&deg;%c",value_ctr,pCONT_sup->TempUnit());
+//         sprintf(table_row,"%s&deg;%c",value_ctr,tkr_sup->TempUnit());
         
 //         if(sensor[sensor_counter].instant.temperature<=25){
 //           sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
@@ -503,7 +503,7 @@ void mSensorsDHT::MQTTHandler_Sender()
 //         char table_row[25]; memset(table_row,0,sizeof(table_row));        
         
 //         char value_ctr[8];
-//         pCONT_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
+//         tkr_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
 
 //         sprintf(table_row,"%s %%",value_ctr);
         

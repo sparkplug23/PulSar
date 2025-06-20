@@ -41,7 +41,7 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
   }
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-  if(!pCONT_iDisp->renderer) { return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID; }
+  if(!tkr_iDisp->renderer) { return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID; }
 
   switch(function){
     /************
@@ -85,7 +85,7 @@ void mOLED_SSD1306::parse_JSONCommand(JsonParserObject obj)
 
 void mOLED_SSD1306::Pre_Init(void)
 {
-  if (pCONT_sup->I2cEnabled(XI2C_04))
+  if (tkr_sup->I2cEnabled(XI2C_04))
   { 
     settings.fEnableSensor = true;
   }
@@ -132,12 +132,12 @@ void mOLED_SSD1306::InitDriver(void)
 
   if (!tkr_set->Settings.display.model)
   {
-    if (pCONT_sup->I2cSetDevice(OLED_ADDRESS1))
+    if (tkr_sup->I2cSetDevice(OLED_ADDRESS1))
     {
       tkr_set->Settings.display.address[0] = OLED_ADDRESS1;
       tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID;
     }
-    else if (pCONT_sup->I2cSetDevice(OLED_ADDRESS2))
+    else if (tkr_sup->I2cSetDevice(OLED_ADDRESS2))
     {
       tkr_set->Settings.display.address[0] = OLED_ADDRESS2;
       tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID;
@@ -148,7 +148,7 @@ void mOLED_SSD1306::InitDriver(void)
   
   if(tkr_set->Settings.display.model == D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID)
   {
-    pCONT_sup->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SSD1306");
+    tkr_sup->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SSD1306");
 
     if((tkr_set->Settings.display.width != 64) && (tkr_set->Settings.display.width != 96) && (tkr_set->Settings.display.width != 128))
     {
@@ -161,17 +161,17 @@ void mOLED_SSD1306::InitDriver(void)
 
     oled1306 = new Adafruit_SSD1306(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire, tkr_pins->Pin(GPIO_OLED_RESET_ID));
     oled1306->begin(SSD1306_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
-    pCONT_iDisp->renderer = oled1306;
-    pCONT_iDisp->renderer->DisplayInit(pCONT_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
-    pCONT_iDisp->renderer->setTextColor(1,0);
+    tkr_iDisp->renderer = oled1306;
+    tkr_iDisp->renderer->DisplayInit(tkr_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
+    tkr_iDisp->renderer->setTextColor(1,0);
 
     #ifdef SHOW_SPLASH
-    pCONT_iDisp->renderer->setTextFont(0);
-    pCONT_iDisp->renderer->setTextSize(2);
-    pCONT_iDisp->renderer->setCursor(20,20);
-    pCONT_iDisp->renderer->println(F("SSD1306"));
-    pCONT_iDisp->renderer->Updateframe();
-    pCONT_iDisp->renderer->DisplayOnff(1);
+    tkr_iDisp->renderer->setTextFont(0);
+    tkr_iDisp->renderer->setTextSize(2);
+    tkr_iDisp->renderer->setCursor(20,20);
+    tkr_iDisp->renderer->println(F("SSD1306"));
+    tkr_iDisp->renderer->Updateframe();
+    tkr_iDisp->renderer->DisplayOnff(1);
     #endif
 
     ALOG_INF(PSTR("DSP: SD1306"));
@@ -186,36 +186,36 @@ void mOLED_SSD1306::ShowScrollingLog(void)
 {
   
   // If no columns have been init, then first allocate memory
-  if (!pCONT_iDisp->screen_buffer.cols) { pCONT_iDisp->ScreenBuffer_Alloc(); }
+  if (!tkr_iDisp->screen_buffer.cols) { tkr_iDisp->ScreenBuffer_Alloc(); }
 
   // Get pointer to row
-  char* txt = pCONT_iDisp->LogBuffer_GetRowPointer('\370');
+  char* txt = tkr_iDisp->LogBuffer_GetRowPointer('\370');
   if (txt != NULL) {
     // Last row is row_size - 1 for indexing
     uint8_t last_row = tkr_set->Settings.display.rows -1;
 
     // Start by clearing the display
-    pCONT_iDisp->renderer->clearDisplay();
-    pCONT_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
-    pCONT_iDisp->renderer->setCursor(0,0);
+    tkr_iDisp->renderer->clearDisplay();
+    tkr_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
+    tkr_iDisp->renderer->setCursor(0,0);
 
     // Shift the logs by moving the rows from next into current and display this
     for (byte i = 0; i < last_row; i++) {
-      strlcpy(pCONT_iDisp->screen_buffer.ptr[i], pCONT_iDisp->screen_buffer.ptr[i +1], pCONT_iDisp->screen_buffer.cols);
-      pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[i]);
+      strlcpy(tkr_iDisp->screen_buffer.ptr[i], tkr_iDisp->screen_buffer.ptr[i +1], tkr_iDisp->screen_buffer.cols);
+      tkr_iDisp->renderer->println(tkr_iDisp->screen_buffer.ptr[i]);
     }
     // Add new row
-    strlcpy(pCONT_iDisp->screen_buffer.ptr[last_row], txt, pCONT_iDisp->screen_buffer.cols);
+    strlcpy(tkr_iDisp->screen_buffer.ptr[last_row], txt, tkr_iDisp->screen_buffer.cols);
     // This is only done here, as the copied rows will have it done at this line when first commited to the screen_buffer
-    pCONT_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(last_row); 
+    tkr_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(last_row); 
 
-    ALOG_DBG(PSTR(D_LOG_DEBUG "[%s]"), pCONT_iDisp->screen_buffer.ptr[last_row]);
+    ALOG_DBG(PSTR(D_LOG_DEBUG "[%s]"), tkr_iDisp->screen_buffer.ptr[last_row]);
 
     // Print last row
-    pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[last_row]);
+    tkr_iDisp->renderer->println(tkr_iDisp->screen_buffer.ptr[last_row]);
 
     // Commit display refresh
-    pCONT_iDisp->renderer->Updateframe();
+    tkr_iDisp->renderer->Updateframe();
   }
 
 }
@@ -227,28 +227,28 @@ void mOLED_SSD1306::ShowStaticLog(void)
 {
   
   // If no columns have been init, then first allocate memory
-  if (!pCONT_iDisp->screen_buffer.cols) { pCONT_iDisp->ScreenBuffer_Alloc(); }
+  if (!tkr_iDisp->screen_buffer.cols) { tkr_iDisp->ScreenBuffer_Alloc(); }
 
   // Start by clearing the display
-  pCONT_iDisp->renderer->clearDisplay();
-  pCONT_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
-  pCONT_iDisp->renderer->setCursor(0,0);
+  tkr_iDisp->renderer->clearDisplay();
+  tkr_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
+  tkr_iDisp->renderer->setCursor(0,0);
 
   // Copy log_buffer contents into screen_buffer
   for(int row_index=0; row_index<tkr_set->Settings.display.rows; row_index++)
   {
     // Get log_buffer by row
-    char* row_ptr = pCONT_iDisp->LogBuffer_GetRowPointerByRowIndex(row_index);
+    char* row_ptr = tkr_iDisp->LogBuffer_GetRowPointerByRowIndex(row_index);
     // Move to screen_buffer
-    strlcpy(pCONT_iDisp->screen_buffer.ptr[row_index], row_ptr, pCONT_iDisp->screen_buffer.cols);
+    strlcpy(tkr_iDisp->screen_buffer.ptr[row_index], row_ptr, tkr_iDisp->screen_buffer.cols);
     // Fill remaining spaces
-    pCONT_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(row_index); 
+    tkr_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(row_index); 
     // Write row to display
-    pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[row_index]);
+    tkr_iDisp->renderer->println(tkr_iDisp->screen_buffer.ptr[row_index]);
   }
 
   // Commit display refresh
-  pCONT_iDisp->renderer->Updateframe();
+  tkr_iDisp->renderer->Updateframe();
 
 }
 
@@ -257,16 +257,16 @@ void mOLED_SSD1306::ShowUTCTime(void)
 {
 
   char line[12];
-  pCONT_iDisp->renderer->clearDisplay();
-  pCONT_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
-  pCONT_iDisp->renderer->setTextFont(tkr_set->Settings.display.font);
-  pCONT_iDisp->renderer->setCursor(0, 0);
+  tkr_iDisp->renderer->clearDisplay();
+  tkr_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
+  tkr_iDisp->renderer->setTextFont(tkr_set->Settings.display.font);
+  tkr_iDisp->renderer->setCursor(0, 0);
   snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), tkr_time->RtcTime.hour,  tkr_time->RtcTime.minute,  tkr_time->RtcTime.second);  // [ 12:34:56 ]
-  pCONT_iDisp->renderer->println(line);
-  pCONT_iDisp->renderer->println();
+  tkr_iDisp->renderer->println(line);
+  tkr_iDisp->renderer->println();
   snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  tkr_time->RtcTime.Mday,  tkr_time->RtcTime.month,  tkr_time->RtcTime.year);   // [01-02-2018]
-  pCONT_iDisp->renderer->println(line);
-  pCONT_iDisp->renderer->Updateframe();
+  tkr_iDisp->renderer->println(line);
+  tkr_iDisp->renderer->Updateframe();
 
 }
 
@@ -314,14 +314,14 @@ void mOLED_SSD1306::MQTTHandler_RefreshAll(){
 
 void mOLED_SSD1306::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
 
 void mOLED_SSD1306::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, 
+  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, 
     EM_MODULE_DISPLAYS_OLED_SSD1306_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id
   );
 

@@ -162,11 +162,13 @@ uint32_t ResetReason_g(void)
 #ifdef ESP32
 
  RESET_REASON reason = rtc_get_reset_reason(0);
+ Serial.println(reason); Serial.flush();
+ DEBUG_LINE_HERE
   if (1  == reason) { return REASON_DEFAULT_RST; }       // POWERON_RESET
   if (12 == reason) { return REASON_SOFT_RESTART; }      // SW_CPU_RESET / RTC_SW_CPU_RESET
   if (5  == reason) { return REASON_DEEP_SLEEP_AWAKE; }  // DEEPSLEEP_RESET
   if (3  == reason) { return REASON_EXT_SYS_RST; }       // SW_RESET / RTC_SW_SYS_RESET
-  return -1; //no "official error code", but should work with the current code base
+  return -1; // no "official error code", but should work with the current code base
 
   
   // #ifdef DEBUG_FASTBOOT
@@ -181,6 +183,8 @@ uint32_t ResetReason_g(void)
  return 0;// resetInfo.reason;  // causing crasg exception 3
 
 #endif
+
+return 0;
   DEBUG_LINE_HERE
 
 
@@ -527,7 +531,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID)&&tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
       {
         char mqtt_data[300];
-        pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+        tkr_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
         ALOG_INF(PSTR("I2C_Scan=%s"), mqtt_data);
       }
       #endif // ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
@@ -539,9 +543,9 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
       if(tkr_time->UpTime()>60)
       {
-        if(pCONT_mqtt->pubsub->connected())
+        if(tkr_mqtt->pubsub->connected())
         {
-          pCONT_mqtt->publish_device_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
+          tkr_mqtt->publish_device_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
         }
       }
       #endif // ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
@@ -605,6 +609,103 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
   va_end(arg);  
   length += snprintf(buffer+length, buflen, "|");
 }
+
+
+
+#ifdef ESP32
+
+#ifdef ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+/*********************************************************************************************\
+ * ESP32 AutoMutex
+\*********************************************************************************************/
+
+//////////////////////////////////////////
+// automutex.
+// create a mute in your driver with:
+// void *mutex = nullptr;
+//
+// then protect any function with
+// TasAutoMutex m(&mutex, "somename");
+// - mutex is automatically initialised if not already intialised.
+// - it will be automagically released when the function is over.
+// - the same thread can take multiple times (recursive).
+// - advanced options m.give() and m.take() allow you fine control within a function.
+// - if take=false at creat, it will not be initially taken.
+// - name is used in serial log of mutex deadlock.
+// - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
+// class TasAutoMutex {
+//   SemaphoreHandle_t mutex;
+//   bool taken;
+//   int maxWait;
+//   const char *name;
+//   public:
+//     TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+//     ~TasAutoMutex();
+//     void give();
+//     void take();
+//     static void init(SemaphoreHandle_t* ptr);
+// };
+//////////////////////////////////////////
+
+mSupport::TasAutoMutex::TasAutoMutex(SemaphoreHandle_t*mutex, const char *name, int maxWait, bool take) {
+  if (mutex) {
+    if (!(*mutex)){
+      TasAutoMutex::init(mutex);
+    }
+    this->mutex = *mutex;
+    this->maxWait = maxWait;
+    this->name = name;
+    if (take) {
+      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
+//      if (!this->taken){
+//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
+//      }
+    }
+  } else {
+    this->mutex = (SemaphoreHandle_t)nullptr;
+  }
+}
+
+mSupport::TasAutoMutex::~TasAutoMutex() {
+  if (this->mutex) {
+    if (this->taken) {
+      xSemaphoreGiveRecursive(this->mutex);
+      this->taken = false;
+    }
+  }
+}
+
+void mSupport::TasAutoMutex::init(SemaphoreHandle_t* ptr) {
+  SemaphoreHandle_t mutex = xSemaphoreCreateRecursiveMutex();
+  (*ptr) = mutex;
+  // needed, else for ESP8266 as we will initialis more than once in logging
+//  (*ptr) = (void *) 1;
+}
+
+void mSupport::TasAutoMutex::give() {
+  if (this->mutex) {
+    if (this->taken) {
+      xSemaphoreGiveRecursive(this->mutex);
+      this->taken= false;
+    }
+  }
+}
+
+void mSupport::TasAutoMutex::take() {
+  if (this->mutex) {
+    if (!this->taken) {
+      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
+//      if (!this->taken){
+//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
+//      }
+    }
+  }
+}
+
+#endif  // ESP32
+
+#endif // mutex
+
 
 
 #ifdef USE_ARDUINO_OTA
@@ -945,7 +1046,7 @@ void mSupport::init_FirmwareVersion()
     
   // Create ascii version name
   sprintf_P(tkr_set->runtime.firmware_version.current.name_ctr,PSTR("%c%d.%d.%d.%d"),
-      pCONT_sup->GetVersionBranchTypeCharNameByID(tkr_set->runtime.firmware_version.current.part_branch),
+      tkr_sup->GetVersionBranchTypeCharNameByID(tkr_set->runtime.firmware_version.current.part_branch),
       tkr_set->runtime.firmware_version.current.part_major,
       tkr_set->runtime.firmware_version.current.part_minor,
       tkr_set->runtime.firmware_version.current.part_system,
@@ -1782,15 +1883,15 @@ char* mSupport::GetState_Name_by_ID(uint8_t id, char* buffer, uint8_t buflen)
   switch(id)
   {
     default:
-    case STATE_NUMBER_OFF_ID:         pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionOff); break;
-    case STATE_NUMBER_ON_ID:          pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionOn); break;
-    case STATE_NUMBER_TOGGLE_ID:      pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionToggle); break;
-    case STATE_NUMBER_BLINK_ID:       pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionBlink); break;
-    case STATE_NUMBER_BLINK_OFF_ID:   pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionBlinkOff); break;
-    case STATE_NUMBER_INCREMENT_ID:   pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionIncrement); break;
-    case STATE_NUMBER_DECREMENT_ID:   pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionDecrement); break;
-    case STATE_NUMBER_FOLLOW_ID:      pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionFollow); break;
-    case STATE_NUMBER_FOLLOW_INV_ID:  pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionFollowInv); break;
+    case STATE_NUMBER_OFF_ID:         tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionOff); break;
+    case STATE_NUMBER_ON_ID:          tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionOn); break;
+    case STATE_NUMBER_TOGGLE_ID:      tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionToggle); break;
+    case STATE_NUMBER_BLINK_ID:       tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionBlink); break;
+    case STATE_NUMBER_BLINK_OFF_ID:   tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionBlinkOff); break;
+    case STATE_NUMBER_INCREMENT_ID:   tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionIncrement); break;
+    case STATE_NUMBER_DECREMENT_ID:   tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionDecrement); break;
+    case STATE_NUMBER_FOLLOW_ID:      tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionFollow); break;
+    case STATE_NUMBER_FOLLOW_INV_ID:  tkr_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionFollowInv); break;
   }
   return buffer;
 }
@@ -2208,7 +2309,7 @@ void mSupport::CheckResetConditions()
         #ifdef USE_MODULE_NETWORK_WIFI   
 #ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
         // THIS should be moved into this class
-        pCONT_wif->EspRestart();        
+        tkr_wifi->EspRestart();        
 #endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
         #endif USE_MODULE_NETWORK_WIFI
 

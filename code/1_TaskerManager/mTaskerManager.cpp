@@ -314,7 +314,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mJsonTemplate());
   #endif
   #ifdef USE_MODULE_CORE_HARDWAREPINS
-  addTasker(new mHardwarePins());
+  addTasker(new mPins());
   #endif 
   #ifdef USE_MODULE_CORE_SUPPORT
   addTasker(new mSupport());
@@ -415,7 +415,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mBuzzer());
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-  addTasker(new OV2640());
+  addTasker(new mCameraOV2640());
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
   addTasker(new mCameraOV2640());
@@ -434,6 +434,12 @@ uint8_t mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
   addTasker(new mWebCamera());
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
+  addTasker(new mCamera());
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_2025
+  addTasker(new mCamera());
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   addTasker(new mMAVLink_Decoder());
@@ -792,8 +798,8 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
     case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
     case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE:       return PM_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
-    case TASK_FUNCTION_LAMBDA_INIT:                   return PM_TASK_FUNCTION_LAMBDA_INIT_CTR;
-    case TASK_FUNCTION_LAMBDA_LOOP:                   return PM_TASK_FUNCTION_LAMBDA_LOOP_CTR;
+    case YTASK_INIT:                   return PM_YTASK_INIT_CTR;
+    case YTASK_LOOP:                   return PM_YTASK_LOOP_CTR;
     // case TASK_COMMAND:                                return PM_TASK_COMMAND_CTR;
     // case TASK_COMMAND_SENSOR:                         return PM_TASK_COMMAND_SENSOR_CTR;
     // case TASK_COMMAND_DRIVER:                         return PM_TASK_COMMAND_DRIVER_CTR;

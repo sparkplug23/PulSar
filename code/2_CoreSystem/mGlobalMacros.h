@@ -88,6 +88,9 @@
 
 // #define P_CHECK(x) if(x!-nullptr)
 
+#define FLOAT_N(x) ((int)(x))
+#define FLOAT_D(x) ((int)((((x) - (int)(x)) * 100.0f)))  // 2 decimal places
+
 
 #ifdef ESP8266
   #define APPEND_ESP_TYPE_MQTT_STRING "_esp8266"
@@ -185,7 +188,7 @@
 
 // #define SET_BUFFER_AS_GLOBAL_OR_LOCAL(X,Y) \
 //           if(Y == nullptr){ \
-//             X = pCONT_sup->global_buffer; \
+//             X = tkr_sup->global_buffer; \
 //           }else{ \
 //             X = Y; \
 //           }

@@ -97,21 +97,21 @@ void mTankVolume::EverySecond()
 
 
 float mTankVolume::GetDistanceCMReading(void){
-  return 0; //return pCONT_ult->ultrasonic.duration*(0.034/2);
+  return 0; //return tkr_ult->ultrasonic.duration*(0.034/2);
 }
 float mTankVolume::GetDistanceMMReading(void){
-  return 0; //return pCONT_ult->ultrasonic.duration*(0.34/2);
+  return 0; //return tkr_ult->ultrasonic.duration*(0.34/2);
 }
 float mTankVolume::GetOilHeightCMReading(void){
-  // float distance_mm= (float)pCONT_ult->ultrasonic.duration*(0.034/2);
+  // float distance_mm= (float)tkr_ult->ultrasonic.duration*(0.034/2);
   return 0; //return (TANK_HEIGHT_CM-distance_mm);
 }
 float mTankVolume::GetOilHeightMMReading(void){
-  // float distance_mm= (float)pCONT_ult->ultrasonic.duration*(0.34/2);
+  // float distance_mm= (float)tkr_ult->ultrasonic.duration*(0.34/2);
   return 0; //return (TANK_HEIGHT_MM-distance_mm);
 }
 float mTankVolume::GetOilHeightMMReadingAdjustedFromTemp(void){
-  // float distance_mm= (float)pCONT_ult->GetDistanceMMReadingAdjustedForTemp();
+  // float distance_mm= (float)tkr_ult->GetDistanceMMReadingAdjustedForTemp();
   return 0; //return (TANK_HEIGHT_MM-distance_mm);
 }
 float mTankVolume::GetOilHeightCMReading(int duration){
@@ -144,24 +144,24 @@ void mTankVolume::SubTask_UltraSonicAverageToOilTank(){
   
   // // instant
   // oiltank.ptr = &oiltank.instant;
-  // oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(pCONT_ult->averaged.instant.final.distance_mm);
-  // oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(pCONT_ult->averaged.instant.final.distance_cm);
+  // oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(tkr_ult->averaged.instant.final.distance_mm);
+  // oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(tkr_ult->averaged.instant.final.distance_cm);
   // oiltank.ptr->ischanged = true;
   // oiltank.ptr->isvalid = true;
   // oiltank.ptr->captured.tLastChanged = millis();
 
   // // 1 minute
   // oiltank.ptr = &oiltank.smooth_1m;
-  // oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1m.final.distance_mm);
-  // oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1m.final.distance_cm);
+  // oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1m.final.distance_mm);
+  // oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1m.final.distance_cm);
   // oiltank.ptr->ischanged = true;
   // oiltank.ptr->isvalid = true;
   // oiltank.ptr->captured.tLastChanged = millis();
 
   // // 1 hour
   // oiltank.ptr = &oiltank.smooth_1hr;
-  // oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1hr.final.distance_mm);
-  // oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(pCONT_ult->averaged.smooth_1hr.final.distance_cm);
+  // oiltank.ptr->final.distance_from_bottom_mm = GetOilHeightMMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1hr.final.distance_mm);
+  // oiltank.ptr->final.distance_from_bottom_cm = GetOilHeightCMReadingAdjustedFromTemp(tkr_ult->averaged.smooth_1hr.final.distance_cm);
   // oiltank.ptr->ischanged = true;
   // oiltank.ptr->isvalid = true;
   // oiltank.ptr->captured.tLastChanged = millis();
@@ -171,9 +171,9 @@ void mTankVolume::SubTask_UltraSonicAverageToOilTank(){
 
 void mTankVolume::SubTask_CopyAveragedSensorValues(){
 
-  // oiltank.instant.ultrasonic_readings.distance_cm = pCONT_ult->averaged.instant.final.distance_cm;
-  // oiltank.smooth_1m.ultrasonic_readings.distance_cm = pCONT_ult->averaged.smooth_1m.final.distance_cm;
-  // oiltank.smooth_1hr.ultrasonic_readings.distance_cm = pCONT_ult->averaged.smooth_1hr.final.distance_cm;
+  // oiltank.instant.ultrasonic_readings.distance_cm = tkr_ult->averaged.instant.final.distance_cm;
+  // oiltank.smooth_1m.ultrasonic_readings.distance_cm = tkr_ult->averaged.smooth_1m.final.distance_cm;
+  // oiltank.smooth_1hr.ultrasonic_readings.distance_cm = tkr_ult->averaged.smooth_1hr.final.distance_cm;
 
 }
 
@@ -181,11 +181,11 @@ void mTankVolume::SubTask_CopyAveragedSensorValues(){
 void mTankVolume::SubTask_UpdateTankVolume()
 {
 
-  float distance_from_sensor_cm = pCONT_sr04->readings.average_EMA.distance_cm;
+  float distance_from_sensor_cm = tkr_sr04->readings.average_EMA.distance_cm;
   float height_cm = tank.height_of_tank_cm - distance_from_sensor_cm;
 
 
-  // float height_mm = pCONT_sr04->readings.average_EMA.distance_cm/1000.0f;
+  // float height_mm = tkr_sr04->readings.average_EMA.distance_cm/1000.0f;
   float volume_cm3 = GetHeightToVolume_Custom_MyTank(height_cm);
 
   tank.volume_litres = volume_cm3;
@@ -199,7 +199,7 @@ float mTankVolume::GetHeightToVolume_Custom_MyTank(float height_cm)
 {
   
   float volume_cm3 = 0;
-  // float height_mm = pCONT_sr04->readings.average_EMA.distance_cm/10.0f;
+  // float height_mm = tkr_sr04->readings.average_EMA.distance_cm/10.0f;
 
   // // Above tank radius split
   if(height_cm == TANK_MAINBOTTOM_THRESHOLD_HEIGHT_CM)

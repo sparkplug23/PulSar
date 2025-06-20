@@ -646,8 +646,8 @@ void mMavlinkFlyingLEDS::EveryLoop()
 
   // ALOG_INF(PSTR("mav.slider_right %d rgbbri = %d %d"), mav.slider_right, rgbbri, cctbri );
 
-  pCONT_iLight->setBriRGB_Global(rgbbri);
-  pCONT_iLight->setBriCT_Global(cctbri);
+  tkr_iLight->setBriRGB_Global(rgbbri);
+  tkr_iLight->setBriCT_Global(cctbri);
 
 
   // ALOG_INF(PSTR("Throttle: %d, Hue: %d, Mode %d"), mode_pwm, hue, mode);
@@ -781,9 +781,9 @@ void mMavlinkFlyingLEDS::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -793,7 +793,7 @@ void mMavlinkFlyingLEDS::MQTTHandler_Rate()
 void mMavlinkFlyingLEDS::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

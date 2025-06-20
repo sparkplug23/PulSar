@@ -359,7 +359,7 @@ void mInterfaceLight::Save_Module()
     char message[7] = "hello\0";
   }test;
 
-  pCONT_mfile->ByteFile_Save(filename_byte, (uint8_t*)&test, sizeof(TEST));
+  tkr_mfile->ByteFile_Save(filename_byte, (uint8_t*)&test, sizeof(TEST));
 
 
   /********************************************************************
@@ -411,7 +411,7 @@ void mInterfaceLight::Save_Module()
   char filename_json[50];
   snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleName());
 
-  pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
+  tkr_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
 
   JBI->ReleaseLock();
 
@@ -1159,7 +1159,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   {
     int8_t state = 0;
     if(jtok.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok.getStr());
+      state = tkr_sup->GetStateNumber(jtok.getStr());
     }else
     if(jtok.isNum()){
       state = jtok.getInt(); 
@@ -1504,7 +1504,7 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1515,7 +1515,7 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
@@ -1569,9 +1569,9 @@ void mInterfaceLight::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -1581,7 +1581,7 @@ void mInterfaceLight::MQTTHandler_Rate()
 void mInterfaceLight::MQTTHandler_Sender()
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
   

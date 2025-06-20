@@ -158,9 +158,9 @@ void mSupport::CrashDump_AddJson(void)
   char buffer[30];
 
   DEBUG_PRINT_FUNCTION_NAME;
-  pCONT_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
+  tkr_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
     resetInfo.exccause,        // Exception Cause
-    pCONT_sup->GetResetReason(buffer, sizeof(buffer)),  // Reset Reason
+    tkr_sup->GetResetReason(buffer, sizeof(buffer)),  // Reset Reason
     resetInfo.epc1,            // Exception Progam Counter
     resetInfo.epc2,            // Exception Progam Counter - High-Priority Interrupt 1
     resetInfo.epc3,            // Exception Progam Counter - High-Priority Interrupt 2
@@ -171,14 +171,14 @@ void mSupport::CrashDump_AddJson(void)
   uint32_t value;
   ESP.rtcUserMemoryRead(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
   if (crash_magic == (value & 0xFFFFFF00)) {
-    pCONT_sup->WriteBuffer_P(PSTR(",\"CallChain\":["));
+    tkr_sup->WriteBuffer_P(PSTR(",\"CallChain\":["));
     uint32_t count = value & 0x3F;
     for (uint32_t i = 0; i < count; i++) {
       ESP.rtcUserMemoryRead(crash_rtc_offset +i, (uint32_t*)&value, sizeof(value));
-      if (i > 0) { pCONT_sup->WriteBuffer_P(PSTR(",")); }
-      pCONT_sup->WriteBuffer_P(PSTR("\"%08x\""), value);
+      if (i > 0) { tkr_sup->WriteBuffer_P(PSTR(",")); }
+      tkr_sup->WriteBuffer_P(PSTR("\"%08x\""), value);
     }
-    pCONT_sup->WriteBuffer_P(PSTR("]"));
+    tkr_sup->WriteBuffer_P(PSTR("]"));
   }
   #endif // ESP8266
   

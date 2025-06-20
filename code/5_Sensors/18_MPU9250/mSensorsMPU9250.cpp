@@ -87,7 +87,7 @@ void mSensorsMPU9250::Pre_Init(){
 
   // char mqtt_data[300];
 
-  // pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+  // tkr_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
 
   // Serial.println(mqtt_data);
 
@@ -100,7 +100,7 @@ void mSensorsMPU9250::Pre_Init(){
   // in futre use array to store bme type found (BME_280_ID, BME_180_ID) etc
   // if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
-  if(pCONT_sup->I2cDevice(I2C_ADDRESS_MPU9250)){
+  if(tkr_sup->I2cDevice(I2C_ADDRESS_MPU9250)){
 
     // Wire = new TwoWire();//tkr_pins->GetPin(GPIO_I2C_SCL_ID),tkr_pins->GetPin(GPIO_I2C_SDA_ID));
 
@@ -298,7 +298,7 @@ uint32_t tSaved = millis();
 //         sensor[sensor_id].temperature = sensor[sensor_id].bme->readTemperature();
 //         sensor[sensor_id].humidity =    sensor[sensor_id].bme->readHumidity();
 //         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
-//         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
+//         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(tkr_iSensors->settings.sealevel_pressure);
 
 //         ALOG_DBG(     PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
 //         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
@@ -409,7 +409,7 @@ void mSensorsMPU9250::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -419,7 +419,7 @@ void mSensorsMPU9250::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -429,7 +429,7 @@ void mSensorsMPU9250::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = 1;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -456,9 +456,9 @@ void mSensorsMPU9250::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -468,7 +468,7 @@ void mSensorsMPU9250::MQTTHandler_Rate()
 void mSensorsMPU9250::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

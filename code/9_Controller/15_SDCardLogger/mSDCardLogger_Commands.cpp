@@ -24,10 +24,10 @@
 //   // Primary method since v0.86.14.21
 //   if(jtok = obj[PM_POWER_STATE]){
 //     if(jtok.isStr()){
-//       state = pCONT_sup->GetStateNumber(jtok.getStr());
+//       state = tkr_sup->GetStateNumber(jtok.getStr());
 //     }else 
 //     if(jtok.isNum()){
-//       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//       state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 //     }
 
 // 		//state needs checked for flipped
@@ -40,10 +40,10 @@
 //   // PHASE OUT by version 0.87
 //   if(jtok = obj[PM_ONOFF]){
 //     if(jtok.isStr()){
-//       state = pCONT_sup->GetStateNumber(jtok.getStr());
+//       state = tkr_sup->GetStateNumber(jtok.getStr());
 //     }else 
 //     if(jtok.isNum()){
-//       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//       state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
 //     }
 //   }
 

@@ -144,9 +144,12 @@ const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
 #include "2_CoreSystem/06_Support/mSupport.h"
 #include "2_CoreSystem/08_Logging/mLogging.h"
 #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/05_HardwarePins/mHardwarePins_Templates.h"
+#include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"
+#include "2_CoreSystem/05_HardwarePins/mPins_Esp32.h"
+#include "2_CoreSystem/05_HardwarePins/mPins_Esp82xx.h"
 
-#include "2_CoreSystem/05_HardwarePins/mHardwarePins.h"
+
+#include "2_CoreSystem/05_HardwarePins/mPins.h"
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
@@ -384,6 +387,7 @@ const uint8_t MAX_SWITCHES_TXT = 8;         // Max number of switches user text
 const uint8_t MAX_SWITCHES_TXT = 28;        // Max number of switches user text
 #endif  // ESP32
 
+const uint16_t TOPSZ = 151;                 // Max number of characters in topic string
 
 const uint32_t START_VALID_UTC_TIME = 1697014158;  // Time is synced and after 2023 October 11, this will need adjusting when NTP code is updated
 
@@ -504,7 +508,7 @@ class mSettings :
     static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
-    ~mSettings() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mSettings() {          }
 
   #ifdef ESP8266
     #if AUTOFLASHSIZE
@@ -623,7 +627,7 @@ class mSettings :
   };  
  
 
-#include "2_CoreSystem/05_HardwarePins/mHardwarePins.h"
+#include "2_CoreSystem/05_HardwarePins/mPins.h"
 
 struct Template_Config{
   uint8_t flags;
@@ -1135,6 +1139,7 @@ struct SETTINGS {
   uint64_t      rf_protocol_mask;          // FA8
   #ifdef ESP32
   WebCamCfg     webcam_config;             // 44C
+  uint8_t       webcam_clk;                // 72F
   WebCamCfg2    webcam_config2;            // 460
   #endif
   #ifdef ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
@@ -1223,6 +1228,7 @@ struct SETTINGS {
     #ifdef ESP32
     bool i2c_enabled_2 = false;                       // I2C configured, second controller on ESP32, Wire1
     #endif
+    bool camera_initialized;                  // For esp32-webcam, to be used in discovery
     bool spi_flg = false;                       // SPI configured
     bool soft_spi_flg = false;                  // Software SPI configured
     bool ntp_force_sync = false;                // Force NTP sync

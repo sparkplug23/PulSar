@@ -99,12 +99,12 @@ uint16_t IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
 void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
 {
   DEBUG_ADC_ISR_EVENT_SET(LOW);
-  pCONT_adc_internal->external_interrupt.flag_pin_active = true;
+  tkr_adc_internal->external_interrupt.flag_pin_active = true;
 
   /**
    * Capture both adc pins for 5 samples (no delay)
    * */
-  mADCInternal::ISR_DUAL_CAPTURE* adc_p = &pCONT_adc_internal->isr_capture;
+  mADCInternal::ISR_DUAL_CAPTURE* adc_p = &tkr_adc_internal->isr_capture;
 
   if(adc_p->within_buffer_iter_counter < 40)
   {
@@ -165,13 +165,13 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
       break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -443,7 +443,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -454,7 +454,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60;//pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = 60;//tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -465,7 +465,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -790,9 +790,9 @@ void mADCInternal::MQTTHandler_Init(){
 // {
 //   for(auto& handle:mqtthandler_list){
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
 //   }
 // }
 
@@ -802,7 +802,7 @@ void mADCInternal::MQTTHandler_Init(){
 // void mSensorsAnalog::MQTTHandler_Sender()
 // {
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+//     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 //   }
 // }
 

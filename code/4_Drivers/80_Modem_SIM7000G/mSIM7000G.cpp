@@ -122,12 +122,12 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
       ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.apn_connect_called %d"), gprs.apn_connect_called); 
       ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.reconnect_init_counts %d"), gprs.reconnect_init_counts); 
       ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.connected_seconds %d"), gprs.connected_seconds);    
-      ALOG_INF(PSTR(D_LOG_CELLULAR "mqtt downtime counter %d"), pCONT_mqtt->brokers[0]->downtime_counter);    
-      if(pCONT_mqtt->brokers.size()){ 
-        ALOG_INF(PSTR(D_LOG_CELLULAR "pubsub->connected %d"), pCONT_mqtt->brokers[0]->pubsub->connected() );        
+      ALOG_INF(PSTR(D_LOG_CELLULAR "mqtt downtime counter %d"), tkr_mqtt->brokers[0]->downtime_counter);    
+      if(tkr_mqtt->brokers.size()){ 
+        ALOG_INF(PSTR(D_LOG_CELLULAR "pubsub->connected %d"), tkr_mqtt->brokers[0]->pubsub->connected() );        
         char buffer[20];
-        mSupport::float2CString(pCONT_mqtt->brokers[0]->debug_stats.payload_publish_success_percentage*100, 6, buffer);
-        ALOG_INF(PSTR(D_LOG_CELLULAR "payload_publish_success_percentage %d/%d %s"), pCONT_mqtt->brokers[0]->debug_stats.payload_publish_sent, pCONT_mqtt->brokers[0]->debug_stats.payload_publish_missed, buffer);
+        mSupport::float2CString(tkr_mqtt->brokers[0]->debug_stats.payload_publish_success_percentage*100, 6, buffer);
+        ALOG_INF(PSTR(D_LOG_CELLULAR "payload_publish_success_percentage %d/%d %s"), tkr_mqtt->brokers[0]->debug_stats.payload_publish_sent, tkr_mqtt->brokers[0]->debug_stats.payload_publish_missed, buffer);
       }
       ALOG_INF(PSTR(D_LOG_CELLULAR "isGprsConnected %d"), modem->isGprsConnected());   
       ALOG_INF(PSTR(D_LOG_CELLULAR "Sim Connected %d"), modem->isNetworkConnected()); 
@@ -138,9 +138,9 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
 
 
       #ifdef ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS // Need to enable passing back if "send failed" to set connection status as down     
-      if(pCONT_mqtt->brokers.size())
+      if(tkr_mqtt->brokers.size())
       {
-        if(pCONT_mqtt->brokers[0]->downtime_counter > ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS) // 10 minutes, do long modem reconnect
+        if(tkr_mqtt->brokers[0]->downtime_counter > ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS) // 10 minutes, do long modem reconnect
         {
           ALOG_INF(PSTR(D_LOG_CELLULAR "MQTT Downtime limit on LTE, forcing modem restart"));
           flag_modem_initialized = false; // no response, force restart
@@ -340,8 +340,8 @@ void mSIM7000G::ModemUpdate_BatteryStatus()
     modem_status.battery.volts_mv,modem_status.battery.percentage,modem_status.battery.charge_state);
 
   #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-  pCONT_batt_modem->readings.battery.volts_mv = modem_status.battery.volts_mv;
-  pCONT_batt_modem->readings.battery.percentage = modem_status.battery.percentage;
+  tkr_batt_modem->readings.battery.volts_mv = modem_status.battery.volts_mv;
+  tkr_batt_modem->readings.battery.percentage = modem_status.battery.percentage;
   #endif
 
 }
@@ -1425,13 +1425,13 @@ void mSIM7000G::ModemUpdate_GPS()
         // ALOG_INF(PSTR(D_LOG_CELLULAR "GPS u/v_sat %d/%d Fix (%d cm)"), gps.usat, gps.vsat, (int)(gps.accuracy*100));
         
         #ifdef USE_MODULE_SENSORS_GPS_MODEM
-        pCONT_gps->readings.update_seconds = millis();
-        pCONT_gps->location.latitude  = gps.latitude;
-        pCONT_gps->location.longitude = gps.longitude;
-        pCONT_gps->location.speed = gps.speed;
-        pCONT_gps->location.altitude = gps.altitude;
-        pCONT_gps->location.accuracy = gps.accuracy;
-        ALOG_INF(PSTR("CEL: Updating devices location (%d)"), (int)(pCONT_gps->location.accuracy*100));
+        tkr_gps->readings.update_seconds = millis();
+        tkr_gps->location.latitude  = gps.latitude;
+        tkr_gps->location.longitude = gps.longitude;
+        tkr_gps->location.speed = gps.speed;
+        tkr_gps->location.altitude = gps.altitude;
+        tkr_gps->location.accuracy = gps.accuracy;
+        ALOG_INF(PSTR("CEL: Updating devices location (%d)"), (int)(tkr_gps->location.accuracy*100));
         #endif // USE_MODULE_SENSORS_GPS_MODEM
 
         #ifdef ENABLE_DEVFEATURE__TIME_UPDATE_WITH_GPS_TIME
@@ -1464,18 +1464,18 @@ void mSIM7000G::SMS_GPSLocation()
 
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   
-  float mavlink_lat = (float)pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
+  float mavlink_lat = (float)tkr_mavlink->pkt.gps_raw_int.data.lat/10000000;
   Serial.println(mavlink_lat);
   char convf_mavlink_lat[TBUFFER_SIZE_FLOAT]; 
   mSupport::float2CString(mavlink_lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lat);
 
-  float mavlink_lon = (float)pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+  float mavlink_lon = (float)tkr_mavlink->pkt.gps_raw_int.data.lon/10000000;
   char convf_mavlink_lon[TBUFFER_SIZE_FLOAT]; 
   mSupport::float2CString(mavlink_lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lon);
 
-  sms_text.Append_P(PSTR("b%d%% c%d\n"),  pCONT_mavlink->pkt.battery_status.data.battery_remaining, pCONT_mavlink->pkt.battery_status.data.current_consumed);
-  sms_text.Append_P(PSTR("WP i%d %dm\n"), pCONT_mavlink->pkt.mission_current.data.seq, pCONT_mavlink->pkt.nav_controller_output.data.wp_dist);
-  sms_text.Append_P(PSTR("%dms\n"),       millis()-pCONT_mavlink->pkt.tSaved_Last_Response);
+  sms_text.Append_P(PSTR("b%d%% c%d\n"),  tkr_mavlink->pkt.battery_status.data.battery_remaining, tkr_mavlink->pkt.battery_status.data.current_consumed);
+  sms_text.Append_P(PSTR("WP i%d %dm\n"), tkr_mavlink->pkt.mission_current.data.seq, tkr_mavlink->pkt.nav_controller_output.data.wp_dist);
+  sms_text.Append_P(PSTR("%dms\n"),       millis()-tkr_mavlink->pkt.tSaved_Last_Response);
   sms_text.Append_P(PSTR("https://www.google.com/maps/dir//%s,%s\n"), convf_mavlink_lat, convf_mavlink_lon);
 
   #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
@@ -1512,18 +1512,18 @@ void mSIM7000G::SMS_GPSLocationAuto()
 
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   
-  float mavlink_lat = (float)pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
+  float mavlink_lat = (float)tkr_mavlink->pkt.gps_raw_int.data.lat/10000000;
   Serial.println(mavlink_lat);
   char convf_mavlink_lat[TBUFFER_SIZE_FLOAT]; 
   mSupport::float2CString(mavlink_lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lat);
 
-  float mavlink_lon = (float)pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+  float mavlink_lon = (float)tkr_mavlink->pkt.gps_raw_int.data.lon/10000000;
   char convf_mavlink_lon[TBUFFER_SIZE_FLOAT]; 
   mSupport::float2CString(mavlink_lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lon);
 
-  sms_text.Append_P(PSTR("b%d%% c%d\n"),  pCONT_mavlink->pkt.battery_status.data.battery_remaining, pCONT_mavlink->pkt.battery_status.data.current_consumed);
-  sms_text.Append_P(PSTR("WP i%d %dm\n"), pCONT_mavlink->pkt.mission_current.data.seq, pCONT_mavlink->pkt.nav_controller_output.data.wp_dist);
-  sms_text.Append_P(PSTR("%dms\n"),       millis()-pCONT_mavlink->pkt.tSaved_Last_Response);
+  sms_text.Append_P(PSTR("b%d%% c%d\n"),  tkr_mavlink->pkt.battery_status.data.battery_remaining, tkr_mavlink->pkt.battery_status.data.current_consumed);
+  sms_text.Append_P(PSTR("WP i%d %dm\n"), tkr_mavlink->pkt.mission_current.data.seq, tkr_mavlink->pkt.nav_controller_output.data.wp_dist);
+  sms_text.Append_P(PSTR("%dms\n"),       millis()-tkr_mavlink->pkt.tSaved_Last_Response);
   sms_text.Append_P(PSTR("https://www.google.com/maps/dir//%s,%s\n"), convf_mavlink_lat, convf_mavlink_lon);
 
   #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
@@ -1624,17 +1624,17 @@ void mSIM7000G::SMS_BatteryDetailed()
 
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   
-  float mavlink_lat = pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
+  float mavlink_lat = tkr_mavlink->pkt.gps_raw_int.data.lat/10000000;
   char convf_mavlink_lat[TBUFFER_SIZE_FLOAT]; 
   mSupport::float2CString(mavlink_lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lat);
 
-  float mavlink_lon = pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+  float mavlink_lon = tkr_mavlink->pkt.gps_raw_int.data.lon/10000000;
   char convf_mavlink_lon[TBUFFER_SIZE_FLOAT]; 
   mSupport::float2CString(mavlink_lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lon);
 
-  sms_text.Append_P(PSTR("b%d%% c%d\n"),  pCONT_mavlink->pkt.battery_status.data.battery_remaining, pCONT_mavlink->pkt.battery_status.data.current_consumed);
-  sms_text.Append_P(PSTR("WP i%d %dm\n"), pCONT_mavlink->pkt.mission_current.data.seq, pCONT_mavlink->pkt.nav_controller_output.data.wp_dist);
-  sms_text.Append_P(PSTR("%dms\n"),       millis()-pCONT_mavlink->pkt.tSaved_Last_Response);
+  sms_text.Append_P(PSTR("b%d%% c%d\n"),  tkr_mavlink->pkt.battery_status.data.battery_remaining, tkr_mavlink->pkt.battery_status.data.current_consumed);
+  sms_text.Append_P(PSTR("WP i%d %dm\n"), tkr_mavlink->pkt.mission_current.data.seq, tkr_mavlink->pkt.nav_controller_output.data.wp_dist);
+  sms_text.Append_P(PSTR("%dms\n"),       millis()-tkr_mavlink->pkt.tSaved_Last_Response);
   sms_text.Append_P(PSTR("https://www.google.com/maps/dir//%s,%s\n"), convf_mavlink_lat, convf_mavlink_lon);
 
   #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
@@ -1679,13 +1679,13 @@ void mSIM7000G::SMS_BatteryDetailed()
 //         "Accuracy %s m\n"
 //         "https://www.google.com/maps/dir//%s,%s"
 //       ), 
-//       pCONT_mavlink->pkt.battery_status.data.battery_remaining,
-//       pCONT_mavlink->pkt.battery_status.data.current_consumed,
+//       tkr_mavlink->pkt.battery_status.data.battery_remaining,
+//       tkr_mavlink->pkt.battery_status.data.current_consumed,
 
-//       pCONT_mavlink->pkt.mission_current.data.seq,
-//       pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
+//       tkr_mavlink->pkt.mission_current.data.seq,
+//       tkr_mavlink->pkt.nav_controller_output.data.wp_dist,
 
-//       millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
+//       millis()-tkr_mavlink->pkt.tSaved_Last_Response,
 //       convf_fix,
 //       convf_lat, 
 //       convf_lon
@@ -1705,8 +1705,8 @@ void mSIM7000G::SMS_BatteryDetailed()
 //     /**
 //      * @brief MAVLink Data
 //      **/    
-//     float mavlink_lat = pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
-//     float mavlink_lon = pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+//     float mavlink_lat = tkr_mavlink->pkt.gps_raw_int.data.lat/10000000;
+//     float mavlink_lon = tkr_mavlink->pkt.gps_raw_int.data.lon/10000000;
 
 
 //     char convf_lat2[TBUFFER_SIZE_FLOAT];
@@ -1777,11 +1777,11 @@ void mSIM7000G::SMS_Send_TimedHeartbeat()
         "\n"
         "https://www.google.com/maps/dir//%s,%s"
       ), 
-      // pCONT_mavlink->pkt.battery_status.data.battery_remaining,
-      // pCONT_mavlink->pkt.battery_status.data.current_consumed,
-      // pCONT_mavlink->pkt.mission_current.data.seq,
-      // pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
-      // millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
+      // tkr_mavlink->pkt.battery_status.data.battery_remaining,
+      // tkr_mavlink->pkt.battery_status.data.current_consumed,
+      // tkr_mavlink->pkt.mission_current.data.seq,
+      // tkr_mavlink->pkt.nav_controller_output.data.wp_dist,
+      // millis()-tkr_mavlink->pkt.tSaved_Last_Response,
       convf_fix,
       convf_lat, 
       convf_lon
@@ -1793,9 +1793,9 @@ void mSIM7000G::SMS_Send_TimedHeartbeat()
      * @brief MAVLink Data
      **/    
     char convf_lat2[TBUFFER_SIZE_FLOAT];
-    mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat2);
+    mSupport::float2CString(tkr_mavlink->pkt.gps_raw_int.data.lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat2);
     char convf_lon2[TBUFFER_SIZE_FLOAT];
-    mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon2);
+    mSupport::float2CString(tkr_mavlink->pkt.gps_raw_int.data.lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon2);
 
     // buflen += snprintf_P(buffer+buflen, sizeof(buffer),
     //   PSTR(
@@ -1863,13 +1863,13 @@ void mSIM7000G::ModemUpdate_GPRS()
         if(gprs.signal_quality_raw == 99)
         {
           gprs.signal_quality_rssi_dbm = -150;
-          pCONT_interface_network->data.cellular_state.isvalid = false;
-          pCONT_interface_network->data.mqtt_state.isvalid = false;
+          tkr_interface_network->data.cellular_state.isvalid = false;
+          tkr_interface_network->data.mqtt_state.isvalid = false;
         }
         else
         {
           gprs.signal_quality_rssi_dbm = mSupport::mapfloat(gprs.signal_quality_raw, 0, 31, -113, -51);
-          pCONT_interface_network->data.cellular_state.isvalid = true;
+          tkr_interface_network->data.cellular_state.isvalid = true;
         }
 
         ALOG_DBM(PSTR(D_LOG_CELLULAR "GPRS: Connected %d dBm (%d)"), int(gprs.signal_quality_rssi_dbm), gprs.signal_quality_raw);
@@ -2214,7 +2214,7 @@ bool mSIM7000G::DataNetwork__StartConnection()
       {
         gsm_client = new TinyGsmClient(*modem); // Only create new if it didnt already exist
       }
-      pCONT_mqtt->CreateConnection(gsm_client, MQTT_HOST_CELLULAR, MQTT_PORT_CELLULAR, CLIENT_TYPE_CELLULAR_ID);
+      tkr_mqtt->CreateConnection(gsm_client, MQTT_HOST_CELLULAR, MQTT_PORT_CELLULAR, CLIENT_TYPE_CELLULAR_ID);
         
 
 
@@ -2470,9 +2470,9 @@ void mSIM7000G::MQTTHandler_Rate()
 
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   // }
 }
 
@@ -2482,7 +2482,7 @@ void mSIM7000G::MQTTHandler_Rate()
 void mSIM7000G::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

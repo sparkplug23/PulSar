@@ -134,7 +134,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
   char buffer_n[100] = {0};
   
   snprintf(buffer, sizeof(buffer), "%s", tkr_time->RtcTime.hhmmss_ctr);
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
 
   // #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
 
@@ -144,7 +144,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
    * @brief Add each sensor on new line
    */
    
-  uint8_t sensors_available = 1;//pCONT_db18->GetSensorCount();
+  uint8_t sensors_available = 1;//tkr_db18->GetSensorCount();
 
   int8_t line = -1;
 
@@ -152,12 +152,12 @@ void mEnergyOLED::SubTask_UpdateOLED()
   {
     line = -1;
     sensors_reading_t val;
-    pCONT_pzem->GetSensorReading(&val, sensor_id);
+    tkr_pzem->GetSensorReading(&val, sensor_id);
     if(val.Valid())
     {
 
       sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+      DLI->GetDeviceName_WithModuleUniqueID( tkr_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
       /**
        * @brief Check for name and replace with OLED friendly short name
@@ -173,7 +173,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
       if(line == 0)
       {
         snprintf(buffer, sizeof(buffer), "Pow: %s", mSupport::float2CString(sensor_data,2,buffer_f) );
-        pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+        tkr_iDisp->LogBuffer_AddRow(buffer, line);
       }
       ALOG_ERR( PSTR("Sensor valid %s"), buffer);
 
@@ -188,12 +188,12 @@ void mEnergyOLED::SubTask_UpdateOLED()
   {
     line = -1;
     sensors_reading_t val;
-    pCONT_pzem->GetSensorReading(&val, sensor_id);
+    tkr_pzem->GetSensorReading(&val, sensor_id);
     if(val.Valid())
     {
 
       sensor_data = val.GetFloat(SENSOR_TYPE_CURRENT_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+      DLI->GetDeviceName_WithModuleUniqueID( tkr_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
       /**
        * @brief Check for name and replace with OLED friendly short name
@@ -209,7 +209,7 @@ void mEnergyOLED::SubTask_UpdateOLED()
       if(line == 1)
       {
         snprintf(buffer, sizeof(buffer), "Cur: %s", mSupport::float2CString(sensor_data,2,buffer_f) );
-        pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+        tkr_iDisp->LogBuffer_AddRow(buffer, line);
       }
       ALOG_ERR( PSTR("Sensor valid %s"), buffer);
 
@@ -226,14 +226,14 @@ void mEnergyOLED::SubTask_UpdateOLED()
   float c = -2.097410;
   
   sensors_reading_t val;
-  pCONT_pzem->GetSensorReading(&val, 0);
+  tkr_pzem->GetSensorReading(&val, 0);
   if(val.Valid())
   {
     float power = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
 
     float estimated_speed = m * power + c;
     snprintf(buffer, sizeof(buffer), "Spd: %s", mSupport::float2CString(estimated_speed,2,buffer_f) );
-    pCONT_iDisp->LogBuffer_AddRow(buffer, 2);
+    tkr_iDisp->LogBuffer_AddRow(buffer, 2);
 
   }
 
@@ -243,12 +243,12 @@ void mEnergyOLED::SubTask_UpdateOLED()
   // {
   //   line = -1;
   //   sensors_reading_t val;
-  //   pCONT_pzem->GetSensorReading(&val, sensor_id);
+  //   tkr_pzem->GetSensorReading(&val, sensor_id);
   //   if(val.Valid())
   //   {
 
   //     sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-  //     DLI->GetDeviceName_WithModuleUniqueID( pCONT_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+  //     DLI->GetDeviceName_WithModuleUniqueID( tkr_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
   //     /**
   //      * @brief Check for name and replace with OLED friendly short name
@@ -264,22 +264,22 @@ void mEnergyOLED::SubTask_UpdateOLED()
   //     if(line == 0)
   //     {
   //       snprintf(buffer, sizeof(buffer), "Pow: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-  //       pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+  //       tkr_iDisp->LogBuffer_AddRow(buffer, line);
   //     }
   //     if(line == 1)
   //     {
   //       snprintf(buffer, sizeof(buffer), "Cur: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-  //       pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+  //       tkr_iDisp->LogBuffer_AddRow(buffer, line);
   //     }
   //     if(line == 2)
   //     {
   //       snprintf(buffer, sizeof(buffer), "EnT: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-  //       pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+  //       tkr_iDisp->LogBuffer_AddRow(buffer, line);
   //     }
   //     if(line == 3)
   //     {
   //       snprintf(buffer, sizeof(buffer), "UpT: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-  //       pCONT_iDisp->LogBuffer_AddRow(buffer, line);
+  //       tkr_iDisp->LogBuffer_AddRow(buffer, line);
   //     }
 
   //   }
@@ -385,9 +385,9 @@ void mEnergyOLED::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -397,7 +397,7 @@ void mEnergyOLED::MQTTHandler_Rate()
 void mEnergyOLED::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

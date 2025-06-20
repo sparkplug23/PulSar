@@ -148,14 +148,14 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
   char buffer[100] = {0};
 
   #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-  mSIM7000G::GPRS_STATUS gprs = pCONT_sim7000g->gprs;
-  mSIM7000G::GPS_STATUS gps = pCONT_sim7000g->gps;
-  mSIM7000G::DATA modem_status = pCONT_sim7000g->modem_status;
+  mSIM7000G::GPRS_STATUS gprs = tkr_sim7000g->gprs;
+  mSIM7000G::GPS_STATUS gps = tkr_sim7000g->gps;
+  mSIM7000G::DATA modem_status = tkr_sim7000g->modem_status;
   // #endif // USE_MODULE_DRIVERS_MODEM_7000G
   // #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-  // mSIM7000G::GPRS_STATUS gprs = pCONT_sim7000g->gprs;
-  // mSIM7000G::GPS_STATUS gps = pCONT_sim7000g->gps;
-  // mSIM7000G::DATA modem_status = pCONT_sim7000g->modem_status;
+  // mSIM7000G::GPRS_STATUS gprs = tkr_sim7000g->gprs;
+  // mSIM7000G::GPS_STATUS gps = tkr_sim7000g->gps;
+  // mSIM7000G::DATA modem_status = tkr_sim7000g->modem_status;
   // #endif // USE_MODULE_DRIVERS_MODEM_7000G
 
   JBI->Start();
@@ -277,9 +277,9 @@ void mCellular::MQTTHandler_Rate()
 
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   // }
 }
 
@@ -289,7 +289,7 @@ void mCellular::MQTTHandler_Rate()
 void mCellular::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

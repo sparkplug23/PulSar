@@ -4,25 +4,25 @@
 
 void mEnergyADE7953::Pre_Init(void)
 {
-  if (!pCONT_sup->I2cEnabled(XI2C_07)) { 
+  if (!tkr_sup->I2cEnabled(XI2C_07)) { 
     return; 
   }
 
   if (tkr_pins->PinUsed(GPIO_ADE7953_IRQ_ID)) {                // Irq on GPIO16 is not supported...
     pinMode(tkr_pins->GetPin(GPIO_ADE7953_IRQ_ID), INPUT);     // Related to resetPins() - Must be set to input
     delay(100);                                                  // Need 100mS to init ADE7953
-    if (pCONT_sup->I2cSetDevice(ADE7953_ADDR)) {
+    if (tkr_sup->I2cSetDevice(ADE7953_ADDR)) {
       if (HLW_PREF_PULSE == tkr_set->Settings.energy_usage.energy_power_calibration) {
         tkr_set->Settings.energy_usage.energy_power_calibration = ADE7953_PREF;
         tkr_set->Settings.energy_usage.energy_voltage_calibration = ADE7953_UREF;
         tkr_set->Settings.energy_usage.energy_current_calibration = ADE7953_IREF;
       }
-      pCONT_sup->I2cSetActiveFound(ADE7953_ADDR, "ADE7953");
+      tkr_sup->I2cSetActiveFound(ADE7953_ADDR, "ADE7953");
       settings.fEnableSensor = true;
       measured.init_step = 2;
-      pCONT_iEnergy->Energy.phase_count = 2;                     // Handle two channels as two phases
-      pCONT_iEnergy->Energy.voltage_common = true;               // Use common voltage
-      // pCONT_iEnergy->Energy.frequency_common = true;             // Use common frequency
+      tkr_iEnergy->Energy.phase_count = 2;                     // Handle two channels as two phases
+      tkr_iEnergy->Energy.voltage_common = true;               // Use common voltage
+      // tkr_iEnergy->Energy.frequency_common = true;             // Use common frequency
       tkr_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
     }
   }
@@ -178,30 +178,30 @@ void mEnergyADE7953::GetData(void)
     measured.current_rms[0], measured.current_rms[1], current_rms_sum,
     measured.active_power[0], measured.active_power[1], active_power_sum);
 
-  if (pCONT_iEnergy->Energy.power_on) {  // Powered on
-    pCONT_iEnergy->Energy.voltage[0] = (float)measured.voltage_rms / tkr_set->Settings.energy_usage.energy_voltage_calibration;
-    pCONT_iEnergy->Energy.frequency[0] = 223750.0f / ( (float)measured.period + 1);
+  if (tkr_iEnergy->Energy.power_on) {  // Powered on
+    tkr_iEnergy->Energy.voltage[0] = (float)measured.voltage_rms / tkr_set->Settings.energy_usage.energy_voltage_calibration;
+    tkr_iEnergy->Energy.frequency[0] = 223750.0f / ( (float)measured.period + 1);
 
     for (uint32_t channel = 0; channel < 2; channel++) {
-      pCONT_iEnergy->Energy.data_valid[channel] = 0;
-      pCONT_iEnergy->Energy.active_power[channel] = (float)measured.active_power[channel] / (tkr_set->Settings.energy_usage.energy_power_calibration / 10);
-      pCONT_iEnergy->Energy.reactive_power[channel] = (float)reactive_power[channel] / (tkr_set->Settings.energy_usage.energy_power_calibration / 10);
-      pCONT_iEnergy->Energy.apparent_power[channel] = (float)apparent_power[channel] / (tkr_set->Settings.energy_usage.energy_power_calibration / 10);
-      if (0 == pCONT_iEnergy->Energy.active_power[channel]) {
-        pCONT_iEnergy->Energy.current[channel] = 0;
+      tkr_iEnergy->Energy.data_valid[channel] = 0;
+      tkr_iEnergy->Energy.active_power[channel] = (float)measured.active_power[channel] / (tkr_set->Settings.energy_usage.energy_power_calibration / 10);
+      tkr_iEnergy->Energy.reactive_power[channel] = (float)reactive_power[channel] / (tkr_set->Settings.energy_usage.energy_power_calibration / 10);
+      tkr_iEnergy->Energy.apparent_power[channel] = (float)apparent_power[channel] / (tkr_set->Settings.energy_usage.energy_power_calibration / 10);
+      if (0 == tkr_iEnergy->Energy.active_power[channel]) {
+        tkr_iEnergy->Energy.current[channel] = 0;
       } else {
-        pCONT_iEnergy->Energy.current[channel] = (float)measured.current_rms[channel] / (tkr_set->Settings.energy_usage.energy_current_calibration * 10);
+        tkr_iEnergy->Energy.current[channel] = (float)measured.current_rms[channel] / (tkr_set->Settings.energy_usage.energy_current_calibration * 10);
       }
     }
 /*
   } else {  // Powered off
-    pCONT_iEnergy->Energy.data_valid[0] = ENERGY_WATCHDOG;
-    pCONT_iEnergy->Energy.data_valid[1] = ENERGY_WATCHDOG;
+    tkr_iEnergy->Energy.data_valid[0] = ENERGY_WATCHDOG;
+    tkr_iEnergy->Energy.data_valid[1] = ENERGY_WATCHDOG;
 */
   }
 
   // if (active_power_sum) {
-  //   pCONT_iEnergy->Energy.kWhtoday_delta += ((active_power_sum * (100000 / (tkr_set->Settings.energy_usage.energy_power_calibration / 10))) / 3600);
+  //   tkr_iEnergy->Energy.kWhtoday_delta += ((active_power_sum * (100000 / (tkr_set->Settings.energy_usage.energy_power_calibration / 10))) / 3600);
   //   EnergyUpdateToday();
   // }
 }
@@ -226,33 +226,33 @@ bool mEnergyADE7953::Command(void)
   // uint32_t channel = (2 == XdrvMailbox.index) ? 1 : 0;
   // uint32_t value = (uint32_t)(CharToFloat(XdrvMailbox.data) * 100);  // 1.23 = 123
 
-  // if (CMND_POWERCAL == pCONT_iEnergy->Energy.command_code) {
+  // if (CMND_POWERCAL == tkr_iEnergy->Energy.command_code) {
   //   if (1 == XdrvMailbox.payload) { XdrvMailbox.payload = ADE7953_PREF; }
-  //   // Service in xdrv_03_pCONT_iEnergy->Energy.ino
+  //   // Service in xdrv_03_tkr_iEnergy->Energy.ino
   // }
-  // else if (CMND_VOLTAGECAL == pCONT_iEnergy->Energy.command_code) {
+  // else if (CMND_VOLTAGECAL == tkr_iEnergy->Energy.command_code) {
   //   if (1 == XdrvMailbox.payload) { XdrvMailbox.payload = ADE7953_UREF; }
-  //   // Service in xdrv_03_pCONT_iEnergy->Energy.ino
+  //   // Service in xdrv_03_tkr_iEnergy->Energy.ino
   // }
-  // else if (CMND_CURRENTCAL == pCONT_iEnergy->Energy.command_code) {
+  // else if (CMND_CURRENTCAL == tkr_iEnergy->Energy.command_code) {
   //   if (1 == XdrvMailbox.payload) { XdrvMailbox.payload = ADE7953_IREF; }
-  //   // Service in xdrv_03_pCONT_iEnergy->Energy.ino
+  //   // Service in xdrv_03_tkr_iEnergy->Energy.ino
   // }
-  // else if (CMND_POWERSET == pCONT_iEnergy->Energy.command_code) {
+  // else if (CMND_POWERSET == tkr_iEnergy->Energy.command_code) {
   //   if (XdrvMailbox.data_len && measured.active_power[channel]) {
   //     if ((value > 100) && (value < 200000)) {  // Between 1W and 2000W
   //       Settings.energy_power_calibration = (measured.active_power[channel] * 1000) / value;  // 0.00 W
   //     }
   //   }
   // }
-  // else if (CMND_VOLTAGESET == pCONT_iEnergy->Energy.command_code) {
+  // else if (CMND_VOLTAGESET == tkr_iEnergy->Energy.command_code) {
   //   if (XdrvMailbox.data_len && measured.voltage_rms) {
   //     if ((value > 10000) && (value < 26000)) {  // Between 100V and 260V
   //       Settings.energy_voltage_calibration = (measured.voltage_rms * 100) / value;  // 0.00 V
   //     }
   //   }
   // }
-  // else if (CMND_CURRENTSET == pCONT_iEnergy->Energy.command_code) {
+  // else if (CMND_CURRENTSET == tkr_iEnergy->Energy.command_code) {
   //   if (XdrvMailbox.data_len && measured.current_rms[channel]) {
   //     if ((value > 2000) && (value < 1000000)) {  // Between 20mA and 10A
   //       Settings.energy_current_calibration = ((measured.current_rms[channel] * 100) / value) * 100;  // 0.00 mA
@@ -349,8 +349,8 @@ void mEnergyADE7953::MQTTHandler_RefreshAll(){
 
 void mEnergyADE7953::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
@@ -369,7 +369,7 @@ void mEnergyADE7953::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_ENERGY_ADE7953_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
+  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_ENERGY_ADE7953_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
 
 }
 

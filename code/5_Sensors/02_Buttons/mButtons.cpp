@@ -37,13 +37,13 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -762,7 +762,7 @@ char* mButtons::GetStateName(uint8_t state, uint8_t count, char* buffer, uint8_t
   {
     press_type = count-1;
   }
-  pCONT_sup->GetTextIndexed_P(buffer, buflen, press_type, kMultiPress);
+  tkr_sup->GetTextIndexed_P(buffer, buflen, press_type, kMultiPress);
   return buffer;
 
 }
@@ -803,6 +803,7 @@ bool mButtons::SendButton(uint32_t index, uint32_t state, uint16_t count)
   #endif
 
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  
   Tasker(TASK_MQTT_SENDER);
 
   event.waiting = false;

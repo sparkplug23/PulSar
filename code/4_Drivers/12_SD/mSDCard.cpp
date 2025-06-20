@@ -67,7 +67,7 @@ void sdcardWriterTask(void *param)
     //       // Serial.println();
     //       // Serial.printf("buflen_\t\t1=%d\n\r", stream_tmp_buflen_1);
 
-    //       xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, stream_tmp_buffer_1, stream_tmp_buflen_1, pdMS_TO_TICKS(500));
+    //       xRingbufferSend(tkr_sdcard->stream.ringbuffer_handle, stream_tmp_buffer_1, stream_tmp_buflen_1, pdMS_TO_TICKS(500));
     //       flag_send_rest_of_frame = true;
 
     //       // reset to empty
@@ -87,7 +87,7 @@ void sdcardWriterTask(void *param)
     //       // Serial.println();
     //       // Serial.printf("buflen_\t\t0=%d\n\r", stream_tmp_buflen_0);
 
-    //       xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, stream_tmp_buffer_0, stream_tmp_buflen_0, pdMS_TO_TICKS(500));
+    //       xRingbufferSend(tkr_sdcard->stream.ringbuffer_handle, stream_tmp_buffer_0, stream_tmp_buflen_0, pdMS_TO_TICKS(500));
     //       flag_send_rest_of_frame = true;
     //       // reset to empty
     //       stream_tmp_buflen_0 = 0;
@@ -110,33 +110,33 @@ void sdcardWriterTask(void *param)
     //   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
     //   // // keyed method
     //   // // jLen += sprintf(json_second_section+jLen, ",\"G\":{");
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"t\":%d,", pCONT_gps->my_gps_vals.lat); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"n\":%d,", pCONT_gps->my_gps_vals.lon); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"a\":%d,", pCONT_gps->my_gps_vals.alt); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"d\":%d,", pCONT_gps->my_gps_vals.speed); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"h\":%d,", pCONT_gps->my_gps_vals.hours); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"m\":%d,", pCONT_gps->my_gps_vals.minutes); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"s\":%d,", pCONT_gps->my_gps_vals.seconds); 
-    //   // //   jLen += sprintf(json_second_section+jLen, "\"i\":%d,", pCONT_gps->my_gps_vals.dateTime_ms/100); // are always hundreds, so shorted to 1 sig fig then recover on matlab
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"t\":%d,", tkr_gps->my_gps_vals.lat); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"n\":%d,", tkr_gps->my_gps_vals.lon); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"a\":%d,", tkr_gps->my_gps_vals.alt); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"d\":%d,", tkr_gps->my_gps_vals.speed); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"h\":%d,", tkr_gps->my_gps_vals.hours); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"m\":%d,", tkr_gps->my_gps_vals.minutes); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"s\":%d,", tkr_gps->my_gps_vals.seconds); 
+    //   // //   jLen += sprintf(json_second_section+jLen, "\"i\":%d,", tkr_gps->my_gps_vals.dateTime_ms/100); // are always hundreds, so shorted to 1 sig fig then recover on matlab
     //   // // jLen += sprintf(json_second_section+jLen, "}");
       
     //   // //array method
     //   // jLen += sprintf(json_second_section+jLen, ",\"G\":[");
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.lat); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.lon); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.alt); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.speed); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.hours); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.minutes); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d,", pCONT_gps->my_gps_vals.seconds); 
-    //   //   jLen += sprintf(json_second_section+jLen, "%d", pCONT_gps->my_gps_vals.dateTime_ms/100); // are always hundreds, so shorted to 1 sig fig then recover on matlab
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.lat); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.lon); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.alt); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.speed); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.hours); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.minutes); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d,", tkr_gps->my_gps_vals.seconds); 
+    //   //   jLen += sprintf(json_second_section+jLen, "%d", tkr_gps->my_gps_vals.dateTime_ms/100); // are always hundreds, so shorted to 1 sig fig then recover on matlab
     //   // jLen += sprintf(json_second_section+jLen, "]");
     //   #endif // USE_MODULE_SENSORS_GPS_SERIAL
 
     //   // jLen += sprintf(json_second_section+jLen, "}");
 
     //   // // Send the rest of the frame
-    //   // xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, json_second_section, jLen, pdMS_TO_TICKS(500));
+    //   // xRingbufferSend(tkr_sdcard->stream.ringbuffer_handle, json_second_section, jLen, pdMS_TO_TICKS(500));
 
     // }
 
@@ -155,7 +155,7 @@ void sdcardWriterTask(void *param)
     //   ){
 
         uint16_t chunks_to_write_with = BYTE_SIZE_GLOABL_STEAM_OUT_BUFFER;
-        uint16_t bytes_read = pCONT_sdcard->GetRingBufferDataAndClear(0, global_stream_out_buffer, chunks_to_write_with, '\n', false);
+        uint16_t bytes_read = tkr_sdcard->GetRingBufferDataAndClear(0, global_stream_out_buffer, chunks_to_write_with, '\n', false);
 
 
         //if any data found
@@ -170,7 +170,7 @@ void sdcardWriterTask(void *param)
             // Serial.print(global_stream_out_buffer[i]);
           }
           //Serial.println();
-          pCONT_sdcard->sdcard_status.bytes_written_to_file += bytes_read;
+          tkr_sdcard->sdcard_status.bytes_written_to_file += bytes_read;
         }
       // }
 
@@ -737,7 +737,7 @@ void mSDCard::Handle_Write_Ringbuffer_Stream_To_SDCard()
 {
 
   // #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
-  // if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
+  // if(tkr_sdcard->writer_settings.status == tkr_sdcard->FILE_STATUS_OPENED_ID)
   // {
 
   //   uint16_t maximum_bytes_to_write_in_one_chunk = 1024; // 2kB per write
@@ -754,7 +754,7 @@ void mSDCard::Handle_Write_Ringbuffer_Stream_To_SDCard()
   //   {  
   //     // char* pbuffer = BufferWriterI->GetPtr();
   //     //ALOG_TST(PSTR("buffer[%d]=\"%s\""),bytes_read, stream_out_buffer);
-  //     pCONT_sdcard->SubTask_Append_To_Open_File(stream_out_buffer, bytes_read);      
+  //     tkr_sdcard->SubTask_Append_To_Open_File(stream_out_buffer, bytes_read);      
   //   }
 
 
@@ -928,16 +928,16 @@ void mSDCard::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
 void mSDCard::MQTTHandler_Sender(){
     
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 
 }
@@ -1062,12 +1062,12 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
     {
       #ifdef USE_MODULE_SENSORS_GPS_SERIAL
       tkr_time->SetUTCTime(
-                    pCONT_gps->gps_result_stored.dateTime.year,
-                    pCONT_gps->gps_result_stored.dateTime.month,
-                    pCONT_gps->gps_result_stored.dateTime.day,
-                    pCONT_gps->gps_result_stored.dateTime.hours,
-                    pCONT_gps->gps_result_stored.dateTime.minutes,
-                    pCONT_gps->gps_result_stored.dateTime.seconds
+                    tkr_gps->gps_result_stored.dateTime.year,
+                    tkr_gps->gps_result_stored.dateTime.month,
+                    tkr_gps->gps_result_stored.dateTime.day,
+                    tkr_gps->gps_result_stored.dateTime.hours,
+                    tkr_gps->gps_result_stored.dateTime.minutes,
+                    tkr_gps->gps_result_stored.dateTime.seconds
                   );
       #endif // USE_MODULE_SENSORS_GPS_SERIAL
 

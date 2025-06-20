@@ -175,7 +175,7 @@ Blue (Upstairs Link) ***********************************************************
 
   #define USE_MODULE_CONTROLLER_HVAC
     #define HEATING_DEVICE_MAX 3
-    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+    
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP

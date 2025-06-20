@@ -1382,7 +1382,7 @@ void mIRRemote::parse_JSONCommand(JsonParserObject obj)
 		// if(ready_to_send)
 		// {			
     	// ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
-		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+		// 	tkr_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		// }
 
 	}
@@ -1405,10 +1405,10 @@ uint16_t state_value = 0;
   // Primary method since v0.86.14.21
   if(jtok = obj["LEDState"]){
     // if(jtok.isStr()){
-    //   state = pCONT_sup->GetStateNumber(jtok.getStr());
+    //   state = tkr_sup->GetStateNumber(jtok.getStr());
     // }else 
     // if(jtok.isNum()){
-      state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+      state_value  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
     // }
 
     /**
@@ -1520,9 +1520,9 @@ void mIRRemote::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -1532,7 +1532,7 @@ void mIRRemote::MQTTHandler_Rate()
 void mIRRemote::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

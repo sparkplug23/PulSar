@@ -103,13 +103,13 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
       break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -128,7 +128,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
 
   ALOG_DBG(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
 
-  // DEBUG_DELAY(5000);
+  // DELAY_DEBUG(5000);
 
   DefaultRuleForModule();
   
@@ -412,7 +412,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
         // char message[50];
         // memset(message,0,sizeof(message));
         // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
-        // pCONT_mqtt->publish_device("status/debug/rules",message,false); //reconnect message
+        // tkr_mqtt->publish_device("status/debug/rules",message,false); //reconnect message
         // ^^ Add this later as a topic so I can know when rule triggers
 
         /**
@@ -428,7 +428,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           {
 
             D_DATA_BUFFER_CLEAR();
-            pCONT_sup->GetTextIndexed(
+            tkr_sup->GetTextIndexed(
               data_buffer.payload.ctr, 
               sizeof(data_buffer.payload.ctr), 
               tkr_rules->rules[rule_index].command.json_commands_dlist_id, 
@@ -488,29 +488,29 @@ rules_active_index = 0;
 
 #ifdef ESP8266
   #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
-    if(tkr_set->Settings.module == mHardwarePins::MODULE_SONOFF_4CHPRO_ID){
+    if(tkr_set->Settings.module == mPins::MODULE_SONOFF_4CHPRO){
       DefaultRule_Sonoff_4CHPRO();
     }else
   #endif // USE_MODULE_TEMPLATE_SONOFF_4CHPRO
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
-    if(tkr_set->Settings.module == mHardwarePins::MODULE_SONOFF_BASIC_ID){
+    if(tkr_set->Settings.module == mPins::MODULE_SONOFF_BASIC){
       DefaultRule_Sonoff_Basic_R2();
     }else
   #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-    if(tkr_set->Settings.module == mHardwarePins::MODULE_SONOFF_IFAN03_ID){
+    if(tkr_set->Settings.module == mPins::MODULE_SONOFF_IFAN03){
       DefaultRule_Sonoff_iFan03();
     }else
   #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
   #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
-    if(tkr_set->Settings.module == mHardwarePins::MODULE_SHELLY_DIMMER2_ID){
+    if(tkr_set->Settings.module == mPins::MODULE_SHELLY_DIMMER2){
       DefaultRule_Shelly_Dimmer2();
     }
   #endif // USE_MODULE_TEMPLATE_SHELLY_DIMMER2
   #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
     #ifndef USE_MODULE_TEMPLATE_SHELLY_2P5_FORCED_DISABLED
     else
-    if(tkr_set->Settings.module == mHardwarePins::MODULE_SHELLY2P5_ID){
+    if(tkr_set->Settings.module == mPins::MODULE_SHELLY2P5){
       DefaultRule_Shelly_2p5();
     }
     #endif
@@ -638,7 +638,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
     if(jtok = jobj["State"]){
       if(jtok.isStr()){
-        if((matched_id = pCONT_sup->GetStateNumber(jtok.getStr()))>=0){
+        if((matched_id = tkr_sup->GetStateNumber(jtok.getStr()))>=0){
           event->value.data[0] = matched_id;
           event->value.length++;// = 0;
           event->value.encoding = ENCODING_BYTES_ID;
@@ -662,7 +662,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
     }//end trigger
     if(jtok = jobj["Value"]){
       if(jtok.isStr()){
-        if((matched_id = pCONT_sup->GetStateNumber(jtok.getStr()))>=0){
+        if((matched_id = tkr_sup->GetStateNumber(jtok.getStr()))>=0){
           event->value.data[1] = matched_id;
           event->value.length++;// = 0;
           event->value.encoding = ENCODING_BYTES_ID;
@@ -699,7 +699,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
           // event->p_json_commands = &jsonbuffer.data[0];
 
-          pCONT_sup->AppendDList(jsonbuffer.data,jtok.getStr());
+          tkr_sup->AppendDList(jsonbuffer.data,jtok.getStr());
 
 
           event->json_commands_dlist_id = jsonbuffer.delims_used;
@@ -710,7 +710,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
           jsonbuffer.bytes_used += strlen(jtok.getStr());
 
           // char dlist[200]; memset(dlist,0,sizeof(dlist));
-          // pCONT_sup->AppendDList(dlist, D_TRANSITION "," D_PIXELS_UPDATE_PERCENTAGE);
+          // tkr_sup->AppendDList(dlist, D_TRANSITION "," D_PIXELS_UPDATE_PERCENTAGE);
   
           // I need to create the ability to move to add/edit buffer (like tas)
           // Rules can therefore only be created once at starttime for now          
@@ -756,7 +756,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
       
       #ifdef ENABLE_LOG_LEVEL_INFO
         ALOG_HGL(PSTR("MATCHED Rule%d"),rule_index);
-        // DEBUG_DELAY(1000);
+        // DELAY_DEBUG(1000);
       #endif // ENABLE_LOG_LEVEL_INFO
 
       EventPackage* p_event = nullptr;
@@ -975,7 +975,7 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
   //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_OFF_ID;  // Toggle
 
     
-  //   pCONT_sup->AppendDList(jsonbuffer.data,jtok.getStr());
+  //   tkr_sup->AppendDList(jsonbuffer.data,jtok.getStr());
   //   event->json_commands_dlist_id = jsonbuffer.delims_used;
   //   jsonbuffer.delims_used++;
   //   jsonbuffer.bytes_used += strlen(jtok.getStr());
@@ -1018,7 +1018,7 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
 //   // animation.transition.pixels_to_update_as_percentage = value;
 
 //   if(value == 1){
-//     pCONT_wif->EspRestart();
+//     tkr_wifi->EspRestart();
 //   }
   
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -1086,7 +1086,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
             //     JBI->Add("json", rules[id].command.p_json_commands);
 
 
-                // pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), rules[id].command.json_commands_dlist_id, jsonbuffer.data);  // should this be _P?
+                // tkr_sup->GetTextIndexed(buffer, sizeof(buffer), rules[id].command.json_commands_dlist_id, jsonbuffer.data);  // should this be _P?
                 //     JBI->Add("json", buffer); 
 
                     
@@ -1094,7 +1094,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
                 char buffer_escaped[D_COMMAND_BUFFER_LENGTH+50] = {0};
                 uint8_t len  = 0;
                 
-                pCONT_sup->GetTextIndexed(
+                tkr_sup->GetTextIndexed(
                     buffer_unescaped, 
                     sizeof(buffer_unescaped), 
                     tkr_rules->rules[id].command.json_commands_dlist_id, 
@@ -1171,7 +1171,7 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1182,7 +1182,7 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;

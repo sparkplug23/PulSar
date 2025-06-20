@@ -50,8 +50,6 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
   /**
    *  @note Timer Commands
    * */
-  #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-
   if(jtok = obj["HVAC"].getObject()[D_TIME_ON])
   { 
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
@@ -59,7 +57,6 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     ALOG_COM( PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), jtok.getInt() );
   }
 
-  #else
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   if(jtok = obj["HVAC"].getObject()[D_TIME_ON]){ 
   #else
@@ -71,7 +68,6 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
     ALOG_DBG(PSTR(D_LOG_HEATING D_COMMAND_NVALUE_K(D_TIME_ON)), jtok.getInt());
     // #endif
   }
-  #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
 
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
   /**

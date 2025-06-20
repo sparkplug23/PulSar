@@ -150,15 +150,15 @@ void mUARTLogger::SubTask_UpdateOLED()
   tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
   char buffer[25];
   snprintf(buffer, sizeof(buffer), "%s %s","Op","fMillis123456");
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 0);
 
   snprintf(buffer, sizeof(buffer), "%s",sdcard_status.isopened?"Open":"CLOSED");
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 1);
 
 
   
   snprintf(buffer, sizeof(buffer), "%s %s","Op",tkr_time->RtcTime.hhmmss_ctr);//tkr_time->GEt DT_UTC;
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 
 }
@@ -240,15 +240,15 @@ void mUARTLogger::MQTTHandler_RefreshAll(){
 
 void mUARTLogger::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
 
 void mUARTLogger::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_SDCARDLOGGER_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
+  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_SDCARDLOGGER_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
 
 }
 

@@ -20,6 +20,10 @@
 
 #include "Adafruit_FONA.h"
 
+
+#ifndef CONFIG_IDF_TARGET_ESP32S3
+
+
 #ifdef SSL_FONA
   char *server_CA_FONA;
   uint16_t port_CA_FONA = 0;
@@ -3850,3 +3854,6 @@ boolean Adafruit_FONA_3G::parseReply(FONAFlashStringPtr toreply,
 
   return true;
 }
+
+
+#endif

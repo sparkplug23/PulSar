@@ -62,13 +62,13 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif // USE_MODULE_NETWORK_MQTT 
   }
@@ -116,7 +116,7 @@ bool mInterfaceNetwork::Connected(uint8_t type)
     (type == NETWORK_TYPE_WIFI) ||
     (type == NETWORK_TYPE_ANY)
   ){
-    if(pCONT_wif->WifiCheckIpConnected())
+    if(tkr_wifi->WifiCheckIpConnected())
     {
       return true;
     }
@@ -138,18 +138,18 @@ bool mInterfaceNetwork::Connected(uint8_t type)
      * 
      */
     #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-    if(pCONT_sim7000g->modem != nullptr)
+    if(tkr_sim7000g->modem != nullptr)
     {
-      if(pCONT_sim7000g->modem->isGprsConnected())
+      if(tkr_sim7000g->modem->isGprsConnected())
       {
         return true;
       }
     }
     #endif
     #ifdef USE_MODULE_DRIVERS_MODEM_800L
-    if(pCONT_sim800l->modem != nullptr)
+    if(tkr_sim800l->modem != nullptr)
     {
-      if(pCONT_sim800l->modem->isGprsConnected())
+      if(tkr_sim800l->modem->isGprsConnected())
       {
         return true;
       }

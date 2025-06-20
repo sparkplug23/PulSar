@@ -7,7 +7,7 @@
 
 
 
-void mHVAC::FunctionHandler_FailSafe(void){
+void mHVAC::YTask_FailSafe(void){
 return;
   uint8_t fMessageToSend = false;
   char tmpctr[100] = {0}; 

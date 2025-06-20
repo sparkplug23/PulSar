@@ -105,6 +105,10 @@ struct functionhandler {
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
+#ifndef nitems
+#define nitems(_a)		(sizeof((_a)) / sizeof((_a)[0]))
+#endif
+
 
 #ifdef ESP8266
 #define AGPIO(x) (x)
@@ -408,8 +412,47 @@ class mSupport :
     static constexpr const char* PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
-    ~mSupport() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mSupport() {          }
     
+
+    
+#ifdef ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+/*********************************************************************************************\
+ * ESP32 AutoMutex
+\*********************************************************************************************/
+
+//////////////////////////////////////////
+// automutex.
+// create a mute in your driver with:
+// void *mutex = nullptr;
+//
+// then protect any function with
+// TasAutoMutex m(&mutex, "somename");
+// - mutex is automatically initialised if not already intialised.
+// - it will be automagically released when the function is over.
+// - the same thread can take multiple times (recursive).
+// - advanced options m.give() and m.take() allow you fine control within a function.
+// - if take=false at creat, it will not be initially taken.
+// - name is used in serial log of mutex deadlock.
+// - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
+// Nested class
+class TasAutoMutex {
+  SemaphoreHandle_t mutex;
+  bool taken;
+  int maxWait;
+  const char *name;
+public:
+  TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+  ~TasAutoMutex();
+  void give();
+  void take();
+  static void init(SemaphoreHandle_t* ptr);
+};
+
+#endif // ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+
+
+
 
     void CheckResetConditions();
 
@@ -435,7 +478,7 @@ class mSupport :
      * be sent. If a payload should sent, the formatted publish function is called.
      * */
     template<typename T>
-    void FunctionHandler_Call(T& class_ptr, uint16_t unique_id, functionhandler<T>* handler_ptr)
+    void YTask_Call(T& class_ptr, uint16_t unique_id, functionhandler<T>* handler_ptr)
     {
       if(handler_ptr == nullptr){
         return;

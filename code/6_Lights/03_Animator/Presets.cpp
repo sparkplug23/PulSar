@@ -137,7 +137,7 @@ void mAnimatorLight::doSaveState()
     DEBUG_LINE_HERE;
     #endif
 
-    size_t len = measureJson(*pCONT_mfile->fileDoc) + 1;
+    size_t len = measureJson(*tkr_mfile->fileDoc) + 1;
 
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
@@ -173,7 +173,7 @@ void mAnimatorLight::doSaveState()
       DEBUG_LINE_HERE;
       #endif
       
-      serializeJson(*pCONT_mfile->fileDoc, tmpRAMbuffer, len);
+      serializeJson(*tkr_mfile->fileDoc, tmpRAMbuffer, len);
   
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
@@ -187,7 +187,7 @@ void mAnimatorLight::doSaveState()
       DEBUG_LINE_HERE;
       #endif
 
-      pCONT_mfile->writeObjectToFileUsingId(filename, presetToSave, pCONT_mfile->fileDoc);
+      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->fileDoc);
   
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
@@ -201,7 +201,7 @@ void mAnimatorLight::doSaveState()
     DEBUG_LINE_HERE;
     #endif
 
-    pCONT_mfile->writeObjectToFileUsingId(filename, presetToSave, pCONT_mfile->fileDoc);
+    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->fileDoc);
   
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
@@ -210,7 +210,7 @@ void mAnimatorLight::doSaveState()
   }
   #endif
 
-  if (persist) pCONT_mfile->presetsModifiedTime = toki.second(); //unix time
+  if (persist) tkr_mfile->presetsModifiedTime = toki.second(); //unix time
   
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
@@ -222,7 +222,7 @@ void mAnimatorLight::doSaveState()
   DEBUG_LINE_HERE;
   #endif
 
-  pCONT_mfile->updateFSInfo();
+  tkr_mfile->updateFSInfo();
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
@@ -248,7 +248,7 @@ bool mAnimatorLight::getPresetName(byte index, String& name)
 
   if (!requestJSONBufferLock(9)) return false;
   bool presetExists = false;
-  if (pCONT_mfile->readObjectFromFileUsingId(getFileName(), index, &doc))
+  if (tkr_mfile->readObjectFromFileUsingId(getFileName(), index, &doc))
   {
     JsonObject fdo = doc.as<JsonObject>();
     if (fdo["n"]) {
@@ -287,7 +287,7 @@ void mAnimatorLight::initPresetsFile()
   ALOG_INF(PSTR("initPresetsFile() -- creating init file"));
 
   if (!f) {
-    pCONT_mfile->errorFlag = ERR_FS_GENERAL;
+    tkr_mfile->errorFlag = ERR_FS_GENERAL;
     return;
   }
   serializeJson(doc, f);
@@ -328,7 +328,7 @@ void mAnimatorLight::SubTask_Presets()
     return;
   }
 
-  if (presetToApply == 0 || pCONT_mfile->fileDoc)
+  if (presetToApply == 0 || tkr_mfile->fileDoc)
   {
     // ALOG_INF(PSTR("(presetToApply == 0 || fileDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
@@ -366,8 +366,8 @@ void mAnimatorLight::SubTask_Presets()
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
     DEBUG_LINE_HERE;
     #endif
-    deserializeJson(*pCONT_mfile->fileDoc,tmpRAMbuffer);
-    pCONT_mfile->errorFlag = ERR_NONE;
+    deserializeJson(*tkr_mfile->fileDoc,tmpRAMbuffer);
+    tkr_mfile->errorFlag = ERR_NONE;
   } 
   else
   #endif
@@ -377,7 +377,7 @@ void mAnimatorLight::SubTask_Presets()
     DEBUG_LINE_HERE;
     #endif
 
-    pCONT_mfile->errorFlag = pCONT_mfile->readObjectFromFileUsingId(filename, tmpPreset, pCONT_mfile->fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
+    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_mfile->fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
 
   } 
 
@@ -385,7 +385,7 @@ void mAnimatorLight::SubTask_Presets()
   DEBUG_LINE_HERE;
   #endif
 
-  fdo = pCONT_mfile->fileDoc->as<JsonObject>();
+  fdo = tkr_mfile->fileDoc->as<JsonObject>();
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
@@ -404,7 +404,7 @@ void mAnimatorLight::SubTask_Presets()
     D_DATA_BUFFER_SOFT_CLEAR();
 
     // Serialise from ArduinoJson into buffer for parser to load
-    serializeJson(*pCONT_mfile->fileDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
+    serializeJson(*tkr_mfile->fileDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
 
     LoggingLevels level = LOG_LEVEL_INFO;
     #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
@@ -455,7 +455,7 @@ void mAnimatorLight::SubTask_Presets()
 
   }
 
-  if (!pCONT_mfile->errorFlag && tmpPreset < 255 && changePreset)
+  if (!tkr_mfile->errorFlag && tmpPreset < 255 && changePreset)
   {
     presetCycCurr = currentPreset = tmpPreset;
   }
@@ -545,7 +545,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     {
       // we will save API call immediately (often causes presets.json corruption)
       presetToSave = 0;
-      if (index > 250 || !pCONT_mfile->fileDoc) return; // cannot save API calls to temporary preset (255)
+      if (index > 250 || !tkr_mfile->fileDoc) return; // cannot save API calls to temporary preset (255)
       sObj.remove("o");
       sObj.remove("v");
       sObj.remove("time");
@@ -563,19 +563,19 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
       DEBUG_LINE_HERE;
       #endif
 
-      pCONT_mfile->writeObjectToFileUsingId(getFileName(index<255), index, pCONT_mfile->fileDoc);
+      tkr_mfile->writeObjectToFileUsingId(getFileName(index<255), index, tkr_mfile->fileDoc);
     
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
       #endif
       
-      pCONT_mfile->presetsModifiedTime = toki.second(); //unix time
+      tkr_mfile->presetsModifiedTime = toki.second(); //unix time
   
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
       DEBUG_LINE_HERE;
       #endif
 
-      pCONT_mfile->updateFSInfo();
+      tkr_mfile->updateFSInfo();
 
     } 
     else 
@@ -603,9 +603,9 @@ void mAnimatorLight::deletePreset(byte index)
 {
 
   StaticJsonDocument<24> empty;
-  pCONT_mfile->writeObjectToFileUsingId(getFileName(), index, &empty);
-  pCONT_mfile->presetsModifiedTime = toki.second(); //unix time
-  pCONT_mfile->updateFSInfo();
+  tkr_mfile->writeObjectToFileUsingId(getFileName(), index, &empty);
+  tkr_mfile->presetsModifiedTime = toki.second(); //unix time
+  tkr_mfile->updateFSInfo();
 
 }
 

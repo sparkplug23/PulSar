@@ -68,6 +68,8 @@ ep=1000
 DEBUG_LEVEL
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+also, thought for later, maybe I want a "standby" mode for leds, ie a state I can activate that dims the lights, but getting back to the original means turning off standby mode, instead of requiring full brightness etc set again. Especially is standby is a complete different version (eg static and dim, vs bright and animated). Future idea. 
+
 ***************************************************************************************************************************************************/
 
 
@@ -1254,7 +1256,7 @@ SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) { SE
 //       for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
 //       {
 //         colour_out = SEGMENT.GetPixelColor(pixel);
-//         colour_out.Fade(2);// = RgbcctColor::ApplyBrightnesstoRgbcctColour(colour_out, pCONT_iLight->getBriRGB_Global());       
+//         colour_out.Fade(2);// = RgbcctColor::ApplyBrightnesstoRgbcctColour(colour_out, tkr_iLight->getBriRGB_Global());       
 //         SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour_out);
 //       }
 //     }
@@ -2674,7 +2676,7 @@ uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevatio
 //  #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   // pCONT_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   // tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //   uint8_t segment_index = SEGIDX;
 //   uint16_t start_pixel = SEGMENT.start;
@@ -2692,12 +2694,12 @@ uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevatio
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
-//   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
+//   bool sun_is_ascending = true;//tkr_solar->solar_position_testing.direction.is_ascending;
 //   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
 
 //   // delay(1000);
@@ -2927,24 +2929,24 @@ uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevatio
 // float sun_elevation = 0;
 // #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 //   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
 //   #else
-//   sun_elevation = (float)pCONT_solar->solar_position.elevation;
+//   sun_elevation = (float)tkr_solar->solar_position.elevation;
 //   #endif
 // #endif
 
 //   if(sun_elevation < -20)
 //   {
-//     SEGMENT.rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMax());      
+//     SEGMENT.rgbcct_controller->setCCT(tkr_iLight->get_CTRangeMax());      
 //   }else
 //   if(sun_elevation > 20)
 //   {
-//     SEGMENT.rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMin());      
+//     SEGMENT.rgbcct_controller->setCCT(tkr_iLight->get_CTRangeMin());      
 //   }else{
 //     // Convert elevation into percentage
 //     uint8_t elev_perc = map(sun_elevation,-20,20,0,100);
 //     // Convert percentage into cct
-//     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMax(),pCONT_iLight->get_CTRangeMin());
+//     uint16_t cct_val = mapvalue(elev_perc, 0,100, tkr_iLight->get_CTRangeMax(),tkr_iLight->get_CTRangeMin());
  
 //     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "cct_val=%d"),cct_val);
 //     // Set the colour temp
@@ -3040,7 +3042,7 @@ uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, 
 
   for (byte i = 0; i < leds_per_segment; i++) 
   {                                             // fill all leds inside current segment with color
-    // animation_colours[( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
+    // animation_colours[( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
 
     pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
 
@@ -3065,21 +3067,21 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
   // // in 12h mode and while in setup upper dots resemble AM, all dots resemble PM
   // byte startPos = LED_PER_DIGITS_STRIP;
   // if ( LED_BETWEEN_DIGITS_STRIPS % 2 == 0 ) {                                                                 // only SE/TE should have a even amount here (0/2 leds between digits)
-  //   animation_colours[startPos].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
-  //   if ( dots == 2 ) animation_colours[startPos + 1].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
+  //   animation_colours[startPos].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
+  //   if ( dots == 2 ) animation_colours[startPos + 1].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
   // } else {                                                                                                    // Regular and XL have 5 leds between digits
-  //   animation_colours[startPos].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
-  //   animation_colours[startPos + 1].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
+  //   animation_colours[startPos].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
+  //   animation_colours[startPos + 1].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
   //   if ( LED_DIGITS / 3 > 1 ) {
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
   //     }
   //   if ( dots == 2 ) {
-  //     animation_colours[startPos + 3].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
-  //     animation_colours[startPos + 4].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
+  //     animation_colours[startPos + 3].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
+  //     animation_colours[startPos + 4].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
   //     if ( LED_DIGITS / 3 > 1 ) {
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
   //     }
   //   }
   // }
@@ -3112,18 +3114,18 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
     }
   } 
   // else {                                                                                                    // Regular and XL have 5 leds between digits
-  //   animation_colours[startPos].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
-  //   animation_colours[startPos + 1].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
+  //   animation_colours[startPos].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
+  //   animation_colours[startPos + 1].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
   //   if ( LED_DIGITS / 3 > 1 ) {
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
   //     }
   //   if ( dots == 2 ) {
-  //     animation_colours[startPos + 3].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
-  //     animation_colours[startPos + 4].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);
+  //     animation_colours[startPos + 3].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
+  //     animation_colours[startPos + 4].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);
   //     if ( LED_DIGITS / 3 > 1 ) {
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, color);//colour;// = ColorFromPalette_WithLoad(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
   //     }
   //   }
   // }
@@ -3198,7 +3200,7 @@ static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_01[] PROGMEM = "C
  */
 uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
 //   // So colour region does not need to change each loop to prevent colour crushing
-//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+//   tkr_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 //   // Pick new colours
 //   //Display on all pixels
 //   UpdateDesiredColourFromPaletteSelected();
@@ -3246,7 +3248,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
 
   //     RgbcctColor colour = RgbcctColor();
 
-  //     animation_colours[i].DesiredColour = ColorFromPalette_WithLoad(pCONT_iLight->animation.palette_id, startColor + (colorOffset * i));      
+  //     animation_colours[i].DesiredColour = ColorFromPalette_WithLoad(tkr_iLight->animation.palette_id, startColor + (colorOffset * i));      
   //     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_width__used_in_effect_generate, RgbwColor(0,0,0,0));
 
 
@@ -9095,7 +9097,7 @@ static const char PM_EFFECT_CONFIG__WAVESINS[] PROGMEM = "Wavesins@!,Brightness 
 // #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
 //           Serial.print("@1");
 //           #endif 
-// pCONT_iLight->ShowInter face();
+// tkr_iLight->ShowInter face();
 
 
 
@@ -9575,10 +9577,10 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
 //      // #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 //       for(int i=0;i<STRIP_SIZE_MAX;i++)
 //       {
-//         // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global());
+//         // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
+//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global());
 
-// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global(), pCONT_iLight->getBriCCT_Global());
+// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global(), tkr_iLight->getBriCCT_Global());
 
 //         // }
 //       }
@@ -9701,10 +9703,10 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
 //       #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 //       for(int i=0;i<STRIP_SIZE_MAX;i++)
 //       {
-//         // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global());
+//         // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
+//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global());
 
-// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global(), pCONT_iLight->getBriCCT_Global());
+// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global(), tkr_iLight->getBriCCT_Global());
 
 //         // }
 //       }
@@ -9807,27 +9809,27 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // Limit ambilight to addressible type, else I will just use "scene"
 // uint16_t mAnimatorLight::init_Ambilight(){
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HUE_N2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(tkr_iLight->HUE_N2F(8),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(330),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(50));
 
 
 
 //   #ifdef   DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(pCONT_iLight->HUE_N2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(340),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(120),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(tkr_iLight->HUE_N2F(0),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(340),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(120),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 42;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 44; // 2 extra pixels on centre inlay
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 23;
@@ -9839,18 +9841,18 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 //   #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
 
 //   #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HUE_N2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(tkr_iLight->HUE_N2F(8),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(330),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(50));
 
 
 
@@ -9947,10 +9949,10 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 //      // #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 //       for(int i=0;i<STRIP_SIZE_MAX;i++)
 //       {
-//         // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global());
+//         // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
+//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global());
 
-// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global(), pCONT_iLight->getBriCCT_Global());
+// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global(), tkr_iLight->getBriCCT_Global());
 
 //         // }
 //       }
@@ -10073,10 +10075,10 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 //       #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 //       for(int i=0;i<STRIP_SIZE_MAX;i++)
 //       {
-//         // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global());
+//         // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
+//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global());
 
-// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global(), pCONT_iLight->getBriCCT_Global());
+// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global(), tkr_iLight->getBriCCT_Global());
 
 //         // }
 //       }
@@ -10109,7 +10111,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //     const char* scenectr = obj[D_NAME];
 // // //     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
 // // //       scene.name_id = tmp_id;
-// // //       pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
+// // //       tkr_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
 // // //       ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_SVALUE),D_NAME,GetSceneName(buffer));
 // // //       // Response_mP(S_JSON_COMMAND_SVALUE,D_NAME,GetSceneName(buffer));
 // // //       data_buffer.isserviced++;
@@ -10129,7 +10131,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[F("top")][F(D_HUE)].isNull()){ 
 // // //     uint16_t hue = obj[F("top")][F(D_HUE)];
 // // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_HUE,hue);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HUE_N2F(hue);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = tkr_iLight->HUE_N2F(hue);
 // // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     data_buffer.isserviced++;
@@ -10137,7 +10139,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[F("top")][F(D_SAT)].isNull()){ 
 // // //     uint8_t sat = obj[F("top")][F(D_SAT)];
 // // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_SAT,sat);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = tkr_iLight->SatN2F(sat);
 // // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
 // // //     data_buffer.isserviced++;
@@ -10145,9 +10147,9 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[F("top")][F(D_BRT)].isNull()){ 
 // // //     uint8_t brt = obj[F("top")][F(D_BRT)];
 // // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_BRT,brt);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,pCONT_iLight->animation.brightness);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,pCONT_iLight->animation.brightness);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = tkr_iLight->animation.brightness = tkr_iLight->BrtN2F(brt);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,tkr_iLight->animation.brightness);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,tkr_iLight->animation.brightness);
 // // //     data_buffer.isserviced++;
 // // //   }
 
@@ -10156,7 +10158,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[F("bottom")][F(D_HUE)].isNull()){ 
 // // //     uint16_t hue = obj[F("bottom")][F(D_HUE)];
 // // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_HUE,hue);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HUE_N2F(hue);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = tkr_iLight->HUE_N2F(hue);
 // // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     data_buffer.isserviced++;
@@ -10164,7 +10166,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[F("bottom")][F(D_SAT)].isNull()){ 
 // // //     uint8_t sat = obj[F("bottom")][F(D_SAT)];
 // // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_SAT,sat);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = tkr_iLight->SatN2F(sat);
 // // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
 // // //     data_buffer.isserviced++;
@@ -10172,9 +10174,9 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   if(!obj[F("bottom")][F(D_BRT)].isNull()){ 
 // // //     uint8_t brt = obj[F("bottom")][F(D_BRT)];
 // // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_BRT,brt);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,pCONT_iLight->animation.brightness);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,pCONT_iLight->animation.brightness);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = tkr_iLight->animation.brightness = tkr_iLight->BrtN2F(brt);
+// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,tkr_iLight->animation.brightness);
+// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,tkr_iLight->animation.brightness);
 // // //     data_buffer.isserviced++;
 // // //   }
 
@@ -10199,18 +10201,18 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 
 // // //   // TIME with different units
 // // //   if(!obj[D_TIME].isNull()){ //default to secs
-// // //     pCONT_iLight->animation.time_ms.val = obj["time"];
-// // //     pCONT_iLight->animation.time_ms.val *= 1000;
-// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
+// // //     tkr_iLight->animation.time_ms.val = obj["time"];
+// // //     tkr_iLight->animation.time_ms.val *= 1000;
+// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),tkr_iLight->animation.time_ms.val);  
 // // //   }else
 // // //   if(!obj[D_TIME].isNull()){
-// // //     pCONT_iLight->animation.time_ms.val = obj["time_secs"];
-// // //     pCONT_iLight->animation.time_ms.val *= 1000;
-// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
+// // //     tkr_iLight->animation.time_ms.val = obj["time_secs"];
+// // //     tkr_iLight->animation.time_ms.val *= 1000;
+// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),tkr_iLight->animation.time_ms.val);  
 // // //   }else
 // // //   if(!obj[D_TIME_MS].isNull()){
-// // //     pCONT_iLight->animation.time_ms.val = obj["time_ms"];
-// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.time_ms.val);  
+// // //     tkr_iLight->animation.time_ms.val = obj["time_ms"];
+// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),tkr_iLight->animation.time_ms.val);  
 // // //   }
 
   
@@ -10305,7 +10307,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 
 // // //     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
 // // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //     //pCONT_iLight->settings.light_size_count
+// // //     //tkr_iLight->settings.light_size_count
 // // //     //ambilightsettings.colour.found_idx
 // // //     for(int i=0;i<index;i++){
 // // //         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
@@ -10376,7 +10378,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //     }
 
 // // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //     //pCONT_iLight->settings.light_size_count
+// // //     //tkr_iLight->settings.light_size_count
 // // //     //ambilightsettings.colour.found_idx
 // // //     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
 // // //     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
@@ -10460,7 +10462,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //     }
 
 // // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //     //pCONT_iLight->settings.light_size_count
+// // //     //tkr_iLight->settings.light_size_count
 // // //     //ambilightsettings.colour.found_idx
 // // //     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
 // // //     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
@@ -10495,7 +10497,7 @@ static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 // // //   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
 // // //   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
 
-// // //   pCONT_iLight->animation.mode_id = MODE_AMBILIGHT_ID;
+// // //   tkr_iLight->animation.mode_id = MODE_AMBILIGHT_ID;
 // // //   fForcePanelUpdate = true;
 
 // //   // return 0;
@@ -10550,13 +10552,13 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
   bool drawingLit = true;
   uint16_t cnt = 0;
 
-  uint8_t buscount = pCONT_iLight->bus_manager->getNumBusses();
+  uint8_t buscount = tkr_iLight->bus_manager->getNumBusses();
 
   for(uint8_t bus_i = 0; bus_i < buscount; bus_i++)
   {
 
-    uint16_t start = pCONT_iLight->bus_manager->getBus(bus_i)->getStart();
-    uint16_t length = pCONT_iLight->bus_manager->getBus(bus_i)->getLength();
+    uint16_t start = tkr_iLight->bus_manager->getBus(bus_i)->getStart();
+    uint16_t length = tkr_iLight->bus_manager->getBus(bus_i)->getLength();
 
     ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus %d/%d (%d/%d\t%d)"), bus_i, buscount, start, length, start + length);
 
@@ -10664,7 +10666,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
   
   for (uint32_t i = SEGMENT.params_user[0]; i < SEGMENT.params_user[1]; i++)
   {
-    SEGMENT.setPixelColor(i,SEGCOLOR_U32(1));
+    // SEGMENT.setPixelColor(i,SEGCOLOR_U32(1));
   }
     
   return FRAMETIME;

@@ -230,8 +230,6 @@ class mHVAC :
     void HandleTimerConfiguration(void);
     void HandleProgramTimerConfiguration();
 
-    void Every_Second();
-
     int mapHeatingTempToHueColour(int val);
     int mapHeatingTempToBrightness(int val);
     
@@ -267,8 +265,6 @@ class mHVAC :
     const char* GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen);
     const char* GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen);
     const char* GetDeviceNameUpperCaseCtrbyID(uint8_t device_id, char* buffer, uint8_t buflen);
-
-    void SetHighestImportance(uint8_t* importanceset, int8_t thisvalue);
 
     void SetHeater(uint8_t device_name, uint8_t state);
 
@@ -309,24 +305,24 @@ class mHVAC :
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = false);
 
 
-    void FunctionHandler_Init();
-    void FunctionHandler_Loop();
+    void YTask_Init();
+    void YTask_Loop();
   
 
     struct functionhandler<mHVAC> functionhandler_status_message;
-    void FunctionHandler_Program_Status();
+    void YTask_Program_Status();
     struct functionhandler<mHVAC> functionhandler_hvac_profiles;
-    void FunctionHandler_HVAC_Profiles(void);
+    void YTask_HVAC_Profiles(void);
     struct functionhandler<mHVAC> functionhandler_relay_status;
-    void FunctionHandler_Relay_Status(void);
+    void YTask_Relay_Status(void);
     struct functionhandler<mHVAC> functionhandler_programs_timers;
-    void FunctionHandler_Programs_Timers(void);
+    void YTask_Programs_Timers(void);
     #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
     struct functionhandler<mHVAC> functionhandler_programs_temps;
-    void FunctionHandler_Programs_Temps(void);
+    void YTask_Programs_Temps(void);
     #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
     struct functionhandler<mHVAC> functionhandler_update_sensors;
-    void FunctionHandler_Update_Sensors(void);
+    void YTask_Update_Sensors(void);
 
     std::vector<struct functionhandler<mHVAC>*> functionhandler_list;
 
@@ -354,9 +350,6 @@ class mHVAC :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();    
-    void MQTTHandler_Sender();
     
     std::vector<struct handler<mHVAC>*> mqtthandler_list;
     struct handler<mHVAC> mqtthandler_settings;

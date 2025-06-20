@@ -75,13 +75,13 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif // USE_MODULE_NETWORK_MQTT
   } // end switch
@@ -121,7 +121,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
     return;
   }
 
-  pCONT_sup->ShowSource(source);
+  tkr_sup->ShowSource(source);
   tkr_set->runtime.last_source = source;
 
   if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {  // All on and stay on
@@ -399,7 +399,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
 // state 16 = POWER_SHOW_STATE = Show power state
 
-  pCONT_sup->ShowSource(source);
+  tkr_sup->ShowSource(source);
 
 //  if (1049 == LANGUAGE_LCID) { return; }
 
@@ -449,7 +449,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     if ((rt.bitpacked.blink_mask & mask)) {
       rt.bitpacked.blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
       #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
-      pCONT_mqtt->MqttPublishPowerBlinkState(device);
+      tkr_mqtt->MqttPublishPowerBlinkState(device);
       #endif
     }
 
@@ -524,7 +524,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     tkr_set->runtime.blink_counter = ((!tkr_set->Settings.blinkcount) ? 64000 : (tkr_set->Settings.blinkcount *2)) +1;
     rt.bitpacked.blink_mask |= mask;    // Set device mask
     #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
-    pCONT_mqtt->MqttPublishPowerBlinkState(device);
+    tkr_mqtt->MqttPublishPowerBlinkState(device);
     #endif
     return;
   }
@@ -532,7 +532,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     bool flag = (rt.bitpacked.blink_mask & mask);
     rt.bitpacked.blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
     #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
-    pCONT_mqtt->MqttPublishPowerBlinkState(device);
+    tkr_mqtt->MqttPublishPowerBlinkState(device);
     #endif
     if (flag) {
       ExecuteCommandPower(device, (rt.bitpacked.blink_powersave >> (device -1))&1, SRC_IGNORE);  // Restore state
@@ -565,7 +565,7 @@ void mRelays::StopAllPowerBlink(void)
     if (rt.bitpacked.blink_mask & mask) {
       rt.bitpacked.blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
       #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
-      pCONT_mqtt->MqttPublishPowerBlinkState(i);
+      tkr_mqtt->MqttPublishPowerBlinkState(i);
       #endif
       ExecuteCommandPower(i, (rt.bitpacked.blink_powersave >> (i -1))&1, SRC_IGNORE);  // Restore state
     }
@@ -600,13 +600,13 @@ void mRelays::StopAllPowerBlink(void)
 void mRelays::Save_Module()
 {
   ALOG_INF(PSTR(D_LOG_RELAYS "Save_Module"));
-  pCONT_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 void mRelays::Load_Module(bool erase)
 {
   ALOG_INF(PSTR(D_LOG_RELAYS "Load_Module"));
-  pCONT_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
+  tkr_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
@@ -978,10 +978,10 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj[PM_POWER_STATE]){
     if(jtok.isStr()){
-      state = pCONT_sup->GetStateNumber(jtok.getStr());
+      state = tkr_sup->GetStateNumber(jtok.getStr());
     }else 
     if(jtok.isNum()){
-      state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+      state  = jtok.getInt();//tkr_sup->GetStateNumber(jtok.getInt());
     }
 
     /**
@@ -1417,7 +1417,7 @@ void mRelays::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1428,7 +1428,7 @@ void mRelays::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
@@ -1439,7 +1439,7 @@ void mRelays::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
@@ -1450,7 +1450,7 @@ void mRelays::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;

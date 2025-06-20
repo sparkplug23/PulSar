@@ -56,16 +56,16 @@
  *                          _____________________
  *                    3V3  |3V3     |USB|     VIN|
  *                    GND  |GND               GND| 
- *                 =BUZZER |15 (fL)            13|
+ *                 =BUZZER |15 (fL)            13| RADAR_OUT_MOT4
  *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
  *              =SONIC RX1 |4             (fH) 14|
  *              =RADAR TX2 |RX2/17             27| 
  *              =RADAR RX2 |TX2/16             26| TOF1EN
- *                         |5  (fL)            25| TOF1INT
- *                         |18                 33| TOF0EN
+ *         PIR_SMALL_MOT2  |5  (fL)            25| TOF1INT
+ *                    aud  |18                 33| TOF0EN
  *              LM386 SPKR |19                 32| TOF0INT
- *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ 
- *                         |RX0         (fL) * 34| PIR_LARGE
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ_MOT3
+ *                         |RX0         (fL) * 34| PIR_LARGE_MOT1
  *                         |TX0              ' VN| 
  *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
  *                     NEO |23               ' EN| 
@@ -117,7 +117,7 @@
  // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
 //new feature to only show logs for a specific module when developing code
-  #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
+  // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
   // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE_ARRAY [1, 2]
 
 
@@ -161,22 +161,24 @@
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
- 
-//  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
-#define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
+
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE        // PIR1
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL        // PIR2
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ    // PIR3
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ      // PIR4
 
 
 // #define ENABLE_TEMPLATE_SECTION__DRIVERS__AUDIO_SPEAKER
 // #define ENABLE_TEMPLATE_SECTION__DRIVERS__AUDIO_BUZZER
 
-// #define ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED
+// #define ENABLE_TEMPLATE_SECTION__LIGHTS__NEOPIXEL
+
+#define ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED
 
 //  // #define ENABLE_TEMPLATE_SECTION__LIGHTING
 //  #define ENABLE_TEMPLATE_SECTION__ENERGY
@@ -192,35 +194,31 @@
    #define USE_MODULE_SENSORS_PIR
     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
  #endif
- #define USE_MODULE_SENSORS_BUTTONS
-   #define ENABLE_DEVFATURE_BUTTON__REMOVE_MQTT_BUTTONS
-   #define SOC_TOUCH_VERSION_1
-
+ #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  #define USE_MODULE_SENSORS_BUTTONS
+    #define ENABLE_DEVFATURE_BUTTON__REMOVE_MQTT_BUTTONS
+    #define SOC_TOUCH_VERSION_1
+  #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
-   #define USE_MODULE_SENSORS_SR04
-   #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
-   #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    #define USE_MODULE_SENSORS_SR04
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
   #endif
-
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
-  #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+    #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
+    #define USE_MODULE_SENSORS__TOF_VL53L0X
+    #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
+    #define VL53L0X_LONG_RANGE
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+    #define USE_MODULE_SENSORS__TOF_VL53L1X
+    #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
+    // #define USE_SENSORS_TOFVL_AVERAGING_DATA
   #endif
 
-
- #define USE_MODULE_DRIVERS_LEDS  
-
- #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
-  #define USE_MODULE_SENSORS__TOF_VL53L0X
-  #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
-  #define VL53L0X_LONG_RANGE
- #endif
- #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
-  #define USE_MODULE_SENSORS__TOF_VL53L1X
-  #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
-  // #define USE_SENSORS_TOFVL_AVERAGING_DATA
- #endif
-
- #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+//  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
 
 //  #define ENABLE_DEVFEATURE_SENSORS__TOF_BOTH_VL53_ACTIVE_ON_SHARED_ADD29
 
@@ -228,44 +226,48 @@
   * SECTION: Lighting Configs
  ************************************/  
 
- #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025_NO_GPIO
+  #ifdef ENABLE_TEMPLATE_SECTION__LIGHTS__NEOPIXEL
 
- #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+    #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025_NO_GPIO
 
- 
- #define USE_LIGHTING_TEMPLATE
- DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
- R"=====(
- {
-   "BusConfig":[
-     {
-       "Pin":23,
-       "ColourOrder":"GRBW",
-       "BusType":"SK6812_RGBW",
-       "Start":0,
-       "Length":9
-     }
-   ],
-   "Segment0": {
-     "Name":"Door Edge",
-     "PixelRange": [
-       0,
-       9
-     ],
-     "ColourPalette":"Rainbow 16",
-     "Effects": {
-       "Function":"Static",
-       "Speed":255,
-       "Intensity":0,
-       "Grouping":1,
-       "RateMs": 1000
-     },
-     "BrightnessRGB": 100,
-     "BrightnessCCT": 100
-   }
-   "BrightnessRGB": 5
- }
- )=====";
+    #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":23,
+          "ColourOrder":"GRBW",
+          "BusType":"SK6812_RGBW",
+          "Start":0,
+          "Length":9
+        }
+      ],
+      "Segment0": {
+        "Name":"Door Edge",
+        "PixelRange": [
+          0,
+          9
+        ],
+        "ColourPalette":"Rainbow 16",
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":0,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100
+      }
+      "BrightnessRGB": 5
+    }
+    )=====";
+
+ #endif
 
   /***********************************
    * SECTION: Display Configs
@@ -296,16 +298,11 @@
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"          
-    //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-    //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
      #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
     // "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," // Flipped
     // "\"21\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," // Flipped      
-     #endif
-     #ifdef USE_MODULE_SENSORS_PIR
-    //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
      #endif
      #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
      "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
@@ -320,31 +317,25 @@
      "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
      "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
      #endif 
-     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-     "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
-     #endif
-     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-     "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE //c
+     "\"34\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-     "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+     "\"5\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\"," //COR
+     #endif
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
+     "\"35\":\""  D_GPIO_FUNCTION_PIR_3_CTR "\","
+     #endif
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+     "\"13\":\""  D_GPIO_FUNCTION_PIR_4_CTR "\","
      #endif
      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
      "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
      "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
      #endif
-    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
-    //  #endif
      #ifdef USE_MODULE_SENSORS_BUTTONS
-    //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-    //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-    //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+     "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\""
      #endif
-     
-    //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-    //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -497,6 +488,8 @@
   // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
   // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE_ARRAY [1, 2]
 
+
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
  ///////////////////////////////////////////// Module Logs
  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  

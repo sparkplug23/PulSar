@@ -83,6 +83,8 @@
 #define D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR     "camera_arduino"
 #define D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR     "camera_tas"
 #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR "camera_multiclient"
+#define D_MODULE_DRIVERS__CAMERA_TAS25_CTR     "camera_tas25"
+#define D_MODULE_DRIVERS__CAMERA_CTR              "camera"
 #define D_MODULE_DRIVERS__TINYGSM__CTR            "tinygsm"
 #define D_MODULE__DRIVERS_MAVLINK_DECODER__CTR    "mavlink"
 #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_telemetry"
@@ -214,8 +216,8 @@
 #define D_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR      "SETTINGS_OVERWRITE_SAVED_TO_DEFAULT"
 #define D_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR         "SETTINGS_LOAD_VALUES_INTO_MODULE"
 #define D_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR         "SETTINGS_SAVE_VALUES_FROM_MODULE"
-#define D_TASK_FUNCTION_LAMBDA_INIT_CTR                     "FUNCTION_LAMBDA_INIT"
-#define D_TASK_FUNCTION_LAMBDA_LOOP_CTR                     "FUNCTION_LAMBDA_LOOP"
+#define D_YTASK_INIT_CTR                     "FUNCTION_LAMBDA_INIT"
+#define D_YTASK_LOOP_CTR                     "FUNCTION_LAMBDA_LOOP"
 #define D_TASK_COMMAND_CTR                                  "COMMAND"
 #define D_TASK_COMMAND_SENSOR_CTR                           "COMMAND_SENSOR"
 #define D_TASK_COMMAND_DRIVER_CTR                           "COMMAND_DRIVER"
@@ -968,9 +970,11 @@
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"
 #define D_GPIO_FUNCTION_PIR_2_CTR         "PIR 2"
 #define D_GPIO_FUNCTION_PIR_3_CTR         "PIR 3"
+#define D_GPIO_FUNCTION_PIR_4_CTR         "PIR 4"
 #define D_GPIO_FUNCTION_PIR_1_INV_CTR     "PIR 1 Inv"
 #define D_GPIO_FUNCTION_PIR_2_INV_CTR     "PIR 2 Inv"
 #define D_GPIO_FUNCTION_PIR_3_INV_CTR     "PIR 3 Inv"
+#define D_GPIO_FUNCTION_PIR_4_INV_CTR     "PIR 4 Inv"
 
 #define D_GPIO_FUNCTION_DHT11_CTR         "DHT11"
 #define D_GPIO_FUNCTION_DHT11_1_CTR         "DHT11_1"
@@ -1209,6 +1213,9 @@
 #define D_GPIO_FUNCTION_ADE7953_IRQ_CTR "ADE7953_IRQ"
 #define D_GPIO_FUNCTION_ANALOG_CTR "Analog"
 
+#define D_GPIO_FUNCTION_SHELLY2_SHD_BOOT0_CTR "SHD Boot"
+#define D_GPIO_FUNCTION_SHELLY2_SHD_RESET_INV_CTR "SHD Reset"
+
 
 #define D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR "HWSerial1 RingBuffer Rx"
 #define D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR "HWSerial1 RingBuffer Tx"
@@ -1419,6 +1426,7 @@
   #define D_LOG_OTHER "OTH: "        // Other
   #define D_LOG_OTA "OTA: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
+  #define D_LOG_PINS "PIN: "       // Settings
   #define D_LOG_PIR "PIR: "         // PIR
   #define D_LOG_PIXEL // Neopixels
   #define D_LOG_PUBSUB "PSB: "         // PubSub
@@ -2265,6 +2273,10 @@
   #define            D_MODULE_NAME_SONOFF_4CHPRO_CTR       "Sonoff 4CHPRO"
   #define            D_MODULE_NAME_SONOFF_IFAN03_CTR       "Sonoff IFAN03"
 
+  #define D_MODULE_NAME__ESP32_DEVKIT__CTR "ESP32-DevKit"
+  #define D_MODULE_NAME_CAM_AITHINKER_CTR          "Webcam AIThinker"
+  #define D__MODULE_TEMPLATE__CAMERA_FREENOVE_WROOVER__CTR          "Webcam FreenoveWroover"
+  #define D__MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE__CTR "Webcam SeedXiao"
 
 /********************************************************************************************/
 

@@ -233,7 +233,7 @@ public:
 
       if(state == RUNNING)
       {
-        pCONT_gps->rt.valid_timeout_seconds = 3;
+        tkr_gps->rt.valid_timeout_seconds = 3;
       }
 
       return (state == RUNNING);
@@ -509,7 +509,7 @@ void mGPS_Serial::ReadGPSStream()
 
 
 //       // BufferWriterI->Clear();
-//       uint16_t bytes_to_read = pCONT_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+//       uint16_t bytes_to_read = tkr_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
 //       // if(strlen(BufferWriterI->GetPtr())==0){
 //       //   ALOG_TST(PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
 //       // }
@@ -556,7 +556,7 @@ void mGPS_Serial::ReadGPSStream()
 //           my_gps_vals.dateTime_ms = fix_valid.dateTime_ms();
 
 
-//           pCONT_uart->special_json_part_of_gps_buflen = sprintf( pCONT_uart->special_json_part_of_gps_buffer,
+//           tkr_uart->special_json_part_of_gps_buflen = sprintf( tkr_uart->special_json_part_of_gps_buffer,
 //             "B]],\"G\":[%d,%d,%d,%d,%d,%d,%d,%d]}@", 
 //             my_gps_vals.lat,
 //             my_gps_vals.lon,
@@ -930,7 +930,7 @@ void mGPS_Serial::Init(void)
 
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
   // Finsihed with manual control, start ISRs
-  pCONT_uart->flag_init_buffers_and_start_isrs = true;
+  tkr_uart->flag_init_buffers_and_start_isrs = true;
   #endif
 
   DEBUG_LINE_HERE;
@@ -2326,7 +2326,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -2337,7 +2337,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR;
@@ -2348,7 +2348,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR;
@@ -2359,7 +2359,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL_CTR;
@@ -2370,7 +2370,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
@@ -2382,7 +2382,7 @@ void mGPS_Serial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR;
@@ -2408,9 +2408,9 @@ void mGPS_Serial::MQTTHandler_Rate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   // }
 }
 
@@ -2420,7 +2420,7 @@ void mGPS_Serial::MQTTHandler_Rate()
 void mGPS_Serial::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

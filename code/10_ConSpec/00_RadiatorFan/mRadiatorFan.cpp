@@ -68,7 +68,7 @@ void mRadiatorFan::Task_UseTemperatureToControlRelay()
    * */
   DeviceAddress known_address = {40,159,147,2,0,0,0,117};
 
-  state.temperature_current = pCONT_db18->sensor_group[0].dallas->getTempC(known_address);
+  state.temperature_current = tkr_db18->sensor_group[0].dallas->getTempC(known_address);
 
   ALOG_INF(PSTR("temperature = %d"), state.temperature_current);
 
@@ -113,11 +113,11 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appendin
       JBI->Object_Start("InternalSensors");
         for(int sensor_id=0;sensor_id<3;sensor_id++)
         { 
-          if(pCONT_db18->sensor_vector.size())
+          if(tkr_db18->sensor_vector.size())
           {
-            // JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
-            JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
-              JBI->Add(D_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
+            // JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,tkr_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
+            JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( tkr_db18->GetModuleUniqueID() ,tkr_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
+              JBI->Add(D_TEMPERATURE, tkr_db18->sensor_vector[sensor_id].reading.val);
             JBI->Object_End();  
           }
         }
@@ -206,9 +206,9 @@ void mRadiatorFan::MQTTHandler_Rate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   }
 }
 
@@ -218,7 +218,7 @@ void mRadiatorFan::MQTTHandler_Rate()
 void mRadiatorFan::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

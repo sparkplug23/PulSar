@@ -1025,7 +1025,7 @@ bool mAnimatorLight::handleSet(AsyncWebServerRequest *request, const String& req
   if (pos > 0) doAdvancePlaylist = true;
   
   //set brightness
-  updateVal(req.c_str(), "&A=", &pCONT_iLight->_briRGB_Global);
+  updateVal(req.c_str(), "&A=", &tkr_iLight->_briRGB_Global);
 
   bool col0Changed = false, col1Changed = false, col2Changed = false;
   //set colors
@@ -1197,8 +1197,8 @@ bool mAnimatorLight::handleSet(AsyncWebServerRequest *request, const String& req
     nightlightActive = false; //always disable nightlight when toggling
     switch (getNumVal(&req, pos))
     {
-      case 0: if (pCONT_iLight->_briRGB_Global != 0){briLast = pCONT_iLight->_briRGB_Global; pCONT_iLight->_briRGB_Global = 0;} break; //off, only if it was previously on
-      case 1: if (pCONT_iLight->_briRGB_Global == 0) pCONT_iLight->_briRGB_Global = briLast; break; //on, only if it was previously off
+      case 0: if (tkr_iLight->_briRGB_Global != 0){briLast = tkr_iLight->_briRGB_Global; tkr_iLight->_briRGB_Global = 0;} break; //off, only if it was previously on
+      case 1: if (tkr_iLight->_briRGB_Global == 0) tkr_iLight->_briRGB_Global = briLast; break; //on, only if it was previously off
       default: toggleOnOff(); //toggle
     }
   }

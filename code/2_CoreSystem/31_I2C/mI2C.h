@@ -24,7 +24,7 @@ class mI2C :
     static constexpr const char* PM_MODULE_CORE__I2C__CTR = D_MODULE_CORE__I2C__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__I2C__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__I2C__ID; }
-    ~mI2C() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mI2C() {          }
     
     struct ClassState
     {

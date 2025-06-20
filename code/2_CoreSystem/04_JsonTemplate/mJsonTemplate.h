@@ -24,7 +24,7 @@ class mJsonTemplate :
     static constexpr const char* PM_MODULE_CORE__TEMPLATE_LOADING__CTR = D_MODULE_CORE__TEMPLATE_LOADING__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__TEMPLATE_LOADING__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_JSON_TEMPLATE_ID; }
-    ~mJsonTemplate() {      Serial.printf("%S\r\n", GetModuleName());    }
+    ~mJsonTemplate() {          }
     
     struct ClassState
     {

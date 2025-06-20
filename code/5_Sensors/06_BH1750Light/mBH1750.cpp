@@ -69,13 +69,13 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -204,17 +204,18 @@ bool mBH1750::Get_SensorReading(uint8_t sensor_index)
     return false;
   }
 
-  float level = (tkr_i2c->wire->read() << 8) | tkr_i2c->wire->read();
+  uint16_t level = (tkr_i2c->wire->read() << 8) | tkr_i2c->wire->read();
   float illuminance = level;
-  Serial.println(level);
+  
   illuminance /= (1.2 * (69 / (float)device_data[sensor_index].mtreg));
   if (1 == Get_Resolution_Mode(sensor_index)) {
     illuminance /= 2;
   }
-  device_data[sensor_index].level = level*1000;
-  device_data[sensor_index].illuminance = illuminance*1000;
+  device_data[sensor_index].level = level;
+  device_data[sensor_index].illuminance = illuminance;
 
-  ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d"), level, illuminance);
+  // ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d (%d.%d)"), level, (int)illuminance, FLOAT_N(illuminance), FLOAT_D(illuminance) );
+  ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d.%d"), level, FLOAT_N(illuminance), FLOAT_D(illuminance) );
 
   device_data[sensor_index].valid = SENSOR_MAX_MISS;
 
@@ -234,7 +235,7 @@ void mBH1750::ReadSensor(void)
     {
       ALOG_ERR( PSTR(D_LOG_BH1750 "Failed Read") );
     }else{
-      ALOG_INF(PSTR(D_LOG_BH1750 "Read Add %02X"), device_data[i].address);
+      ALOG_DBM(PSTR(D_LOG_BH1750 "Read Add %02X"), device_data[i].address);
     }
   }
 
@@ -339,7 +340,7 @@ void mBH1750::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetConfigPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -350,7 +351,7 @@ void mBH1750::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetTelePeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -361,7 +362,7 @@ void mBH1750::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = pCONT_mqtt->GetIfChangedPeriod(); 
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;

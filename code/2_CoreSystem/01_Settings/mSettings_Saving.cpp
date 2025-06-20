@@ -136,7 +136,7 @@ void mSettings::SettingsLoad(void)
      * Load as temporary settings, to enable testing of cfg_size 
      **/
     SETTINGS settings_temp_load;
-    if (pCONT_mfile->TfsLoadFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (uint8_t*)&settings_temp_load, sizeof(SETTINGS))) 
+    if (tkr_mfile->TfsLoadFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (uint8_t*)&settings_temp_load, sizeof(SETTINGS))) 
     {
       DEBUG_LINE_HERE
       if(settings_temp_load.cfg_size == sizeof(SETTINGS))
@@ -182,7 +182,7 @@ void mSettings::SettingsLoad(void)
 uint32_t mSettings::SettingsRead(void *data, size_t size) 
 {
   #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
-  if (pCONT_mfile->TfsLoadFile(TASM_FILE_SETTINGS, (uint8_t*)data, size)) 
+  if (tkr_mfile->TfsLoadFile(TASM_FILE_SETTINGS, (uint8_t*)data, size)) 
   {
     return 2;
   }
@@ -204,7 +204,7 @@ void mSettings::SettingsWrite(const void *pSettings, unsigned nSettingsLen)
   #endif
 
   #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
-  pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)pSettings, nSettingsLen);
+  tkr_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)pSettings, nSettingsLen);
   #endif
   
   DEBUG_LINE_HERE
@@ -267,7 +267,7 @@ void mSettings::SettingsSave(uint8_t rotate)
 
     #ifdef ESP8266
     #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
-      pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, &Settings, sizeof(SETTINGS));
+      tkr_mfile->TfsSaveFile(TASM_FILE_SETTINGS, &Settings, sizeof(SETTINGS));
     #endif  // ENABLE_DEVFEATURE_SETTINGS__TFS
       if (ESP.flashEraseSector(settings_location)) {
         ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SETTINGS));
@@ -398,7 +398,7 @@ void mSettings::SettingsErase(uint8_t type)
       r2 = NvmErase("main");
       #endif
       #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
-      r3 = pCONT_mfile->TfsDeleteFile(TASM_FILE_SETTINGS);
+      r3 = tkr_mfile->TfsDeleteFile(TASM_FILE_SETTINGS);
       #endif
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " Tasmota data (%d,%d,%d)"), r1, r2, r3);
       break;
@@ -418,7 +418,7 @@ void mSettings::SettingsErase(uint8_t type)
       #endif
       //      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " Tasmota (%d,%d) and PHY data (%d)"), r1, r2, r3);
       #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
-      r3 = pCONT_mfile->TfsDeleteFile(TASM_FILE_SETTINGS);
+      r3 = tkr_mfile->TfsDeleteFile(TASM_FILE_SETTINGS);
       #endif
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " Tasmota data (%d,%d,%d)"), r1, r2, r3);
       break;

@@ -11,7 +11,7 @@ extern "C" {
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
   #ifdef ENABLE_DEVFEATURE_NETWORK__BLOCK_CONNECT_PUSH_BACKOFF_LONG_AS_TEMP_SOLUTION_TO_NO_WIFI
   return 0;
   #endif
@@ -91,10 +91,10 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
           pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
           DEBUG_LINE_HERE3
           
-          pCONT_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+          tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
           DEBUG_LINE_HERE3
 
-          pCONT_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+          tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
           DEBUG_LINE_HERE3
           
           // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
@@ -103,10 +103,10 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
           DEBUG_LINE_HERE3
           char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
           DEBUG_LINE_HERE3
-          pCONT_mqtt->brokers.back()->SetClientName(client_name);
+          tkr_mqtt->brokers.back()->SetClientName(client_name);
           DEBUG_LINE_HERE3
 
-          pCONT_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
+          tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
           DEBUG_LINE_HERE3
 
         #endif // USE_MODULE_NETWORK_MQTT
@@ -117,7 +117,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
   return FUNCTION_RESULT_UNKNOWN_ID;
 
 
@@ -384,6 +384,11 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
     
     WiFi.begin(tkr_set->SettingsText(SET_STASSID1 + tkr_set->Settings.sta_active), tkr_set->SettingsText(SET_STAPWD1 + tkr_set->Settings.sta_active));
   }
+
+  #ifdef ENABLE_FEATURE_WIFI__SET_TXPOWER
+  WiFi.setTxPower(WIFI_POWER_8_5dBm);
+  ALOG_INF(PSTR(D_LOG_WIFI "TxPower=%d"), WiFi.getTxPower()); // to fix ESP32C3 antenna issues
+  #endif
   
   #ifdef ESP8266
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -1749,7 +1754,7 @@ void mWiFi::EspRestart(void)
   // delay(100);                 // Allow time for message xfer - disabled v6.1.0b
   // //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
   // WifiDisconnect();
-  // //pCONT_sup->CrashDumpClear();
+  // //tkr_sup->CrashDumpClear();
   // ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
   // #ifdef ESP8266
   //   ESP.reset();

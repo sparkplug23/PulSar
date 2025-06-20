@@ -84,7 +84,7 @@ DEBUG_LINE_HERE_MILLIS
 //   ALOG_INF(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
 //   ALOG_INF(PSTR("status: %d"), dt.connection[idx].status);
 
-//   pCONT_tel->mqtthandler_mqtt.flags.SendNow = true;
+//   tkr_tel->mqtthandler_mqtt.flags.SendNow = true;
 
 
 
@@ -203,7 +203,7 @@ void mMQTTManager::Default_Module__Connection_WiFi()
 
   uint8_t idx = broker_index_next; //size with index from 0, will already give next slot
 
-  // pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID, pCONT_mqtt->dt.connection[idx].client, pCONT_mqtt->dt.connection[idx].prefixtopic);
+  // tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID, tkr_mqtt->dt.connection[idx].client, tkr_mqtt->dt.connection[idx].prefixtopic);
       
 
   // MQTTConnection* con = brokers[idx];
@@ -239,13 +239,13 @@ void mMQTTManager::Default_Module__Connection_WiFi()
 void mMQTTManager::Save_Module()
 {
   ALOG_INF(PSTR(D_LOG_MQTT "Save_Module"));
-  pCONT_mfile->ByteFile_Save("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
+  tkr_mfile->ByteFile_Save("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
 void mMQTTManager::Load_Module(bool erase)
 {
   ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
-  // pCONT_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
+  // tkr_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
@@ -579,21 +579,28 @@ void mMQTTManager::CallMQTTSenders()
  */
 boolean mMQTTManager::Publish(const char* topic, const char* payload, boolean retained)
 {
-  
+  DEBUG_LINE_HERE3
+  Serial.println("mMQTTManager::Publish"); Serial.flush();
+  DEBUG_LINE_HERE3
   if(brokers.size())
-      // if(brokers_active)   
   {
+    DEBUG_LINE_HERE3
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
+      DEBUG_LINE_HERE3
       for (auto& broker : brokers)
       {
+        DEBUG_LINE_HERE3
         if(broker->pubsub->connected())
         {
+          DEBUG_LINE_HERE3
           return broker->publish_device(topic,payload,retained);
         }
+        DEBUG_LINE_HERE3
       }
     }
   }
+  DEBUG_LINE_HERE3
 
 }
 

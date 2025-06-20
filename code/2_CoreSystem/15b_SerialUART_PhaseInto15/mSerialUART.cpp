@@ -43,7 +43,7 @@
 
 // //       #ifndef USE_MODULE_SENSORS_GPS_SERIAL
 // //         // Finsihed with manual control, start ISRs
-// //         pCONT_uart->flag_init_buffers_and_start_isrs = true;
+// //         tkr_uart->flag_init_buffers_and_start_isrs = true;
 // //       #endif
     
 // //      if(flag_init_buffers_and_start_isrs && !settings.fEnableModule)
@@ -58,13 +58,13 @@
 // // //temp dump data so it doesnt fill
 
 // //       size_t rss_data_read_size = 0;
-// //       char *rss_data_read = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &rss_data_read_size, pdMS_TO_TICKS(1000));
+// //       char *rss_data_read = (char *)xRingbufferReceive(tkr_uart->settings.uart2.ringbuffer_handle, &rss_data_read_size, pdMS_TO_TICKS(1000));
 // //       if (rss_data_read != NULL) { // Read from buffer
 // //         //memcpy(isr_rss_buffer,rss_data_read,rss_data_read_size);
 // //         // for(int i=0;i<rss_data_read_size;i++){
 // //         //   BufferWriterI->Append_P(PSTR("%d%s"), rss_data_read[i], i<rss_data_read_size-1? ",": ""); 
 // //         // }
-// //         vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)rss_data_read); // Free memory
+// //         vRingbufferReturnItem(tkr_uart->settings.uart2.ringbuffer_handle, (void *)rss_data_read); // Free memory
 // //       }
 // //       #endif // USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
 
@@ -89,7 +89,7 @@
 //    case TASK_LOOP:{
 
 //       // BufferWriterI->Clear();
-//       // uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(2, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+//       // uint16_t bytes_in_line = tkr_uart->GetRingBufferDataAndClear(2, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
 //       // if(BufferWriterI->GetLength()){
 //       //   ALOG_TST(PSTR("GPS UART%d >> [%d] \"%s\""), 2, bytes_in_line, BufferWriterI->GetPtr());
 //       // }
@@ -136,28 +136,28 @@
 // //     // #endif
 
 
-//     // ALOG_TST(PSTR("[%d] \"%s\""),pCONT_uart->urxlen2,(char*)pCONT_uart->rxbuf2);
+//     // ALOG_TST(PSTR("[%d] \"%s\""),tkr_uart->urxlen2,(char*)tkr_uart->rxbuf2);
 
-//     // Serial.println(pCONT_uart->urxlen2);
-//     // for(int i=0;i<10;i++){   Serial.print((char)pCONT_uart->rxbuf2[i]); }
+//     // Serial.println(tkr_uart->urxlen2);
+//     // for(int i=0;i<10;i++){   Serial.print((char)tkr_uart->rxbuf2[i]); }
 //     // Serial.println();
-//       // ALOG_INF(PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+//       // ALOG_INF(PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
   
 //       // xRingbufferPrintInfo(settings.uart2.ringbuffer_handle);
 //       // //Receive an item from no-split ring buffer
 //       // size_t item_size;
-//       // char*  item = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(1000));
+//       // char*  item = (char *)xRingbufferReceive(tkr_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(1000));
 
 //       // //Check received item
 //       // if (item != NULL) {
-//       //   Serial.printf("UART2:>%d %d sizeB=%d\n\r",item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+//       //   Serial.printf("UART2:>%d %d sizeB=%d\n\r",item_size,millis(),xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
 //       //   //Print item
 //       //   for(int i = 0; i < item_size; i++) {
 //       //     Serial.printf("%c", item[i]);
 //       //   }
 //       //   //Return Item
-//       //   vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
-//       //   Serial.printf("\n\r sizeA=%d\n\r",xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+//       //   vRingbufferReturnItem(tkr_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
+//       //   Serial.printf("\n\r sizeA=%d\n\r",xRingbufferGetCurFreeSize(tkr_uart->settings.uart2.ringbuffer_handle));
 //       // } else {
 //       //   //Failed to receive item
 //       //   Serial.printf("Failed to receive item\n");
@@ -309,9 +309,9 @@
 //     DEBUG_LINE_HERE;
 
 //     ALOG_INF(PSTR("mSerialUART::Init %d %d %d"),
-//       pCONT_uart->settings.uart2.baud, 
-//       pCONT_uart->settings.uart2.gpio.rx, 
-//       pCONT_uart->settings.uart2.gpio.tx
+//       tkr_uart->settings.uart2.baud, 
+//       tkr_uart->settings.uart2.gpio.rx, 
+//       tkr_uart->settings.uart2.gpio.tx
 //     );
 
 
@@ -893,7 +893,7 @@
 //   urxlen1 = i;
 
 //   BaseType_t dummyval;
-//   UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart1.ringbuffer_handle, rxbuf1, urxlen1, &dummyval);
+//   UBaseType_t res =  xRingbufferSendFromISR(tkr_uart->settings.uart1.ringbuffer_handle, rxbuf1, urxlen1, &dummyval);
   
 //   // after reading bytes from buffer clear UART interrupt status
 //   uart_clear_intr_status(UART_NUM_1, 
@@ -1130,17 +1130,17 @@
 
 // //   while(rx_fifo_len)
 // //   {
-// //     pCONT_uart->rxbuf2[i++] = UART2.fifo.rw_byte; // You can not directly access the UART0.fifo.rw_byte on esp32s2 but have to use READ_PERI_REG(UART_FIFO_AHB_REG(0))
+// //     tkr_uart->rxbuf2[i++] = UART2.fifo.rw_byte; // You can not directly access the UART0.fifo.rw_byte on esp32s2 but have to use READ_PERI_REG(UART_FIFO_AHB_REG(0))
 // //     if(i>=RINGBUFFER_HANDLE_2_LENGTH-1)
 // //     {
 // //       break;
 // //     }
 // //     rx_fifo_len--;
 // //   }
-// //   pCONT_uart->urxlen2 = i;
+// //   tkr_uart->urxlen2 = i;
 
 // //   BaseType_t dummyval;
-// //   UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart2.ringbuffer_handle, pCONT_uart->rxbuf2, pCONT_uart->urxlen2, &dummyval);
+// //   UBaseType_t res =  xRingbufferSendFromISR(tkr_uart->settings.uart2.ringbuffer_handle, tkr_uart->rxbuf2, tkr_uart->urxlen2, &dummyval);
   
 // //   // after reading bytes from buffer clear UART interrupt status
 // //   uart_clear_intr_status(UART_NUM_2, 
@@ -1239,20 +1239,20 @@
 
 
 
-// //     pCONT_uart->special_json_part_of_gps_buffer[0] = 253;
-// //  pCONT_uart->special_json_part_of_gps_buflen = 1;
+// //     tkr_uart->special_json_part_of_gps_buffer[0] = 253;
+// //  tkr_uart->special_json_part_of_gps_buflen = 1;
 // // if(urxlen2){
 //   BaseType_t dummyval;
 
 //   // use start and end of array "~~" so matlab can search and repair the json
-//       xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
-//       xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
-//       // xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
-//       // if(pCONT_uart->special_json_part_of_gps_buflen)
+//       xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
+//       xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
+//       // xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
+//       // if(tkr_uart->special_json_part_of_gps_buflen)
 //       // {
-//       //   xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle,  pCONT_uart->special_json_part_of_gps_buffer,  pCONT_uart->special_json_part_of_gps_buflen, &dummyval);
+//       //   xRingbufferSendFromISR(tkr_sdcard->stream.ringbuffer_handle,  tkr_uart->special_json_part_of_gps_buffer,  tkr_uart->special_json_part_of_gps_buflen, &dummyval);
 //       // }
-//       // xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
+//       // xRingbufferSend(tkr_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
 // // }
 
 //       // /**
@@ -1289,7 +1289,7 @@
 
 //     #else
 //     BaseType_t dummyval;
-//     UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart2.ringbuffer_handle, rxbuf2, urxlen2, &dummyval); // instead of ringbuffer, this probably also needs to be cycling buffers
+//     UBaseType_t res =  xRingbufferSendFromISR(tkr_uart->settings.uart2.ringbuffer_handle, rxbuf2, urxlen2, &dummyval); // instead of ringbuffer, this probably also needs to be cycling buffers
 //     #endif // ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
 
 //     /**
@@ -1506,7 +1506,7 @@
 
 //     #else
 //     BaseType_t dummyval;
-//     UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart2.ringbuffer_handle, rxbuf2, urxlen2, &dummyval); // instead of ringbuffer, this probably also needs to be cycling buffers
+//     UBaseType_t res =  xRingbufferSendFromISR(tkr_uart->settings.uart2.ringbuffer_handle, rxbuf2, urxlen2, &dummyval); // instead of ringbuffer, this probably also needs to be cycling buffers
 //     #endif // ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
 
 //     /**
@@ -1846,9 +1846,9 @@
 // {
 //   for(auto& handle:mqtthandler_list){
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 //     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+//       handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
 //   }
 // }
 
@@ -1858,7 +1858,7 @@
 // void mSerialUART::MQTTHandler_Sender()
 // {
 //   for(auto& handle:mqtthandler_list){
-//     pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+//     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 //   }
 // }
 // #endif // USE_MODULE_NETWORK_MQTT

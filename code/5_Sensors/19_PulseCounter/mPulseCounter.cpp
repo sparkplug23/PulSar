@@ -273,14 +273,14 @@ void mPulseCounter::WebAppend_Root_Status_Table_Draw(){
   // for(int ii=0;ii<fSensorCount;ii++){ //add number in name? List needed? also hold user defined name?
     
   //     char name_buffer_tmp[25];
-  //     pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
+  //     tkr_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
 
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Temperature %s</td>"), "22",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Temperature %s</td>"), "22",name_buffer_tmp);//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
   //     tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+  //     tkr_web->AppendBuffer_PI2(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
   //     tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
   //   tkr_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
   // }
@@ -303,9 +303,9 @@ void mPulseCounter::WebAppend_Root_Status_Table_Data(){
   //       char table_row[25]; memset(table_row,0,sizeof(table_row));       
 
   //       char value_ctr[8];
-  //       pCONT_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
+  //       tkr_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
 
-  //       sprintf(table_row,"%s&deg;%c",value_ctr,pCONT_sup->TempUnit());
+  //       sprintf(table_row,"%s&deg;%c",value_ctr,tkr_sup->TempUnit());
         
   //       if(sensor[sensor_counter].instant.temperature<=25){
   //         sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
@@ -327,7 +327,7 @@ void mPulseCounter::WebAppend_Root_Status_Table_Data(){
   //       char table_row[25]; memset(table_row,0,sizeof(table_row));        
         
   //       char value_ctr[8];
-  //       pCONT_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
+  //       tkr_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
 
   //       sprintf(table_row,"%s %%",value_ctr);
         
@@ -416,7 +416,7 @@ for(uint8_t sensor_id=0;sensor_id<fSensorCount;sensor_id++){
 
   
   char name_buffer_tmp[25];
-  pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), sensor_id, name_buffer);
+  tkr_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), sensor_id, name_buffer);
 
   
 
@@ -464,7 +464,7 @@ void mPulseCounter::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -474,7 +474,7 @@ void mPulseCounter::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -484,7 +484,7 @@ void mPulseCounter::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.ifchanged_secs;
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs;
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -504,8 +504,8 @@ void mPulseCounter::MQTTHandler_RefreshAll(){
 
 void mPulseCounter::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
@@ -524,7 +524,7 @@ void mPulseCounter::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
@@ -544,7 +544,7 @@ void mPulseCounter::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
     // Pass handlers into command to test and (ifneeded) execute
     if(handler_found){ pCONT->mqt->MQTTHandler_Comm and(*this,D_MODULE_SENSORS_PULSECOUNTER_ID,ptr); }
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 
     // stop searching
     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

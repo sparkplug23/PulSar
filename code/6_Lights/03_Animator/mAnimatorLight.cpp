@@ -68,7 +68,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       AddLog(log_level, PSTR("desired  %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__desired_colour / 1000 : lighting_time_critical_logging.dynamic_buffer__desired_colour, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
       AddLog(log_level, PSTR("effect_call  %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.effect_call / 1000 : lighting_time_critical_logging.effect_call, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
       AddLog(log_level, PSTR("segment_effects  ---------> %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.segment_effects / 1000 : lighting_time_critical_logging.segment_effects, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
-      ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);    
+      ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, tkr_sup->activity.cycles_per_sec);    
       #endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
     }break;
@@ -111,13 +111,13 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif // USE_MODULE_NETWORK_MQTT
     /************
@@ -230,7 +230,7 @@ void mAnimatorLight::Save_Module()
   char filename_json[50];
   snprintf_P(filename_json, sizeof(filename_json), "/lgt_%S.json", GetModuleName());
 
-  pCONT_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
+  tkr_mfile->JSONFile_Save(filename_json, JBI->GetBuffer(), JBI->GetBufferLength());
 
   JBI->ReleaseLock();
 
@@ -478,9 +478,9 @@ bool sendLiveLedsWs(uint32_t wsClient)
     uint8_t g = G(c);
     uint8_t b = B(c);
     uint8_t w = W(c);
-    buffer[pos++] = r;//pCONT_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
-    buffer[pos++] = g;//pCONT_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
-    buffer[pos++] = b;//pCONT_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
+    buffer[pos++] = r;//tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
+    buffer[pos++] = g;//tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
+    buffer[pos++] = b;//tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
     Serial.println(r);
   }
 
@@ -524,7 +524,7 @@ void mAnimatorLight::EveryLoop()
     ALOG_INF(PSTR("Re-init busses"));
         
     bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
-    pCONT_iLight->bus_manager->removeAll();
+    tkr_iLight->bus_manager->removeAll();
 
     ALOG_INF(PSTR("checkSegmentAlignment()-----------------------------------------aligned %d"), aligned);
     uint32_t mem = 0;
@@ -540,12 +540,12 @@ void mAnimatorLight::EveryLoop()
       unsigned maxLedsOnBus = 0;
       unsigned maxChannels = 0;
       for (unsigned i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
-        if (pCONT_iLight->busConfigs[i] == nullptr) break;
-        if (!Bus::isDigital(pCONT_iLight->busConfigs[i]->type)) continue;
-        if (!Bus::is2Pin(pCONT_iLight->busConfigs[i]->type)) {
+        if (tkr_iLight->busConfigs[i] == nullptr) break;
+        if (!Bus::isDigital(tkr_iLight->busConfigs[i]->type)) continue;
+        if (!Bus::is2Pin(tkr_iLight->busConfigs[i]->type)) {
           digitalCount++;
-          unsigned channels = Bus::getNumberOfChannels(pCONT_iLight->busConfigs[i]->type);
-          if (pCONT_iLight->busConfigs[i]->count > maxLedsOnBus) maxLedsOnBus = pCONT_iLight->busConfigs[i]->count;
+          unsigned channels = Bus::getNumberOfChannels(tkr_iLight->busConfigs[i]->type);
+          if (tkr_iLight->busConfigs[i]->count > maxLedsOnBus) maxLedsOnBus = tkr_iLight->busConfigs[i]->count;
           if (channels > maxChannels) maxChannels  = channels;
         }
       }
@@ -559,56 +559,56 @@ void mAnimatorLight::EveryLoop()
       {  // I will want >2, as I0 and I1 are for 2 pins only, then immediately switch to parallel
         DEBUG_PRINTF_P(PSTR("Switching to parallel I2S\n\r"));
         useParallel = true;
-        pCONT_iLight->bus_manager->useParallelOutput(true);
-        pCONT_iLight->bus_manager->setRequiredChannels(digitalCount);
+        tkr_iLight->bus_manager->useParallelOutput(true);
+        tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
         mem = BusManager::memUsage(maxChannels, maxLedsOnBus, 8); // use alternate memory calculation (hse to be used *after* useParallelOutput())
       }else
       if (maxLedsOnBus > 300 && digitalCount > 2) 
       {
         ALOG_ERR(PSTR("Parallel is required to avoid RMT, but per bus count exceeded. Using anyway for now (%d,%d)"), maxLedsOnBus, digitalCount);
-        pCONT_iLight->bus_manager->setRequiredChannels(digitalCount);
-        pCONT_iLight->bus_manager->useParallelOutput(true);
+        tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+        tkr_iLight->bus_manager->useParallelOutput(true);
       }
       else{
         ALOG_INF(PSTR("Parallel is not required for %d channels"), digitalCount);
-        pCONT_iLight->bus_manager->setRequiredChannels(digitalCount);
-        pCONT_iLight->bus_manager->useParallelOutput(false);
+        tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+        tkr_iLight->bus_manager->useParallelOutput(false);
       }
       #endif
     #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
 
-    DEBUG_DELAY(1000);
+    DELAY_DEBUG(1000);
   
     /*****************************************************************************
      * Create NPB methods
     ******************************************************************************/
     for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) 
     {
-      if (pCONT_iLight->busConfigs[i] == nullptr) break;
-      // mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
+      if (tkr_iLight->busConfigs[i] == nullptr) break;
+      // mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]);
 
       #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
       if (useParallel && i < 16) {
         // if for some unexplained reason the above pre-calculation was wrong, update
-        unsigned memT = BusManager::memUsage(*pCONT_iLight->busConfigs[i]); // includes x8 memory allocation for parallel I2S
+        unsigned memT = BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes x8 memory allocation for parallel I2S
         if (memT > mem) mem = memT; // if we have unequal LED count use the largest
       } 
       else
       #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
       {
-        mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]); // includes global buffer
+        mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes global buffer
       }
 
       if (mem <= MAX_LED_MEMORY) 
       {        
-        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);        
+        tkr_iLight->bus_manager->add(*tkr_iLight->busConfigs[i]);        
       }
       else
       {        
         ALOG_ERR(PSTR("MEMORY ISSUE"));        
       }
-      delete pCONT_iLight->busConfigs[i]; 
-      pCONT_iLight->busConfigs[i] = nullptr;
+      delete tkr_iLight->busConfigs[i]; 
+      tkr_iLight->busConfigs[i] = nullptr;
     }
     
     finalizeInit(); // also loads default ledmap if present
@@ -951,7 +951,7 @@ void mAnimatorLight::EveryLoop()
   // if (doSerializeConfig) serializeConfig();
 
   // Tmp fix to set brightness
-  // pCONT_iLight->bus_manager->setBrightness( pCONT_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
+  // tkr_iLight->bus_manager->setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
 
   if (doReboot && !doInitBusses) // if busses have to be inited & saved, wait until next iteration
     reset();
@@ -4200,7 +4200,7 @@ void mAnimatorLight::Segment::refreshLightCapabilities() {
   }
 
   for (unsigned b = 0; b < BusManager::getNumBusses(); b++) {
-    Bus *bus = pCONT_iLight->bus_manager->getBus(b);
+    Bus *bus = tkr_iLight->bus_manager->getBus(b);
     if (bus == nullptr || bus->getLength()==0) break;
     if (!bus->isOk()) continue;
     if (bus->getStart() >= segStopIdx) continue;
@@ -4697,7 +4697,7 @@ uint8_t mAnimatorLight::Segment::get_random_wheel_index(uint8_t pos) {
 void mAnimatorLight::finalizeInit(void)
 {
 
-  // ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), pCONT_iLight->bus_manager->getNumBusses());
+  // ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), tkr_iLight->bus_manager->getNumBusses());
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
@@ -4708,28 +4708,28 @@ void mAnimatorLight::finalizeInit(void)
 
   // _hasWhiteChannel = _isOffRefreshRequired = false;
 
-  if(pCONT_iLight->bus_manager == nullptr)
+  if(tkr_iLight->bus_manager == nullptr)
   {
     ALOG_ERR(PSTR("busses null"));
     return;
   }
 
   //if busses failed to load, add default (fresh install, FS issue, ...)
-  if (pCONT_iLight->bus_manager->getNumBusses() == 0) 
+  if (tkr_iLight->bus_manager->getNumBusses() == 0) 
   {
     DEBUG_PRINTLN(F("No busses, init default"));
-    pCONT_iLight->BusManager_Create_DefaultSingleNeoPixel();
+    tkr_iLight->BusManager_Create_DefaultSingleNeoPixel();
   }
 
-  DEBUG_PRINTF("busses->getNumBusses() %d\n\r", pCONT_iLight->bus_manager->getNumBusses());
+  DEBUG_PRINTF("busses->getNumBusses() %d\n\r", tkr_iLight->bus_manager->getNumBusses());
 
   _length = 0;
-  for (uint8_t i=0; i<pCONT_iLight->bus_manager->getNumBusses(); i++) 
+  for (uint8_t i=0; i<tkr_iLight->bus_manager->getNumBusses(); i++) 
   {
     
     DEBUG_PRINTF("getNumBusses %d\n\r", i);
 
-    Bus *bus = pCONT_iLight->bus_manager->getBus(i);
+    Bus *bus = tkr_iLight->bus_manager->getBus(i);
     if (bus == nullptr)
     {
       DEBUG_PRINTF("bus == nullptr\n\r");
@@ -4786,15 +4786,15 @@ void mAnimatorLight::finalizeInit(void)
   //segments are created in makeAutoSegments();
   loadCustomPalettes(); // (re)load all custom palettes
   
-  // ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), pCONT_iLight->bus_manager->getNumBusses());
+  // ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), tkr_iLight->bus_manager->getNumBusses());
 
 }
 
 // Setter for RGB brightness, with optional global brightness parameter
 void mAnimatorLight::Segment::UpdateBrightness()
 {
-  _brightness_rgb_combined = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
-  _brightness_cct_combined = scale8(_brightness_cct, pCONT_iLight->getBriCCT_Global());
+  _brightness_rgb_combined = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+  _brightness_cct_combined = scale8(_brightness_cct, tkr_iLight->getBriCCT_Global());
 
 }
 
@@ -4816,13 +4816,13 @@ void IRAM_ATTR mAnimatorLight::setPixelColor(uint32_t i, ColourBaseType col) {
   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
   Serial.printf("void IRAM_ATTR mAnimatorLight::setPixelColor(uint32_t i, %d,%d,%d)\n\r", col.R, col.G, col.B);
   #endif
-  pCONT_iLight->bus_manager->setPixelColor(i, col);
+  tkr_iLight->bus_manager->setPixelColor(i, col);
 }
 
 ColourBaseType IRAM_ATTR mAnimatorLight::getPixelColor(uint32_t i) const {
   i = getMappedPixelIndex(i);
   if (i >= _length) return 0;
-  return pCONT_iLight->bus_manager->getPixelColor(i);
+  return tkr_iLight->bus_manager->getPixelColor(i);
 }
 
 
@@ -4861,7 +4861,7 @@ ColourBaseType IRAM_ATTR mAnimatorLight::getPixelColor(uint32_t i) const {
 //   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
 //   ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
 //   #endif
-//   pCONT_iLight->bus_manager->setPixelColor(i, c);
+//   tkr_iLight->bus_manager->setPixelColor(i, c);
 // }
 
 // // uint32_t mAnimatorLight::BUS_getPixelColor(uint16_t i)
@@ -4869,7 +4869,7 @@ ColourBaseType IRAM_ATTR mAnimatorLight::getPixelColor(uint32_t i) const {
 // {
 //   if (i >= _length) { ALOG_ERR(PSTR("return early")); return 0; }
 //   if (i < customMappingSize) i = customMappingTable[i];
-//   return pCONT_iLight->bus_manager->getPixelColor(i).getU32();
+//   return tkr_iLight->bus_manager->getPixelColor(i).getU32();
 // }
 
 // /**
@@ -4897,11 +4897,11 @@ ColourBaseType IRAM_ATTR mAnimatorLight::getPixelColor(uint32_t i) const {
 //   ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, col.R, col.G, col.B);
 //   #endif
 
-//   // ALOG_INF(PSTR("busnum %d"), pCONT_iLight->bus_manager->getNumBusses());
+//   // ALOG_INF(PSTR("busnum %d"), tkr_iLight->bus_manager->getNumBusses());
 //   #endif // ENABLE_DEVFEATURE_LIGHTING__TEMPORARY_DISABLE_CODE_FOR_SPEED_TESTING
 
 //   // DEBUG_TIME__START
-//   pCONT_iLight->bus_manager->setPixelColor(i, col);
+//   tkr_iLight->bus_manager->setPixelColor(i, col);
 //   // if(i==0) DEBUG_TIME__SHOW_MESSAGE("set")
 
 
@@ -4918,7 +4918,7 @@ ColourBaseType IRAM_ATTR mAnimatorLight::getPixelColor(uint32_t i) const {
 //   }
   
 //   // Directly return the color retrieved from the bus manager
-//   return pCONT_iLight->bus_manager->getPixelColor(i);
+//   return tkr_iLight->bus_manager->getPixelColor(i);
 // }
 
 
@@ -5058,7 +5058,7 @@ void mAnimatorLight::show(void)
  * On some hardware (ESP32), strip updates are done asynchronously.
  */
 bool mAnimatorLight::isUpdating() {
-  return !pCONT_iLight->bus_manager->canAllShow();
+  return !tkr_iLight->bus_manager->canAllShow();
 }
 
 /**
@@ -5333,8 +5333,8 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
     uint16_t segStarts[MAX_NUM_SEGMENTS] = {0};
     uint16_t segStops [MAX_NUM_SEGMENTS] = {0};
     uint8_t s = 0;
-    for (uint8_t i = 0; i < pCONT_iLight->bus_manager->getNumBusses(); i++) {
-      Bus* b = pCONT_iLight->bus_manager->getBus(i);
+    for (uint8_t i = 0; i < tkr_iLight->bus_manager->getNumBusses(); i++) {
+      Bus* b = tkr_iLight->bus_manager->getBus(i);
 
       segStarts[s] = b->getStart();
       segStops[s]  = segStarts[s] + b->getLength();
@@ -5398,8 +5398,8 @@ void mAnimatorLight::fixInvalidSegments()
 bool mAnimatorLight::checkSegmentAlignment() {
   bool aligned = false;
   for (segment &seg : segments) {
-    for (uint8_t b = 0; pCONT_iLight->bus_manager->getNumBusses(); b++) {
-      Bus *bus = pCONT_iLight->bus_manager->getBus(b);
+    for (uint8_t b = 0; tkr_iLight->bus_manager->getNumBusses(); b++) {
+      Bus *bus = tkr_iLight->bus_manager->getBus(b);
       if (
         seg.start == bus->getStart() && 
         seg.stop == bus->getStart() + bus->getLength()
@@ -5519,7 +5519,7 @@ void mAnimatorLight::loadCustomPalettes()
 
 //   if (!requestJSONBufferLock(7)) return false;
 
-//   if (!pCONT_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
+//   if (!tkr_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
 //     releaseJSONBufferLock();
 //     return false; //if file does not exist just exit
 //   }
@@ -5570,7 +5570,7 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
 
   if (!isFile || !requestJSONBufferLock(7)) return false;
 
-  if (!pCONT_mfile->readObjectFromFile(fileName, nullptr, pDoc)) {
+  if (!tkr_mfile->readObjectFromFile(fileName, nullptr, pDoc)) {
     DEBUG_PRINT(F("ERROR Invalid ledmap in ")); DEBUG_PRINTLN(fileName);
     releaseJSONBufferLock();
     return false; // if file does not load properly then exit
@@ -5678,7 +5678,7 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
 
 //   // Apply brightness if needed
 //   if (apply_brightness) {
-//     uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+//     uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
 
 //     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
 
@@ -5764,7 +5764,7 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_Rgbww(
 
   // Apply brightness if needed
   if (apply_brightness) {
-    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
 
     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
 
@@ -5866,7 +5866,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
 
   // Apply brightness if needed
   if (apply_brightness) {
-    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
     // ALOG_INF(PSTR("brightness getpal %d"),brightness);
     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
 
@@ -6001,8 +6001,8 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
   #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
   // // Apply brightness if needed
   if (flag_brightness_already_applied==false) {
-    // uint8_t brightness = pCONT_iLight->getBriRGB_Global();//scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
-    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
     // Extract, scale, and repack in one step
     col = RGBW32(
@@ -6206,7 +6206,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col
 
   // // Apply brightness if needed
   // if (!flag_brightness_already_applied) {
-  //   uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+  //   uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
   //   uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
   //   // Extract, scale, and repack in one step
   //   col = RGBW32(
@@ -6220,8 +6220,8 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col
   #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
   // // Apply brightness if needed
   if (flag_brightness_already_applied==false) {
-    // uint8_t brightness = pCONT_iLight->getBriRGB_Global();//scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
-    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
     col = col.Dim(scale);
     // Extract, scale, and repack in one step
@@ -7076,9 +7076,9 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
 
 
 
-    JBI->Add("Brightness_Master",    pCONT_iLight->getBri_Global());
-    JBI->Add("BrightnessRGB_Master", pCONT_iLight->getBriRGB_Global());
-    JBI->Add("BrightnessCCT_Master", pCONT_iLight->getBriCCT_Global());
+    JBI->Add("Brightness_Master",    tkr_iLight->getBri_Global());
+    JBI->Add("BrightnessRGB_Master", tkr_iLight->getBriRGB_Global());
+    JBI->Add("BrightnessCCT_Master", tkr_iLight->getBriCCT_Global());
 
   JBI->Add("FPS", getFps());
 
@@ -7406,7 +7406,7 @@ JBI->Start();
     // JBI->Array_End();
     
 //   JBI->Start();  
-//     JBI->Add_P(PM_SIZE, pCONT_iLight->settings.light_size_count);
+//     JBI->Add_P(PM_SIZE, tkr_iLight->settings.light_size_count);
 //     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
 //     JBI->Add("ColourPaletteID", tkr_anim->SEGMENT_I(0).palette_id );
 //     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette_id, buffer, sizeof(buffer)));
@@ -7469,9 +7469,9 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
 {
   JBI->Start();
 
-  JBI->Add("Brightness_Master",    pCONT_iLight->getBri_Global());
-  JBI->Add("BrightnessRGB_Master", pCONT_iLight->getBriRGB_Global());
-  JBI->Add("BrightnessCCT_Master", pCONT_iLight->getBriCCT_Global());
+  JBI->Add("Brightness_Master",    tkr_iLight->getBri_Global());
+  JBI->Add("BrightnessRGB_Master", tkr_iLight->getBriRGB_Global());
+  JBI->Add("BrightnessCCT_Master", tkr_iLight->getBriCCT_Global());
   
   uint8_t seg_count = getSegmentsNum();
   seg_count = seg_count < 3 ? seg_count : 3; //limit memory overrun, or else later instead of reducing the seg count, reduce the data shared in another topic as overview
@@ -7739,7 +7739,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -7750,7 +7750,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
@@ -7761,7 +7761,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
@@ -7773,7 +7773,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MATRIX_CTR;
@@ -7786,7 +7786,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR;
@@ -7799,7 +7799,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
@@ -7812,7 +7812,7 @@ void mAnimatorLight::MQTTHandler_Init()
   // ptr->tSavedLastSent = 0;
   // ptr->flags.PeriodicEnabled = true;
   // ptr->flags.SendNow = true;
-  // ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
+  // ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
   // ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   // ptr->json_level = JSON_LEVEL_DETAILED;
   // ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
@@ -7825,7 +7825,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
@@ -7838,7 +7838,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
@@ -7851,7 +7851,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
@@ -7864,7 +7864,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = pCONT_mqtt->dt.ifchanged_secs; 
+  ptr->tRateSecs              = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level             = JSON_LEVEL_DETAILED;
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_CUSTOM_MAPPING_TABLE__CTR;
@@ -7877,7 +7877,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR;
@@ -7982,7 +7982,7 @@ void mAnimatorLight::notify(byte callMode, bool followUp)
   mAnimatorLight::Segment& mainseg = tkr_anim->getMainSegment();
   udpOut[0] = 0; //0: wled notifier protocol 1: WARLS protocol
   udpOut[1] = callMode;
-  udpOut[2] = pCONT_iLight->getBri_Global();
+  udpOut[2] = tkr_iLight->getBri_Global();
   uint32_t col = mainseg.segcol[0].getU32();
   udpOut[3] = R(col);
   udpOut[4] = G(col);
@@ -8121,7 +8121,7 @@ void realtimeLock2(uint32_t timeoutMs, byte md)
     // clear strip/segment
     for (size_t i = start; i < stop; i++) tkr_anim->setPixelColor(i,BLACK);
     // if WLED was off and using main segment only, freeze non-main segments so they stay off
-    if (tkr_anim->useMainSegmentOnly && pCONT_iLight->getBri_Global() == 0) {
+    if (tkr_anim->useMainSegmentOnly && tkr_iLight->getBri_Global() == 0) {
       for (size_t s=0; s < tkr_anim->getSegmentsNum(); s++) {
         tkr_anim->getSegment(s).freeze = true;
       }
@@ -8145,7 +8145,7 @@ void realtimeLock2(uint32_t timeoutMs, byte md)
 void exitRealtime2() {
   if (!tkr_anim->realtimeMode) return;
   if (tkr_anim->realtimeOverride == REALTIME_OVERRIDE_ONCE) tkr_anim->realtimeOverride = REALTIME_OVERRIDE_NONE;
-  tkr_anim->setBrightness(scaledBri2(pCONT_iLight->getBri_Global()), true);
+  tkr_anim->setBrightness(scaledBri2(tkr_iLight->getBri_Global()), true);
   tkr_anim->realtimeTimeout = 0; // cancel realtime mode immediately
   tkr_anim->realtimeMode = REALTIME_MODE_INACTIVE; // inform UI immediately
   tkr_anim->realtimeIP[0] = 0;
@@ -8414,7 +8414,7 @@ void handleNotifications()
     tkr_anim->nightlightActive = udpIn[6];
     if (tkr_anim->nightlightActive) tkr_anim->nightlightDelayMins = udpIn[7];
 
-    if (tkr_anim->receiveNotificationBrightness || !someSel) pCONT_iLight->setBriRGB_Global( udpIn[2] );
+    if (tkr_anim->receiveNotificationBrightness || !someSel) tkr_iLight->setBriRGB_Global( udpIn[2] );
     // stateUpdated(CALL_MODE_NOTIFICATION);
     return;
   }

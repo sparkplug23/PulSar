@@ -68,13 +68,13 @@ int8_t mHLK_LD2410::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      pCONT_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // pCONT_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      pCONT_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -92,16 +92,17 @@ void mHLK_LD2410::Pre_Init(void)
 
 }
 
-
 void mHLK_LD2410::Init(void) 
 {
-  // ALOG_INF(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
+  ALOG_INF(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
   if (tkr_pins->PinUsed(GPIO_LD2410_RX_ID) && tkr_pins->PinUsed(GPIO_LD2410_TX_ID)) 
   {
     LD2410.buffer = (uint8_t*)malloc(LD2410_BUFFER_SIZE);    // Default 64
     if (!LD2410.buffer) { return; }
 
-    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), 2);
+    ALOG_INF(PSTR(D_LOG_LD2410 "RX=%d TX=%d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
+
+    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), LD2410_DEFAULT_SERIAL_NUMBER);
     
     if (LD2410Serial->begin(256000)) {
       
@@ -171,7 +172,7 @@ void mHLK_LD2410::Ld1410HandleTargetData(void) {
       LD2410.static_energy = LD2410.buffer[14];
       LD2410.detect_distance = LD2410.buffer[16] << 8 | LD2410.buffer[15];
 
-      ALOG_INF(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), LD2410.moving_distance, LD2410.moving_energy, LD2410.static_distance, LD2410.static_energy, LD2410.detect_distance);
+      ALOG_DBM(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), LD2410.moving_distance, LD2410.moving_energy, LD2410.static_distance, LD2410.static_energy, LD2410.detect_distance);
 
     }else{
       ALOG_INF(PSTR(D_LOG_LD2410 "No target"));

@@ -94,7 +94,7 @@ void mAnimatorLight::setUpMatrix() {
         DEBUG_PRINT(F("Reading LED gap from "));
         DEBUG_PRINTLN(fileName);
         // read the array into global JSON buffer
-        if (pCONT_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
+        if (tkr_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
           // the array is similar to ledmap, except it has only 3 values:
           // -1 ... missing pixel (do not increase pixel count)
           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
@@ -227,7 +227,7 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   //    * @brief Apply "GLOBAL" brightness to the colour
   //    * 
   //    */
-  //   uint8_t bri_master = pCONT_iLight->getBriRGB_Global(); 
+  //   uint8_t bri_master = tkr_iLight->getBriRGB_Global(); 
   //   uint8_t bri_segment = getBrightnessRGB();
 
   //   /**
@@ -251,8 +251,8 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
   // // Apply brightness if needed
   if (flag_brightness_already_applied==false) {
-    // uint8_t brightness = pCONT_iLight->getBriRGB_Global();//scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
-    uint8_t brightness = scale8(_brightness_rgb, pCONT_iLight->getBriRGB_Global());
+    // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
     // Extract, scale, and repack in one step
     col = RGBW32(

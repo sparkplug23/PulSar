@@ -284,13 +284,13 @@ uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level, bool json_append
     // JBI->Add("furnace_on", digitalRead(14));//D5));
     // water temps
     #ifdef USE_MODULE_SENSORS_DS18X
-    JBI->Add("water0", pCONT_db18->sensor[0].reading.val);
-    JBI->Add("water1", pCONT_db18->sensor[1].reading.val);
-    JBI->Add("water2", pCONT_db18->sensor[2].reading.val);
+    JBI->Add("water0", tkr_db18->sensor[0].reading.val);
+    JBI->Add("water1", tkr_db18->sensor[1].reading.val);
+    JBI->Add("water2", tkr_db18->sensor[2].reading.val);
     #endif // USE_MODULE_SENSORS_DS18X
     // ambient temp
     #ifdef USE_MODULE_SENSORS_BME
-    JBI->Add("garage_temp", pCONT_bme->bmp_sensors[0].temperature);
+    JBI->Add("garage_temp", tkr_bme->bmp_sensors[0].temperature);
     #endif 
 
     JBI->Object_End();
@@ -381,9 +381,9 @@ void mFurnaceSensor::MQTTHandler_Rate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.teleperiod_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_mqtt->dt.ifchanged_secs;
+  //     handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
   // }
 }
 
@@ -393,7 +393,7 @@ void mFurnaceSensor::MQTTHandler_Rate()
 void mFurnaceSensor::MQTTHandler_Sender()
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
 

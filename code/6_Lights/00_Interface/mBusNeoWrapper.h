@@ -26,6 +26,16 @@
 #define NEOPIXEL_DISABLE_I2S1_PIXELBUS
 #endif
 
+
+// #if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
+// #undef DISABLE_RMT_METHODS
+// #endif
+// #if !defined(NEOPIXEL_DISABLE_I2S1_PIXELBUS) && (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S2))
+// #undef DISABLE_RMT_METHODS
+// #endif
+
+
+
 //Hardware SPI Pins
 #define P_8266_HS_MOSI 13
 #define P_8266_HS_CLK  14
@@ -189,7 +199,6 @@ enum EM_BUS_TYPE
 #endif
 #endif
 
-#define DISABLE_RMT_METHODS
 
 /*** ESP32 Neopixel methods ***/
 #ifdef ARDUINO_ARCH_ESP32
@@ -214,7 +223,11 @@ enum EM_BUS_TYPE
   #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method>
   #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method>
   //RGBWW (WS2805)
+  #ifdef DISABLE_RMT_METHODS
   #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method> // No RMT method
+  #else
+  #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812Method> // No RMT method
+  #endif
   #define PIXELBUS_32_I0_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
   #define PIXELBUS_32_I1_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1Ws2805Method>
   #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1X8Ws2805Method>
@@ -1050,17 +1063,17 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
 
             #if defined(CONFIG_IDF_TARGET_ESP32S2)
                 // ESP32-S2 only has 4 RMT channels
-                if (num > 4) return I_NONE;
+                if (num > 4) return BUSTYPE__NONE__ID;
                 if (num > 3) offset_method_inside_group = 1;  // only one I2S
 
             #elif defined(CONFIG_IDF_TARGET_ESP32C3)
                 // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
-                if (num > 1) return I_NONE;
+                if (num > 1) return BUSTYPE__NONE__ID;
                 //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
 
             #elif defined(CONFIG_IDF_TARGET_ESP32S3)
                 // On ESP32-S3 only the first 4 RMT channels are usable for transmitting
-                if (num > 3) return I_NONE;
+                if (num > 3) return BUSTYPE__NONE__ID;
                 //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
 
             #else
