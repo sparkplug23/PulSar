@@ -95,6 +95,8 @@ class mSunTracking :
       SunPosition position;
       double max_elevation;  // Maximum elevation of the sun for the day
       double min_elevation;  // Minimum elevation of the sun for the day (typically at dawn or dusk)
+      float  sunrise_azimuth;
+      float  sunset_azimuth;
       #endif 
 
       #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
@@ -127,7 +129,20 @@ class mSunTracking :
     double calculateJtransit(double J_, double M_radians, double Lambda_radians);
     double calculateDeclination(double Lambda_radians);
     double calculateHourAngle(double latitude, double delta, double elevation = 0.0, double twilight_angle = -0.833);
-    SolarDayTimes CalculateSolarEventTimes_Day(double latitude, double longitude, time_t utc_time, double height_above_sealevel, bool daylight_savings_active) ;
+    SolarDayTimes CalculateSolarEventTimes_Day(double latitude, double longitude, time_t utc_time, double height_above_sealevel, bool daylight_savings_active);
+
+    double Get_Azimuth_Sunrise(double latitude, double longitude, double altitude)
+    {
+      if (!calc.isvalid) return 0.0;
+      return CalculateSolarAzEl(calc.today.sunrise, latitude, longitude, altitude).azimuth;
+    }
+
+    double Get_Azimuth_Sunset(double latitude, double longitude, double altitude)
+    {
+      if (!calc.isvalid) return 0.0;
+      return CalculateSolarAzEl(calc.today.sunset, latitude, longitude, altitude).azimuth;
+    }
+
         
     // Converts a time_t value to a trimmed String
     String TimeToString(time_t t) {
@@ -206,6 +221,7 @@ class mSunTracking :
     double julian_day(time_t utc_time_point);
     SunPosition CalculateSolarAzEl(time_t utc_time, double latitude, double longitude, double altitude) ;
     void CalculateMaxMinElevationForDay(time_t utc_time, double latitude, double longitude, double altitude);
+    void CalculateSunriseSunsetAzimuth(double latitude, double longitude, double altitude);
     #endif
 
     #ifdef ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY

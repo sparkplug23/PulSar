@@ -5,20 +5,10 @@
  * This module works with HLK-LD2410, HLK-LD2410B (md5sum-as tested), HLK-LD2410C (md5sum-as tested) devices. 
  * The module does not support HLK-LD2410S (md5sum-as tested) and is not guaranteed to work with other devices.
  * 
- * 
  * LD2410Duration 0                            - Set factory default settings
  * LD2410Duration 1..65535                     - Set no-one duration in seconds (default 5)
  * LD2410MovingSens 50,50,40,30,20,15,15,15,15 - Set moving distance sensitivity for up to 9 gates (at 0.75 meter interval)
  * LD2410StaticSens 0,0,40,40,30,30,20,20,20   - Set static distance sensitivity for up to 9 gates (at 0.75 meter interval)
- *
- * LD2410Get                                   - Read last sensors
- * LD2410EngineeringStart                      - Start engineering mode
- * LD2410EngineeringEnd                        - End engineering mode
- *
- * Inspiration:
- * https://community.home-assistant.io/t/mmwave-wars-one-sensor-module-to-rule-them-all/453260/2
- * Resources:
- * https://drive.google.com/drive/folders/1p4dhbEJA3YubyIjIIC7wwVsSo8x29Fq-?spm=a2g0o.detail.1000023.17.93465697yFwVxH
  *
  * Internal info:
  * - After a LD2410 serial command a response takes about 10mS
@@ -60,6 +50,15 @@ int8_t mHLK_LD2410::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_SHOWLOG_SENSOR_READING:
       Show_SensorReading();
     break;
+    case TASK_UPTIME_1_MINUTES:
+      CmndEnableEngineeringMode(1);
+    break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -94,15 +93,15 @@ void mHLK_LD2410::Pre_Init(void)
 
 void mHLK_LD2410::Init(void) 
 {
-  ALOG_INF(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
-  if (tkr_pins->PinUsed(GPIO_LD2410_RX_ID) && tkr_pins->PinUsed(GPIO_LD2410_TX_ID)) 
+  ALOG_DBM(PSTR(D_LOG_LD2410 "%d %d"), tkr_pins->Pin(GPIO_LD2410_RX), tkr_pins->Pin(GPIO_LD2410_TX));
+  if (tkr_pins->PinUsed(GPIO_LD2410_RX) && tkr_pins->PinUsed(GPIO_LD2410_TX)) 
   {
-    LD2410.buffer = (uint8_t*)malloc(LD2410_BUFFER_SIZE);    // Default 64
-    if (!LD2410.buffer) { return; }
+    rt.buffer = (uint8_t*)malloc(LD2410_BUFFER_SIZE);    // Default 64
+    if (!rt.buffer) { return; }
 
-    ALOG_INF(PSTR(D_LOG_LD2410 "RX=%d TX=%d"), tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID));
+    ALOG_INF(PSTR(D_LOG_LD2410 "RX=%d TX=%d"), tkr_pins->Pin(GPIO_LD2410_RX), tkr_pins->Pin(GPIO_LD2410_TX));
 
-    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX_ID), tkr_pins->Pin(GPIO_LD2410_TX_ID), LD2410_DEFAULT_SERIAL_NUMBER);
+    LD2410Serial = new TasmotaSerial(tkr_pins->Pin(GPIO_LD2410_RX), tkr_pins->Pin(GPIO_LD2410_TX), LD2410_DEFAULT_SERIAL_NUMBER);
     
     if (LD2410Serial->begin(256000)) {
       
@@ -110,35 +109,106 @@ void mHLK_LD2410::Init(void)
         tkr_sup->ClaimSerial(); 
       }
 
-      ALOG_INF(PSTR(D_LOG_LD2410 "Serial UART%d"), LD2410Serial->getUart());  
+      ALOG_INF(PSTR(D_LOG_LD2410 "UART%d"), LD2410Serial->getUart());  
       
-      LD2410.retry = 4;
-      LD2410.step = 12;
+      rt.retry = 4;
+      rt.step = 12;
       module_state.devices++;
     }
     
-    LD2410.set_engin_mode = 0;
-    memset(&LD2410.engineering,0,sizeof(LD2410.engineering));
+    rt.set_engin_mode = 0;
+    memset(&rt.engineering,0,sizeof(rt.engineering));
   }
 
-  
   if (module_state.devices > 0) {
     module_state.mode = ModuleStatus::Running;
   }
-  ALOG_HGL(PSTR("END OF INIT"));
+  
 }
 
 
-uint32_t mHLK_LD2410::ToBcd(uint32_t value) {
-  return ((value >> 4) * 10) + (value & 0xF);
+/************************************************************************************************
+ * SECTION: Internal Functions
+ ************************************************************************************************/
+        
+void mHLK_LD2410::PollSensor(void) 
+{
+
+  while (LD2410Serial->available()) {
+    yield();                                                    // Fix watchdogs
+
+    rt.buffer[rt.byte_counter++] = LD2410Serial->read();
+    AddLog_Array(LOG_LEVEL_DEBUG, "buffer", rt.buffer, LD2410_BUFFER_SIZE);
+    if (rt.byte_counter < 4) { continue; }                  // Need first four header bytes
+
+    uint32_t header_start = rt.byte_counter -4;             // Fix interrupted header transmits
+    bool target_header = (CheckHeaderMatch(LD2410_target_header, header_start));  // F4F3F2F1
+    bool config_header = (CheckHeaderMatch(LD2410_config_header, header_start));  // FDFCFBFA
+    if ((target_header || config_header) && (header_start != 0)) {
+      memmove(rt.buffer, rt.buffer + header_start, 4);  // Sync buffer with header
+      rt.byte_counter = 4;
+    }
+    if (rt.byte_counter < 6) { continue; }                  // Need packet size bytes
+
+    // ALOG_INF(PSTR("target_header %d"), target_header);
+    // ALOG_INF(PSTR("config_header %d"), config_header);
+  
+    target_header = (CheckHeaderMatch(LD2410_target_header, 0));     // F4F3F2F1
+    config_header = (CheckHeaderMatch(LD2410_config_header, 0));     // FDFCFBFA
+    if (target_header || config_header) {
+      uint32_t len = rt.buffer[4] +10;                      // Total packet size
+      if (len > LD2410_BUFFER_SIZE) {
+        rt.byte_counter = 0;                                // Invalid data
+        break;                                                  // Exit loop to satisfy yields
+      }
+      if (rt.byte_counter < len) { continue; }              // Need complete packet
+
+      AddLog_Array(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "buffer"), rt.buffer, len, /*as hex*/ true );
+
+      if (target_header) 
+      {                                      // F4F3F2F1
+
+        AddLog_Array(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "target buffer"), rt.buffer, len, /*as hex*/ true );
+
+        if (CheckHeaderMatch(LD2410_target_footer, len -4)) {        // F8F7F6F5
+          Ld1410HandleTargetData();
+        }
+
+      }
+      else 
+      if (config_header) 
+      {                                 // FDFCFBFA
+
+        AddLog_Array(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "config buffer"), rt.buffer, len, /*as hex*/ true );
+
+        if (CheckHeaderMatch(LD2410_config_footer, len -4)) {        // 04030201
+          Ld1410HandleConfigData();
+          LD2410Serial->setReadChunkMode(0);                    // Disable chunk mode fixing Hardware Watchdogs
+        }
+
+      }
+    }
+    rt.byte_counter = 0;                                    // Finished or bad received footer
+    break;                                                      // Exit loop to satisfy yields
+  }
+  // If here then rt.byte_counter could still be partial correct for next loop
+
+}
+
+
+bool mHLK_LD2410::CheckHeaderMatch(const uint8_t *header, uint32_t offset) {
+  for (uint32_t i = 0; i < 4; i++) {
+    if (rt.buffer[offset +i] != header[i]) { return false; }
+  }
+  return true;
 }
 
 
 void mHLK_LD2410::Ld1410HandleTargetData(void) {
   uint8_t i;
 
-  if (((0x0D == LD2410.buffer[4]) && (0x55 == LD2410.buffer[17]) && (0x02 == LD2410.buffer[6]))
-      or ((0x23 == LD2410.buffer[4]) && (0x55 == LD2410.buffer[39]) && (0x01 == LD2410.buffer[6]))) {  // Add bad reception detection
+  if (((0x0D == rt.buffer[4]) && (0x55 == rt.buffer[17]) && (0x02 == rt.buffer[6]))
+      or ((0x23 == rt.buffer[4]) && (0x55 == rt.buffer[39]) && (0x01 == rt.buffer[6]))) {  // Add bad reception detection
     //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22
     // F4 F3 F2 F1 0D 00 02 AA 00 00 00 00 00 00 37 00 00 55 00 F8 F7 F6 F5 - No target
     // F4 F3 F2 F1 0D 00 02 AA 00 45 00 3E 00 00 3A 00 00 55 00 F8 F7 F6 F5 - No target
@@ -159,157 +229,90 @@ void mHLK_LD2410::Ld1410HandleTargetData(void) {
     //                                                    55 00 F8 F7 F6 F5
     // header     |len  |dt|hd|st|movin|me|stati|se|detec|tr|ck|trailer
 
-    LD2410.moving_distance = 0;
-    LD2410.moving_energy = 0;
-    LD2410.static_distance = 0;
-    LD2410.static_energy = 0;
-    LD2410.detect_distance = 0;
+    rt.moving_distance = 0;
+    rt.moving_energy = 0;
+    rt.static_distance = 0;
+    rt.static_energy = 0;
+    rt.detect_distance = 0;
 
-    if (LD2410.buffer[8] != 0x00) {                               // Movement and/or Stationary target
-      LD2410.moving_distance = LD2410.buffer[10] << 8 | LD2410.buffer[9];
-      LD2410.moving_energy = LD2410.buffer[11];
-      LD2410.static_distance = LD2410.buffer[13] << 8 | LD2410.buffer[12];
-      LD2410.static_energy = LD2410.buffer[14];
-      LD2410.detect_distance = LD2410.buffer[16] << 8 | LD2410.buffer[15];
+    if (rt.buffer[8] != 0x00) {                               // Movement and/or Stationary target
+      rt.moving_distance = rt.buffer[10] << 8 | rt.buffer[9];
+      rt.moving_energy   = rt.buffer[11];
+      rt.static_distance = rt.buffer[13] << 8 | rt.buffer[12];
+      rt.static_energy   = rt.buffer[14];
+      rt.detect_distance = rt.buffer[16] << 8 | rt.buffer[15];
 
-      ALOG_DBM(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), LD2410.moving_distance, LD2410.moving_energy, LD2410.static_distance, LD2410.static_energy, LD2410.detect_distance);
+      ALOG_INF(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), rt.moving_distance, rt.moving_energy, rt.static_distance, rt.static_energy, rt.detect_distance);
 
     }else{
       ALOG_INF(PSTR(D_LOG_LD2410 "No target"));
     }
 
 
-    LD2410.web_engin_mode = LD2410.buffer[6]==1?1:0;
-    if (0x01 == LD2410.buffer[6]) { /* Engineering mode*/
-      if (LD2410.buffer[17] < 9) {
-        for (i=0; i<= LD2410.buffer[17]; i++) {
-          LD2410.engineering.moving_gate_energy[i] = LD2410.buffer[i+19];
+    rt.web_engin_mode = rt.buffer[6]==1?1:0;
+    if (0x01 == rt.buffer[6]) { /* Engineering mode*/
+      if (rt.buffer[17] < 9) {
+        for (i=0; i<= rt.buffer[17]; i++) {
+          rt.engineering.moving_gate_energy[i] = rt.buffer[i+19];
         }
       }
-      if (LD2410.buffer[18] < 9) {
-        for (i=0; i<= LD2410.buffer[18]; i++) {
-          LD2410.engineering.static_gate_energy[i] = LD2410.buffer[i+28];
+      if (rt.buffer[18] < 9) {
+        for (i=0; i<= rt.buffer[18]; i++) {
+          rt.engineering.static_gate_energy[i] = rt.buffer[i+28];
         }
       }
-      LD2410.engineering.light=LD2410.buffer[37];
-      LD2410.engineering.out_pin=LD2410.buffer[38];
-      AddLog(LOG_LEVEL_DEBUG, PSTR("LD2 Eng: mov: %d %d %d %d %d %d %d %d %d, st: %d %d %d %d %d %d %d %d %d, light: %d, out: %d"), 
-          LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
-          LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
-          LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
-          LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
-          LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
-          LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
-          LD2410.engineering.light,LD2410.engineering.out_pin);
+      rt.engineering.light=rt.buffer[37];
+      rt.engineering.out_pin=rt.buffer[38];
+      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "Eng: mov: %d %d %d %d %d %d %d %d %d, st: %d %d %d %d %d %d %d %d %d, light: %d, out: %d"), 
+          rt.engineering.moving_gate_energy[0],rt.engineering.moving_gate_energy[1],rt.engineering.moving_gate_energy[2],
+          rt.engineering.moving_gate_energy[3],rt.engineering.moving_gate_energy[4],rt.engineering.moving_gate_energy[5],
+          rt.engineering.moving_gate_energy[6],rt.engineering.moving_gate_energy[7],rt.engineering.moving_gate_energy[8],
+          rt.engineering.static_gate_energy[0],rt.engineering.static_gate_energy[1],rt.engineering.static_gate_energy[2],
+          rt.engineering.static_gate_energy[3],rt.engineering.static_gate_energy[4],rt.engineering.static_gate_energy[5],
+          rt.engineering.static_gate_energy[6],rt.engineering.static_gate_energy[7],rt.engineering.static_gate_energy[8],
+          rt.engineering.light,rt.engineering.out_pin);
     }
   }
 }
 
 
 void mHLK_LD2410::Ld1410HandleConfigData(void) {
-  if (LD2410_CMND_READ_PARAMETERS == LD2410.buffer[6]) {           // 0x61
+  if (LD2410_CMND_READ_PARAMETERS == rt.buffer[6]) {           // 0x61
     //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
     // FD FC FB FA 1C 00 61 01 00 00 AA 08 08 08 32 32 28 1E 14 0F 0F 0F 0F 00 00 28 28 1E 1E 14 14 14 05 00 04 03 02 01 - Default
     // header     |len  |cw cv|ack  |hd|dd|md|sd|moving sensitivity 0..8   |static sensitivity 0..8   |timed|trailer
     //            |   28|     |    0|  | 8| 8| 8|50 50 40 30 20 15 15 15 15| 0  0 40 40 30 30 20 20 20|    5|
-    LD2410.max_moving_distance_gate = LD2410.buffer[12];
-    LD2410.max_static_distance_gate = LD2410.buffer[13];
-    for (uint32_t i = 0; i <= LD2410_MAX_GATES; i++) {
-      LD2410.moving_sensitivity[i] = LD2410.buffer[14 +i];
-      LD2410.static_sensitivity[i] = LD2410.buffer[23 +i];
+    rt.max_moving_distance_gate = rt.buffer[12];
+    rt.max_static_distance_gate = rt.buffer[13];
+    for (uint32_t i = 0; i < LD2410_MAX_GATES; i++) {
+      rt.moving_sensitivity[i] = rt.buffer[14 +i];
+      rt.static_sensitivity[i] = rt.buffer[23 +i];
     }
-    LD2410.no_one_duration = LD2410.buffer[33] << 8 | LD2410.buffer[32];
+    rt.no_one_duration = rt.buffer[33] << 8 | rt.buffer[32];
   }
-  else if (LD2410_CMND_START_CONFIGURATION == LD2410.buffer[6]) {  // 0xFF
+  else if (LD2410_CMND_START_CONFIGURATION == rt.buffer[6]) {  // 0xFF
     //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
     // FD FC FB FA 08 00 FF 01 00 00 01 00 40 00 04 03 02 01
     // header     |len  |ty   |ack  |protv|bsize|trailer
     //            |    8|     |    0|    1|   64|
-    LD2410.valid_response = true;
+    rt.valid_response = true;
   }
-  else if (LD2410_CMND_GET_FIRMWARE == LD2410.buffer[6]) {         // 0xA0
+  else if (LD2410_CMND_GET_FIRMWARE == rt.buffer[6]) {         // 0xA0
     //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
     // FD FC FB FA 0C 00 A0 01 00 00 00 01 07 01 16 15 09 22 04 03 02 01
     // header     |len  |ty|hd|ack  |ftype|major|minor      |trailer
     //            |   12|  | 1|    0|  256|  1.7|   22091516|
-    AddLog(LOG_LEVEL_INFO, PSTR("LD2: Firmware version V%d.%02d.%02d%02d%02d%02d"),  // Firmware version V1.07.22091516
-      ToBcd(LD2410.buffer[13]), ToBcd(LD2410.buffer[12]),
-      ToBcd(LD2410.buffer[17]), ToBcd(LD2410.buffer[16]), ToBcd(LD2410.buffer[15]), ToBcd(LD2410.buffer[14]));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LD2410 "Firmware version V%d.%02d.%02d%02d%02d%02d"),  // Firmware version V1.07.22091516
+      ToBcd(rt.buffer[13]), ToBcd(rt.buffer[12]),
+      ToBcd(rt.buffer[17]), ToBcd(rt.buffer[16]), ToBcd(rt.buffer[15]), ToBcd(rt.buffer[14]));
   }
 }
 
 
-bool mHLK_LD2410::CheckHeaderMatch(const uint8_t *header, uint32_t offset) {
-  for (uint32_t i = 0; i < 4; i++) {
-    if (LD2410.buffer[offset +i] != header[i]) { return false; }
-  }
-  return true;
+uint32_t mHLK_LD2410::ToBcd(uint32_t value) {
+  return ((value >> 4) * 10) + (value & 0xF);
 }
 
-
-void mHLK_LD2410::PollSensor(void) 
-{
-
-  while (LD2410Serial->available()) {
-    yield();                                                    // Fix watchdogs
-
-    LD2410.buffer[LD2410.byte_counter++] = LD2410Serial->read();
-    AddLog_Array(LOG_LEVEL_DEBUG_MORE, "LD2410.buffer", LD2410.buffer, LD2410_BUFFER_SIZE);
-    if (LD2410.byte_counter < 4) { continue; }                  // Need first four header bytes
-
-    uint32_t header_start = LD2410.byte_counter -4;             // Fix interrupted header transmits
-    bool target_header = (CheckHeaderMatch(LD2410_target_header, header_start));  // F4F3F2F1
-    bool config_header = (CheckHeaderMatch(LD2410_config_header, header_start));  // FDFCFBFA
-    if ((target_header || config_header) && (header_start != 0)) {
-      memmove(LD2410.buffer, LD2410.buffer + header_start, 4);  // Sync buffer with header
-      LD2410.byte_counter = 4;
-    }
-    if (LD2410.byte_counter < 6) { continue; }                  // Need packet size bytes
-
-    // ALOG_INF(PSTR("target_header %d"), target_header);
-    // ALOG_INF(PSTR("config_header %d"), config_header);
-  
-    target_header = (CheckHeaderMatch(LD2410_target_header, 0));     // F4F3F2F1
-    config_header = (CheckHeaderMatch(LD2410_config_header, 0));     // FDFCFBFA
-    if (target_header || config_header) {
-      uint32_t len = LD2410.buffer[4] +10;                      // Total packet size
-      if (len > LD2410_BUFFER_SIZE) {
-        LD2410.byte_counter = 0;                                // Invalid data
-        break;                                                  // Exit loop to satisfy yields
-      }
-      if (LD2410.byte_counter < len) { continue; }              // Need complete packet
-
-      AddLog_Array(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LD2410 "buffer"), LD2410.buffer, len, /*as hex*/ true );
-
-      if (target_header) 
-      {                                      // F4F3F2F1
-
-        AddLog_Array(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "target buffer"), LD2410.buffer, len, /*as hex*/ true );
-
-        if (CheckHeaderMatch(LD2410_target_footer, len -4)) {        // F8F7F6F5
-          Ld1410HandleTargetData();
-        }
-
-      }
-      else 
-      if (config_header) 
-      {                                 // FDFCFBFA
-
-        AddLog_Array(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "config buffer"), LD2410.buffer, len, /*as hex*/ true );
-
-        if (CheckHeaderMatch(LD2410_config_footer, len -4)) {        // 04030201
-          Ld1410HandleConfigData();
-          LD2410Serial->setReadChunkMode(0);                    // Disable chunk mode fixing Hardware Watchdogs
-        }
-
-      }
-    }
-    LD2410.byte_counter = 0;                                    // Finished or bad received footer
-    break;                                                      // Exit loop to satisfy yields
-  }
-  // If here then LD2410.byte_counter could still be partial correct for next loop
-
-}
 
 void mHLK_LD2410::SendCommand(uint32_t command, uint8_t *val, uint32_t val_len) {
   uint32_t len = val_len +12;
@@ -332,7 +335,7 @@ void mHLK_LD2410::SendCommand(uint32_t command, uint8_t *val, uint32_t val_len) 
   buffer[10 +val_len] = 0x02;
   buffer[11 +val_len] = 0x01;
 
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LD2: Send %*_H"), len, buffer);
+  AddLog_Array(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LD2410 "Send buffer"), buffer, len, /*as hex*/ true );
 
   LD2410Serial->setReadChunkMode(1);                            // Enable chunk mode introducing possible Hardware Watchdogs
   LD2410Serial->flush();
@@ -379,9 +382,9 @@ void mHLK_LD2410::SetBaudrate(uint32_t index) {                        // 0xA1
 /********************************************************************************************/
 
 void mHLK_LD2410::Every100MSecond(void) {
-  if (LD2410.step) {
-    LD2410.step--;
-    switch (LD2410.step) {
+  if (rt.step) {
+    rt.step--;
+    switch (rt.step) {
       // case 60: Set default settings
       case 59:
         SetConfigMode();                                  // Stop running mode
@@ -393,8 +396,8 @@ void mHLK_LD2410::Every100MSecond(void) {
         SendCommand(LD2410_CMND_REBOOT);                  // Wait at least 1 second
         break;
       case 51:
-        LD2410.step = 12;
-        AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Settings factory reset"));
+        rt.step = 12;
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "Settings factory reset"));
         break;
 
       // case 40: Save settings
@@ -402,46 +405,27 @@ void mHLK_LD2410::Every100MSecond(void) {
         SetConfigMode();                                  // Stop running mode
         break;
       case 37:
-        SetMaxDistancesAndNoneDuration(8, 8, LD2410.no_one_duration);
+        SetMaxDistancesAndNoneDuration(8, 8, rt.no_one_duration);
         break;
       case 28 ... 36: {
-          uint32_t index = LD2410.step -28;
-          SetGateSensitivity(index, LD2410.moving_sensitivity[index], LD2410.static_sensitivity[index]);
+          uint32_t index = rt.step -28;
+          SetGateSensitivity(index, rt.moving_sensitivity[index], rt.static_sensitivity[index]);
         }
         break;
       case 27:
-        LD2410.step = 3;
-        AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Settings saved"));
+        rt.step = 3;
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "Settings saved"));
         break;
-/*
-      // case 24: pre-POC using 57600 bps instead of default 256000 bps
-      case 23:
-        AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Switch to 57600 bps"));
-        LD2410Serial->flush();
-        LD2410Serial->begin(256000);
-        break;
-      case 21:
-        SetConfigMode();                                  // Stop running mode
-        break;
-      case 19:
-        SetBaudrate(4);                                   // 57600 bps
-        break;
-      case 18:
-        SendCommand(LD2410_CMND_REBOOT);                  // Wait at least 1 second
-        LD2410Serial->flush();
-        LD2410Serial->begin(57600);
-      break;
-*/
       case 17:
         SetConfigMode();                                  // Stop running mode
         break;
       case 14:
-        if (0 == LD2410.set_engin_mode) {
+        if (0 == rt.set_engin_mode) {
           SendCommand(LD2410_CMND_END_ENGINEERING);
         } else {
           SendCommand(LD2410_CMND_START_ENGINEERING);
         }
-        LD2410.step = 2;
+        rt.step = 2;
         break;
 
       // case 12: Init
@@ -449,14 +433,13 @@ void mHLK_LD2410::Every100MSecond(void) {
         SetConfigMode();                                  // Stop running mode
         break;
       case 3:
-        if (!LD2410.valid_response && LD2410.retry) {
-          LD2410.retry--;
-          if (LD2410.retry) {
-//            LD2410.step = 24;                                   // Change baudrate
-            LD2410.step = 7;                                    // Retry
+        if (!rt.valid_response && rt.retry) {
+          rt.retry--;
+          if (rt.retry) {
+            rt.step = 7;                                    // Retry
           } else {
-            LD2410.step = 0;
-            AddLog(LOG_LEVEL_DEBUG, PSTR("LD2: Not detected"));
+            rt.step = 0;
+            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LD2410 "Not detected"));
           }
         } else {
           SendCommand(LD2410_CMND_GET_FIRMWARE);
@@ -470,181 +453,129 @@ void mHLK_LD2410::Every100MSecond(void) {
         break;
     }
   } else {
-    if (1 == LD2410.settings) {
-      LD2410.settings = 0;
-      LD2410.step = 40;
+    if (1 == rt.settings) {
+      rt.settings = 0;
+      rt.step = 40;
     }
-    else if (2 == LD2410.settings) {
-      LD2410.settings = 0;
-      LD2410.step = 60;
+    else if (2 == rt.settings) {
+      rt.settings = 0;
+      rt.step = 60;
     }
   }
 }
 
 void mHLK_LD2410::Show_SensorReading(void) {
-  // if (LD2410.moving_energy and (!Settings->flag6.ld2410_use_pin)) {
-
-  //   // Send state change to be captured by rules
-  //   // {"Time":"2022-11-26T10:48:16","Switch1":"ON","LD2410":{"Distance":[125.0,0.0,0.0],"Energy":[0,100]}}
-  //   MqttPublishSensor();
-  // }
-
-
-  // if (json) {
-    //                                                             cm   cm   cm                          %  %
-    ALOG_INF(PSTR(",\"LD2410\":{\"" D_DISTANCE "\":[%d,%d,%d],\"" D_ENERGY "\":[%d,%d]}"),
-    LD2410.moving_distance, LD2410.static_distance, LD2410.detect_distance, LD2410.moving_energy, LD2410.static_energy);
-#ifdef USE_WEBSERVER
-  } else {
-    WSContentSend_PD(HTTP_SNS_LD2410_CM, &moving_distance, &static_distance, &detect_distance);
-    if (LD2410.web_engin_mode == 1) {
-      WSContentSend_PD(HTTP_SNS_LD2410_ENG, 
-          LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
-          LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
-          LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
-          LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
-          LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
-          LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
-          LD2410.engineering.light,LD2410.engineering.out_pin);
-    }
-#endif
-  
+  //                                              cm cm cm                     %  %
+  ALOG_INF(PSTR("\"LD2410\":{\"" D_DISTANCE "\":[%d,%d,%d],\"" D_ENERGY "\":[%d,%d]}"),
+  rt.moving_distance, rt.static_distance, rt.detect_distance, rt.moving_energy, rt.static_energy);
 
 }
 
-/*********************************************************************************************\
- * Commands
-\*********************************************************************************************/
-
-// const char kCommands[] PROGMEM = "LD2410|"  // Prefix
-//   "Duration|MovingSens|StaticSens|Get|EngineeringEnd|EngineeringStart";
-
-// void (* const Command[])(void) PROGMEM = {
-//   &CmndDuration, &CmndMovingSensitivity, &CmndStaticSensitivity, &Cmndlast, &CmndEngineeringEnd, &CmndEngineeringStart };
-
-// void Response(void) {
-//   Response_P(PSTR("{\"LD2410\":{\"Duration\":%d,\"Moving\":{\"Gates\":%d,\"Sensitivity\":["),
-//     LD2410.no_one_duration, LD2410.max_moving_distance_gate);
-//   for (uint32_t i = 0; i <= LD2410_MAX_GATES; i++) {
-//     ResponseAppend_P(PSTR("%s%d"), (i==0)?"":",", LD2410.moving_sensitivity[i]);
-//   }
-//   ResponseAppend_P(PSTR("]},\"Static\":{\"Gates\":%d,\"Sensitivity\":["), LD2410.max_static_distance_gate);
-//   for (uint32_t i = 0; i <= LD2410_MAX_GATES; i++) {
-//     ResponseAppend_P(PSTR("%s%d"), (i==0)?"":",", LD2410.static_sensitivity[i]);
-//   }
-//   ResponseAppend_P(PSTR("]}}}"));
-// }
-
-// void CmndDuration(void) {
-//   // LD2410Duration 0  - Set default settings
-//   if (0 == XdrvMailbox.payload) {
-//     LD2410.settings = 2;
-//   }
-//   // LD2410Duration 5
-//   else if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= 65535)) {
-//     LD2410.no_one_duration = XdrvMailbox.payload;
-//     LD2410.settings = 1;
-//   }
-//   Response();
-// }
-
-// void CmndMovingSensitivity(void) {
-//   // LD2410MovingSens 50,50,40,30,20,15,15,15,15
-//   uint32_t parm[LD2410_MAX_GATES +1] = { 0 };
-//   uint32_t count = ParseParameters(LD2410_MAX_GATES +1, parm);
-//   if (count) {
-//     for (uint32_t i = 0; i < count; i++) {
-//       if ((parm[i] >= 0) && (parm[i] <= 100)) {
-//         LD2410.moving_sensitivity[i] = parm[i];
-//       }
-//     }
-//     LD2410.settings = 1;
-//   }
-//   Response();
-// }
-
-// void CmndStaticSensitivity(void) {
-//   // LD2410StaticSens 0,0,40,40,30,30,20,20,20
-//   uint32_t parm[LD2410_MAX_GATES +1] = { 0 };
-//   uint32_t count = ParseParameters(LD2410_MAX_GATES +1, parm);
-//   if (count) {
-//     for (uint32_t i = 0; i < count; i++) {
-//       if ((parm[i] >= 0) && (parm[i] <= 100)) {
-//         LD2410.static_sensitivity[i] = parm[i];
-//       }
-//     }
-//     LD2410.settings = 1;
-//   }
-//   Response();
-// }
-
-// void Cmndlast(void) {
-//   Response_P(PSTR("{\"LD2410\":{\"Moving energy\":[%d,%d,%d,%d,%d,%d,%d,%d,%d],\"Static energy\":[%d,%d,%d,%d,%d,%d,%d,%d,%d],\"Light\":%d,\"Out_pin\":%d}}"),
-//           LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
-//           LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
-//           LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
-//           LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
-//           LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
-//           LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
-//           LD2410.engineering.light,LD2410.engineering.out_pin);
-// }
-
-// void CmndEngineeringEnd(void) {
-//     LD2410.set_engin_mode = 0;
-//     LD2410.step = 18;
-//     Response_P(PSTR("LD2410: End engineering mode"));
-// }
-
-// void CmndEngineeringStart(void) {
-//     LD2410.set_engin_mode= 1;
-//     LD2410.step = 18;
-//     Response_P(PSTR("LD2410: Start engineering mode"));
-// }
-
-// /*********************************************************************************************\
-//  * Presentation
-// \*********************************************************************************************/
-
-// #ifdef USE_WEBSERVER
-// const char HTTP_SNS_LD2410_CM[] PROGMEM =
-//   "{s}LD2410 " D_MOVING_DISTANCE "{m}%1_f " D_UNIT_CENTIMETER "{e}"
-//   "{s}LD2410 " D_STATIC_DISTANCE "{m}%1_f " D_UNIT_CENTIMETER "{e}"
-//   "{s}LD2410 " D_DETECT_DISTANCE "{m}%1_f " D_UNIT_CENTIMETER "{e}";
-// const char HTTP_SNS_LD2410_ENG[] PROGMEM =
-//   "{s}LD2410 " D_MOVING_ENERGY_T "{m}%d %d %d %d %d %d %d %d %d{e}"
-//   "{s}LD2410 " D_STATIC_ENERGY_T "{m}%d %d %d %d %d %d %d %d %d{e}"
-//   "{s}LD2410 " D_LD2410_LIGHT "{m}%d{e}"
-//   "{s}LD2410 " D_LD2410_PIN_STATE "{m}%d{e}";
-// #endif
-
-// void Show(bool json) {
-//   float moving_distance = LD2410.moving_distance;
-//   float static_distance = LD2410.static_distance;
-//   float detect_distance = LD2410.detect_distance;
-//   if (json) {
-//     //                                                             cm   cm   cm                          %  %
-//     ResponseAppend_P(PSTR(",\"LD2410\":{\"" D_JSON_DISTANCE "\":[%1_f,%1_f,%1_f],\"" D_JSON_ENERGY "\":[%d,%d]}"),
-//       &moving_distance, &static_distance, &detect_distance, LD2410.moving_energy, LD2410.static_energy);
-// #ifdef USE_WEBSERVER
-//   } else {
-//     WSContentSend_PD(HTTP_SNS_LD2410_CM, &moving_distance, &static_distance, &detect_distance);
-//     if (LD2410.web_engin_mode == 1) {
-//       WSContentSend_PD(HTTP_SNS_LD2410_ENG, 
-//           LD2410.engineering.moving_gate_energy[0],LD2410.engineering.moving_gate_energy[1],LD2410.engineering.moving_gate_energy[2],
-//           LD2410.engineering.moving_gate_energy[3],LD2410.engineering.moving_gate_energy[4],LD2410.engineering.moving_gate_energy[5],
-//           LD2410.engineering.moving_gate_energy[6],LD2410.engineering.moving_gate_energy[7],LD2410.engineering.moving_gate_energy[8],
-//           LD2410.engineering.static_gate_energy[0],LD2410.engineering.static_gate_energy[1],LD2410.engineering.static_gate_energy[2],
-//           LD2410.engineering.static_gate_energy[3],LD2410.engineering.static_gate_energy[4],LD2410.engineering.static_gate_energy[5],
-//           LD2410.engineering.static_gate_energy[6],LD2410.engineering.static_gate_energy[7],LD2410.engineering.static_gate_energy[8],
-//           LD2410.engineering.light,LD2410.engineering.out_pin);
-//     }
-// #endif
-//   }
-// }
 
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
+
+
+void mHLK_LD2410::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  JsonParserToken jtok_sub = 0; 
+  int8_t tmp_id = 0;
+
+  JsonParserObject jobj = 0; 
+  
+  if(!(jobj = obj[GetModuleName()].getObject()))
+  {
+    ALOG_DBM(PSTR(D_LOG_RADAR_LD2410 "No Command"));
+    return;
+  }
+	
+  if(jtok = jobj["Duration"])
+  {
+    ALOG_INF(PSTR(D_LOG_RADAR_LD2410 "Duration %d"), jtok.getInt());
+    CmndDuration(jtok.getInt());
+  }
+
+  if(jtok = jobj["MovingSens"])
+  {
+    ALOG_INF(PSTR(D_LOG_RADAR_LD2410 "MovingSens %d"), jtok.getInt());
+    if(jtok.isArray())
+    {
+      uint8_t values[LD2410_MAX_GATES] = { 0 };
+      uint32_t length = 0;
+      for(auto v : jtok.getArray())
+      {
+        if (length >= LD2410_MAX_GATES) break;
+        values[length++] = v.getInt();
+      }
+      CmndMovingSensitivity(values, length);
+    }
+  }
+
+  if(jtok = jobj["StaticSens"])
+  {
+    ALOG_INF(PSTR(D_LOG_RADAR_LD2410 "StaticSens %d"), jtok.getInt());
+    if(jtok.isArray())
+    {
+      uint8_t values[LD2410_MAX_GATES] = { 0 };
+      uint32_t length = 0;
+      for(auto v : jtok.getArray())
+      {
+        if (length >= LD2410_MAX_GATES) break;
+        values[length++] = v.getInt();
+      }
+      CmndStaticSensitivity(values, length);
+    }
+  }
+
+  if(jtok = jobj["EngineeringMode"])
+  {
+    ALOG_INF(PSTR(D_LOG_RADAR_LD2410 "EngineeringMode %d"), jtok.getBool());
+    CmndEnableEngineeringMode(jtok.getBool());
+  }
+
+}
+
+
+void mHLK_LD2410::CmndDuration(uint16_t val) {
+  // LD2410Duration 0  - Set default settings
+  if (0 == val) {
+    rt.settings = 2;
+  }
+  // LD2410Duration 5
+  rt.no_one_duration = val;
+  rt.settings = 1;
+}
+
+
+void mHLK_LD2410::CmndMovingSensitivity(uint8_t* values, uint32_t length) {
+  // Directly set moving sensitivity from input array
+  for (uint32_t i = 0; i < length && i < LD2410_MAX_GATES + 1; i++) {
+    if (values[i] <= 100) {  // uint8_t is always >= 0
+      rt.moving_sensitivity[i] = values[i];
+    }
+  }
+  rt.settings = 1;
+}
+
+
+void mHLK_LD2410::CmndStaticSensitivity(uint8_t* values, uint32_t length) {
+  // Directly set moving sensitivity from input array
+  for (uint32_t i = 0; i < length && i < LD2410_MAX_GATES + 1; i++) {
+    if (values[i] <= 100) {  // uint8_t is always >= 0
+      rt.static_sensitivity[i] = values[i];
+    }
+  }
+  rt.settings = 1;
+}
+
+
+void mHLK_LD2410::CmndEnableEngineeringMode(bool val) {
+  rt.set_engin_mode= val;
+  rt.step = 18;
+}
 
   
 /******************************************************************************************************************
@@ -654,7 +585,27 @@ void mHLK_LD2410::Show_SensorReading(void) {
 uint8_t mHLK_LD2410::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add(D_SENSOR_COUNT, module_state.devices);
+    // Add array fields
+    JBI->Array_AddArray("moving_sensitivity", rt.moving_sensitivity, LD2410_MAX_GATES);
+    JBI->Array_AddArray("static_sensitivity", rt.static_sensitivity, LD2410_MAX_GATES);
+    JBI->Array_AddArray("engineering_moving_gate_energy", rt.engineering.moving_gate_energy, LD2410_MAX_GATES);
+    JBI->Array_AddArray("engineering_static_gate_energy", rt.engineering.static_gate_energy, LD2410_MAX_GATES);
+
+    JBI->Add("no_one_duration", rt.no_one_duration);
+    JBI->Add("max_moving_distance_gate", rt.max_moving_distance_gate);
+    JBI->Add("max_static_distance_gate", rt.max_static_distance_gate);
+    JBI->Add("step", rt.step);
+    JBI->Add("retry", rt.retry);
+    JBI->Add("settings", rt.settings);
+    JBI->Add("byte_counter", rt.byte_counter);
+    JBI->Add("valid_response", rt.valid_response);
+    JBI->Add("set_engin_mode", rt.set_engin_mode);
+    JBI->Add("web_engin_mode", rt.web_engin_mode);  
+
+    // Engineering extras
+    JBI->Add("engineering_light", rt.engineering.light);
+    JBI->Add("engineering_out_pin", rt.engineering.out_pin);
+
   return JsonBuilderI->End();
 
 }
@@ -662,35 +613,17 @@ uint8_t mHLK_LD2410::ConstructJSON_Settings(uint8_t json_level, bool json_append
 uint8_t mHLK_LD2410::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-
-  // Raw pointer to LD2410 struct assumed
-  JBI->Add("moving_distance", LD2410.moving_distance);
-  JBI->Add("static_distance", LD2410.static_distance);
-  JBI->Add("detect_distance", LD2410.detect_distance);
-  JBI->Add("no_one_duration", LD2410.no_one_duration);
-  JBI->Add("max_moving_distance_gate", LD2410.max_moving_distance_gate);
-  JBI->Add("max_static_distance_gate", LD2410.max_static_distance_gate);
-  JBI->Add("moving_energy", LD2410.moving_energy);
-  JBI->Add("static_energy", LD2410.static_energy);
-  JBI->Add("step", LD2410.step);
-  JBI->Add("retry", LD2410.retry);
-  JBI->Add("settings", LD2410.settings);
-  JBI->Add("byte_counter", LD2410.byte_counter);
-  JBI->Add("valid_response", LD2410.valid_response);
-  JBI->Add("set_engin_mode", LD2410.set_engin_mode);
-  JBI->Add("web_engin_mode", LD2410.web_engin_mode);
-
-  // Add array fields
-  // JBI->AddArray("moving_sensitivity", LD2410.moving_sensitivity, LD2410_MAX_GATES + 1);
-  // JBI->AddArray("static_sensitivity", LD2410.static_sensitivity, LD2410_MAX_GATES + 1);
-  // JBI->AddArray("engineering_moving_gate_energy", LD2410.engineering.moving_gate_energy, LD2410_MAX_GATES + 1);
-  // JBI->AddArray("engineering_static_gate_energy", LD2410.engineering.static_gate_energy, LD2410_MAX_GATES + 1);
-
-  // Engineering extras
-  JBI->Add("engineering_light", LD2410.engineering.light);
-  JBI->Add("engineering_out_pin", LD2410.engineering.out_pin);
-
+    JBI->Object_Start(D_DISTANCE);
+      JBI->Add(D_MOVING, rt.moving_distance);
+      JBI->Add(D_STATIC, rt.static_distance);
+      JBI->Add(D_DETECT, rt.detect_distance);
+    JBI->Object_End();
+    JBI->Object_Start(D_ENERGY);
+      JBI->Add(D_MOVING, rt.moving_energy);
+      JBI->Add(D_STATIC, rt.static_energy);
+    JBI->Object_End();
   return JBI->End();
+
 }
 
 

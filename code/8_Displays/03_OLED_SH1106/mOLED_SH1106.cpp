@@ -180,7 +180,7 @@ void mOLED_SH1106::InitDriver(void)
     }
 
     oled1106 = new Adafruit_SH1106(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire);
-    oled1106->begin(SH1106_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
+    oled1106->begin(SH1106_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET) >= 0);
     tkr_iDisp->renderer = oled1106;
     tkr_iDisp->renderer->DisplayInit(tkr_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
     tkr_iDisp->renderer->setTextColor(1,0);

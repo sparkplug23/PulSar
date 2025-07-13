@@ -529,7 +529,7 @@ return 1;
 
     bool flag_uptime_reached_reduce_frequency = false;
 
-    const char* GetState_PCtr(int8_t state);
+    // const char* GetState_PCtr(int8_t state);
     void Load_New_Subscriptions_From_Function_Template();
     
     void CallMQTTSenders();

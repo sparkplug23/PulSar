@@ -1435,6 +1435,7 @@
   #define D_LOG_RESPONSE "RES: "
   #define D_LOG_RESULT "RSL: "       // Result
   #define D_LOG_RFR "RFR: "          // RF Received
+  #define D_LOG_RADAR_LD2410 "RAD: "
   #define D_LOG_RULES "RUL: "
   #define D_LOG_SDCARD "SDC: "
   #define D_LOG_SERIAL "SER: "       // Serial
@@ -1510,6 +1511,11 @@
 #define D_CHANNELCOUNT "ChannelCount"
 // #define D_DATA "Data"
 #define D_DISTANCE "Distance"
+
+
+#define D_MOVING "Moving"
+#define D_STATIC "Static"
+#define D_DETECT "Detect"
 
 #define D_DISPLAY "Display"
 #define D_DISPLAY_MODE "DisplayMode"
@@ -2277,6 +2283,8 @@
   #define D_MODULE_NAME_CAM_AITHINKER_CTR          "Webcam AIThinker"
   #define D__MODULE_TEMPLATE__CAMERA_FREENOVE_WROOVER__CTR          "Webcam FreenoveWroover"
   #define D__MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE__CTR "Webcam SeedXiao"
+
+  #define  D__MODULE_TEMPLATE__GENERIC__CTR "Generic Module"
 
 /********************************************************************************************/
 

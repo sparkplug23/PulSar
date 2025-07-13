@@ -1066,7 +1066,9 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01();
     uint16_t EffectAnim__SunPositions__Sunset_Blended_Palettes_01();
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_01();
+    uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_02();
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Azimuth_01();
+    uint16_t EffectAnim__SunPositions__DrawSun_1D_Azimuth_02();
     uint16_t EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01();
     uint16_t EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01();
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
@@ -1282,6 +1284,30 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     *******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
+    /***
+     * Effect Ideas:
+     * * (1) "ScatterBurst" 
+     *        - A burst of light that scatters in all directions, like fireworks.
+     *        - New spanned burst points will appear equidistant along the string, with random bursting that either
+     *          allows overlap, or isolated (ends short) of the neighbouring burst points.
+     *        - Option Multi:
+     *           = Dying fades will either; immediate die, flicker out, or fade out.
+     *    (2) ScatterBurst Random
+     *        - Similar to (1), but the burst points are randomly distributed along the string. (eg similar to firework without launch)
+     *        - Option Multi:
+     *           = Dying fades will either; immediate die, flicker out, or fade out.
+     *        - (1) and (2) should share base
+     *    (3) Work on PWM effects for XMAS controller emulation.
+     *        - Using a custom PWM/H321 build with 4 outputs, can I completely emulate the XMAS controller?
+     *        - Later, a custom board could be made that works on mains voltage, and has 4 outputs.
+     *        - Make a test board for this, with a jumper enabling 3V to a row of coloured LEDs. Those LED grounds, will be tied to PWM shifters, so I can test with LEDs or view full sets.
+     *     (4) "Pop #"
+     *        - Likely exists already but can be refined.
+     *        - Random Palette colours will go full brightness On, then decay to secondary palette
+     *          = Using base, effect will be added to have fade to black default, decay to white (ie saturation decay) or decay to another palette.
+     *          = Decay method, will again be either; immediate die, flicker out, or fade out.
+     * 
+     */
 
     enum EFFECTS_FUNCTION__IDS
     {
@@ -1497,7 +1523,9 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_02__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_02__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__ID,
       #endif

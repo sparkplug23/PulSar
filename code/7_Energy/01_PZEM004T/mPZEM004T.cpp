@@ -101,7 +101,7 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
 void mEnergyPZEM004T::Pre_Init(void)
 {
 
-  if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
+  if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX))
   {
     module_state.mode = ModuleStatus::Initialising;
   }
@@ -112,7 +112,7 @@ void mEnergyPZEM004T::Pre_Init(void)
 void mEnergyPZEM004T::Init(void)
 {
 
-  modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS_ID), tkr_pins->GetPin(GPIO_PZEM0XX_TX_ID));
+  modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS), tkr_pins->GetPin(GPIO_PZEM0XX_TX));
 
   uint8_t result = modbus->Begin(9600);
 
@@ -277,7 +277,7 @@ void mEnergyPZEM004T::DeviceSearch(uint8_t address_limit)
     timeout = millis();
     uint16_t wait_time = 200;
     if(address_limit>100) wait_time = 100;
-    while(abs(millis()-timeout)<wait_time)
+    while((millis()-timeout)<wait_time)
     {
       WDT_Reset();
 

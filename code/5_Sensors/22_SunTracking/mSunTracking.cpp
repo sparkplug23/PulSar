@@ -37,6 +37,7 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
 
 		Update_Solar_Tracking_Data();
 
+        CalculateSunriseSunsetAzimuth(LATITUDE, LONGITUDE, ALTITUDE_ABOVE_SEALEVEL);
 
         #ifdef ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
             double latitude = LATITUDE;
@@ -85,7 +86,10 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
         #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
         // Takes 144ms
         CalculateMaxMinElevationForDay(LATITUDE, LONGITUDE, tkr_time->GetUTCTime(), ALTITUDE_ABOVE_SEALEVEL); //will only need to run once a day
+        CalculateSunriseSunsetAzimuth(LATITUDE, LONGITUDE, ALTITUDE_ABOVE_SEALEVEL);
         #endif
+
+
     break;
     /************
      * COMMANDS SECTION * 
@@ -174,6 +178,7 @@ void mSunTracking::Update_Solar_Tracking_Data()
     calc.is_daytime = calc.position.elevation > 0 ? true : false;
     if(calc.max_elevation == 0){ // Not set, run here once
         CalculateMaxMinElevationForDay(latitude, longitude, utc_time, altitude); //will only need to run once a day
+        CalculateSunriseSunsetAzimuth(latitude, longitude, altitude);
     }
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
 
@@ -927,6 +932,41 @@ void mSunTracking::CalculateMaxMinElevationForDay(time_t utc_time, double latitu
     #endif
 }
 
+void mSunTracking::CalculateSunriseSunsetAzimuth(double latitude, double longitude, double altitude)
+{
+  // Reset
+  calc.sunrise_azimuth = 0.0f;
+  calc.sunset_azimuth  = 0.0f;
+
+  if (!calc.isvalid){
+    
+    
+  ALOG_INF(PSTR("CalculateSunriseSunsetAzimuth end early"));
+    return;
+  }
+
+
+  // Defensive: ensure sunrise/sunset times are valid
+  if (calc.today.sunrise > 0) {
+    SunPosition pos = CalculateSolarAzEl(calc.today.sunrise, latitude, longitude, altitude);
+    calc.sunrise_azimuth = static_cast<float>(pos.azimuth);
+  }
+
+  if (calc.today.sunset > 0) {
+    SunPosition pos = CalculateSolarAzEl(calc.today.sunset, latitude, longitude, altitude);
+    calc.sunset_azimuth = static_cast<float>(pos.azimuth);
+  }
+
+  #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+  std::cout << "Sunrise Azimuth: " << calc.sunrise_azimuth << "°\n";
+  std::cout << "Sunset Azimuth: "  << calc.sunset_azimuth  << "°\n";
+  #endif
+
+  ALOG_INF(PSTR("az rise/set %d/%d"), calc.sunrise_azimuth, calc.sunset_azimuth);
+}
+
+
+
 #endif // USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
 
 
@@ -1013,6 +1053,8 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
         JBI->Add(PM__ELEVATION, (float)calc.position.elevation);
         JBI->Add(PM__ELEVATION_MAX, calc.max_elevation);
         JBI->Add(PM__ELEVATION_MIN, calc.min_elevation);
+        JBI->Add("SunriseAzimuth", calc.sunrise_azimuth);
+        JBI->Add("SunsetAzimuth", calc.sunset_azimuth);
     JBI->Object_End();
     #endif
 

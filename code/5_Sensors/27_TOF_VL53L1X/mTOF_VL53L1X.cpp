@@ -71,7 +71,7 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
         }
       }
 
-      ALOG_INF(PSTR("roi_set %d"), roi_set);
+      // ALOG_INF(PSTR("roi_set %d"), roi_set);
           
     break;
     case TASK_EVERY_50_MSECOND:
@@ -196,10 +196,10 @@ void mTOF_VL53L1X::Pre_Init(void)
   module_state.devices = 0;
 
   for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) {
-    if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, i)) {
-      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Disable%d p%d"),i,tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID,i));
-      pinMode(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, i), OUTPUT);
-      digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, 0), LOW);
+    if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, i)) {
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Disable%d p%d"),i,tkr_pins->Pin(GPIO_VL53L1X_XSHUT1,i));
+      pinMode(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, i), OUTPUT);
+      digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, 0), LOW);
     }
   }
 
@@ -260,12 +260,12 @@ void mTOF_VL53L1X::Init(void)
   **************************/
   uint32_t xshut_mask = 1;
   for (uint32_t i = 0; i < module_state.devices; i++, xshut_mask <<= 1) {
-      bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, i);
+      bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, i);
 
       ALOG_INF(PSTR("VL53L1X[%d] XSHUT %d"), i, use_xshut);
 
       if (use_xshut) {
-          digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, i), HIGH);
+          digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, i), HIGH);
           delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME); // XSHUT boot delay
       }
       if (!use_xshut) {
@@ -440,8 +440,8 @@ uint8_t mTOF_VL53L1X::SearchForDevices()
    for (uint32_t i = 0; i < VL53LXX_MAX_SENSORS; i++) 
    {
      // Enable device
-     if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, i)){
-       digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, i), HIGH);
+     if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, i)){
+       digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, i), HIGH);
        delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME);
      }
  
@@ -466,8 +466,8 @@ uint8_t mTOF_VL53L1X::SearchForDevices()
      }
      
      // Disable device
-     if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, i)){
-       digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, i), LOW);
+     if (tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, i)){
+       digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, i), LOW);
        delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME);
      }
  
@@ -509,11 +509,11 @@ bool mTOF_VL53L1X::SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) {
       return false;
   }
 
-  bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1_ID, device_id);
+  bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, device_id);
 
   if (use_xshut) {
       ALOG_INF(PSTR("Enabling XSHUT for VL53L1X[%d]"), device_id);
-      digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, device_id), HIGH);
+      digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, device_id), HIGH);
       delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME); // XSHUT boot delay
   }
 
@@ -542,7 +542,7 @@ bool mTOF_VL53L1X::SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) {
   ALOG_INF(PSTR("VL53L1X[%d] successfully switched to 0x%02X"), device_id, new_address);
 
   if (use_xshut) {
-      digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1_ID, device_id), LOW);
+      digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, device_id), LOW);
   }
 
   return true;

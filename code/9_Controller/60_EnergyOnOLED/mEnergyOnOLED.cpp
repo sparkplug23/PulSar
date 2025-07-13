@@ -86,6 +86,7 @@ int8_t mEnergyOLED::Tasker(uint8_t function, JsonParserObject obj){
     break;
     #endif  
   }
+  return 1;
 
 }//end
 

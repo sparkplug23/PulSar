@@ -19,7 +19,7 @@
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_02
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_03
-
+// #define DEVICE_GROUP__CAMERAS__ESP32_CAM_EYE_SENSOR_01
 
 //--------------------------------[Enable Device]-------------------------------------
 
@@ -121,23 +121,20 @@
   // #define CAMERA_MODEL_WROVER_KIT
 
   // #define USE_MODULE_DRIVERS_CAMERA_OV2640
-
-  #define USE_MODULE_DRIVERS__CAMERA_TAS25
+  // #define USE_MODULE_DRIVERS_CAMERA_OV2640
+  #define USE_MODULE_DRIVERS__CAMERA_2025
   #define CAMERA_MODEL_WROVER_KIT
   #define WEBCAM_DEV_DEBUG
 
-  #define USE_MODULE_DRIVERS__CAMERA_TAS25_TESTING__WORKING
-  #define USE_MODULE_DRIVERS__CAMERA_TAS25_TESTING__NOT_YET_WORKING
-  #define USE_MODULE_DRIVERS__CAMERA_TAS25_TESTING_INCLUDE
+  
 #define USE_MODULE_NETWORK_WEBSERVER
 #define USE_MODULE_CORE_FILESYSTEM
 #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 #define DEBUG_DRIVERS__CAMERA_2025
+#define ENABLE_RTSPSERVER
 
-#define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-#define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-
+#define DEBUG_DRIVERS__CAMERA_2025
 // //  /***********************************
 // //   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
 // //  ************************************/  
@@ -368,9 +365,17 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
 
 
-// #define USE_FUNCTION_TEMPLATE
-// DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-// "{"
+#define USE_FUNCTION_TEMPLATE
+DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+"{"
+  "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
+    "\"Mirror\":1,"
+      "\"Flip\":1,"
+      "\"AWB\":0,"
+      "\"Resolution\":12"
+    "}"
+
+
 //   "\"" D_DEVICENAME "\":{"
 //     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
 //       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
@@ -405,8 +410,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //   "},"
 //   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
 //   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
-// "}";
-
+"}";
 
 #endif
 
@@ -523,6 +527,9 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 // #define ENABLE_RTSPSERVER
+
+#define DEBUG_DRIVERS__CAMERA_2025
+#define ENABLE_RTSPSERVER
 
 #define DEBUG_DRIVERS__CAMERA_2025
 // //  /***********************************
@@ -914,6 +921,12 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // #define ENABLE_RTSPSERVER
 
 #define DEBUG_DRIVERS__CAMERA_2025
+
+#define ENABLE_RTSPSERVER
+
+#define ENABLE_CAMERA__MOTION_DETECTION
+#define USE_WEBCAM_MOTION
+
 // //  /***********************************
 // //   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
 // //  ************************************/  
@@ -1788,6 +1801,195 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 
 
+/**
+ * @brief 
+ * 
+ * Using IFAN03 hardware as test build for esp8285 boards. Confirming if template loads.
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *          BIB (Built-in Button) → On some boards, pin is used for onboard button
+ *                               *I ~PWM 'NC    
+ *                       _____________________
+ *                      |3V3     |USB|     VIN|
+ *                      |GND               GND| 
+ *                      |TX  G1, fL        RST| 
+ *                      |RX  G3             EN| 
+ *                      |D8  G15,fL        3V3|
+ *                      |D7  G13           GND| 
+ *                      |D6  G12           CLK| 
+ *                      |D5  G14           SDO| 
+ *                      |GND               CMD| 
+ *                      |3V3               SD1| 
+ *                      |D4  G2,fL,BIL     SD2| 
+ *                      |D3  G0,fL,BIB     SD3| 
+ *                      |D2  G4            RSV| 
+ *                      |D1  G5            RSV| 
+ *                      |D0  G16      ADC0  A0| 
+ *                       _____________________
+ **/
+#ifdef DEVICE_GROUP__CAMERAS__ESP32_CAM_EYE_SENSOR_01
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "tg_cameras__cam_eye_sens01"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+   #define MQTT_HOST     "192.168.3.70"
+   #define MQTT_PORT     1883
+  
+/***********************************
+ * SECTION: System Debug Options
+************************************/    
+
+///////////////////////////////////////////// Enable Logs
+// #define DISABLE_SERIAL
+// #define DISABLE_SERIAL0_CORE
+// #define DISABLE_SERIAL_LOGGING
+// #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+
+///////////////////////////////////////////// System Logs
+// #define ENABLE_ADVANCED_DEBUGGING
+// #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+// #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+// #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+// #define ENABLE_DEBUG_FUNCTION_NAMES
+// #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+// #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+// #define ENABLE_DEBUG_LINE_HERE
+// #define ENABLE_DEBUG_LINE_HERE2
+// #define ENABLE_DEBUG_LINE_HERE3
+// #define ENABLE_DEBUG_LINE_HERE_TRACE
+// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+// #define USE_DEBUG_PRINT
+// #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
+
+//new feature to only show logs for a specific module when developing code
+ // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
+ // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE_ARRAY [1, 2]
+
+#define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+// #define ESP32
+// #define CONFIG_IDF_TARGET_ESP32C3
+// #define ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
+
+#define ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+
+#define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
+
+#define ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
+
+// ///////////////////////////////////////////// Module Logs
+// // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+// // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+/***********************************
+ * SECTION: System Configs
+************************************/    
+
+// #define SETTINGS_HOLDER 1239
+
+// #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+// #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+// #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+    
+/***********************************
+* SECTION: Network Configs
+************************************/    
+
+#define USE_MODULE_NETWORK_WEBSERVER
+#define USE_MODULE_CORE_FILESYSTEM
+#define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+/***********************************
+* SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+************************************/  
+
+#define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
+
+/***********************************
+* SECTION: Drivers Configs
+************************************/  
+
+#define USE_MODULE_DRIVERS__CAMERA_2025
+#define WEBCAM_DEV_DEBUG
+#define CAMERA_MODEL_AI_THINKER
+
+/***********************************
+* SECTION: Sensor Configs
+************************************/  
+
+/***********************************
+ * SECTION: Lighting Configs
+************************************/  
+
+/***********************************
+* SECTION: Display Configs
+************************************/ 
+
+/***********************************
+ * SECTION: Energy Configs
+************************************/  
+
+/***********************************
+ * SECTION: Controller Configs
+************************************/  
+
+/***********************************
+ * SECTION: Module/GPIO Configs
+************************************/  
+
+#define USE_MODULE_TEMPLATE
+DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+"{"
+  "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+  "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  "\"" D_GPIO_NUMBER "\":{"    
+    #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR
+    "\"16\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\""
+    #endif
+    #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+    "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    #endif
+  "},"
+  "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+  "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+"}";
+
+/***********************************
+ * SECTION: TEMPLATE: Names
+************************************/    
+
+#define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "PIRLarge"
+#define D_DEVICE_SENSOR_BME_680_NAME "BME680"
+#define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
+
+#define USE_FUNCTION_TEMPLATE
+DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+"{"
+  "\"" D_DEVICENAME "\":{"
+    "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+    "],"
+    "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BME_680_NAME "\""
+    "]"
+  "},"
+  "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"
+"}";
+
+
+#endif
 
 
 #endif // _CONFIG__FIRMWARE_GROUP__CAMERAS_H

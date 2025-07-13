@@ -36,9 +36,6 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   }
 
   uint8_t segments_found = 0;
-
-
-
   
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   /**
@@ -73,36 +70,57 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   }
   #endif
   
-
+  // === [1] Parse "Segment0":{...seg info...},"Segment1":{...seg info...}, ... format ===
   for(uint8_t segment_i = 0; segment_i < MAX_NUM_SEGMENTS; segment_i++)
   {
     snprintf(buffer, sizeof(buffer), "Segment%d", segment_i);
     if(jtok = obj[buffer])
     { 
-
       ALOG_INF(PSTR("Seg: \"%s\""), buffer);
-
       if(segment_i >= segments.size())
       { 
         uint16_t seg_size = segments.size();
-        Segment_AppendNew(0, 16, segment_i);
+        Segment_AppendNew(0, 10, segment_i);
         ALOG_INF(PSTR("Created new segment%02d %dB (T%dB)"), segment_i, segments.size()-seg_size, segments.size());
       }
-      
       subparse_JSONCommand(jtok.getObject(), segment_i);
-
       segments_found++;
-
     }
   }
 
-  /**
-   * @brief 
-   * When commands are not inside a {"Segment#":{commands}} then assume direct control of first segment (ie 0)
-   **/
+  // === [2] Optional "Segments":[{...seg info...}, {...seg info...}] array format ===
+  if (segments_found == 0 && obj["Segments"].isArray()) {
+    JsonParserArray seg_arr = obj["Segments"];
+    for (uint8_t i = 0; i < seg_arr.size() && i < MAX_NUM_SEGMENTS; i++) {
+      JsonParserObject seg_obj = seg_arr[i];      
+      if (i >= segments.size()) {
+        uint16_t seg_size = segments.size();
+        Segment_AppendNew(0, 10, i);
+        ALOG_INF(PSTR("Created new segment%02d %dB (T%dB)"), i, segments.size() - seg_size, segments.size());
+      }
+      subparse_JSONCommand(seg_obj, i);
+      segments_found++;
+    }
+  }
+
+  // === [3] Check for keys that match segment names === ie the new SegmentName can be used directly to group segment commands
+  if (segments_found == 0) {
+    for (uint8_t i = 0; i < segments.size(); i++) {
+      const char* seg_name = SEGMENT_I(i).getName();
+      if (!seg_name || !*seg_name) continue;
+      if (jtok = obj[seg_name]) {
+        ALOG_INF(PSTR("Seg: \"%s\" (name match)"), seg_name);
+        subparse_JSONCommand(jtok.getObject(), i);
+        segments_found++;
+      }
+    }
+  }
+
+
+  // When no direct segment is set, assumed they are single segment (or control of first segment)
   if(segments_found == 0)
   {
-    ALOG_INF(PSTR(D_LOG_NEO "Assume main segment"));
+    ALOG_INF(PSTR(D_LOG_NEO "Assumed main segment"));
     subparse_JSONCommand(obj, 0); // Legacy commands
   }
 

@@ -370,49 +370,46 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
   /********************************************************************************************\
    * ESP32-C3 Module templates
   \********************************************************************************************/
+  
+  DEFINE_PGM_CTR(PM__MODULE_TEMPLATE__GENERIC__CTR)        D__MODULE_TEMPLATE__GENERIC__CTR;
 
-  #define USER_MODULE        255
-
-  // Supported hardware modules
-  enum SupportedModulesESP32C3 {
-    WEMOS,
-    MAXMODULE };
-
-  const uint8_t kModuleNiceList[] PROGMEM = {
-    WEMOS,
-  };
-
-  const char kModuleNames[] PROGMEM =
+  const char mPins::module_template__names[] PROGMEM =
     "ESP32C3|"
     ;
 
-  const mytmplt kModules[] PROGMEM = {
-    {                              // Generic ESP32C3 device
-      GPIO_USER,               // 0       IO                  GPIO0, ADC1_CH0, XTAL_32K_P
-      GPIO_USER,               // 1       IO                  GPIO1, ADC1_CH1, XTAL_32K_N
-      GPIO_USER,               // 2       IO                  GPIO2, ADC1_CH2, FSPIQ
-      GPIO_USER,               // 3       IO                  GPIO3, ADC1_CH3
-      GPIO_USER,               // 4       IO                  GPIO4, ADC1_CH4, FSPIHD, MTMS
-      GPIO_USER,               // 5       IO                  GPIO5, ADC2_CH0, FSPIWP, MTDI
-      GPIO_USER,               // 6       IO                  GPIO6, FSPICLK, MTCK
-      GPIO_USER,               // 7       IO                  GPIO7, FSPID, MTDO
-      GPIO_USER,               // 8       IO                  GPIO8
-      GPIO_USER,               // 9       IO                  GPIO9
-      GPIO_USER,               // 10      IO                  GPIO10
-      0,                       // 11      IO                  GPIO11, output power supply for flash
-      0,                       // 12      IO                  GPIO12, SPIHD - Free if flash DIO/DOUT
-      0,                       // 13      IO                  GPIO13, SPIWP - Free if flash DIO/DOUT
-      0,                       // 14      IO                  GPIO14, SPICS0
-      0,                       // 15      IO                  GPIO15, SPICLK
-      0,                       // 16      IO                  GPIO16, SPID
-      0,                       // 17      IO                  GPIO17, SPIQ
-      GPIO_USER,               // 18      IO                  GPIO18, USB_D
-      GPIO_USER,               // 19      IO                  GPIO19, USB_D+
-      GPIO_USER,               // 20      IO     RXD0         GPIO20, U0RXD
-      GPIO_USER,               // 21      IO     TXD0         GPIO21, U0TXD
-      0                        // Flag
-    },
+  const uint8_t mPins::module_template__ids[] PROGMEM = {
+    MODULE_GENERIC
   };
+
+    // !!! Update this list in the same order as SupportedModulesESP32C3 !!!
+    const mytmplt mPins::module_template__gpio_map[] PROGMEM = {
+      {                              // Generic ESP32C3 device
+        GPIO_USER,              // 0       IO                  GPIO0, ADC1_CH0, XTAL_32K_P
+        GPIO_USER,              // 1       IO                  GPIO1, ADC1_CH1, XTAL_32K_N
+        GPIO_USER,              // 2       IO                  GPIO2, ADC1_CH2, FSPIQ
+        GPIO_USER,              // 3       IO                  GPIO3, ADC1_CH3
+        GPIO_USER,              // 4       IO                  GPIO4, ADC1_CH4, FSPIHD, MTMS
+        GPIO_USER,              // 5       IO                  GPIO5, ADC2_CH0, FSPIWP, MTDI
+        GPIO_USER,              // 6       IO                  GPIO6, FSPICLK, MTCK
+        GPIO_USER,              // 7       IO                  GPIO7, FSPID, MTDO
+        GPIO_USER,              // 8       IO                  GPIO8
+        GPIO_USER,              // 9       IO                  GPIO9
+        GPIO_USER,              // 10      IO                  GPIO10
+        0,                           // 11      IO                  GPIO11, output power supply for flash
+        0,                           // 12      IO                  GPIO12, SPIHD - Free if flash DIO/DOUT
+        0,                           // 13      IO                  GPIO13, SPIWP - Free if flash DIO/DOUT
+        0,                           // 14      IO                  GPIO14, SPICS0
+        0,                           // 15      IO                  GPIO15, SPICLK
+        0,                           // 16      IO                  GPIO16, SPID
+        0,                           // 17      IO                  GPIO17, SPIQ
+        GPIO_USER,              // 18      IO                  GPIO18, USB_D
+        GPIO_USER,              // 19      IO                  GPIO19, USB_D+
+        GPIO_USER,              // 20      IO     RXD0         GPIO20, U0RXD
+        GPIO_USER,              // 21      IO     TXD0         GPIO21, U0TXD
+        0                            // Flag
+      },
+    };
+
 
 #elif CONFIG_IDF_TARGET_ESP32C6
 
@@ -913,7 +910,8 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
     ALOG_WRN(PSTR("ShowGPIOTemplates"));
     char buffer[100];
     uint16_t gpio_buffer[MAX_USER_PINS];
-  
+
+    #ifdef ESP8266
     for (int module_i = 0; module_i < MODULE_MAXMODULE_8266; module_i++) {
       memcpy_P(gpio_buffer, &mPins::module_template__gpio_map_ESP8266[module_i], sizeof(gpio_buffer));
   
@@ -930,6 +928,26 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
         }
       }
     }
+    #endif
+    #ifdef ESP32 
+    for (int module_i = 0; module_i < MAXMODULE; module_i++) {
+      memcpy_P(gpio_buffer, &mPins::module_template__gpio_map[module_i], sizeof(gpio_buffer));
+  
+      ALOG_INF(PSTR("Module %d:"), module_i);
+  
+      for (int gpio_i = 0; gpio_i < MAX_USER_PINS; gpio_i++) {
+        uint16_t gpio_fn = gpio_buffer[gpio_i];
+  
+        if (gpio_fn != 0) {
+          const char* fn_name = GetGPIOFunctionNamebyID(gpio_fn, buffer, sizeof(buffer));
+          ALOG_INF(PSTR("  GPIO%02d = %d (%s)"), gpio_i, gpio_fn, buffer);
+        } else {
+          ALOG_INF(PSTR("  GPIO%02d = None"), gpio_i);
+        }
+      }
+    }
+    #endif
+
   }
   
 
@@ -1310,19 +1328,27 @@ void mPins::ModuleDefault(uint8_t module)
 {
   if (USER_MODULE == module) { module = MODULE_DEFAULT; }  // Generic
   tkr_set->Settings.user_template.base = module;
+
   ALOG_ERR(PSTR("ModuleDefault REMOVED CODE, NEEDS FIXING module=%d"),module);
+
+  DEBUG_LINE_HERE3
+  DEBUG_LINE_HERE3
+  DEBUG_LINE_HERE3
 
   #ifdef ESP32
     module = ModuleTemplate(module);
   #endif
 
     char name[TOPSZ];
-    tkr_set->SettingsUpdateText(SET_TEMPLATE_NAME, tkr_sup->GetTextIndexed(name, sizeof(name), module, module_template__names));
+    tkr_set->SettingsUpdateText(SET_TEMPLATE_NAME, tkr_sup->GetTextIndexed_P(name, sizeof(name), module, module_template__names));
   #ifdef ESP8266
     // Read the entire template with option 3 (GPIO + flags)
     GetInternalTemplate(&tkr_set->Settings.user_template, module, 3);
   #endif  // ESP8266
   #ifdef ESP32
+  
+    ALOG_INF( PSTR("ModuleDefault =================================================================================================================================================================================================module=%d %d %d"), module, sizeof(tkr_set->Settings.user_template), sizeof(mytmplt));
+
     memcpy_P(&tkr_set->Settings.user_template, &module_template__gpio_map[module], sizeof(mytmplt));
   #endif  // ESP32
 }

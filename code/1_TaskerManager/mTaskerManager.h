@@ -442,6 +442,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "5_Sensors/03_BME/mBME.h"
   #define tkr_bme                             static_cast<mBME*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BME_ID))
 #endif
+#ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #include "5_Sensors/04_DB18x20/mDB18x20.h"
+  #define tkr_db18                      static_cast<mDB18x20*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID))
+#endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/05_DHT/mSensorsDHT.h"
   #define tkr_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
@@ -518,18 +522,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "5_Sensors/30_ADCInternal/mADCInternal.h"
   #define tkr_adc_internal                          static_cast<mADCInternal*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID))
 #endif
-// #ifdef USE_MODULE_SENSORS_ADC_INTERNAL  I2S may be best phased into above as option, since most code remains the same
-//   #include "5_Sensors/31_ADCInternal_ESP32/mADCInternal.h"
-//   #define tkr_iLight                          static_cast<mADCInternal*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID))
-// #endif
-#ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-  #include "5_Sensors/40_ds18x20/mDB18x20.h"
-  #define tkr_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
-#endif
-#ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  #include "5_Sensors/41_ds18x20_esp32/mDB18x20_ESP32.h"
-  #define tkr_db18                      static_cast<mDB18x20_ESP32*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID))
-#endif
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   #include "5_Sensors/50_GPS_Serial/mGPS_Serial.h"
   #define tkr_gps                                static_cast<mGPS_Serial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID))
@@ -566,7 +558,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_iEnergy                           static_cast<mEnergyInterface*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_ENERGY_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  #include "7_Energy/01_Pzem004T_v3/mPZEM004T.h"
+  #include "7_Energy/01_PZEM004T/mPZEM004T.h"
   #define tkr_pzem                              static_cast<mEnergyPZEM004T*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_ENERGY_PZEM004T_ID))
 #endif
 #ifdef USE_MODULE_ENERGY_ADE7953

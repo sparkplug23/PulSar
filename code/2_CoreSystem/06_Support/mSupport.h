@@ -493,7 +493,7 @@ public:
       }
 
       if(handler_ptr->flags.periodic_enabled){
-        if(abs(millis()-handler_ptr->saved_millis)>=handler_ptr->time_val*time_multiplier){ handler_ptr->saved_millis=millis();
+        if((millis()-handler_ptr->saved_millis)>=handler_ptr->time_val*time_multiplier){ handler_ptr->saved_millis=millis();
           handler_ptr->flags.run_now = true;
         }
       }

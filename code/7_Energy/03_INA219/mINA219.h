@@ -125,9 +125,6 @@ class mEnergyINA219 :
 
     /*********************************************************************************************\
      * INA219 - Low voltage (max 32V!) Current sensor
-     *
-     * Source: Adafruit Industries
-     *
      * I2C Address: 0x40, 0x41 0x44 or 0x45
     \*********************************************************************************************/
 
@@ -243,6 +240,7 @@ class mEnergyINA219 :
       float direct_current_ma;
       float power_mw;
       float direct_power_mw;
+      bool invert_reported_sign = false; // If true, the reported current and power values will be inverted (multiplied by -1 when wired in reverse)
     };
     std::vector<sensor_data_s> sensor;
 
@@ -295,29 +293,6 @@ class mEnergyINA219 :
     struct handler<mEnergyINA219> mqtthandler_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
  
-
-    
-// Phase out
-enum SWITCH_SPLIT_TASK_IDS{
-  SPLIT_TASK_NOT_RUNNING_ID=0,
-  SPLIT_TASK_SUCCESS_ID=1,
-  SPLIT_TASK_SEC1_ID,
-  SPLIT_TASK_SEC2_ID,
-  SPLIT_TASK_SEC3_ID,
-  SPLIT_TASK_SEC4_ID,
-  SPLIT_TASK_SEC5_ID,
-  SPLIT_TASK_SEC6_ID,
-  SPLIT_TASK_SEC7_ID,
-  SPLIT_TASK_SEC8_ID,
-  SPLIT_TASK_TIMEOUT_ID,
-  SPLIT_TASK_ERROR_ID,
-  SPLIT_TASK_DONE_ID
-};
-
-    
-
-
-
 };
 #endif
 

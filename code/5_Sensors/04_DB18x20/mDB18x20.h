@@ -1,7 +1,7 @@
 #ifndef _mDB18x20_ESP32_H
 #define _mDB18x20_ESP32_H
 
-#define D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID 5041 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID 5004 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -26,14 +26,14 @@
 
 // https://www.analog.com/en/technical-articles/guidelines-for-reliable-long-line-1wire-networks.html
 
-class mDB18x20_ESP32 :
+class mDB18x20 :
   public mTaskerInterface
 {
   public:
     /************************************************************************************************
      * SECTION: Construct Class Base
      ************************************************************************************************/
-	  mDB18x20_ESP32(){};
+	  mDB18x20(){};
     void Pre_Init(void);
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -141,13 +141,13 @@ class mDB18x20_ESP32 :
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    std::vector<struct handler<mDB18x20_ESP32>*> mqtthandler_list;
-    struct handler<mDB18x20_ESP32> mqtthandler_settings;
-    struct handler<mDB18x20_ESP32> mqtthandler_sensor_ifchanged;
-    struct handler<mDB18x20_ESP32> mqtthandler_sensor_teleperiod;
+    std::vector<struct handler<mDB18x20>*> mqtthandler_list;
+    struct handler<mDB18x20> mqtthandler_settings;
+    struct handler<mDB18x20> mqtthandler_sensor_ifchanged;
+    struct handler<mDB18x20> mqtthandler_sensor_teleperiod;
 
       #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-      struct handler<mDB18x20_ESP32> mqtthandler_debug;
+      struct handler<mDB18x20> mqtthandler_debug;
       uint8_t ConstructJSON_Debug(uint8_t json_level = 0, bool json_appending = true);
       #endif
     

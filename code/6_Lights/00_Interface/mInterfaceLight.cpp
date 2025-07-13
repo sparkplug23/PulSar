@@ -4,7 +4,7 @@
 
 int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 {
-  
+  DEBUG_LINE_HERE3
   int8_t function_result = 0;
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
@@ -23,6 +23,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
+  DEBUG_LINE_HERE3
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
@@ -87,7 +88,10 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
 
   } // end switch
+
+  return function_result;
   
+  DEBUG_LINE_HERE3
 } // END function
 
 
@@ -270,6 +274,10 @@ void mInterfaceLight::Init(void)
   auto_off_settings.time_decounter_secs = 0;
 
   module_state.mode = ModuleStatus::Running;
+
+  ALOG_INF(PSTR((D_LOG_LIGHT "mInterfaceLight::Init() - Module Running")));
+
+  return;
 
 }
 

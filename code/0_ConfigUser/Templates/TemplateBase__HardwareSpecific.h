@@ -140,6 +140,9 @@
     "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"Button\""
       "]"
     "}"
   "}";
@@ -281,6 +284,69 @@
   // {"RfReceived":{"Data":11071155,"Bits":24,"Protocol":1,"Pulse":191,"millis":83687314,"Time":"18:48:02"}} // black doorbell
 
 #endif
+
+
+#ifdef DEVICE_TEMPLATE__ESP8285__IFAN03
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "tg_boardbuild__esp8285_ifan03"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define ESP8266
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_CONTROLLER_SONOFF_IFAN
+    #define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"Button\""
+      "],"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"Relay1\","
+        "\"Relay2\","
+        "\"Relay3\","
+        "\"Relay4\""
+      "]"
+    "}"
+  "}";
+
+
+#endif
+
 
 
 #endif // _TEMPLATE__HARDWARE_SPECIFIC_H

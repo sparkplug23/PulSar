@@ -1,5 +1,5 @@
 /**
- * @file mDB18x20_ESP32.cpp
+ * @file mDB18x20.cpp
  * @author Michael Doone (michaeldoonehub@gmail.com)
  * @brief DallasTemperature DB18X20
  * @version 1.0
@@ -20,16 +20,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
-#include "mDB18x20_ESP32.h"
+#include "mDB18x20.h"
 
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
 
+constexpr uint8_t mDB18x20::ds18x20_chipids[]; // Definition outside the class is required for c++14 or older. c++17 can remove this with "inline"
 
-constexpr uint8_t mDB18x20_ESP32::ds18x20_chipids[]; // Definition outside the class is required for c++14 or older. c++17 can remove this with "inline"
-
-
-
-int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
+int8_t mDB18x20::Tasker(uint8_t function, JsonParserObject obj)
 {
   
   /************
@@ -83,11 +80,13 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
+  return 1;
+
 
 } // END function
 
 
-void mDB18x20_ESP32::Pre_Init(void)
+void mDB18x20::Pre_Init(void)
 {
   
   module_state.mode = ModuleStatus::Initialising;
@@ -95,10 +94,10 @@ void mDB18x20_ESP32::Pre_Init(void)
   module_state.pins_used = 0;
   for (uint8_t pins = 0; pins < MAX_DSB_PINS; pins++) 
   {
-    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), tkr_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
-    if (tkr_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
+    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DSB_1, pins), tkr_pins->GetPin(GPIO_DSB_1, pins));
+    if (tkr_pins->PinUsed(GPIO_DSB_1, pins)) 
     {
-      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DSB_1, pins));
       ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), module_state.pins_used);
       module_state.pins_used++;
     }
@@ -112,7 +111,7 @@ void mDB18x20_ESP32::Pre_Init(void)
 }
 
 
-void mDB18x20_ESP32::BootMessage()
+void mDB18x20::BootMessage()
 {
   #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
   char buffer[100] = {0};
@@ -134,14 +133,14 @@ void mDB18x20_ESP32::BootMessage()
 }
 
 
-void mDB18x20_ESP32::Ds18x20Init(void) 
+void mDB18x20::Ds18x20Init(void) 
 {
   Ds18x20Search();
   ALOG_INF(PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), module_state.devices);
 }
 
 
-void mDB18x20_ESP32::Ds18x20Search(void)
+void mDB18x20::Ds18x20Search(void)
 {
   uint8_t sensor_count = 0;
   uint8_t sensor = 0;
@@ -214,7 +213,7 @@ void mDB18x20_ESP32::Ds18x20Search(void)
 }
 
 
-void mDB18x20_ESP32::Ds18x20Convert(void) 
+void mDB18x20::Ds18x20Convert(void) 
 {
   for (uint32_t i = 0; i < module_state.pins_used; i++) {
     ds = ds18x20_gpios[i];
@@ -231,7 +230,7 @@ void mDB18x20_ESP32::Ds18x20Convert(void)
   }
 }
 
-bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t) 
+bool mDB18x20::Ds18x20Read(uint8_t sensor, float &t) 
 {
   uint8_t data[12];
   int8_t sign = 1;
@@ -297,7 +296,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t)
 }
 
 
-void mDB18x20_ESP32::EverySecond(void) 
+void mDB18x20::EverySecond(void) 
 {
 
   // Check for sensors if none was found
@@ -330,7 +329,7 @@ void mDB18x20_ESP32::EverySecond(void)
 }
 
 
-void mDB18x20_ESP32::SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len)
+void mDB18x20::SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len)
 {
 
   AddLog_Array(LOG_LEVEL_INFO, "Value", array_val, array_len);
@@ -352,7 +351,7 @@ void mDB18x20_ESP32::SetDeviceNameID_WithAddress(const char* device_name, uint8_
 }
 
 
-void mDB18x20_ESP32::Scan_ReportAsJsonBuilder()
+void mDB18x20::Scan_ReportAsJsonBuilder()
 {
   
   // Pre_Init();
@@ -368,7 +367,7 @@ void mDB18x20_ESP32::Scan_ReportAsJsonBuilder()
 *******************************************************************************************************************/
 
 
-uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
+uint8_t mDB18x20::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
 
   JBI->Start();
@@ -392,7 +391,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_app
 }
 
 
-uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
+uint8_t mDB18x20::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
   
   char buffer[40];
@@ -425,7 +424,8 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
         if(json_level >= JSON_LEVEL_DETAILED)
         {
           JBI->Add(PM_VALID, sensor_vector[sensor_id].reading.isvalid);
-          JBI->Add(PM_TIME_ELASPED, (uint32_t)abs(millis()-sensor_vector[sensor_id].utc_measured_timestamp));
+          uint32_t age_ms = millis() - sensor_vector[sensor_id].utc_measured_timestamp;
+          JBI->Add(PM_TIME_ELASPED, age_ms);
         }
 
         if(json_level >= JSON_LEVEL_DEBUG)
@@ -447,7 +447,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
 
 
 #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_appending)
+uint8_t mDB18x20::ConstructJSON_Debug(uint8_t json_level, bool json_appending)
 {
 
   JBI->Start();
@@ -475,7 +475,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_append
 *******************************************************************************************************************/
 
 
-void mDB18x20_ESP32::parse_JSONCommand(JsonParserObject obj)
+void mDB18x20::parse_JSONCommand(JsonParserObject obj)
 {
 
   JsonParserToken jtok = 0; 
@@ -537,9 +537,9 @@ void mDB18x20_ESP32::parse_JSONCommand(JsonParserObject obj)
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mDB18x20_ESP32::MQTTHandler_Init(){
+void mDB18x20::MQTTHandler_Init(){
 
-  struct handler<mDB18x20_ESP32>* ptr;
+  struct handler<mDB18x20>* ptr;
 
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
@@ -549,7 +549,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Settings;
+  ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
@@ -560,7 +560,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
+  ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
@@ -571,7 +571,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
+  ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
   #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
@@ -583,7 +583,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
   ptr->json_level = JSON_LEVEL_ALL;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Debug;
+  ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Debug;
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
 

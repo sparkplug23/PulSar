@@ -10,6 +10,8 @@ mAnimatorLight* tkr_extern_lAni = nullptr;
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
 
+  int8_t function_result = FUNCTION_RESULT_SUCCESS_ID;
+
   /************
    * INIT SECTION * 
   *******************/
@@ -114,7 +116,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
       tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
@@ -138,6 +140,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     #endif // USE_MODULE_NETWORK_WEBSERVER
   } // switch(command)
 
+  return function_result;
 
 } // END FUNCTION
 
@@ -1105,6 +1108,8 @@ void mAnimatorLight::Pre_Init(void)
 void mAnimatorLight::Init(void)
 { 
   
+  DEBUG_LINE_HERE4
+
   #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
@@ -1124,6 +1129,7 @@ void mAnimatorLight::Init(void)
   snprintf(serverDescription, sizeof(serverDescription), tkr_set->Settings.system_name.friendly);
   #endif
   #endif
+  DEBUG_LINE_HERE4
 
   sprintf(ntpServerName, NTP_SERVER1);  
   sprintf(apPass, CLIENT_SSID);
@@ -1132,17 +1138,24 @@ void mAnimatorLight::Init(void)
   sprintf(clientPass, CLIENT_PASS);
   #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
+  WAIT_WITH_PRINT_TICK(1000);
 
+  DEBUG_LINE_HERE4
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
   initPresetsFile();
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
+  DEBUG_LINE_HERE4
+  WAIT_WITH_PRINT_TICK(1000);
   Reset_CustomPalette_NamesDefault();  
 
+  WAIT_WITH_PRINT_TICK(1000);
+  DEBUG_LINE_HERE4
   #ifdef WLED_ENABLE_WEBSOCKETS2
   tkr_web->ws->onEvent(wsEvent);
   #endif
   
+  DEBUG_LINE_HERE4
   loadLedmap = 0; // To enable it to load once
   paletteFade=0;
   paletteBlend = 0;
@@ -1171,15 +1184,20 @@ void mAnimatorLight::Init(void)
   segment_current_index = 0;
   _mainSegment = 0;
 
+  DEBUG_LINE_HERE4
   effects.function.reserve(effects.count);     // allocate memory to prevent initial fragmentation (does not increase size())
   effects.config.reserve(effects.count); // allocate memory to prevent initial fragmentation (does not increase size())
     
+  DEBUG_LINE_HERE4
   LoadEffects();
 
+  DEBUG_LINE_HERE4
   Init_Segments();
 
+  DEBUG_LINE_HERE4
   module_state.mode = ModuleStatus::Running;
 
+  DEBUG_LINE_HERE4
 } // END "Init"
 
 
@@ -7750,7 +7768,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
@@ -7890,7 +7908,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = 1; 
+  ptr->tRateSecs              = tkr_mqtt->dt.ifchanged_secs; 
   ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level             = JSON_LEVEL_DETAILED;
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR;

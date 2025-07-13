@@ -574,21 +574,18 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS  {
   GPIO_FUNCTION_SDCARD_HSPI_MOSI, GPIO_FUNCTION_SDCARD_HSPI_MISO,
   
   GPIO_SENSOR_END 
-}; // used 171of 250
+};
 
 // Error as warning to rethink GPIO usage with max 2045
 static_assert(GPIO_SENSOR_END < 2000, "Too many UserSelectablePins");
 
 
-// /**
-//  * @brief Programmer selectable GPIO functionality
-//  */
+/**
+ * @brief Programmer selectable GPIO functionality
+ */
 enum ProgramSelectablePins {
-  GPIO_FIX_START = 2046,//?
-  // GPIO_SPI_MISO,       // SPI MISO library fixed pin GPIO12
-  // GPIO_SPI_MOSI,       // SPI MOSI library fixed pin GPIO13
-  // GPIO_SPI_CLK,        // SPI Clk library fixed pin GPIO14
-  GPIO_USER=9999,           // User configurable needs to be 255
+  GPIO_FIX_START = 2046,
+  GPIO_USER=9999,
   GPIO_MAX };
 
 

@@ -2,6 +2,16 @@
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
 
+/******
+ * 
+ * Need to make a new "standby" preset, with "timeon" end being switching to standby preset
+ * the idea is standby is on dim, or different colour etc
+ * 
+ * 
+ * 
+ * 
+ */
+
 void mAnimatorLight::shufflePlaylist() 
 {
 

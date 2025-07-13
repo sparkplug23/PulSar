@@ -2365,28 +2365,1682 @@ static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] P
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
+// {
+//   // Safety checks
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if(!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+  
+//   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+//   {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Off
+//   }
+
+//   // === Get sun position range ===
+//   double elev_min = 0; // capped at horizon
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+
+//   // Clamp elevation to bounds
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   // === Map elevation to pixel position ===
+//   double norm = (elev - elev_min) / (elev_max - elev_min); // [0.0, 1.0]
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   // === Compute draw width ===
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t width = (SEGMENT.intensity * max_width) / 255;
+//   if (width == 0) width = 1; // Single pixel
+
+//   // === Draw pixels around sun_center ===
+//   uint32_t colour;
+//   for (int16_t offset = -((int16_t)width); offset <= (int16_t)width; offset++)
+//   {
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//     uint16_t i = (uint16_t)(offset + width); // index from 0 to 2*width
+
+//     // Normalize across 0 to 2*width
+//     float pos_norm = (float)i / (2.0f * (float)width);
+//     uint16_t palette_index;
+
+//     if (SEGMENT.check1) {
+//       // Mirrored palette
+//       float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f; // [0, 1]
+//       palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//     } else {
+//       // Linear palette span
+//       palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//     }
+
+
+//     colour = SEGMENT.GetPaletteColour(
+//       palette_index,
+//       PALETTE_INDEX_SPANS_SEGLEN_ON,
+//       PALETTE_WRAP_ON,
+//       PALETTE_DISCRETE_OFF,
+//       NO_ENCODED_VALUE
+//     );
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//   }
+
+//   ALOG_INF(PSTR("sun_center%d (%d,%d,%d)"), sun_center, (int)elev, (int)elev_min, (int)elev_max);
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Off
+//   }
+
+//   // === Get sun position range ===
+//   double elev_min = 0; // Horizon
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   double norm = (elev - elev_min) / (elev_max - elev_min); // [0.0, 1.0]
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+//   if (base_width == 0) base_width = 1;
+
+//   if (!SEGMENT.check2)
+//   {
+//     // === Default palette-based mode ===
+//     for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       uint16_t i = (uint16_t)(offset + base_width);
+//       float pos_norm = (float)i / (2.0f * (float)base_width);
+//       uint16_t palette_index;
+
+//       if (SEGMENT.check1) {
+//         float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//         palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//       } else {
+//         palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//       }
+
+//       uint32_t colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX_SPANS_SEGLEN_ON,
+//         PALETTE_WRAP_ON,
+//         PALETTE_DISCRETE_OFF,
+//         NO_ENCODED_VALUE
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+//   }
+//   else
+//   {
+//     // === Custom "Sun + Sky" Mode ===
+//     constexpr float kSun_Width_Factor = 1.0f;
+//     constexpr float kSky_Width_Factor = 3.0f;
+//     constexpr uint8_t kMaxSunBrightness = 255;
+//     constexpr uint8_t kMaxSkyBrightness = 160;
+
+//     uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+//     uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+
+//     // === SUN COLOUR (based on elevation) ===
+//     float r = 0, g = 0, b = 0;
+
+//     if (elev >= 20)       { r = 255; g = 255; b = 220; }
+//     else if (elev >= 15)  { r = 255; g = 240; b = 160; }
+//     else if (elev >= 10)  { r = 255; g = 220; b = 100; }
+//     else if (elev >= 5)   { r = 255; g = 128; b = 40;  }
+//     else                  { r = 255; g = 64;  b = 32;  }
+
+//     // === SKY COLOUR (cyan-blue) ===
+//     float sky_r = 40, sky_g = 160, sky_b = 255;
+//     float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f);
+//     if (sky_brightness < 0) sky_brightness = 0;
+//     if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+//     // === Draw Sun Orb ===
+//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel,
+//         RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//     }
+
+//     // === Draw Sky Gradient ===
+//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//       if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       float dist = fabsf((float)offset);
+//       float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+//       if (fade < 0.0f) fade = 0.0f;
+
+//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//     }
+//   }
+
+
+
+//   ALOG_INF(PSTR("sun_center%d elev=%.1f max=%.1f"), sun_center, elev, elev_max);
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+// Parameter	Source	Effect
+// SEGMENT.check2	Boolean	Enables sun+sky effect mode
+// SEGMENT.custom1	0–255	Sun orb width multiplier (scales intensity)
+// SEGMENT.custom2	0–255	Sky fade width multiplier (scales intensity)
+// SEGMENT.intensity	0–255	Base width control for both orb & sky
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0);
+//   }
+
+//   double elev_min = 0;
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   double norm = (elev - elev_min) / (elev_max - elev_min);
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+//   if (base_width == 0) base_width = 1;
+
+//   if (!SEGMENT.check1)
+//   {
+//     // === Original palette effect ===
+//     for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       uint16_t i = (uint16_t)(offset + base_width);
+//       float pos_norm = (float)i / (2.0f * (float)base_width);
+//       uint16_t palette_index;
+
+//       if (SEGMENT.check2) {
+//         float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//         palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//       } else {
+//         palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//       }
+
+//       uint32_t colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX_SPANS_SEGLEN_ON,
+//         PALETTE_WRAP_ON,
+//         PALETTE_DISCRETE_OFF,
+//         NO_ENCODED_VALUE
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+//   }
+//   else
+//   {
+//     // === Custom Orb + Sky Gradient Mode ===
+
+//     // Scale from custom sliders
+//     float kSun_Width_Factor = (float)(SEGMENT.custom1 + 1) / 16.0f;  // 1–16 → 0.06 to 1.0
+//     float kSky_Width_Factor = (float)(SEGMENT.custom2 + 1) / 4.0f;   // 1–255 → 0.25 to ~64
+
+//     constexpr uint8_t kMaxSkyBrightness = 160;
+//     constexpr uint8_t kMaxSunBrightness = 255;
+
+//     uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+//     uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+
+//     // === Blended SUN colour by elevation ===
+//     float r = 0, g = 0, b = 0;
+
+//     if (elev >= 20) {
+//       r = 255; g = 255; b = 220;
+//     } else if (elev >= 15) {
+//       float f = (elev - 15) / 5.0f;
+//       r = 255;
+//       g = 240 + (15 * f);
+//       b = 160 + (60 * f);
+//     } else if (elev >= 10) {
+//       float f = (elev - 10) / 5.0f;
+//       r = 255;
+//       g = 220 + (20 * f);
+//       b = 100 + (60 * f);
+//     } else if (elev >= 5) {
+//       float f = (elev - 5) / 5.0f;
+//       r = 255;
+//       g = 128 + (92 * f);
+//       b = 40  + (60 * f);
+//     } else {
+//       float f = elev / 5.0f;
+//       r = 255;
+//       g = 64 + (64 * f);
+//       b = 32 + (8 * f);
+//     }
+
+//     // === Sky cyan fade strength ===
+//     float sky_r = 40, sky_g = 160, sky_b = 255;
+//     float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f);
+//     if (sky_brightness < 0) sky_brightness = 0;
+//     if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+//     // === Draw Sun Orb ===
+//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//     }
+
+//     // === Draw Sky Gradient ===
+//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//       if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       float dist = fabsf((float)offset);
+//       float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+//       if (fade < 0.0f) fade = 0.0f;
+
+//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//     }
+//   }
+
+//   ALOG_INF(PSTR("sun_center%d elev=%.1f max=%.1f"), sun_center, elev, elev_max);
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0);
+//   }
+
+//   double elev_min = 0;
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   double norm = (elev - elev_min) / (elev_max - elev_min);
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+//   if (base_width == 0) base_width = 1;
+
+//   // === Marker overlay (check3) ===
+//   if (SEGMENT.check3)
+//   {
+//     constexpr uint8_t marker_brightness_max = 100;
+//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+//     if (marker_brightness == 0) marker_brightness = 4;
+
+//     // Marker: current elevation center
+//     if (sun_center < SEGLEN)
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(sun_center, RGBW32(marker_brightness, marker_brightness, marker_brightness, 0));
+
+//     // Marker: max elevation
+//     double max_elev_norm = (tkr_solar->Get_Elevation_Max() - elev_min) / (elev_max - elev_min);
+//     uint16_t max_elev_pixel = (uint16_t)(max_elev_norm * (SEGLEN - 1));
+//     if (max_elev_pixel < SEGLEN)
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(max_elev_pixel, RGBW32(marker_brightness, marker_brightness, marker_brightness, 0));
+
+//     // Marker: segment start (sunrise equivalent)
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(0, RGBW32(marker_brightness, marker_brightness, marker_brightness, 0));
+
+//     // Marker: segment end (sunset equivalent)
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, RGBW32(marker_brightness, marker_brightness, marker_brightness, 0));
+//   }
+
+//   if (!SEGMENT.check1)
+//   {
+//     // === Palette Mode ===
+//     for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       uint16_t i = (uint16_t)(offset + base_width);
+//       float pos_norm = (float)i / (2.0f * (float)base_width);
+//       uint16_t palette_index;
+
+//       if (SEGMENT.check2) {
+//         float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//         palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//       } else {
+//         palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//       }
+
+//       uint32_t colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX_SPANS_SEGLEN_ON,
+//         PALETTE_WRAP_ON,
+//         PALETTE_DISCRETE_OFF,
+//         NO_ENCODED_VALUE
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+//   }
+//   else
+//   {
+//     // === Orb + Sky Mode ===
+//     constexpr bool kSkyNonLinearFade = true;
+
+//     float kSun_Width_Factor = (float)(SEGMENT.custom1 + 1) / 16.0f;
+//     float kSky_Width_Factor = (float)(SEGMENT.custom2 + 1) / 4.0f;
+
+//     constexpr uint8_t kMaxSkyBrightness = 160;
+
+//     uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+//     uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+
+//     // === Blended SUN colour by elevation ===
+//     float r = 0, g = 0, b = 0;
+//     if (elev >= 20) {
+//       r = 255; g = 255; b = 220;
+//     } else if (elev >= 15) {
+//       float f = (elev - 15) / 5.0f;
+//       r = 255;
+//       g = 240 + (15 * f);
+//       b = 160 + (60 * f);
+//     } else if (elev >= 10) {
+//       float f = (elev - 10) / 5.0f;
+//       r = 255;
+//       g = 220 + (20 * f);
+//       b = 100 + (60 * f);
+//     } else if (elev >= 5) {
+//       float f = (elev - 5) / 5.0f;
+//       r = 255;
+//       g = 128 + (92 * f);
+//       b = 40  + (60 * f);
+//     } else {
+//       float f = elev / 5.0f;
+//       r = 255;
+//       g = 64 + (64 * f);
+//       b = 32 + (8 * f);
+//     }
+
+//     // === Sky colour + brightness scaling ===
+//     float sky_r = 40, sky_g = 160, sky_b = 255;
+//     float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f);
+//     if (sky_brightness < 0) sky_brightness = 0;
+//     if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+//     // Draw sun orb
+//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//     }
+
+//     // Draw sky gradient
+//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//       if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       float dist = fabsf((float)offset);
+//       float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+//       if (fade < 0.0f) fade = 0.0f;
+//       if (kSkyNonLinearFade) fade *= fade;
+
+//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//     }
+//   }
+
+//   ALOG_INF(PSTR("sun_center%d elev=%.1f max=%.1f"), sun_center, elev, elev_max);
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+/**
+ * @brief
+ * Simulates the sun’s **vertical position (elevation)** across a linear LED segment.
+ * 
+ * The LED segment represents the sky from horizon to zenith (bottom to top).
+ * The sun is drawn at a height corresponding to its current **elevation angle** (0°–max°).
+ * Two display modes are supported:
+ * 
+ * ▶ Palette Mode (`check1 = true`)
+ *     - Uses the current palette to draw a centered gradient orb around the sun.
+ *     - `check2` mirrors the palette across the sun center.
+ * 
+ * ▶ Custom Mode (`check1 = false`)
+ *     - Draws a coloured orb for the sun using elevation-based tinting (deep red → white).
+ *     - Adds a surrounding blue sky gradient that fades outward from the sun.
+ *     - Sun/sky width are scaled using `custom1` and `custom2`.
+ * 
+ * ▶ Marker Overlay (`check3 = true`)
+ *     - Adds static reference markers:
+ *         • Noon (center pixel of segment)
+ *         • Sunrise / Sunset (edges of segment)
+ *         • Dawn / Dusk (estimated at 10% and 90% of segment height)
+ *     - Marker brightness is scaled using `custom3` (mapped 0–31 → 0–100).
+ * 
+ * @custom1: Sun orb width multiplier  (1–255 → scales base width × (custom1+1)/16)
+ * @custom2: Sky gradient width multiplier (1–255 → scales base width × (custom2+1)/4)
+ * @custom3: Marker brightness (5-bit: 0–31 → mapped to 0–100)
+ * @intensity: Overall width scaler (0–255) applied to both sun and sky size
+ */
+
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Clear all
+//   }
+
+//   // === Optional: Draw markers ===
+//   if (SEGMENT.check3)
+//   {
+//     uint8_t marker_brightness_max = 100;
+//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+//     uint32_t marker_colour = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN / 2, marker_colour);                          // Noon
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(0, marker_colour);                                   // Sunrise
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, marker_colour);                          // Sunset
+//     SEGMENT.Set_DynamicBuffer_DesiredColour((uint16_t)(0.10f * (SEGLEN - 1)), marker_colour);     // Dawn
+//     SEGMENT.Set_DynamicBuffer_DesiredColour((uint16_t)(0.90f * (SEGLEN - 1)), marker_colour);     // Dusk
+//   }
+
+//   // === Get elevation and clamp ===
+//   double elev_min = 0;
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   double norm = (elev - elev_min) / (elev_max - elev_min);
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+//   if (base_width == 0) base_width = 1;
+
+//   if(SEGMENT.check1) // Use palette
+//   {
+//     // === Original palette effect ===
+//     for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       uint16_t i = (uint16_t)(offset + base_width);
+//       float pos_norm = (float)i / (2.0f * (float)base_width);
+//       uint16_t palette_index;
+
+//       if (SEGMENT.check2) {
+//         float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//         palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//       } else {
+//         palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//       }
+
+//       uint32_t colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX_SPANS_SEGLEN_ON,
+//         PALETTE_WRAP_ON,
+//         PALETTE_DISCRETE_OFF,
+//         NO_ENCODED_VALUE
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+//   }
+//   else 
+//   {
+//     // === Custom Orb + Sky Gradient Mode ===
+
+//     // Scale from custom sliders
+//     float kSun_Width_Factor = (float)(SEGMENT.custom1 + 1) / 16.0f;  // 1–16 → 0.06 to 1.0
+//     float kSky_Width_Factor = (float)(SEGMENT.custom2 + 1) / 4.0f;   // 1–255 → 0.25 to ~64
+
+//     // Limit maximum width to 1/2 segment length to avoid overflow
+//     uint16_t sun_width = (uint16_t)(SEGLEN * 0.5f * kSun_Width_Factor);
+//     uint16_t sky_width = (uint16_t)(SEGLEN * 0.5f * kSky_Width_Factor);
+
+//     // Clamp to segment size
+//     if (sun_width >= SEGLEN / 2) sun_width = SEGLEN / 2;
+//     if (sky_width >= SEGLEN)     sky_width = SEGLEN - 1;
+
+//     constexpr uint8_t kMaxSkyBrightness = 100;
+//     constexpr uint8_t kMaxSunBrightness = 255;
+
+//     uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+//     uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+
+//     // === Blended SUN colour by elevation ===
+//     float r = 0, g = 0, b = 0;
+
+//     if (elev >= 20) {
+//       r = 255; g = 255; b = 220;
+//     } else if (elev >= 15) {
+//       float f = (elev - 15) / 5.0f;
+//       r = 255;
+//       g = 240 + (15 * f);
+//       b = 160 + (60 * f);
+//     } else if (elev >= 10) {
+//       float f = (elev - 10) / 5.0f;
+//       r = 255;
+//       g = 220 + (20 * f);
+//       b = 100 + (60 * f);
+//     } else if (elev >= 5) {
+//       float f = (elev - 5) / 5.0f;
+//       r = 255;
+//       g = 128 + (92 * f);
+//       b = 40  + (60 * f);
+//     } else {
+//       float f = elev / 5.0f;
+//       r = 255;
+//       g = 64 + (64 * f);
+//       b = 32 + (8 * f);
+//     }
+
+//     // === Sky cyan fade strength ===
+//     float sky_r = 40, sky_g = 160, sky_b = 255;
+//     float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f);
+//     if (sky_brightness < 0) sky_brightness = 0;
+//     if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+//     // === Draw Sun Orb ===
+//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//     }
+
+//     // === Draw Sky Gradient ===
+//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//       if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       float dist = fabsf((float)offset);
+//       float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+//       if (fade < 0.0f) fade = 0.0f;
+
+//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//     }
+//   }
+
+//   ALOG_INF(PSTR("sun_center %d elev=%.1f max=%.1f"), sun_center, elev, elev_max);
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
 {
-
-  if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )){ return USE_ANIMATOR; } // Pixel_Width * Two_Channels * Pixel_Count
-    
-  uint32_t colour;
-  for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
-  {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
-    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
+  if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+    return USE_ANIMATOR;
   }
+
+  if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+  for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Clear all
+  }
+
+  // === Optional: Draw markers ===
+  if (SEGMENT.check3)
+  {
+    uint8_t marker_brightness_max = 100;
+    uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+    uint32_t marker_colour = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+
+    SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN / 2, marker_colour);                          // Noon
+    SEGMENT.Set_DynamicBuffer_DesiredColour(0, marker_colour);                                   // Sunrise
+    SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, marker_colour);                          // Sunset
+    SEGMENT.Set_DynamicBuffer_DesiredColour((uint16_t)(0.10f * (SEGLEN - 1)), marker_colour);     // Dawn
+  }
+
+  // === Get elevation and clamp ===
+  double elev_min = 0;
+  double elev_max = tkr_solar->Get_Elevation_Max();
+  double elev     = tkr_solar->Get_Elevation();
+  if (elev < elev_min) elev = elev_min;
+  if (elev > elev_max) elev = elev_max;
+
+  double norm = (elev - elev_min) / (elev_max - elev_min);
+  uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+  uint16_t max_width = SEGLEN / 2;
+  uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+  if (base_width == 0) base_width = 1;
+
+  if (SEGMENT.check1) // Use palette
+  {
+    for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+
+      uint16_t i = (uint16_t)(offset + base_width);
+      float pos_norm = (float)i / (2.0f * (float)base_width);
+      uint16_t palette_index;
+
+      if (SEGMENT.check2) {
+        float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+        palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+      } else {
+        palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+      }
+
+      uint32_t colour = SEGMENT.GetPaletteColour(
+        palette_index,
+        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_WRAP_ON,
+        PALETTE_DISCRETE_OFF,
+        NO_ENCODED_VALUE
+      );
+
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+    }
+  }
+  else 
+  {
+    // === Custom Orb + Sky Gradient Mode ===
+
+    // Scale from custom sliders
+    float kSun_Width_Factor = (float)(SEGMENT.custom1 + 1) / 16.0f;  // 1–16 → 0.06 to 1.0
+    float kSky_Width_Factor = (float)(SEGMENT.custom2 + 1) / 4.0f;   // 1–255 → 0.25 to ~64
+
+    // Widths relative to base_width (which scales with intensity and SEGLEN)
+    uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+    uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+
+    // Clamp to segment size
+    if (sun_width >= SEGLEN / 2) sun_width = SEGLEN / 2;
+    if (sky_width >= SEGLEN)     sky_width = SEGLEN - 1;
+
+    constexpr uint8_t kMaxSkyBrightness = 50;
+    constexpr uint8_t kMaxSunBrightness = 255;
+
+    // === Blended SUN colour by elevation ===
+    float r = 0, g = 0, b = 0;
+
+    if (elev >= 20) {
+      r = 255; g = 255; b = 220;
+    } else if (elev >= 15) {
+      float f = (elev - 15) / 5.0f;
+      r = 255;
+      g = 240 + (15 * f);
+      b = 160 + (60 * f);
+    } else if (elev >= 10) {
+      float f = (elev - 10) / 5.0f;
+      r = 255;
+      g = 220 + (20 * f);
+      b = 100 + (60 * f);
+    } else if (elev >= 5) {
+      float f = (elev - 5) / 5.0f;
+      r = 255;
+      g = 128 + (92 * f);
+      b = 40  + (60 * f);
+    } else {
+      float f = elev / 5.0f;
+      r = 255;
+      g = 64 + (64 * f);
+      b = 32 + (8 * f);
+    }
+
+    // === Sky cyan fade strength ===
+    float sky_r = 40, sky_g = 160, sky_b = 255;
+    float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f);
+    if (sky_brightness < 0) sky_brightness = 0;
+    if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+    // === Draw Sun Orb ===
+    for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+    }
+
+    // === Draw Sky Gradient ===
+    for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+      if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+
+      float dist = fabsf((float)offset);
+      float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+      if (fade < 0.0f) fade = 0.0f;
+
+      uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+      uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+      uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+    }
+  }
+
+  ALOG_INF(PSTR("sun_center %d elev=%.1f max=%.1f"), sun_center, elev, elev_max);
 
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) { SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param); });
+  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+  });
 
   return USE_ANIMATOR;
-
 }
-static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Sun 1D Elevation 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
+
+
+
+// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Sun 1D Elevation Day 01@,Intensity,3,4,5,Use Palette,Mirror,8,Period,Grouping;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow,c1=0,c2=1"; // default not to use palette, enable mirror of colours
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @description           : EffectAnim__SunPositions__DrawSun_1D_Elevation_02
+ * @description:   : 
+ * 
+ * @param Intensity: None
+ * @param Speed    : None
+ * @param rate     : None
+ * @param time     : Blend time on first/only update
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+
+
+/***************************************************************************************************
+ * EffectAnim__SunPositions__DrawSun_1D_Elevation_02
+ * 
+ * Elevation DuskDawn — A 1D LED animation showing sun elevation from dawn to dusk.
+ * 
+ * - Elevation range: from -6° (civil twilight start) to max solar elevation.
+ * - SEGMENT.intensity: Controls sun size
+ * - SEGMENT.check1: Palette (ON) or custom colour mode (OFF)
+ * - SEGMENT.check2: Mirrored palette distribution
+ * - SEGMENT.check3: Marker lines
+ * - SEGMENT.custom1: Orb size factor
+ * - SEGMENT.custom2: Sky gradient size factor
+ * - SEGMENT.custom3: Marker brightness
+ * 
+ * Markers:
+ *   - Noon / Sunrise / Sunset → White
+ *   - Dawn / Dusk            → Dark Blue
+ ***************************************************************************************************/
+/**
+ * EFFECT: Elevation DuskDawn
+ * 
+ * Displays a sun and sky representation across the LED segment, where sun position is based on current elevation.
+ * Extends rendering below horizon down to -6°, blending redder colours as the sun sets/rises.
+ * 
+ * CUSTOMS:
+ * - custom1: Sun orb width multiplier (1–16)
+ * - custom2: Sky gradient width multiplier (1–64)
+ * - custom3: Marker brightness (0–31 → 0–100)
+ * - check1: Use palette (off = manual sun/sky blend)
+ * - check2: Symmetric palette (mirror horizontally)
+ * - check3: Enable markers (noon, rise/set, dusk/dawn)
+ */
+
+//  uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
+//  {
+//    if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//      return USE_ANIMATOR;
+//    }
+ 
+//    if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+ 
+//    for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Clear all
+//    }
+ 
+//    // === Optional: Draw markers ===
+//    if (SEGMENT.check3)
+//    {
+//      uint8_t marker_brightness_max = 100;
+//      uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+//      uint32_t col_white = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+//      uint32_t col_dusk  = RGBW32(0, 0, marker_brightness, 0);
+ 
+//      // Dusk and dawn markers (at edges)
+//      SEGMENT.Set_DynamicBuffer_DesiredColour(0, col_dusk);                // Dawn  (-6°) Dusk  (-6°)
+ 
+//      // Sunrise/Sunset (elevation = 0)
+//      double elev_min = -6.0;
+//      double elev_max = tkr_solar->Get_Elevation_Max();
+//      float norm_sunrise = (0.0f - elev_min) / (elev_max - elev_min);
+//      uint16_t px_sunrise = (uint16_t)(norm_sunrise * (SEGLEN - 1));
+//      SEGMENT.Set_DynamicBuffer_DesiredColour(px_sunrise, col_white);
+//      SEGMENT.Set_DynamicBuffer_DesiredColour((SEGLEN - 1) - px_sunrise, col_white); // Sunset
+ 
+//      SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, col_white);     // Noon = end of segment
+
+//    }
+ 
+//    // === Elevation Range: Dusk/Dawn (-6°) to Max Elevation ===
+//    double elev_min = -6.0;
+//    double elev_max = tkr_solar->Get_Elevation_Max();
+//    double elev     = tkr_solar->Get_Elevation();
+//    if (elev < elev_min) elev = elev_min;
+//    if (elev > elev_max) elev = elev_max;
+ 
+//    double norm = (elev - elev_min) / (elev_max - elev_min);
+//    uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+ 
+//    uint16_t max_width = SEGLEN / 2;
+//    uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+//    if (base_width == 0) base_width = 1;
+ 
+//    if(SEGMENT.check1) // Use palette
+//    {
+//      for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+//        int16_t pixel = sun_center + offset;
+//        if (pixel < 0 || pixel >= SEGLEN) continue;
+ 
+//        uint16_t i = (uint16_t)(offset + base_width);
+//        float pos_norm = (float)i / (2.0f * (float)base_width);
+//        uint16_t palette_index;
+ 
+//        if (SEGMENT.check2) {
+//          float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//          palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//        } else {
+//          palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//        }
+ 
+//        uint32_t colour = SEGMENT.GetPaletteColour(
+//          palette_index,
+//          PALETTE_INDEX_SPANS_SEGLEN_ON,
+//          PALETTE_WRAP_ON,
+//          PALETTE_DISCRETE_OFF,
+//          NO_ENCODED_VALUE
+//        );
+ 
+//        SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//      }
+//    }
+//    else
+//    {
+//      // Custom sun/sky blend mode
+//      float kSun_Width_Factor = (float)(SEGMENT.custom1 + 1) / 16.0f;
+//      float kSky_Width_Factor = (float)(SEGMENT.custom2 + 1) / 4.0f;
+ 
+//      uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+//      uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+ 
+//      if (sun_width >= SEGLEN / 2) sun_width = SEGLEN / 2;
+//      if (sky_width >= SEGLEN)     sky_width = SEGLEN - 1;
+ 
+//      constexpr uint8_t kMaxSkyBrightness = 70;
+//      constexpr uint8_t kMaxSunBrightness = 255;
+ 
+//      float r = 0, g = 0, b = 0;
+ 
+//      if (elev >= 20) {
+//        r = 255; g = 255; b = 220;
+//      } else if (elev >= 15) {
+//        float f = (elev - 15) / 5.0f;
+//        r = 255;
+//        g = 240 + (15 * f);
+//        b = 160 + (60 * f);
+//      } else if (elev >= 10) {
+//        float f = (elev - 10) / 5.0f;
+//        r = 255;
+//        g = 220 + (20 * f);
+//        b = 100 + (60 * f);
+//      } else if (elev >= 5) {
+//        float f = (elev - 5) / 5.0f;
+//        r = 255;
+//        g = 128 + (92 * f);
+//        b = 40  + (60 * f);
+//      } else if (elev >= 0) {
+//        float f = elev / 5.0f;
+//        r = 255;
+//        g = 64 + (64 * f);
+//        b = 32 + (8 * f);
+//      } else {
+//        float f = (elev - elev_min) / -elev_min; // fades from red to dark
+//        r = 255 * (0.01f + 0.99f * f); // red from 1% to 100%
+//        g = 0;
+//        b = 0;
+//      }
+ 
+//      float sky_r = 40, sky_g = 160, sky_b = 255;
+//      float sky_brightness = (float)kMaxSkyBrightness * ((elev - elev_min) / (elev_max - elev_min));
+//      if (sky_brightness < 0) sky_brightness = 0;
+//      if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+ 
+//      for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//        int16_t pixel = sun_center + offset;
+//        if (pixel < 0 || pixel >= SEGLEN) continue;
+//        SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//      }
+ 
+//      for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//        if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+ 
+//        int16_t pixel = sun_center + offset;
+//        if (pixel < 0 || pixel >= SEGLEN) continue;
+ 
+//        float dist = fabsf((float)offset);
+//        float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+//        if (fade < 0.0f) fade = 0.0f;
+ 
+//        uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//        uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//        uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+ 
+//        SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//      }
+//    }
+ 
+//    SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+ 
+//    SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//      SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//    });
+ 
+//    return USE_ANIMATOR;
+//  }
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Clear all
+//   }
+
+//   // === Optional: Draw markers ===
+//   if (SEGMENT.check3)
+//   {
+//     uint8_t marker_brightness_max = 100;
+//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+//     uint32_t col_white = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+//     uint32_t col_dusk  = RGBW32(0, 0, marker_brightness, 0);
+
+//     // Dawn/Dusk markers (start and end of day, -6°)
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(0, col_dusk);                // Dawn marker
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, col_white);      // Noon marker (top)
+
+//     // Sunrise/Sunset markers (0° elevation) at ~5% from ends
+//     uint16_t px_sunrise = (uint16_t)(0.05f * (SEGLEN - 1));
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(px_sunrise, col_white); // Sunrise + Sunset marker (0°)
+
+//   }
+
+
+//   // === Elevation Range: Dusk/Dawn (-6°) to Max Elevation ===
+//   double elev_min = -6.0;
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   double norm = (elev - elev_min) / (elev_max - elev_min);
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   uint16_t sun_width = ((SEGMENT.intensity + 1) * SEGLEN) / 64;
+
+//   // Map custom1 (0–255) nonlinearly: 0 → 0 width, 255 → SEGLEN
+//   float f_sky = SEGMENT.custom1 / 255.0f;
+//   f_sky = f_sky * f_sky;  // Quadratic scale for finer low-end control
+//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
+
+//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
+
+//   ALOG_INF(PSTR("sun_widthA %d,%d"), SEGMENT.intensity, sun_width);
+//   ALOG_INF(PSTR("sky_widthA %d,%d"), SEGMENT.intensity, sky_width);
+
+//   sun_width = min(sun_width, (uint16_t)(SEGLEN / 2));
+//   sky_width = min(sky_width, (uint16_t)(SEGLEN - 1));  
+
+//   constexpr uint8_t kMaxSkyBrightness = 100;
+//   constexpr uint8_t kMaxSunBrightness = 255;
+
+//   float r = 0, g = 0, b = 0;
+
+//   if (elev >= 20) {
+//     r = 255; g = 255; b = 220;
+//   } else if (elev >= 15) {
+//     float f = (elev - 15) / 5.0f;
+//     r = 255;
+//     g = 240 + (15 * f);
+//     b = 160 + (60 * f);
+//   } else if (elev >= 10) {
+//     float f = (elev - 10) / 5.0f;
+//     r = 255;
+//     g = 220 + (20 * f);
+//     b = 100 + (60 * f);
+//   } else if (elev >= 5) {
+//     float f = (elev - 5) / 5.0f;
+//     r = 255;
+//     g = 128 + (92 * f);
+//     b = 40  + (60 * f);
+//   } else if (elev >= 0) {
+//     float f = elev / 5.0f;
+//     r = 255;
+//     g = 64 + (64 * f);
+//     b = 32 + (8 * f);
+//   } else {
+//     float f = (elev - elev_min) / -elev_min;
+//     r = 255 * (0.01f + 0.99f * f);
+//     g = 0;
+//     b = 0;
+//   }
+
+//   float sky_r = 10;
+//   float sky_g = 30;
+//   float sky_b = 80;
+//   if (elev > 0.3f) {
+//     // float f = min((elev - 0.3f) / 2.7f, 1.0f); // full shift complete by ~3.0° elevation
+//     float f = fminf((elev - 0.3f) / 2.7f, 1.0f);
+//     sky_r = (1.0f - f) * 10  + f * 40;
+//     sky_g = (1.0f - f) * 30  + f * 160;
+//     sky_b = (1.0f - f) * 80  + f * 255;
+//   }
+
+//   float sky_brightness = (float)kMaxSkyBrightness * ((elev - elev_min) / (elev_max - elev_min));
+//   sky_brightness = constrain(sky_brightness, 0, kMaxSkyBrightness);
+
+//   for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//   }
+
+//   ALOG_INF(PSTR("sun_width %d"), sun_width);
+//   ALOG_INF(PSTR("sky_width %d"), sky_width);
+
+//   for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//     if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//     float dist = fabsf((float)offset);
+//     float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
+//     fade = constrain(fade, 0.0f, 1.0f);
+
+//     uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//     uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//     uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//   }
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+/**
+ * EFFECT: Elevation DuskDawn
+ * 
+ * Displays a sun and sky representation across the LED segment, where sun position is based on current elevation.
+ * Extends rendering below horizon down to -6°, blending redder colours as the sun sets/rises.
+ * 
+ * CUSTOMS:
+ * - intensity: Sun orb width (scaled across SEGLEN)
+ * - custom1: Sky gradient width (scaled across SEGLEN)
+ * - custom2: Sky gradient rolloff factor (controls linearity vs. stretch of tails)
+ * - custom3: Marker brightness (0–31 → 0–100)
+ * - check1: Use palette (off = manual sun/sky blend)
+ * - check2: Symmetric palette (mirror horizontally)
+ * - check3: Enable markers (noon, rise/set, dusk/dawn)
+ */
+
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return USE_ANIMATOR;
+//   }
+
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0); // Clear all
+//   }
+
+//   // === Optional: Draw markers ===
+//   if (SEGMENT.check3)
+//   {
+//     uint8_t marker_brightness_max = 100;
+//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+//     uint32_t col_white = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+//     uint32_t col_dusk  = RGBW32(0, 0, marker_brightness, 0);
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(0, col_dusk);                // Dawn marker (-6°)
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, col_dusk);       // Dusk marker (-6°)
+
+//     double elev_min = -6.0;
+//     double elev_max = tkr_solar->Get_Elevation_Max();
+//     float norm_sunrise = (0.0f - elev_min) / (elev_max - elev_min);
+//     uint16_t px_sunrise = (uint16_t)(norm_sunrise * (SEGLEN - 1));
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(px_sunrise, col_white);                // Sunrise marker (0°)
+//     SEGMENT.Set_DynamicBuffer_DesiredColour((SEGLEN - 1) - px_sunrise, col_white); // Sunset marker (0°)
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN / 2, col_white);                // Noon (center)
+//   }
+
+//   // === Elevation Range: Dusk/Dawn (-6°) to Max Elevation ===
+//   double elev_min = -6.0;
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+//   if (elev < elev_min) elev = elev_min;
+//   if (elev > elev_max) elev = elev_max;
+
+//   double norm = (elev - elev_min) / (elev_max - elev_min);
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   uint16_t sun_width = max(1, ((SEGMENT.intensity + 1) * SEGLEN) / 64);
+
+//   float f_sky = SEGMENT.custom1 / 255.0f;
+//   f_sky = f_sky * f_sky;  // Quadratic scale for finer low-end control
+//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
+
+//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
+
+//   sun_width = min(sun_width, SEGLEN / 2);
+//   sky_width = min(sky_width, SEGLEN - 1);
+
+//   ALOG_INF(PSTR("sun_width %d,%d"), SEGMENT.intensity, sun_width);
+//   ALOG_INF(PSTR("sky_width %d,%d"), SEGMENT.custom1, sky_width);
+
+//   constexpr uint8_t kMaxSkyBrightness = 100;
+//   constexpr uint8_t kMaxSunBrightness = 255;
+
+//   float r = 0, g = 0, b = 0;
+
+//   if (elev >= 20) {
+//     r = 255; g = 255; b = 220;
+//   } else if (elev >= 15) {
+//     float f = (elev - 15) / 5.0f;
+//     r = 255;
+//     g = 240 + (15 * f);
+//     b = 160 + (60 * f);
+//   } else if (elev >= 10) {
+//     float f = (elev - 10) / 5.0f;
+//     r = 255;
+//     g = 220 + (20 * f);
+//     b = 100 + (60 * f);
+//   } else if (elev >= 5) {
+//     float f = (elev - 5) / 5.0f;
+//     r = 255;
+//     g = 128 + (92 * f);
+//     b = 40  + (60 * f);
+//   } else if (elev >= 0) {
+//     float f = elev / 5.0f;
+//     r = 255;
+//     g = 64 + (64 * f);
+//     b = 32 + (8 * f);
+//   } else {
+//     float f = (elev - elev_min) / -elev_min;
+//     r = 255 * (0.01f + 0.99f * f);
+//     g = 0;
+//     b = 0;
+//   }
+
+//   float sky_r = 10;
+//   float sky_g = 30;
+//   float sky_b = 80;
+//   if (elev > 0.3f) {
+//     float f = min((elev - 0.3f) / 2.7f, 1.0f); // full shift complete by ~3.0° elevation
+//     sky_r = (1.0f - f) * 10  + f * 40;
+//     sky_g = (1.0f - f) * 30  + f * 160;
+//     sky_b = (1.0f - f) * 80  + f * 255;
+//   }
+
+//   float sky_brightness = (float)kMaxSkyBrightness * ((elev - elev_min) / (elev_max - elev_min));
+//   sky_brightness = constrain(sky_brightness, 0, kMaxSkyBrightness);
+
+//   for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//   }
+
+//   for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//     if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//     float dist = fabsf((float)offset);
+//     float norm = (sky_width > sun_width) ? ((dist - sun_width) / (sky_width - sun_width)) : 1.0f;
+//     norm = constrain(norm, 0.0f, 1.0f);
+
+//     float fade = powf(1.0f - norm, rolloff_param / 8.0f);
+//     fade = constrain(fade, 0.0f, 1.0f);
+
+//     uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//     uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//     uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0));
+//   }
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
+// {
+//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+//   SEGMENT.fill(BLACK); // Clear all pixels directly
+
+//   // === Elevation to pixel position ===
+//   double elev_min = -6.0;
+//   double elev_max = tkr_solar->Get_Elevation_Max();
+//   double elev     = tkr_solar->Get_Elevation();
+//   elev = constrain(elev, elev_min, elev_max);
+//   double norm     = (elev - elev_min) / (elev_max - elev_min);
+//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+//   // === Widths ===
+//   float f_sun = SEGMENT.intensity / 255.0f;
+//   f_sun = f_sun * f_sun; // nonlinear control
+//   uint16_t min_width = 1;
+//   uint16_t max_width = SEGLEN / 4;
+//   uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width));
+
+
+//   float f_sky = SEGMENT.custom1 / 255.0f;
+//   f_sky = f_sky * f_sky;  // Nonlinear mapping
+//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
+//   sky_width = (uint16_t)(fminf((float)sky_width, (float)(SEGLEN - 1)));
+
+//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
+
+//   // === Sun Colour ===
+//   float r = 0, g = 0, b = 0;
+//   if (elev >= 20) {
+//     r = 255; g = 255; b = 220;
+//   } else if (elev >= 15) {
+//     float f = (elev - 15) / 5.0f;
+//     r = 255;
+//     g = 240 + (15 * f);
+//     b = 160 + (60 * f);
+//   } else if (elev >= 10) {
+//     float f = (elev - 10) / 5.0f;
+//     r = 255;
+//     g = 220 + (20 * f);
+//     b = 100 + (60 * f);
+//   } else if (elev >= 5) {
+//     float f = (elev - 5) / 5.0f;
+//     r = 255;
+//     g = 128 + (92 * f);
+//     b = 40  + (60 * f);
+//   } else if (elev >= 0) {
+//     float f = elev / 5.0f;
+//     r = 255;
+//     g = 64 + (64 * f);
+//     b = 32 + (8 * f);
+//   } else {
+//     float f = (elev - elev_min) / -elev_min;
+//     r = 255 * (0.01f + 0.99f * f);
+//     g = 0;
+//     b = 0;
+//   }
+
+//   // === Sky Colour ===
+//   float sky_r = 10;
+//   float sky_g = 30;
+//   float sky_b = 80;
+//   if (elev > 0.3f) {
+//     float f = fminf((elev - 0.3f) / 2.7f, 1.0f);
+//     sky_r = (1.0f - f) * 10  + f * 40;
+//     sky_g = (1.0f - f) * 30  + f * 160;
+//     sky_b = (1.0f - f) * 80  + f * 255;
+//   }
+
+//   float sky_brightness = (float)100.0f * ((elev - elev_min) / (elev_max - elev_min));
+//   sky_brightness = constrain(sky_brightness, 0.0f, 100.0f);
+
+//   // === Sun Core ===
+//   if (SEGMENT.check1) // Use palette
+//   {
+//     int16_t base_width = (int16_t)sun_width;
+//     for (int16_t offset = -base_width; offset <= base_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       uint16_t i = (uint16_t)(offset + base_width);
+//       float pos_norm = (float)i / (2.0f * (float)base_width);
+//       uint16_t palette_index;
+
+//       if (SEGMENT.check2) {
+//         float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//         palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//       } else {
+//         palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//       }
+
+//       uint32_t colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX_SPANS_SEGLEN_ON,
+//         PALETTE_WRAP_ON,
+//         PALETTE_DISCRETE_OFF,
+//         NO_ENCODED_VALUE
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+//   }
+//   else
+//   {
+//     // === Sun Core ===
+//     float f_sun = SEGMENT.intensity / 255.0f;
+//     f_sun = f_sun * f_sun;  // nonlinear control
+//     float max_half_width = SEGLEN / 8.0f;  // Half of SEGLEN/4
+//     int16_t sun_width = (int16_t)(f_sun * max_half_width + 0.5f);  // rounded width
+//     if (sun_width < 0) sun_width = 0;
+
+//     for (int16_t offset = -sun_width; offset <= sun_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+//       SEGMENT.setPixelColor(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+//     }
+
+//   }
+
+//   // === Sky Glow ===
+//   for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//     if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//     float dist = fabsf((float)offset);
+//     float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
+//     fade = constrain(fade, 0.0f, 1.0f);
+
+//     uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f) + 0.5f);
+//     uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f) + 0.5f);
+//     uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f) + 0.5f);
+
+//     SEGMENT.setPixelColor(pixel, RGBW32(r_f, g_f, b_f, 0));
+//   }
+
+//   // === Draw markers (after sun/sky to avoid overwrite) ===
+//   if (SEGMENT.check3)
+//   {
+//     uint8_t marker_brightness_max = 100;
+//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+//     uint32_t col_white = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+//     uint32_t col_dusk  = RGBW32(0, 0, marker_brightness, 0);
+
+//     double elev_min = -6.0;
+//     double elev_max = tkr_solar->Get_Elevation_Max();
+//     float norm_sunrise = (0.0f - elev_min) / (elev_max - elev_min);
+//     uint16_t px_sunrise = (uint16_t)(norm_sunrise * (SEGLEN - 1));
+//     uint16_t px_dawn    = 0;
+//     uint16_t px_dusk    = SEGLEN - 1;
+//     uint16_t px_noon    = SEGLEN / 2;
+
+//     if (abs((int32_t)px_dawn - sun_center) > sun_width)    SEGMENT.setPixelColor(px_dawn, col_dusk);
+//     if (abs((int32_t)px_dusk - sun_center) > sun_width)    SEGMENT.setPixelColor(px_dusk, col_dusk);
+//     if (abs((int32_t)px_sunrise - sun_center) > sun_width) SEGMENT.setPixelColor(px_sunrise, col_white);
+//     if (abs((int32_t)((SEGLEN - 1) - px_sunrise) - sun_center) > sun_width)
+//                                                           SEGMENT.setPixelColor((SEGLEN - 1) - px_sunrise, col_white);
+//     if (abs((int32_t)px_noon - sun_center) > sun_width)    SEGMENT.setPixelColor(px_noon, col_white);
+//   }
+
+
+//   return FRAMETIME;
+// }
+
+uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
+{
+  if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
+
+  SEGMENT.fill(BLACK); // Clear all pixels
+
+  bool use_palette = SEGMENT.check1;
+  bool is_mirrored = SEGMENT.check2;
+  bool draw_markers = SEGMENT.check3;
+
+  // === Elevation to pixel position ===
+  const double elev_min = -6.0;
+  const double elev_max = tkr_solar->Get_Elevation_Max();
+  double elev = constrain(tkr_solar->Get_Elevation(), elev_min, elev_max);
+  double norm = (elev - elev_min) / (elev_max - elev_min);
+  uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
+
+  // === Widths ===
+  float f_sun = SEGMENT.intensity / 255.0f;
+  f_sun *= f_sun;
+  uint16_t min_width = 1;
+  uint16_t max_width = SEGLEN / 4;
+  uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width) + 0.5f);
+
+  float f_sky = SEGMENT.custom1 / 255.0f;
+  f_sky *= f_sky;
+  uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
+  sky_width = constrain(sky_width, 0, SEGLEN - 1);
+
+  uint8_t rolloff_param = SEGMENT.custom2 + 1;
+
+  // === Sun Colour ===
+  float r = 0, g = 0, b = 0;
+  if (elev >= 20) {
+    r = 255; g = 255; b = 220;
+  } else if (elev >= 15) {
+    float f = (elev - 15) / 5.0f;
+    r = 255;
+    g = 240 + (15 * f);
+    b = 160 + (60 * f);
+  } else if (elev >= 10) {
+    float f = (elev - 10) / 5.0f;
+    r = 255;
+    g = 220 + (20 * f);
+    b = 100 + (60 * f);
+  } else if (elev >= 5) {
+    float f = (elev - 5) / 5.0f;
+    r = 255;
+    g = 128 + (92 * f);
+    b = 40 + (60 * f);
+  } else if (elev >= 0) {
+    float f = elev / 5.0f;
+    r = 255;
+    g = 64 + (64 * f);
+    b = 32 + (8 * f);
+  } else {
+    float f = (elev - elev_min) / -elev_min;
+    r = 255 * (0.01f + 0.99f * f);
+    g = 0;
+    b = 0;
+  }
+
+  // === Sky Colour ===
+  float sky_r = 10, sky_g = 30, sky_b = 80;
+  if (elev > 0.3f) {
+    float f = fminf((elev - 0.3f) / 2.7f, 1.0f);
+    sky_r = (1.0f - f) * 10 + f * 40;
+    sky_g = (1.0f - f) * 30 + f * 160;
+    sky_b = (1.0f - f) * 80 + f * 255;
+  }
+
+  float sky_brightness = 100.0f * ((elev - elev_min) / (elev_max - elev_min));
+  sky_brightness = constrain(sky_brightness, 0.0f, 100.0f);
+
+  uint32_t colour;
+
+  // === Sun Core ===
+  if (use_palette) { 
+    for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+
+      uint16_t i = (uint16_t)(offset + sun_width);
+      float pos_norm = (float)i / (2.0f * sun_width);
+      uint16_t palette_index = is_mirrored
+        ? (uint16_t)(fabsf(0.5f - pos_norm) * 2.0f * (SEGLEN - 1))
+        : (uint16_t)(pos_norm * (SEGLEN - 1));
+
+      uint32_t colour = SEGMENT.GetPaletteColour(
+        palette_index,
+        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_WRAP_ON,
+        PALETTE_DISCRETE_OFF,
+        NO_ENCODED_VALUE
+      );
+      SEGMENT.setPixelColor(pixel, colour);
+    }
+  } else {
+    
+    for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+      SEGMENT.setPixelColor(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
+    }
+  }
+
+  // === Sky Glow ===
+  for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+    if (abs(offset) <= (int16_t)sun_width) continue;  // avoid overwriting sun
+    int16_t pixel = sun_center + offset;
+    if (pixel < 0 || pixel >= SEGLEN) continue;
+
+    float dist = fabsf((float)offset);
+    float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
+    fade = constrain(fade, 0.0f, 1.0f);
+
+    uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f) + 0.5f);
+    uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f) + 0.5f);
+    uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f) + 0.5f);
+
+    SEGMENT.setPixelColor(pixel, RGBW32(r_f, g_f, b_f, 0));
+  }
+
+  // === Markers (draw last) ===
+  if (draw_markers)
+  {
+    uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, 100);
+    uint32_t col_white = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+    uint32_t col_dusk = RGBW32(0, 0, marker_brightness, 0);
+
+    float norm_sunrise = (0.0f - elev_min) / (elev_max - elev_min);
+    uint16_t px_sunrise = (uint16_t)(norm_sunrise * (SEGLEN - 1));
+    uint16_t px_dawn = 0;
+    uint16_t px_noon = SEGLEN - 1;
+
+    if (abs((int32_t)px_dawn - sun_center) > sun_width)    SEGMENT.setPixelColor(px_dawn, col_dusk); //and dusk are first pixel
+    if (abs((int32_t)px_sunrise - sun_center) > sun_width){      
+      uint16_t px_sunrise = (uint16_t)(0.05f * (SEGLEN - 1));
+      SEGMENT.Set_DynamicBuffer_DesiredColour(px_sunrise, col_white); // Sunrise + Sunset marker (0°)
+    } 
+    if (abs((int32_t)px_noon - sun_center) > sun_width)    SEGMENT.setPixelColor(px_noon, col_white);
+
+
+
+  }
+
+  return FRAMETIME;
+}
+
+
+
+// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM = "Sun 1D Elevation DuskDawn 02@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,Period,Grouping;;name of palette;1;sx=255,ix=20,ep=1000,paln=Yellow,c1=24,c2=66,c3=1,o1=0,o3=1"; // default not to use palette, enable mirror of colours
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -2400,26 +4054,378 @@ static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROG
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01()
+// {
+//   // Safety checks
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return DEFAULT_EFFECTS_FUNCTION;
+//   }
+
+//   if (!tkr_solar->Valid()) return USE_ANIMATOR;
+
+//   // Clear entire dynamic buffer to "off"
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0);
+//   }
+
+//   // If sun is below horizon, skip drawing
+//   if (tkr_solar->Get_Elevation() <= 0.0) {
+//     return USE_ANIMATOR;
+//   }
+
+//   // === Get current azimuth and sunrise/sunset azimuth bounds ===
+//   double azimuth      = tkr_solar->Get_Azimuth();
+//   double az_start     = tkr_solar->calc.sunrise_azimuth;
+//   double az_end       = tkr_solar->calc.sunset_azimuth;
+
+//   // Clamp azimuth if outside expected bounds (just in case)
+//   if (azimuth < az_start) azimuth = az_start;
+//   if (azimuth > az_end)   azimuth = az_end;
+
+//   // Normalize azimuth to [0.0, 1.0] across the daylight range
+//   double az_norm = (azimuth - az_start) / (az_end - az_start);
+
+//   // Map to pixel index
+//   uint16_t sun_center = (uint16_t)(az_norm * (SEGLEN - 1));
+
+//   // Width based on segment intensity
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t width = (SEGMENT.intensity * max_width) / 255;
+//   if (width == 0) width = 1;
+
+//   // Draw band centered on sun_center
+//   for (int16_t offset = -((int16_t)width); offset <= (int16_t)width; offset++) {
+//     int16_t pixel = sun_center + offset;
+//     if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//     uint16_t i = (uint16_t)(offset + width); // index from 0 to 2*width
+//     float pos_norm = (float)i / (2.0f * (float)width);
+//     uint16_t palette_index;
+
+//     if (SEGMENT.check1) {
+//       // Mirrored palette
+//       float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//       palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//     } else {
+//       // Linear palette
+//       palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//     }
+
+//     uint32_t colour = SEGMENT.GetPaletteColour(
+//       palette_index,
+//       PALETTE_INDEX_SPANS_SEGLEN_ON,
+//       PALETTE_WRAP_ON,
+//       PALETTE_DISCRETE_OFF,
+//       NO_ENCODED_VALUE
+//     );
+
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//   }
+
+//   ALOG_INF(PSTR("sun_center%d (%d,%d,%d)"), sun_center, (int)azimuth, (int)az_start, (int)az_end);
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01()
+// {
+//   if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+//     return DEFAULT_EFFECTS_FUNCTION;
+//   }
+
+//   if (!tkr_solar->Valid()) return USE_ANIMATOR;
+
+//   for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0);
+//   }
+
+//   if (tkr_solar->Get_Elevation() <= 0.0) {
+//     return USE_ANIMATOR;
+//   }
+
+//   double azimuth  = tkr_solar->Get_Azimuth();
+//   double az_start = tkr_solar->calc.sunrise_azimuth;
+//   double az_end   = tkr_solar->calc.sunset_azimuth;
+
+//   if (azimuth < az_start) azimuth = az_start;
+//   if (azimuth > az_end)   azimuth = az_end;
+
+//   double az_norm = (azimuth - az_start) / (az_end - az_start);
+//   uint16_t sun_center = (uint16_t)(az_norm * (SEGLEN - 1));
+
+//   // Compute base width from intensity
+//   uint16_t max_width = SEGLEN / 2;
+//   uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+//   if (base_width == 0) base_width = 1;
+
+//   if (!SEGMENT.check2)
+//   {
+//     // === Use default palette rendering ===
+//     for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       uint16_t i = (uint16_t)(offset + base_width);
+//       float pos_norm = (float)i / (2.0f * (float)base_width);
+//       uint16_t palette_index;
+
+//       if (SEGMENT.check1) {
+//         float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+//         palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+//       } else {
+//         palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+//       }
+
+//       uint32_t colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX_SPANS_SEGLEN_ON,
+//         PALETTE_WRAP_ON,
+//         PALETTE_DISCRETE_OFF,
+//         NO_ENCODED_VALUE
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+//   }
+//   else
+//   {
+//     // === Custom Orb + Sky Fade Mode ===
+
+//     // Tunable multipliers
+//     constexpr float kSun_Width_Factor = 1.0f;
+//     constexpr float kSky_Width_Factor = 3.0f;
+//     constexpr uint8_t kMaxSunBrightness = 255;
+//     constexpr uint8_t kMaxSkyBrightness = 160;
+
+//     uint16_t sun_width = (uint16_t)(base_width * kSun_Width_Factor);
+//     uint16_t sky_width = (uint16_t)(base_width * kSky_Width_Factor);
+
+//     // Elevation in degrees
+//     double elev = tkr_solar->Get_Elevation();
+
+//     // === SUN COLOUR ===
+//     float r = 0, g = 0, b = 0;
+
+//     if (elev >= 20)       { r = 255; g = 255; b = 220; } // white-yellow
+//     else if (elev >= 15)  { r = 255; g = 240; b = 160; }
+//     else if (elev >= 10)  { r = 255; g = 220; b = 100; }
+//     else if (elev >= 5)   { r = 255; g = 128; b = 40;  }
+//     else                  { r = 255; g = 64;  b = 32;  } // deep red
+
+//     // === SKY COLOUR (cyanish) ===
+//     float sky_r = 40, sky_g = 160, sky_b = 255;
+//     float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f); // fade out as sun nears horizon
+//     if (sky_brightness < 0) sky_brightness = 0;
+//     if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+//     // === Draw Sun Orb ===
+//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0) );
+//     }
+
+//     // === Draw Sky Gradient ===
+//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+//       if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+//       int16_t pixel = sun_center + offset;
+//       if (pixel < 0 || pixel >= SEGLEN) continue;
+
+//       float dist = fabsf((float)offset);
+//       float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+//       if (fade < 0.0f) fade = 0.0f;
+
+//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0) );
+//     }
+//   }
+
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
+/**
+ * @brief
+ * Simulates the sun’s **horizontal path (azimuth)** across a linear LED segment.
+ * 
+ * The LED segment spans the visible sun path from **sunrise azimuth to sunset azimuth**.
+ * The sun is rendered at its current horizontal position based on azimuth angle.
+ * Two display modes are supported:
+ * 
+ * ▶ Palette Mode (`check1 = true`)
+ *     - Uses the current palette to draw a centered orb across the sun’s azimuth position.
+ *     - `check2` enables mirrored palette rendering.
+ * 
+ * ▶ Custom Mode (`check1 = false`)
+ *     - Draws an elevation-coloured sun orb.
+ *     - Adds a surrounding cyan sky fade that diminishes with distance from the sun.
+ *     - Orb/sky width are scaled using `custom1` and `custom2`.
+ * 
+ * ▶ Marker Overlay (`check3 = true`)
+ *     - Draws markers to indicate solar reference times:
+ *         • Noon (center of segment)
+ *         • Sunrise and Sunset (segment edges)
+ *         • Dawn and Dusk (at 10% and 90% of segment span)
+ *     - Marker brightness scales from `custom3` (0–31 mapped to 0–100 brightness)
+ * 
+ * @custom1: Sun orb width multiplier  (1–255 → scales base width × (custom1+1)/16)
+ * @custom2: Sky gradient width multiplier (1–255 → scales base width × (custom2+1)/4)
+ * @custom3: Marker brightness (5-bit: 0–31 → mapped to 0–100)
+ * @intensity: Overall width scaler (0–255) applied to both sun and sky size
+ */
+
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01()
 {
+  if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )) {
+    return DEFAULT_EFFECTS_FUNCTION;
+  }
 
-  if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )){ return USE_ANIMATOR; } // Pixel_Width * Two_Channels * Pixel_Count
-    
-  uint32_t colour;
-  for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+  if (!tkr_solar->Valid()) return USE_ANIMATOR;
+
+  for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
+    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, 0);
+  }
+
+  if (tkr_solar->Get_Elevation() <= 0.0) return USE_ANIMATOR;
+
+  double azimuth  = tkr_solar->Get_Azimuth();
+  double az_start = tkr_solar->calc.sunrise_azimuth;
+  double az_end   = tkr_solar->calc.sunset_azimuth;
+
+  if (azimuth < az_start) azimuth = az_start;
+  if (azimuth > az_end)   azimuth = az_end;
+
+  double az_norm = (azimuth - az_start) / (az_end - az_start);
+  uint16_t sun_center = (uint16_t)(az_norm * (SEGLEN - 1));
+
+  // === Optional: Draw markers ===
+  if (SEGMENT.check3)
   {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
-    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
+    uint8_t marker_brightness_max = 100;
+    uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, marker_brightness_max);
+    uint32_t marker_colour = RGBW32(marker_brightness, marker_brightness, marker_brightness, 0);
+
+    SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN / 2, marker_colour);                          // Noon (center)
+    SEGMENT.Set_DynamicBuffer_DesiredColour(0, marker_colour);                                   // Sunrise
+    SEGMENT.Set_DynamicBuffer_DesiredColour(SEGLEN - 1, marker_colour);                          // Sunset
+  }
+
+  uint16_t max_width = SEGLEN / 2;
+  uint16_t base_width = (SEGMENT.intensity * max_width) / 255;
+  if (base_width == 0) base_width = 1;
+
+  if (SEGMENT.check1)
+  {
+    // === Use palette mode ===
+    for (int16_t offset = -((int16_t)base_width); offset <= (int16_t)base_width; offset++) {
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+
+      uint16_t i = (uint16_t)(offset + base_width);
+      float pos_norm = (float)i / (2.0f * (float)base_width);
+      uint16_t palette_index;
+
+      if (SEGMENT.check2) {
+        float mirror_pos = fabsf(0.5f - pos_norm) * 2.0f;
+        palette_index = (uint16_t)(mirror_pos * (SEGLEN - 1));
+      } else {
+        palette_index = (uint16_t)(pos_norm * (SEGLEN - 1));
+      }
+
+      uint32_t colour = SEGMENT.GetPaletteColour(
+        palette_index,
+        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_WRAP_ON,
+        PALETTE_DISCRETE_OFF,
+        NO_ENCODED_VALUE
+      );
+
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+    }
+  }
+  else
+  {
+    // === Custom Orb + Sky Fade Mode ===
+    float kSun_Width_Factor = (float)(SEGMENT.custom1 + 1) / 16.0f;
+    float kSky_Width_Factor = (float)(SEGMENT.custom2 + 1) / 4.0f;
+
+    // Limit maximum width to 1/2 segment length to avoid overflow
+    uint16_t sun_width = (uint16_t)(SEGLEN * kSun_Width_Factor);
+    uint16_t sky_width = (uint16_t)(SEGLEN * kSky_Width_Factor);
+
+    // Clamp to segment size
+    if (sun_width >= SEGLEN / 2) sun_width = SEGLEN / 2;
+    if (sky_width >= SEGLEN)     sky_width = SEGLEN - 1;
+
+    constexpr uint8_t kMaxSunBrightness = 255;
+    constexpr uint8_t kMaxSkyBrightness = 160;
+
+    double elev = tkr_solar->Get_Elevation();
+
+    // === SUN COLOUR ===
+    float r = 0, g = 0, b = 0;
+    if (elev >= 20)       { r = 255; g = 255; b = 220; }
+    else if (elev >= 15)  { r = 255; g = 240; b = 160; }
+    else if (elev >= 10)  { r = 255; g = 220; b = 100; }
+    else if (elev >= 5)   { r = 255; g = 128; b = 40;  }
+    else                  { r = 255; g = 64;  b = 32;  }
+
+    float sky_r = 40, sky_g = 160, sky_b = 255;
+    float sky_brightness = (float)kMaxSkyBrightness * (elev / 20.0f);
+    if (sky_brightness < 0) sky_brightness = 0;
+    if (sky_brightness > kMaxSkyBrightness) sky_brightness = kMaxSkyBrightness;
+
+    // === Draw Sun Orb ===
+    for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0) );
+    }
+
+    // === Draw Sky Gradient ===
+    for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
+      if (offset >= -((int16_t)sun_width) && offset <= ((int16_t)sun_width)) continue;
+
+      int16_t pixel = sun_center + offset;
+      if (pixel < 0 || pixel >= SEGLEN) continue;
+
+      float dist = fabsf((float)offset);
+      float fade = 1.0f - (dist - sun_width) / (sky_width - sun_width);
+      if (fade < 0.0f) fade = 0.0f;
+
+      uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
+      uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
+      uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
+
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, RGBW32(r_f, g_f, b_f, 0) );
+    }
   }
 
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) { SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param); });
+  SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+  });
 
   return USE_ANIMATOR;
-
 }
-static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01[] PROGMEM = "Sun 1D Azimuth 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
+
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01[] PROGMEM = "Sun 1D Azimuth 01@1,2,3,4,5,6,7,8,Period,Grouping;;name of palette;1;sx=255,ep=1000,ix=0,paln=Yellow";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
 
@@ -14924,9 +16930,13 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01);
 
   addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_01__ID,
-            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01,
-            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01);
+    &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01,
+    PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01);
 
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_02__ID,
+    &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02,
+    PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02);
+      
   addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,
             &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01,
             PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01);

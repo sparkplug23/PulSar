@@ -85,6 +85,8 @@ int8_t DeviceNameList::AddDeviceName(const char* name_ctr, int16_t unique_module
   // AddLog_Array(LOG_LEVEL_DEBUG_MORE,PSTR("device_id"),number_buffer.index_ids,(int8_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
     #endif// ENABLE_LOG_LEVEL_INFO
 
+    return true;
+
 }
 
 int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_module_id, int8_t device_id){

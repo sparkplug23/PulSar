@@ -40,6 +40,25 @@
 
 #include <ESP8266WebServer.h>
 
+#ifdef ENABLE_RTSPSERVER
+  #include <OV2640.h>
+  #include <SimStreamer.h>
+  #include <OV2640Streamer.h>
+  #include <CRtspSession.h>
+  #ifndef RTSP_FRAME_TIME
+    #define RTSP_FRAME_TIME 100
+  #endif // RTSP_FRAME_TIME
+#endif
+
+// #include "cam_hal.h"
+// #include "esp_camera.h"
+// #include "sensor.h"
+// #include "fb_gfx.h"
+// #include "camera_pins.h"
+// #include "esp_jpg_decode.h"
+//#include "img_converters.h"
+
+
 #define WEBCAM_CORE 0
 
 enum LedEffect {
@@ -76,6 +95,11 @@ struct LedState {
 };
 
 
+
+
+
+
+
 class mCamera :
   public mTaskerInterface
 {
@@ -101,6 +125,26 @@ class mCamera :
       uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
     }module_state;
 
+
+    #ifdef ENABLE_RTSPSERVER
+      class localOV2640Streamer : public CStreamer {
+        BufPtr f_ptr; // Frame pointer
+        int f_len;
+    
+      public:
+        localOV2640Streamer(SOCKET aClient, int width, int height);
+        void setframe(BufPtr ptr, int len);
+        void clearframe();
+        virtual void streamImage(uint32_t curMsec);
+      };
+    
+      localOV2640Streamer* rtsp_streamer = nullptr;
+    
+      void RTSP_SetFrame(camera_fb_t* fb);
+      void RTSP_ClearFrame();
+      void RTSP_StreamTick(uint32_t now);
+    #endif
+    
     /************************************************************************************************
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
@@ -115,6 +159,16 @@ class mCamera :
 #define MAX_PICSTORE 4
 #endif
 
+#ifdef ENABLE_RTSPSERVER
+void WcEndRTSP();
+
+typedef struct tag_wc_rtspclient {
+  localOV2640Streamer * volatile camStreamer;
+  CRtspSession * volatile rtsp_session;
+  WiFiClient rtsp_client;
+  tag_wc_rtspclient * volatile p_next;
+} wc_rtspclient;
+#endif //ENABLE_RTSPSERVER
 
 
 typedef struct tag_wc_client {
@@ -191,7 +245,7 @@ struct {
   // TCP server on port 8554
   WiFiServer *rtspp;
   // pointer to the first rtsp client in a list of multiple clients, or nullptr
-  wc_rtspclient * volatile rtspclient;
+  wc_rtspclient * volatile rtsp_client;
   uint8_t rtsp_start;
   #endif // ENABLE_RTSPSERVER
 } Wc;
@@ -209,11 +263,13 @@ struct {
   uint32_t framesTotal;
   uint32_t framesLost;
 
-  uint8_t webclientcount;
-  uint8_t rtspclientcount;
+  struct ActiveClients {
+    uint8_t web;
+    uint8_t rtsp;
+  } activeClients;
 
   char name[7] = "Webcam";
-} WcStats;
+} stats;
 
 /*********************************************************************************************/
 // functions to encode into a jpeg buffer.
@@ -231,6 +287,7 @@ struct PICSTORE OurOneJpeg = {0};
 struct PICSTORE VideoJpeg = {0};
 
 
+bool LoadDefaultConfig();
 
 // allocate a PICSTORE buffer.
 // for PIXFORMAT_JPEG:
@@ -268,7 +325,9 @@ ESP8266WebServer *Webserver;
     bool wc_check_format(int format);
 
     void WCStartOperationTask();
-    static void WCOperationTask(void *pvParameters);
+    // static void WCOperationTask(void *pvParameters);
+    void WCOperationTask();
+    static void WCOperationTaskS(void* pvParameters);
 
     void WcUpdateStats(void);
         
@@ -308,6 +367,229 @@ ESP8266WebServer *Webserver;
     void WcShowStream(void);
     void WcInit(void);
 
+    
+#ifdef ENABLE_CAMERA__MOTION_DETECTION
+
+
+/*********************************************************************************************\
+ * ESP32 webcam motion routines
+ *
+ * WcGetmotionpixelsN = (N=1..4) read addr, len, w, h as JSON {"addr":123456,"len":12345,"w":160,"h":120, "format":4} 
+ *    motion(1)
+ *    difference(2) buffer - e.g for berry
+ *    mask(3)
+ *    background(4)
+ *     e.g. could be used to read pixels, or change pixels from berry.
+
+ * WcConvertFrameN <format> <scale> - convert a wcgetframe in picstore from jpeg to <format> (0=2BPP/RGB565, 3=1BPP/GRAYSCALE, 5=3BPP/RGB888), <scale> (0-3)
+ *     converts in place, replacing the stored frame with the new format.  Data can be retrieved using wcgetpicstoreN (e.g. for use in berry)
+ *     will fail if it can't convert or allocate.
+ * 
+ * WcSetPicture - SetPictureN (N=1-MAX_PICTORE) expects 'addr len format [width height]
+ *   use to populate a frame in Wc.picstore from Berry.  e.g. to put a JPEG mask there
+ *   so you can then decode it, get it's address, get the address of the current mask, and 
+ *   copy data across.
+ *   if sending JPEG (format=0|5), width and height are calculated on decode.
+ *   if sending pixels (format=4(GRAY)|6(RGB)|1(RGB565)), width and height are required, and used to allocate.
+ *   binary data is copied from addr.  i.e. you can send the addr/len from Berry introspect bytes.
+ *    ideas: could be used to set background image based on time of day.
+
+### Enable motion detection interval
+WCsetMotiondetect <timems>
+WCsetMotiondetect 2000
+
+### disable motion detection
+WCsetMotiondetect 0
+
+### return overall normalised pixel difference.
+WCsetMotiondetect -1
+
+### return overall normalised brightness.
+WCsetMotiondetect -2
+
+### motion detect via jpeg frame size (% change)
+Does not run motion detect frame scan!
+(i.e. you can turn off WCsetMotiondetect 0 - and detect at 50fps)
+WCsetMotiondetect2 <fsizediff percent limit>
+WCsetMotiondetect2 20
+
+### Pixel diff value threshold
+if set > 0, pixels with a difference > threshold will be counted
+if a difference buffer is enabled, then pixels in it are raised to 255.
+WCsetMotiondetect3 <pixel diff threshold 1-255>
+WCsetMotiondetect3 10
+
+### Pixels over threshold trigger
+if the number of pixels changed (per 10000) is > limit, motion is triggered.
+set 0 to disable.
+WCsetMotiondetect4 <pixel count trigger thresh, in 1/10000>
+WCsetMotiondetect4 10
+
+### set scale for motion detect image ref camera res
+the number 0-7 = 1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128
+values 0-3 use scaling on jpeg decode (fast).
+values 4-7 add software scaling (not much performance gain, but some) 
+WCsetMotiondetect5 0-7
+
+### enable difference buffer
+enable/disable the difference buffer
+WCsetMotiondetect6 0-1
+
+### Set motion trigger threshold (accumulated pixels difference)
+normalised value, try 1000...
+WCsetMotiondetect7 0-nnnnn
+
+
+Endpoints:
+http://IP/motionlbuff.jpg - last motion buffer as jpeg (fully scaled) - if motion enabled, else 404
+http://IP/motionbuff.jpg - motion buffer as jpeg (only jpeg scaled) - if motion enabled, else 404
+http://IP/motiondiff.jpg - last difference buffer as jpeg (fully scaled) - if enabled, else 404
+
+http://IP:81/diff.mjpeg - motion or difference buffer stream as mjpeg (fully scaled, buf is motion if diff not enabled) - if enabled, else no data
+
+ */
+
+/*********************************************************************************************/
+
+/*********************************************************************************************/
+/*
+Berry usage:
+if you turn on motion detect with "wcsetmotiondetect 1000" (number is ms between detect)
+or it you turn on frame sending using "wcberryframes 1"
+then berry will be called expecting to find a driver which has a method "webcam", e.g.:
+
+var piccount = 0
+class MyWebcamDriver
+  #- create a method for adding a button to the main menu -#
+  def webcam(cmd, idx, payload)
+    print("webcam "+cmd+" payload:"+payload)
+    if (cmd == "motion")
+      #split payload at space
+      var val = int(payload)
+      if (val > 1000)
+        piccount = piccount+1
+        var tcmd = "wcsavepic0 /myfile" .. piccount .. ".jpg"
+        tasmota.cmd(tcmd)
+        print("webcam motion -> "+tcmd)
+      end
+    end
+  end
+end
+
+This  will be called with 
+"motion <framediff> <<framebrightness>"
+and/or
+"frame"
+
+*/
+/*********************************************************************************************/
+
+
+// extern SemaphoreHandle_t WebcamMutex;
+
+
+#define DEFAULT_INITIAL_JPEG_LEN 16384
+
+
+
+// size_t WcJpegEncoderStore_jpg_out_cb(void * arg, size_t index, const void* data, size_t len);
+bool WcencodeToJpeg(uint8_t *src, size_t srclen, int width, int height, int format, uint8_t quality, struct PICSTORE *dest);
+
+void Wcencode_reset(struct PICSTORE *dest);
+
+struct WC_Motion {
+  /////////////////////////////////////
+  // configured by user
+  uint16_t motion_detect; // time between detections
+  uint32_t motion_trigger_limit; // last amount of difference measured (~100 for none, > ~1000 for motion?)
+  uint8_t scale; /*0=native, 1=/2, 2=/4, 3=/8*/
+  uint8_t swscale; // skips pixels 0=native, 1=/2, 2=/4, 3=/8 - after scale
+  uint8_t enable_diffbuff; // enable create of a buffer containing the last difference image
+  uint8_t enable_backgroundbuff;
+  uint8_t capture_background;
+
+  uint8_t pixelThreshold;
+  uint32_t  pixel_trigger_limit; // pertenthousand changed pixels
+
+  uint8_t enable_mask; // enable mask buffer
+  uint32_t auto_mask; // number of motion runs to run automask over
+  uint8_t auto_mask_pixel_threshold; // pixel change threshold to add pixel to mask
+  uint8_t auto_mask_pixel_expansion; // number of pixels atound the detected pixel to set in mask (square)
+
+  ////////////////////////////////////
+  // variables used in detection
+
+  // set to 0 each any time we restart (new last_motion_buffer), goes to after first processing 
+  // set to -1 on malloc failure - will happen with larger frames
+  int8_t motion_state;
+  uint32_t motion_ltime;  // time of last detect
+  uint32_t motion_trigger; // last amount of difference measured (~100 for none, > ~1000 for motion?)
+  uint32_t motion_brightness; // last frame brightness read (~15000)
+
+  // jpeg is decoded (with scale) into here.
+  struct PICSTORE *frame;
+  // the others are both scale and swscale
+  // the last image - to compare against.
+  struct PICSTORE *last_motion;
+  // optional - the last difference.
+  struct PICSTORE *diff;
+  // optional - a mask to stop differences in set pixels triggering motion
+  struct PICSTORE *mask;
+  // Optional static background image - to compare against.
+  struct PICSTORE *background;
+
+  int scaledwidth;
+  int scaledheight;
+  uint32_t changedPixelPertenthousand;
+
+  uint32_t required_motion_buffer_len; // required frame buffer len - used to prevent continual reallocation after failure
+
+  ////////////////////////////////////
+  // triggers picked up by wcloop()
+  volatile uint8_t motion_processed; // set to 1 each time it's processed.
+  volatile uint8_t motion_triggered; // motion was over trigger limit
+
+  ////////////////////////////////////
+  // status/debug
+  int32_t last_duration;
+};
+WC_Motion wc_motion;
+
+void WcSetMotionDefaults();
+void HandleImagemotionmask();
+void HandleImagemotiondiff();
+void HandleImagemotionbuff();
+void HandleImagemotionlbuff();
+void HandleImagemotionbackgroundbuff();
+uint32_t WcSetMotionDetect(int32_t value);
+bool WcConvertFrame(int32_t bnum_i, int format, int scale);
+void WcMotionLog();
+
+typedef struct {
+        uint16_t width;
+        uint16_t height;
+        uint16_t data_offset;
+        const uint8_t *input;
+        struct PICSTORE *poutput;
+} wc_rgb_jpg_decoder;
+
+// unsigned int wc_jpg_read(void * arg, size_t index, uint8_t *buf, size_t len);
+static bool _mono_write(void * arg, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t *data);
+#ifdef WC_USE_RGB_DECODE
+static bool wc_rgb_write(void * arg, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t *data);
+static bool wc_rgb565_write(void * arg, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t *data);
+#endif
+bool wc_jpg2mono(const uint8_t *src, size_t src_len, struct PICSTORE * out, int scale);
+bool convertJpegToPixels(const uint8_t *src_buf, size_t src_len, int width, int height, int scale, int format, struct PICSTORE *out);
+void WcAutoMask();
+void WcDetectMotionFn(uint8_t *_jpg_buf, int _jpg_buf_len);
+void CmndWebcamConvertFrame(void);
+void CmndWebcamSetPicture(void);
+void CmndWebcamSetMotionDetect(void);
+void CmndWebcamGetMotionPixels(void);
+
+#endif
+
 
     /************************************************************************************************
      * SECTION: Commands
@@ -315,9 +597,114 @@ ESP8266WebServer *Webserver;
     
     void parse_JSONCommand(JsonParserObject obj);
 
+    #define D_CMND_WC_STREAM "Stream"
+    #define D_CMND_WC_RESOLUTION "Resolution"
+    #define D_CMND_WC_MIRROR "Mirror"
+    #define D_CMND_WC_FLIP "Flip"
+    #define D_CMND_WC_SATURATION "Saturation"
+    #define D_CMND_WC_BRIGHTNESS "Brightness"
+    #define D_CMND_WC_CONTRAST "Contrast"
+    #define D_CMND_WC_SPECIALEFFECT "SpecialEffect"
+
+    #define D_CMND_WC_AWB "AWB"
+    #define D_CMND_WC_WB_MODE "WBMode"
+    #define D_CMND_WC_AWB_GAIN "AWBGain"
+
+    #define D_CMND_WC_AEC "AEC"
+    #define D_CMND_WC_AEC_VALUE "AECValue"
+    #define D_CMND_WC_AE_LEVEL "AELevel"
+    #define D_CMND_WC_AEC2 "AECDSP"
+
+    #define D_CMND_WC_AGC "AGC"
+    #define D_CMND_WC_AGC_GAIN "AGCGain"
+    #define D_CMND_WC_GAINCEILING "GainCeiling"
+
+    #define D_CMND_WC_RAW_GMA "GammaCorrect"
+    #define D_CMND_WC_LENC "LensCorrect"
+
+    #define D_CMND_WC_WPC "WPC"
+    #define D_CMND_WC_DCW "DCW"
+    #define D_CMND_WC_BPC "BPC"
+
+    #define D_CMND_WC_COLORBAR "Colorbar"
+
+    #define D_CMND_WC_FEATURE "Feature"
+    #define D_CMND_WC_SETDEFAULTS "SetDefaults"
+    #define D_CMND_WC_STATS "Stats"
+
+    #define D_CMND_WC_INIT "Init"
+    #define D_CMND_RTSP "Rtsp"
+
+    #define D_CMND_WC_AUTH "Auth"
+    #define D_CMND_WC_CLK "Clock"
+
+    #define D_CMND_WC_STARTTASK "Starttask"
+    #define D_CMND_WC_STOPTASK "Stoptask"
+
+    #define D_CMND_WC_MENUVIDEODISABLE "MenuVideoDisable"
+
+    // for testing to see what happens after cam_stop()
+    #define D_CMND_WC_INTERRUPT "Interrupt"
+
+    // mainly for testing functions which could be used by scripts.
+    #define D_CMND_WC_SETMOTIONDETECT "Setmotiondetect"
+    #define D_CMND_WC_GETFRAME "Getframe"
+    #define D_CMND_WC_GETPICSTORE "Getpicstore"
+
+    #define D_CMND_WC_BERRYFRAMES "Berryframes"
+
+    #define D_CMND_WC_SAVEPIC "SavePic"
+    #define D_CMND_WC_APPENDPIC "AppendPic"
+
+    #define D_CMND_WC_GETMOTIONPIXELS "GetMotionPixels"
+
+    #define D_CMND_WC_SETOPTIONS "SetOptions"
+    #define D_CMND_WC_CONVERTFRAME "ConvertFrame"
+    #define D_CMND_WC_SETPICTURE "SetPicture"
+
+    #define D_CMND_WC_POWEROFF "Poweroff"
 
     void CmndWebcamResolution(uint8_t resolution);
-    void CmndWebcamMirror(bool mirror)
+    void CmndWebcamMirror(bool mirror);
+    void CmndWebcamFlip(bool flip);        
+    void CmndWebcamSaturation(int8_t val);
+    void CmndWebcamBrightness(int8_t val);
+    void CmndWebcamContrast(int8_t val);
+    void CmndWebcamSpecialEffect(uint8_t val);
+    void CmndWebcamAWB(bool val);
+    void CmndWebcamWBMode(uint8_t val);
+    void CmndWebcamAWBGain(bool val);
+    void CmndWebcamAEC(bool val);
+    void CmndWebcamAECValue(uint16_t val);
+    void CmndWebcamAELevel(int8_t val);
+    void CmndWebcamAEC2(bool val);
+    void CmndWebcamAGC(bool val);
+    void CmndWebcamAGCGain(uint8_t val);
+    void CmndWebcamGainCeiling(uint8_t val);
+    void CmndWebcamGammaCorrect(bool val);
+    void CmndWebcamLensCorrect(bool val);
+    void CmndWebcamWPC(bool val);
+    void CmndWebcamDCW(bool val);
+    void CmndWebcamBPC(bool val);
+    void CmndWebcamColorbar(bool val);
+    void CmndWebcamFeature(uint8_t val);
+    void CmndWebcamAuth(bool val);
+    void CmndWebcamClock(uint16_t val);
+    void CmndWebcamCamStartStop(bool val);
+    void CmndWebcamSetDefaults();
+
+    void CmndWebcamGetFrame(int bnum);
+    void CmndWebcamGetPicStore(int bnum);
+
+    void CmndWebcamPowerOff(void);
+    void CmndWebcamTaskEnable(bool val);
+
+    void CmndWebcamInit();
+    void CmndWebRtsp(bool val);
+
+    void WcStopTask();
+
+    void SuspendAndShutdownCameraForOTA();
 
 
     /************************************************************************************************

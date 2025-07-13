@@ -64,15 +64,15 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
 
 void mBuzzer::Pre_Init(void)
 {
-  if (tkr_pins->PinUsed(GPIO_BUZZER_ID)) {
-    pinMode(tkr_pins->GetPin(GPIO_BUZZER_ID), OUTPUT);
-    Buzzer.pin = tkr_pins->GetPin(GPIO_BUZZER_ID);
+  if (tkr_pins->PinUsed(GPIO_BUZZER)) {
+    pinMode(tkr_pins->GetPin(GPIO_BUZZER), OUTPUT);
+    Buzzer.pin = tkr_pins->GetPin(GPIO_BUZZER);
     BuzzerSet(0);
     settings.fEnableSensor = true;
   } else
-  if (tkr_pins->PinUsed(GPIO_BUZZER_INV_ID)) {
-    pinMode(tkr_pins->GetPin(GPIO_BUZZER_INV_ID), OUTPUT);
-    Buzzer.pin = tkr_pins->GetPin(GPIO_BUZZER_INV_ID);
+  if (tkr_pins->PinUsed(GPIO_BUZZER_INV)) {
+    pinMode(tkr_pins->GetPin(GPIO_BUZZER_INV), OUTPUT);
+    Buzzer.pin = tkr_pins->GetPin(GPIO_BUZZER_INV);
     Buzzer.inverted = true;
     BuzzerSet(0);
     settings.fEnableSensor = true;

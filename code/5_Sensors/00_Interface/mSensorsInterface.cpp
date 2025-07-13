@@ -866,12 +866,12 @@ void mSensorsInterface::Update_UnifiedFilteredReadings()
 
         // Look for the desired sensor_type within the reading
         for (size_t i = 0; i < val.sensor_type.size(); i++) {
-            ALOG_INF(PSTR("sensor_type[%d] = %d"), i, val.sensor_type[i]);
+            ALOG_DBM(PSTR("sensor_type[%d] = %d"), i, val.sensor_type[i]);
 
             if (val.sensor_type[i] == entry.desired_type_id && i < val.data_f.size()) {
                 entry.filter_buffer.Add(val.data_f[i]);
-                Serial.print(val.data_f[i]); Serial.print(" ");
-                Serial.println(entry.filter_buffer.Mean());
+                // Serial.print(val.data_f[i]); Serial.print(" ");
+                // Serial.println(entry.filter_buffer.Mean());
                 entry.tLastUpdate = now;
                 break; // Only add the first match
             }

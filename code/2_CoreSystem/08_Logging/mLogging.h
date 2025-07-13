@@ -192,6 +192,29 @@ enum LoggingLevels {
 #endif
 
 
+#if defined(ENABLE_DEBUG_LINE_HERE4)
+  #define DEBUG_LINE_HERE4    SERIAL_DEBUG.printf("DEBUG HERE4: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE_HERE4   //nothing, no code
+#endif
+
+#if defined(ENABLE_WAIT_WITH_PRINT_TICK)
+  #define WAIT_WITH_PRINT_TICK(ms) do { \
+      SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - wait %lu ms START\n", __FILE__, __LINE__, (unsigned long)(ms)); \
+      uint32_t __wait_tick_start_##__LINE__ = millis(); \
+      while (millis() - __wait_tick_start_##__LINE__ < (uint32_t)(ms)) delay(1); \
+      SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - wait DONE\n", __FILE__, __LINE__); \
+      SERIAL_DEBUG.flush(); \
+    } while(0)
+#else
+  #define WAIT_WITH_PRINT_TICK(ms)  // No-op
+#endif
+
+
+
 #if defined(ENABLE_DEBUG_LINE_HERE_MILLIS)
   #define DEBUG_LINE_HERE_MILLIS    SERIAL_DEBUG.printf("DEBUG: ");\
                         SERIAL_DEBUG.print(__FILE__);\

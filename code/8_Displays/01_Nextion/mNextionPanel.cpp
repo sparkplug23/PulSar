@@ -121,6 +121,8 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     #endif
   }
 
+  return 1;
+
 }
 
 
@@ -160,33 +162,41 @@ void mNextionPanel::Show_ConnectionNotWorking()
 void mNextionPanel::Pre_Init(void)
 {
 
+  DEBUG_LINE_HERE
+
   module_state.mode = ModuleStatus::Initialising;
 
   // Plan to make Serial the primary code, then everything here will interface into it. 
   // For now, just using locally
 
+  DEBUG_LINE_HERE
   uint8_t serial_port = 1; // default
   uint8_t rx_pin = 0;
   uint8_t tx_pin = 0;
-  if(tkr_pins->PinUsed(GPIO_NEXTION_RX_ID) && tkr_pins->PinUsed(GPIO_NEXTION_TX_ID))
+  if(tkr_pins->PinUsed(GPIO_NEXTION_RX) && tkr_pins->PinUsed(GPIO_NEXTION_TX))
   {
+    DEBUG_LINE_HERE
     serial_port = 1;
-    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX_ID);
-    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX_ID);
+    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX);
+    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX);
   }
-  else if(tkr_pins->PinUsed(GPIO_NEXTION_RX2_ID) && tkr_pins->PinUsed(GPIO_NEXTION_TX2_ID))
+  else if(tkr_pins->PinUsed(GPIO_NEXTION_RX2) && tkr_pins->PinUsed(GPIO_NEXTION_TX2))
   {
+    DEBUG_LINE_HERE
     serial_port = 2;
-    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX2_ID);
-    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX2_ID);
+    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX2);
+    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX2);
   }else{
+    DEBUG_LINE_HERE
     module_state.mode = ModuleStatus::NoGPIOConfigured;
     return;
   }
 
+  DEBUG_LINE_HERE
   display = new HardwareSerial(serial_port);
+  DEBUG_LINE_HERE
   
-  ALOG_COM(PSTR(D_LOG_NEXTION "Using GPIO%d for Nextion RX"), rx_pin);
+  ALOG_INF(PSTR(D_LOG_NEXTION "Using GPIO%d for Nextion RX"), rx_pin);
 
   pinMode( rx_pin, OUTPUT); // RX - try forcing these to GPIO to stop serial comms
   pinMode( tx_pin, OUTPUT); // TX - try forcing these to GPIO to stop serial comms
@@ -997,17 +1007,43 @@ bool mNextionPanel::nextionConnect()
 
 DEBUG_LINE_HERE;
 
+DEBUG_LINE_HERE;
+DEBUG_LINE_HERE;
   memset(nextionSuffix,0xFF,sizeof(nextionSuffix));
 
+  DEBUG_LINE_HERE;
   const unsigned long nextionCheckTimeout = 2000; // Max time in msec for nextion connection check
   unsigned long nextionCheckTimer = millis();     // Timer for nextion connection checks
 
+  DEBUG_LINE_HERE;
+
+  if(display)
+  {
+    DEBUG_LINE_HERE;
+  
+    Serial.println("display is not null, continuing"); Serial.flush();
+    DEBUG_LINE_HERE;
+  
+  }else{
+    DEBUG_LINE_HERE;
+  
+    Serial.println("display is null, not continuing"); Serial.flush();
+    DEBUG_LINE_HERE;
+  
+    // return false; // display is not initialized, so we cannot continue
+  }
+  DEBUG_LINE_HERE;
+
+
+
   display->write(nextionSuffix, sizeof(nextionSuffix));
 
+  DEBUG_LINE_HERE;
   nextionSendCmd("connect"); // 
   // S:comok 1,30601-0,NX3224T024_011R,163,61488,DE6064B7E70C6521,4194304ÿÿÿ // response from connect
 
 
+  DEBUG_LINE_HERE;
   if (!lcdConnected)
   { // Check for some traffic from our LCD
     ALOG_INF(PSTR("HMI: Waiting for LCD connection"));
@@ -1017,10 +1053,12 @@ DEBUG_LINE_HERE;
     }
   }
 
+  DEBUG_LINE_HERE;
   if (!lcdConnected)
   { // No response from the display using the configured speed, so scan all possible speeds
     nextionSetSpeed();
 
+    DEBUG_LINE_HERE;
     nextionCheckTimer = millis(); // Reset our timer
     ALOG_INF(PSTR("HMI: Waiting again for LCD connection"));
     while (((millis() - nextionCheckTimer) <= nextionCheckTimeout) && !lcdConnected)
@@ -1035,6 +1073,7 @@ DEBUG_LINE_HERE;
     }
   }
 
+  DEBUG_LINE_HERE;
   // Query backlight status.  This should always succeed under simulation or non-HASPone HMI
   lcdBacklightQueryFlag = true;
   ALOG_INF(PSTR("HMI: Querying LCD backlight status"));
@@ -1051,10 +1090,12 @@ DEBUG_LINE_HERE;
     return false;
   }
 
+  DEBUG_LINE_HERE;
   // We are now communicating with the panel successfully.  Enable ACK checking for all future commands.
   nextionAckEnable = true;
   nextionSendCmd("bkcmd=3");
 
+  DEBUG_LINE_HERE;
   // This check depends on the HMI having been designed with a version number in the object
   // defined in lcdVersionQuery.  It's OK if this fails, it just means the HMI project is
   // not utilizing the version capability that the HASPone project makes use of.
@@ -1073,6 +1114,7 @@ DEBUG_LINE_HERE;
     return false;
   }
 
+  DEBUG_LINE_HERE;
   if (nextionModel.length() == 0)
   { // Check for LCD model via `connect`.  The Nextion simulator does not support this command,
     // so if we're running under that environment this process should timeout.
@@ -1083,6 +1125,7 @@ DEBUG_LINE_HERE;
       nextionHandleInput();
     }
   }
+  DEBUG_LINE_HERE;
   return true;
 
 
@@ -1180,6 +1223,7 @@ void mNextionPanel::nextionProcessInput()
   // Command reference: https://www.itead.cc/wiki/Nextion_Instruction_Set#Format_of_Device_Return_Data
   // tl;dr, command byte, command data, 0xFF 0xFF 0xFF
 
+  DEBUG_LINE_HERE;
   // Serial.printf("nextionProcessInput Instruction= %d\n\r", nextionReturnBuffer[0]);
 
   // ALOG_INF(PSTR("nextionProcessInput = %02x, %d, %d, %d, %d"), nextionReturnBuffer[0], nextionReturnBuffer[1], nextionReturnBuffer[2], nextionReturnBuffer[3], nextionReturnBuffer[4] );
@@ -1382,6 +1426,7 @@ void mNextionPanel::nextionProcessInput()
       //mqttClient.publish(mqttStateTopic, getString);
       Serial.println(getString);
       tkr_mqtt->Publish("status/nextion/event9",getString.c_str(),0);
+      DEBUG_LINE_HERE;
     }
     // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
     else
@@ -1885,6 +1930,7 @@ void mNextionPanel::nextionProcessInput()
   //   mqttGetSubtopic = "";
   // }
   nextionReturnIndex = 0; // Done handling the buffer, reset index back to 0
+  DEBUG_LINE_HERE;
 }
 
 
@@ -2063,7 +2109,7 @@ uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_level, bool json_appe
   JBI->Start();
     JBI->Add("test", 1);
     JBI->Add("lcdConnected", lcdConnected);
-  JBI->End();
+  return JBI->End();
 }
 
 
@@ -2072,7 +2118,7 @@ uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   
   JBI->Start();
     JBI->Add("test", 1);
-  JBI->End();
+  return JBI->End();
 
 }
 
@@ -2104,7 +2150,7 @@ void mNextionPanel::MQTTSend_PressEvent(){
   
   // screen_press.page = nextionReturnBuffer[1];
   // screen_press.event = nextionReturnBuffer[2];
-  uint32_t tSavedTimeSincePressOn = abs(millis() - screen_press.tSavedButtonONEvent);
+  uint32_t tSavedTimeSincePressOn = millis() - screen_press.tSavedButtonONEvent;
 
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s elapsed=%d of %dthreshold"), screen_press.page, screen_press.event, (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS", tSavedTimeSincePressOn, LONG_PRESS_DURATION);
   

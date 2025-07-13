@@ -81,7 +81,7 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
 
 void mSR04::Pre_Init(void)
 {
-  if (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID) && tkr_pins->PinUsed(GPIO_SR04_ECHO_ID))
+  if (tkr_pins->PinUsed(GPIO_SR04_TRIG) && tkr_pins->PinUsed(GPIO_SR04_ECHO))
   {
     settings.fEnableSensor = true;
     settings.fSensorCount++;
@@ -113,8 +113,8 @@ void mSR04::Config_Filters()
 void mSR04::Init(void)
 {
 
-  int sr04_echo_pin = tkr_pins->Pin(GPIO_SR04_ECHO_ID, 0);
-  int sr04_trig_pin = tkr_pins->Pin(GPIO_SR04_TRIG_ID, 0); 
+  int sr04_echo_pin = tkr_pins->Pin(GPIO_SR04_ECHO, 0);
+  int sr04_trig_pin = tkr_pins->Pin(GPIO_SR04_TRIG, 0); 
   AddLog(LOG_LEVEL_DEV_TEST,PSTR("SR04: Init Detect mode pins TX%d, RX%d"), sr04_trig_pin, sr04_echo_pin);
 
   if (sonar_serial==nullptr && sonar==nullptr) {
@@ -146,13 +146,13 @@ void mSR04::Init(void)
 void mSR04::ModeDetect(void) {
   for (uint32_t i = 0; i < MAX_SR04; i++) {
     SR04[i].type = SR04_MODE_NONE;
-    if (!tkr_pins->PinUsed(GPIO_SR04_ECHO_ID, i)){ 
+    if (!tkr_pins->PinUsed(GPIO_SR04_ECHO, i)){ 
       ALOG_TST(PSTR("Sr04: No ECHO %d"),i);
       continue; 
     }
     sr04_sensor_count++;
-    int sr04_echo_pin = tkr_pins->Pin(GPIO_SR04_ECHO_ID, i);
-    int sr04_trig_pin = tkr_pins->Pin(GPIO_SR04_TRIG_ID, i);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_TRIG as -1
+    int sr04_echo_pin = tkr_pins->Pin(GPIO_SR04_ECHO, i);
+    int sr04_trig_pin = tkr_pins->Pin(GPIO_SR04_TRIG, i);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_TRIG as -1
     SR04[i].sonar_serial = new TasmotaSerial(sr04_echo_pin, sr04_trig_pin, 1);
 
     AddLog(LOG_LEVEL_DEV_TEST,PSTR("SR04: ADetect mode pins TX%d, RX%d"), sr04_trig_pin, sr04_echo_pin);
@@ -161,7 +161,7 @@ void mSR04::ModeDetect(void) {
       // DEBUG_SENSOR_LOG(PSTR("SR4: Detect mode"));
       AddLog(LOG_LEVEL_DEV_TEST,PSTR("SR04:B Detect mode pins TX%d, RX%d"), sr04_trig_pin, sr04_echo_pin);
 
-      if (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID, i)) {
+      if (tkr_pins->PinUsed(GPIO_SR04_TRIG, i)) {
         SR04[i].type = (MiddleValue(Mode3Distance(i), Mode3Distance(i), Mode3Distance(i)) != 0) ? SR04_MODE_SER_TRANSCEIVER : SR04_MODE_TRIGGER_ECHO;
       } else {
         SR04[i].type = (MiddleValue(Mode2Distance(i), Mode2Distance(i), Mode2Distance(i)) != 0) ? SR04_MODE_SER_RECEIVER : SR04_MODE_TRIGGER_ECHO;
@@ -182,7 +182,7 @@ void mSR04::ModeDetect(void) {
         ALOG_INF(PSTR("NewPing %d"), __LINE__); Serial.println();
       }
       ALOG_INF(PSTR("NewPing %d"), __LINE__); Serial.println();
-      sr04_trig_pin = (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID, i)) ? tkr_pins->Pin(GPIO_SR04_TRIG_ID,i ) : tkr_pins->Pin(GPIO_SR04_ECHO_ID, i);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
+      sr04_trig_pin = (tkr_pins->PinUsed(GPIO_SR04_TRIG, i)) ? tkr_pins->Pin(GPIO_SR04_TRIG,i ) : tkr_pins->Pin(GPIO_SR04_ECHO, i);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
       SR04[i].sonar = new NewPing(sr04_trig_pin, sr04_echo_pin, SR04_MAX_SENSOR_DISTANCE);
       delay(100); // give time to inizialise, preventing ping_median fails
       ALOG_INF(PSTR("NewPing %d"), __LINE__); Serial.println();

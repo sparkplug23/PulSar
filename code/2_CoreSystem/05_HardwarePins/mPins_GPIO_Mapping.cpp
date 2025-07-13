@@ -498,8 +498,8 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_PIR_4_INV == id)                        p = PM_GPIO_FUNCTION_PIR_4_INV_CTR;
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  if(GPIO_DSB_1OF2 == id)                        p = PM_GPIO_FUNCTION_DS18X20_1_CTR;
-  if(GPIO_DSB_2OF2 == id)                        p = PM_GPIO_FUNCTION_DS18X20_2_CTR;
+  if(GPIO_DSB_1 == id)                        p = PM_GPIO_FUNCTION_DS18X20_1_CTR;
+  if(GPIO_DSB_2 == id)                        p = PM_GPIO_FUNCTION_DS18X20_2_CTR;
   #endif
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
   if(GPIO_LDR_BASIC_DIGITAL1 == id)                        p = PM_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR;

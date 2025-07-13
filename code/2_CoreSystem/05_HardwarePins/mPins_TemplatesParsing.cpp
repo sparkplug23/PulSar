@@ -251,7 +251,13 @@ void mPins::TemplateGPIOs(myio *gp)
       GetInternalTemplate(&src, tkr_set->Settings.module, 1);
     #endif
     #ifdef ESP32
-      memcpy_P(&src, &module_template__gpio_map[ModuleTemplate(tkr_set->Settings.module)].gp, sizeof(mycfgio));
+      uint32_t module = ModuleTemplate(tkr_set->Settings.module);
+      ALOG_INF(PSTR(D_LOG_PINS "Loading ESP32 template %d"), module);
+      if(ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io) != sizeof(mycfgio))
+      {
+        ALOG_ERR(PSTR("TemplateGPIOs: Size mismatch %d != %d"), ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io), sizeof(mycfgio));
+      }
+      memcpy_P(&src, &module_template__gpio_map[module].gp, sizeof(mycfgio));
     #endif
   }
 

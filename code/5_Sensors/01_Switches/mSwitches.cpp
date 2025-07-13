@@ -44,6 +44,8 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
+  return FUNCTION_RESULT_SUCCESS_ID;
+
 }
 
 
@@ -137,7 +139,6 @@ void mSwitches::Init(void) {
     TickerSwitch->attach_ms(
       (ac_detect) ? SWITCH_FAST_PROBE_INTERVAL : SWITCH_PROBE_INTERVAL,
       +[](mSwitches* testInstance){ testInstance->Probe();}, this);
-      #error "ESP32 Ticker not implemented"
     #else
     TickerSwitch->attach_ms(
       (ac_detect) ? SWITCH_FAST_PROBE_INTERVAL : SWITCH_PROBE_INTERVAL, 
@@ -582,6 +583,8 @@ void mSwitches::Handler(void) {
  */
 bool mSwitches::SendSwitch(uint32_t index, uint32_t state)
 {
+
+  DEBUG_LINE_HERE4
   
   char switch_name[50];
   DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), index, switch_name, sizeof(switch_name));  
@@ -617,6 +620,8 @@ bool mSwitches::SendSwitch(uint32_t index, uint32_t state)
   Tasker(TASK_MQTT_SENDER);
 
   event.waiting = false;
+
+  return true; // Event was sent
 
 }
 

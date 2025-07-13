@@ -87,6 +87,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
   } // end switch
 
   return FUNCTION_RESULT_UNKNOWN_ID;
+
 } // END function
 
 
@@ -108,7 +109,7 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
 
   for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
-    tkr_pins->DigitalWrite(GPIO_REL1_ID + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+    tkr_pins->DigitalWrite(GPIO_REL1 + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
 }
 
@@ -207,9 +208,9 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         uint16_t gpio_pin = 0;
         if(bitRead(rt.bitpacked.rel_inverted, i))
         { //add the gpio mpin shift back in
-          gpio_pin = GPIO_REL1_INV_ID;          
+          gpio_pin = GPIO_REL1_INV;          
         }else{
-          gpio_pin = GPIO_REL1_ID;
+          gpio_pin = GPIO_REL1;
         }
         tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         // tkr_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
@@ -235,9 +236,9 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
           uint16_t gpio_pin = 0;
           if(bitRead(rt.bitpacked.rel_inverted, i))
           { //add the gpio mpin shift back in
-            gpio_pin = GPIO_REL1_INV_ID;          
+            gpio_pin = GPIO_REL1_INV;          
           }else{
-            gpio_pin = GPIO_REL1_ID;
+            gpio_pin = GPIO_REL1;
           }
           power_t state = rpower &1;
           tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
@@ -363,11 +364,11 @@ void mRelays::SetPowerOnState(void)
           && !tkr_set->Settings.flag3.shutter_mode       // SetOption80 - Enable shutter support
           #endif // USE_SHUTTER
         ) {
-        if ((port < MAX_RELAYS) && tkr_pins->PinUsed(GPIO_REL1_ID, port)) {
+        if ((port < MAX_RELAYS) && tkr_pins->PinUsed(GPIO_REL1, port)) {
           if (bitRead(rt.bitpacked.rel_bistable, port)) {
             port++;                              // Skip both bistable relays as always 0
           } else {
-            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL1_ID, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
+            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL1, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
           }
         }
         port++;
@@ -621,16 +622,16 @@ void mRelays::Pre_Init(void){
   // Lets check each type on their own, normal, inverted etc
   for(uint8_t driver_index=0; driver_index<MAX_RELAYS; driver_index++)
   {
-    if(tkr_pins->PinUsed(GPIO_REL1_ID, driver_index))
+    if(tkr_pins->PinUsed(GPIO_REL1, driver_index))
     {
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_ID, driver_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, driver_index);
       pinMode(pin_number, OUTPUT);
       rt.devices_present++;
       if(module_state.devices++ >= MAX_RELAYS){ break; }
     }else
-    if(tkr_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
+    if(tkr_pins->PinUsed(GPIO_REL1_INV, driver_index))
     {
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV_ID, driver_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV, driver_index);
       pinMode(pin_number, OUTPUT);
       bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
       rt.devices_present++;
@@ -1269,7 +1270,7 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_appending
 
 
 
-  JBI->End();
+  return JBI->End();
 
 }
 
@@ -1352,6 +1353,8 @@ uint8_t mRelays::AppendJSONResponse_Drivers_Unified()
   JBI->Level_Start_P(PM_MODULE_DRIVERS_RELAY_CTR);
     ConstructJSON_State(JSON_LEVEL_SHORT, false);
   JBI->Object_End();
+
+  return 1; // fix crash
 }
 
 

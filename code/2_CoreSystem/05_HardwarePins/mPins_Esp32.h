@@ -205,7 +205,7 @@ typedef struct MYIO {
  
  typedef struct MYCFGIO {
    uint16_t      io[MAX_USER_PINS];// = {GPIO_NONE_ID};
- } mycfgio                      // 14 * 2 = 28 bytes / 36 * 2 = 72 bytes
+ } mycfgio;                      // 14 * 2 = 28 bytes / 36 * 2 = 72 bytes
  
  
  typedef union {

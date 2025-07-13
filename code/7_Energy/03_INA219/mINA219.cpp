@@ -171,7 +171,7 @@ float mEnergyINA219::GetCurrent_mA(uint16_t addr)
   ina219_currentDivider_mA = 10; // Current LSB = 100uA per bit (1000/100 = 10)
   ina219_powerMultiplier_mW = 2; // Power LSB = 1mW per bit (2/1)
  
- tkr_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
+  tkr_i2c->I2cWrite16(addr, INA219_REG_CALIBRATION, ina219_calValue);
   // Now we can safely read the CURRENT register!
   // raw current value (16-bit signed integer, so +-32767)
   float value = tkr_i2c->I2cReadS16(addr, INA219_REG_CURRENT);

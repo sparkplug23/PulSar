@@ -17,6 +17,7 @@
 #include "mPin_GPIO.h"
 
 
+
 #define USE_MODULE_TEMPLATE_SONOFF_BASIC
 #define USE_MODULE_TEMPLATE_SONOFF_BASIC_EXTERNAL
 #define USE_MODULE_TEMPLATE_H801
@@ -239,47 +240,25 @@ class mPins :
     
     // Supported hardware modules
     enum SupportedModulesESP32C3 {
-      WEMOS,
+      MODULE_GENERIC,
       MAXMODULE };
     
-    // Default module settings
-    const uint8_t kModuleNiceList[] PROGMEM = {
-      WEMOS,
-    };
+    // // Default module settings
+    // const uint8_t kModuleNiceList[] PROGMEM = {
+    //   WEMOS,
+    // };
     
-    // !!! Update this list in the same order as kModuleNiceList !!!
-    const char kModuleNames[] PROGMEM =
-      "ESP32C3|"
-      ;
+    // // !!! Update this list in the same order as kModuleNiceList !!!
+    // const char kModuleNames[] PROGMEM =
+    //   "ESP32C3|"
+    //   ;
     
-    // !!! Update this list in the same order as SupportedModulesESP32C3 !!!
-    const mytmplt kModules[] PROGMEM = {
-      {                              // Generic ESP32C3 device
-        GPIO_USER,              // 0       IO                  GPIO0, ADC1_CH0, XTAL_32K_P
-        GPIO_USER,              // 1       IO                  GPIO1, ADC1_CH1, XTAL_32K_N
-        GPIO_USER,              // 2       IO                  GPIO2, ADC1_CH2, FSPIQ
-        GPIO_USER,              // 3       IO                  GPIO3, ADC1_CH3
-        GPIO_USER,              // 4       IO                  GPIO4, ADC1_CH4, FSPIHD, MTMS
-        GPIO_USER,              // 5       IO                  GPIO5, ADC2_CH0, FSPIWP, MTDI
-        GPIO_USER,              // 6       IO                  GPIO6, FSPICLK, MTCK
-        GPIO_USER,              // 7       IO                  GPIO7, FSPID, MTDO
-        GPIO_USER,              // 8       IO                  GPIO8
-        GPIO_USER,              // 9       IO                  GPIO9
-        GPIO_USER,              // 10      IO                  GPIO10
-        0,                           // 11      IO                  GPIO11, output power supply for flash
-        0,                           // 12      IO                  GPIO12, SPIHD - Free if flash DIO/DOUT
-        0,                           // 13      IO                  GPIO13, SPIWP - Free if flash DIO/DOUT
-        0,                           // 14      IO                  GPIO14, SPICS0
-        0,                           // 15      IO                  GPIO15, SPICLK
-        0,                           // 16      IO                  GPIO16, SPID
-        0,                           // 17      IO                  GPIO17, SPIQ
-        GPIO_USER,              // 18      IO                  GPIO18, USB_D
-        GPIO_USER,              // 19      IO                  GPIO19, USB_D+
-        GPIO_USER,              // 20      IO     RXD0         GPIO20, U0RXD
-        GPIO_USER,              // 21      IO     TXD0         GPIO21, U0TXD
-        0                            // Flag
-      },
-    };
+    static const uint8_t module_template__ids[]  PROGMEM;
+    static const char     module_template__names[]  PROGMEM;
+    static const mytmplt  module_template__gpio_map[] PROGMEM;
+
+    #define MODULE_DEFAULT mPins::MODULE_GENERIC // should become the WEMO in esp8285
+    
     
     /*********************************************************************************************\
      Known templates

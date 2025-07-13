@@ -103,6 +103,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }  
+  return 1;
 
 } // END Tasker
 

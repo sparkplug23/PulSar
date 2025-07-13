@@ -1313,6 +1313,9 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
     // if (segbri > 0) seg.setOpacity(segbri);
     // seg.setOption(SEG_OPTION_ON, segbri); // use transition
+    ALOG_INF(PSTR("USing the opacity as RGB, but need to decide where to use later"));
+    seg.setBrightnessRGB(segbri);
+    seg.setBrightnessCCT(segbri);
   }
 
   if (getVal(elem["cBri"], &seg._brightness_rgb)) {

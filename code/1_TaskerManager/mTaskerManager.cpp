@@ -180,9 +180,12 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
 
 
 
-    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE4;
       result = mod->Tasker(task, obj);
-      DEBUG_LINE_HERE;
+      /***
+       * In the future if we get stuck, remember missing return from task required with platest platform/board
+       */
+      DEBUG_LINE_HERE4;
   #endif
 
     
@@ -533,10 +536,10 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mADCInternal());
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-  addTasker(new mDB18x20_ESP32());
+  addTasker(new mDB18x20());
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  addTasker(new mDB18x20_ESP32());
+  addTasker(new mDB18x20());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   addTasker(new mGPS_Serial());

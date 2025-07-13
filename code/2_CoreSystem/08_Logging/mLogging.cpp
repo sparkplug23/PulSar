@@ -227,7 +227,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   }
   #endif // ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
   
-  DEBUG_LINE_HERE3
+  // DEBUG_LINE_HERE3
 }
 
 

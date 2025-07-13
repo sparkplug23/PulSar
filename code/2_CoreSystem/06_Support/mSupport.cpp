@@ -746,8 +746,11 @@ void mSupport::ArduinoOTAInit(void)
 
     // Disable parts (e.g. RF receive interrupts) before starting update
     pCONT->Tasker_Interface(TASK_UPDATE_OTA_BEFORE_ON_START);
+
+    tkr_set->Settings.logging.serial_level = LOG_LEVEL_NONE; // Disable serial logging
+    tkr_set->Settings.logging.web_level = LOG_LEVEL_NONE; // Disable web logging
     
-    delay(100);       // Allow time for message xfer
+    delay(200);       // Allow time for message xfer
   });
 
 
@@ -1959,9 +1962,7 @@ void mSupport::ShowSource(int source)
 {
   if ((source > 0) && (source < SRC_MAX)) {
     char stemp1[20];
-    #ifdef ENABLE_LOG_LEVEL_INFO
     ALOG_INF(PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
-    #endif// ENABLE_LOG_LEVEL_INFO
   }
 }
 

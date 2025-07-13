@@ -602,6 +602,8 @@ boolean mMQTTManager::Publish(const char* topic, const char* payload, boolean re
   }
   DEBUG_LINE_HERE3
 
+  return false; // No broker connected or not available, return false
+
 }
 
 
@@ -635,25 +637,25 @@ boolean mMQTTManager::Subscribe(const char* topic, uint8_t qos)
 }
 
 
-/**
- * @brief This is not thread safe
- * 
- * @return const char* 
- */
-const char* mMQTTManager::GetState_PCtr(int8_t state)
-{
-  switch(state){
-    case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");
-    case MQTT_CONNECTION_LOST:          return PSTR("Connecttion Lost");
-    case MQTT_CONNECT_FAILED:           return PSTR("Connect Failed");
-    case MQTT_DISCONNECTED:             return PSTR("Disconnected");
-    case MQTT_CONNECTED:                return PSTR("Connected");
-    case MQTT_CONNECT_BAD_PROTOCOL:     return PSTR("Bad Protocol");
-    case MQTT_CONNECT_BAD_CLIENT_ID:    return PSTR("Bad Client ID");
-    case MQTT_CONNECT_UNAVAILABLE:      return PSTR("Unavailable");
-    case MQTT_CONNECT_BAD_CREDENTIALS:  return PSTR("Bad Credentials");
-    case MQTT_CONNECT_UNAUTHORIZED:     return PSTR("Unauthorized");
-  }
-}
+// /**
+//  * @brief This is not thread safe
+//  * 
+//  * @return const char* 
+//  */
+// const char* mMQTTManager::GetState_PCtr(int8_t state)
+// {
+//   switch(state){
+//     case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");
+//     case MQTT_CONNECTION_LOST:          return PSTR("Connecttion Lost");
+//     case MQTT_CONNECT_FAILED:           return PSTR("Connect Failed");
+//     case MQTT_DISCONNECTED:             return PSTR("Disconnected");
+//     case MQTT_CONNECTED:                return PSTR("Connected");
+//     case MQTT_CONNECT_BAD_PROTOCOL:     return PSTR("Bad Protocol");
+//     case MQTT_CONNECT_BAD_CLIENT_ID:    return PSTR("Bad Client ID");
+//     case MQTT_CONNECT_UNAVAILABLE:      return PSTR("Unavailable");
+//     case MQTT_CONNECT_BAD_CREDENTIALS:  return PSTR("Bad Credentials");
+//     case MQTT_CONNECT_UNAUTHORIZED:     return PSTR("Unauthorized");
+//   }
+// }
 
 #endif // USE_MODULE_NETWORK_MQTT
