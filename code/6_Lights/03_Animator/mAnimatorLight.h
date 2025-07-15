@@ -1065,8 +1065,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__SunPositions__Sunrise_Alarm_01();
     uint16_t EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01();
     uint16_t EffectAnim__SunPositions__Sunset_Blended_Palettes_01();
+    uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(bool include_duskdawn);
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_01();
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_02();
+    uint16_t EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool include_duskdawn);
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Azimuth_01();
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Azimuth_02();
     uint16_t EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01();

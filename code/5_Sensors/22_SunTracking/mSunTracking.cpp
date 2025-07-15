@@ -2,6 +2,21 @@
 
 #ifdef USE_MODULE_SENSORS_SUN_TRACKING
 
+time_t ConvertToUTCTime(int year, int month, int day, int hour, int min, int sec) {
+    struct tm timeinfo = { 0 };
+    timeinfo.tm_year = year - 1900;  // tm_year is years since 1900
+    timeinfo.tm_mon  = month - 1;    // tm_mon is 0-based
+    timeinfo.tm_mday = day;
+    timeinfo.tm_hour = hour;
+    timeinfo.tm_min  = min;
+    timeinfo.tm_sec  = sec;
+  
+    // Use mktime assuming system is set to UTC (or ignore timezone entirely)
+    time_t t = mktime(&timeinfo);
+    return t;
+  }
+
+
 int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
 {
 
@@ -37,7 +52,50 @@ int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
 
 		Update_Solar_Tracking_Data();
 
+        ALOG_DBM(PSTR("GetUTC %d"),tkr_time->GetUTCTime());
+
+        CalculateMaxMinElevationForDay(tkr_time->GetUTCTime(), LATITUDE, LONGITUDE, ALTITUDE_ABOVE_SEALEVEL); //will only need to run once a day
+        ALOG_DBM(PSTR("max min %d %d"), (int)calc.max_elevation, (int)calc.min_elevation);
         CalculateSunriseSunsetAzimuth(LATITUDE, LONGITUDE, ALTITUDE_ABOVE_SEALEVEL);
+
+        // Location: Belfast (example)
+// double latitude = 54.6;
+// double longitude = -5.9;
+// double altitude = 0;
+
+// time_t t;
+// mSunTracking::SunPosition AzEl;
+
+// t = ConvertToUTCTime(2025, 7, 14, 0, 0, 0);   // Midnight UTC
+// AzEl = CalculateSolarAzEl(t, latitude, longitude, altitude);
+// ALOG_INF(PSTR("\n\r\n\r00:00 UTC → Elev: %d.%d, Az: %d.%d"),
+//          FLOAT_N(AzEl.elevation), FLOAT_D(AzEl.elevation),
+//          FLOAT_N(AzEl.azimuth), FLOAT_D(AzEl.azimuth));
+
+// t = ConvertToUTCTime(2025, 7, 14, 6, 0, 0);   // 06:00 UTC
+// AzEl = CalculateSolarAzEl(t, latitude, longitude, altitude);
+// ALOG_INF(PSTR("\n\r\n\r06:00 UTC → Elev: %d.%d, Az: %d.%d"),
+//          FLOAT_N(AzEl.elevation), FLOAT_D(AzEl.elevation),
+//          FLOAT_N(AzEl.azimuth), FLOAT_D(AzEl.azimuth));
+
+// t = ConvertToUTCTime(2025, 7, 14, 12, 0, 0);  // 12:00 UTC
+// AzEl = CalculateSolarAzEl(t, latitude, longitude, altitude);
+// ALOG_INF(PSTR("\n\r\n\r12:00 UTC → Elev: %d.%d, Az: %d.%d"),
+//          FLOAT_N(AzEl.elevation), FLOAT_D(AzEl.elevation),
+//          FLOAT_N(AzEl.azimuth), FLOAT_D(AzEl.azimuth));
+
+// t = ConvertToUTCTime(2025, 7, 14, 18, 0, 0);  // 18:00 UTC
+// AzEl = CalculateSolarAzEl(t, latitude, longitude, altitude);
+// ALOG_INF(PSTR("\n\r\n\r18:00 UTC → Elev: %d.%d, Az: %d.%d"),
+//          FLOAT_N(AzEl.elevation), FLOAT_D(AzEl.elevation),
+//          FLOAT_N(AzEl.azimuth), FLOAT_D(AzEl.azimuth));
+
+// t = ConvertToUTCTime(2025, 7, 15, 0, 0, 0);   // Next midnight UTC (start of 15th)
+// AzEl = CalculateSolarAzEl(t, latitude, longitude, altitude);
+// ALOG_INF(PSTR("\n\r\n\r00:00 (next day) UTC → Elev: %d.%d, Az: %d.%d"),
+//          FLOAT_N(AzEl.elevation), FLOAT_D(AzEl.elevation),
+//          FLOAT_N(AzEl.azimuth), FLOAT_D(AzEl.azimuth));
+
 
         #ifdef ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
             double latitude = LATITUDE;
@@ -782,6 +840,93 @@ double mSunTracking::julian_day(time_t utc_time_point)
     return jd;
 }
 
+#ifdef USE_MAXELEVATION_CALC_JULY2025
+
+mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, double latitude, double longitude, double altitude) {
+    SunPosition AzEl;
+
+    // === Step 1: Julian Day and fractional day
+    double jd = julian_day(utc_time);                      // E.g. 2460870.5 = noon
+    double jd_whole = floor(jd);
+    double d = jd_whole - 2451545.0;                       // Days since J2000
+    double fractional_day = jd - jd_whole;
+
+    // === Step 2: Sun’s position in ecliptic coordinates
+    double g = fmod(357.529 + 0.98560028 * d, 360.0);      // Mean anomaly
+    double q = fmod(280.459 + 0.98564736 * d, 360.0);      // Mean longitude
+    double L = fmod(q + 1.915 * sin(DEG_TO_RAD * g) + 0.020 * sin(2 * DEG_TO_RAD * g), 360.0); // Ecliptic longitude
+
+    // === Step 3: Obliquity of the ecliptic
+    double e = 23.439 - 0.00000036 * d;
+
+    // === Step 4: Convert to equatorial coordinates
+    double x = cos(DEG_TO_RAD * L);
+    double y = cos(DEG_TO_RAD * e) * sin(DEG_TO_RAD * L);
+    double z = sin(DEG_TO_RAD * e) * sin(DEG_TO_RAD * L);
+
+    double RA  = atan2(y, x) * RAD_TO_DEG;
+    double dec = asin(z) * RAD_TO_DEG;
+    if (RA < 0) RA += 360.0;
+
+    // === Step 5: Greenwich Mean Sidereal Time (with fractional day)
+    double T = d / 36525.0;
+    double GMST_base = 280.46061837 + 360.98564736629 * d +
+                       0.000387933 * T * T - (T * T * T) / 38710000.0;
+    double GMST = fmod(GMST_base + 360.98564736629 * fractional_day, 360.0);
+
+    // === Step 6: Local Sidereal Time
+    double LST = fmod(GMST + longitude, 360.0);
+    if (LST < 0) LST += 360.0;
+
+    // === Step 7: Hour Angle
+    double HA = LST - RA;
+    if (HA < -180.0) HA += 360.0;
+    if (HA >  180.0) HA -= 360.0;
+
+    // === Step 8: Convert to horizontal coordinates
+    double ha_rad  = DEG_TO_RAD * HA;
+    double dec_rad = DEG_TO_RAD * dec;
+    double lat_rad = DEG_TO_RAD * latitude;
+
+    double sin_alt = sin(dec_rad) * sin(lat_rad) + cos(dec_rad) * cos(lat_rad) * cos(ha_rad);
+    double alt = asin(sin_alt);
+
+    double cos_az = (sin(dec_rad) - sin(alt) * sin(lat_rad)) / (cos(alt) * cos(lat_rad));
+    double az = acos(cos_az);
+    if (sin(ha_rad) > 0)
+        az = 2 * M_PI - az;
+
+    AzEl.elevation = alt * RAD_TO_DEG;
+    AzEl.azimuth   = az * RAD_TO_DEG;
+
+    // === Optional debug logging
+    // ALOG_INF(PSTR("JD = %d.%d  Days = %d.%d"),
+    //          FLOAT_N(jd), FLOAT_D(jd),
+    //          FLOAT_N(d + fractional_day), abs(FLOAT_D(d + fractional_day)));
+    // ALOG_INF(PSTR("g = %d.%d  q = %d.%d  L = %d.%d"),
+    //          FLOAT_N(g), FLOAT_D(g),
+    //          FLOAT_N(q), FLOAT_D(q),
+    //          FLOAT_N(L), FLOAT_D(L));
+    // ALOG_INF(PSTR("RA = %d.%d  Dec = %d.%d"),
+    //          FLOAT_N(RA), FLOAT_D(RA),
+    //          FLOAT_N(dec), FLOAT_D(dec));
+    // ALOG_INF(PSTR("GMST = %d.%d  LST = %d.%d"),
+    //          FLOAT_N(GMST), FLOAT_D(GMST),
+    //          FLOAT_N(LST), FLOAT_D(LST));
+    // ALOG_INF(PSTR("HA = %d.%d"),
+    //          FLOAT_N(HA), FLOAT_D(HA));
+    // ALOG_INF(PSTR("Azimuth = %d.%d  Elevation = %d.%d"),
+    //          FLOAT_N(AzEl.azimuth), FLOAT_D(AzEl.azimuth),
+    //          FLOAT_N(AzEl.elevation), FLOAT_D(AzEl.elevation));
+
+    return AzEl;
+}
+
+
+
+
+#else
+
 mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, double latitude, double longitude, double altitude) {
     // Step 1: Calculate the Julian day from UTC time
     double jd = julian_day(utc_time); // Replace with your own Julian day calculation function
@@ -839,6 +984,34 @@ mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, doub
     // Step 12: Hour Angle
     double HA = local_sidereal_time * 15 - RA;
 
+    #ifdef USE_MAXELEVATION_CALC_JULY2025
+
+    // Step 13–14: Convert to horizontal coordinates
+    double sin_lat = sin(latitude * DEG_TO_RAD);
+    double cos_lat = cos(latitude * DEG_TO_RAD);
+    double sin_dec = sin(dec * DEG_TO_RAD);
+    double cos_dec = cos(dec * DEG_TO_RAD);
+    double cos_HA = cos(HA * DEG_TO_RAD);
+
+    // Elevation
+    double elevation = asin(sin_dec * sin_lat + cos_dec * cos_lat * cos_HA);
+
+    // Azimuth
+    double y = -sin(HA * DEG_TO_RAD);
+    double x = tan(dec * DEG_TO_RAD) * cos_lat - sin_lat * cos_HA;
+    double azimuth = atan2(y, x);
+
+    // Normalize azimuth to [0, 360)
+    azimuth = fmod(azimuth * RAD_TO_DEG + 360.0, 360.0);
+
+    // Store result
+    SunPosition AzEl;
+    AzEl.elevation = elevation * RAD_TO_DEG;
+    AzEl.azimuth = azimuth;
+
+
+    #else
+
     // Step 13: Convert to rectangular coordinate system
     double x_hor = cos(HA * DEG_TO_RAD) * cos(dec * DEG_TO_RAD);
     double y_hor = sin(HA * DEG_TO_RAD) * cos(dec * DEG_TO_RAD);
@@ -854,6 +1027,8 @@ mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, doub
     AzEl.azimuth = atan2(y_rotated, x_rotated) * RAD_TO_DEG + 180.0;  // Azimuth (degrees)
     AzEl.elevation = asin(z_rotated) * RAD_TO_DEG;  // Elevation (degrees)
 
+    #endif
+
     #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS_LOOPS
     std::cout << "Azimuth: " << AzEl.azimuth << " degrees, Elevation: " << AzEl.elevation << " degrees\n";
     #endif
@@ -861,6 +1036,7 @@ mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, doub
     return AzEl;
 }
 
+#endif
 
 /*
 
@@ -875,52 +1051,43 @@ Performance Benefit:
 
 
 */
+time_t GetStartOfUTCDay(time_t t) {
+    struct tm* tm_utc = gmtime(&t);
+    tm_utc->tm_hour = 0;
+    tm_utc->tm_min = 0;
+    tm_utc->tm_sec = 0;
+    return mktime(tm_utc);
+}
+
+  
 void mSunTracking::CalculateMaxMinElevationForDay(time_t utc_time, double latitude, double longitude, double altitude) {
     // Reset the max and min elevation for a new calculation
     calc.max_elevation = -90.0;  // Start with the lowest possible elevation
     calc.min_elevation = 90.0;   // Start with the highest possible elevation
 
     SunPosition AzEl;
-    int max_elevation_hour = 0;
-    int min_elevation_hour = 0;
-    const int coarse_interval_minutes = 60;  // Coarse step: every hour
-    const int fine_interval_minutes = 1;     // Fine step: every minute
 
-    // Coarse calculation: Calculate solar position every hour to identify potential max/min hours
-    for (int hour_offset = 0; hour_offset < 24; ++hour_offset) {
-        time_t current_time = utc_time + (hour_offset * 3600);  // Offset in seconds (1 hour intervals)
+    // Anchor to start of UTC day
+    time_t start_of_day = GetStartOfUTCDay(utc_time);
 
-        // Calculate the elevation at this time
+    ALOG_DBM(PSTR("start_of_day %d"), start_of_day);
+
+    // time_t test_time = ConvertToUTCTime(2025, 7, 13, 12, 0, 0); // 13 July 2025 @ 12:00 UTC
+    // AzEl = CalculateSolarAzEl(test_time, 54.6, -5.9, 0);
+
+
+
+    // Full-day scan: 1440 minutes (00:00 to 23:59 UTC)
+    for (int minute = 0; minute < 1440; minute+=5) {
+        time_t current_time = start_of_day + (minute * 60);  // Offset in seconds
         AzEl = CalculateSolarAzEl(current_time, latitude, longitude, altitude);
 
-        // Check if we have a new max or min elevation
-        if (AzEl.elevation > calc.max_elevation) {
-            calc.max_elevation = AzEl.elevation;
-            max_elevation_hour = hour_offset;
-        }
+        // ALOG_INF(PSTR("minute=%d, current_time=%d x=%d,y=%d.%d"), minute, current_time, minute, FLOAT_N(AzEl.elevation), abs(FLOAT_D(AzEl.elevation)));
 
-        if (AzEl.elevation < calc.min_elevation) {
-            calc.min_elevation = AzEl.elevation;
-            min_elevation_hour = hour_offset;
-        }
-    }
-
-    // Fine calculation: Calculate solar position per minute within the max and min elevation hours
-    // Fine calculation for max elevation hour
-    for (int minutes_offset = 0; minutes_offset < 60; ++minutes_offset) {
-        time_t current_time = utc_time + (max_elevation_hour * 3600) + (minutes_offset * 60);  // Per minute in the max elevation hour
-
-        AzEl = CalculateSolarAzEl(current_time, latitude, longitude, altitude);
         if (AzEl.elevation > calc.max_elevation) {
             calc.max_elevation = AzEl.elevation;
         }
-    }
 
-    // Fine calculation for min elevation hour
-    for (int minutes_offset = 0; minutes_offset < 60; ++minutes_offset) {
-        time_t current_time = utc_time + (min_elevation_hour * 3600) + (minutes_offset * 60);  // Per minute in the min elevation hour
-
-        AzEl = CalculateSolarAzEl(current_time, latitude, longitude, altitude);
         if (AzEl.elevation < calc.min_elevation) {
             calc.min_elevation = AzEl.elevation;
         }
@@ -937,16 +1104,20 @@ void mSunTracking::CalculateSunriseSunsetAzimuth(double latitude, double longitu
   // Reset
   calc.sunrise_azimuth = 0.0f;
   calc.sunset_azimuth  = 0.0f;
+  calc.dawn_azimuth    = 0.0f;
+  calc.dusk_azimuth    = 0.0f;
 
-  if (!calc.isvalid){
-    
-    
-  ALOG_INF(PSTR("CalculateSunriseSunsetAzimuth end early"));
+  if (!calc.isvalid) {
+    ALOG_INF(PSTR("CalculateSunriseSunsetAzimuth end early"));
     return;
   }
 
+  // Defensive: ensure each event time is valid
+  if (calc.today.dawn > 0) {
+    SunPosition pos = CalculateSolarAzEl(calc.today.dawn, latitude, longitude, altitude);
+    calc.dawn_azimuth = static_cast<float>(pos.azimuth);
+  }
 
-  // Defensive: ensure sunrise/sunset times are valid
   if (calc.today.sunrise > 0) {
     SunPosition pos = CalculateSolarAzEl(calc.today.sunrise, latitude, longitude, altitude);
     calc.sunrise_azimuth = static_cast<float>(pos.azimuth);
@@ -957,13 +1128,25 @@ void mSunTracking::CalculateSunriseSunsetAzimuth(double latitude, double longitu
     calc.sunset_azimuth = static_cast<float>(pos.azimuth);
   }
 
+  if (calc.today.dusk > 0) {
+    SunPosition pos = CalculateSolarAzEl(calc.today.dusk, latitude, longitude, altitude);
+    calc.dusk_azimuth = static_cast<float>(pos.azimuth);
+  }
+
   #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+  std::cout << "Dawn Azimuth:    " << calc.dawn_azimuth    << "°\n";
   std::cout << "Sunrise Azimuth: " << calc.sunrise_azimuth << "°\n";
-  std::cout << "Sunset Azimuth: "  << calc.sunset_azimuth  << "°\n";
+  std::cout << "Sunset Azimuth:  " << calc.sunset_azimuth  << "°\n";
+  std::cout << "Dusk Azimuth:    " << calc.dusk_azimuth    << "°\n";
   #endif
 
-  ALOG_INF(PSTR("az rise/set %d/%d"), calc.sunrise_azimuth, calc.sunset_azimuth);
+  ALOG_DBM(PSTR("az dawn/rise/set/dusk %d/%d/%d/%d"),
+           (int)calc.dawn_azimuth,
+           (int)calc.sunrise_azimuth,
+           (int)calc.sunset_azimuth,
+           (int)calc.dusk_azimuth);
 }
+
 
 
 
@@ -972,32 +1155,39 @@ void mSunTracking::CalculateSunriseSunsetAzimuth(double latitude, double longitu
 
 void mSunTracking::parse_JSONCommand(JsonParserObject obj)
 {
-
 	
   char buffer[50];
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
+
+  JsonParserObject jobj = 0; 
+
+  if(!(jobj = obj[GetModuleName()].getObject()))
+  {
+    // ALOG_ERR(PSTR(D_LOG_CAMERA "%S"),GetModuleName());
+    return;
+  }
   
   #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  if(jtok = obj["SunAngles"].getObject()["Enabled"])
+  if(jtok = jobj["Enabled"])
   {
     debug.enabled = jtok.getBool();
   }
 
-  if(jtok = obj["SunAngles"].getObject()["Elevation"])
+  if(jtok = jobj["Elevation"])
   {
     debug.elevation = jtok.getFloat();
   }
-  if(jtok = obj["SunAngles"].getObject()["ElevationMin"])
+  if(jtok = jobj["ElevationMin"])
   {
     debug.min_elevation = jtok.getFloat();
   }
-  if(jtok = obj["SunAngles"].getObject()["ElevationMax"])
+  if(jtok = jobj["ElevationMax"])
   {
     debug.max_elevation = jtok.getFloat();
   }
 
-  if(jtok = obj["SunAngles"].getObject()["Azimuth"])
+  if(jtok = jobj["Azimuth"])
   {
     debug.azimuth = jtok.getFloat();
   }
@@ -1055,6 +1245,8 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
         JBI->Add(PM__ELEVATION_MIN, calc.min_elevation);
         JBI->Add("SunriseAzimuth", calc.sunrise_azimuth);
         JBI->Add("SunsetAzimuth", calc.sunset_azimuth);
+        JBI->Add("DawnAzimuth", calc.dawn_azimuth);
+        JBI->Add("DuskAzimuth", calc.dusk_azimuth);
     JBI->Object_End();
     #endif
 

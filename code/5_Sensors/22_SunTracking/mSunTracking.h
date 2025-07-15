@@ -93,10 +93,12 @@ class mSunTracking :
       
       #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
       SunPosition position;
-      double max_elevation;  // Maximum elevation of the sun for the day
+      double max_elevation=0;  // Maximum elevation of the sun for the day
       double min_elevation;  // Minimum elevation of the sun for the day (typically at dawn or dusk)
       float  sunrise_azimuth;
       float  sunset_azimuth;
+      float dusk_azimuth;
+      float dawn_azimuth;
       #endif 
 
       #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED

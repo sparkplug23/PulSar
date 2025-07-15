@@ -1262,7 +1262,7 @@ bool mPins::ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index)
 
 bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
 {
-  ALOG_ERR(PSTR("not in tas25"));
+  ALOG_ERR(PSTR("not in tas25 %d[%d]"), pin_array[index], index);
   // Outside valid gpio function range
   // if((pin_array[index] >= GPIO_SENSOR_END) && (pin_array[index] < GPIO_USER)){
   //     return false;

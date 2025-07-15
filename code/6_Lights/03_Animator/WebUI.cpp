@@ -1527,9 +1527,12 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
 
 
+
   seg.check1 = elem["o1"] | seg.check1;
   seg.check2 = elem["o2"] | seg.check2;
   seg.check3 = elem["o3"] | seg.check3;
+  
+  ALOG_INF(PSTR("c1 %d"), seg.check1);
 
   JsonArray iarr = elem[F("i")]; //set individual LEDs
   if (!iarr.isNull()) {

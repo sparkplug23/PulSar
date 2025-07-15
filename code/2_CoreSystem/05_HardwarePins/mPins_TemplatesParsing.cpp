@@ -432,21 +432,21 @@ void mPins::GpioInit(void)
   for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.module_pins.io); i++) 
   { //all pins
     
-    ALOG_INF(PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),tkr_set->Settings.module_pins.io[i],i);
+    ALOG_DBM(PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),tkr_set->Settings.module_pins.io[i],i);
 
     uint16_t gpio = tkr_set->Settings.module_pins.io[i];
 
-    ALOG_INF(PSTR(D_LOG_CONFIG "module_pins.io[%d]=%d"),i,tkr_set->Settings.module_pins.io[i]);
+    ALOG_DBM(PSTR(D_LOG_CONFIG "module_pins.io[%d]=%d"),i,tkr_set->Settings.module_pins.io[i]);
     
     // If out of range, reset to none
     if(!ValidUserGPIOFunction(tkr_set->Settings.module_pins.io,i)){
       tkr_set->Settings.module_pins.io[i] = GPIO_NONE;             // Fix not supported sensor ids in module
-      ALOG_INF(PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
+      ALOG_DBM(PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
     }
     // Set any user pins 
     else if (tkr_set->Settings.module_pins.io[i] > GPIO_NONE) {
       tkr_set->runtime.my_module.io[i] = tkr_set->Settings.module_pins.io[i];
-      ALOG_INF(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,tkr_set->Settings.module_pins.io[i]);
+      ALOG_DBM(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,tkr_set->Settings.module_pins.io[i]);
     }
 
     // Set any pins set in template
@@ -457,7 +457,7 @@ void mPins::GpioInit(void)
         #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
         #ifdef ENABLE_LOG_LEVEL_INFO
           char buffer[50];
-          ALOG_INF(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%s\""), tkr_set->runtime.my_module.io[i], def_gp.io[i], i,ConvertIndexPinToRealPin(i), GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
+          ALOG_DBM(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%s\""), tkr_set->runtime.my_module.io[i], def_gp.io[i], i,ConvertIndexPinToRealPin(i), GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
         );
         #endif // ENABLE_LOG_LEVEL_INFO
         #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES

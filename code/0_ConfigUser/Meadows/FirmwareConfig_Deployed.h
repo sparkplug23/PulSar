@@ -4844,6 +4844,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+  #define USE_MAXELEVATION_CALC_JULY2025
 
   // #define ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
 
@@ -4974,10 +4975,12 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects": {
-            "Function":"Sun 1D Azimuth 01",
-            "Check1":1,
-            "Speed":180,
+            "Function":"Sun Azimuth DuskDawn",
             "Intensity":0,
+            "Custom1":92,
+            "Custom2":53,
+            "Check1":0,
+            "Check3":1,
             "Grouping":1,
             "RateMs": 20,
             "Reverse":1
@@ -4993,10 +4996,12 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
           "ColourPalette":"Vintage",
           "ColourType":3,
           "Effects": {
-            "Function":"Sun 1D Elevation DuskDawn 01",
-            "Check1":1,
-            "Speed":180,
+            "Function":"Sun Elevation DuskDawn",
             "Intensity":0,
+            "Custom1":151,
+            "Custom2":87,
+            "Check1":0,
+            "Check3":1,
             "Grouping":1,
             "RateMs": 20
           },
