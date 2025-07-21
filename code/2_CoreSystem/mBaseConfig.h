@@ -344,9 +344,9 @@ With latest version, all longer term shared debug features should be added here 
 
 
 // // temporary, to be phased out into "MQTT_HOST"
-// #ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-// #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-// #endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+// #ifndef MQTT_HOST
+// #define MQTT_HOST       MQTT_HOST
+// #endif // MQTT_HOST
 
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
@@ -360,7 +360,7 @@ With latest version, all longer term shared debug features should be added here 
 #define MQTT_PORT 1883 // default
 #endif
 
-// #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
+// #define MQTT_HOST       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
 #define MQTT_HOST_DISCOVERY
 
 #ifdef USE_NETWORK_MDNS

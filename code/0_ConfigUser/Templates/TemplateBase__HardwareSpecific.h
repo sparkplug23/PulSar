@@ -40,8 +40,8 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -101,8 +101,8 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
 
 
@@ -163,8 +163,8 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
 
   //#define FORCE_TEMPLATE_LOADING
@@ -256,8 +256,8 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Sonoff 4CH Pro"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
   
   #define USE_MODULE_CORE_RULES
@@ -297,8 +297,8 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER

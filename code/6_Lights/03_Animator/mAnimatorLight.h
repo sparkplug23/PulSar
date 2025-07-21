@@ -274,7 +274,12 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
+#ifndef ENABLE_DEVFEATURE_PALETTE__VERSION2
 #include "6_Lights/02_Palette/mPalette.h"
+#endif
+#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2
+#include "6_Lights/02_Palette/mPalette2.h"
+#endif
 #include "6_Lights/02_Palette/mPaletteLoaded.h"
 
 #include "6_Lights/00_Interface/mInterfaceLight.h"
@@ -647,7 +652,7 @@ char releaseString[7] = WLED_RELEASE_NAME; // must include the quotes when defin
   #define WLED_UTC_OFFSET 0
 #endif
 bool ntpEnabled      _INIT(WLED_NTP_ENABLED); // get internet time. Only required if you use clock overlays or time-activated macros
-bool useAMPM         _INIT(false);            // 12h/24h clock format
+bool useAMPM         = false; //_INIT(false);            // 12h/24h clock format
 byte currentTimezone _INIT(WLED_TIMEZONE);    // Timezone ID. Refer to timezones array in wled10_ntp.ino
 int utcOffsetSecs    _INIT(WLED_UTC_OFFSET);  // Seconds to offset from UTC before timzone calculation
 
@@ -2362,7 +2367,7 @@ uint8_t getBrightnessCCT() const {
 
     // Set CCT in Kelvin
     void setCCT_Kelvin(uint16_t _cct) {
-      Serial.println("I dont want this right now");
+      // Serial.println("I dont want this right now");
         // Clamp CCT to valid range
         cct = (_cct < cct_min_range) ? cct_min_range : (_cct > cct_max_range ? cct_max_range : _cct);
 

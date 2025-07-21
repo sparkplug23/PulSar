@@ -3,333 +3,6 @@
 
 
 
-#ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE_OLD
-  #define DEVICENAME_CTR          "h801_bedroom_wardrobe"
-  #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-      
-  #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  #define DISABLE_WEBSERVER
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
-  
-    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
-    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  
-  
-  // #define USE_SERIAL_ALTERNATE_TX
-  // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  // //#define FORCE_TEMPLATE_LOADING
-  // // #define SETTINGS_HOLDER 2 
-
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  // #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-
-  // #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_PWM
-  
-  // 
-  // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-
-  // #define MAX_NUM_SEGMENTS 5
-  
-  
-  // #define 
-  
-  
-  
-
-
-  // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
-  
-  #define USE_MODULE_CORE_RULES
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"0\":\""  D_GPIO_FUNCTION_KEY1_INV_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
-  "}";
- 
-
-  #define STRIP_SIZE_MAX 2
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_RGB_COLOUR_ORDER   "\":\"GRBcw\","
-    "\"" D_TRANSITION     "\":{\"" D_TIME "\":0,\"" D_RATE "\":1\"},"
-    "\"" D_COLOUR_PALETTE "\":10,"
-    "\"Hue\":120,\"Sat\":100\","
-    "\"" D_ANIMATIONMODE  "\":\"" D_EFFECTS "\","
-    "\"Effects\":{\"Function\":\"Solid\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
-    "\"BrightnessRGB\": 100,"
-    "\"CCT_TempPercentage\":0,"
-    "\"BrightnessCCT\":100,"
-    "\"Light\":{\"TimeOn\":60}"
-  "}";
-
-
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    "\"Rule0\":{" //switch example
-      "\"Trigger\":{"
-        "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR "\","
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," //number, name, or all
-        "\"State\":\"Toggle\"" // toggle
-      "}"
-    "}"
-  "}";
-
-
-  // //#define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 1   
-
-  
-  // // #define USE_MODULE_CORE_RULES
-  
-  // // #define USE_MODULE_SENSORS_INTERFACE
-  // // #define USE_MODULE_SENSORS_BUTTONS
-
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_PWM
-
-
-  // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
-  // // need to add motion here
-
-  // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-
-  // //#define USE_MODULE_SENSORS_SUN_TRACKING
-
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //    "\"" D_GPIOC "\":{"
-  //     #ifdef USE_MODULE_SENSORS_BUTTONS
-  //     "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
-  //     #endif    
-  //   "},"
-  //   "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
-  // "}";
-  
-  // #define STRIP_SIZE_MAX 1 // PWM type, set size to 1
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_RGB_COLOUR_ORDER "\":\"RGBwc\","
-  //   "\"" D_ANIMATIONMODE    "\":\""  D_EFFECTS  "\","
-  //   "\"" D_EFFECTS "\":{" 
-  //     // "\"" D_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
-  //     "\"" D_FUNCTION "\":8"//\"Sun Elevation RGBCCT Solid Palette 01\""
-  //   "},"
-  //   "\"" D_TRANSITION       "\":{"
-  //     "\"" D_TIME "\":1,"
-  //     "\"" D_RATE "\":5,"
-  //     "\"" D_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_ORDER "\":\"" D_RANDOM "\""
-  //   "},"
-  //   "\"" D_CCT_TEMP "\":300,"
-  //   "\"" D_HUE "\":25,"
-  //   "\"" D_SAT "\":100,"
-  //   "\"" D_COLOUR_PALETTE "\":67,"
-  //   "\"" D_BRIGHTNESS_CCT "\":100,"
-  //   "\"" D_BRIGHTNESS_RGB "\":100"
-  // "}";
-
-
-  // #define USE_RULES_TEMPLATE
-  // DEFINE_PGM_CTR(RULES_TEMPLATE)
-  // "{"
-  //   "\"Rule0\":{" //switch example
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"Buttons\","    //sensor
-  //       "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-  //       "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-  //       "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"Relays\","
-  //       "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-  //       "\"DeviceName\":0," //number, name, or all
-  //       "\"State\":2" // toggle
-  //     "}"
-  //   "}"
-  // "}"
-    
-#endif
-
-
-
-#ifdef DEVICE_SHELLYDIMMER_BEDROOM_LAMP
-  #define DEVICENAME_CTR          "dimmer_bedroom_lamp"
-  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
-  
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-
-  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
-  
-  #define USE_MODULE_SENSORS_SWITCHES
-
-  #define USE_MODULE_CORE_RULES
-  #define USE_HARDWARE_DEFAULT_RULES_1
-
-  #define DISABLE_SERIAL_LOGGING //temp measure
-  // #define DISABLE_SERIAL0_CORE //dont think its needed
-
-  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
-  "}";
-
-  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
-  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
-  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
-        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
-
-
-
-
-#ifdef DEVICE_BEDROOM_BEDLIGHT
-  #define DEVICENAME_CTR          "bedroom_bedlight"
-  #define DEVICENAME_FRIENDLY_CTR "Bedroom Bedlight H801"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-      
-  #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  #define DISABLE_WEBSERVER
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
-  
-    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
-    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-  #define STRIP_SIZE_MAX 1
-  #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_STRIP_SIZE       "\":1,"
-  //   "\"" D_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-  //   "\"" D_TRANSITION     "\":{\"" D_TIME "\":2,\"" D_RATE "\":20},"
-  //   "\"" D_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
-  //   "\"" D_ANIMATIONMODE  "\":\"Effects\","
-  //   "\"" D_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
-  //   "\"" D_BRIGHTNESS     "\":100"
-  // "}";
-
-  
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_STRIP_SIZE       "\":1,"
-    "\"" D_RGB_COLOUR_ORDER "\":\"RGBCW\","
-    "\"" D_TRANSITION       "\":{\"" D_TIME "\":2,\"" D_RATE "\":20},"
-    "\"" D_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
-    "\"Hue\":345,\"Sat\":100,"
-    "\"" D_ANIMATIONMODE    "\":\"Effects\","
-    "\"" D_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_BRIGHTNESS_RGB   "\":100,"
-    "\"" D_BRIGHTNESS_CCT   "\":100"
-  "}";
-
-
-
-#endif
-
-
-
 /**
  * @brief 
  * Primary testbed for all new lighting code on nodemcu
@@ -338,7 +11,7 @@
   #define DEVICENAME_CTR          "testbed_segment_esp82"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Animation Segment String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define DISABLE_NETWORK
 
@@ -593,7 +266,7 @@
   #define DEVICENAME_CTR          "testbed_segment_esp32"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Animation Segment String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define DISABLE_NETWORK
 
@@ -851,7 +524,7 @@
   #define DEVICENAME_CTR          "testbed_segment_multipin_esp32"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
     // multipin should only be tested in lighting branch, now to remove all blocking code in wifi etc
@@ -1611,7 +1284,7 @@
   #define DEVICENAME_CTR          "testbed_segment_multipin_h801"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
     // multipin should only be tested in lighting branch, now to remove all blocking code in wifi etc
@@ -3132,7 +2805,7 @@
   #define DEVICENAME_CTR          "testbed_notifications"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Notifications"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
     // multipin should only be tested in lighting branch, now to remove all blocking code in wifi etc
@@ -4093,7 +3766,7 @@
   #define DEVICENAME_CTR          "testbed_heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
@@ -4504,7 +4177,7 @@
   #define DEVICENAME_CTR            "testbed_webui_esp32"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed webui_esp32"
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -4546,7 +4219,7 @@
   #define DEVICENAME_CTR            "testbed_webui_esp82"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -4796,7 +4469,7 @@
   #endif
   #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
     #define ENABLE_DEVFEATURE_REMOVING_HSBID
@@ -6673,7 +6346,7 @@
   #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
 
   //#define ENABLE_DEVFEATURE_DUAL_MQTT_BROKER
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED  192,168,0,55
+  #define MQTT_HOST  192,168,0,55
 
   /**
    * @brief Uncomment one line to use testing template configs for lighting_template
@@ -8854,7 +8527,7 @@
   #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
 
   //#define ENABLE_DEVFEATURE_DUAL_MQTT_BROKER
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED  192,168,0,55
+  #define MQTT_HOST  192,168,0,55
 
   /**
    * @brief Uncomment one line to use testing template configs for lighting_template
@@ -9938,7 +9611,7 @@
   #define DEVICENAME_CTR                            "testbed_camera"
   #define DEVICENAME_FRIENDLY_CTR                   "testbed_camera"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -9980,7 +9653,7 @@
   #define DEVICENAME_CTR                            "testbed_camera"
   #define DEVICENAME_FRIENDLY_CTR                   "testbed_camera"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -10226,7 +9899,7 @@
   #define DEVICENAME_CTR          "testbed_sim7000g"
   #define DEVICENAME_FRIENDLY_CTR "Neopixel RTOS Show"
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define USE_MODULE_DRIVERS__CELLULAR_SIM7000
     // #define ENABLE_DEBUG_FEATURE_MQTT__CELLULAR_SIM__DEBUG_POLL_LATEST
@@ -10329,7 +10002,7 @@
   #define DEVICENAME_CTR          "testbed_sim7000g_oled"
   #define DEVICENAME_FRIENDLY_CTR "Testbed SIM7000G with OLED"
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define USE_MODULE_DRIVERS__CELLULAR_SIM7000
     // #define ENABLE_DEBUG_FEATURE_MQTT__CELLULAR_SIM__DEBUG_POLL_LATEST
@@ -10447,7 +10120,7 @@
   #define DEVICENAME_CTR          "testbed_h801_desk"
   #define DEVICENAME_FRIENDLY_CTR "H801 Primary Testbed"
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
 
   #define USE_SERIAL_ALTERNATE_TX
@@ -10570,7 +10243,7 @@
   #define DEVICENAME_CTR          "h801_testbed_2023"
   #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -11036,7 +10709,7 @@
   #define DEVICENAME_CTR          "rgbcooker"
   #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   // // Disable MQTT, or else run it temporarily on SLS for debugging
   
@@ -11291,7 +10964,7 @@
   #define DEVICENAME_CTR          "desksensor_slave"
   #define DEVICENAME_FRIENDLY_CTR "Desk Sensor Slave"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -11344,199 +11017,6 @@
   "}";
 
      
-
-#endif
-
-
-#ifdef DEVICE_RGBCLOCK_TVROOM
-  #define DEVICENAME_CTR          "rgbclock_tvroom"
-  #define DEVICENAME_FRIENDLY_CTR "RGBW Clock 01"
-  #define DEVICENAME_ROOMHINT_CTR "TVRoom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define USE_SK6812_METHOD_DEFAULT
-    
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    
-    
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    #define ENABLE_DEVFEATURE_INTERFACELIGHT_NEW_UNIQUE_TIMEON
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-
-  #define DISABLE_WEBSERVER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-  #define STRIP_SIZE_MAX 94
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"SK6812",
-    "ColourOrder":"grbw",
-    "AnimationMode":"Effects",
-    "ColourPalette":2,
-    "Effects": {
-      "Function":"Clock Basic 01",
-      "Intensity":50,
-      "Grouping":1
-    },
-    "Transition": {
-      "TimeMs": 1000,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
-
-#endif
-
-
-
-#ifdef DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
-  #define DEVICENAME_CTR          "rgbdisplay_weight"
-  #define DEVICENAME_FRIENDLY_CTR "RGBW Clock 01"
-  #define DEVICENAME_ROOMHINT_CTR "TVRoom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define USE_SK6812_METHOD_DEFAULT
-    
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    
-    
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    #define ENABLE_DEVFEATURE_INTERFACELIGHT_NEW_UNIQUE_TIMEON
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-
-  #define DISABLE_WEBSERVER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-  #define STRIP_SIZE_MAX 94
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"SK6812",
-    "ColourOrder":"grbw",
-    "AnimationMode":"Effects",
-    "ColourPalette":2,
-    "Effects": {
-      "Function":"Clock Basic 01",
-      "Intensity":50,
-      "Grouping":1
-    },
-    "Transition": {
-      "TimeMs": 1000,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
 
 #endif
 
@@ -13248,7 +12728,7 @@
   #define DEVICENAME_CTR          "hvac_masterbedroom"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Master Bedroom"
   #define DEVICENAME_ROOMHINT_CTR "Master Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   //#define FORCE_TEMPLATE_LOADING
   // #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
@@ -14812,7 +14292,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "cellular_locator_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
@@ -14918,7 +14398,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
 
@@ -15203,7 +14683,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "testgroup_multipin_h801_rgbsplitcct"
   #define DEVICENAME_FRIENDLY_CTR "DevelopingByTypes H801 RGB Split CCT Channels"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -15359,7 +14839,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "testgroup_multipin_h801_5white"
   #define DEVICENAME_FRIENDLY_CTR "DevelopingByTypes H801 Five White Channels"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -15546,7 +15026,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "testgroup_multipin_esp32_neodual"
   #define DEVICENAME_FRIENDLY_CTR "DevelopingByTypes H801 RGB Dual Channels"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   #define USE_MODULE_TEMPLATE

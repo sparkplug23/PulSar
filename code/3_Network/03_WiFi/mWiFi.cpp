@@ -70,6 +70,11 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case TASK_EVERY_FIVE_MINUTE:
       // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
+      
+      #ifdef USE_NETWORK_MDNS
+        StartMdns();
+      #endif  // USE_NETWORK_MDNS
+
     break;
     case TASK_WIFI_CONNECTED:{
 
@@ -1894,6 +1899,9 @@ bool mWiFi::WifiConfigCounter(void)
 
 
 void mWiFi::StartMdns(void) { 
+
+  if(Mdns.begun) return;
+
   const char* originalName = tkr_set->Settings.system_name.device;
   
   // Define a temporary buffer (max 64 bytes: 63 + null terminator)
@@ -1906,6 +1914,9 @@ void mWiFi::StartMdns(void) {
       if (*p == '_') *p = '-';
   }
 
+  WiFi.setHostname(hostname); // For USERNAME in omada
+  ArduinoOTA.setHostname(hostname);  // Same as MDNS.begin(hostname)
+
   // Close existing session to prevent failure
   MDNS.end(); 
 
@@ -1917,6 +1928,16 @@ void mWiFi::StartMdns(void) {
 
   #ifdef ESP32
   MDNS.addService("_http", "_tcp", 80); // Register service
+
+  String escapedMac;
+  escapedMac = WiFi.macAddress();
+  escapedMac.replace(":", "");
+  escapedMac.toLowerCase();
+
+  
+  MDNS.addService("http", "tcp", 80);
+  MDNS.addService("pulsar", "tcp", 80);
+  MDNS.addServiceTxt("pulsar", "tcp", "mac", escapedMac.c_str());
   #endif
 }
 

@@ -28,8 +28,10 @@
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
 // #define DEVICE_MEADOWS__BATHROOM__IMMERSION
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
-#define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
-
+// #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
+// #define DEVICE_MEADOWS__OFFICE__BLACK_STAND
+// #define DEVICE_OFFICE__DESK_LIGHTING
+#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -269,8 +271,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
 
  /***********************************
@@ -410,8 +411,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
 
 
@@ -566,25 +566,25 @@
         "Length":100
       }
     ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        100
-      ],
-      "ColourPalette":"Warm White",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Candles",
-        "Speed":180,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 20
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
+    "Segments":[
+      {
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Candles",
+          "Speed":180,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
   }
   )=====";
 
@@ -624,8 +624,8 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+  #ifndef MQTT_HOST
+  #define MQTT_HOST   "192.168.3.70"
   #endif
     #define MQTT_PORT     1883
 
@@ -827,8 +827,8 @@
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-   #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define MQTT_HOST   "192.168.3.70"
+   #define MQTT_HOST     MQTT_HOST
    #define MQTT_PORT     1883
 
 
@@ -1462,7 +1462,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  *  - Task 1: Check the windows wallpaper stored in memory, and use it to create the wallpaper and send via UDP.
 */
 #ifdef DEVICE_MEADOWS__OFFICE__MONITORS_BACKLIGHT
-
 #ifndef DEVICENAME_CTR
 #define DEVICENAME_CTR          "xmas24__final__snow_silver"
 #endif
@@ -1473,8 +1472,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.1"
+#ifndef MQTT_HOST
+#define MQTT_HOST   "192.168.1.1"
 #endif
   #define MQTT_PORT     1883
 
@@ -1564,40 +1563,125 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
         "ColourOrder":"GRBW",
         "BusType":"SK6812_RGBW",
         "Start":0,
-        "Length":104
+        "Length":132,
+        "Reverse":1
       },
       {
         "Pin":4,
         "ColourOrder":"GRB",
         "BusType":"WS2812_RGB",
-        "Start":104,
-        "Length":132,
-        "Reverse":1
+        "Start":132,
+        "Length":104
       }
     ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        236
-      ],
-      "ColourPalette":"RGPBO",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Static",
-        "Speed":255,
-        "Intensity":127,
-        "Grouping":20,
-        "RateMs": 20
+    "Segments":[
+      {
+        "Name":"32 Inch Horizontal",
+        "PixelRange": [
+          0,
+          132
+        ],
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":20,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 20
       },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
+      {
+        "Name":"27 Inch Vertical",
+        "PixelRange": [
+          132,
+          236
+        ],
+        "ColourPalette":"Sunset",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":20,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
   }
   )=====";
 
 #endif
+
+
+
+
+
+#ifdef DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
+
+#define ENABLE_DEVFEATURE_PALETTE__VERSION2
+
+
+// #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":201
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"32 Inch Horizontal",
+        "PixelRange": [
+          0,
+          201
+        ],
+        "ColourPalette":"Snowy 02",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+
+#endif
+
+
+
+
+
+
+
 
 
 
@@ -1738,8 +1822,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
+  #ifndef MQTT_HOST
+  #define MQTT_HOST   "192.168.3.70"
   #endif
     #define MQTT_PORT     1883
     
@@ -2903,19 +2987,19 @@ May need to add two power connections too, so its not just the cat5e wire to let
  * 
  */
 #ifdef DEVICE_MEADOWS__OFFICE__DOORFRAME
-  #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "template_name"
-  #endif
-  #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR "Template Name"
-  #endif
-  #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
-  #endif
-  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define MQTT_PORT     1883
+  // #ifndef DEVICENAME_CTR
+  // #define DEVICENAME_CTR          "template_name"
+  // #endif
+  // #ifndef DEVICENAME_FRIENDLY_CTR
+  // #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  // #endif
+  // #ifndef DEVICENAME_DESCRIPTION_CTR
+  // #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  // #endif
+  // #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  // #define MQTT_HOST   "192.168.3.70"
+  //   #define MQTT_HOST     MQTT_HOST
+  //   #define MQTT_PORT     1883
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -2934,24 +3018,37 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 
+ #define USE_MODULE_SENSORS_SUN_TRACKING     
+ #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+ #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+ #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+ #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+   // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
+ #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+ // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+ #define USE_MAXELEVATION_CALC_JULY2025
+
+ #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
  /***********************************
   * SECTION: Module/GPIO Configs
  ************************************/  
 
- #define USE_MODULE_TEMPLATE
- DEFINE_PGM_CTR(MODULE_TEMPLATE) 
- "{"
-   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-   "\"" D_GPIO_NUMBER "\":{"
-     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-   "},"
-   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
- "}";
+//  #define USE_MODULE_TEMPLATE
+//  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//  "{"
+//    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+//    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//    "\"" D_GPIO_NUMBER "\":{"
+//      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+//      "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+//    "},"
+//    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//  "}";
 
   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
   #define USE_LIGHTING_TEMPLATE
@@ -3024,8 +3121,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
 
 
@@ -3147,7 +3243,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
  
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3277,8 +3373,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
 
 
@@ -3516,8 +3611,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
 
   
@@ -4002,14 +4096,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
 
   // #define DEVICENAME_CTR          "treadmill_power_monitor"
   // #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
   // #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
+  // #define MQTT_HOST   "192.168.1.70" // primary
   //   #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -4252,8 +4345,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
  #endif
  #define DEVICENAME_ROOMHINT_CTR "testgroup"
- #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+ #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883   
    
   /***********************************
@@ -4470,8 +4562,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
     
  /***********************************
@@ -4670,8 +4761,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-  #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define MQTT_HOST   "192.168.3.70"
+  #define MQTT_HOST     MQTT_HOST
   #define MQTT_PORT     1883
   
   // #define USE_MODULE_DRIVERS_INTERFACE
@@ -4730,19 +4821,19 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
  * 
  */
 #ifdef DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
-  #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "testbed_default"
-  #endif
-  #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
-  #endif
-  #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
-  #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define MQTT_PORT     1883
+  // #ifndef DEVICENAME_CTR
+  // #define DEVICENAME_CTR          "testbed_default"
+  // #endif
+  // #ifndef DEVICENAME_FRIENDLY_CTR
+  // #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  // #endif
+  // #ifndef DEVICENAME_DESCRIPTION_CTR
+  // #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  // #endif
+  // #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  // #define MQTT_HOST   "192.168.3.70"
+  //   #define MQTT_HOST     MQTT_HOST
+  //   #define MQTT_PORT     1883
 
 
 
@@ -4775,7 +4866,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
    * SECTION: Storage Configs
   ************************************/  
  
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  // #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
@@ -4785,7 +4876,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
 
   // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
-  #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
   // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
   // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
   // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
@@ -4799,7 +4890,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
   //   #define WLED_ENABLE_FS_EDITOR
@@ -4814,37 +4905,37 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
 
   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
 
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
-  /***********************************
-   * SECTION: Sensor Configs
-  ************************************/  
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
 
   
-  #define USE_MODULE_SENSORS_SUN_TRACKING     
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-    // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+  // #define USE_MODULE_SENSORS_SUN_TRACKING     
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+  //   // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-  #define USE_MAXELEVATION_CALC_JULY2025
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  // // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+  // #define USE_MAXELEVATION_CALC_JULY2025
 
   // #define ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
 
@@ -4862,80 +4953,80 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
 
-  #define USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
+  // #define USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
  
 
-  #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
+  // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":2,
-        "ColourOrder":"GRB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":450
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        35
-      ],
-      "ColourPalette":"Red",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Static",
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 0
-    },
-    "Segment1": {
-      "PixelRange": [
-        35,
-        137
-      ],
-      "ColourPalette":"Rainbow",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Candles",
-        "Speed":180,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 20
-      },
-      "BrightnessRGB": 100
-    },
-    "Segment2": {
-      "PixelRange": [
-        137,
-        450
-      ],
-      "ColourPalette":"Vintage",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Candles",
-        "Speed":180,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 20
-      },
-      "BrightnessRGB": 100
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
+  // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"GRB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":450
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       35
+  //     ],
+  //     "ColourPalette":"Red",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Static",
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 0
+  //   },
+  //   "Segment1": {
+  //     "PixelRange": [
+  //       35,
+  //       137
+  //     ],
+  //     "ColourPalette":"Rainbow",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Candles",
+  //       "Speed":180,
+  //       "Intensity":85,
+  //       "Grouping":1,
+  //       "RateMs": 20
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "Segment2": {
+  //     "PixelRange": [
+  //       137,
+  //       450
+  //     ],
+  //     "ColourPalette":"Vintage",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Candles",
+  //       "Speed":180,
+  //       "Intensity":85,
+  //       "Grouping":1,
+  //       "RateMs": 20
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
 
-  #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
+  // #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
 
 
-  #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
+  // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
  
    #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
    #define USE_LIGHTING_TEMPLATE
@@ -4948,29 +5039,16 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
           "ColourOrder":"GRB",
           "BusType":"WS2812_RGB",
           "Start":0,
-          "Length":450
+          "Length":415,
+          "Skip":35
         }
      ],
      "Segments":[
         {
-          "Name":"Unused Pixels",
-          "PixelRange": [
-            0,
-            35
-          ],
-          "ColourPalette":"Red",
-          "ColourType":3,
-          "Effects": {
-            "Function":"Static",
-            "RateMs": 1000
-          },
-          "BrightnessRGB": 0
-        },
-        {
           "Name":"Horizontal L2R",
           "PixelRange": [
-            35,
-            137
+            0,
+            102
           ],
           "ColourPalette":"Rainbow",
           "ColourType":3,
@@ -4990,8 +5068,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
         {
           "Name":"Vertical B2T",
           "PixelRange": [
-            137,
-            450
+            102,
+            415
           ],
           "ColourPalette":"Vintage",
           "ColourType":3,
@@ -5011,12 +5089,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
       "BrightnessRGB": 100
    }
    )=====";
-// remind me later to have check2 as modifier on elevation
-// if active, then min is the dusk elevation, and not sunset. So we can show bottom as DARK.
-// if active, we should make sure we switch into a new or darker brightness/palette
-  //  "col":[[255,186,10,128,128],[38,163,161,128,128],[57,80,79,128,128],[4,7,8,0,0],[0,41,41,0,0]]
+  //  #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
 
-   #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
@@ -5026,50 +5100,484 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   * SECTION: Sensor Configs
  ************************************/  
 
-  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
-   #define USE_MODULE_SENSORS_INTERFACE
-   #define USE_MODULE_SENSORS_PIR
-    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
- #endif
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
 
- #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+//  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 
 
 
- /***********************************
-  * SECTION: Module/GPIO Configs
- ************************************/  
+//  /***********************************
+//   * SECTION: Module/GPIO Configs
+//  ************************************/  
 
- #define USE_MODULE_TEMPLATE
- DEFINE_PGM_CTR(MODULE_TEMPLATE) 
- "{"
-   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-   "\"" D_GPIO_NUMBER "\":{"
-     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-   "},"
-   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
- "}";
+//  #define USE_MODULE_TEMPLATE
+//  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//  "{"
+//    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+//    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//    "\"" D_GPIO_NUMBER "\":{"
+//      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+//      "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+//    "},"
+//    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//  "}";
 
   
- #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+//  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
 
- #define USE_FUNCTION_TEMPLATE
- DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
- "{"
-   "\"" D_DEVICENAME "\":{"
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
-       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-     "]"
-   "}"
- "}";
+//  #define USE_FUNCTION_TEMPLATE
+//  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//  "{"
+//    "\"" D_DEVICENAME "\":{"
+//      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+//        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+//      "]"
+//    "}"
+//  "}";
 
 #endif
 
 
 
+
+/**
+ * @brief 
+ * 
+ * Using 3mm pixels to show sun position on office door frame and skirting.
+ * -- vertical, is height (eleveation) of sun
+ * -- horizontal, is azimuth of sun from sunrise to sunset, with end pixels showing distance from sun (blue far, red close)
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 =BUZZER |15 (fL)            13|
+ *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
+ *              =SONIC RX1 |4             (fH) 14|
+ *              =RADAR TX2 |RX2/17             27| 
+ *              =RADAR RX2 |TX2/16             26| TOF1EN
+ *                         |5  (fL)            25| TOF1INT
+ *                         |18                 33| TOF0EN
+ *              LM386 SPKR |19                 32| TOF0INT
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ 
+ *                         |RX0         (fL) * 34| PIR_LARGE
+ *                         |TX0              ' VN| 
+ *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+#ifdef DEVICE_MEADOWS__OFFICE__BLACK_STAND
+  // #ifndef DEVICENAME_CTR
+  // #define DEVICENAME_CTR          "testbed_default"
+  // #endif
+  // #ifndef DEVICENAME_FRIENDLY_CTR
+  // #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  // #endif
+  // #ifndef DEVICENAME_DESCRIPTION_CTR
+  // #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  // #endif
+  // #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  // #define MQTT_HOST   "192.168.3.70"
+  //   #define MQTT_HOST     MQTT_HOST
+  //   #define MQTT_PORT     1883
+
+
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
+
+  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
+
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+ 
+  // #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+  /**
+   * For debugging and short term I may want to store everything as JSON, so I can view the data?
+   * Longer term, a mixture of JSON/Binary for space.
+   * Options should just be ifdef to switch between methods. 
+  */
+  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+
+  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
+  // #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
+  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
+  
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/     
+
+  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
+
+  // // #define USE_MODULE_CORE_FILESYSTEM
+  // //   #define WLED_ENABLE_FS_EDITOR
+  // //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  // //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+  // // Settings saving and loading
+  // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+  // //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  // //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+
+  // // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+
+  // // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  
+  // #define USE_MODULE_SENSORS_SUN_TRACKING     
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+  //   // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  // // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+  // #define USE_MAXELEVATION_CALC_JULY2025
+
+  // // #define ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
+
+  // // #define USE_MODULE_SENSORS_SUN_TRACKING__DETAILED_MQTT_INFO_UNIX
+
+  // /***********************************
+  //  * SECTION: Display Configs
+  // ************************************/  
+
+  // /***********************************
+  //  * SECTION: Driver Configs
+  // ************************************/  
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
+
+  // #define USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
+ 
+
+  // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
+
+  // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"GRB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":450
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       35
+  //     ],
+  //     "ColourPalette":"Red",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Static",
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 0
+  //   },
+  //   "Segment1": {
+  //     "PixelRange": [
+  //       35,
+  //       137
+  //     ],
+  //     "ColourPalette":"Rainbow",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Candles",
+  //       "Speed":180,
+  //       "Intensity":85,
+  //       "Grouping":1,
+  //       "RateMs": 20
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "Segment2": {
+  //     "PixelRange": [
+  //       137,
+  //       450
+  //     ],
+  //     "ColourPalette":"Vintage",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Candles",
+  //       "Speed":180,
+  //       "Intensity":85,
+  //       "Grouping":1,
+  //       "RateMs": 20
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+
+//   #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
+
+
+//   #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
+ 
+   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+   #define USE_LIGHTING_TEMPLATE
+   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+   R"=====(
+   {
+     "BusConfig":[
+       {
+          "Pin":22,
+          "ColourOrder":"GRBW",
+          "BusType":"SK6812_RGBW",
+          "Start":0,
+          "Length":144
+        },
+        {
+          "Pin":23,
+          "ColourOrder":"GRBW",
+          "BusType":"SK6812_RGBW",
+          "Start":144,
+          "Length":77
+        }
+     ],
+     "Segments":[
+        {
+          "Name":"Black",
+          "PixelRange": [
+            0,
+            144
+          ],
+          "ColourPalette":"Orange & Teal",
+          "ColourType":3,
+          "Effects": {
+            "Function":"Static",
+            "Intensity":0,
+            "Custom1":92,
+            "Custom2":53,
+            "Check1":0,
+            "Check3":1,
+            "Grouping":1,
+            "RateMs": 20,
+            "Reverse":1
+          },
+          "BrightnessRGB": 100
+        },
+        {
+          "Name":"Silver",
+          "PixelRange": [
+            144,
+            221
+          ],
+          "ColourPalette":"Retro Clown",
+          "ColourType":3,
+          "Effects": {
+            "Function":"Static",
+            "Intensity":0,
+            "Custom1":151,
+            "Custom2":87,
+            "Check1":0,
+            "Check3":1,
+            "Grouping":1,
+            "RateMs": 20
+          },
+          "BrightnessRGB": 100
+        }
+      ],
+      "BrightnessRGB": 10
+   }
+   )=====";
+//    #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
+
+//  /***********************************
+//   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+//  ************************************/  
+//   // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+//  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+
+
+
+//  /***********************************
+//   * SECTION: Module/GPIO Configs
+//  ************************************/  
+
+//  #define USE_MODULE_TEMPLATE
+//  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//  "{"
+//    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+//    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//    "\"" D_GPIO_NUMBER "\":{"
+//      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+//      "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+//    "},"
+//    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//  "}";
+
+  
+//  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+//  #define USE_FUNCTION_TEMPLATE
+//  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//  "{"
+//    "\"" D_DEVICENAME "\":{"
+//      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+//        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+//      "]"
+//    "}"
+//  "}";
+
+#endif
+
+
+
+#ifdef DEVICE_OFFICE__DESK_LIGHTING 
+  
+  #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":[5,18,19,21,22],
+        "ColourOrder":"RGBCW",
+        "BusType":"ANALOG_5CH",
+        "Start":0,
+        "Length":1
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"GRBWC",
+        "BusType":"WS2805_RGBWW",
+        "Start":1,
+        "Length":20
+      }
+    ],    
+    "Segment0":{
+      "PixelRange": [
+        0,
+        1
+      ],
+      "ColourType":5,
+      "ColourPalette":0,
+      "SegColour0": {
+        "Hue": 25,
+        "Sat": 100,
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100,
+        "CCT_TempPercentage":100
+      },
+      "Effects": {
+        "Function":"Solid Colour",
+        "RateMs": 1000,
+        "Speed":255
+      },
+      "BrightnessRGB":100,
+      "BrightnessCCT":100
+    },
+    "Segment1":{
+      "PixelRange": [
+        1,
+        21
+      ],
+      "ColourType":5,
+      "ColourPalette":"Orange & Teal",
+      "Effects": {
+        "Function":"Bands",
+        "RateMs": 1000,
+        "Speed":255
+      },
+      "BrightnessRGB":100,
+      "BrightnessCCT":100
+    },
+    "BrightnessRGB":100,
+    "BrightnessCCT":100
+  }
+  )=====";
+
+#endif
 
 
 

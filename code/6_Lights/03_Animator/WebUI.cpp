@@ -2302,9 +2302,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     uint16_t colours_in_palette = GetNumberOfColoursInPalette(palette_id);
    
   DEBUG_LINE_HERE_TRACE
-    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+    // #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
-    #endif
+    // #endif
 
     JsonArray curPalette_obj = palettes.createNestedArray(String(palette_id));
     JsonObject curPalette_s_obj = palettes_style.createNestedObject(String(palette_id));

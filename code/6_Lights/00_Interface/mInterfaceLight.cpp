@@ -850,6 +850,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   uint8_t reversed = 0;
   uint8_t ColourOrder = 0;//{COLOUR_ORDER_INIT_DISABLED};
   uint8_t pins[5] = {255}; // 255 is unset
+  uint8_t skip_pixels = 0;
 
   if(jtok2 = obj["Pin"])
   {
@@ -915,6 +916,11 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     ALOG_INF(PSTR("reversed %d"), reversed);
   }
 
+  if(jtok = obj["Skip"])
+  {
+    skip_pixels = jtok.getInt();
+    ALOG_INF(PSTR("Skip %d"), skip_pixels);
+  }
 
   uint8_t bus_index = bus_count; // next bus space 
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
@@ -955,7 +961,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     length,
     ColourOrder,
     reversed, 
-    0, 
+    skip_pixels, 
     RGBW_MODE_MANUAL_ONLY
   );    
   

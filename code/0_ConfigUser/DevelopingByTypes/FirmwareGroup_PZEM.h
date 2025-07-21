@@ -37,7 +37,7 @@
   #define DEVICENAME_CTR          "socket_energy_01"
   #define DEVICENAME_FRIENDLY_CTR "hvac_oil_radiator #1"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   /***********************************

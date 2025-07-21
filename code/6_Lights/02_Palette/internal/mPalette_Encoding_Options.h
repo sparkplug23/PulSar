@@ -24,7 +24,7 @@
 // For more bytes, I can considered U32
 
 
-#define PALETTE_ENCODING_INDEX_NONE              0x0000
+// #define PALETTE_ENCODING_INDEX_NONE              0x0000
 
 
 // Group setting

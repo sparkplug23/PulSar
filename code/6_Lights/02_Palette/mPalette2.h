@@ -1,5 +1,16 @@
-#ifndef _M_PALETTE_H
-#define _M_PALETTE_H
+#ifndef _M_PALETTE2_H
+#define _M_PALETTE2_H
+
+// Create Version 2 of mPalette, to allow for more features and better code structure
+/***
+ * 
+ * U32 palettes should be default, unless forced to allow RGBWW with GENERATE
+ * Refactor "exact" and "forced_gradient", so U8 can be used to determine [default mode as defined, forced discrete, forced gradient by effects]
+
+
+
+
+ */
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -17,7 +28,7 @@
 
 #include "internal/mPalette_Encoding_Options.h"
 
-#ifndef ENABLE_DEVFEATURE_PALETTE__VERSION2
+#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2
 
 class mPalette 
 {
@@ -339,6 +350,8 @@ class mPalette
     uint16_t GetPaletteListLength(){ return PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + user_defined_palette_count; }
 
     bool IsPaletteGradient(uint16_t palette_id);
+
+
     /**
      * @brief IMPORTANT
      * 
@@ -350,45 +363,33 @@ class mPalette
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 
-        uint16_t red_enabled : 1;
-        uint16_t green_enabled : 1;
-        uint16_t blue_enabled : 1;
-        uint16_t white_warm_enabled : 1;
-
-        uint16_t white_cold_enabled : 1;        
-        /**
-         * @brief Index can take up to three bytes
-         * 
-         **/
-        uint16_t encoded_value_byte_width : 3; // 3 bits wide, or 0b000 gives 9 value options
-
-        // Remove this
-        uint16_t reserved1 : 1;                       // Specialised, maybe also could be removed as not useful. The effect itself should treat this index as special
-        // Rename from "index_ scaled_to_segment" to "index_gradient"
-        uint16_t index_gradient : 1;           // To rename, again, "index_gradient" worded as effect style, whereas it should simply be "index_gradient"
-        //
-        uint16_t index_is_trigger_value_exact : 1;
-        uint16_t index_is_trigger_value_scaled100 : 1;  //probably remove this, why bother having 100% when 0-255 is the same
-
-        uint16_t reserved2 : 1; // encoded_as_hsb_ids : 1; //move this to other encoded types   //deleting!!!!
-        uint16_t encoded_as_crgb_palette_16 : 1;
-        uint16_t encoded_as_crgb_palette_256 : 1;
-        uint16_t palette_can_be_modified : 1;
-        
+        uint16_t red_enabled                      : 1; // bit 15
+        uint16_t green_enabled                    : 1; // bit 14
+        uint16_t blue_enabled                     : 1; // bit 13
+        uint16_t white_warm_enabled               : 1; // bit 12
+        uint16_t white_cold_enabled               : 1; // bit 11       
+        uint16_t encoded_value_byte_width         : 3; // bit 10-8 (3 bits wide, 9 value options)
+        uint16_t reserved1                        : 1; // bit 7 // Specialised, maybe also could be removed as not useful. The effect itself should treat this index as special        
+        uint16_t index_gradient                   : 1; // bit 6 // To rename, again, "index_gradient" worded as effect style, whereas it should simply be "index_gradient" // Rename from "index_ scaled_to_segment" to "index_gradient"
+        uint16_t index_is_trigger_value_exact     : 1; // bit 5
+        uint16_t index_is_trigger_value_scaled100 : 1; // bit 4 probably remove this, why bother having 100% when 0-255 is the same
+        uint16_t reserved2                        : 1; // bit 3 UNUSED
+        uint16_t encoded_as_crgb_palette_16       : 1; // bit 2
+        uint16_t encoded_as_crgb_palette_256      : 1; // bit 1
+        uint16_t palette_can_be_modified          : 1; // bit 0        
       };
     } PALETTE_ENCODING_DATA;
 
     /**
-     * @brief 
-     * StaticPalette will not change, and are stored in memory under various encoding types
-     * 
-     */
+     * Palette Data Structure
+     **/
     struct PALETTE_DATA{ // 6 bytes per palette
       uint16_t palettelist_id;      
-      std::vector<uint8_t> data; // colour bytes       
-      uint8_t number_of_colours; // Moving away from colour_width to reduce calculation per pixel      
-      PALETTE_ENCODING_DATA encoding;// Contains information on formatting of data buffer
+      std::vector<uint8_t> data;       // colour bytes       
+      uint8_t number_of_colours;       // Moving away from colour_width to reduce calculation per pixel      
+      PALETTE_ENCODING_DATA encoding;  // Contains information on formatting of data buffer
     };
+
     std::vector<PALETTE_DATA> static_palettes;
     std::vector<PALETTE_DATA> dynamic_palettes;
     std::vector<PALETTE_DATA> custom_palettes;
@@ -422,8 +423,6 @@ class mPalette
       uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      
-      // both options below shoud be rolled into one U8, 0=use_default, 1=force_discrete, 2=force_gradient
       bool     flag_crgb_exact_colour = false,
       bool     flag_forced_gradient = false
     );

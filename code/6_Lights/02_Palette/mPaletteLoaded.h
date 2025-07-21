@@ -3,7 +3,12 @@
 
 #include "stdint.h"
 
+#ifndef ENABLE_DEVFEATURE_PALETTE__VERSION2
 #include "6_Lights/02_Palette/mPalette.h"
+#endif
+#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2
+#include "6_Lights/02_Palette/mPalette2.h"
+#endif
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/00_Interface/FastLED/FastLED.h"

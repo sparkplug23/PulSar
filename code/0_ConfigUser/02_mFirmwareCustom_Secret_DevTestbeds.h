@@ -157,7 +157,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating 2023#2"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -389,126 +389,6 @@ Blue (Upstairs Link) ***********************************************************
 #endif
 
 
-#ifdef DEVICE_TESTBED_CAMERA_SENSOR_MODULE
-  #define DEVICENAME_CTR          "testbed_camera_sensor"
-  #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
-  #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-    
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define DISABLE_SERIAL
-  #define DISABLE_SERIAL0_CORE
-  #define DISABLE_SERIAL_LOGGING
-
-  #define USE_MODULE_CORE_RULES
-       
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_PIR
-  #define USE_MODULE_SENSORS_BH1750
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"      
-      #ifdef USE_MODULE_SENSORS_BME
-      "\"3\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"1\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
-      #endif
-      #ifdef USE_MODULE_SENSORS_PIR
-      "\"16\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
-      #endif
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1
-  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Ensuite"
-  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Ensuite"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-      "]"
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
-
-  "}";
-
-
-  #define STRIP_SIZE_MAX 58
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_SK6812_METHOD_DEFAULT
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"SK6812",
-    "AnimationMode":"Effects",
-    "ColourOrder":"grbw",
-    "ColourPalette":"Rgbcct 01",
-    "Effects": {
-      "Function":0,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "SegColour": {
-      "Hue": 18,
-      "Sat": 100,
-      "SubType":3
-    },
-    "BrightnessRGB":0,
-    "BrightnessCCT":0
-  }
-  )=====";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
-  
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"// for PIR to follow
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0," 
-        "\"State\":\"Follow\""
-      "}"
-    "}"
-  "}";
-
-#endif
-
-
 
 /**
  * @brief Integrating best camera code
@@ -518,7 +398,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_camera"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -646,7 +526,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_mavlink_decoder"
   #define DEVICENAME_FRIENDLY_CTR "Testbed MAVLink Decoder"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define ENABLE_FEATURE_WATCHDOG_TIMER
   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -782,7 +662,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_mavlink_telemetry_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
 
   #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1040,7 +920,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_buzzer_tones"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1149,7 +1029,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR            "testbed_oled_sh1106"
   #define DEVICENAME_FRIENDLY_CTR   "TestBed SH1106"
   #define DEVICENAME_ROOMHINT_CTR   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
@@ -1335,7 +1215,7 @@ Blue (Upstairs Link) ***********************************************************
 #ifdef DEVICE_testbed_rcs_ext
   #define DEVICENAME_CTR          "testbed_rcs_ext"
   #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define USE_MODULE_DRIVERS_INTERFACE
 
@@ -1439,7 +1319,7 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_sr04"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
@@ -1551,7 +1431,7 @@ Blue (Upstairs Link) ***********************************************************
 #ifdef DEVICE_TESTBED__SETTINGS_STORING
   #define DEVICENAME_CTR          "testbed_settings_storage"
   #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define DEVICENAME_ROOMHINT_CTR "Example"
 
   /***********************************
@@ -1604,7 +1484,7 @@ Blue (Upstairs Link) ***********************************************************
 #ifdef DEVICE_TESTBED__FILESYSTEM
   #define DEVICENAME_CTR          "testbed_filesystem"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Filesystem"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define DEVICENAME_ROOMHINT_CTR "Example"
 
   /***********************************

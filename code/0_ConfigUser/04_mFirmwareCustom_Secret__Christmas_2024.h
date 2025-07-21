@@ -117,7 +117,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -394,7 +394,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -672,7 +672,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1018,7 +1018,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1748,7 +1748,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -2146,7 +2146,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -2433,7 +2433,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -2746,7 +2746,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -3166,7 +3166,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -3606,7 +3606,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -4553,7 +4553,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -4853,7 +4853,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -5116,7 +5116,7 @@
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "Living Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************

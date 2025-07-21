@@ -18,6 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - aim to make these quarterly
+ * #130 : Aug25 Moving towards FIRMWARE_DEFAULT__LIGHTING_CONFIG__## and merging longterm working lighting options. From now on, unless testing a new feature inside FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA (where it, then inside it will be a test ifdef to keep it centralised) all lighting will be defined in the ini, and use FIRMWARE_DEFAULT__LIGHTING_CONFIG__## to define the lighting config. 
  * #129 : Jun25 Esp32, c3, s3, pin mapping templates updated
  * #128 : May25 SuperMiniC3 compiled, updating to allow new esp32 variants.
  * #127 : Jan25 Switched to RgbwwColor, removed Rgbcct and reverted to latest unedited neopixelbus. Added new dynamic colourbuffer to segments.
@@ -38,7 +39,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    129 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    130 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #06 : New BME680 added, bme/p 180/280 manual without library

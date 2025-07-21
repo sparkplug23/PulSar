@@ -35,7 +35,7 @@
 // MQTT
 
 // eg. `192,168,1,65`
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65
+#define MQTT_HOST       192,168,1,65
 
 // Belfast
 #define LATITUDE               54.5973         // [Latitude] Your location to be used with sunrise and sunset

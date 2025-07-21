@@ -149,10 +149,10 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
   // Set up the animation function callback
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
     #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
-      SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_BrightnessAlreadySet(param);
-      #else
-      SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(param);
-      #endif
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_BrightnessAlreadySet(param);
+    #else
+    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(param);
+    #endif
   });
 
   return USE_ANIMATOR;
@@ -188,12 +188,18 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
 {
   // Serial.printf("EffectAnim__Static_Palette A %d\n\r", SEGLEN);
 
+  DEBUG_LINE_HERE_TRACE
+
+  // ALOG_INF(PSTR("pixs %d"),GetNumberOfColoursInPalette(SEGMENT.palette_id));
+
+
   /**
    * @brief When speed is not instantaneous (max 255), then it should blend based on that speed
    **/
   if(SEGMENT.speed==255)
   {
 
+    DEBUG_LINE_HERE_TRACE
     uint32_t colour;
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
@@ -203,6 +209,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
 
     // SERIAL_DEBUG_COL32i("last", colour, 0);
 
+    DEBUG_LINE_HERE_TRACE
     return FRAMETIME;
   }
   /**
@@ -211,12 +218,15 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
   else
   {
 
+    DEBUG_LINE_HERE_TRACE
     if (!SEGMENT.allocateColourData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN )){ return USE_ANIMATOR; } // Pixel_Width * Two_Channels * Pixel_Count
 
+    DEBUG_LINE_HERE_TRACE
     SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
     uint32_t colour;
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
+      DEBUG_LINE_HERE_TRACE
       colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_COLOURS    
@@ -224,6 +234,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
       #endif
     }
 
+    DEBUG_LINE_HERE_TRACE
     SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
       #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
@@ -2354,15 +2365,55 @@ static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] P
 
 
 /********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description           : EffectAnim__SunPositions__DrawSun_1D_Elevation_01
- * @description:   : 
+ ********************************************************************************************************************************************************************************************************************
+ * @function              : EffectAnim__SunPositions__DrawSun_1D_Elevation_Base
+ * @description           : 
+ *   Renders a vertical 1D visual of the sun’s **elevation angle** using a glowing orb and a surrounding sky gradient.
+ *   The LED segment is treated as a vertical axis:
+ *     - Bottom pixel represents low elevation (horizon or twilight)
+ *     - Top pixel represents the sun’s highest point (solar noon)
  * 
- * @param Intensity: None
- * @param Speed    : None
- * @param rate     : None
- * @param time     : Blend time on first/only update
- *******************************************************************************************************************************************************************************************************************
+ *   The sun's **elevation angle** is mapped to a pixel position and colored with a smooth RGB transition depending on height.
+ *   Surrounding sky glow fades outward from the sun using a configurable falloff. Optionally, sunrise/noon markers can be drawn.
+ * 
+ *   Behavior is modified depending on the `include_duskdawn` flag:
+ * 
+ *   ● `include_duskdawn == false` (Standard Mode):
+ *     - Segment range maps from 0° (sunrise) to maximum elevation (solar noon)
+ *     - Used when only visible sun (above horizon) is of interest
+ *     - Pixel 0 → elevation 0°, Top pixel → max elevation (e.g., 56.5°)
+ *     - Sunrise and noon markers drawn at extremes
+ * 
+ *   ● `include_duskdawn == true` (Twilight Mode):
+ *     - Segment range maps from -6° (civil dawn) to maximum elevation
+ *     - Used when twilight periods are visually important
+ *     - Pixel 0 → elevation -6°, Top pixel → max elevation
+ *     - Additional marker drawn for 0° elevation (sunrise)
+ *     - Allows sun to appear **before** actual sunrise
+ * 
+ * @param include_duskdawn     : When true, includes twilight zone (−6° to 0° elevation) in the scale mapping
+ * 
+ * @param SEGMENT.intensity    : Controls sun's width (0–255), squared mapping for fine control
+ * @param SEGMENT.custom1      : Controls sky glow width (0–255), squared
+ * @param SEGMENT.custom2      : Controls falloff sharpness of sky glow (0–255); higher = tighter fade
+ * @param SEGMENT.custom3      : Marker brightness (0–31 mapped to 0–100). Affects sunrise/noon markers.
+ * @param SEGMENT.check1       : Use palette for sun coloring if true; otherwise use calculated RGB gradient
+ * @param SEGMENT.check2       : Mirror palette from sun center if true (ignored in RGB mode)
+ * @param SEGMENT.check3       : Enable rendering of reference markers (sunrise, noon)
+ * 
+ * @param Intensity            : [unused] Included for compatibility with effect manager
+ * @param Speed                : [unused]
+ * @param rate                 : [unused]
+ * @param time                 : Used for blending control (if applicable in caller)
+ * 
+ * @return uint16_t
+ *   Returns `FRAMETIME` constant for standard refresh timing
+ * 
+ * @notes
+ *   - When `tkr_solar` is invalid, or sun elevation is below range, the effect renders nothing
+ *   - All positioning and color mapping uses floating-point precision for smooth animation
+ *   - Intended for use with real-time sun tracking updates
+ ********************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(bool include_duskdawn)
@@ -2526,502 +2577,57 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
 }// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM = "Sun Elevation DuskDawn@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,;;name of palette;1;ep=1000,paln=Yellow,ix=0,c1=186,c2=50,o1=0,o3=1";
 
-
-
-// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
-// {
-//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
-
-//   SEGMENT.fill(BLACK); // Clear all pixels
-
-//   bool use_palette   = SEGMENT.check1;
-//   bool is_mirrored   = SEGMENT.check2;
-//   bool draw_markers  = SEGMENT.check3;
-
-//   // === Elevation to pixel position (sunrise to noon only) ===
-//   const double elev_min = 0.0;
-//   const double elev_max = tkr_solar->Get_Elevation_Max();
-//   double elev = constrain(tkr_solar->Get_Elevation(), elev_min, elev_max);
-//   double norm = (elev - elev_min) / (elev_max - elev_min);
-//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
-
-//   // === Widths ===
-//   float f_sun = SEGMENT.intensity / 255.0f;
-//   f_sun *= f_sun;
-//   uint16_t min_width = 1;
-//   uint16_t max_width = SEGLEN / 4;
-//   uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width) + 0.5f);
-
-//   float f_sky = SEGMENT.custom1 / 255.0f;
-//   f_sky *= f_sky;
-//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
-//   sky_width = constrain(sky_width, 0, SEGLEN - 1);
-
-//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
-
-// // === Sun Colour (blend by elevation) ===
-// float r = 0, g = 0, b = 0;
-
-// if (elev >= 20.0f) {
-//   // Max yellow
-//   r = 255; g = 210; b = 0;
-// } else if (elev >= 15.0f) {
-//   float f = (elev - 15.0f) / 5.0f;
-//   r = 255;
-//   g = 180 + f * (210 - 180);  // g: 180 → 210
-//   b = 40 + f * (0 - 40);      // b: 40 → 0
-// } else if (elev >= 10.0f) {
-//   float f = (elev - 10.0f) / 5.0f;
-//   r = 255;
-//   g = 128 + f * (180 - 128);  // g: 128 → 180
-//   b = 40 + f * (40 - 40);     // b: constant 40
-// } else if (elev >= 5.0f) {
-//   float f = (elev - 5.0f) / 5.0f;
-//   r = 255;
-//   g = 64 + f * (128 - 64);    // g: 64 → 128
-//   b = 32 + f * (40 - 32);     // b: 32 → 40
-// } else if (elev >= 0.0f) {
-//   float f = elev / 5.0f;
-//   r = 255;
-//   g = 32 + f * (64 - 32);     // g: 32 → 64
-//   b = 16 + f * (32 - 16);     // b: 16 → 32
-// } else {
-//   float f = (elev - elev_min) / -elev_min;
-//   f = constrain(f, 0.0f, 1.0f);
-//   r = 255 * (0.01f + 0.99f * f);  // avoid full black
-//   g = 0;
-//   b = 0;
-// }
-
-
-
-//   // === Sky Colour ===
-//   float sky_r = 10, sky_g = 30, sky_b = 80;
-//   if (elev > 0.3f) {
-//     float f = fminf((elev - 0.3f) / 2.7f, 1.0f);
-//     sky_r = (1.0f - f) * 10 + f * 40;
-//     sky_g = (1.0f - f) * 30 + f * 160;
-//     sky_b = (1.0f - f) * 80 + f * 255;
-//   }
-
-//   float sky_brightness = 100.0f * norm;
-//   sky_brightness = constrain(sky_brightness, 0.0f, 100.0f);
-
-//   // === Sun Core ===
-//   if (use_palette) {
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//       uint16_t i = (uint16_t)(offset + sun_width);
-//       float pos_norm = (float)i / (2.0f * sun_width);
-//       uint16_t palette_index = is_mirrored
-//         ? (uint16_t)(fabsf(0.5f - pos_norm) * 2.0f * (SEGLEN - 1))
-//         : (uint16_t)(pos_norm * (SEGLEN - 1));
-
-//       uint32_t colour = SEGMENT.GetPaletteColour(
-//         palette_index,
-//         PALETTE_INDEX_SPANS_SEGLEN_ON,
-//         PALETTE_WRAP_ON,
-//         PALETTE_DISCRETE_OFF,
-//         NO_ENCODED_VALUE
-//       );
-//       SEGMENT.setPixelColor(pixel, colour);
-//     }
-//   } else {
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-//       SEGMENT.setPixelColor(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
-//     }
-//   }
-
-//   // === Sky Glow ===
-//   for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
-//     if (abs(offset) <= (int16_t)sun_width) continue;
-//     int16_t pixel = sun_center + offset;
-//     if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//     float dist = fabsf((float)offset);
-//     float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
-//     fade = constrain(fade, 0.0f, 1.0f);
-
-//     uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f) + 0.5f);
-//     uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f) + 0.5f);
-//     uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f) + 0.5f);
-
-//     SEGMENT.setPixelColor(pixel, RGBW32(r_f, g_f, b_f, 0));
-//   }
-
-//   // === Markers (final stage) ===
-//   if (draw_markers) {
-//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, 100);
-//     uint32_t col_noon       = RGBW32(0, marker_brightness, marker_brightness, 0);
-//     uint32_t col_sunsetrise  = RGBW32(scale8(171, marker_brightness), scale8(57, marker_brightness), scale8(5, marker_brightness), 0); // orange
-  
-//     uint16_t px_sunrise = 0;
-//     uint16_t px_noon    = SEGLEN - 1;
-  
-//     int16_t min_sun = (int16_t)sun_center - (int16_t)sun_width;
-//     int16_t max_sun = (int16_t)sun_center + (int16_t)sun_width;
-  
-//     if ((int16_t)px_sunrise < min_sun || (int16_t)px_sunrise > max_sun)
-//       SEGMENT.setPixelColor(px_sunrise, col_sunsetrise);
-  
-//     if ((int16_t)px_noon < min_sun || (int16_t)px_noon > max_sun)
-//       SEGMENT.setPixelColor(px_noon, col_noon);
-//   }
-  
-
-//   return FRAMETIME;
-// }
-// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
 
-
-
 /********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description           : EffectAnim__SunPositions__DrawSun_1D_Elevation_02
- * @description:   : 
+ ********************************************************************************************************************************************************************************************************************
+ * @function              : EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base
+ * @description           : 
+ *   Draws a 1D visual representation of the sun's current azimuth position across a horizontal LED segment (e.g., LED strip).
+ *   The sun is drawn as a glowing orb at the correct azimuth position, with optional palette coloring and sky glow.
+ *   Markers for sunrise, sunset, and optionally dawn/dusk are included for visual reference.
  * 
- * @param Intensity: None
- * @param Speed    : None
- * @param rate     : None
- * @param time     : Blend time on first/only update
- *******************************************************************************************************************************************************************************************************************
+ *   The azimuth is mapped linearly from either:
+ *     - Sunrise → Sunset      (if `include_duskdawn == false`)
+ *     - Dawn    → Dusk        (if `include_duskdawn == true`)
+ * 
+ *   The sun's color is computed from its **elevation** to create a realistic color progression (e.g., red → orange → yellow → white).
+ *   The sun core can be drawn either as a smooth RGB blend or using a palette.
+ *   The width of the sun and surrounding sky glow is configurable via segment parameters.
+ * 
+ *   This is a **base function** and should be called by wrapper functions that pass `include_duskdawn = true` or `false`.
+ * 
+ * @param SEGMENT.intensity  : Controls the sun's width (larger intensity = wider sun). Nonlinear curve (squared).
+ * @param SEGMENT.custom1    : Controls the sky glow width (range 0–255, nonlinear squared).
+ * @param SEGMENT.custom2    : Controls the sharpness of the sky glow edge falloff. Higher = sharper falloff.
+ * @param SEGMENT.custom3    : Controls the brightness of optional marker pixels (e.g., dawn/sunrise/sunset/noon).
+ * @param SEGMENT.check1     : If true, uses the current palette instead of flat RGB color for the sun.
+ * @param SEGMENT.check2     : If true, mirrors the palette from both sides of the sun center (symmetrical).
+ * @param SEGMENT.check3     : If true, draws markers for sunrise, sunset, and optionally dawn/dusk/noon.
+ * 
+ * @param include_duskdawn   : 
+ *   - `false`: Maps azimuth from **sunrise to sunset**. Markers placed at:
+ *       - Pixel 0      → Sunrise
+ *       - Middle pixel → Noon (sun at highest point)
+ *       - Last pixel   → Sunset
+ *   - `true`: Maps azimuth from **dawn to dusk**. Markers placed at:
+ *       - Pixel 0      → Dawn (-6° elevation)
+ *       - 5% pixel in  → Sunrise (0° elevation)
+ *       - Middle pixel → Noon
+ *       - 95% pixel in → Sunset
+ *       - Last pixel   → Dusk (-6° elevation)
+ * 
+ * @return uint16_t
+ *   Returns `FRAMETIME` to maintain current frame rate.
+ * 
+ * @notes
+ *   - If the sun is below the visual horizon (below min elevation), nothing is drawn.
+ *   - `tkr_solar` must be valid and precomputed with azimuth/elevation values for the current time.
+ *   - This function is optimized for ESP32 animation loops and is called regularly for LED effects.
+ ********************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
-// {
-//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
-
-//   SEGMENT.fill(BLACK); // Clear all pixels
-
-//   bool use_palette = SEGMENT.check1;
-//   bool is_mirrored = SEGMENT.check2;
-//   bool draw_markers = SEGMENT.check3;
-
-//   // === Elevation to pixel position ===
-//   const double elev_min = -6.0;
-//   const double elev_max = tkr_solar->Get_Elevation_Max();
-//   double elev = constrain(tkr_solar->Get_Elevation(), elev_min, elev_max);
-//   double norm = (elev - elev_min) / (elev_max - elev_min);
-//   uint16_t sun_center = (uint16_t)(norm * (SEGLEN - 1));
-
-//   // === Widths ===
-//   float f_sun = SEGMENT.intensity / 255.0f;
-//   f_sun *= f_sun;
-//   uint16_t min_width = 1;
-//   uint16_t max_width = SEGLEN / 4;
-//   uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width) + 0.5f);
-
-//   float f_sky = SEGMENT.custom1 / 255.0f;
-//   f_sky *= f_sky;
-//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
-//   sky_width = constrain(sky_width, 0, SEGLEN - 1);
-
-//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
-
-
-// // === Sun Colour (blend by elevation) ===
-// float r = 0, g = 0, b = 0;
-
-// if (elev >= 20.0) {
-//   // Max elevation: strong rich yellow
-//   r = 255; g = 210; b = 0;
-// } else if (elev >= 15.0) {
-//   // Blend from (255,180,40) → (255,210,0)
-//   float f = (elev - 15.0f) / 5.0f;
-//   r = 255;
-//   g = 180 + f * (210 - 180);  // g: 180 → 210
-//   b = 40  + f * (0 - 40);     // b: 40 → 0
-// } else if (elev >= 10.0) {
-//   // Blend from (255,128,32) → (255,180,40)
-//   float f = (elev - 10.0f) / 5.0f;
-//   r = 255;
-//   g = 128 + f * (180 - 128);  // g: 128 → 180
-//   b = 32  + f * (40 - 32);    // b: 32 → 40
-// } else if (elev >= 5.0) {
-//   // Blend from (255,64,24) → (255,128,32)
-//   float f = (elev - 5.0f) / 5.0f;
-//   r = 255;
-//   g = 64 + f * (128 - 64);    // g: 64 → 128
-//   b = 24 + f * (32 - 24);     // b: 24 → 32
-// } else if (elev >= 0.0) {
-//   // Blend from (255,16,8) → (255,64,24)
-//   float f = elev / 5.0f;
-//   r = 255;
-//   g = 16 + f * (64 - 16);     // g: 16 → 64
-//   b = 8  + f * (24 - 8);      // b: 8 → 24
-// } else {
-//   // Below horizon: deep red to dark
-//   float f = (elev - elev_min) / -elev_min;  // 0 at min, 1 at 0°
-//   f = constrain(f, 0.0f, 1.0f);
-//   r = 255 * (0.01f + 0.99f * f);
-//   g = 0;
-//   b = 0;
-// }
-
-
-//   // === Sky Colour ===
-//   float sky_r = 10, sky_g = 30, sky_b = 80;
-//   if (elev > 0.3f) {
-//     float f = fminf((elev - 0.3f) / 2.7f, 1.0f);
-//     sky_r = (1.0f - f) * 10 + f * 40;
-//     sky_g = (1.0f - f) * 30 + f * 160;
-//     sky_b = (1.0f - f) * 80 + f * 255;
-//   }
-
-//   float sky_brightness = 100.0f * ((elev - elev_min) / (elev_max - elev_min));
-//   sky_brightness = constrain(sky_brightness, 0.0f, 100.0f);
-
-//   uint32_t colour;
-
-//   // === Sun Core ===
-//   if (use_palette) { 
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//       uint16_t i = (uint16_t)(offset + sun_width);
-//       float pos_norm = (float)i / (2.0f * sun_width);
-//       uint16_t palette_index = is_mirrored
-//         ? (uint16_t)(fabsf(0.5f - pos_norm) * 2.0f * (SEGLEN - 1))
-//         : (uint16_t)(pos_norm * (SEGLEN - 1));
-
-//       uint32_t colour = SEGMENT.GetPaletteColour(
-//         palette_index,
-//         PALETTE_INDEX_SPANS_SEGLEN_ON,
-//         PALETTE_WRAP_ON,
-//         PALETTE_DISCRETE_OFF,
-//         NO_ENCODED_VALUE
-//       );
-//       SEGMENT.setPixelColor(pixel, colour);
-//     }
-//   } else {
-    
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-//       SEGMENT.setPixelColor(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
-//     }
-//   }
-
-//   // === Sky Glow ===
-//   for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
-//     if (abs(offset) <= (int16_t)sun_width) continue;  // avoid overwriting sun
-//     int16_t pixel = sun_center + offset;
-//     if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//     float dist = fabsf((float)offset);
-//     float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
-//     fade = constrain(fade, 0.0f, 1.0f);
-
-//     uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f) + 0.5f);
-//     uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f) + 0.5f);
-//     uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f) + 0.5f);
-
-//     SEGMENT.setPixelColor(pixel, RGBW32(r_f, g_f, b_f, 0));
-//   }
-
-//     // ALOG_INF(PSTR("px_noon < min_sun%d || px_noon%d > max_sun%d"), min_sun, px_noon, max_sun);
-//   // === Markers (draw last) ===
-//   if (draw_markers)
-//   {
-//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, 100);
-//     uint32_t col_noon        = RGBW32(0, marker_brightness, marker_brightness, 0); // cyan (noon)
-//     uint32_t col_dusk        = RGBW32(0, 0, marker_brightness, 0);                 // blue (dusk/dawn)
-//     uint32_t col_sunsetrise  = RGBW32(scale8(171, marker_brightness), scale8(57, marker_brightness), scale8(5, marker_brightness), 0); // orange
-
-//     float norm_sunrise = (0.0f - elev_min) / (elev_max - elev_min);
-//     uint16_t px_sunrise = (uint16_t)(norm_sunrise * (SEGLEN - 1));
-//     uint16_t px_dawn    = 0;
-//     uint16_t px_noon    = SEGLEN - 1;
-
-//     int16_t min_sun = (int16_t)sun_center - (int16_t)sun_width;
-//     int16_t max_sun = (int16_t)sun_center + (int16_t)sun_width;
-
-//     if ((int16_t)px_dawn < min_sun || (int16_t)px_dawn > max_sun)
-//       SEGMENT.setPixelColor(px_dawn, col_dusk);
-
-//     if ((int16_t)px_sunrise < min_sun || (int16_t)px_sunrise > max_sun)
-//       SEGMENT.setPixelColor(px_sunrise, col_sunsetrise);
-
-//     if ((int16_t)px_noon < min_sun || (int16_t)px_noon > max_sun)
-//       SEGMENT.setPixelColor(px_noon, col_noon);
-//   }
-
-
-//   return FRAMETIME;
-// }
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description           : EffectAnim__SunPositions__DrawSun_1D_Elevation_01
- * @description:   : 
- * 
- * @param Intensity: None
- * @param Speed    : None
- * @param rate     : None
- * @param time     : Blend time on first/only update
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool include_duskdawn)
-// {
-//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
-//   SEGMENT.fill(BLACK);
-
-//   double elevation = tkr_solar->Get_Elevation();
-//   double elev_min = include_duskdawn ? tkr_solar->Get_Elevation_Min() : 0.0;
-//   if (elevation <= elev_min) return DEFAULT_EFFECTS_FUNCTION;
-
-//   // Normalize azimuth range
-//   double azimuth  = tkr_solar->Get_Azimuth();
-//   double az_start = tkr_solar->calc.sunrise_azimuth;
-//   double az_end   = tkr_solar->calc.sunset_azimuth;
-
-//   azimuth = constrain(azimuth, az_start, az_end);
-//   double az_norm = (azimuth - az_start) / (az_end - az_start);
-//   uint16_t sun_center = (uint16_t)(az_norm * (SEGLEN - 1));
-
-//   // Widths
-//   float f_sun = SEGMENT.intensity / 255.0f;
-//   f_sun *= f_sun;
-//   uint16_t min_width = 1;
-//   uint16_t max_width = SEGLEN / 4;
-//   uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width) + 0.5f);
-
-//   float f_sky = SEGMENT.custom1 / 255.0f;
-//   f_sky *= f_sky;
-//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
-//   sky_width = constrain(sky_width, 0, SEGLEN - 1);
-
-//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
-
-//   // === Sun Colour (same as Elevation_02 smoothing) ===
-//   float r = 0, g = 0, b = 0;
-//   if (elevation >= 20.0) {
-//     r = 255; g = 210; b = 0;
-//   } else if (elevation >= 15.0) {
-//     float f = (elevation - 15.0f) / 5.0f;
-//     r = 255;
-//     g = 180 + f * (210 - 180);
-//     b = 40 + f * (0 - 40);
-//   } else if (elevation >= 10.0) {
-//     float f = (elevation - 10.0f) / 5.0f;
-//     r = 255;
-//     g = 128 + f * (180 - 128);
-//     b = 32 + f * (40 - 32);
-//   } else if (elevation >= 5.0) {
-//     float f = (elevation - 5.0f) / 5.0f;
-//     r = 255;
-//     g = 64 + f * (128 - 64);
-//     b = 24 + f * (32 - 24);
-//   } else if (elevation >= 0.0) {
-//     float f = elevation / 5.0f;
-//     r = 255;
-//     g = 16 + f * (64 - 16);
-//     b = 8  + f * (24 - 8);
-//   } else {
-//     float f = (elevation - elev_min) / -elev_min;
-//     f = constrain(f, 0.0f, 1.0f);
-//     r = 255 * (0.01f + 0.99f * f);
-//     g = 0;
-//     b = 0;
-//   }
-
-//   // === Sky Colour ===
-//   float sky_r = 10, sky_g = 30, sky_b = 80;
-//   if (elevation > 0.3f) {
-//     float f = fminf((elevation - 0.3f) / 2.7f, 1.0f);
-//     sky_r = (1.0f - f) * 10 + f * 40;
-//     sky_g = (1.0f - f) * 30 + f * 160;
-//     sky_b = (1.0f - f) * 80 + f * 255;
-//   }
-
-//   float sky_brightness = 100.0f * ((elevation - elev_min) / (20.0f - elev_min));
-//   sky_brightness = constrain(sky_brightness, 0.0f, 100.0f);
-
-//   bool use_palette  = SEGMENT.check1;
-//   bool is_mirrored  = SEGMENT.check2;
-//   bool draw_markers = SEGMENT.check3;
-
-//   // === Sun Core ===
-//   if (use_palette) {
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//       uint16_t i = (uint16_t)(offset + sun_width);
-//       float pos_norm = (float)i / (2.0f * sun_width);
-//       uint16_t palette_index = is_mirrored
-//         ? (uint16_t)(fabsf(0.5f - pos_norm) * 2.0f * (SEGLEN - 1))
-//         : (uint16_t)(pos_norm * (SEGLEN - 1));
-
-//       uint32_t colour = SEGMENT.GetPaletteColour(
-//         palette_index,
-//         PALETTE_INDEX_SPANS_SEGLEN_ON,
-//         PALETTE_WRAP_ON,
-//         PALETTE_DISCRETE_OFF,
-//         NO_ENCODED_VALUE
-//       );
-//       SEGMENT.setPixelColor(pixel, colour);
-//     }
-//   } else {
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-//       SEGMENT.setPixelColor(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
-//     }
-//   }
-
-//   // === Sky Glow (RGB only) ===
-//   if (!use_palette) {
-//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
-//       if (abs(offset) <= (int16_t)sun_width) continue;
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//       float dist = fabsf((float)offset);
-//       float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
-//       fade = constrain(fade, 0.0f, 1.0f);
-
-//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
-//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
-//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
-
-//       SEGMENT.setPixelColor(pixel, RGBW32(r_f, g_f, b_f, 0));
-//     }
-//   }
-
-//   // === Markers ===
-//   if (draw_markers) {
-//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, 100);
-//     uint32_t col_noon       = RGBW32(0, marker_brightness, marker_brightness, 0);
-//     uint32_t col_sunsetrise = RGBW32(scale8(171, marker_brightness), scale8(57, marker_brightness), scale8(5, marker_brightness), 0);
-
-//     uint16_t px_sunrise = 0;
-//     uint16_t px_sunset  = SEGLEN - 1;
-//     uint16_t px_noon    = SEGLEN / 2;
-
-//     int16_t min_sun = (int16_t)sun_center - (int16_t)sun_width;
-//     int16_t max_sun = (int16_t)sun_center + (int16_t)sun_width;
-
-//     if ((int16_t)px_sunrise < min_sun || (int16_t)px_sunrise > max_sun)
-//       SEGMENT.setPixelColor(px_sunrise, col_sunsetrise);
-//     if ((int16_t)px_sunset < min_sun || (int16_t)px_sunset > max_sun)
-//       SEGMENT.setPixelColor(px_sunset, col_sunsetrise);
-//     if ((int16_t)px_noon < min_sun || (int16_t)px_noon > max_sun)
-//       SEGMENT.setPixelColor(px_noon, col_noon);
-//   }
-
-//   return FRAMETIME;
-// }
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool include_duskdawn)
 {
   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
@@ -3158,8 +2764,8 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool 
 
     uint16_t px_dawn    = 0;
     uint16_t px_dusk    = SEGLEN - 1;
-    uint16_t px_sunrise = (uint16_t)(0.05f * (SEGLEN - 1) + 0.5f);
-    uint16_t px_sunset  = (uint16_t)(0.95f * (SEGLEN - 1) + 0.5f);
+    uint16_t px_sunrise = (uint16_t)(0.10f * (SEGLEN - 1) + 0.5f);
+    uint16_t px_sunset  = (uint16_t)(0.90f * (SEGLEN - 1) + 0.5f);
     uint16_t px_noon    = (uint16_t)(0.5f  * (SEGLEN - 1) + 0.5f);
 
     int16_t min_sun = (int16_t)sun_center - (int16_t)sun_width;
@@ -3189,170 +2795,12 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01()
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01[] PROGMEM = "Sun Azimuth Day@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,;;name of palette;1;ep=1000,paln=Yellow,ix=0,c1=186,c2=50,o1=0,o3=1";
 
-// New with dusk/dawn blending:
+
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_02()
 {
   return EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(true);
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_02[] PROGMEM = "Sun Azimuth DuskDawn@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,;;name of palette;1;ep=1000,paln=Yellow,ix=0,c1=186,c2=50,o1=0,o3=1";
-
-
-
-// uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01()
-// {
-//   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
-
-//   SEGMENT.fill(BLACK); // Clear all pixels
-
-//   if (tkr_solar->Get_Elevation() <= 0.0) return DEFAULT_EFFECTS_FUNCTION;
-
-//   // === AZIMUTH RANGE NORMALISATION ===
-//   double azimuth  = tkr_solar->Get_Azimuth();
-//   double az_start = tkr_solar->calc.sunrise_azimuth;
-//   double az_end   = tkr_solar->calc.sunset_azimuth;
-
-//   if (azimuth < az_start) azimuth = az_start;
-//   if (azimuth > az_end)   azimuth = az_end;
-
-//   double az_norm = (azimuth - az_start) / (az_end - az_start);
-//   uint16_t sun_center = (uint16_t)(az_norm * (SEGLEN - 1));
-
-//   // ALOG_INF(PSTR("sun_center %d"), sun_center);
-  
-//   // === Widths ===
-//   float f_sun = SEGMENT.intensity / 255.0f;
-//   f_sun *= f_sun;
-//   uint16_t min_width = 1;
-//   uint16_t max_width = SEGLEN / 4;
-//   uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width) + 0.5f);
-
-//   float f_sky = SEGMENT.custom1 / 255.0f;
-//   f_sky *= f_sky;
-//   uint16_t sky_width = (uint16_t)(f_sky * SEGLEN);
-//   sky_width = constrain(sky_width, 0, SEGLEN - 1);
-
-//   // ALOG_INF(PSTR("sun_width %d"), sun_width);
-//   // ALOG_INF(PSTR("sky_width %d"), sky_width);
-
-//   uint8_t rolloff_param = SEGMENT.custom2 + 1;
-
-// // === SUN COLOUR (based on elevation) ===
-// float r = 0, g = 0, b = 0;
-// double elev = tkr_solar->Get_Elevation();
-// double elev_min = tkr_solar->Get_Elevation_Min();
-
-// if (elev >= 20.0) {
-//   // High sun: rich yellow
-//   r = 255; g = 210; b = 0;
-// } else if (elev >= 10.0) {
-//   // Blend from orange (255,128,40) → yellow (255,210,0)
-//   float t = (elev - 10.0f) / 10.0f;
-//   r = 255;
-//   g = 128 + t * (210 - 128);  // 128 → 210
-//   b = 40  + t * (0 - 40);     // 40 → 0
-// } else if (elev > 0.0) {
-//   // Blend from deep red (255,64,32) → orange (255,128,40)
-//   float t = elev / 10.0f;
-//   r = 255;
-//   g = 64 + t * (128 - 64);    // 64 → 128
-//   b = 32 + t * (40 - 32);     // 32 → 40
-// } else {
-//   // Below horizon: deep red fade → dark
-//   float f = (elev - elev_min) / -elev_min;  // 0 → 1
-//   f = constrain(f, 0.0f, 1.0f);
-//   r = 255 * (0.01f + 0.99f * f);
-//   g = 0;
-//   b = 0;
-// }
-
-
-
-
-//   // === SKY COLOUR ===
-//   float sky_r = 40, sky_g = 160, sky_b = 255;
-//   float sky_brightness = constrain((float)(160.0 * elev / 20.0f), 0.0f, 160.0f);
-
-//   bool use_palette  = SEGMENT.check1;
-//   bool is_mirrored  = SEGMENT.check2;
-//   bool draw_markers = SEGMENT.check3;
-
-//   if (use_palette) {
-//     // === SUN USING PALETTE ===
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//       uint16_t i = (uint16_t)(offset + sun_width);
-//       float pos_norm = (float)i / (2.0f * sun_width);
-//       uint16_t palette_index = is_mirrored
-//         ? (uint16_t)(fabsf(0.5f - pos_norm) * 2.0f * (SEGLEN - 1))
-//         : (uint16_t)(pos_norm * (SEGLEN - 1));
-
-//       uint32_t colour = SEGMENT.GetPaletteColour(
-//         palette_index,
-//         PALETTE_INDEX_SPANS_SEGLEN_ON,
-//         PALETTE_WRAP_ON,
-//         PALETTE_DISCRETE_OFF,
-//         NO_ENCODED_VALUE
-//       );
-//       SEGMENT.setPixelColor(pixel, colour);
-//     }
-//   } else {
-//     // === SUN USING RGB COLOUR ===
-//     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-//       SEGMENT.setPixelColor(pixel, RGBW32((uint8_t)r, (uint8_t)g, (uint8_t)b, 0));
-//     }
-//   }
-
-//   // === SKY GLOW (RGB MODE ONLY) ===
-//   if (!use_palette) {
-//     for (int16_t offset = -((int16_t)sky_width); offset <= (int16_t)sky_width; offset++) {
-//       if (abs(offset) <= (int16_t)sun_width) continue;
-
-//       int16_t pixel = sun_center + offset;
-//       if (pixel < 0 || pixel >= SEGLEN) continue;
-
-//       float dist = fabsf((float)offset);
-//       float fade = powf(1.0f - (dist - sun_width) / (sky_width - sun_width), rolloff_param / 8.0f);
-//       fade = constrain(fade, 0.0f, 1.0f);
-
-//       uint8_t r_f = (uint8_t)(sky_r * fade * (sky_brightness / 255.0f));
-//       uint8_t g_f = (uint8_t)(sky_g * fade * (sky_brightness / 255.0f));
-//       uint8_t b_f = (uint8_t)(sky_b * fade * (sky_brightness / 255.0f));
-
-//       SEGMENT.setPixelColor(pixel, RGBW32(r_f, g_f, b_f, 0));
-//     }
-//   }
-
-//   // === MARKERS (draw last) ===
-//   if (draw_markers) {
-//     uint8_t marker_brightness = map(SEGMENT.custom3, 0, 31, 0, 100);
-//     uint32_t col_noon      = RGBW32(0, marker_brightness, marker_brightness, 0);
-//     uint32_t col_sunsetrise = RGBW32(scale8(171, marker_brightness), scale8(57, marker_brightness), scale8(5, marker_brightness), 0);
-  
-//     uint16_t px_sunrise = 0;
-//     uint16_t px_sunset  = SEGLEN - 1;
-//     uint16_t px_noon    = SEGLEN / 2;
-  
-//     int16_t min_sun = (int16_t)sun_center - (int16_t)sun_width;
-//     int16_t max_sun = (int16_t)sun_center + (int16_t)sun_width;
-  
-//     if ((int16_t)px_sunrise < min_sun || (int16_t)px_sunrise > max_sun)
-//       SEGMENT.setPixelColor(px_sunrise, col_sunsetrise);
-  
-//     if ((int16_t)px_sunset < min_sun || (int16_t)px_sunset > max_sun)
-//       SEGMENT.setPixelColor(px_sunset, col_sunsetrise);
-  
-//     if ((int16_t)px_noon < min_sun || (int16_t)px_noon > max_sun)
-//       SEGMENT.setPixelColor(px_noon, col_noon);
-//   }
-  
-
-//   return FRAMETIME;
-// }
-
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
@@ -3956,6 +3404,8 @@ uint16_t mAnimatorLight::LCDDisplay_displayTime(time_t t, byte color, byte color
   if ( tkr_time->second(t) % 2 == 0 ) 
     LCDDisplay_showDots(2, tkr_time->second(t) * 4.25);                                // show : between hours and minutes on even seconds with the color cycling through the palette once per minute
   lastSecond = tkr_time->second(t);
+
+  return 0;
 }
 
 
@@ -3964,6 +3414,8 @@ uint16_t mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) 
   for (byte i = 0; i < 7; i++) {
     if (digits[digit][i] != 0) LCDDisplay_showSegment(i, color, pos);
   }
+
+  return 0;
 }
 uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, byte segDisplay) {
   
@@ -3990,6 +3442,8 @@ uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, 
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
   }
+
+  return 0;
   
 }
 
@@ -4063,6 +3517,8 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
   //     }
   //   }
   // }
+
+  return 0;
 
 
 }
@@ -4221,6 +3677,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
   // );
   // #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
+  return USE_ANIMATOR;
 
 }
 
@@ -4289,6 +3746,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualNumber_01()
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
     #endif
   });
+  return USE_ANIMATOR;
 
 
 }
@@ -4367,6 +3825,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualString_01()
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
     #endif
   });
+  return USE_ANIMATOR;
 
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM = "Seven-Segment String 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
@@ -4860,7 +4319,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Colour()
 {
-  EffectAnim__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
+  return EffectAnim__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
 }
 static const char PM_EFFECT_CONFIG__CHASE_COLOR[] PROGMEM = "Chase@!,Width;!,!,!;!";
 
@@ -4876,7 +4335,7 @@ uint16_t mAnimatorLight::EffectAnim__Chase_Rainbow()
   unsigned color_index = SEGMENT.call & 0xFF;
   uint32_t color = SEGMENT.color_wheel(((SEGMENT.step * color_sep) + color_index) & 0xFF);
 
-  EffectAnim__Base_Chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
+  return EffectAnim__Base_Chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
   SET_DIRECT_MODE();
   
 }
@@ -5066,7 +4525,6 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase_TriColour(uint32_t color1, uint3
  * @note : Converted from WLED Effects "mode_tricolor_chase"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_TriColour(void) {
-
   return EffectAnim__Base_Chase_TriColour(SEGCOLOR(2), SEGCOLOR(0));
 }
 static const char PM_EFFECT_CONFIG__TRICOLOR_CHASE[] PROGMEM = "Chase 3@!,Size;1,2,3;!";
@@ -5351,6 +4809,7 @@ static const char PM_EFFECT_CONFIG__STARBURST[] PROGMEM = "Fireworks Starburst@C
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks()
 {
+
 
   if (SEGLEN == 1) return EFFECT_DEFAULT();
   const int cols = SEGMENT.is2D() ? SEG_W : 1;
@@ -5843,6 +5302,7 @@ uint16_t mAnimatorLight::EffectAnim__Sparkle_Flash() // Firework_Rain
 
   SEGMENT.cycle_time__rate_ms =  FRAMETIME;
   SET_DIRECT_MODE();
+  return FRAMETIME;
   
 }
 static const char PM_EFFECT_CONFIG__FLASH_SPARKLE[] PROGMEM = "Sparkle Dark@!,!,,,,,,,Overlay;Bg,Fx;!;;m12=0";
@@ -5873,6 +5333,7 @@ uint16_t mAnimatorLight::EffectAnim__Sparkle_Hyper() // Firework_Rain
 
   SEGMENT.cycle_time__rate_ms =  FRAMETIME;
   SET_DIRECT_MODE();
+  return FRAMETIME;
   
 }
 static const char PM_EFFECT_CONFIG__HYPER_SPARKLE[] PROGMEM = "Sparkle+@!,!,,,,,,,Overlay;Bg,Fx;!;;m12=0";
@@ -6000,7 +5461,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Running(bool saw, bool dual)
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Running_Lights()
 {
-  EffectAnim__Base_Running(false);
+  return EffectAnim__Base_Running(false);
 }
 static const char PM_EFFECT_CONFIG__RUNNING_LIGHTS[] PROGMEM = "Running@!,Wave width;!,!;!";
 
@@ -6011,7 +5472,7 @@ static const char PM_EFFECT_CONFIG__RUNNING_LIGHTS[] PROGMEM = "Running@!,Wave w
  *********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Saw()
 {
-  EffectAnim__Base_Running(true);
+  return EffectAnim__Base_Running(true);
 }
 static const char PM_EFFECT_CONFIG__SAW[] PROGMEM = "Saw@!,Width;!,!;!";
 
@@ -6118,7 +5579,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Dissolve(uint32_t color)
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Dissolve()
 {
-  EffectAnim__Base_Dissolve(SEGMENT.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0));
+  return EffectAnim__Base_Dissolve(SEGMENT.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0));
 }
 static const char PM_EFFECT_CONFIG__DISSOLVE[] PROGMEM = "Dissolve@Repeat speed,Dissolve speed,,,,Random;!,!;!";
 
@@ -6129,7 +5590,7 @@ static const char PM_EFFECT_CONFIG__DISSOLVE[] PROGMEM = "Dissolve@Repeat speed,
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Dissolve_Random()
 {
-  EffectAnim__Base_Dissolve( SEGMENT.color_wheel(hw_random8()) );
+  return EffectAnim__Base_Dissolve( SEGMENT.color_wheel(hw_random8()) );
 }
 static const char PM_EFFECT_CONFIG__DISSOLVE_RANDOM[] PROGMEM = "Dissolve Random@Repeat speed,Dissolve speed;,!;!";
 
@@ -6183,6 +5644,7 @@ uint16_t mAnimatorLight::EffectAnim__Android()
 
   SEGMENT.cycle_time__rate_ms = 3 + ((8 * (uint32_t)(255 - SEGMENT.speed)) / SEGLEN);
   SET_DIRECT_MODE();
+  return FRAMETIME;
 
 }
 static const char PM_EFFECT_CONFIG__ANDROID[] PROGMEM = "Android@!,Width;!,!;!;;m12=1"; //vertical
@@ -6238,6 +5700,7 @@ uint16_t mAnimatorLight::EffectAnim__ColourFul()
   }
   
   DIRECT_MODE(FRAMETIME);
+  return FRAMETIME;
   
 }
 static const char PM_EFFECT_CONFIG__COLORFUL[] PROGMEM = "Colourful@!,Saturation;1,2,3;!";
@@ -6273,6 +5736,7 @@ uint16_t mAnimatorLight::EffectAnim__Traffic_Light()
   }
 
   DIRECT_MODE(FRAMETIME);
+  return FRAMETIME;
   
 }
 static const char PM_EFFECT_CONFIG__TRAFFIC_LIGHT[] PROGMEM = "Traffic Light@!,US style;,!;!";
@@ -6306,6 +5770,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Running(uint32_t color1, uint32_t colo
     SEGMENT.step = it;
   }
   DIRECT_MODE(FRAMETIME);
+  return FRAMETIME;
     
 }
 
@@ -6354,6 +5819,9 @@ uint16_t mAnimatorLight::EffectAnim__Running_Random()
 
   SEGMENT.aux1 = it;
   DIRECT_MODE(FRAMETIME);
+
+  
+  return FRAMETIME;
   
 }
 static const char PM_EFFECT_CONFIG__RUNNING_RANDOM[] PROGMEM = "Stream@!,Zone size;;!";
@@ -8280,7 +7748,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Blink()
 {
-  EffectAnim__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), false, true);  
+  return EffectAnim__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), false, true);  
 }
 static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM = "Blink@!,Duty cycle;!,!;!;01";
 
@@ -8291,7 +7759,7 @@ static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM = "Blink@!,Duty cycle;!,!;!;
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Blink_Rainbow()
 {
-  EffectAnim__Base_Blink( SEGMENT.color_wheel(SEGMENT.call & 0xFF), SEGCOLOR(1), false, false );  
+  return EffectAnim__Base_Blink( SEGMENT.color_wheel(SEGMENT.call & 0xFF), SEGCOLOR(1), false, false );  
 }
 static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
 
@@ -8302,7 +7770,7 @@ static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM = "Blink Rainbow@Fre
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Strobe()
 {
-  EffectAnim__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
+  return EffectAnim__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
 }
 static const char PM_EFFECT_CONFIG__STROBE[] PROGMEM = "Strobe@!;!,!;!;01";
 
@@ -8349,7 +7817,7 @@ static const char PM_EFFECT_CONFIG__MULTI_STROBE[] PROGMEM = "Strobe Multi@!,!;!
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Strobe_Rainbow()
 {
-  EffectAnim__Base_Blink( SEGMENT.color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), true, false);
+  return EffectAnim__Base_Blink( SEGMENT.color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), true, false);
 }
 static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM = "Strobe Rainbow@!;,!;!;01";
 
@@ -8829,7 +8297,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Scan(bool dual)
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Scan()
 {
-  EffectAnim__Base_Scan(false);
+  return EffectAnim__Base_Scan(false);
 }
 static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM = "Scan@!,# of dots,,,,,,,Overlay;!,!,!;!";
 
@@ -8840,7 +8308,7 @@ static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM = "Scan@!,# of dots,,,,,,,Ove
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Scan_Dual()
 {
-  EffectAnim__Base_Scan(true);
+  return EffectAnim__Base_Scan(true);
 }
 static const char PM_EFFECT_CONFIG__DUAL_SCAN[] PROGMEM = "Scan Dual@!,# of dots,,,,,,,Overlay;!,!,!;!";
 
@@ -8903,7 +8371,7 @@ static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM = "Scanner@!,Trail,
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Larson_Scanner_Dual(void){
   SEGMENT.check1 = true;
-  EffectAnim__Larson_Scanner();
+  return EffectAnim__Larson_Scanner();
 }
 static const char PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER[] PROGMEM = "Scanner Dual@!,Trail,Delay,,,Dual,Bi-delay;!,!,!;!;;m12=0,c1=0";
 

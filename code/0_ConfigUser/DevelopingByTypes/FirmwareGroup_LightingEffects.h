@@ -1304,7 +1304,7 @@
         0,8
       ],
       "ColourType":3,
-      "ColourPalette":"Orange & Teal",
+      "ColourPalette":"IceCream Floats",
       "SegColour0": {
         "Hue": 180,
         "Sat": 100,
@@ -1313,22 +1313,18 @@
         "CCT_TempPercentage":0
       },
       "SegColour1": {
-        "Hue": 25,
-        "Sat": 100,
-        "BrightnessRGB": 20,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100
+        "RGBWC":[0,0,0,0,0]
       },
       "Effects": {
         "Function":"Digital Text Clock",
         "Speed":6,
-        "Intensity":127,
+        "Intensity":136,
         "Decimate":0,
         "Grouping":1,
-        "RateMs": 5000,
-        "Custom1":163,
-        "Custom2":127,
-        "Custom3":15,
+        "RateMs": 1000,
+        "Custom1":1,
+        "Custom2":133,
+        "Custom3":19,
         "Check1":1,
         "Check2":0,
         "Check3":1
@@ -1336,7 +1332,7 @@
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
     },
-    "BrightnessRGB": 25,
+    "BrightnessRGB": 13,
     "BrightnessCCT": 0
   }
   )=====";
@@ -1378,8 +1374,8 @@
  
  */
 
-  #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE_DEFAULT 
-  #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE_DEFAULT 
+  // #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
   #define ENABLE_DEVFEATURE_LIGHT__CUSTOM_PIXEL_DATA
 
@@ -1425,22 +1421,20 @@
         "CCT_TempPercentage":0
       },
       "SegColour1": {
-        "Hue": 25,
+        "Hue": 270,
         "Sat": 100,
-        "BrightnessRGB": 20,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100
+        "BrightnessRGB": 5
       },
       "Effects": {
         "Function":"Scrolling Text with Baseline",
         "Speed":6,
-        "Intensity":127,
+        "Intensity":136,
         "Decimate":0,
         "Grouping":1,
         "RateMs": 5000,
-        "Custom1":163,
-        "Custom2":127,
-        "Custom3":15,
+        "Custom1":1,
+        "Custom2":133,
+        "Custom3":19,
         "Check1":1,
         "Check2":0,
         "Check3":1
@@ -1518,7 +1512,7 @@
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
     },
-    "BrightnessRGB": 50,
+    "BrightnessRGB": 20,
     "BrightnessCCT": 0
   }
   )=====";
@@ -1532,6 +1526,8 @@
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_EFFECTS_16SEGMENTS_ON_GRID
 
   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
     
   #define MAX_NUM_SEGMENTS 16
 
@@ -1843,7 +1839,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1998,7 +1994,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -2243,7 +2239,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -2433,7 +2429,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -2592,7 +2588,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -2748,7 +2744,7 @@
 //   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 //   #endif
 //   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+//   #define MQTT_HOST   "192.168.1.70"
 //     #define MQTT_PORT     1883
 
 //   /***********************************
@@ -3901,7 +3897,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -4061,7 +4057,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -4274,7 +4270,7 @@
 //   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
 //   #endif
 //   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+//   #define MQTT_HOST   "192.168.1.70"
 //     #define MQTT_PORT     1883
     
 //   #define SETTINGS_HOLDER 1239
@@ -4527,7 +4523,7 @@
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -4926,7 +4922,7 @@ Left to right
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -5301,7 +5297,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -5638,7 +5634,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP8266 NoWEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -5781,7 +5777,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP8266 NoWEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -5932,7 +5928,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP8266 NoWEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -6090,7 +6086,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP8266 NoWEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -6283,157 +6279,6 @@ typedef uint32_t ColourBaseType;
 //-----SORT ALL DEVICES BELOW THIS LINE ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //-----SORT ALL DEVICES BELOW THIS LINE ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-/**
- * @brief 
- * Primary testbed for all new lighting code on nodemcu
- */
-#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L3__ESP8266_1CH_RGB_100LEDS
-  #ifndef DEVICENAME_CTR
-    #define DEVICENAME_CTR          "testbed_default"
-  #endif
-  #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
-  #endif
-  #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
-  #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-    #define MQTT_PORT     1883
-
-
-  // #define NEOPIXEL_DISABLE_I2S0_PIXELBUS
-  // #define NEOPIXEL_DISABLE_I2S1_PIXELBUS
-
-  #define ESP8266
-  #undef  ESP32
-
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
-
-  /***********************************
-   * SECTION: System Configs
-  ************************************/    
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-    
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
-
-  // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
-
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/    
-
-  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023_ESP8266
-  
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":3"   
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
-  //   "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
-  // "}";
-
-
-  #define USE_LIGHTING_TEMPLATE
-  #define STRIP_SIZE_MAX 100
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":3,
-        "ColourOrder":"GRB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":100
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        100
-      ],
-      "ColourPalette":"Christmas Snowy 02",
-      "Effects": {
-        "Function":"Slow Glow",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1
-      },
-      "Transition": {
-        "TimeMs": 500,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 100
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 100
-  }
-  )=====";
-
-#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L3__ESP8266_1CH_RGB_100LEDS
-
-
 
 
 
@@ -6647,7 +6492,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_CTR          "testgroup_multipin_h801_rgbsplitcct"
   #define DEVICENAME_FRIENDLY_CTR "DevelopingByTypes H801 RGB Split CCT Channels"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -6964,7 +6809,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_CTR          "testgroup_multipin_h801_5white"
   #define DEVICENAME_FRIENDLY_CTR "DevelopingByTypes H801 Five White Channels"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -7153,7 +6998,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -7576,7 +7421,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -8083,7 +7928,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -8567,7 +8412,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
 
@@ -8711,7 +8556,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_CTR            "rgbclock_testclock_01"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
   #define DEVICENAME_ROOMHINT_CTR   "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
   
   /***********************************
@@ -8862,7 +8707,7 @@ typedef uint32_t ColourBaseType;
   #endif
   #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -9056,7 +8901,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_CTR          "testgroup_lighting_L13"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree"
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
     #error "here"
@@ -9321,7 +9166,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_CTR          "testgroup_lighting_L15"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree"
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -9493,7 +9338,7 @@ typedef uint32_t ColourBaseType;
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239

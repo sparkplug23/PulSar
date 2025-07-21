@@ -35,7 +35,6 @@
 // #define DEVICE_TESTBED__FLIGHT__LED_CONTROL_MAVLINK
 // #define DEVICE_DOLPHIN__FLIGHT__LED_CONTROL_MAVLINK
 // #define DEVICE_TESTBED__ULTRASONIC
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__70__ESP32_PARALLEL_4CH_TRIPLE_CONNECTOR_TESTER
 // #define DEVICE_LIGHTING__LIGHTING_EFFECTS__MATRIX_SEGMENT_TESTER
 // #define DEVICE_TESTBED__GPS_SERIAL
 // #define DEVICE_ACTIVE_DEVELOPMENT__SWITCHES_AND_BUTTONS
@@ -62,7 +61,7 @@
   #define DEVICENAME_CTR          "testbed_ultrasonic"
   #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Attic"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -172,8 +171,8 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR          "desk_sensor"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
+  // #define MQTT_HOST   "192.168.1.70" // primary
+  #define MQTT_HOST   "192.168.1.70" // Auto as temporary IP
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1241
@@ -904,8 +903,8 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR          "testbed_mavlink_led"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
+  // #define MQTT_HOST   "192.168.1.70" // primary
+  #define MQTT_HOST   "192.168.1.70" // Auto as temporary IP
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -1512,8 +1511,8 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR          "flight_mavlink_led"
   #define DEVICENAME_FRIENDLY_CTR "MAVLink Dolphin Lighting"
   #define DEVICENAME_ROOMHINT_CTR "Dolphin"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
+  // #define MQTT_HOST   "192.168.1.70" // primary
+  #define MQTT_HOST   "192.168.1.70" // Auto as temporary IP
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -2768,7 +2767,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR          "desksensor"
   #define DEVICENAME_FRIENDLY_CTR "Desk Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define MQTT_PORT     1883
 
   /***********************************
@@ -3954,7 +3953,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR          "testbed_gps_serial"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   
   /***********************************
@@ -4085,7 +4084,7 @@ new 26GHz radar sensor
 //   //   #define USE_MODULE_NETWORK_WIFI
 //   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
 //   //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-//   //   #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+//   //   #define MQTT_HOST       MQTT_HOST
 //   //   #define MQTT_PORT     1883
 //   // #endif
 //   // #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
@@ -4431,8 +4430,8 @@ new 26GHz radar sensor
 //   #define DEVICENAME_CTR          "testbed_ledmatrix"
 //   #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
 //   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-//   // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // primary
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Auto as temporary IP
+//   // #define MQTT_HOST   "192.168.1.70" // primary
+//   #define MQTT_HOST   "192.168.1.70" // Auto as temporary IP
 //     #define MQTT_PORT     1883
     
 //   #define SETTINGS_HOLDER 1239
@@ -4852,7 +4851,7 @@ new 26GHz radar sensor
 //     #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 //   #endif
 //   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+//   #define MQTT_HOST   "192.168.1.70"
 //     #define MQTT_PORT     1883
     
 //   #define SETTINGS_HOLDER 1239
@@ -5010,7 +5009,7 @@ new 26GHz radar sensor
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -5181,7 +5180,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR            "nextion_desk"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
 
   /***********************************
@@ -5297,7 +5296,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR            "nextion_kitchen"
   #define DEVICENAME_FRIENDLY_CTR   "Installed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Installed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   #define SUBDEVICE_TESTBED__NEXTION_DISPLAY__KITCHEN_7INCH
 #endif
@@ -5305,7 +5304,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR            "nextion_kitchen_testbed"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   #define SUBDEVICE_TESTBED__NEXTION_DISPLAY__KITCHEN_7INCH
 #endif
@@ -5462,7 +5461,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR            "nextion_treadmill_01"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
 
   /***********************************
@@ -5582,7 +5581,7 @@ new 26GHz radar sensor
   #define DEVICENAME_CTR            "nextion_treadmill_02"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
 
   /***********************************
@@ -5695,264 +5694,6 @@ new 26GHz radar sensor
 #endif
 
 
-// /**
-//  * @brief 
-//  * Primary testbed for all new lighting code on nodemcu
-//  */
-// #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__70__ESP32_PARALLEL_4CH_TRIPLE_CONNECTOR_TESTER
-//   #ifndef DEVICENAME_CTR
-//   #define DEVICENAME_CTR          "testbed_default"
-//   #endif
-//   #ifndef DEVICENAME_FRIENDLY_CTR
-//   #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
-//   #endif
-//   #ifndef DEVICENAME_DESCRIPTION_CTR
-//   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
-//   #endif
-//   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-//     #define MQTT_PORT     1883
-
-// // #define ENABLE_DEBUG_LINE_HERE
-
-//   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-//   #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-//   #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-//   #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
-//   #define USE_MODULE_CORE_FILESYSTEM
-//   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
-//   #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
-//   #define ENABLE_DEVFEATURE_MQTT__ESTIMATED_INCOMING_COMMANDS_AND_REPORT_ISSERVICED
-
-//   /***********************************
-//    * SECTION: System Debug Options
-//   ************************************/    
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-  
-//   // #define ENABLE_ADVANCED_DEBUGGING
-//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-//   // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-//   // #define ENABLE_DEBUG_LINE_HERE_TRACE
-//   // #define ENABLE_DEBUG_LINE_HERE
-//   // #define ENABLE_DEBUG_LINE_HERE2
-
-//   // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-//   // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-//   // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
-
-//   // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
-
-//   /***********************************
-//    * SECTION: Storage Configs
-//   ************************************/  
- 
-//   #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-
-//   /**
-//    * For debugging and short term I may want to store everything as JSON, so I can view the data?
-//    * Longer term, a mixture of JSON/Binary for space.
-//    * Options should just be ifdef to switch between methods. 
-//   */
-//   // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
-//   // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
-//   #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
-//   // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
-//   // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
-//   // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
-//   // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
-//   // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
-//   // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
-//   // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
-  
-
-//   /***********************************
-//    * SECTION: System Configs
-//   ************************************/     
-
-//   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-//   // #define USE_MODULE_CORE_FILESYSTEM
-//   //   #define WLED_ENABLE_FS_EDITOR
-//   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-//   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-//   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
-
-//   // Settings saving and loading
-//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-//   //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
-//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-//   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-//   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
-
-//   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-//   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-
-//   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
-
-//   /***********************************
-//    * SECTION: Network Configs
-//   ************************************/    
-
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
-
-//   /***********************************
-//    * SECTION: Sensor Configs
-//   ************************************/  
-
-//   /***********************************
-//    * SECTION: Display Configs
-//   ************************************/  
-
-//   /***********************************
-//    * SECTION: Driver Configs
-//   ************************************/  
-
-//   /***********************************
-//    * SECTION: Lighting Configs
-//   ************************************/  
- 
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-
-//     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-//     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
-//     #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-//     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__LOG_MESSAGES
-
-//     // #undef ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-//     // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
-
-//     #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
-
-
-//   #define USE_MODULE_TEMPLATE
-//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-//   "{"
-//     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_GPIO_FUNCTION "\":{},"
-//     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-//     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-//   "}";
-
-//   #define USE_LIGHTING_TEMPLATE
-
-//   #define ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__TESTCASE_SINGLE_OUTPUT
-
-//   #ifdef ENABLE_DEVFEATURE__LIGHTING_TEMPLATE__TESTCASE_SINGLE_OUTPUT
-  
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
-//   R"=====(
-//   {
-//     "BusConfig":[
-//       {
-//         "Pin":2,
-//         "ColourOrder":"RGB",
-//         "BusType":"WS2812_RGB",
-//         "Start":0,
-//         "Length":1000
-//       }
-//     ],
-//     "Segment0": {
-//       "PixelRange": [
-//         0,
-//         1000
-//       ],
-//       "ColourPalette":"RGPBO",
-//       "Effects": {
-//         "Function":"Static",
-//         "Speed":127,
-//         "Intensity":127,
-//         "Grouping":10,
-//         "RateMs": 1000
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "BrightnessRGB": 100,
-//     "BrightnessCCT": 0
-//   }
-//   )=====";
-
-//   #else
-
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "BusConfig":[
-//       {
-//         "Pin":2,
-//         "ColourOrder":"BGR",
-//         "BusType":"WS2812_RGB",
-//         "Start":0,
-//         "Length":10
-//       },
-//       {
-//         "Pin":4,
-//         "ColourOrder":"BGR",
-//         "BusType":"WS2812_RGB",
-//         "Start":10,
-//         "Length":10
-//       },
-//       {
-//         "Pin":18,
-//         "ColourOrder":"BGR",
-//         "BusType":"WS2812_RGB",
-//         "Start":20,
-//         "Length":10
-//       },
-//       {
-//         "Pin":19,
-//         "ColourOrder":"BGR",
-//         "BusType":"WS2812_RGB",
-//         "Start":30,
-//         "Length":10
-//       }
-//     ],
-//     "Segment0": {
-//       "PixelRange": [
-//         0,
-//         40
-//       ],
-//       "ColourPalette":"Snowy 02",
-//       "Effects": {
-//         "Function":"Slow Glow",
-//         "Speed":127,
-//         "Intensity":127,
-//         "Grouping":1
-//       },
-//       "Transition": {
-//         "TimeMs": 500,
-//         "RateMs": 1000
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "BrightnessRGB": 100,
-//     "BrightnessCCT": 0
-//   }
-//   )=====";
-  
-//   #endif // 
-  
-// #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L2__ESP32_I2S_PARALLEL_4CH
-
-
-
-
-
-
 /**
  * @brief 
  * To test the ensuite code
@@ -5968,7 +5709,7 @@ new 26GHz radar sensor
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -6420,8 +6161,8 @@ new 26GHz radar sensor
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-   #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define MQTT_HOST   "192.168.3.70"
+   #define MQTT_HOST     MQTT_HOST
    #define MQTT_PORT     1883
   
 
@@ -6773,8 +6514,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-   #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define MQTT_HOST   "192.168.3.70"
+   #define MQTT_HOST     MQTT_HOST
    #define MQTT_PORT     1883
   
 
@@ -7169,8 +6910,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-  #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define MQTT_HOST   "192.168.3.70"
+  #define MQTT_HOST     MQTT_HOST
   #define MQTT_PORT     1883
   
 /***********************************
@@ -7351,8 +7092,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-   #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define MQTT_HOST   "192.168.3.70"
+   #define MQTT_HOST     MQTT_HOST
    #define MQTT_PORT     1883
   
 

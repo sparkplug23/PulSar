@@ -484,7 +484,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
     buffer[pos++] = r;//tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
     buffer[pos++] = g;//tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
     buffer[pos++] = b;//tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
-    Serial.println(r);
+    // Serial.println(r);
   }
 
 
@@ -1309,6 +1309,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   LoadPalette_AsyncLock = true; // take control of the lock
   #endif
 
+  DEBUG_LINE_HERE_TRACE
   uint8_t segment_index = 0;
 
   DEBUG_PRINT_F("Palette ID: %d", palette_id);
@@ -1324,8 +1325,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container = palette_container;
   }
 
+  DEBUG_LINE_HERE_TRACE
 
   palette_container->loaded_palette_id = palette_id;
+  DEBUG_LINE_HERE_TRACE
 
   if(
     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
@@ -1405,7 +1408,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   if(
     ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))     
   ){      
-  // DEBUG_LINE_HERE
+    DEBUG_LINE_HERE_TRACE
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
     // ALOG_HGL(PSTR("ERROR HERE palette_id_adj %d"),palette_id_adj); 
 
@@ -1462,17 +1465,19 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   // Only some dynamic needs loading
   // The colours should have been placed into the dynamic_palette memory, then here it gets copied/loaded again
   if(
-    ((palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID))     
+    ((palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID))     
   ){      
-  // DEBUG_LINE_HERE
-    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
+    DEBUG_LINE_HERE_TRACE
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
     
-    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-    ALOG_HGL(PSTR("LOADING PALETTELIST_DYNAMIC palette_id_adj %d %d %d"),palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID); 
-    #endif
+    // #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+    ALOG_HGL(PSTR("LOADING PALETTELIST_DYNAMIC palette_id_adj %d %d %d"),palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START); 
+    // #endif
     
+  DEBUG_LINE_HERE_TRACE
     mPalette::PALETTE_DATA *ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
     _palette_container->pData = ptr->data;
+    DEBUG_LINE_HERE_TRACE
     
   }else
   if(
@@ -2035,6 +2040,7 @@ void mAnimatorLight::SubTask_Effects()
       Serial.println("Pre Effect Call -------------------------------------------------------------");
       #endif
       
+      // if(seg.effect_id<90)//77
       frameDelay = (this->*effects.function[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
       
       #ifdef ENABLE_EFFECTS_TIMING_DEBUG_GPIO
@@ -2212,10 +2218,10 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
       // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
       return palette_colour_count;
     }
-    
-    // ALOG_INF(PSTR("============  pal.data_length/encoded_colour_width %d %d"),  pal.data_length, encoded_colour_width);
   
     palette_colour_count = pal.data.size()/encoded_colour_width; 
+    
+    // ALOG_INF(PSTR("============  data_length/encoded_width %d %d"),  pal.data.size(), encoded_colour_width);
  
   }
   else
@@ -2244,7 +2250,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
   }
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
   ){  
     ALOG_INF(PSTR("Temporary fix, needs its own palette count"));
     palette_colour_count = 1;    
@@ -2255,17 +2261,17 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     switch(palette_id)
     {
       default:
-      case mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID:
-        palette_colour_count = 1;
-      break;
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
         palette_colour_count = 1;
       break;
-      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
-        palette_colour_count = 16;
-     break;
-      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID:
-        palette_colour_count = sizeof(PM_PALETTE_DYNAMIC__SOLAR_SKY_01__DATA)/6;
+      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID:
+        palette_colour_count = 1;
+      break;
+    //   case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
+    //     palette_colour_count = 16;
+    //  break;
+      case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID:
+        palette_colour_count = sizeof(PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__DATA)/6;
       break;
       // case mPalette::PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
       //   // if(SEGMENT.palette_container->pData.size())
@@ -2335,9 +2341,9 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
 
 
       // }break;
-      case mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID:
-        palette_colour_count = 1;
-      break;
+      // case mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID:
+      //   palette_colour_count = 1;
+      // break;
     }
   }
   else
@@ -5845,6 +5851,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
       uint8_t mcol
 ){
   
+  DEBUG_LINE_HERE_TRACE
   if(palette_id != palette_container->loaded_palette_id)
   {
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
@@ -5871,6 +5878,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
   ){
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
   }
+  DEBUG_LINE_HERE_TRACE
 
   uint32_t colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
     palette_id,
@@ -5953,6 +5961,7 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
     ((palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)) ||
     ((palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
   ) {
+    DEBUG_LINE_HERE_TRACE
     // These palettes do not require loading into RAM. Directly call GetColourFromPreloadedPaletteBuffer_RGBWW
     return mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
       palette_id,
@@ -5970,7 +5979,9 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
    * @brief Load is required for other palette types, so we call LoadPalette
    */
   mPaletteLoaded palette_container_temp = mPaletteLoaded();
+  DEBUG_LINE_HERE_TRACE
   SEGMENT.LoadPalette(palette_id, &palette_container_temp);
+  DEBUG_LINE_HERE_TRACE
   
   return mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
     palette_id,

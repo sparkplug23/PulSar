@@ -173,7 +173,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -319,7 +319,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -584,8 +584,8 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"  //SLS
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.106" // Billie Left
+  // #define MQTT_HOST   "192.168.50.206"  //SLS
+  #define MQTT_HOST   "192.168.50.106" // Billie Left
     #define MQTT_PORT     1883
 
   /***********************************
@@ -742,7 +742,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -933,8 +933,8 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"  //SLS
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.106" // Billie Left
+  // #define MQTT_HOST   "192.168.50.206"  //SLS
+  #define MQTT_HOST   "192.168.50.106" // Billie Left
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1083,8 +1083,8 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"  //SLS
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.106" // Billie Left
+  // #define MQTT_HOST   "192.168.50.206"  //SLS
+  #define MQTT_HOST   "192.168.50.106" // Billie Left
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1279,7 +1279,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1818,7 +1818,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif 
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT     1883
     
   /***********************************
@@ -2076,7 +2076,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "colorado"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -2524,7 +2524,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_CTR                            "testbed_camera"
   #define DEVICENAME_FRIENDLY_CTR                   "testbed_camera"
   #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -2567,7 +2567,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_CTR                            "colorado_camera_01"
   #define DEVICENAME_FRIENDLY_CTR                   "colorado_camera_01"
   #define DEVICENAME_ROOMHINT_CTR                   "Colorado"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.50.206"
+  #define MQTT_HOST   "192.168.50.206"
     #define MQTT_PORT 1883
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER

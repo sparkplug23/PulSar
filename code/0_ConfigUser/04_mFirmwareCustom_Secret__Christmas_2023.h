@@ -40,7 +40,7 @@
   #define DEVICENAME_CTR          "xmas_tree_water"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Tree Water"
   #define DEVICENAME_ROOMHINT_CTR "Living Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -161,7 +161,7 @@
     #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -376,7 +376,7 @@
     #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Inside|Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -630,7 +630,7 @@
     #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -831,7 +831,7 @@
   #define DEVICENAME_CTR          "xmas23_snowtree"
   #define DEVICENAME_FRIENDLY_CTR "xmas23_snowtree"
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -1159,7 +1159,7 @@
     #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   // #endif
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1239
@@ -1543,7 +1543,7 @@
   #define DEVICENAME_CTR          "xmas32_giveaway1"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree"
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     #define SETTINGS_HOLDER 1239
 
@@ -1733,7 +1733,7 @@
   #define DEVICENAME_CTR          "xmas32_redgive"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Red Give"
   #define DEVICENAME_ROOMHINT_CTR "XMAS"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     #define SETTINGS_HOLDER 1239
 
@@ -1995,7 +1995,7 @@
   #define DEVICENAME_CTR          "xmas32_redboard_tester"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Red Give"
   #define DEVICENAME_ROOMHINT_CTR "XMAS"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     #define SETTINGS_HOLDER 1239
 
@@ -2189,7 +2189,7 @@
   #define DEVICENAME_CTR          "xmas32_bauble4pin"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree"
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     #define SETTINGS_HOLDER 1239
 
@@ -2375,7 +2375,7 @@
   #define DEVICENAME_CTR          "xmas32_utility_shelf"
   #define DEVICENAME_FRIENDLY_CTR "xmas32_utility_shelf"
   #define DEVICENAME_ROOMHINT_CTR "XMAS|Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     #define SETTINGS_HOLDER 1239
 
@@ -2614,7 +2614,7 @@
     #define DEVICENAME_ROOMHINT_CTR "template"
   #endif
 
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     #define SETTINGS_HOLDER 1239
 

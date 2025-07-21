@@ -41,7 +41,7 @@
   #define DEVICENAME_CTR          "hvac_oil_radiator"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Oil Radiator with Energy Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -184,7 +184,7 @@
   #define DEVICENAME_CTR          "hvac_oil_radiator"
   #define DEVICENAME_FRIENDLY_CTR "hvac_oil_radiator #1"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   /***********************************

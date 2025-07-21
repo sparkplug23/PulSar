@@ -41,7 +41,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
 
 
@@ -208,7 +208,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   //   #define USE_MODULE_NETWORK_WIFI
   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
   //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-  //   #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  //   #define MQTT_HOST       MQTT_HOST
   //   #define MQTT_PORT     1883
   // #endif
   // #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
@@ -449,7 +449,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //   #define DEVICENAME_CTR          "cellular_locator_01"
 //   #define DEVICENAME_FRIENDLY_CTR "Selfcontained tracker with SIM staying" // Antennas covers SIM, but flip the board later
 //   #define DEVICENAME_ROOMHINT_CTR "testbed"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+//   #define MQTT_HOST   "192.168.1.70"
 //   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
 //   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
 //   #define UART_CELLULAR_BAUD   921600
@@ -468,7 +468,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //   #define DEVICENAME_CTR          "cellular_locator_02"
 //   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
 //   #define DEVICENAME_ROOMHINT_CTR "roaming"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+//   #define MQTT_HOST   "192.168.1.70"
 //   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
 //   #define SIM_CARD_PHONE_NUMBER "07518522105"
 //   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
@@ -573,7 +573,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //     #define USE_MODULE_NETWORK_WIFI
 //     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
 //     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-//     #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+//     #define MQTT_HOST       MQTT_HOST
 //     #define MQTT_PORT     1883
 //   #endif
 
@@ -651,7 +651,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "testbed_sim7000g"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -796,7 +796,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "testbed_sim7000g_v2"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -942,7 +942,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
@@ -1091,7 +1091,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1242,7 +1242,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "mavlink_cellular_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // #define ENABLE_ADVANCED_DEBUGGING
@@ -1318,7 +1318,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
 
@@ -1333,7 +1333,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
 
   #endif
@@ -1454,7 +1454,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_01"
   #define DEVICENAME_FRIENDLY_CTR "Selfcontained tracker with SIM staying" // Antennas covers SIM, but flip the board later
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
   #define UART_CELLULAR_BAUD   921600
@@ -1468,7 +1468,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "MAVlink ^Pin "
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
   #define UART_CELLULAR_BAUD   921600
@@ -1480,7 +1480,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "Plane - Optional LIPO for weight on Plane"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
   #define SIM_CARD_PHONE_NUMBER "07518522105"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
@@ -1499,7 +1499,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_04"
   #define DEVICENAME_FRIENDLY_CTR "Tester - Run MQTT over WiFi without LTE connected"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
   #define USE_GROUPFEATURE__MQTT_AS_WIFI
   #define UART_CELLULAR_BAUD   115200
@@ -1599,7 +1599,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif
 
@@ -1676,7 +1676,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR                                "cellular_locator_01"
   #define DEVICENAME_FRIENDLY_CTR                       "Selfcontained tracker with SIM staying" // Antennas covers SIM, but flip the board later
   #define DEVICENAME_ROOMHINT_CTR                       "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       "192.168.1.70"
+  #define MQTT_HOST       "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG  "CellularLocator01"
   #define SIM_CARD_PHONE_NUMBER "07708542353" // spark28007
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
@@ -1700,7 +1700,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
   #define SIM_CARD_PHONE_NUMBER "07518522105"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
@@ -1725,7 +1725,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "cellular_locator_02"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
   #define SIM_CARD_PHONE_NUMBER "07518522105"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
@@ -1869,7 +1869,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   //   #define USE_MODULE_NETWORK_WIFI
   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
   //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-  //   #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  //   #define MQTT_HOST       MQTT_HOST
   //   #define MQTT_PORT     1883
   // #endif
   // #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
@@ -2032,7 +2032,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_CTR          "testbed_sim800l"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION

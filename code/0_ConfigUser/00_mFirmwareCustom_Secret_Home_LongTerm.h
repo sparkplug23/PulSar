@@ -245,55 +245,55 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 01
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 02
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP1
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 03
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP2
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 04
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__05
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 05
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__06
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 06
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__07
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 07
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__08
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 08
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__09
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 09
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
@@ -303,7 +303,7 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 12
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"  // "|" is for multinames for rooms while "Temporary_" is devices that will leave with me 
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__E2NSUITE_CEILING_FAN
   #define DEVICE_SOCKET_NUMBERED
@@ -317,13 +317,13 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 15
   #define DEVICENAME_ROOMHINT_CTR "Hallway"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__CANDLE_WARMER
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 16
   #define DEVICENAME_ROOMHINT_CTR "Hallway"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
@@ -341,55 +341,55 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 20
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__21
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 21
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__22
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 22
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__23
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 23
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__24
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 24
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__25
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 25
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__26
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 26
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__27
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 27
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__28
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 28
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 
 /**
@@ -400,7 +400,7 @@ Bathroom
   #define DEVICENAME_CTR          "cooker_extractor_fan"
   #define DEVICENAME_FRIENDLY_CTR "Cooker Extractor Fan"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 
 
@@ -735,7 +735,7 @@ Bathroom
   #define DEVICENAME_CTR          "dimmer_hallway_lamp"
   #define DEVICENAME_FRIENDLY_CTR "Dimmer Hallway Lamp"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 #endif
 #ifdef DEVICE_DEFAULT_SHELLY_DIMMER__LIVINGROOM_LAMP1
   #define DEVICE_SOCKET_NUMBERED
@@ -746,7 +746,7 @@ Bathroom
   #define DEVICENAME_CTR          "dimmer_bedroom_globe"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Bedroom Globe"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   // #define USE_HARDWARE_DEFAULT_RULES_SHELLY_DIMMER_BOTH_INPUTS_TOGGLE_OUTPUT // Going to install 2gang so I can test this going forward
 #endif
 #ifdef DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_CEILING
@@ -893,7 +893,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight1"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 1 [Main Kitchen]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define USE_MODULE_CORE_RULES
 
@@ -994,7 +994,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight2"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 2 [Table/Window]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
   /*
@@ -1122,7 +1122,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight3"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen 3 VirtualSwt"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   //#define FORCE_TEMPLATE_LOADING
   #define USE_MODULE_CORE_RULES
@@ -1196,7 +1196,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight4"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light Cupboard [Under|Downlight]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     
   /*
     Method should only activate if boot loop happens 10 times
@@ -1317,7 +1317,7 @@ Bathroom
   #define DEVICENAME_CTR            "kitchenpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
   #define DEVICENAME_ROOMHINT_CTR   "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1414,7 +1414,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbshelf"
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define MQTT_PORT     1883
     
   #define SETTINGS_HOLDER 1240
@@ -1705,7 +1705,7 @@ Bathroom
 //   #define DEVICENAME_CTR          "rgbshelf"
 //   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
 //   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-//   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+//   #define MQTT_HOST   "192.168.1.70"
 
 //   // #define DISABLE_NETWORK
 
@@ -1795,7 +1795,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbcooker"
   #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -1884,7 +1884,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchensensor"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1967,7 +1967,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbfridge"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fridge H801"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -2034,7 +2034,7 @@ Bathroom
   #define DEVICENAME_CTR          "utility_switch_i4"
   #define DEVICENAME_FRIENDLY_CTR "Utility WallSwitch I4"
   #define DEVICENAME_ROOMHINT_CTR "Utility"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2058,7 +2058,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbutility"
   #define DEVICENAME_FRIENDLY_CTR "RGB Utility H801"
   #define DEVICENAME_ROOMHINT_CTR "Utility"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -2143,7 +2143,7 @@ Bathroom
   #define DEVICENAME_CTR          "utilitysensor"
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Utility"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -2290,7 +2290,7 @@ Bathroom
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
 
@@ -2734,7 +2734,7 @@ Bathroom
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
     
 
@@ -2942,7 +2942,7 @@ Bathroom
   #define DEVICENAME_CTR          "atticsensor"
   #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Attic"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -3040,7 +3040,7 @@ Bathroom
   #define DEVICENAME_CTR          "livingroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Living Room Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -3177,7 +3177,7 @@ Bathroom
   #define DEVICENAME_CTR          "radiatorfan"
   #define DEVICENAME_FRIENDLY_CTR "Radiator Fan"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -3390,7 +3390,7 @@ Bathroom
   #define DEVICENAME_CTR          "heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating 2023#2"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -3656,7 +3656,7 @@ Bathroom
   #define DEVICENAME_CTR          "sidedoorlight"
   #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Light"
   #define DEVICENAME_ROOMHINT_CTR   "Outdoor|Driveway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -3739,7 +3739,7 @@ Bathroom
   #define DEVICENAME_CTR          "gazebo_sonoff_4chpro"
   #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
   #define DEVICENAME_ROOMHINT_CTR  "Gazebo"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define USE_MODULE_CORE_RULES
   
@@ -3785,7 +3785,7 @@ Bathroom
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
   /***********************************
@@ -4304,7 +4304,7 @@ Bathroom
   #define DEVICENAME_CTR          "garage_inside_spotlight"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
   #define DEVICENAME_ROOMHINT_CTR "Garage"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define DISABLE_SERIAL_LOGGING
   
@@ -4389,7 +4389,7 @@ Bathroom
 #ifdef DEVICE_GARAGE_OUTSIDE_433MHZ_TRANSCEIVER
   #define DEVICENAME_CTR          "garage_transceiver_433mhz"
   #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   #define DEVICENAME_ROOMHINT_CTR "Example"
 
   #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
@@ -4422,7 +4422,7 @@ Bathroom
   #define DEVICENAME_CTR          "oiltank"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
@@ -4497,7 +4497,7 @@ Bathroom
   #define DEVICENAME_CTR          "oilfurnace"
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
   #define DEVICENAME_ROOMHINT_CTR "Garage"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -4643,7 +4643,7 @@ Bathroom
   #define DEVICENAME_CTR          "garagelight"
   #define DEVICENAME_FRIENDLY_CTR "Garage Garden Lights"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -4951,7 +4951,7 @@ Bathroom
   #define DEVICENAME_CTR          "shellydimmer_tvroom"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer TV Room"
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       "192.168.1.70"
+  #define MQTT_HOST       "192.168.1.70"
   
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -5040,7 +5040,7 @@ Bathroom
   #define DEVICENAME_CTR          "ceiling_masterbedroom_light"//"shellydimmer_masterbedroom"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer MBed Room"
   #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -5121,7 +5121,7 @@ Bathroom
   #define DEVICENAME_CTR          "dimmer_masterbedroom_lamp1"
   #define DEVICENAME_FRIENDLY_CTR "Dimmer Masterbedroom Lamp1"
   #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -5233,7 +5233,7 @@ Bathroom
   #define DEVICENAME_CTR          "ensuitesensor"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -5335,7 +5335,7 @@ Bathroom
   #define DEVICENAME_CTR          "ceiling_ensuite_light"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Ensuite"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
       
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -5418,9 +5418,9 @@ Bathroom
   #define DEVICENAME_CTR          "ensuite_switch"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Switch: Light and Fan"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70" // Whitehall
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70" // Meadows for testing
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.1.70" // Whitehall
+  // #define MQTT_HOST   "192.168.3.70" // Meadows for testing
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
 
   #define ESP8266
@@ -5558,7 +5558,7 @@ Bathroom
   #define DEVICENAME_CTR          "ensuite_extractor_fan"
   #define DEVICENAME_FRIENDLY_CTR "Shelly1 Ensuite Extractor Fan"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -5686,7 +5686,7 @@ Bathroom
   #define DEVICENAME_CTR          "bathroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bathroom Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bathroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -5842,7 +5842,7 @@ Bathroom
   #define DEVICENAME_CTR          "ceiling_landing_light"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define DISABLE_SERIAL_LOGGING
   
@@ -6020,7 +6020,7 @@ Bathroom
   #define DEVICENAME_CTR          "immersion_controller"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Heater Panel"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -6437,7 +6437,7 @@ Bathroom
   #define DEVICENAME_CTR          "bedroom_ceilingfan"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Ceiling Fan"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
   #define USE_MODULE_CORE_RULES
   
@@ -6465,7 +6465,7 @@ Bathroom
   #define DEVICENAME_CTR          "dimmer_bedroom_ceiling"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       "192.168.1.70"
+  #define MQTT_HOST       "192.168.1.70"
   
   #define DISABLE_SERIAL_LOGGING
   
@@ -6583,7 +6583,7 @@ Bathroom
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -6739,9 +6739,9 @@ HVAC controllers here
   #define DEVICENAME_CTR          "airpurifier"
   #define DEVICENAME_FRIENDLY_CTR "Air Purifier 1"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
   
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -6787,8 +6787,8 @@ HVAC controllers here
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.3.70"
-    #define MQTT_HOST     D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -6842,7 +6842,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan2"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 2"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       "192.168.1.70"
+  #define MQTT_HOST       "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -6876,7 +6876,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan3"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 3"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -6914,7 +6914,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan4"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 4"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -6951,7 +6951,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan5"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 5"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -7001,7 +7001,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan6"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 6"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
