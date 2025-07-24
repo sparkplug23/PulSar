@@ -385,7 +385,7 @@ typedef enum {
 #define D_RGB_RED_PASTEL_1      236,19,19,
 #define D_RGB_RED_PASTEL_2      255,6,6,
 #define D_RGB_RED_ALT_1         255,5,5,
-#define D_RGB_RED_DARKER_4      25, 2, 0
+#define D_RGB_RED_DARKER_4      25, 2, 0,
 // Orange
 #define D_RGB_ORANGE_FULL    255,60,0,  
 #define D_RGB_ORANGE_WARM_3     255,30,0, 
@@ -593,7 +593,7 @@ DEF_PGM_UINT8(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_10__DATA)
 
 
 #ifndef D_PALETTE_OCEAN_01_NAME_CTR
-#define D_PALETTE_OCEAN_01_NAME_CTR        "Ocean 01"   
+#define D_PALETTE_OCEAN_01_NAME_CTR        "Ocean"   
 #endif
 #define D_PALETTE_OCEAN_01_ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
 DEF_PGM_UINT8(PM_PALETTE_OCEAN_01__DATA)
@@ -610,17 +610,63 @@ DEF_PGM_UINT8(PM_PALETTE_OCEAN_01__DATA)
 #define D_PALETTE_RAINBOW_ENCODING                (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
 DEF_PGM_UINT8(PM_PALETTE_RAINBOW__DATA)
 {
-  // to make it visually nicer, I will compress the blue region
-  0,    D_RGB_RED_FULL //0
-  14,   RGB_LIGHTORANGE //20
-  35,   RGB_YELLOW //50
-  85,   RGB_GREEN //120
-  127,  RGB_CYAN //180
-  170,  RGB_BLUE //240
-  213,  RGB_PURPLE //300
-  241,  RGB_PINK //340
-  255,  D_RGB_RED_FULL //0       // When handled to "wrap" correctly, there will be no need to hold the first as last
+   0,   255,   0,   0,   // Red
+  17,   255,  30,   0,   //
+  34,   255, 106,   0,   // Orange
+  51,   255, 213,   0,   //
+  68,   191, 255,   0,   // Yellow-green
+  85,    85, 255,   0,   // Green
+  102,     0, 255,  64,   // Green-cyan
+  119,     0, 255, 170,   // Cyan
+  136,     0, 191, 255,   // Cyan-blue
+  153,     0,  85, 255,   // Blue
+  170,    64,   0, 255,   // Indigo
+  187,   170,   0, 255,   // Violet
+  204,   255,   0, 191,   // Purple-pink
+  221,   255,   0, 106,   // Magenta-pink
+  238,   255,   0,  64,   // Pink-red
+  255,   255,   0,  43    // Hot pink
 };
+
+
+#ifndef D_PALETTE_RAINBOW_WARM_NAME_CTR
+#define D_PALETTE_RAINBOW_WARM_NAME_CTR        "Rainbow Warm"   
+#endif
+#define        D_PALETTE_RAINBOW_WARM_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
+DEF_PGM_UINT8(PM_PALETTE_RAINBOW_WARM__DATA)
+{
+
+    // Red → Orange (0–40)
+      0, 255,   0,   0,     // Red
+      6, 255,  20,   0,
+     12, 255,  40,   0,
+     18, 255,  60,   0,
+     24, 255,  80,   0,
+     32, 255, 100,   0,
+     40, 255, 120,   0,
+
+
+    // Compressed green → cyan → blue (115–135)
+    110, 255, 200,   0,      // Yellow (sharp transition)
+    120,  64, 255,   0,     // Green
+    // 125,   0, 255,  85,     // Green-cyan
+    127,   0, 255, 255,     // Cyan
+    // 130,   0, 128, 255,     // Cyan-blue
+    135,   0,  64, 255,     // Blue
+
+    // Magenta and Pinks (160–255)
+    145,  85,   0, 255,     // Indigo
+    // 180, 170,   0, 255,     // Violet
+    180, 255,   0, 255,     // Magenta
+    220, 255,   0, 180,     // Purple-pink
+    235, 255,   0, 128,     // Pink
+    // 245, 255,   0,  96,     // Light pink
+    // 252, 255,   0,  64,     // Deep rose
+    255, 255,   0,  32      // Hot pink
+};
+
+  
+
 
 #ifndef D_PALETTE_RAINBOW_INVERTED_NAME_CTR
 #define D_PALETTE_RAINBOW_INVERTED_NAME_CTR        "Rainbow Inverted"   
@@ -628,15 +674,22 @@ DEF_PGM_UINT8(PM_PALETTE_RAINBOW__DATA)
 #define D_PALETTE_RAINBOW_INVERTED_ENCODING                (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
 DEF_PGM_UINT8(PM_PALETTE_RAINBOW_INVERTED__DATA)
 {
-  0,   RGB_BLUE //0
-  14,  RGB_PURPLE //20
-  35,  RGB_PINK //50
-  85,  RGB_RED //120
-  127, RGB_LIGHTORANGE //180
-  170, RGB_YELLOW //240
-  213, RGB_GREEN //300
-  241, RGB_CYAN //340
-  255, RGB_BLUE //0
+  0,     0, 191, 255,   // Cyan-blue (was index 136 → (136 + 127) % 256 = 7)
+  17,     0,  85, 255,   // Blue
+  34,    64,   0, 255,   // Indigo
+  51,   170,   0, 255,   // Violet
+  68,   255,   0, 191,   // Purple-pink
+  85,   255,   0, 106,   // Magenta-pink
+ 102,   255,   0,  64,   // Pink-red
+ 119,   255,   0,  43,   // Hot pink
+ 136,   255,   0,   0,   // Red
+ 153,   255,  30,   0,   //
+ 170,   255, 106,   0,   // Orange
+ 187,   255, 213,   0,   //
+ 204,   191, 255,   0,   // Yellow-green
+ 221,    85, 255,   0,   // Green
+ 238,     0, 255,  64,   // Green-cyan
+ 255,     0, 255, 170    // Cyan
 };
 
 #ifndef D_PALETTE_AUTUMN_RED_NAME_CTR
@@ -668,7 +721,7 @@ DEF_PGM_UINT8(PM_PALETTE_AUTUMN_GREEN__DATA)
 };
 
 #ifndef D_PALETTE_COLOURFUL_DEFAULT_NAME_CTR
-#define D_PALETTE_COLOURFUL_DEFAULT_NAME_CTR        "Colourful Default"   
+#define D_PALETTE_COLOURFUL_DEFAULT_NAME_CTR        "Colourful"   
 #endif
 #define D_PALETTE_COLOURFUL_DEFAULT_ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
 DEF_PGM_UINT8(PM_PALETTE_COLOURFUL_DEFAULT__DATA)
@@ -705,22 +758,6 @@ DEF_PGM_UINT8(PM_PALETTE_HOLLOWEEN_OGP__DATA)
   D_RGB_ORANGE_WARM_3
   D_RGB_GREEN_FADED_ALT_1
   D_RGB_PURPLE_BLUE
-};
-
-
-#ifndef D_PALETTE_COMPRESSED_RAINBOW_NAME_CTR
-#define D_PALETTE_COMPRESSED_RAINBOW_NAME_CTR        "Compressed Rainbow"   
-#endif
-#define        D_PALETTE_COMPRESSED_RAINBOW_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
-DEF_PGM_UINT8(PM_PALETTE_COMPRESSED_RAINBOW__DATA)
-{
-  0,   RGB_RED
-  51,  RGB_ORANGE
-  90,  RGB_GREEN
-  127,  RGB_CYAN
-  165,  RGB_BLUE
-  204,  RGB_PINK
-  255, RGB_HOTPINK
 };
 
 /**
@@ -810,7 +847,7 @@ DEF_PGM_UINT8(PM_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__DATA)
   0,0,100,    // Blue Faded
   255,16,44,  // Pink
   252,157,3,  // Yellow
-  157,0,255,  // Purple
+  187,0,255,  // Purple
 };
 
 #ifndef D_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__NAME_CTR
@@ -819,12 +856,12 @@ DEF_PGM_UINT8(PM_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__DATA)
 #define D_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)     
 DEF_PGM_UINT8(PM_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__DATA)
 { // R,G,B
+  255,16,44,  // Pink
+  255,60,0,   // Orange
   0,120,0,    // Green
   150,0,0,    // Red
+  127,70,13,  // Filament White
   0,0,100,    // Blue Faded
-  255,16,44,  // Pink
-  252,157,3,  // Yellow
-  157,0,255,  // Purple
 };
 
 #ifndef D_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__NAME_CTR
@@ -1165,20 +1202,21 @@ DEF_PGM_UINT8(PM_PALETTE__COLOURFUL_PAIRS_01__DATA)
 #ifndef D_PALETTE__GOLDEN__NAME_CTR
 #define D_PALETTE__GOLDEN__NAME_CTR        "Golden/Christmas Star" // Yellow and slight gold (not orange)   
 #endif
-#define        D_PALETTE__GOLDEN__ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE__GOLDEN__ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
 DEF_PGM_UINT8(PM_PALETTE__GOLDEN__DATA)
-{ // R,G,B        
-  255,215,0, //gold  
-  252,94,3, //yellow-orange  
-  255,215,10,       
-  255,230,0, //gold   
-  218,125,17, //goldenrod
-  252,94,3, //yellow-orange
-  252,157,3, //
-  252,157,15, //
-  255,223,0, //goldern yellow
-  252,84,3, //yellow-orange
+{ // R,G,B  
+  255, 215,   0,   // True gold
+  255, 223,  40,   // Light golden yellow
+  252, 157,  10,   // Mid amber
+  255, 173,  25,   // Warm goldenrod
+  230, 130,  20,   // Muted amber orange
+  210, 100,  20,   // Deeper golden orange
+  192,  80,  10,   // Burnt orange hint
+  255, 140,   0,   // Deep gold orange
+  255, 110,   0,   // Bright warm orange
+  252,  84,   3    // Deep yellow-orange
 };
+
 
 
 /** GRADIENT_FIRE
@@ -1247,13 +1285,8 @@ DEF_PGM_UINT8(PM_PALETTE_PURPLE_PINK__DATA)
   D_RGB_PURPLE_RED
   D_RGB_PINK
   D_RGB_PURPLE_BLUE
-  D_RGB_PURPLE_RED
   D_RGB_PINK_FADED_1  
-  D_RGB_PURPLE_BLUE
-  D_RGB_PURPLE_RED
   D_RGB_PINK_ALT_1
-  D_RGB_PURPLE_BLUE
-  D_RGB_PURPLE_RED
 };
 
 
@@ -1320,156 +1353,150 @@ DEF_PGM_UINT8(PM_PALETTE_PASTEL_04__DATA)
 
 
 #ifndef D_PALETTE_PASTEL_05_NAME_CTR
-#define D_PALETTE_PASTEL_05_NAME_CTR        "Pastel Pinks"     //for shelf 
+#define D_PALETTE_PASTEL_05_NAME_CTR        "Pastel Pinks"
 #endif
-#define        D_PALETTE_PASTEL_05_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE_PASTEL_05_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)
 DEF_PGM_UINT8(PM_PALETTE_PASTEL_05__DATA)
-{      
-  D_RGB_WHITE_COOL_FULL
-  255, 100, 224, //pink white
-  243, 74, 204, // more pink
-  247, 58, 203,
+{
+    0,   255, 255, 255,   // White
+   16,   255, 200, 230,   // Almost-white blush
+   32,   255, 160, 220,   // Rosy pink
+   48,   255, 120, 210,   // Bubblegum pink
+   64,   243,  74, 204,   // Stronger pink
+   96,   247,  58, 203,   // Candy pink
+  127,   235,  40, 190,   // Deep pink
+  160,   225,  20, 180,   // Hot pastel pink
+  192,   200,  10, 160,   // Stronger saturation
+  255,   170,   5, 140    // Deepest warm magenta in pastel set
 };
 
-/**
- * https://www.schemecolor.com/pastel-color-tones.php
- * */
+
 #ifndef D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_NAME_CTR
 #define D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_NAME_CTR        "Pastel Purple"   
 #endif
-#define        D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
+#define D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
 DEF_PGM_UINT8(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE__DATA)
-{ //grad range 0-255, R,G,B
-  0, 224, 187, 228, // est. Thistle RGB: (224, 187, 228)
-  0, 224, 40, 228, // est. Thistle RGB: (224, 187, 228)
-  64,100, 20, 100, // est. Lavender Purple RGB: (149, 125, 173)
-  127,200, 20, 180, // est. Pastel Violet RGB: (210, 145, 188)
-  190,250, 25, 194, // est. Cotton Candy RGB: (254, 200, 216)
-  255,254, 118, 78  //est. Name: Lumber RGB: (255, 223, 211)     
+{ // grad range 0-255, R,G,B
+    0,   224, 187, 228,   // Soft lavender
+   16,   224, 140, 228,   // Slightly deeper
+   32,   224,  40, 228,   // Pinkish violet
+   64,   160,  30, 160,   // Muted plum
+   96,   100,  20, 100,   // Dusty purple
+  127,   200,  20, 180,   // Pastel magenta
+  160,   230,  25, 190,   // Lightened again
+  200,   250,  25, 194,   // Near-white purple
+  255,   255, 210, 230    // Softest fade to pastel lilac-pink
 };
+
 
 #ifndef D_PALETTE_WINTER_01_NAME_CTR
-#define D_PALETTE_WINTER_01_NAME_CTR        "Winter Blue W01"  // Only blues https://www.google.com/url?sa=i&url=https%3A%2F%2Fcreativemarket.com%2Fblog%2Fwinter-color-palettes&psig=AOvVaw1GiJufj17c7To3tgxRCaZS&ust=1689756901327000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCPDnv5Hxl4ADFQAAAAAdAAAAABAc
+#define D_PALETTE_WINTER_01_NAME_CTR        "Winter Frosted Blue"
 #endif
-#define        D_PALETTE_WINTER_01_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE_WINTER_01_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)
 DEF_PGM_UINT8(PM_PALETTE_WINTER_01__DATA)
-{      
-  // USe pastels like this orange, that are "creamy" (orange ice mixed style)
-  0x05, 0x44, 0xa1, //    
-  0x05, 0x2c, 0x7e, // 
-  0x04, 0x84, 0xe4, // 
-  0x27, 0x4d, 0x83, // 
+{
+   0,  0x04, 0x84, 0xe4,  // Ice blue
+  36,  0x05, 0x5a, 0xac,  // Light royal blue
+  72,  0x05, 0x44, 0xa1,  // Classic winter blue
+ 108,  0x27, 0x4d, 0x83,  // Steel blue
+ 144,  0x05, 0x2c, 0x7e,  // Deep navy
+ 180,  0x18, 0x39, 0x68,  // Shadow blue
+ 216,  0x35, 0x5b, 0x93,  // Cool twilight
+ 255,  0x4a, 0x6e, 0xa8   // Faded arctic blue
 };
 
-// Redo, "no dark", not useful as its just brightness
 #ifndef D_PALETTE_WINTER_02_NAME_CTR
-#define D_PALETTE_WINTER_02_NAME_CTR        "Winter --- W02"  // Should contain whites (e.g. a snow covered mountain scene with pale blue sky, the kind that has a hazy white to it near horizon)
+#define D_PALETTE_WINTER_02_NAME_CTR        "Winter Twilight"
 #endif
-#define        D_PALETTE_WINTER_02_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE_WINTER_02_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)
 DEF_PGM_UINT8(PM_PALETTE_WINTER_02__DATA)
-{      
-  0x1f, 0x29, 0x33, // Ebony Clay
-  0x13, 0x1e, 0x32, // Blue
-
-  // deep purple
-  // deep blue
+{
+   0,  0x80, 0x94, 0xb5,  // Icy violet blue
+  32,  0x5c, 0x6f, 0x9a,  // Dusk blue
+  64,  0x3c, 0x50, 0x8c,  // Twilight navy
+  96,  0x2c, 0x3c, 0x6c,  // Muted indigo
+ 127,  0x1f, 0x29, 0x50,  // Deep ocean
+ 159,  0x16, 0x20, 0x3c,  // Cold steel blue
+ 191,  0x13, 0x1e, 0x32,  // Night blue
+ 223,  0x10, 0x18, 0x28,  // Near black
+ 255,  0x0c, 0x14, 0x20   // Black ice
 };
+
+
 
 #ifndef D_PALETTE_WINTER_03_NAME_CTR
-#define D_PALETTE_WINTER_03_NAME_CTR        "Winter Snow W03"  // Should contain whites (e.g. a snow covered mountain scene with pale blue sky, the kind that has a hazy white to it near horizon)
-#endif //https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2Fcolor-palette-ideas-from-693-winter-images--764767580450031607%2F&psig=AOvVaw1ul7ntaVEtUpLQY-9MvR6S&ust=1689757340640000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCKDI7OLyl4ADFQAAAAAdAAAAABAJ
-#define        D_PALETTE_WINTER_03_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE_WINTER_03_NAME_CTR        "Winter Snow"
+#endif
+#define D_PALETTE_WINTER_03_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)
 DEF_PGM_UINT8(PM_PALETTE_WINTER_03__DATA)
-{      
-  // USe pastels like this orange, that are "creamy" (orange ice mixed style)
-  0x67, 0xb3, 0xe4, //    
-  0xc4, 0xd4, 0xdd, // 
-  0x64, 0xb2, 0xdb, // 
-  0x94, 0xac, 0xbd, // 
-  0x54, 0xb4, 0xe4, // 
+{
+   0,  0xf2, 0xf7, 0xfc,  // Bright snow white
+  36,  0xc4, 0xd4, 0xdd,  // Cloud blue-gray
+  72,  0x94, 0xac, 0xbd,  // Overcast
+ 108,  0x67, 0xb3, 0xe4,  // Soft sky blue
+ 144,  0x64, 0xb2, 0xdb,  // Slightly deeper sky
+ 180,  0x54, 0xb4, 0xe4,  // Blue frost
+ 220,  0x75, 0xc2, 0xee,  // Blue shimmer
+ 255,  0xd9, 0xed, 0xf9   // Pale white-blue glow
 };
 
 
 #ifndef D_PALETTE_WINTER_04_NAME_CTR
-#define D_PALETTE_WINTER_04_NAME_CTR        "Winter SunGlow W04"  // Snow mountain at sunset (alpineglow)
-#endif 
-#define        D_PALETTE_WINTER_04_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE_WINTER_04_NAME_CTR        "Winter Alpenglow"
+#endif
+#define D_PALETTE_WINTER_04_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)
 DEF_PGM_UINT8(PM_PALETTE_WINTER_04__DATA)
-{      
-  // USe pastels like this orange, that are "creamy" (orange ice mixed style)
-  0x67, 0xb3, 0xe4, //    
-  0xc4, 0xd4, 0xdd, // 
-  0x0c, 0x64, 0xcc,
-  255, 67, 10, // peach   
-  252,167,10,  //Yellow
-  0xfb, 0xdf, 0x98,
-  0x94, 0x5c, 0x54,
-  0x64, 0xb2, 0xdb, //
-  0x94, 0xac, 0xbd, // 
-  0x54, 0xb4, 0xe4, // 
+{
+  0x67, 0xb3, 0xe4,   // Sky blue
+  0xc4, 0xd4, 0xdd,   // Cloud pastel
+  0x0c, 0x64, 0xcc,   // Horizon blue
+  0xff, 0x43, 0x0a,   // Peach-orange
+  0xfc, 0xa7, 0x0a,   // Golden yellow
+  0xfb, 0xdf, 0x98,   // Creamy sunlight
+  0x94, 0x5c, 0x54,   // Warm shadow pink
+  0x64, 0xb2, 0xdb,   // Blue reflection
+  0x94, 0xac, 0xbd,   // Ice haze
+  0x54, 0xb4, 0xe4    // Cold pastel blue
 };
 
 
-  /**
-   * Deep purple to light blue then white
-   * */
-  #ifndef D_PALETTE_SUNRISE_01_NAME_CTR
-  #define D_PALETTE_SUNRISE_01_NAME_CTR        "Sunrise Orange SR01/Sunrise 01"   
-  #endif
-  #define        D_PALETTE_SUNRISE_01_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
-  DEF_PGM_UINT8(PM_PALETTE_SUNRISE_01__DATA)
-  { //grad,R,G,B,WW,CW
-    0, 10, 17, 42, 0, 0,
-    40, 84, 39, 27,  0, 0,
-    70, 80, 12, 3,0,0,      
-    90, 100, 20, 3,0,0,
-    120,100, 20, 3,0,0,
-    //CENTRE
-    127, 255, 44, 10, 0, 0, 
-    //CENTRE
-    134,100, 20, 3,0,0,   
-    164, 100, 20, 3,0,0,
-    184, 80, 12, 3,0,0, 
-    294, 84, 39, 27,  0, 0,  
-    255, 10, 17, 42, 0, 0,  
-  };
+/**
+ * Deep purple to light blue then white
+ */
+#ifndef D_PALETTE_SUNRISE_01_NAME_CTR
+#define D_PALETTE_SUNRISE_01_NAME_CTR        "Sunrise Orange"
+#endif
+#define D_PALETTE_SUNRISE_01_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)
+DEF_PGM_UINT8(PM_PALETTE_SUNRISE_01__DATA)
+{ // index, R, G, B, WW, CW
+    0,   10,  17,  42,   0,  0,   // Dark indigo
+   40,   84,  39,  27,   0,  0,   // Muted red
+   70,   80,  12,   3,   0,  0,   // Deep orange
+   90,  100,  20,   3,   0,  0,   // Reddish orange
+  120, 100,  20,   3,   0,  0,   // Orange
+  127, 255,  44,  10,   0,  0,   // Bright center
+  134, 100,  20,   3,   0,  0,   // Mirror orange
+  164, 100,  20,   3,   0,  0,   // Mirror reddish
+  184,  80,  12,   3,   0,  0,   // Mirror deep orange
+  224,  84,  39,  27,   0,  0,   // Mirror muted red
+  255,  10,  17,  42,   0,  0    // Return to dark indigo
+};
+
 
 /**
- * Warmer sunrise, blue with yellows midway
- * */
+ * Warmer sunrise, blue to yellow-pink center, then blue
+ */
 #ifndef D_PALETTE_SUNRISE_02_NAME_CTR
-#define D_PALETTE_SUNRISE_02_NAME_CTR        "Sunrise Blue SR02/Sunrise 02"   
+#define D_PALETTE_SUNRISE_02_NAME_CTR        "Sunrise Blue"
 #endif
-#define        D_PALETTE_SUNRISE_02_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
+#define D_PALETTE_SUNRISE_02_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)
 DEF_PGM_UINT8(PM_PALETTE_SUNRISE_02__DATA)
-{ //R,G,B,WW,CW
-  // 0x06, 0x2B, 0x79, 0, 0, // Dark Blue
-  // 0x16, 0x49, 0x8A, 0, 0,
-  // 0x16, 0x49, 0x8A, 25, 25,
-  // 0x16, 0x49, 0x8A, 50, 50,
-  // 0x59, 0x95, 0xB7, 100, 100,
-  // 0x59, 0x95, 0xB7, 175, 175,
-  // 255, 255,   255, 255, 255,
-  
-  0,  50,   255,   255,  0, 0,
-
-  // 30, 84, 39, 27, 0, 0,
-  // 50, 84, 39, 27,  0, 0,
-  // 60, 100, 20, 3,0,0,      
-  // 80, 100, 20, 3,0,0,
-  120,255, 44, 10, 0, 0, 
-  //CENTRE
-  127, 255, 100, 10, 0, 0, 
-  //CENTRE
-  134,255, 44, 10, 0, 0,  
-  // 174, 100, 20, 3,0,0,
-  // 194, 100, 20, 3,0,0, 
-  // 204, 84, 39, 27,  0, 0,  
-  // 225, 84, 39, 27, 0, 0,  
-  
-  255,   50,   255,   255,  0, 0,   
-
-
+{ // index, R, G, B, WW, CW
+    0,   50, 255, 255,   0,  0,   // Deep sky blue
+  120, 255,  44,  10,   0,  0,   // Warm orange
+  127, 255, 100,  10,   0,  0,   // Center glow
+  134, 255,  44,  10,   0,  0,   // Warm orange
+  255,  50, 255, 255,   0,  0    // Return to sky blue
 };
 
 
@@ -1477,7 +1504,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNRISE_02__DATA)
  * Warmer sunrise, blue with yellows midway
  * */
 #ifndef D_PALETTE_SUNRISE_03_NAME_CTR
-#define D_PALETTE_SUNRISE_03_NAME_CTR        "Sunrise 03/Sunrise Gradient 01"   
+#define D_PALETTE_SUNRISE_03_NAME_CTR        "*Sunrise 03/Sunrise Gradient 01"   
 #endif
 #define        D_PALETTE_SUNRISE_03_ENCODING        (PALETTE_ENCODING_INCLUDES_RGBCCT_NO_INDEX)     
 DEF_PGM_UINT8(PM_PALETTE_SUNRISE_03__DATA)
@@ -1522,7 +1549,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNRISE_03__DATA)
  * Warmer sunrise, blue with yellows midway
  * */
 #ifndef D_PALETTE_SUNRISE_04_NAME_CTR
-#define D_PALETTE_SUNRISE_04_NAME_CTR        "Sunrise 04/Sunrise Gradient 02"   
+#define D_PALETTE_SUNRISE_04_NAME_CTR        "*Sunrise 04/Sunrise Gradient 02"   
 #endif
 #define        D_PALETTE_SUNRISE_04_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
 DEF_PGM_UINT8(PM_PALETTE_SUNRISE_04__DATA)
@@ -1540,7 +1567,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNRISE_04__DATA)
  * Warmer sunrise, blue with yellows midway
  * */
 #ifndef D_PALETTE_SUNSET_01_NAME_CTR
-#define D_PALETTE_SUNSET_01_NAME_CTR        "Sunset 01/Sunset Step 01"   
+#define D_PALETTE_SUNSET_01_NAME_CTR        "*Sunset 01/Sunset Step 01"   
 #endif
 #define        D_PALETTE_SUNSET_01_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
 DEF_PGM_UINT8(PM_PALETTE_SUNSET_01__DATA)
@@ -1558,7 +1585,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNSET_01__DATA)
  * Warmer sunrise, blue with yellows midway
  * */
 #ifndef D_PALETTE_SUNSET_02_NAME_CTR
-#define D_PALETTE_SUNSET_02_NAME_CTR        "Sunset 02/Sunset Gradient 01"   
+#define D_PALETTE_SUNSET_02_NAME_CTR        "*Sunset 02/Sunset Gradient 01"   
 #endif
 #define        D_PALETTE_SUNSET_02_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
 DEF_PGM_UINT8(PM_PALETTE_SUNSET_02__DATA)
@@ -1576,7 +1603,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNSET_02__DATA)
  * Warmer sunrise, blue with yellows midway
  * */
 #ifndef D_PALETTE_SUNSET_RED_NAME_CTR
-#define D_PALETTE_SUNSET_RED_NAME_CTR        "Sunset Red/Sunset Gradient 01"   
+#define D_PALETTE_SUNSET_RED_NAME_CTR        "*Sunset Red/Sunset Gradient 01"   
 #endif
 #define        D_PALETTE_SUNSET_RED_ENCODING        (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)     
 DEF_PGM_UINT8(PM_PALETTE_SUNSET_RED__DATA)
@@ -1600,7 +1627,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNSET_RED__DATA)
  * Have the look from a beach at sunset, with water, sun, orange glow and pale blue (light)
  * */
 #ifndef D_PALETTE_SUNSET_BEACH_NAME_CTR
-#define D_PALETTE_SUNSET_BEACH_NAME_CTR        "Sunset Beach/Sunset Gradient 01"   
+#define D_PALETTE_SUNSET_BEACH_NAME_CTR        "*Sunset Beach/Sunset Gradient 01"   
 #endif
 #define        D_PALETTE_SUNSET_BEACH_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
 DEF_PGM_UINT8(PM_PALETTE_SUNSET_BEACH__DATA)
@@ -1739,7 +1766,7 @@ DEF_PGM_UINT8(PM_PALETTE_SKY_GLOW_01__DATA)
    * First RGBCCT Strip Test
    * */
   #ifndef D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR
-  #define D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR        "Colourful CCT 01"   
+  #define D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR        "*Colourful CCT 01"   
   #endif
   #define        D_PALETTE__COLOURFUL_WITH_CCT_01__ENCODING        (PALETTE_ENCODING_INCLUDES_RGBCCT)     
   DEF_PGM_UINT8(PM_PALETTE__COLOURFUL_WITH_CCT_01__DATA)
@@ -2751,13 +2778,78 @@ const byte* const gGradientPalettes[] PROGMEM = {
 };
 
 
+#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
 DEFINE_PGM_CTR(PM_STATIC__PALETTES_NAMES_CTR)
 {
   D_PALETTE_COLOURFUL_DEFAULT_NAME_CTR "|"
   D_PALETTE_HOLLOWEEN_OP_NAME_CTR "|" 
   D_PALETTE_HOLLOWEEN_OGP_NAME_CTR "|"
   D_PALETTE_RAINBOW_NAME_CTR "|"
-  D_PALETTE_COMPRESSED_RAINBOW_NAME_CTR "|"
+  D_PALETTE_RAINBOW_WARM_NAME_CTR "|"
+  D_PALETTE_RAINBOW_INVERTED_NAME_CTR "|"
+  D_PALETTE_PASTEL_01_NAME_CTR "|"
+  D_PALETTE_PASTEL_02_NAME_CTR "|"
+  D_PALETTE_PASTEL_03_NAME_CTR "|"
+  D_PALETTE_PASTEL_04_NAME_CTR  "|"
+  D_PALETTE_PASTEL_05_NAME_CTR "|"
+  D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_NAME_CTR "|"
+  D_PALETTE_FLOWER_SWEATPEA_NAME_CTR "|"
+  D_PALETTE_PINK_PURPLE_NAME_CTR "|"
+  D_PALETTE_PURPLE_PINK_NAME_CTR "|"
+  D_PALETTE_HOT_PINK_NEON_WITH_NAVY_NAME_CTR "|"
+  D_PALETTE_WINTER_01_NAME_CTR "|"
+  D_PALETTE_WINTER_02_NAME_CTR "|"
+  D_PALETTE_WINTER_03_NAME_CTR "|"
+  D_PALETTE_WINTER_04_NAME_CTR "|"
+  D_PALETTE_AUTUMN_GREEN_NAME_CTR "|"
+  D_PALETTE_AUTUMN_RED_NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__NAME_CTR  "|"
+  D_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_BERRY_YELLOW__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_BERRY_ORANGE__NAME_CTR "|"
+  D_PALETTE__CHRISTMAS_BERRY_GREEN__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_PAIRS_01__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_COLOUR_WHITE_STRIPE__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_COLOUR_WARMWHITE_STRIPE__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_BLUE_WHITE__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_WHITE_MIXED__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_PINK_RED_YELLOW__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_PEACHY_ORANGE__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_PEACHY_YELLOW__NAME_CTR "|"
+  D_PALETTE__COLOURFUL_GREENLESS__NAME_CTR "|"
+  D_PALETTE__GOLDEN__NAME_CTR  "|"
+  D_PALETTE_SUNRISE_01_NAME_CTR "|"
+  D_PALETTE_SUNRISE_02_NAME_CTR "|"
+  D_PALETTE_SUNRISE_03_NAME_CTR  "|"
+  D_PALETTE_SUNRISE_04_NAME_CTR "|"
+  D_PALETTE_SUNSET_01_NAME_CTR "|"
+  D_PALETTE_SUNSET_02_NAME_CTR "|"
+  D_PALETTE_SUNSET_RED_NAME_CTR "|"
+  D_PALETTE_SUNSET_BEACH_NAME_CTR "|"
+  D_PALETTE_SKY_GLOW_01_NAME_CTR "|"
+  D_PALETTE__COLOURFUL_WITH_CCT_01__NAME_CTR "|"
+  D_PALETTE_CANDLE_FLAME_01_NAME_CTR "|"
+  D_PALETTE_GRADIENT_FIRE_01_NAME_CTR "|"
+  D_PALETTE_OCEAN_01_NAME_CTR
+};
+
+#else
+DEFINE_PGM_CTR(PM_STATIC__PALETTES_NAMES_CTR)
+{
+  D_PALETTE_COLOURFUL_DEFAULT_NAME_CTR "|"
+  D_PALETTE_HOLLOWEEN_OP_NAME_CTR "|" 
+  D_PALETTE_HOLLOWEEN_OGP_NAME_CTR "|"
+  D_PALETTE_RAINBOW_NAME_CTR "|"
+  D_PALETTE_RAINBOW_WARM_NAME_CTR "|"
   D_PALETTE_RAINBOW_INVERTED_NAME_CTR "|"
   D_PALETTE_PASTEL_01_NAME_CTR "|"
   D_PALETTE_PASTEL_02_NAME_CTR "|"
@@ -2813,21 +2905,40 @@ DEFINE_PGM_CTR(PM_STATIC__PALETTES_NAMES_CTR)
   D_PALETTE_PINK_PURPLE_NAME_CTR "|"
   D_PALETTE_PURPLE_PINK_NAME_CTR
 };
+#endif
 
 
+#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+DEFINE_PGM_CTR(PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR)
+{
+  "Gradient Two|Gradient Three|Gradient Four|Gradient Five|Five Colours Repeated"
+};
+
+#else
 DEFINE_PGM_CTR(PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR)
 {
   "Two Colours|Three Colours|Four Colours|Five Colours|"
   "Five Colours Repeated|"
   "Random 01|Random 02|Random 03|Random 04|Random 05"
 };
+#endif
 
 
 DEFINE_PGM_CTR(PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR)
 {
-  "Colour 01|Colour 02|Colour 03|Colour 04|Colour 05"
+  "Colour 1|Colour 2|Colour 3|Colour 4|Colour 5"
 };
 
+#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+DEFINE_PGM_CTR(PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR)
+{
+  "Hue Cyclone|"
+  "Pastel Wash|"
+  "Colour Drift|"
+  "Colour Fadar|"
+  "Huewave"
+};
+#endif
 
 DEFINE_PGM_CTR(PM_DYNAMIC_PALETTES_NAMES_CTR)
 {

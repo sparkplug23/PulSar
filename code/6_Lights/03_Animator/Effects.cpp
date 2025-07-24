@@ -113,7 +113,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
   // Retrieve the desired color from the palette
   if (SEGMENT.colour_width__used_in_effect_generate == ColourType::COLOUR_TYPE__RGBWW__ID) {
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    RgbwwColor desiredColour = SEGMENT.GetPaletteColour_Rgbww();
+    RgbwwColor desiredColour = SEGMENT.GetPaletteColour_RGBWW();
     RgbwwColor startingColour = SEGMENT.getPixelColorRgbww(0);
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
@@ -465,6 +465,17 @@ static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM = "Gradi
 uint16_t mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
 {
 
+  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+  uint16_t palette_id = SEGMENT.palette_id;
+  if(!IsWithinLimitsInclusive(
+    mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID, 
+    palette_id, 
+    mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID))
+  {
+    ALOG_INF(PSTR("restoring to default")); // though I dont want this when running without iterative mode, so consider that
+    SEGMENT.palette_id = mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;
+  }
+  #else
   uint16_t palette_id = SEGMENT.palette_id;
   if(!IsWithinLimitsInclusive(
     mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID, 
@@ -474,6 +485,7 @@ uint16_t mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
     ALOG_INF(PSTR("restoring to default")); // though I dont want this when running without iterative mode, so consider that
     SEGMENT.palette_id = mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID;
   }
+  #endif
 
   
   uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT.intensity))*100);

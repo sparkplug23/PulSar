@@ -6,8 +6,10 @@
  * 
  * U32 palettes should be default, unless forced to allow RGBWW with GENERATE
  * Refactor "exact" and "forced_gradient", so U8 can be used to determine [default mode as defined, forced discrete, forced gradient by effects]
-
-
+ * GETAS_DEFAULT
+ * GETAS_DISCRETE
+ * GETAS_GRADIENT
+  
 
 
  */
@@ -89,11 +91,11 @@ class mPalette
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID,
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID,
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID,
-      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID,      
-      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
-      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
-      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
-      PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
+      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID,      
+      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
+      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
+      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
+      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID    
     };
 
@@ -234,7 +236,7 @@ class mPalette
       PALETTELIST_STATIC_HOLLOWEEN_OGP__ID,
       PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID,
       PALETTELIST_STATIC_RAINBOW__ID,
-      PALETTELIST_STATIC_COMPRESSED_RAINBOW__ID,
+      PALETTELIST_STATIC_RAINBOW_WARM__ID,
       PALETTELIST_STATIC_RAINBOW_INVERTED__ID,
       PALETTELIST_STATIC_PASTEL_01__ID,
       PALETTELIST_STATIC_PASTEL_02__ID,
@@ -248,6 +250,9 @@ class mPalette
       PALETTELIST_STATIC_AUTUMN_GREEN__ID,
       PALETTELIST_STATIC_AUTUMN_RED__ID,
       PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID,
+      PALETTELIST_STATIC_FLOWER_SWEATPEA__ID,
+      PALETTELIST_STATIC_PINK_PURPLE__ID,
+      PALETTELIST_STATIC_PURPLE_PINK__ID,
       PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBO__ID,
       PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBY__ID,
       PALETTELIST_STATIC__FESTIVE_TRADITIONAL_ROGPBY__ID,
@@ -285,10 +290,32 @@ class mPalette
       PALETTELIST_STATIC_CANDLE_FLAME_01__ID,
       PALETTELIST_STATIC_GRADIENT_FIRE_01__ID,
       PALETTELIST_STATIC_OCEAN_01__ID,
-      PALETTELIST_STATIC_FLOWER_SWEATPEA__ID,
-      PALETTELIST_STATIC_PINK_PURPLE__ID,
-      PALETTELIST_STATIC_PURPLE_PINK__ID,
       PALETTELIST_STATIC_LENGTH__ID 
+    };
+
+
+    enum PALETTELIST_DYNAMIC__COLOUR_CRGBPALETTE__IDS
+    {
+      /****
+       * 
+
+       Lets rework these 
+       1) Keep (100% saturation, random hue)
+       2) Washed out (always pastels)
+       3) Hues, and pastels (can I force at least one to be pastel?)
+       4) Hues, and pastels, but also allow wide swings in brightness
+       5) Have start tied to off, middle mid bightness, end to full brightness (so gradient of rising colour, think how it would look on the tree)
+       */
+      
+      PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID = PALETTELIST_STATIC_LENGTH__ID,      
+      PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID,
+      PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID,      
+      PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID,
+      PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID,
+
+      PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID
+
+
     };
 
 
@@ -315,10 +342,17 @@ class mPalette
      * 
      * 
      * */
-    #define PALETTELIST_DYNAMIC__COLOUR__ID_START PALETTELIST_STATIC_LENGTH__ID
+    #define PALETTELIST_DYNAMIC__COLOUR__ID_START PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID
     enum PALETTELIST_DYNAMIC__COLOUR__IDS
     {
-      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID = PALETTELIST_STATIC_LENGTH__ID, // dawndusk to ELEVATION_DAY_TRESHOLD
+      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID = PALETTELIST_STATIC_LENGTH__ID,      
+      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
+      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
+      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
+      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
+
+
+      PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID = PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID, // dawndusk to ELEVATION_DAY_TRESHOLD
 
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID,         // elevation > 0 to elev < ELEVATION_DAY_TRESHOLD      ie sun above horizon seg colour transitions, ELEVATION_DAY_TRESHOLD==0 means consider daily range (hard coded define options)
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID,    // elevation > -6 to elev < ELEVATION_DAY_TRESHOLD     ie from dawn to dusk transitions, with +10deg and above DAYTIME
@@ -350,6 +384,10 @@ class mPalette
     uint16_t GetPaletteListLength(){ return PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + user_defined_palette_count; }
 
     bool IsPaletteGradient(uint16_t palette_id);
+
+    #define PALETTE_ENCODING_OVERRIDE__NONE            0
+    #define PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE 1
+    #define PALETTE_ENCODING_OVERRIDE__FORCED_GRADIENT 2
 
 
     /**
@@ -404,7 +442,7 @@ class mPalette
     uint8_t GetColoursInCRGB16Palette(uint16_t palette_id);
     PALETTE_ENCODING_DATA findPaletteEncoding(uint16_t id);
 
-    IRAM_ATTR [[gnu::hot]] RgbwwColor      Get_Encoded_Colour_ReadBuffer_RGBWW
+    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Colour_ReadBuffer_RGBWW
     (
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
@@ -413,7 +451,8 @@ class mPalette
       uint8_t encoded_colour_width = 0
     );
 
-    IRAM_ATTR [[gnu::hot]] RgbwwColor      Get_Encoded_Palette_Colour_RGBWW
+    // includes the same args are main function, so should not really exist? is this a subfunction, if so needs named that way
+    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Palette_Colour_RGBWW
     (
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
@@ -427,27 +466,47 @@ class mPalette
       bool     flag_forced_gradient = false
     );
 
+    /*********************************
+     * NOTE: The two functions below are the core RGBWW and U32 colour getters. Others must use these. 
+     *********************************/
+
     IRAM_ATTR [[gnu::hot]] RgbwwColor     GetColourFromPreloadedPaletteBuffer_RGBWW
     (
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
+      uint16_t id = 0,
+      // Pass preloaded palette data buffer. If nullptr, and "id" does not match any preloaded palette, then it will force a reload of the palette data.
+      uint8_t* data = nullptr,
+      // In discrete mode, this index will automatically modulo and repeat the palette over infinite length (MAXU16). In Gradient mode, must be scaled in 0 to 255 range.
+      uint16_t desired_index = 0,
+      // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
       uint8_t* encoded_index = nullptr,
-      uint8_t     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      uint8_t     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t     flag_crgb_exact_colour = false,
+      // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
+      uint8_t  rescale_index255_to_span_segment_length = 1,
+      // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
+      uint8_t  rescale_index_wrap_for_hardedge = 1,
+      // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
+      uint8_t  override_default_encoding = 0, // flag_crgb_exact_colour = 0, // true: "CRGB exact colour", false: "U32 colour"
+      // Requesting preview: Live palettes must respond with preview for UI
       bool flag_request_is_for_full_visual_output = false
     );
-  
+
+    uint8_t white_warm = 0; // R,G,B, W1, then W2 is temp per function call below, to allow one function does both
+    // A wrapper can be used to the calls below work as is. The internals of both of these will use ifdefs to block them when not needed.
     IRAM_ATTR [[gnu::hot]] uint32_t       GetColourFromPreloadedPaletteBuffer_U32
     (
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
+      uint16_t id = 0,
+      // Pass preloaded palette data buffer. If nullptr, and "id" does not match any preloaded palette, then it will force a reload of the palette data.
+      uint8_t* data = nullptr,
+      // In discrete mode, this index will automatically modulo and repeat the palette over infinite length (MAXU16). In Gradient mode, must be scaled in 0 to 255 range.
+      uint16_t desired_index = 0,
+      // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
       uint8_t* encoded_index = nullptr,
-      uint8_t     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      uint8_t     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t     flag_crgb_exact_colour = false,
+      // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
+      uint8_t  rescale_index255_to_span_segment_length = 1,
+      // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
+      uint8_t  rescale_index_wrap_for_hardedge = 1,
+      // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
+      uint8_t  override_default_encoding = 0, // flag_crgb_exact_colour = 0, // true: "CRGB exact colour", false: "U32 colour"
+      // Requesting preview: Live palettes must respond with preview for UI
       bool flag_request_is_for_full_visual_output = false
     );
 
@@ -463,3 +522,74 @@ class mPalette
 #endif // _M_PALETTE_H
 
 
+/**
+ * @brief 
+ * 
+        | ID | Descriptive Name Ideas                                              |
+| -- | ------------------------------------------------------------------- |
+| 01 | Chroma Pulse, Hue Cyclone, Vibe Glow, Spectra Drift, Colour Flux    |
+| 02 | Prisma Haze, Soft Shift, Pastel Bloom, Vivid Whisper, Silk Spectrum |
+| 03 | Sunkissed Flow, Tinted Dance, Citrus Flash, Radiant Fade, Neon Ease |
+| 04 | Muted Spark, Pastel Spin, Warm Mist, Subtle Prism, Faint Glow       |
+| 05 | Washed Spectrum, Color Cloud, Whisper Wheel, Ghost Fade, Hazy Loop  |
+Live Spectrum Drift
+
+Live Chroma Pulse
+
+Live Hue Cyclone
+
+Live Prism Glow
+
+Live Neon Mist
+
+Live Vibe Radiance
+
+Live Pulse Stream
+
+Live Tinted Flux
+
+Live Colour Fader
+
+Live Soft Fade
+
+Live Saturation Spin
+
+Live Dream Loop
+
+Live Bloom Flux
+
+Live Pastel Wash
+
+Live Whisper Hue
+
+Live Lightshift
+
+Live Aurora Thread
+
+Live Silk Spiral
+
+Live Glowline
+
+Live Mist Shimmer
+
+Live Driftfield
+
+Live Huewave
+
+Live Tone Cascade
+
+Live Prism Roll
+
+Live Flowing Ink
+
+Live Moodstream
+
+Live Gossamer Shift
+
+Live Colour Whisper
+
+Live Intensity Breeze
+
+Live Fluxband
+ * 
+ */

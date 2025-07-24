@@ -2428,14 +2428,21 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           }
       } 
       // Handle random hue palettes
+      #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+      else if (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID && palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID) {
+          // Add "r" for random color-based palettes
+          for (int i = 0; i < 4; ++i) {
+              curPalette_obj.add("r");
+          }
+      }
+      #else
       else if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID) {
           // Add "r" for random color-based palettes
           for (int i = 0; i < 4; ++i) {
               curPalette_obj.add("r");
           }
-          
-  DEBUG_LINE_HERE_TRACE
       }
+      #endif
 
       /**
        * @brief Palettes that the RGB data should be retrived
@@ -2546,11 +2553,27 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
     if (
       (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID) ||
-      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID) ||
-      (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
+      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
     ) {  
         palette_display_as_banded_gradient = false; // These palettes use gradients
     }
+
+    
+    #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+    if (
+      (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID && 
+       palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+    ) {  
+        palette_display_as_banded_gradient = false; // These palettes use gradients
+    }
+    #else
+    if (
+      (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && 
+       palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
+    ) {  
+        palette_display_as_banded_gradient = false; // These palettes use gradients
+    }
+    #endif
 
     /***
      * Custom palettes

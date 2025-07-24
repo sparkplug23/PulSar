@@ -514,6 +514,96 @@ void sendDataWs(AsyncWebSocketClient * client) {}
 #endif
 
 
+void mAnimatorLight::Init_Busses()
+{
+
+  uint32_t mem = 0;
+
+    /*****************************************************************************
+     * Detect type of NPB methods
+    ******************************************************************************/
+   #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+   // determine if it is sensible to use parallel I2S outputs on ESP32 (i.e. more than 5 outputs = 1 I2S + 4 RMT)
+   bool useParallel = false;
+   #if defined(ARDUINO_ARCH_ESP32) && !defined(ARDUINO_ARCH_ESP32S2) && !defined(ARDUINO_ARCH_ESP32S3) && !defined(ARDUINO_ARCH_ESP32C3)
+   unsigned digitalCount = 0;
+   unsigned maxLedsOnBus = 0;
+   unsigned maxChannels = 0;
+   for (unsigned i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
+     if (tkr_iLight->busConfigs[i] == nullptr) break;
+     if (!Bus::isDigital(tkr_iLight->busConfigs[i]->type)) continue;
+     if (!Bus::is2Pin(tkr_iLight->busConfigs[i]->type)) {
+       digitalCount++;
+       unsigned channels = Bus::getNumberOfChannels(tkr_iLight->busConfigs[i]->type);
+       if (tkr_iLight->busConfigs[i]->count > maxLedsOnBus) maxLedsOnBus = tkr_iLight->busConfigs[i]->count;
+       if (channels > maxChannels) maxChannels  = channels;
+     }
+   }
+   DEBUG_PRINTF_P(PSTR("Maximum LEDs on a bus: %u\n\rDigital buses: %u\n\r"), maxLedsOnBus, digitalCount);
+   /**
+    * Assign to use parallel only when pixels per bus are low, and channels are more than 2
+    * Will use combined I2Sx2 + RMTx8 when pixels per bus are more than 300
+    * 
+    */
+   if (maxLedsOnBus <= 300 && digitalCount > 2) 
+   {  // I will want >2, as I0 and I1 are for 2 pins only, then immediately switch to parallel
+     DEBUG_PRINTF_P(PSTR("Switching to parallel I2S\n\r"));
+     useParallel = true;
+     tkr_iLight->bus_manager->useParallelOutput(true);
+     tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+     mem = BusManager::memUsage(maxChannels, maxLedsOnBus, 8); // use alternate memory calculation (hse to be used *after* useParallelOutput())
+   }else
+   if (maxLedsOnBus > 300 && digitalCount > 2) 
+   {
+     ALOG_ERR(PSTR("Parallel is required to avoid RMT, but per bus count exceeded. Using anyway for now (%d,%d)"), maxLedsOnBus, digitalCount);
+     tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+     tkr_iLight->bus_manager->useParallelOutput(true);
+   }
+   else{
+     ALOG_INF(PSTR("Parallel is not required for %d channels"), digitalCount);
+     tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+     tkr_iLight->bus_manager->useParallelOutput(false);
+   }
+   #endif
+ #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+
+ DELAY_DEBUG(1000);
+
+ /*****************************************************************************
+  * Create NPB methods
+ ******************************************************************************/
+ for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) 
+ {
+   if (tkr_iLight->busConfigs[i] == nullptr) break;
+   // mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]);
+
+   #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+   if (useParallel && i < 16) {
+     // if for some unexplained reason the above pre-calculation was wrong, update
+     unsigned memT = BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes x8 memory allocation for parallel I2S
+     if (memT > mem) mem = memT; // if we have unequal LED count use the largest
+   } 
+   else
+   #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+   {
+     mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes global buffer
+   }
+
+   if (mem <= MAX_LED_MEMORY) 
+   {        
+     tkr_iLight->bus_manager->add(*tkr_iLight->busConfigs[i]);        
+   }
+   else
+   {        
+     ALOG_ERR(PSTR("MEMORY ISSUE"));        
+   }
+   delete tkr_iLight->busConfigs[i]; 
+   tkr_iLight->busConfigs[i] = nullptr;
+ }
+ ALOG_INF(PSTR("Memory used: %d"), mem);
+
+  
+}
 
 
 void mAnimatorLight::EveryLoop()
@@ -530,89 +620,9 @@ void mAnimatorLight::EveryLoop()
     tkr_iLight->bus_manager->removeAll();
 
     ALOG_INF(PSTR("checkSegmentAlignment()-----------------------------------------aligned %d"), aligned);
-    uint32_t mem = 0;
 
-    /*****************************************************************************
-     * Detect type of NPB methods
-    ******************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
-      // determine if it is sensible to use parallel I2S outputs on ESP32 (i.e. more than 5 outputs = 1 I2S + 4 RMT)
-      bool useParallel = false;
-      #if defined(ARDUINO_ARCH_ESP32) && !defined(ARDUINO_ARCH_ESP32S2) && !defined(ARDUINO_ARCH_ESP32S3) && !defined(ARDUINO_ARCH_ESP32C3)
-      unsigned digitalCount = 0;
-      unsigned maxLedsOnBus = 0;
-      unsigned maxChannels = 0;
-      for (unsigned i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
-        if (tkr_iLight->busConfigs[i] == nullptr) break;
-        if (!Bus::isDigital(tkr_iLight->busConfigs[i]->type)) continue;
-        if (!Bus::is2Pin(tkr_iLight->busConfigs[i]->type)) {
-          digitalCount++;
-          unsigned channels = Bus::getNumberOfChannels(tkr_iLight->busConfigs[i]->type);
-          if (tkr_iLight->busConfigs[i]->count > maxLedsOnBus) maxLedsOnBus = tkr_iLight->busConfigs[i]->count;
-          if (channels > maxChannels) maxChannels  = channels;
-        }
-      }
-      DEBUG_PRINTF_P(PSTR("Maximum LEDs on a bus: %u\n\rDigital buses: %u\n\r"), maxLedsOnBus, digitalCount);
-      /**
-       * Assign to use parallel only when pixels per bus are low, and channels are more than 2
-       * Will use combined I2Sx2 + RMTx8 when pixels per bus are more than 300
-       * 
-       */
-      if (maxLedsOnBus <= 300 && digitalCount > 2) 
-      {  // I will want >2, as I0 and I1 are for 2 pins only, then immediately switch to parallel
-        DEBUG_PRINTF_P(PSTR("Switching to parallel I2S\n\r"));
-        useParallel = true;
-        tkr_iLight->bus_manager->useParallelOutput(true);
-        tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
-        mem = BusManager::memUsage(maxChannels, maxLedsOnBus, 8); // use alternate memory calculation (hse to be used *after* useParallelOutput())
-      }else
-      if (maxLedsOnBus > 300 && digitalCount > 2) 
-      {
-        ALOG_ERR(PSTR("Parallel is required to avoid RMT, but per bus count exceeded. Using anyway for now (%d,%d)"), maxLedsOnBus, digitalCount);
-        tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
-        tkr_iLight->bus_manager->useParallelOutput(true);
-      }
-      else{
-        ALOG_INF(PSTR("Parallel is not required for %d channels"), digitalCount);
-        tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
-        tkr_iLight->bus_manager->useParallelOutput(false);
-      }
-      #endif
-    #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+    Init_Busses();
 
-    DELAY_DEBUG(1000);
-  
-    /*****************************************************************************
-     * Create NPB methods
-    ******************************************************************************/
-    for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) 
-    {
-      if (tkr_iLight->busConfigs[i] == nullptr) break;
-      // mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]);
-
-      #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
-      if (useParallel && i < 16) {
-        // if for some unexplained reason the above pre-calculation was wrong, update
-        unsigned memT = BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes x8 memory allocation for parallel I2S
-        if (memT > mem) mem = memT; // if we have unequal LED count use the largest
-      } 
-      else
-      #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
-      {
-        mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes global buffer
-      }
-
-      if (mem <= MAX_LED_MEMORY) 
-      {        
-        tkr_iLight->bus_manager->add(*tkr_iLight->busConfigs[i]);        
-      }
-      else
-      {        
-        ALOG_ERR(PSTR("MEMORY ISSUE"));        
-      }
-      delete tkr_iLight->busConfigs[i]; 
-      tkr_iLight->busConfigs[i] = nullptr;
-    }
     
     finalizeInit(); // also loads default ledmap if present
 
@@ -651,302 +661,10 @@ void mAnimatorLight::EveryLoop()
     #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
     ALOG_INF(PSTR("Segment count: %d"), getSegmentsNum());
-    ALOG_INF(PSTR("Memory used: %d"), mem);
-
     doSerializeConfig = true;
     // serializeConfig(); // in WLED This saved everything to json memory
   }
-  
-
-  // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  // /***
-  //  * Matrix can only be loaded after the busses have been created, and segments have been created.
-  //  * An easy way to do this to ensure order is perhaps have "isMatrix" not started (ie not loading panels)
-  //  * until this section of code runs (Which would only be called after segments have been created)
-  //  */
-  // // if(panel.size()) // if there are panels waiting to be loading
-  // // {
-  // //   ALOG_INF(PSTR("PANELS: %d"), panel.size());    
-  // //   setUpMatrix();
-  // //   makeAutoSegments();
-  // //   if(SEGMENT.stopY > 1000){ ALOG_ERR(PSTR("SEGMENT.stopY > 1000")); } // debug issue
-  // // }
-
-  // // /***
-  // //  * Either 1D or 2D custom maps can now be loaded after busses and any 2d matrix have been started
-  // //  */
-  // // if (loadLedmap >= 0) {
-  // //   ALOG_HGL(PSTR("Loading LED map."));
-  // //   deserializeMap(loadLedmap); // load custom LED map
-  // //   loadLedmap = -1;
-  // // }
-
-
-  // #ifdef ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
-
-  // #warning "HARDCODED MATRIX SETUP to be phased out with commands"
-
-  // // loadLedmap = 0;
-  // isMatrix = true;
-  
-  //   // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  //   // if (i1 < mAnimatorLight::Segment::maxWidth) seg.start = i1;
-  //   // seg.stop = i2 > mAnimatorLight::Segment::maxWidth ? mAnimatorLight::Segment::maxWidth : i2;
-  //   // if (startY < mAnimatorLight::Segment::maxHeight) seg.startY = startY;
-
-  //   #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP
-  //   SEGMENT.startY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y;
-  //   SEGMENT.stopY = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y;
-  //   SEGMENT.stop = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP;
-  //   #else
-  //   // SEGMENT.startY = 0;
-  //   // SEGMENT.stopY = 16;
-  //   // SEGMENT.stop = 16;
-  //   // #error "dont want this happening from now on"
-  //   #endif
-
-
-  //   // ALOG_INF(PSTR("setSegment(%d, %d, %d, %d, %d, %d, %d, %d)"),n,i1,i2,grouping,spacing,offset,startY,stopY);
-  //   // delay(1000);
-  //   // #endif
-
-  //   #error "with dyanmic, dont be here"
-
-
-
-  // // 2D Matrix Settings
-  // // JsonObject matrix = hw_led[F("matrix")];
-  // // if (!matrix.isNull()) {
-  // //   tkr_anim->isMatrix = true;
     
-  //   panels = 1;
-  //   panel.clear();
-  //   ALOG_INF(PSTR("panel.clear() HERE E?????????????????????????????????????????????????????"));
-  //   // JsonArray panels = matrix[F("panels")];
-  //   uint8_t s = 0;
-  //   // if (!panels.isNull()) {
-  //     panel.reserve(max(1U,min((size_t)panels,(size_t)WLED_MAX_PANELS)));  // pre-allocate memory for panels
-  //     // for (JsonObject pnl : panels) {
-
-  //     //   	var px = parseInt(Sf[`P${p}X`].value); //first led x
-	// 		// var py = parseInt(Sf[`P${p}Y`].value); //first led y
-	// 		// var pw = parseInt(Sf[`P${p}W`].value); //width
-	// 		// var ph = parseInt(Sf[`P${p}H`].value); //height
-
-	// 		// var pb = Sf[`P${p}B`].value == "1"; //bottom
-	// 		// var pr = Sf[`P${p}R`].value == "1"; //right
-	// 		// var pv = Sf[`P${p}V`].value == "1"; //vertical
-	// 		// var ps = Sf[`P${p}S`].checked; //serpentine
-
-	// 		// var topLeftX = px*ppL + space; //left margin
-	// 		// var topLeftY = py*ppL + space; //top margin
-
-  //       /**
-  //        * @brief These are temporary define configs until the proper json commands are inserted for setting up matrix panels
-  //        * 
-  //        */
-  //       #if defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32by8_PANEL)
-
-  //       #error "DONT USE ANYMORE!"
-
-
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 8;//,      pnl["h"]);
-  //       p.width = 32;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-
-  //       #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_SEGMENT_TESTER)
-
-
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 8;//,      pnl["h"]);
-  //       p.width = 32;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-  //       #error "HERE?else"
-
-  //       #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_32X8__VERTICAL)
-
-
-  //       #error "HERE?else"
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 32;//,      pnl["h"]);
-  //       p.width = 8;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-
-  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_8W32H)
-
-
-  //       // #error "HERE?else"
-  //       Panel p;
-  //       p.bottomStart = 1; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 0;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 32;//,      pnl["h"]);
-  //       p.width = 8;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-
-  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_HORIZONTAL_32W8H)
-
-  //       // #error "HERE?else"
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 8;//,      pnl["h"]);
-  //       p.width = 32;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-
-
-  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H)
-
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 16;//,      pnl["h"]);
-  //       p.width = 16;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-  //       #elif defined(ENABLE_FEATURE_LIGHTS__2D_MATRIX_16W16H_VERTICAL)
-
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 0;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 16;//,      pnl["h"]);
-  //       p.width = 16;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-
-
-  //       #elif defined(ENABLE_DEVFEATURE_LIGHT__MATRIX_COLORADO_MATRIX_TREE)
-
-
-  //       #error "HERE?else"
-  //       Panel p;
-  //       p.bottomStart = 0; //, pnl["b"]);
-  //       p.rightStart = 0;//,  pnl["r"]);
-  //       p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       p.serpentine = true; //,  pnl["s"]);
-  //       p.xOffset = 0;//,     pnl["x"]);
-  //       p.yOffset = 0;//,     pnl["y"]);
-  //       p.height = 8;//,      pnl["h"]);
-  //       p.width = 32;//,       pnl["w"]);
-  //       panel.push_back(p);
-
-
-
-  //       #else
-  //       // default when not overriding
-
-  //       // #error "HERE?else"
-  //       // Panel p;
-  //       // p.bottomStart = 0; //, pnl["b"]);
-  //       // p.rightStart = 0;//,  pnl["r"]);
-  //       // #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL
-  //       // p.vertical = ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL;//,    pnl["v"]);`
-  //       // #else
-  //       // p.vertical = 1;//,    pnl["v"]);` // works for 16x16
-  //       // #endif
-  //       // p.serpentine = true; //,  pnl["s"]);
-  //       // p.xOffset = 0;//,     pnl["x"]);
-  //       // p.yOffset = 0;//,     pnl["y"]);
-  //       // p.height = SEGMENT.stopY;//,      pnl["h"]);
-  //       // p.width = SEGMENT.stop;//,       pnl["w"]);
-  //       // panel.push_back(p);
-
-
-
-  //       #endif
-
-
-
-  //     //   if (++s >= WLED_MAX_PANELS || s >= tkr_anim->panels) break; // max panels reached
-  //     // }
-  //   // } else {
-  //   //   // fallback
-  //   //   WS2812FX::Panel p;
-  //   //   tkr_anim->panels = 1;
-  //   //   p.height = p.width = 8;
-  //   //   p.xOffset = p.yOffset = 0;
-  //   //   p.options = 0;
-  //   //   tkr_anim->panel.push_back(p);
-  //   // }
-  //   // cannot call tkr_anim->setUpMatrix() here due to already locked JSON buffer
-  // // }
-
-  // // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
-  // if (loadLedmap >= 0) {
-  //   ALOG_HGL(PSTR("Loading LED map."));
-  //   bool flag_deserializeMap = deserializeMap(loadLedmap);
-  //   if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
-  //   {
-  //     ALOG_INF(PSTR("Matrix setup"));
-  //     setUpMatrix();
-  //   }
-  //   loadLedmap = -1;
-  // }
-  // yield();
-  // #else
-
-  // #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_MATRIX_IMMEDIATELY
-
-
-  // // THIS HAS BEEN MOVED IN 2025 INTO THE READ MAP FILE, AND THE SECTION BELOW SHOULD MOVE TOO
-  // if (loadLedmap >= 0) {
-  //   ALOG_HGL(PSTR("Loading LED map."));
-  //   bool flag_deserializeMap = deserializeMap(loadLedmap);
-  //   if (!flag_deserializeMap && isMatrix && loadLedmap == 0)
-  //   {
-  //     ALOG_INF(PSTR("Matrix setup"));
-  //     setUpMatrix();
-  //   }
-  //   loadLedmap = -1;
-  // }
-  // yield();
-
-  // #endif
-
-
-  // #endif // ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP
-
-  // #endif // enable matrix ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  
   #ifdef WLED_ENABLE_WEBSOCKETS2
   handleWs();
   #endif
@@ -1470,9 +1188,9 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     DEBUG_LINE_HERE_TRACE
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
     
-    // #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_HGL(PSTR("LOADING PALETTELIST_DYNAMIC palette_id_adj %d %d %d"),palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START); 
-    // #endif
+    #endif
     
   DEBUG_LINE_HERE_TRACE
     mPalette::PALETTE_DATA *ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
@@ -1483,22 +1201,17 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   if(
     ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
   ){
-  // DEBUG_LINE_HERE
     // Preloading is not needed, already in ram
-  
-    
   }else
   if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
-  ){  
-  // DEBUG_LINE_HERE
+  ){
     // Preloading is not needed, already in ram
   }
-  
-  
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)
+    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
   ){  
   // DEBUG_LINE_HERE
 
@@ -1555,6 +1268,137 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter,four,five, prim,sec,ter,four,five, prim,sec,ter,four,five, five); 
       }
       break;    
+      #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+      /**
+       * Keep these here, because a palette "loads" this once, and not with the GetColourFromPalette
+       * 
+       * 
+       */
+      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID:
+      {        
+        /*
+        intensity ranges from 0 to 255.
+        The term (255 - intensity) ranges from 255 (when intensity = 0) to 0 (when intensity = 255).
+        The multiplication ((255 - intensity) * 100) ranges from 255 * 100 = 25500 ms to 0 * 100 = 0 ms.
+        Adding 1000 gives the final range for new_colour_rate_ms:
+            Minimum: 1000 + 0 = 1000 ms (1 second).
+            Maximum: 1000 + 25500 = 26500 ms (26.5 seconds).
+        */
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+        if (millis() - aux3 > new_colour_rate_ms)        
+        {
+          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          //                 CHSV(random8(), 255, random8(128, 255)),
+          //                 CHSV(random8(), 255, random8(128, 255)),
+          //                 CHSV(random8(), 192, random8(128, 255)),
+          //                 CHSV(random8(), 255, random8(128, 255))
+          // );
+          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+            CHSV(random8(), 255, 255),
+            CHSV(random8(), 255, 255),
+            CHSV(random8(), 255, 255),
+            CHSV(random8(), 255, 255)
+          );
+          ALOG_INF(PSTR("new_colour_rate_ms=%d"), new_colour_rate_ms);
+          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , aux3 , new_colour_rate_ms);
+          aux3 = millis();
+        }
+      }
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
+      {        
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+        if (millis() - aux3 > new_colour_rate_ms)        
+        {
+          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
+          //                 CHSV(random8(), random8(204, 255), 255),
+          //                 CHSV(random8(), random8(204, 255), 255),
+          //                 CHSV(random8(), random8(204, 255), 255),
+          //                 CHSV(random8(), random8(204, 255), 255)
+          // );                  
+          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+            CHSV(random8(), random8(40, 100), random8(220, 255)),
+            CHSV(random8(), random8(40, 100), random8(220, 255)),
+            CHSV(random8(), random8(40, 100), random8(220, 255)),
+            CHSV(random8(), random8(40, 100), random8(220, 255))
+          );               
+          aux3 = millis();
+        }
+      }
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
+      {        
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+        if (millis() - aux3 > new_colour_rate_ms)        
+        {
+          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          //                 CHSV(random8(), random8(153, 255), 255),
+          //                 CHSV(random8(), random8(153, 255), 255),
+          //                 CHSV(random8(), random8(153, 255), 255),
+          //                 CHSV(random8(), random8(153, 255), 255)
+          // );         
+          
+          uint8_t pastel_index = random8(4);  // force 1 entry to be pastel
+
+          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+            CHSV(random8(), (pastel_index == 0) ? random8(40, 100) : random8(153, 255), 255),
+            CHSV(random8(), (pastel_index == 1) ? random8(40, 100) : random8(153, 255), 255),
+            CHSV(random8(), (pastel_index == 2) ? random8(40, 100) : random8(153, 255), 255),
+            CHSV(random8(), (pastel_index == 3) ? random8(40, 100) : random8(153, 255), 255)
+          );
+          aux3 = millis();
+        }
+      }
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
+      {        
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+        if (millis() - aux3 > new_colour_rate_ms)        
+        {
+          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          //                 CHSV(random8(), random8(153, 217), 255),
+          //                 CHSV(random8(), random8(153, 217), 255),
+          //                 CHSV(random8(), random8(153, 217), 255),
+          //                 CHSV(random8(), random8(153, 217), 255)
+          // );                          
+          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+            CHSV(random8(), random8(100, 217), random8(10, 255)),
+            CHSV(random8(), random8(100, 217), random8(10, 255)),
+            CHSV(random8(), random8(100, 217), random8(10, 255)),
+            CHSV(random8(), random8(100, 217), random8(10, 255))
+          );                        
+          aux3 = millis();
+        }
+      }
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
+      {        
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+        if (millis() - aux3 > new_colour_rate_ms)        
+        {
+        //   palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+        //                   CHSV(random8(), random8(0, 255), 255),
+        //                   CHSV(random8(), random8(0, 255), 255),
+        //                   CHSV(random8(), random8(0, 255), 255),
+        //                   CHSV(random8(), random8(0, 255), 255)
+        //                   );
+          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+            CHSV(random8(), random8(153, 217), random8(0, 68)),
+            CHSV(random8(), random8(153, 217), random8(69, 127)),
+            CHSV(random8(), random8(153, 217), random8(127, 190)),
+            CHSV(random8(), random8(153, 217), random8(190, 255))
+          );                                                  
+          aux3 = millis();
+        }
+      }
+      break;    
+
+      #else
       case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID:
       {        
         /*
@@ -1646,6 +1490,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         }
       }
       break;    
+      #endif
 
 
 
@@ -2237,11 +2082,20 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     palette_colour_count = 16;
   }
   else
+  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  ){  
+    palette_colour_count = 16;    
+  }
+
+  #else
   if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
   ){  
     palette_colour_count = 16;    
   }
+  #endif
   else
   if(
     (palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
@@ -5627,187 +5481,6 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
 }
 
 
-
-
-
-// // PHASE THIS OUT
-// RgbwwColor 
-// #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-// IRAM_ATTR 
-// #endif 
-// mAnimatorLight::Segment::GetPaletteColour(
-//   /**
-//    * @brief _pixel_position
-//    * ** [0-SEGLEN]
-//    * ** [0-255]   
-//    */
-//   uint16_t pixel_position,
-//   /**
-//    * @brief flag_spanned_segment
-//    * ** [1] : If spanned segment, then indexing (0-255) is expanded into the SEGLEN 
-//    * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
-//    * ** [2]: preffered
-//    */
-//   uint8_t     flag_spanned_segment, 
-//   /**
-//    * @brief flag_wrap_hard_edge
-//    * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-//    * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-//    */
-//   uint8_t     flag_wrap_hard_edge,
-//   /**
-//    * @brief flag_crgb_exact_colour
-//    * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-//    * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-//    */
-//   uint8_t     flag_crgb_exact_colour,
-//   /**
-//    * @brief encoded_value
-//    * ** [uint32_t*] : encoded value from palette
-//    */
-//   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-
-//   bool apply_brightness
-// ){
-  
-//   if(palette_id != palette_container->loaded_palette_id)
-//   {
-//     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-//   }
-  
-//   /**
-//    * @brief These functions always need called as they are dynamic
-//    * I should make this a check here, if palette is dynamic, then load everytime
-//    * 
-//    * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
-//    * ie have a new tSaved_DynamicUpdate 
-//    */
-//   else // else so it only tries this if the above "if" did not occur to stop double loads
-//   if(
-//     (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
-//     (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-//   ){
-//     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-//   }
-
-//   RgbcctColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
-//     palette_id,
-//     (uint8_t*)palette_container->pData.data(),
-//     pixel_position,
-//     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-//     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-//     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-//     flag_crgb_exact_colour
-//   );
-
-//   // Apply brightness if needed
-//   if (apply_brightness) {
-//     uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
-
-//     uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
-
-//     colour.R  = (colour.R * scale) >> 8;
-//     colour.G  = (colour.G * scale) >> 8;
-//     colour.B  = (colour.B * scale) >> 8;
-//     colour.WW = (colour.WW * scale) >> 8;
-//     colour.CW = (colour.CW * scale) >> 8;
-
-//   }
-
-
-
-//   return colour;
-
-// }
-
-
-RgbwwColor mAnimatorLight::Segment::GetPaletteColour_Rgbww(
-  /**
-   * @brief _pixel_position
-   * ** [0-SEGLEN]
-   * ** [0-255]   
-   */
-  uint16_t pixel_position,
-  /**
-   * @brief flag_spanned_segment
-   * ** [1] : If spanned segment, then indexing (0-255) is expanded into the SEGLEN 
-   * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
-   * ** [2]: preffered
-   */
-  uint8_t     flag_spanned_segment, 
-  /**
-   * @brief flag_wrap_hard_edge
-   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-   */
-  uint8_t     flag_wrap_hard_edge,
-  /**
-   * @brief flag_crgb_exact_colour
-   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-   */
-  uint8_t     flag_crgb_exact_colour,
-  /**
-   * @brief encoded_value
-   * ** [uint32_t*] : encoded value from palette
-   */
-  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-
-  bool apply_brightness
-){
-  
-  if(palette_id != palette_container->loaded_palette_id)
-  {
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-  }
-  
-  /**
-   * @brief These functions always need called as they are dynamic
-   * I should make this a check here, if palette is dynamic, then load everytime
-   * 
-   * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
-   * ie have a new tSaved_DynamicUpdate 
-   */
-  else // else so it only tries this if the above "if" did not occur to stop double loads
-  if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
-    (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-  ){
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-  }
-
-  RgbwwColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
-    palette_id,
-    (uint8_t*)palette_container->pData.data(),
-    pixel_position,
-    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    flag_crgb_exact_colour
-  );
-
-  // Apply brightness if needed
-  if (apply_brightness) {
-    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
-
-    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
-
-    colour.R  = (colour.R * scale) >> 8;
-    colour.G  = (colour.G * scale) >> 8;
-    colour.B  = (colour.B * scale) >> 8;
-    colour.WW = (colour.WW * scale) >> 8;
-    colour.CW = (colour.CW * scale) >> 8;
-
-  }
-
-
-
-  return colour;
-
-}
-
-
-
 uint32_t mAnimatorLight::Segment::GetPaletteColour(
   /**
    * @brief _pixel_position
@@ -5870,7 +5543,20 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
    * 
    * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
    * ie have a new tSaved_DynamicUpdate 
+   * 
+   * This needs moved into its own function and called outside this.
+   * SEGMENT.UpdatePalette(); and only called when palette is dynamic/live
    */
+  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+  // else // else so it only tries this if the above "if" did not occur to stop double loads
+  // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+    (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  ){
+    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  }
+  #else
   else // else so it only tries this if the above "if" did not occur to stop double loads
   if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
@@ -5878,6 +5564,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
   ){
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
   }
+  #endif
   DEBUG_LINE_HERE_TRACE
 
   uint32_t colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
@@ -5911,6 +5598,105 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
   return colour;
 
 }
+
+RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
+  /**
+   * @brief _pixel_position
+   * ** [0-SEGLEN]
+   * ** [0-255]   
+   */
+  uint16_t pixel_position,
+  /**
+   * @brief flag_spanned_segment
+   * ** [1] : If spanned segment, then indexing (0-255) is expanded into the SEGLEN 
+   * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
+   * ** [2]: preffered
+   */
+  uint8_t     flag_spanned_segment, 
+  /**
+   * @brief flag_wrap_hard_edge
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  uint8_t     flag_wrap_hard_edge,
+  /**
+   * @brief flag_crgb_exact_colour
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  uint8_t     flag_crgb_exact_colour,
+  /**
+   * @brief encoded_value
+   * ** [uint32_t*] : encoded value from palette
+   */
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+
+  bool apply_brightness
+){
+  
+  if(palette_id != palette_container->loaded_palette_id)
+  {
+    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+  }
+  
+  /**
+   * @brief These functions always need called as they are dynamic
+   * I should make this a check here, if palette is dynamic, then load everytime
+   * 
+   * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
+   * ie have a new tSaved_DynamicUpdate 
+   */
+  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+  // else // else so it only tries this if the above "if" did not occur to stop double loads
+  // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+    (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  ){
+    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  }
+  #else
+  else // else so it only tries this if the above "if" did not occur to stop double loads
+  if(
+    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
+    (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
+  ){
+    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  }
+  #endif
+
+  RgbwwColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
+    palette_id,
+    (uint8_t*)palette_container->pData.data(),
+    pixel_position,
+    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    flag_crgb_exact_colour
+  );
+
+  // Apply brightness if needed
+  if (apply_brightness) {
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+
+    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+
+    colour.R  = (colour.R * scale) >> 8;
+    colour.G  = (colour.G * scale) >> 8;
+    colour.B  = (colour.B * scale) >> 8;
+    colour.WW = (colour.WW * scale) >> 8;
+    colour.CW = (colour.CW * scale) >> 8;
+
+  }
+
+
+
+  return colour;
+
+}
+
+
+
 
 CRGB mAnimatorLight::ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {

@@ -640,6 +640,8 @@ char releaseString[7] = WLED_RELEASE_NAME; // must include the quotes when defin
     static uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
     // #define color_blend ColourBlend
 
+    
+void Init_Busses();
 
 // Time CONFIG
 #ifndef WLED_NTP_ENABLED
@@ -1327,6 +1329,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__CANDLE_SINGLE__ID,
       EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,
       EFFECTS_FUNCTION__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH__ID,
+      // EFFECTS_FUNCTION__RANDOMISE_GRADIENT_ANY_PALETTE_WITH_ZOOM_AND_SQUEEZE__ID, Make new effect that will take any palette, with or without grad indexs, and will zoom/stretch them. Ie 4 colours, which would have [0, 90,190, 255] as centre points, will have the 90 and 190 distances move around. This will depend on number of colours in a palette.
       EFFECTS_FUNCTION__STATIC_PALETTE_VARIED__ID,
       #endif
 
@@ -3101,41 +3104,18 @@ typedef struct Segment
     uint32_t color_wheel(uint8_t pos);
 
 
-    [[gnu::hot]] RgbwwColor GetPaletteColour_Rgbww(
-      /**
-       * @brief _pixel_position
-       * ** [0-SEGLEN]
-       * ** [0-255]   
-       */
-      uint16_t pixel_position = 0,
-      /**
-       * @brief flag_position_scaled255
-       * ** [true] : pixel_position should be between 0-255
-       * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
-       */
-      uint8_t     flag_position_scaled255 = false,
-      /**
-       * @brief flag_wrap_hard_edge
-       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-       */
-      uint8_t     flag_wrap_hard_edge = false,
-      /**
-       * @brief flag_crgb_exact_colour
-       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-       */
-      uint8_t     flag_crgb_exact_colour = false,
-      /**
-       * @brief encoded_value
-       * ** [uint32_t*] : encoded value from palette
-       */
-      uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    /******************************************************************************************************************************************************
+     * U32 vs RGBWW
+     * In normal mode (<300 pixels RGBWW performance is good)
+     *  * RGBWW can be used directly (though for most effects, a define will convert it to U32 anyway)
+     * In performance mode (>300 pixels RGBWW performance is bad)
+     *  * U32 is used directly, RGBWW methods are not used
+     * In Hybrid mode 
+     *  * RGBWW can be used directly, but U32 methods are used for performance
+     * 
+     ******************************************************************************************************************************************************/
 
-      
 
-      bool apply_brightness = false
-    );
 
     /**
      * @brief Depending on the build settings later, I will want to keep a Rgbcct and U32 palette method
@@ -3188,6 +3168,46 @@ typedef struct Segment
 
       uint8_t mcol = 0
     );
+
+    /*****
+     * Some effects allow for RGBWW to be generated, but this has performance implications
+     *****/
+    [[gnu::hot]] RgbwwColor GetPaletteColour_RGBWW(
+      /**
+       * @brief _pixel_position
+       * ** [0-SEGLEN]
+       * ** [0-255]   
+       */
+      uint16_t pixel_position = 0,
+      /**
+       * @brief flag_position_scaled255
+       * ** [true] : pixel_position should be between 0-255
+       * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
+       */
+      uint8_t     flag_position_scaled255 = false,
+      /**
+       * @brief flag_wrap_hard_edge
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      uint8_t     flag_wrap_hard_edge = false,
+      /**
+       * @brief flag_crgb_exact_colour
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      uint8_t     flag_crgb_exact_colour = false,
+      /**
+       * @brief encoded_value
+       * ** [uint32_t*] : encoded value from palette
+       */
+      uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+
+      
+
+      bool apply_brightness = false
+    );
+
     
     /**
      * WLED Palette Conversion
