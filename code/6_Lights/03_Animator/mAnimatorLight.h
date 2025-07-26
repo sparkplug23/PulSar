@@ -3127,6 +3127,7 @@ typedef struct Segment
      * #define GetPaletteColour GetPaletteColourRGBCCT
      * #endif
      **/
+    uint8_t white_warm_GetPaletteColour = 0;
     [[gnu::hot]] uint32_t GetPaletteColour(
       /**
        * @brief _pixel_position

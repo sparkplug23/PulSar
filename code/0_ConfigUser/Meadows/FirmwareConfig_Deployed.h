@@ -31,7 +31,7 @@
 // #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
 // #define DEVICE_MEADOWS__OFFICE__BLACK_STAND
 // #define DEVICE_OFFICE__DESK_LIGHTING
-#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
+// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1624,7 +1624,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 #define ENABLE_DEVFEATURE_PALETTE__VERSION2
 #define ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
-#define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+// #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
 
 
 
@@ -5513,6 +5513,11 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 #ifdef DEVICE_OFFICE__DESK_LIGHTING 
   
   #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+  #define ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+
+  #define ENABLE_DEVFEATURE_PALETTE__VERSION2
+  #define ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+
 
   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
 

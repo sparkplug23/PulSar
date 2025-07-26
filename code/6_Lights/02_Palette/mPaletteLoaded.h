@@ -40,6 +40,8 @@ class mPaletteLoaded
 	 */
 	std::vector<float> mapping_values;
 	std::vector<uint8_t> pData;
+	uint8_t encoded_colour_width = 0; // This is the width of the colour in bytes, so 3 for RGB, 4 for RGBW, etc
+	uint8_t colours_in_palette = 0; // This is the number of colours in the palette, so 16 for CRGBPalette16, 256 for CRGBPalette256, etc
 
 	struct CRGB16Palette16_PALETTE
 	{

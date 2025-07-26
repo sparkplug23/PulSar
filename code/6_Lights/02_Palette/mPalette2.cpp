@@ -776,6 +776,8 @@ mPalette::PALETTE_ENCODING_DATA mPalette::findPaletteEncoding(uint16_t id)
   return {0}; // You could also return an error code here if needed
 }
 
+// #define ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+
 
 /*********************************************************************************************************************************************************************************
  *********************************************************************************************************************************************************************************
@@ -786,6 +788,8 @@ mPalette::PALETTE_ENCODING_DATA mPalette::findPaletteEncoding(uint16_t id)
 /**
  * @brief Thought, maybe make a U8 for just the other white object, it would remove the need for two functions like this. 
  * This optionally could be like ignore, or repeat it across them all, again to speed things up.
+ * 
+ * Could use flag in segment of "WW enabled", so it can be disabled for processing speed when not needed.
  */
 
 IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuffer_U32
@@ -806,18 +810,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   // Requesting preview: Live palettes must respond with preview for UI
   bool flag_request_is_for_full_visual_output
 ){
-  
-
-  // uint16_t palette_id,
-  // uint8_t* palette_buffer,
-  // uint16_t _pixel_position,    
-  // uint8_t* encoded_value,  
-  // uint8_t flag_spanned_segment, 
-  // uint8_t flag_wrap_hard_edge,        
-  // uint8_t flag_crgb_exact_colour,
-  // bool flag_request_is_for_full_visual_output
-
-  DEBUG_LINE_HERE_TRACE
 
   RgbwwColor colourRGBWW;
   uint32_t      colour32;
@@ -833,42 +825,32 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
    * 
   ***************************************************************/
   if(
-    ((id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-    ((id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
-    ((id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
-    ((id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
+    ((id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+    ((id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
+    ((id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+    ((id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
   ){
     
-    uint8_t segIdx = tkr_anim->segment_current_index;
-    if (segIdx >= tkr_anim->segments.size()) {
-      // This might be what causes segment1+ to override what is in the segment0, needs investigated.
-      segIdx = 0;
-    }
-
-    CRGB fastled_col;
     uint16_t pixel_position_adjust = desired_index;
 
-    if (override_default_encoding == PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE) { // flag_crgb_exact_colour
-      uint8_t pixels_in_crgb16palette = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size(); // surely always 16 bytes???????
-      pixel_position_adjust = desired_index % pixels_in_crgb16palette;
-      pixel_position_adjust = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[pixel_position_adjust];
+    if (override_default_encoding == PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE) {
+      pixel_position_adjust = pSEGMENT.palette_container->CRGB16Palette16_Palette.encoded_index[desired_index % 16]; // Ensure pixel_position_adjust is in range 0-15
     }
 
-    if (rescale_index255_to_span_segment_length) 
-    {
-      if (tkr_anim->_virtualSegmentLength == 1) {
-        pixel_position_adjust = 0;
-      } else {
-        pixel_position_adjust = (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
-      }
+    if (rescale_index255_to_span_segment_length) {
+      pixel_position_adjust = (tkr_anim->_virtualSegmentLength == 1) ? 0 : (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
     }
 
     if (rescale_index_wrap_for_hardedge) {
-      pixel_position_adjust = scale8(pixel_position_adjust, 240);
+      pixel_position_adjust = scale8(pixel_position_adjust, 240); // Rescale to avoid wrap around blending
     }
 
-    fastled_col = ColorFromPalette(pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, NOBLEND);
+    CRGB fastled_col = ColorFromPalette(pSEGMENT.palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, NOBLEND);
     colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
+    #endif
+
   } 
   /**************************************************************
    * 
@@ -884,6 +866,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     const uint8_t* data  = PM_STATIC_SINGLE_COLOURS__DATA;
     uint8_t adjust_buf_i =  adjusted_id*3;
     colour32 = RGBW32(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2], 0);
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    colour32_white_cold = 0; // No white in PALETTELIST_STATIC_SINGLE_COLOUR
+    #endif
   }  
   /**************************************************************
    * 
@@ -895,16 +880,12 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   if(
     (id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
   ){  
-  
     uint8_t adjusted_id = id - PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID;
-    uint8_t segIdx = tkr_anim->segment_current_index;
-
-    if(segIdx >= tkr_anim->segments.size() ){ segIdx = 0; } 
-    if(adjusted_id < RGBCCTCOLOURS_SIZE)
-    {
-      colourRGBWW = tkr_anim->segments[segIdx].segcol[adjusted_id].colour;
-      colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-    }
+    colourRGBWW = pSEGMENT.segcol[adjusted_id].colour;
+    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
+    #endif
   }
   /**************************************************************
    * 
@@ -915,19 +896,15 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   else if (id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID && 
            id < PALETTELIST_STATIC_LENGTH__ID) {
 
-    // if(millis()%10==0) ALOG_INF(PSTR("pal %d"), id);
-
     uint16_t palette_adjusted_id = id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; 
-
-    uint8_t encoded_colour_width = GetEncodedColourWidth(static_palettes[palette_adjusted_id].encoding);
-    uint8_t colours_in_palette = static_palettes[palette_adjusted_id].data.size() / encoded_colour_width;
     data = &static_palettes[palette_adjusted_id].data[0];
 
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW( // should make a U32 version for improved performance when only in RGB mode
       data,
       desired_index,
-      encoded_colour_width,
-      colours_in_palette,
+      pSEGMENT.palette_container->encoded_colour_width,
+      pSEGMENT.palette_container->colours_in_palette,
       static_palettes[palette_adjusted_id].encoding,
       encoded_index,
       rescale_index255_to_span_segment_length,
@@ -935,7 +912,21 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       override_default_encoding,
       false
     );
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
+    #else // Fast RGBW support only
+    colour32 = SubGet_Encoded_Palette_Colour_U32( // should make a U32 version for improved performance when only in RGB mode
+      data,
+      desired_index,
+      pSEGMENT.palette_container->encoded_colour_width,
+      pSEGMENT.palette_container->colours_in_palette,
+      static_palettes[palette_adjusted_id].encoding,
+      encoded_index,
+      rescale_index255_to_span_segment_length,
+      rescale_index_wrap_for_hardedge,
+      override_default_encoding,
+      false
+    );
+    #endif
   }
   /**************************************************************
    * 
@@ -947,16 +938,14 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
            id < GetPaletteListLength()) {
 
     uint16_t palette_adjusted_id = id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
-
-    uint8_t encoded_colour_width = GetEncodedColourWidth(custom_palettes[palette_adjusted_id].encoding);
-    uint8_t colours_in_palette = custom_palettes[palette_adjusted_id].data.size() / encoded_colour_width;
     data = &custom_palettes[palette_adjusted_id].data[0];
 
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
       data,
       desired_index,
-      encoded_colour_width,
-      colours_in_palette,
+      pSEGMENT.palette_container->encoded_colour_width,
+      pSEGMENT.palette_container->colours_in_palette,
       custom_palettes[palette_adjusted_id].encoding,
       encoded_index,
       rescale_index255_to_span_segment_length,
@@ -964,7 +953,21 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       override_default_encoding,
       false
     );
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
+    #else
+    colour32 = SubGet_Encoded_Palette_Colour_U32(
+      data,
+      desired_index,
+      pSEGMENT.palette_container->encoded_colour_width,
+      pSEGMENT.palette_container->colours_in_palette,
+      custom_palettes[palette_adjusted_id].encoding,
+      encoded_index,
+      rescale_index255_to_span_segment_length,
+      rescale_index_wrap_for_hardedge,
+      override_default_encoding,
+      false
+    );
+    #endif
   }
   /**************************************************************
    * 
@@ -976,16 +979,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   if(
     ((id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) && (id < PALETTELIST_DYNAMIC__LENGTH__ID))
   ){  
-    DEBUG_LINE_HERE_TRACE
     uint8_t palette_adjusted_id_rel0 = id - PALETTELIST_DYNAMIC__COLOUR__ID_START;
-    uint8_t encoded_colour_width  = GetEncodedColourWidth(dynamic_palettes[palette_adjusted_id_rel0].encoding);   
-    uint8_t colours_in_palette = dynamic_palettes[palette_adjusted_id_rel0].data.size() / encoded_colour_width ;
-    data = &dynamic_palettes[palette_adjusted_id_rel0].data[0];
-    PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_adjusted_id_rel0].encoding;
+    data = &dynamic_palettes[palette_adjusted_id_rel0].data[0];;
 
-    // Serial.println("((id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (id < PALETTELIST_DYNAMIC__LENGTH__ID))");
-
-    DEBUG_LINE_HERE_TRACE
     switch(id) 
     {
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID: {
@@ -1000,59 +996,49 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           float el_max = 10;
         #endif
 
-        #ifdef ENABLE_NEW_LIVE_PALETTES
+        mAnimatorLight::SegmentColour colour_out = 0;
+        float eval_elevation;
 
-          mAnimatorLight::SegmentColour colour_out = 0;
-          float eval_elevation;
+        if (flag_request_is_for_full_visual_output) {
+          uint16_t pixel_length = tkr_anim->_virtualSegmentLength;
+          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
+          ALOG_INF(PSTR("Full Visual Output: Pixel Position: %d, Mapped Elevation: %d"), desired_index, (int)eval_elevation);
+        } else {
+          eval_elevation = elevation;
+        }
 
-          if (flag_request_is_for_full_visual_output) {
-            uint16_t pixel_length = tkr_anim->_virtualSegmentLength;
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-            ALOG_INF(PSTR("Full Visual Output: Pixel Position: %d, Mapped Elevation: %d"), desired_index, (int)eval_elevation);
-          } else {
-            eval_elevation = elevation;
-          }
+        if (eval_elevation <= el_min) {
+          colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT);         // Warm white
+          colour_out.setRGB(0xFF, 0x52, 0x18);
+        } else if (eval_elevation >= el_max) {
+          colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT);         // Cold white
+          colour_out.setRGB(255, 255, 255);
+        } else {
+          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
 
-          if (eval_elevation <= el_min) {
-            colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT);         // Warm white
-            colour_out.setRGB(0xFF, 0x52, 0x18);
-          } else if (eval_elevation >= el_max) {
-            colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT);         // Cold white
-            colour_out.setRGB(255, 255, 255);
-          } else {
-            float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+          mAnimatorLight::SegmentColour warm = 0;
+          warm.setCCT_Kelvin(CCT_MAX_DEFAULT);
+          warm.setRGB(0xFF, 0x52, 0x18);
 
-            mAnimatorLight::SegmentColour warm = 0;
-            warm.setCCT_Kelvin(CCT_MAX_DEFAULT);
-            warm.setRGB(0xFF, 0x52, 0x18);
+          mAnimatorLight::SegmentColour cold = 0;
+          cold.setCCT_Kelvin(CCT_MIN_DEFAULT);
+          cold.setRGB(255, 255, 255);
 
-            mAnimatorLight::SegmentColour cold = 0;
-            cold.setCCT_Kelvin(CCT_MIN_DEFAULT);
-            cold.setRGB(255, 255, 255);
+          colour_out.colour = RgbwwColor::LinearBlend(warm.colour, cold.colour, progress);
+        }
 
-            colour_out.colour = RgbwwColor::LinearBlend(warm.colour, cold.colour, progress);
-          }
-
-          #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-            // Serial.println(eval_elevation);
-            // colour_out.debug_print("colour_out");
-          #endif
-
-          colourRGBWW = colour_out.colour;
-          colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-
-        #else
-
-          float progress = mSupport::mapfloat(elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          uint32_t col32 = RGBW32(col.R, col.G, col.B, col.WW);
-          return col32;
-
+        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+          // Serial.println(eval_elevation);
+          // colour_out.debug_print("colour_out");
         #endif
 
-        break;
+        colourRGBWW = colour_out.colour;
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
+        #endif
+
+      break;
       }
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID: {
 
@@ -1066,34 +1052,25 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           float el_max = 10;
         #endif
       
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-      
-          float eval_elevation;
-          if (flag_request_is_for_full_visual_output) {
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          } else {
-            eval_elevation = elevation;
-          }
-      
-          eval_elevation = constrain(eval_elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-      
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-      
-        #else
-      
-          float progress = mSupport::mapfloat(elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          return RGBW32(col.R, col.G, col.B, col.WW);
-      
+        float eval_elevation;
+        if (flag_request_is_for_full_visual_output) {
+          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
+        } else {
+          eval_elevation = elevation;
+        }
+    
+        eval_elevation = constrain(eval_elevation, el_min, el_max);
+        float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+    
+        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
+        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
+        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
         #endif
-      
-        break;
+          
+      break;
       }
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID: {
 
@@ -1107,34 +1084,25 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           float el_max = 10;
         #endif
       
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-      
-          float eval_elevation;
-          if (flag_request_is_for_full_visual_output) {
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          } else {
-            eval_elevation = elevation;
-          }
-      
-          eval_elevation = constrain(eval_elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-      
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-      
-        #else
-      
-          float progress = mSupport::mapfloat(elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          return RGBW32(col.R, col.G, col.B, col.WW);
-      
+        float eval_elevation;
+        if (flag_request_is_for_full_visual_output) {
+          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
+        } else {
+          eval_elevation = elevation;
+        }
+    
+        eval_elevation = constrain(eval_elevation, el_min, el_max);
+        float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+    
+        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
+        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
+        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
         #endif
-      
-        break;
+          
+      break;
       }
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID: {
 
@@ -1148,38 +1116,26 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           float el_max = -10;
         #endif
       
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-      
-          float eval_elevation;
-          if (flag_request_is_for_full_visual_output) {
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          } else {
-            eval_elevation = elevation;
-          }
-      
-          eval_elevation = constrain(eval_elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-      
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-      
-        #else
-      
-          float eval_elevation = constrain(elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          return RGBW32(col.R, col.G, col.B, col.WW);
-      
+        float eval_elevation;
+        if (flag_request_is_for_full_visual_output) {
+          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
+        } else {
+          eval_elevation = elevation;
+        }
+    
+        eval_elevation = constrain(eval_elevation, el_min, el_max);
+        float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+    
+        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
+        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
+        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
         #endif
-      
-        break;
-      }
     
-    
+      break;
+      }    
       case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__MINUTE_BLEND__ID:
       {
         /***
@@ -1197,7 +1153,10 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
         RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
         RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
         colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);   
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);     
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
+        #endif
       }
       break;
       case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__HOUR_BLEND__ID:
@@ -1217,7 +1176,10 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
         RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
         RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
         colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);    
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);    
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
+        #endif
       }
       break;
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID: {
@@ -1261,19 +1223,34 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       
         bool flag_force_gradient = false;// missing as it was in 
       
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS    
         colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
           data,
           rescaled_palette_index,
-          encoded_colour_width,
-          colours_in_palette,
-          encoding,
+          pSEGMENT.palette_container->encoded_colour_width,
+          pSEGMENT.palette_container->colours_in_palette,
+          dynamic_palettes[palette_adjusted_id_rel0].encoding,
           encoded_index,
           false,
           rescale_index_wrap_for_hardedge,
           override_default_encoding,
           flag_force_gradient
         );
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
+        #else        
+        colourRGBWW = SubGet_Encoded_Palette_Colour_U32(
+          data,
+          rescaled_palette_index,
+          pSEGMENT.palette_container->encoded_colour_width,
+          pSEGMENT.palette_container->colours_in_palette,
+          dynamic_palettes[palette_adjusted_id_rel0].encoding,
+          encoded_index,
+          false,
+          rescale_index_wrap_for_hardedge,
+          override_default_encoding,
+          flag_force_gradient
+        );
+        #endif
       }
       break;
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID: {
@@ -1293,20 +1270,35 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       
         bool flag_force_gradient = false;// missing as it was in 
       
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS    
         colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
           data,
           palette_index,
-          encoded_colour_width,
-          colours_in_palette,
-          encoding,
+          pSEGMENT.palette_container->encoded_colour_width,
+          pSEGMENT.palette_container->colours_in_palette,
+          dynamic_palettes[palette_adjusted_id_rel0].encoding,
           encoded_index,
           false,
           rescale_index_wrap_for_hardedge,
           override_default_encoding,
           flag_force_gradient
         );
+        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
+        #else // Fast RGBW support only        
+        colour32 = SubGet_Encoded_Palette_Colour_U32(
+          data,
+          palette_index,
+          pSEGMENT.palette_container->encoded_colour_width,
+          pSEGMENT.palette_container->colours_in_palette,
+          dynamic_palettes[palette_adjusted_id_rel0].encoding,
+          encoded_index,
+          false,
+          rescale_index_wrap_for_hardedge,
+          override_default_encoding,
+          flag_force_gradient
+        );
+        #endif
 
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
       }
       break;
       
@@ -1325,9 +1317,10 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 }
 
 
+#ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
 
- IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBuffer_RGBWW
- (
+IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBuffer_RGBWW
+(
   uint16_t id,
   // Pass preloaded palette data buffer. If nullptr, and "id" does not match any preloaded palette, then it will force a reload of the palette data.
   uint8_t* data,
@@ -1344,533 +1337,34 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   // Requesting preview: Live palettes must respond with preview for UI
   bool flag_request_is_for_full_visual_output  
 ){
-  // uint16_t palette_id,
-  // uint8_t* palette_buffer,
-  // uint16_t _pixel_position,    
-  // uint8_t* encoded_value,  
-  // uint8_t flag_spanned_segment, 
-  // uint8_t flag_wrap_hard_edge,        
-  // uint8_t flag_crgb_exact_colour,
-  // bool flag_request_is_for_full_visual_output
-  
-  // ALOG_INF(PSTR("palid %d"), palette_id);
-  DEBUG_LINE_HERE_TRACE
-  RgbwwColor colourRGBWW = RgbwwColor();
 
-  // This block merges all dynamic palette handling directly into this function
-  if(
-    ((id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-    ((id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
-    ((id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
-    ((id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
-  ){
-    
-    uint8_t segIdx = tkr_anim->segment_current_index;
-    if (segIdx >= tkr_anim->segments.size()) {
-      segIdx = 0;
-    }
+  /***
+   * Keep the function signature the same, but internally call GetColourFromPreloadedPaletteBuffer_U32
+   * Use external variable to hold additional white component generated in U32 version
+   * This allows _U32 to be centralised generation of colour (i.e. makes it easier to maintain, particularly for dynamic palettes)
+   */
+  uint32_t rgbw = GetColourFromPreloadedPaletteBuffer_U32(
+                                                            id,
+                                                            data,
+                                                            desired_index,
+                                                            encoded_index,
+                                                            rescale_index255_to_span_segment_length,
+                                                            rescale_index_wrap_for_hardedge,
+                                                            override_default_encoding,
+                                                            flag_request_is_for_full_visual_output
+                                                          );
+                                                        
+  return RgbwwColor(
+    (rgbw >> 16) & 0xFF, // Red
+    (rgbw >>  8) & 0xFF, // Green
+    (rgbw >>  0) & 0xFF, // Blue
+    (rgbw >> 24) & 0xFF, // White component
+    colour32_white_cold  // To get around U32 performance with more than 32bit wide, the 5th component is updated inside _U32 function then appended here.
+  );
 
-    CRGB fastled_col;
-    uint16_t pixel_position_adjust = desired_index;
-
-    if (override_default_encoding == PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE) { // flag_crgb_exact_colour
-      uint8_t pixels_in_crgb16palette = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size();
-      pixel_position_adjust = desired_index % pixels_in_crgb16palette;
-      pixel_position_adjust = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[pixel_position_adjust];
-    }
-
-    if (rescale_index255_to_span_segment_length) {
-      if (tkr_anim->_virtualSegmentLength == 1) {
-        pixel_position_adjust = 0;
-      } else {
-        pixel_position_adjust = (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
-      }
-    }
-
-    if (rescale_index_wrap_for_hardedge == PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE) {
-      pixel_position_adjust = scale8(pixel_position_adjust, 240);
-    }
-
-    fastled_col = ColorFromPalette(pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, NOBLEND);
-    colourRGBWW = RgbwwColor(fastled_col.r, fastled_col.g, fastled_col.b);
-  } 
-  // Static single color handling
-  /**************************************************************
-   * 
-   * PALETTELIST_STATIC_SINGLE_COLOURS__IDS
-   * 
-  ***************************************************************/
-  else
-  if(
-    (id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
-  ){  
-
-  
-    uint8_t adjusted_id  = id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
-    const uint8_t* data  = PM_STATIC_SINGLE_COLOURS__DATA;
-    uint8_t adjust_buf_i =  adjusted_id*3;
-    colourRGBWW = RgbwwColor(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2]);
-
-  }
-  
-  /**************************************************************
-   * 
-   * PALETTELIST_SEGMENT__SEGMENT_COLOUR__IDS
-   * 
-  ***************************************************************/
-  else
-  if(
-    (id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
-  ){  
-  
-
-    uint8_t adjusted_id = id - PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID;
-    uint8_t segIdx = tkr_anim->segment_current_index;
-
-    if(segIdx >= tkr_anim->segments.size() ){ segIdx = 0; } 
-    if(adjusted_id < RGBCCTCOLOURS_SIZE)
-    {
-      colourRGBWW = tkr_anim->segments[segIdx].segcol[adjusted_id].colour;
-    }
-    // SERIAL_DEBUG_COLRGBWWi("pal", colour, segIdx);
-    // colour.debug_print("rgbcctcolors");
-  }
-  else if (id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID && 
-           id < PALETTELIST_STATIC_LENGTH__ID) {
-
-    // if(millis()%10==0) ALOG_INF(PSTR("pal %d"), id);
-
-    uint16_t palette_adjusted_id = id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; 
-
-    uint8_t encoded_colour_width = GetEncodedColourWidth(static_palettes[palette_adjusted_id].encoding);
-    uint8_t colours_in_palette = static_palettes[palette_adjusted_id].data.size() / encoded_colour_width;
-    data = &static_palettes[palette_adjusted_id].data[0];
-
-    colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-      data,
-      desired_index,
-      encoded_colour_width,
-      colours_in_palette,
-      static_palettes[palette_adjusted_id].encoding,
-      encoded_index,
-      rescale_index255_to_span_segment_length,
-      rescale_index_wrap_for_hardedge,
-      override_default_encoding,
-      false
-    );
-  }
-  // Custom palette handling
-  else if (id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED && 
-           id < GetPaletteListLength()) {
-
-            DEBUG_LINE_HERE_TRACE
-    uint16_t palette_adjusted_id = id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
-
-    uint8_t encoded_colour_width = GetEncodedColourWidth(custom_palettes[palette_adjusted_id].encoding);
-    uint8_t colours_in_palette = custom_palettes[palette_adjusted_id].data.size() / encoded_colour_width;
-    data = &custom_palettes[palette_adjusted_id].data[0];
-
-    colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-      data,
-      desired_index,
-      encoded_colour_width,
-      colours_in_palette,
-      custom_palettes[palette_adjusted_id].encoding,
-      encoded_index,
-      rescale_index255_to_span_segment_length,
-      rescale_index_wrap_for_hardedge,
-      override_default_encoding,
-      false
-    );
-  }
-  // Dynamic palettes inline switch-case to reduc performance with another function call
-  else 
-  if(
-    ((id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) && (id < PALETTELIST_DYNAMIC__LENGTH__ID))
-  ){  
-    DEBUG_LINE_HERE_TRACE
-    uint8_t palette_adjusted_id_rel0 = id - PALETTELIST_DYNAMIC__COLOUR__ID_START;
-    uint8_t encoded_colour_width  = GetEncodedColourWidth(dynamic_palettes[palette_adjusted_id_rel0].encoding);   
-    uint8_t colours_in_palette = dynamic_palettes[palette_adjusted_id_rel0].data.size() / encoded_colour_width;
-    data = &dynamic_palettes[palette_adjusted_id_rel0].data[0];
-    PALETTE_ENCODING_DATA encoding = dynamic_palettes[palette_adjusted_id_rel0].encoding;
-
-    // ALOG_INF(PSTR("palid %d"), id);
-    DEBUG_LINE_HERE_TRACE
-
-    switch(id) {
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID: {
-
-        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
-          float el_max = (ELEVATION_DAY_THRESHOLD != 0)   ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0;
-          float el_min = -10;
-          float el_max = 10;
-        #endif
-
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-
-          mAnimatorLight::SegmentColour colour_out = 0;
-          float eval_elevation;
-
-          if (flag_request_is_for_full_visual_output) {
-            uint16_t pixel_length = tkr_anim->_virtualSegmentLength;
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-            ALOG_INF(PSTR("Full Visual Output: Pixel Position: %d, Mapped Elevation: %d"), desired_index, (int)eval_elevation);
-          } else {
-            eval_elevation = elevation;
-          }
-
-          if (eval_elevation <= el_min) {
-            colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT);         // Warm white
-            colour_out.setRGB(0xFF, 0x52, 0x18);
-          } else if (eval_elevation >= el_max) {
-            colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT);         // Cold white
-            colour_out.setRGB(255, 255, 255);
-          } else {
-            float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-
-            mAnimatorLight::SegmentColour warm = 0;
-            warm.setCCT_Kelvin(CCT_MAX_DEFAULT);
-            warm.setRGB(0xFF, 0x52, 0x18);
-
-            mAnimatorLight::SegmentColour cold = 0;
-            cold.setCCT_Kelvin(CCT_MIN_DEFAULT);
-            cold.setRGB(255, 255, 255);
-
-            colour_out.colour = RgbwwColor::LinearBlend(warm.colour, cold.colour, progress);
-          }
-
-          #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-            // Serial.println(eval_elevation);
-            // colour_out.debug_print("colour_out");
-          #endif
-
-          colourRGBWW = colour_out.colour;
-
-        #else
-
-          float progress = mSupport::mapfloat(elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          uint32_t col32 = RGBW32(col.R, col.G, col.B, col.WW);
-          return col32;
-
-        #endif
-
-        break;
-      }
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID: {
-
-        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = 0.0f;
-          float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0;
-          float el_min = 0;
-          float el_max = 10;
-        #endif
-      
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-      
-          float eval_elevation;
-          if (flag_request_is_for_full_visual_output) {
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          } else {
-            eval_elevation = elevation;
-          }
-      
-          eval_elevation = constrain(eval_elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-      
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-      
-        #else
-      
-          float progress = mSupport::mapfloat(elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          return RGBW32(col.R, col.G, col.B, col.WW);
-      
-        #endif
-      
-        break;
-      }
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID: {
-
-        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
-          float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0;
-          float el_min = -10;
-          float el_max = 10;
-        #endif
-      
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-      
-          float eval_elevation;
-          if (flag_request_is_for_full_visual_output) {
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          } else {
-            eval_elevation = elevation;
-          }
-      
-          eval_elevation = constrain(eval_elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-      
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-      
-        #else
-      
-          float progress = mSupport::mapfloat(elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          return RGBW32(col.R, col.G, col.B, col.WW);
-      
-        #endif
-      
-        break;
-      }
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID: {
-
-        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = tkr_solar->Get_Elevation();
-          float el_max = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : -10.0f;
-          float el_min = tkr_solar->Get_Elevation_Min();
-        #else
-          float elevation = 0;
-          float el_min = -30;
-          float el_max = -10;
-        #endif
-      
-        #ifdef ENABLE_NEW_LIVE_PALETTES
-      
-          float eval_elevation;
-          if (flag_request_is_for_full_visual_output) {
-            eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          } else {
-            eval_elevation = elevation;
-          }
-      
-          eval_elevation = constrain(eval_elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-      
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-      
-        #else
-      
-          float eval_elevation = constrain(elevation, el_min, el_max);
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-          RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-          RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-          RgbwwColor col = RgbwwColor::LinearBlend(colour1, colour2, progress);
-          return RGBW32(col.R, col.G, col.B, col.WW);
-      
-        #endif
-      
-        break;
-      }
-    
-    
-      case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__MINUTE_BLEND__ID:
-      {
-        /***
-         * Sawtooth style blending, from 0->1->0 of segment colours. Stops hard transition of time rollover
-         */
-        float progress;
-        if (tkr_time->RtcTime.second < 30) {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.second, 0, 29, 0.0f, 1.0f);
-        } else {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.second, 30, 59, 1.0f, 0.0f);
-        }       
-        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-        Serial.println(progress);
-        #endif        
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);        
-      }
-      break;
-      case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__HOUR_BLEND__ID:
-      {
-        /***
-         * Sawtooth style blending, from 0->1->0 of segment colours. Stops hard transition of time rollover
-         */
-        float progress;
-        if (tkr_time->RtcTime.hour < 30) {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.hour, 0, 29, 0.0f, 1.0f);
-        } else {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.hour, 30, 59, 1.0f, 0.0f);
-        }       
-        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-        Serial.println(progress);
-        #endif        
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);        
-      }
-      break;
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID: {
-        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = tkr_solar->Get_Elevation_Min();
-          float el_max = tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0.0f;
-          float el_min = -45.0f;
-          float el_max = 45.0f;
-        #endif
-      
-        uint16_t pixel_length = tkr_anim->_virtualSegmentLength;
-        uint16_t rescaled_palette_index;
-      
-        if (flag_request_is_for_full_visual_output) {
-          rescaled_palette_index = desired_index;
-        } else {
-          float zoom_ratio = pSEGMENT.custom1 / 255.0f;
-          zoom_ratio = constrain(zoom_ratio, 0.01f, 1.0f);  // Prevent zero or too narrow
-      
-          float zoom_range = (el_max - el_min) * zoom_ratio;
-          float el_start = elevation - (zoom_range / 2.0f);
-          float el_end   = elevation + (zoom_range / 2.0f);
-      
-          el_start = constrain(el_start, el_min, el_max);
-          el_end   = constrain(el_end, el_min, el_max);
-
-          uint16_t pixel_position_adjust = (pixel_length > 1) ? (desired_index * 255) / (pixel_length - 1) : 0;
-          uint16_t palette_start = (uint16_t)mSupport::mapfloat(el_start, el_min, el_max, 0.0f, 255.0f);
-          uint16_t palette_end   = (uint16_t)mSupport::mapfloat(el_end,   el_min, el_max, 0.0f, 255.0f);
-      
-          if (palette_start >= palette_end)
-            palette_start = (palette_end > 0) ? palette_end - 1 : 0;
-      
-          rescaled_palette_index = (uint16_t)mSupport::mapfloat(
-            pixel_position_adjust, 0.0f, 255.0f, palette_start, palette_end);
-          rescaled_palette_index = constrain(rescaled_palette_index, 0, 255);
-        }
-        
-        bool flag_force_gradient = false;// missing as it was in 
-      
-        colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-          data,
-          rescaled_palette_index,
-          encoded_colour_width,
-          colours_in_palette,
-          encoding,
-          encoded_index,
-          false, // rescale_index255_to_span_segment_length
-          rescale_index_wrap_for_hardedge,
-          override_default_encoding,
-          flag_force_gradient
-        );
-      }
-      break;
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID: {
-        #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = tkr_solar->Get_Elevation_Min();
-          float el_max = tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0.0f;
-          float el_min = -45.0f;
-          float el_max = 45.0f;
-        #endif
-      
-        float eval_elevation = constrain(elevation, el_min, el_max);
-        uint16_t palette_index = (uint16_t)mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 255.0f);
-        palette_index = constrain(palette_index, 0, 255);
-      
-        bool flag_force_gradient = false;// missing as it was in 
-      
-        colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-          data,
-          palette_index,
-          encoded_colour_width,
-          colours_in_palette,
-          encoding,
-          encoded_index,
-          false, // rescale_index255_to_span_segment_length
-          rescale_index_wrap_for_hardedge,
-          override_default_encoding,
-          flag_force_gradient
-        );
-      }
-      break;
-      // Add additional cases for other dynamic palettes here, as needed
-      default:
-        ALOG_ERR(PSTR("Bad Palette ID"));
-        return RgbwwColor(0, 0, 0); // Default to black if palette is not found
-    }
-  }
-  else {
-    ALOG_INF(PSTR("Missing %d"), id);
-  }
-
-  DEBUG_PIN4_SET(1);
-  return colourRGBWW;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
 /*********************************************************************************************************************************************************************************
  *********************************************************************************************************************************************************************************
@@ -1882,18 +1376,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
 {
 
-  if(*c=='\0'){
-    return -1;
-  }
-
-  
-
   char buffer[100] = {0};
-  int16_t index_found = -1;
   int16_t id = -1;
-
-  ALOG_INF( PSTR("Get_Static_PaletteIDbyName A") ); 
-
 
   for(
     uint8_t ii=0;
@@ -1908,16 +1392,11 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     }
   }
 
-
-  ALOG_INF( PSTR("Get_Static_PaletteIDbyName B") ); 
-
   /**************************************************************
    * 
    * PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID
    * 
   ***************************************************************/
-
-
   for(
     uint8_t ii=0;
             ii<(PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID-PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID);
@@ -1969,25 +1448,6 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
 
   /**************************************************************
    * 
-   * PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR
-   * 
-  ***************************************************************/
- for(
-    uint8_t ii=0;
-            ii<(PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID-PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID);
-            ii++
-  ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR ); 
-    if((id=mSupport::GetCommandID16_P(c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR))>=0)
-    {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;            
-    }
-  }
-
-
-  /**************************************************************
-   * 
    * PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID
    * 
   ***************************************************************/
@@ -2004,13 +1464,12 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     }
   }
 
-
   /**************************************************************
    * 
    * PALETTELIST_STATIC__IDS
    * 
   ***************************************************************/
-  for( // loops relative to exact palette id
+  for(
     uint8_t ii=0;
             ii<(PALETTELIST_STATIC_LENGTH__ID - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID);
             ii++
@@ -2020,6 +1479,25 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     {
       ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
       return id+PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;            
+    }
+  }
+
+
+  /**************************************************************
+   * 
+   * PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR
+   * 
+  ***************************************************************/
+ for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID-PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID);
+            ii++
+  ){    
+    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR))>=0)
+    {
+      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      return id+PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;            
     }
   }
 
@@ -2051,15 +1529,14 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     }
   }
 
-
-
-
   /**************************************************************
    * 
    * PALETTELIST_VARIABLE_GENERIC__IDS - undefined user names, default naming
+   * User names should have been captured in mAnimatorLight::GetPaletteNameByID before calling this function.
+   * This safe guard makes sure the default exists should this be called directly.
    * 
   ***************************************************************/
-  for( // loops relative to 0
+  for(
     uint8_t ii=0;
             ii<(MAX_USER_DEFINED_ENCODED_PALETTES);
             ii++
@@ -2076,23 +1553,12 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     
   }
 
-  /**************************************************************
-   * 
-   * Final check, palette id was given as string number
-   * 
-  ***************************************************************/
-  // uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
-  // if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH__ID)){
-  //   return found_index;
-  // }
-
   return -1; // Must be -1 to show name not found
 }
 
 
 const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8_t buflen)
 {
-
 
   /**************************************************************
    * 
@@ -2217,7 +1683,6 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   ***************************************************************/
   // If stored in RAM, and user editable, then it resides in DeviceNameBuffer and not within mPalette class
 
-
   return buffer;
 
 }
@@ -2273,91 +1738,6 @@ bool mPalette::IsPaletteGradient(uint16_t palette_id) {
 
   // Return true if the encoding indicates a gradient.
   return encoding.index_gradient;
-}
-
-
-
-/*********************************************************************************************************************************************************************************
- *********************************************************************************************************************************************************************************
- * SECTION: Internal helpers
- *********************************************************************************************************************************************************************************
- *********************************************************************************************************************************************************************************/
-
-
-/**
- * Refresh value stored in palette, and return new value
- * */
-uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
-  
-  uint8_t new_size = 1; // assumed 1 at least
-  
-  if((palette_id>=PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID)&&(palette_id<PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)){
-
-    mPalette::PALETTE_DATA *ptr_tmp = &static_palettes[palette_id];
-
-    new_size = 5; // only 1*5
-
-    // ptr_tmp
-    ALOG_ERR(PSTR("Removed code, needs refactored"));
-    
-    // ptr_tmp->data_length = new_size;
-
-  }else
-  if((palette_id>=PALETTELIST_LENGTH_OF_STATIC_IDS)&&(palette_id<GetPaletteListLength())){
-
-    // PALETTE *ptr_tmp = &static_palettes[palette_id];
-    
-    new_size = 5; // ASSUME 10 RIGHT NOW  
-    ALOG_ERR(PSTR("ERROR ON SIZE GET £$%"));
-    // ptr_tmp->data_length; // currently refreshed when init is triggered, about this may need changing, leaving unchanged for now
-  }
-  else
-  {
-
-    new_size = 1;//ptr_tmp->data_length;
-    ALOG_INF(PSTR("GetColourMapSizeByPaletteID ELSE  ERORRRRRRRRRRRRRRRRRRRRRRR"));
-    
-
-  }
-
-  return new_size;
-}
-
-
-
-
-uint8_t mPalette::GetColoursInCRGB16Palette(uint16_t palette_id)
-{
-
-  if(
-    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
-  ){  
-    uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
-    // mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
-    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
-
-    uint8_t colour_count = pSEGMENT_I(0).palette_container->CRGB16Palette16_Palette.encoded_index.size();
-
-    // ALOG_INF(PSTR("colour_count=%d, pal%d"), colour_count, palette_id);
-
-    return colour_count;
-
-  }
-
-
-  if(
-    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  ){  
-    uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    // mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
-    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
-
-    return pSEGMENT_I(0).palette_container->CRGB16Palette16_Palette.encoded_index.size();
-
-  }
-
-  return 16;
-
 }
 
 
@@ -2503,9 +1883,12 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
     ALOG_INF(PSTR("Missing %d"), palette_id);
   }
 
+  return 1; // error!
+
 
 }
 
+#ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
 
 IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Colour_ReadBuffer_RGBWW(
   uint8_t* palette_buffer,
@@ -2517,28 +1900,22 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Colour_ReadBuffe
   // Precompute the index where the color starts (considering the gradient byte)
   uint16_t index_relative = pixel_position * encoded_colour_width;
 
-  DEBUG_LINE_HERE_TRACE
   // Handle the gradient byte if gradient is enabled
   if (encoding.index_gradient) {
-    DEBUG_LINE_HERE_TRACE
     // If the gradient is enabled, read it and skip over it to access the color data
     if (return_encoded_value != nullptr) {
-      DEBUG_LINE_HERE_TRACE
       *return_encoded_value = palette_buffer[index_relative];  // store gradient value
     }
     index_relative++; // Move past the gradient byte to reach color data
   }
-  DEBUG_LINE_HERE_TRACE
 
   // Fetch the color components based on the encoding flags
-  uint8_t red   = (encoding.red_enabled)   ? palette_buffer[index_relative]   : 0;
-  uint8_t green = (encoding.green_enabled) ? palette_buffer[index_relative+1] : 0;
-  uint8_t blue  = (encoding.blue_enabled)  ? palette_buffer[index_relative+2] : 0;
+  uint8_t red        = (encoding.red_enabled)        ? palette_buffer[index_relative]   : 0;
+  uint8_t green      = (encoding.green_enabled)      ? palette_buffer[index_relative+1] : 0;
+  uint8_t blue       = (encoding.blue_enabled)       ? palette_buffer[index_relative+2] : 0;
   uint8_t white_cold = (encoding.white_cold_enabled) ? palette_buffer[index_relative+3] : 0;
   uint8_t white_warm = (encoding.white_warm_enabled) ? palette_buffer[index_relative+4] : 0;
 
-  DEBUG_LINE_HERE_TRACE
-  // Return the final color based on the decoded values
   return RgbwwColor(red, green, blue, white_cold, white_warm);
 }
 
@@ -2568,13 +1945,6 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 ){
   RgbwwColor colour;
   uint16_t pixel_position_adjust = _pixel_position;
-  
-  
-  
-  // ALOG_INF(PSTR("_pix %d"), _pixel_position);
-  DEBUG_LINE_HERE_TRACE
-
-
 
   // Handling discrete sequence palettes (non-gradient)
   bool is_forced_to_get_discrete = flag_crgb_exact_colour;
@@ -2582,16 +1952,13 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
   bool is_basic_sequence_palette = is_forced_to_get_discrete || (is_not_gradient && !flag_spanned_segment);
 
   if (is_basic_sequence_palette) {
-    DEBUG_LINE_HERE_TRACE
     // Handle non-gradient palette colors, with or without segment spanning
     if (flag_spanned_segment && !is_forced_to_get_discrete) {
       pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
     }
 
     // Map pixel position to color index in the palette
-    DEBUG_LINE_HERE_TRACE
     pixel_position_adjust %= colours_in_palette;
-    DEBUG_LINE_HERE_TRACE
 
     colour = SubGet_Encoded_Colour_ReadBuffer_RGBWW(
       palette_buffer,
@@ -2605,7 +1972,6 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 
   // Handle gradient palettes or forced gradient
   if (encoding.index_gradient || flag_force_gradient) {
-    DEBUG_LINE_HERE_TRACE
     if (flag_spanned_segment) {
       pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
     }
@@ -2687,7 +2053,6 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
     return colour;
   }
 
-  DEBUG_LINE_HERE_TRACE
   // Handle simple spanned palettes
   if (flag_spanned_segment) {
     pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
@@ -2695,8 +2060,6 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 
   uint8_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
   
-  DEBUG_LINE_HERE_TRACE
-
   colour = SubGet_Encoded_Colour_ReadBuffer_RGBWW(
     palette_buffer,
     palette_index,  
@@ -2707,6 +2070,184 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 
   return colour;
 }
+
+#else
+
+IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_U32(
+  uint8_t* palette_buffer,
+  uint16_t pixel_position,  
+  uint8_t* return_encoded_value,
+  PALETTE_ENCODING_DATA encoding,
+  uint8_t encoded_colour_width
+) {
+  // Precompute the index where the color starts (considering the gradient byte)
+  uint16_t index_relative = pixel_position * encoded_colour_width;
+
+  // Handle the gradient byte if gradient is enabled
+  if (encoding.index_gradient) {
+    // If the gradient is enabled, read it and skip over it to access the color data
+    if (return_encoded_value != nullptr) {
+      *return_encoded_value = palette_buffer[index_relative];  // store gradient value
+    }
+    index_relative++; // Move past the gradient byte to reach color data
+  }
+
+  // Fetch the color components based on the encoding flags
+  uint8_t red        = (encoding.red_enabled)        ? palette_buffer[index_relative]   : 0;
+  uint8_t green      = (encoding.green_enabled)      ? palette_buffer[index_relative+1] : 0;
+  uint8_t blue       = (encoding.blue_enabled)       ? palette_buffer[index_relative+2] : 0;
+  uint8_t white_cold = (encoding.white_cold_enabled) ? palette_buffer[index_relative+3] : 0;
+  // uint8_t white_warm = (encoding.white_warm_enabled) ? palette_buffer[index_relative+4] : 0; // IGNORED IN RGBWW
+
+  return RGBW32(red, green, blue, white_cold);
+}
+
+
+
+IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Palette_Colour_U32(
+  uint8_t* palette_buffer,
+  uint16_t _pixel_position, 
+  uint8_t encoded_colour_width,
+  uint8_t colours_in_palette,
+  PALETTE_ENCODING_DATA encoding,
+  uint8_t* encoded_value, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  bool     flag_spanned_segment, 
+  bool     flag_wrap_hard_edge,        
+  bool     flag_crgb_exact_colour,
+  bool     flag_force_gradient
+){
+  uint32_t colour;
+  uint16_t pixel_position_adjust = _pixel_position;
+
+  // Handling discrete sequence palettes (non-gradient)
+  bool is_forced_to_get_discrete = flag_crgb_exact_colour;
+  bool is_not_gradient = (encoding.index_gradient == false);
+  bool is_basic_sequence_palette = is_forced_to_get_discrete || (is_not_gradient && !flag_spanned_segment);
+
+  if (is_basic_sequence_palette) {
+    // Handle non-gradient palette colors, with or without segment spanning
+    if (flag_spanned_segment && !is_forced_to_get_discrete) {
+      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+    }
+
+    // Map pixel position to color index in the palette
+    pixel_position_adjust %= colours_in_palette;
+
+    colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+      palette_buffer,
+      pixel_position_adjust,  
+      encoded_value,
+      encoding,
+      encoded_colour_width
+    );
+    return colour;
+  }
+
+  // Handle gradient palettes or forced gradient
+  if (encoding.index_gradient || flag_force_gradient) {
+    if (flag_spanned_segment) {
+      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+    }
+
+    // Set boundaries for gradient mapping
+    uint8_t lower_limit = colours_in_palette / 2;
+    uint8_t upper_limit = 255 - (colours_in_palette / 2);
+    
+    std::vector<uint8_t> gradient_palettes(colours_in_palette);
+    if (encoding.index_gradient) {
+      for (uint8_t i = 0; i < colours_in_palette; ++i) {
+        SubGet_Encoded_Colour_ReadBuffer_U32(
+          palette_buffer,
+          i,  
+          &gradient_palettes[i],
+          encoding,
+          encoded_colour_width
+        );
+      }
+    } else {
+      for (uint8_t i = 0; i < colours_in_palette; ++i) {
+        gradient_palettes[i] = map(i, 0, colours_in_palette - 1, lower_limit, upper_limit);
+      }
+    }
+
+    // Search for lower and upper boundaries within gradient
+    uint8_t lower_boundary_i = 0, upper_boundary_i = 0;
+    uint8_t lower_boundary_v = 0, upper_boundary_v = 0;
+    uint8_t progress = 0;
+
+    if (pixel_position_adjust < lower_limit) {
+      lower_boundary_i = 0;
+      upper_boundary_i = 1;
+      lower_boundary_v = gradient_palettes[lower_boundary_i];
+      upper_boundary_v = gradient_palettes[upper_boundary_i];
+      progress = 0;
+    } else if (pixel_position_adjust > upper_limit) {
+      lower_boundary_i = gradient_palettes.size() - 1;
+      upper_boundary_i = gradient_palettes.size(); // ignored
+      lower_boundary_v = gradient_palettes[lower_boundary_i];
+      upper_boundary_v = gradient_palettes[upper_boundary_i];
+      progress = 0;
+    } else {
+      for (uint8_t i = 0; i < gradient_palettes.size() - 1; ++i) {
+        if (pixel_position_adjust >= gradient_palettes[i] && pixel_position_adjust < gradient_palettes[i + 1]) {
+          lower_boundary_i = i;
+          upper_boundary_i = i + 1;
+          lower_boundary_v = gradient_palettes[lower_boundary_i];
+          upper_boundary_v = gradient_palettes[upper_boundary_i];
+          // progress = mSupport::mapfloat(pixel_position_adjust, lower_boundary_v, upper_boundary_v, 0.0f, 1.0f);
+          progress = map(pixel_position_adjust, lower_boundary_v, upper_boundary_v, 0, 255);
+          break;
+        }
+      }
+    }
+
+    // Blend between lower and upper color boundaries
+    uint32_t lower_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+      palette_buffer,
+      lower_boundary_i,  
+      nullptr,
+      encoding,
+      encoded_colour_width
+    );
+    uint32_t upper_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+      palette_buffer,
+      upper_boundary_i,  
+      nullptr,
+      encoding,
+      encoded_colour_width
+    );
+
+    colour = mAnimatorLight::ColourBlend(lower_colour, upper_colour, progress);
+
+    // Set the encoded value if applicable
+    if (encoded_value != nullptr) {
+      *encoded_value = (pixel_position_adjust < 255) ? lower_boundary_v : upper_boundary_v;
+    }
+
+    return colour;
+  }
+
+  // Handle simple spanned palettes
+  if (flag_spanned_segment) {
+    pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+  }
+
+  uint8_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
+  
+  colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+    palette_buffer,
+    palette_index,  
+    encoded_value,
+    encoding,
+    encoded_colour_width
+  );
+
+  return colour;
+}
+
+
+#endif
+
 
 #endif // ENABLE_DEVFEATURE_PALETTE__VERSION2
 

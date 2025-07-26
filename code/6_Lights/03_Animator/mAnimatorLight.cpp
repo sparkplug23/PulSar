@@ -1132,8 +1132,9 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
 
     mPalette::PALETTE_DATA *ptr = &mPaletteI->static_palettes[palette_id_adj];
     _palette_container->pData = ptr->data;
+    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
+    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
     
-
     #ifdef ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
 // Gradient palettes are loaded into CRGB16Palettes in such a way
     // that, if possible, every color represented in the gradient palette
@@ -1195,6 +1196,9 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   DEBUG_LINE_HERE_TRACE
     mPalette::PALETTE_DATA *ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
     _palette_container->pData = ptr->data;
+    
+    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
+    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
     DEBUG_LINE_HERE_TRACE
     
   }else
@@ -1303,6 +1307,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
           ALOG_INF(PSTR("new_colour_rate_ms=%d"), new_colour_rate_ms);
           // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , aux3 , new_colour_rate_ms);
           aux3 = millis();
+
+          
+          _palette_container->encoded_colour_width = 3;
+          _palette_container->colours_in_palette = 16;
         }
       }
       break;
@@ -1325,6 +1333,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(40, 100), random8(220, 255))
           );               
           aux3 = millis();
+          _palette_container->encoded_colour_width = 3;
+          _palette_container->colours_in_palette = 16;
         }
       }
       break;
@@ -1350,6 +1360,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), (pastel_index == 3) ? random8(40, 100) : random8(153, 255), 255)
           );
           aux3 = millis();
+          _palette_container->encoded_colour_width = 3;
+          _palette_container->colours_in_palette = 16;
         }
       }
       break;
@@ -1372,6 +1384,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(100, 217), random8(10, 255))
           );                        
           aux3 = millis();
+          _palette_container->encoded_colour_width = 3;
+          _palette_container->colours_in_palette = 16;
         }
       }
       break;
@@ -1394,6 +1408,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(153, 217), random8(190, 255))
           );                                                  
           aux3 = millis();
+          _palette_container->encoded_colour_width = 3;
+          _palette_container->colours_in_palette = 16;
         }
       }
       break;    
@@ -5576,6 +5592,9 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
     flag_crgb_exact_colour
   );
+  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+  white_warm_GetPaletteColour = mPaletteI->colour32_white_cold; // Bypass W2, as this is not used in RGBWW
+  #endif
 
   // Apply brightness if needed
   if (apply_brightness) {
@@ -5590,6 +5609,9 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
       (B(colour) * scale) >> 8,  // Blue
       (W(colour) * scale) >> 8   // White
     );
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    white_warm_GetPaletteColour = (mPaletteI->colour32_white_cold * scale) >> 8; // Rescale bypass W2
+    #endif
   }
 
 
@@ -5633,65 +5655,83 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
 
   bool apply_brightness
 ){
-  
-  if(palette_id != palette_container->loaded_palette_id)
-  {
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-  }
-  
-  /**
-   * @brief These functions always need called as they are dynamic
-   * I should make this a check here, if palette is dynamic, then load everytime
-   * 
-   * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
-   * ie have a new tSaved_DynamicUpdate 
-   */
-  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
-  // else // else so it only tries this if the above "if" did not occur to stop double loads
-  // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
-  if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
-    (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
-  ){
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-  }
-  #else
-  else // else so it only tries this if the above "if" did not occur to stop double loads
-  if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
-    (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-  ){
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-  }
-  #endif
 
-  RgbwwColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
-    palette_id,
-    (uint8_t*)palette_container->pData.data(),
+  uint32_t colour32 = GetPaletteColour(
     pixel_position,
+    flag_spanned_segment,
+    flag_wrap_hard_edge,
+    flag_crgb_exact_colour,
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    flag_crgb_exact_colour
+    apply_brightness
+  );
+  return RgbwwColor(
+    R(colour32),  // Red
+    G(colour32),  // Green
+    B(colour32),  // Blue
+    W(colour32),  // White
+    white_warm_GetPaletteColour  // Cold White
   );
 
-  // Apply brightness if needed
-  if (apply_brightness) {
-    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
 
-    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+  
+  // if(palette_id != palette_container->loaded_palette_id)
+  // {
+  //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+  // }
+  
+  // /**
+  //  * @brief These functions always need called as they are dynamic
+  //  * I should make this a check here, if palette is dynamic, then load everytime
+  //  * 
+  //  * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
+  //  * ie have a new tSaved_DynamicUpdate 
+  //  */
+  // #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
+  // // else // else so it only tries this if the above "if" did not occur to stop double loads
+  // // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
+  // if(
+  //   (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+  //   (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  // ){
+  //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  // }
+  // #else
+  // else // else so it only tries this if the above "if" did not occur to stop double loads
+  // if(
+  //   (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
+  //   (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
+  // ){
+  //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  // }
+  // #endif
 
-    colour.R  = (colour.R * scale) >> 8;
-    colour.G  = (colour.G * scale) >> 8;
-    colour.B  = (colour.B * scale) >> 8;
-    colour.WW = (colour.WW * scale) >> 8;
-    colour.CW = (colour.CW * scale) >> 8;
+  // RgbwwColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
+  //   palette_id,
+  //   (uint8_t*)palette_container->pData.data(),
+  //   pixel_position,
+  //   encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  //   flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  //   flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  //   flag_crgb_exact_colour
+  // );
 
-  }
+  // // Apply brightness if needed
+  // if (apply_brightness) {
+  //   uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+
+  //   uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+
+  //   colour.R  = (colour.R * scale) >> 8;
+  //   colour.G  = (colour.G * scale) >> 8;
+  //   colour.B  = (colour.B * scale) >> 8;
+  //   colour.WW = (colour.WW * scale) >> 8;
+  //   colour.CW = (colour.CW * scale) >> 8;
+
+  // }
 
 
 
-  return colour;
+  // return colour;
 
 }
 
@@ -5748,6 +5788,8 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
     ((palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
   ) {
     DEBUG_LINE_HERE_TRACE
+    
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     // These palettes do not require loading into RAM. Directly call GetColourFromPreloadedPaletteBuffer_RGBWW
     return mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
       palette_id,
@@ -5759,6 +5801,26 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
       flag_crgb_exact_colour,
       flag_request_is_for_full_visual_output
     );
+    #else
+    // These palettes do not require loading into RAM. Directly call GetColourFromPreloadedPaletteBuffer_RGBWW
+    uint32_t colour32 = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
+      palette_id,
+      nullptr, // No buffer required for these types
+      _pixel_position,
+      encoded_value,
+      flag_spanned_segment,
+      flag_wrap_hard_edge,
+      flag_crgb_exact_colour,
+      flag_request_is_for_full_visual_output
+    );
+    return RgbwwColor(
+      R(colour32),  // Red
+      G(colour32),  // Green
+      B(colour32),  // Blue
+      W(colour32),  // White
+      0  // Cold White
+    );  
+    #endif
   }
 
   /**
@@ -5769,6 +5831,7 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
   SEGMENT.LoadPalette(palette_id, &palette_container_temp);
   DEBUG_LINE_HERE_TRACE
   
+  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
   return mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
     palette_id,
     &palette_container_temp.pData[0],
@@ -5779,6 +5842,26 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
     flag_crgb_exact_colour,
     flag_request_is_for_full_visual_output
   );
+  #else
+  uint32_t colour32 = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
+    palette_id,
+    &palette_container_temp.pData[0],
+    _pixel_position,
+    encoded_value,
+    flag_spanned_segment,
+    flag_wrap_hard_edge,
+    flag_crgb_exact_colour,
+    flag_request_is_for_full_visual_output
+  );
+  return RgbwwColor(
+    R(colour32),  // Red
+    G(colour32),  // Green
+    B(colour32),  // Blue
+    W(colour32),  // White
+    0  // Cold White
+  );  
+
+  #endif
 }
 
 
@@ -7119,7 +7202,6 @@ JBI->Start();
     if(segments.size())
     {
 
-      JBI->Add("PaletteSize", mPaletteI->GetColoursInCRGB16Palette(SEGMENT.palette_id) );
       JBI->Array_Start("CRGB16Palette16");   
 
       for(uint8_t elem_i=0;elem_i<16;elem_i++)

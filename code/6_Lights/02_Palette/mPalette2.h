@@ -436,40 +436,13 @@ class mPalette
     void addCustomPalette (uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
     void addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
 
-    uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
     uint8_t GetColoursInPalette(uint16_t palette_id);
-    uint8_t GetColoursInCRGB16Palette(uint16_t palette_id);
     PALETTE_ENCODING_DATA findPaletteEncoding(uint16_t id);
 
-    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Colour_ReadBuffer_RGBWW
-    (
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      PALETTE_ENCODING_DATA encoding = {0},
-      uint8_t encoded_colour_width = 0
-    );
-
-    // includes the same args are main function, so should not really exist? is this a subfunction, if so needs named that way
-    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Palette_Colour_RGBWW
-    (
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t encoded_colour_width = 0,
-      uint8_t colours_in_palette = 0,
-      PALETTE_ENCODING_DATA encoding = {0},
-      uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_crgb_exact_colour = false,
-      bool     flag_forced_gradient = false
-    );
-
-    /*********************************
-     * NOTE: The two functions below are the core RGBWW and U32 colour getters. Others must use these. 
-     *********************************/
-
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    
+    uint8_t colour32_white_cold = 0; // R,G,B, W1, then W2 is temp per function call below, to allow one function does both
     IRAM_ATTR [[gnu::hot]] RgbwwColor     GetColourFromPreloadedPaletteBuffer_RGBWW
     (
       uint16_t id = 0,
@@ -489,7 +462,52 @@ class mPalette
       bool flag_request_is_for_full_visual_output = false
     );
 
-    uint8_t white_warm = 0; // R,G,B, W1, then W2 is temp per function call below, to allow one function does both
+    // includes the same args are main function, so should not really exist? is this a subfunction, if so needs named that way
+    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Palette_Colour_RGBWW
+    (
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t encoded_colour_width = 0,
+      uint8_t colours_in_palette = 0,
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      bool     flag_forced_gradient = false
+    );
+    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Colour_ReadBuffer_RGBWW
+    (
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t encoded_colour_width = 0
+    );
+    #else
+    IRAM_ATTR [[gnu::hot]] uint32_t      SubGet_Encoded_Palette_Colour_U32
+    (
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t encoded_colour_width = 0,
+      uint8_t colours_in_palette = 0,
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      bool     flag_forced_gradient = false
+    );
+    IRAM_ATTR [[gnu::hot]] uint32_t      SubGet_Encoded_Colour_ReadBuffer_U32
+    (
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      PALETTE_ENCODING_DATA encoding = {0},
+      uint8_t encoded_colour_width = 0
+    );
+    #endif
+    
     // A wrapper can be used to the calls below work as is. The internals of both of these will use ifdefs to block them when not needed.
     IRAM_ATTR [[gnu::hot]] uint32_t       GetColourFromPreloadedPaletteBuffer_U32
     (
@@ -509,7 +527,6 @@ class mPalette
       // Requesting preview: Live palettes must respond with preview for UI
       bool flag_request_is_for_full_visual_output = false
     );
-
 
 };
 
