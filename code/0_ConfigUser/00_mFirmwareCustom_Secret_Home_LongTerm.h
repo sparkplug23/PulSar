@@ -2400,7 +2400,7 @@ Bathroom
  
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
 
   /***********************************
    * SECTION: Energy Configs
@@ -2809,7 +2809,7 @@ Bathroom
  
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
 
   /***********************************
    * SECTION: Lighting BusConfig Set

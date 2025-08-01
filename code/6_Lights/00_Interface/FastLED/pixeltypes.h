@@ -86,6 +86,9 @@ typedef enum {
     HUE_PINK = 224
 } HSVHue;
 
+//colors.cpp
+#define ColorFromPalette ColorFromPaletteWLED // override fastled version
+
 /// Representation of an RGB pixel (Red, Green, Blue)
 struct CRGB {
 	union {

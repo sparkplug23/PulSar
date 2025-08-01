@@ -6,6 +6,7 @@
 /**
  * Three levels of sun tracking for memory efficiency
  * 
+ * USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE // based on time of day, no solar calculation. Minimal for palettes
  * USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
  * USE_MODULE_SENSORS_SUN_TRACKING__SUNRISE_SUNSET
  * USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
@@ -14,7 +15,11 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_SUN_TRACKING
+#ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE
+#include "mSunTracking_Fallback.h" // minimal version of below in self contained header
+#endif
+
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING) && !defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
 #include "3_Network/10_MQTT/mMQTT.h"
 
 #include <stdio.h>      /* printf */
@@ -44,8 +49,7 @@ class mSunTracking :
 
     static constexpr const char* PM_MODULE_SENSORS_SUN_TRACKING_CTR = D_MODULE_SENSORS_SUN_TRACKING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SUN_TRACKING_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID; }
-  
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID; }  
 
     struct ClassState
     {

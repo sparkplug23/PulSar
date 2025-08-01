@@ -498,7 +498,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
   #define tkr_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_SUN_TRACKING
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
   #include "5_Sensors/22_SunTracking/mSunTracking.h"
   #define   tkr_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
 #endif

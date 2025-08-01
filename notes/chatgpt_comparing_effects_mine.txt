@@ -37,9 +37,9 @@ void mAnimatorLight::LoadEffects()
             &mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth,
             PM_EFFECT_CONFIG__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH,
             Effect_DevStage::Beta);
-  addEffect(EFFECTS_FUNCTION__STATIC_PALETTE_VARIED__ID,
-            &mAnimatorLight::EffectAnim__Static_Palette_Varied,
-            PM_EFFECT_CONFIG__STATIC_PALETTE_VARIED,
+  addEffect(EFFECTS_FUNCTION__PALETTE_VARIATION__ID,
+            &mAnimatorLight::EffectAnim__PALETTE_VARIATION,
+            PM_EFFECT_CONFIG__PALETTE_VARIATION,
             Effect_DevStage::Dev);
   #endif
 

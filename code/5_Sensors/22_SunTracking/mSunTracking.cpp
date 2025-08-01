@@ -1,7 +1,21 @@
 #include "mSunTracking.h"
 
-#ifdef USE_MODULE_SENSORS_SUN_TRACKING
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE) && !defined(USE_MODULE_SENSORS_SUN_TRACKING)
+uint32_t mSunTracking::LocalTime(){ // Only function in cpp to access mTime
+    return tkr_time->LocalTime();
+}
+#endif
 
+/***
+ * 
+ * Suntracking, is currently a sensor. 
+ * If enabled, it should do all of the things.
+ * However, is not enabled, this should still exist as a default, where the time of day is converted into basic elevation and azimuth
+ * So midday is elevation max, midnight is elevation min.
+ * Azimuth (find out where 0 is, london?) should also have minutes of day scaled into overhead for here.
+ */
+
+#ifdef USE_MODULE_SENSORS_SUN_TRACKING
 time_t ConvertToUTCTime(int year, int month, int day, int hour, int min, int sec) {
     struct tm timeinfo = { 0 };
     timeinfo.tm_year = year - 1900;  // tm_year is years since 1900
@@ -1414,7 +1428,6 @@ void mSunTracking::MQTTHandler_Init()
 } 
 
 #endif // USE_MODULE_NETWORK_MQTT
-
 
 
 #endif // USE_MODULE_SENSORS_SUN_TRACKING

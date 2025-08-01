@@ -311,7 +311,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
       selseg.setOpacity(udpIn[10+ofs]);
       if (applyEffects) {
         DEBUG_PRINTF_P(PSTR("Apply effect: %u\n"), id);
-        selseg.setMode(udpIn[11+ofs]);
+        selseg.setEffect(udpIn[11+ofs]);
         selseg.speed     = udpIn[12+ofs];
         selseg.intensity = udpIn[13+ofs];
       }
@@ -363,7 +363,7 @@ void parseNotifyPacket(uint8_t *udpIn) {
       Segment& seg = strip.getSegment(i);
       if (!seg.isActive() || !seg.isSelected()) continue;
       if (applyEffects) {
-        seg.setMode(udpIn[8]);
+        seg.setEffect(udpIn[8]);
         seg.speed = udpIn[9];
         if (version > 2) seg.intensity = udpIn[16];
       }

@@ -391,6 +391,19 @@ uint32_t mTime::MinutesPastMidnight(void)
   return minutes;
 }
 
+uint32_t mTime::SecondsPastMidnight_SecondsOfCurrentDay(void) 
+{
+  uint32_t seconds = 0;
+
+  if (RtcTime.valid) {
+    seconds = (RtcTime.hour * 3600) + (RtcTime.minute * 60) + RtcTime.second;
+  }
+
+  // ALOG_INF(PSTR("%d:%d:%d"), RtcTime.hour, RtcTime.minute, RtcTime.second);
+
+  return seconds;
+}
+
 
 uint32_t mTime::RtcMillis(void) 
 {

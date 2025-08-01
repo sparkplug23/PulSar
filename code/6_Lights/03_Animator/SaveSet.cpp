@@ -1152,7 +1152,7 @@ bool mAnimatorLight::handleSet(AsyncWebServerRequest *request, const String& req
   for (unsigned i = 0; i < getSegmentsNum(); i++) {
     Segment& seg = getSegment(i);
     if (i != selectedSeg && (singleSegment || !seg.isActive() || !seg.isSelected())) continue; // skip non main segments if not applying to all
-    if (fxModeChanged)    seg.setMode(effectIn, req.indexOf(F("FXD="))>0);  // apply defaults if FXD= is specified
+    if (fxModeChanged)    seg.setEffect(effectIn, req.indexOf(F("FXD="))>0);  // apply defaults if FXD= is specified
     if (speedChanged)     seg.speed     = speedIn;
     if (intensityChanged) seg.intensity = intensityIn;
     if (paletteChanged)   seg.setPalette(paletteIn);

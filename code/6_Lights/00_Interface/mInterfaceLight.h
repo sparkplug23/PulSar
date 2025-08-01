@@ -26,12 +26,7 @@
 #include "JsonParser.h"
 #include "6_Lights/02_Palette/mPaletteLoaded.h"
 
-#ifndef ENABLE_DEVFEATURE_PALETTE__VERSION2
 #include "6_Lights/02_Palette/mPalette.h"
-#endif
-#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2
-#include "6_Lights/02_Palette/mPalette2.h"
-#endif
 
 #include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/07_Time/mTime.h"

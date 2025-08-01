@@ -279,11 +279,11 @@ void sendDataWs(AsyncWebSocketClient * client)
   tkr_anim->serializeInfo(info);
 
   size_t len = measureJson(*tkr_anim->pDoc);
-  DEBUG_PRINTF_P(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_anim->pDoc->memoryUsage(), len);
+  // DEBUG_PRINTF_P(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_anim->pDoc->memoryUsage(), len);
 
   // the following may no longer be necessary as heap management has been fixed by @willmmiles in AWS
   size_t heap1 = ESP.getFreeHeap();
-  DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  // DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
   #ifdef ESP8266
   if (len>heap1) {
     DEBUG_PRINTLN(F("Out of memory (WS)!"));
@@ -324,7 +324,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
 
   uint8_t log = LOG_LEVEL_INFO;
 
-  ALOG_INF(PSTR("wsEvent_________________________________________________________%d"),type);
+  // ALOG_INF(PSTR("wsEvent_________________________________________________________%d"),type);
 
   if(type == WS_EVT_CONNECT){
     //client connected
@@ -335,7 +335,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
     if (client->id() == wsLiveClientId) wsLiveClientId = 0;
     DEBUG_PRINTLN(F("WS client disconnected."));
   } else if(type == WS_EVT_DATA){
-    ALOG(log, PSTR("WS data received."));
+    // ALOG(log, PSTR("WS data received."));
     // data packet
     AwsFrameInfo * info = (AwsFrameInfo*)arg;
     if(info->final && info->index == 0 && info->len == len){
@@ -368,11 +368,11 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
         } else if (root.containsKey("lv")) {
           wsLiveClientId = root["lv"] ? client->id() : 0;
         } else {
-          ALOG(log, PSTR("we are here"));
+          // ALOG(log, PSTR("we are here"));
           verboseResponse = tkr_anim->deserializeState(root);
         }
         tkr_anim->releaseJSONBufferLock();
-        ALOG(log, PSTR("we are here 2"));
+        // ALOG(log, PSTR("we are here 2"));
 
         if (!tkr_anim->interfaceUpdateCallMode) { // individual client response only needed if no WS broadcast soon
           if (verboseResponse) {
@@ -387,7 +387,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
           //lastInterfaceUpdate = millis() - (INTERFACE_UPDATE_COOLDOWN -500); // ESP8266 does not like this
         }
       }
-        ALOG(log, PSTR("we are here 3"));
+        // ALOG(log, PSTR("we are here 3"));
     } else {
       //message is comprised of multiple frames or the frame is split into multiple packets
       //if(info->index == 0){
@@ -398,7 +398,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
       //{
 
       //}
-        ALOG(log, PSTR("we are here 4"));
+        // ALOG(log, PSTR("we are here 4"));
 
       if((info->index + len) == info->len){
         if(info->final){
@@ -1035,17 +1035,17 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
 
   if (_palette_container == nullptr) 
   {
-    if (palette_container == nullptr) 
+    if (palette == nullptr) 
     {
       ALOG_ERR(PSTR("No palette container passed and no default container set"));
       return;
     }
-    _palette_container = palette_container;
+    _palette_container = palette;
   }
 
   DEBUG_LINE_HERE_TRACE
 
-  palette_container->loaded_palette_id = palette_id;
+  palette->loaded_palette_id = palette_id;
   DEBUG_LINE_HERE_TRACE
 
   if(
@@ -1082,6 +1082,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     for(uint8_t i=0;i<16;i++){
       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
     }
+    
+    _palette_container->colours_in_palette = 16;
 
   }else
   if(
@@ -1120,7 +1122,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       u = *ent;
     }
 
-    // ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, _palette_container->CRGB16Palette16_Palette.data[0].r, _palette_container->CRGB16Palette16_Palette.data[0].g, _palette_container->CRGB16Palette16_Palette.data[0].b );
+    _palette_container->colours_in_palette = 16;
+    // ALOG_INF(PSTR("palette%d (seg%d) %d %d %d"), gradient_id, seg_i, _palette_container->CRGB16Palette16_Palette.data[0].r, _palette_container->CRGB16Palette16_Palette.data[0].g, _palette_container->CRGB16Palette16_Palette.data[0].b );
    
   }else
   if(
@@ -1173,7 +1176,6 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
                       CRGB(0,0,255),
                       CRGB(255,0,255)
       );
-
       // loadDynamicGradientPalette should enable with one (of 255) width to define edges of my palettes, and hence give them as non gradients when not a gradient, or as gradient when they are.
 
 
@@ -1206,11 +1208,17 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
   ){
     // Preloading is not needed, already in ram
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
+    mPalette::PALETTE_DATA *ptr = &mPaletteI->custom_palettes[palette_id_adj];
+    _palette_container->pData = ptr->data;
+    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
+    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
   }else
   if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
   ){
     // Preloading is not needed, already in ram
+          _palette_container->colours_in_palette = 1;
   }
   else
   if(
@@ -1225,6 +1233,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     for(uint8_t i=0;i<16;i++){
       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
     }
+          _palette_container->colours_in_palette = 16;
 
     switch(palette_id)
     {
@@ -1272,7 +1281,6 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter,four,five, prim,sec,ter,four,five, prim,sec,ter,four,five, five); 
       }
       break;    
-      #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
       /**
        * Keep these here, because a palette "loads" this once, and not with the GetColourFromPalette
        * 
@@ -1292,13 +1300,13 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
-          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), 255, random8(128, 255)),
           //                 CHSV(random8(), 255, random8(128, 255)),
           //                 CHSV(random8(), 192, random8(128, 255)),
           //                 CHSV(random8(), 255, random8(128, 255))
           // );
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
             CHSV(random8(), 255, 255),
             CHSV(random8(), 255, 255),
             CHSV(random8(), 255, 255),
@@ -1320,13 +1328,13 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
-          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
+          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
           //                 CHSV(random8(), random8(204, 255), 255),
           //                 CHSV(random8(), random8(204, 255), 255),
           //                 CHSV(random8(), random8(204, 255), 255),
           //                 CHSV(random8(), random8(204, 255), 255)
           // );                  
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
             CHSV(random8(), random8(40, 100), random8(220, 255)),
             CHSV(random8(), random8(40, 100), random8(220, 255)),
             CHSV(random8(), random8(40, 100), random8(220, 255)),
@@ -1344,7 +1352,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
-          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), random8(153, 255), 255),
           //                 CHSV(random8(), random8(153, 255), 255),
           //                 CHSV(random8(), random8(153, 255), 255),
@@ -1353,7 +1361,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
           
           uint8_t pastel_index = random8(4);  // force 1 entry to be pastel
 
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
             CHSV(random8(), (pastel_index == 0) ? random8(40, 100) : random8(153, 255), 255),
             CHSV(random8(), (pastel_index == 1) ? random8(40, 100) : random8(153, 255), 255),
             CHSV(random8(), (pastel_index == 2) ? random8(40, 100) : random8(153, 255), 255),
@@ -1371,13 +1379,13 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
-          // palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), random8(153, 217), 255),
           //                 CHSV(random8(), random8(153, 217), 255),
           //                 CHSV(random8(), random8(153, 217), 255),
           //                 CHSV(random8(), random8(153, 217), 255)
           // );                          
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
             CHSV(random8(), random8(100, 217), random8(10, 255)),
             CHSV(random8(), random8(100, 217), random8(10, 255)),
             CHSV(random8(), random8(100, 217), random8(10, 255)),
@@ -1395,13 +1403,13 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
-        //   palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+        //   palette->CRGB16Palette16_Palette.data = CRGBPalette16(
         //                   CHSV(random8(), random8(0, 255), 255),
         //                   CHSV(random8(), random8(0, 255), 255),
         //                   CHSV(random8(), random8(0, 255), 255),
         //                   CHSV(random8(), random8(0, 255), 255)
         //                   );
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
             CHSV(random8(), random8(153, 217), random8(0, 68)),
             CHSV(random8(), random8(153, 217), random8(69, 127)),
             CHSV(random8(), random8(153, 217), random8(127, 190)),
@@ -1413,108 +1421,30 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         }
       }
       break;    
-
-      #else
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID:
-      {        
-        /*
-        intensity ranges from 0 to 255.
-        The term (255 - intensity) ranges from 255 (when intensity = 0) to 0 (when intensity = 255).
-        The multiplication ((255 - intensity) * 100) ranges from 255 * 100 = 25500 ms to 0 * 100 = 0 ms.
-        Adding 1000 gives the final range for new_colour_rate_ms:
-            Minimum: 1000 + 0 = 1000 ms (1 second).
-            Maximum: 1000 + 25500 = 26500 ms (26.5 seconds).
-        */
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
-        {
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
-                          CHSV(random8(), 255, random8(128, 255)),
-                          CHSV(random8(), 255, random8(128, 255)),
-                          CHSV(random8(), 192, random8(128, 255)),
-                          CHSV(random8(), 255, random8(128, 255))
-          );
-          ALOG_INF(PSTR("new_colour_rate_ms=%d"), new_colour_rate_ms);
-          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , aux3 , new_colour_rate_ms);
-          aux3 = millis();
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
-      {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
-        {
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
-                          CHSV(random8(), random8(204, 255), 255),
-                          CHSV(random8(), random8(204, 255), 255),
-                          CHSV(random8(), random8(204, 255), 255),
-                          CHSV(random8(), random8(204, 255), 255)
-          );                          
-          aux3 = millis();
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID: // S60-S100%
-      {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
-        {
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
-                          CHSV(random8(), random8(153, 255), 255),
-                          CHSV(random8(), random8(153, 255), 255),
-                          CHSV(random8(), random8(153, 255), 255),
-                          CHSV(random8(), random8(153, 255), 255)
-          );                          
-          aux3 = millis();
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID: // S60-S85%
-      {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
-        {
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
-                          CHSV(random8(), random8(153, 217), 255),
-                          CHSV(random8(), random8(153, 217), 255),
-                          CHSV(random8(), random8(153, 217), 255),
-                          CHSV(random8(), random8(153, 217), 255)
-          );                          
-          aux3 = millis();
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID: // S0-S100%
-      {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
-        {
-          palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
-                          CHSV(random8(), random8(0, 255), 255),
-                          CHSV(random8(), random8(0, 255), 255),
-                          CHSV(random8(), random8(0, 255), 255),
-                          CHSV(random8(), random8(0, 255), 255)
-                          );
-                          
-          aux3 = millis();
-        }
-      }
-      break;    
-      #endif
-
-
-
-
     }
+    
+    
+    /**
+     * To allow smooth transitions, effect period must be longer than intensity driven update rate
+     * This is only need when speed (blending) is active
+     **/
+    if(
+      (speed != 255) &&
+      (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
+      (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
+    ){
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        if(new_colour_rate_ms > cycle_time__rate_ms) cycle_time__rate_ms = new_colour_rate_ms + 100;
+    }
+
 
     
   }
+
+  // On load now, number of pixels in palette MUST be set here
+  // No longer reloading in realtime, but only calculating on Load to improve performance. 
+  // Calling function here now, but should roll it into the above code directly.
+  // pSEGMENT.Get
 
   // DEBUG_LINE_HERE
 
@@ -1815,7 +1745,11 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
 
   This ensures that id is only used as an identifier, and the true vector index is correctly managed.
  */
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, const char* effect_description, uint8_t development_stage)
+#else
 void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
+#endif
 {
   // Find the index in effects.id where the given id exists
   auto it = std::find(effects.id.begin(), effects.id.end(), id);
@@ -1826,11 +1760,17 @@ void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* 
     effects.function[index] = function;
     effects.config[index] = effect_config;
     effects.development_stage[index] = development_stage;
+    #ifdef ENABLE_EFFECT_DESCRIPTIONS
+    effects.description[index] = effect_description;
+    #endif
   } else {
     // If not found, append a new entry
     effects.function.push_back(function);
     effects.config.push_back(effect_config);
     effects.development_stage.push_back(development_stage);
+    #ifdef ENABLE_EFFECT_DESCRIPTIONS
+    effects.description.push_back(effect_description);
+    #endif
     effects.id.push_back(id);
     effects.count = effects.id.size();
   }
@@ -2032,11 +1972,16 @@ void mAnimatorLight::SubTask_Effects()
 uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
 {
 
+  Serial.println("PO");//PHASE OUT!!!! OR MAKE SURE NEVER REALTIME CALL NEVER CALLED?? why");
+
+
+// when preloaded, use mPalette.colours_in_palette
+
   uint8_t palette_colour_count = 0;
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
 
-  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, tkr_anim->segment_current_index);
+  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, 0, tkr_anim->segment_current_index);
 
   /**
    * @brief PaletteList Vectors should have the length stored in it. Actual pixel count depends on encoding type
@@ -2098,20 +2043,11 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     palette_colour_count = 16;
   }
   else
-  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
   if(
     (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
   ){  
     palette_colour_count = 16;    
   }
-
-  #else
-  if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-  ){  
-    palette_colour_count = 16;    
-  }
-  #endif
   else
   if(
     (palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
@@ -2144,9 +2080,9 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
         palette_colour_count = sizeof(PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__DATA)/6;
       break;
       // case mPalette::PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
-      //   // if(SEGMENT.palette_container->pData.size())
+      //   // if(SEGMENT.palette->pData.size())
       //   // {
-      //   //   palette_colour_count = (SEGMENT.palette_container->pData.size()-2)/3;
+      //   //   palette_colour_count = (SEGMENT.palette->pData.size()-2)/3;
       //   // }else{
       //     palette_colour_count = 1;
       //   // }
@@ -2234,8 +2170,12 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
 
     uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; // adjust back into correct indexing
 
+
     uint8_t colour_width  = mPaletteI->GetEncodedColourWidth(mPaletteI->custom_palettes[palette_adjusted_id].encoding); 
     palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size()/colour_width;
+
+    
+    ALOG_INF(PSTR("LoadPalette %d %d %d %d"),palette_id, palette_adjusted_id, colour_width, palette_colour_count); delay(3000);
 
   }
 
@@ -2386,6 +2326,13 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   SEGMENT_I(segment_index).flags.animator_first_run = true; // first run, so do extra things
 
   ALOG_DBM(PSTR("segments[segment_index].effect_id=%d"),segments[segment_index].effect_id);
+
+  #ifdef ENABLE_EFFECT_DESCRIPTIONS   
+  if (value < effects.description.size())
+  ALOG_INF(PSTR("description=%S"),effects.description[value]);
+
+  ALOG_INF(PSTR("description len=%d"),effects.description.size());
+  #endif
   
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
@@ -2830,15 +2777,13 @@ bool mAnimatorLight::Segment::allocateColourData(uint16_t len) {
     return true;
 }
 
-void mAnimatorLight::Segment::deallocateColourData() {
-    // Safely free memory and reset pointers
-    if (coldata) {
-        free(coldata);
-        coldata = nullptr; // Prevent dangling pointer
-    }
-    _coldataLen = 0;
-  addUsedSegmentData(-_coldataLen);
-    // subUsedSegmentData(_coldataLen); // Adjust used memory counter
+void mAnimatorLight::Segment::deallocateColourData() 
+{
+  if(!coldata) return;
+  free(coldata);
+  coldata = nullptr;
+  addUsedSegmentData(-_coldataLen); // Update all segment usage
+  _coldataLen = 0;                  // reset this segment uage
 }
 
 // bool mAnimatorLight::Segment::allocateColourData(uint16_t len) {
@@ -3069,88 +3014,64 @@ void mAnimatorLight::Segment::setOption(uint8_t n, bool val) {
   // if (!(n == SEG_OPTION_SELECTED || n == SEG_OPTION_RESET || n == SEG_OPTION_TRANSITIONAL)) stateChanged = true; // send UDP/WS broadcast
 }
 
-void mAnimatorLight::Segment::setMode(uint8_t fx, bool loadDefaults) 
+/**
+ * @brief Updated August 2025
+ * setMode, means loading the effects preloaded into the EFFECTS_DATA.
+ * These must be called in this function, and the appended effects are only what is in this function, so update here when new default options are required by an effect 
+ * 
+ * @param fx 
+ * @param loadDefaults 
+ */
+void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults) 
 {
-  ALOG_INF(PSTR("Load FXData Defaults %d"), fx);
-  // if we have a valid mode & is not reserved
-  // if (fx < tkr_anim->getModeCount() && strncmp_P("RSVD", tkr_anim->getModeData(fx), 4)) {
-  //   if (fx != mode) {
-  //     startTransition(tkr_anim->getTransition()); // set effect transitions
-      //markForReset(); // transition will handle this
-      effect_id = fx;
+  ALOG_INF(PSTR("setEffect %d"), fx);
+  
+  // ALOG_INF(PSTR("description len=%d"), tkr_anim->effects.description.size());
+  #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  char buffer[100];
+  ALOG_INF(PSTR("Effect Description\n\r_________\n\r%s\n\r%S\n\r_________"), tkr_anim->GetFlasherFunctionNamebyID(fx, buffer, sizeof(buffer)), tkr_anim->effects.description[fx]);
+  #endif
 
-    ALOG_INF(PSTR("setMode These are likely where the parser takes the defaults from effects %d"), effect_id);
+  bool mode_changed = false;
+  if(fx != effect_id) mode_changed = true;
 
+  effect_id = fx;
+  if (loadDefaults) 
+  {
+    int16_t sOpt = -1;
 
-      // load default values from effect string
-      // if (loadDefaults) {
+    sOpt = tkr_anim->extractModeDefaults(fx, "sx");   if (sOpt >= 0) speed   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "ix");   if (sOpt >= 0) intensity   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "pal");   if (sOpt >= 0) setPalette(sOpt);
+    
+    char paletteName[32]; // Buffer to store the extracted palette name
+    if (tkr_anim->extractModeDefaults(fx, "paln", paletteName, sizeof(paletteName))) // Check for the "paln" command (palette name)
+    {
+      ALOG_INF(PSTR("paln=%s"), paletteName);
+      int16_t tmp_id = -1;
+      if((tmp_id=tkr_anim->GetPaletteIDbyName(paletteName))>=0){
+        ALOG_INF(PSTR("pal=%d"),tmp_id);
+        palette_id = tmp_id;
+      }
+    }
 
-        int16_t sOpt = -1;
-
-        if ((sOpt = tkr_anim->extractModeDefaults(fx, "sx")) >= 0) 
-        {
-          ALOG_INF(PSTR("Loading default sx=%d"), sOpt);
-          speed = sOpt;
-        }
-
-        if ((sOpt = tkr_anim->extractModeDefaults(fx, "ix")) >= 0) 
-        {
-          ALOG_INF(PSTR("Loading default ix=%d"), sOpt);
-          intensity = sOpt;
-        }
-
-        if ((sOpt = tkr_anim->extractModeDefaults(fx, "pal")) >= 0) 
-        {
-          ALOG_INF(PSTR("Loading default pal=%d"), sOpt);
-          setPalette(sOpt);
-        } 
-        
-        char paletteName[32]; // Buffer to store the extracted palette name
-        // Check for the "paln" command (palette name)
-        if (tkr_anim->extractModeDefaults(fx, "paln", paletteName, sizeof(paletteName)))
-        {
-          ALOG_INF(PSTR("Loading named palette: %s"), paletteName);
-          int16_t tmp_id = -1;
-          if((tmp_id=tkr_anim->GetPaletteIDbyName(paletteName))>=0){
-            ALOG_INF(PSTR("tmp_id=%d"),tmp_id);
-            palette_id = tmp_id;
-          }
-        }
-
-        if ((sOpt = tkr_anim->extractModeDefaults(fx, "ra")) >= 0) 
-        {
-          ALOG_INF(PSTR("Loading default ra=%d"), sOpt);
-          cycle_time__rate_ms = sOpt;
-        }
-
-        if ((sOpt = tkr_anim->extractModeDefaults(fx, "ti")) >= 0) 
-        {
-          ALOG_INF(PSTR("Loading default ti=%d"), sOpt);
-          // time_ms = sOpt;
-        }
-
-
-
-
-
-
-        // sOpt = tkr_anim->extractModeDefaults(fx, "c1");   if (sOpt >= 0) custom1   = sOpt;
-        // sOpt = tkr_anim->extractModeDefaults(fx, "c2");   if (sOpt >= 0) custom2   = sOpt;
-        // sOpt = tkr_anim->extractModeDefaults(fx, "c3");   if (sOpt >= 0) custom3   = sOpt;
-        // sOpt = extractModeDefaults(fx, "m12");  if (sOpt >= 0) map1D2D   = constrain(sOpt, 0, 7);
-        // sOpt = extractModeDefaults(fx, "si");   if (sOpt >= 0) soundSim  = constrain(sOpt, 0, 7);
-        // sOpt = extractModeDefaults(fx, "rev");  if (sOpt >= 0) reverse   = (bool)sOpt;
-        // sOpt = extractModeDefaults(fx, "mi");   if (sOpt >= 0) mirror    = (bool)sOpt; // NOTE: setting this option is a risky business
-        // sOpt = extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
-        // sOpt = extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
-        
-      // }
-
-
-
-      // stateChanged = true; // send UDP/WS broadcast
-    // }
-  // }
+    sOpt = tkr_anim->extractModeDefaults(fx, "ep");   if (sOpt >= 0) cycle_time__rate_ms   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "c1");   if (sOpt >= 0) custom1   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "c2");   if (sOpt >= 0) custom2   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "c3");   if (sOpt >= 0) custom3   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "o1");   if (sOpt >= 0) check1   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "o2");   if (sOpt >= 0) check2   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "o3");   if (sOpt >= 0) check3   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "m12");  if (sOpt >= 0) map1D2D   = constrain(sOpt, 0, 7);
+    sOpt = tkr_anim->extractModeDefaults(fx, "si");   if (sOpt >= 0) soundSim  = constrain(sOpt, 0, 7);
+    sOpt = tkr_anim->extractModeDefaults(fx, "rev");  if (sOpt >= 0) reverse   = (bool)sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "mi");   if (sOpt >= 0) mirror    = (bool)sOpt; // NOTE: setting this option is a risky business
+    sOpt = tkr_anim->extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
+    
+    if(mode_changed) tkr_anim->stateChanged = true; // send UDP/WS broadcast
+ 
+  }
 }
 
 
@@ -3162,9 +3083,6 @@ void mAnimatorLight::Segment::setMode(uint8_t fx, bool loadDefaults)
 //;sx=16,ix=240,1d
 int16_t mAnimatorLight::extractModeDefaults(uint8_t mode, const char *segVar)
 {
-
-
-
   if (mode < getModeCount()) {
     char lineBuffer[128] = "";
     strncpy_P(lineBuffer, getModeData_Config(mode), 127);
@@ -4694,10 +4612,6 @@ void mAnimatorLight::Segment::UpdateBrightness()
 
 
 
-
-
-// #ifdef ENABLE_DEVFEATURE_LIGHTING__REMOVE_RGBCCT
-
 void IRAM_ATTR mAnimatorLight::setPixelColor(uint32_t i, ColourBaseType col) {
   // Serial.printf(" mAnimatorLight::setPixelColor[%d] = %d,%d,%d,%d)\n\r", i, col.R, col.G, col.B, col.WW);
   i = getMappedPixelIndex(i);
@@ -4718,107 +4632,6 @@ ColourBaseType IRAM_ATTR mAnimatorLight::getPixelColor(uint32_t i) const {
   if (i >= _length) return 0;
   return tkr_iLight->bus_manager->getPixelColor(i);
 }
-
-
-
-// #else // In this case, Rgbcct must be mapped back into U32 as a temporary measure
-
-
-
-
-
-
-
-
-// // IS contained within segment so busses etc are known (ie the right pin will be used)
-// // void IRAM_ATTR mAnimatorLight::BUS_setPixelColor(int i, uint32_t col)
-// void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
-// {
-
-
-
-
-//   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-//   ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
-//   #endif 
-//   if (i >= _length) return;
-//   if (i < customMappingSize)
-//   {
-//     // ALOG_INF(PSTR("setPixelColor customMappingTable %d -> %d"), i, customMappingTable[i]);
-//     i = customMappingTable[i];
-//   }
-//   RgbcctColor c = RgbcctColor( R(col),G(col),B(col),W(col),W(col) );
-
-
-
-
-//   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-//   ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, R(col), G(col), B(col));
-//   #endif
-//   tkr_iLight->bus_manager->setPixelColor(i, c);
-// }
-
-// // uint32_t mAnimatorLight::BUS_getPixelColor(uint16_t i)
-// uint32_t mAnimatorLight::getPixelColor(uint16_t i)
-// {
-//   if (i >= _length) { ALOG_ERR(PSTR("return early")); return 0; }
-//   if (i < customMappingSize) i = customMappingTable[i];
-//   return tkr_iLight->bus_manager->getPixelColor(i).getU32();
-// }
-
-// /**
-//  * @brief NEw method which are the only entry point into the busmanager for RgbcctColour Types and hence enable mapping
-//  * 
-//  */
-// void IRAM_ATTR mAnimatorLight::setPixelColor_Rgbcct(int i, RgbcctColor col)
-// {
-//   #ifndef ENABLE_DEVFEATURE_LIGHTING__TEMPORARY_DISABLE_CODE_FOR_SPEED_TESTING
-//   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-//   ALOG_INF(PSTR("i0--------setPixelColor %d, %d, %d, %d"), i, col.R, col.G, col.B);
-//   #endif 
-//   if (i >= _length)
-//   {
-//     ALOG_INF(PSTR("i len %d %d"),i,_length);
-//     return;
-//   }
-//   if (i < customMappingSize)
-//   {
-//     ALOG_INF(PSTR("setPixelColor customMappingSize %d -> %d"), i, customMappingSize);
-//     // ALOG_INF(PSTR("setPixelColor customMappingTable %d -> %d"), i, customMappingTable[i]);
-//     i = customMappingTable[i];
-//   }
-//   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-//   ALOG_INF(PSTR("i1--------setPixelColor %d, %d, %d, %d"), i, col.R, col.G, col.B);
-//   #endif
-
-//   // ALOG_INF(PSTR("busnum %d"), tkr_iLight->bus_manager->getNumBusses());
-//   #endif // ENABLE_DEVFEATURE_LIGHTING__TEMPORARY_DISABLE_CODE_FOR_SPEED_TESTING
-
-//   // DEBUG_TIME__START
-//   tkr_iLight->bus_manager->setPixelColor(i, col);
-//   // if(i==0) DEBUG_TIME__SHOW_MESSAGE("set")
-
-
-// }
-
-// RgbcctColor mAnimatorLight::getPixelColor_Rgbcct(uint16_t i)
-// {
-//   // if (i >= _length) {
-//   //   return RgbcctColor((uint32_t)0);  // Early exit if index exceeds length
-//   // }
-  
-//   if (i < customMappingSize) {
-//     i = customMappingTable[i];  // Update index if it's within custom mapping size
-//   }
-  
-//   // Directly return the color retrieved from the bus manager
-//   return tkr_iLight->bus_manager->getPixelColor(i);
-// }
-
-
-// #endif
-
-
 
 
 //DISCLAIMER
@@ -4969,7 +4782,10 @@ void mAnimatorLight::setTargetFps(uint8_t fps) {
   _frametime = 1000 / _targetFps;
 }
 
-void mAnimatorLight::setMode(uint8_t segid, uint8_t m) {
+void mAnimatorLight::setEffect(uint8_t segid, uint8_t m) {
+  
+    ALOG_INF(PSTR("description len=%d"),effects.description.size());
+
   if (segid >= segments.size()) return;
    
   if (m >= getModeCount()) m = getModeCount() - 1;
@@ -4978,6 +4794,13 @@ void mAnimatorLight::setMode(uint8_t segid, uint8_t m) {
     // segments[segid].startTransition(_transitionDur); // set effect transitions
     //segments[segid].markForReset();
     segments[segid].animation_mode_id = m;
+    
+    #ifdef ENABLE_EFFECT_DESCRIPTIONS   
+    // if (m < effects.description.size())
+    // ALOG_INF(PSTR("description=%S"),effects.description[m]);
+    
+    ALOG_INF(PSTR("description len=%d"),effects.description.size());
+    #endif
   }
 }
 
@@ -5496,7 +5319,7 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
   return (customMappingSize > 0);
 }
 
-
+/*WrapEdge and Discrete should be flipped*/
 uint32_t mAnimatorLight::Segment::GetPaletteColour(
   /**
    * @brief _pixel_position
@@ -5535,13 +5358,13 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
    */
   bool apply_brightness,
   
-      uint8_t pbri,
+  uint8_t pbri,
 
-      uint8_t mcol
+  uint8_t mcol
 ){
   
   DEBUG_LINE_HERE_TRACE
-  if(palette_id != palette_container->loaded_palette_id)
+  if(palette_id != palette->loaded_palette_id)
   {
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   }
@@ -5563,29 +5386,18 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
    * This needs moved into its own function and called outside this.
    * SEGMENT.UpdatePalette(); and only called when palette is dynamic/live
    */
-  #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
   // else // else so it only tries this if the above "if" did not occur to stop double loads
-  // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
   if(
     (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
     (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
   ){
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
   }
-  #else
-  else // else so it only tries this if the above "if" did not occur to stop double loads
-  if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
-    (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-  ){
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-  }
-  #endif
   DEBUG_LINE_HERE_TRACE
 
   uint32_t colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
     palette_id,
-    (uint8_t*)palette_container->pData.data(),
+    (uint8_t*)palette->pData.data(),
     pixel_position,
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
@@ -5674,7 +5486,7 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
 
 
   
-  // if(palette_id != palette_container->loaded_palette_id)
+  // if(palette_id != palette->loaded_palette_id)
   // {
   //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   // }
@@ -5686,7 +5498,6 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
   //  * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
   //  * ie have a new tSaved_DynamicUpdate 
   //  */
-  // #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
   // // else // else so it only tries this if the above "if" did not occur to stop double loads
   // // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
   // if(
@@ -5695,19 +5506,228 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
   // ){
   //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
   // }
-  // #else
-  // else // else so it only tries this if the above "if" did not occur to stop double loads
-  // if(
-  //   (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
-  //   (palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-  // ){
-  //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-  // }
-  // #endif
 
   // RgbwwColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
   //   palette_id,
-  //   (uint8_t*)palette_container->pData.data(),
+  //   (uint8_t*)palette->pData.data(),
+  //   pixel_position,
+  //   encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  //   flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  //   flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  //   flag_crgb_exact_colour
+  // );
+
+  // // Apply brightness if needed
+  // if (apply_brightness) {
+  //   uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+
+  //   uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+
+  //   colour.R  = (colour.R * scale) >> 8;
+  //   colour.G  = (colour.G * scale) >> 8;
+  //   colour.B  = (colour.B * scale) >> 8;
+  //   colour.WW = (colour.WW * scale) >> 8;
+  //   colour.CW = (colour.CW * scale) >> 8;
+
+  // }
+
+
+
+  // return colour;
+
+}
+
+
+
+/*WrapEdge and Discrete should be flipped, will rename into original when full conversion is done*/
+uint32_t mAnimatorLight::Segment::GetPaletteColour_ModeWrap(
+  /**
+   * @brief _pixel_position
+   * ** [0-SEGLEN]
+   * ** [0-255]   
+   */
+  uint16_t pixel_position,
+  /**
+   * @brief flag_spanned_segment
+   * ** [1] : If spanned segment, then indexing (0-255) is expanded into the SEGLEN 
+   * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
+   * ** [2]: preffered
+   */
+  uint8_t     flag_spanned_segment, 
+  /**
+   * @brief force_palette_mode flag_crgb_exact_colour
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  uint8_t     force_palette_mode,
+  /**
+   * @brief flag_wrap_hard_edge
+   * ** [PALETTE_MODE__DEFAULT]
+   * ** [PALETTE_MODE__FORCE_GRADIENT] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [PALETTE_MODE__FORCE_DISCRETE]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  uint8_t     flag_wrap_hard_edge,
+  /**
+   * @brief encoded_value
+   * ** [uint32_t*] : encoded value from palette
+   */
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  /**
+   * @brief apply_brightness
+   * ** [false] : Apply brightness to the colour
+   * ** [true]  : Get the "full" 255 range colour object
+   */
+  bool apply_brightness,
+  
+  uint8_t pbri,
+
+  uint8_t mcol
+){
+  
+  DEBUG_LINE_HERE_TRACE
+  if(palette_id != palette->loaded_palette_id)
+  {
+    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+  }
+
+
+  // uint32_t color = SEGCOLOR(mcol < NUM_COLORS ? mcol : 0);
+  // // default palette or no RGB support on segment
+  // if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) {
+  //   return color_fade(color, pbri, true);
+  // }
+  
+  /**
+   * @brief These functions always need called as they are dynamic
+   * I should make this a check here, if palette is dynamic, then load everytime
+   * 
+   * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
+   * ie have a new tSaved_DynamicUpdate 
+   * 
+   * This needs moved into its own function and called outside this.
+   * SEGMENT.UpdatePalette(); and only called when palette is dynamic/live
+   */
+  // else // else so it only tries this if the above "if" did not occur to stop double loads
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+    (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  ){
+    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  }
+  DEBUG_LINE_HERE_TRACE
+
+  uint32_t colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
+    palette_id,
+    (uint8_t*)palette->pData.data(),
+    pixel_position,
+    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    force_palette_mode
+  );
+  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+  white_warm_GetPaletteColour = mPaletteI->colour32_white_cold; // Bypass W2, as this is not used in RGBWW
+  #endif
+
+  // Apply brightness if needed
+  if (apply_brightness) {
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+    // ALOG_INF(PSTR("brightness getpal %d"),brightness);
+    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+
+    // Extract, scale, and repack in one step
+    colour = RGBW32(
+      (R(colour) * scale) >> 8,  // Red
+      (G(colour) * scale) >> 8,  // Green
+      (B(colour) * scale) >> 8,  // Blue
+      (W(colour) * scale) >> 8   // White
+    );
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    white_warm_GetPaletteColour = (mPaletteI->colour32_white_cold * scale) >> 8; // Rescale bypass W2
+    #endif
+  }
+
+  return colour;
+
+}
+
+RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW_2025(
+  /**
+   * @brief _pixel_position
+   * ** [0-SEGLEN]
+   * ** [0-255]   
+   */
+  uint16_t pixel_position,
+  /**
+   * @brief flag_spanned_segment
+   * ** [1] : If spanned segment, then indexing (0-255) is expanded into the SEGLEN 
+   * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
+   * ** [2]: preffered
+   */
+  uint8_t     flag_spanned_segment, 
+  /**
+   * @brief force_palette_mode flag_crgb_exact_colour
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  uint8_t     force_palette_mode,
+  /**
+   * @brief flag_wrap_hard_edge
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  uint8_t     flag_wrap_hard_edge,
+  /**
+   * @brief encoded_value
+   * ** [uint32_t*] : encoded value from palette
+   */
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+
+  bool apply_brightness
+){
+
+  uint32_t colour32 = GetPaletteColour(
+    pixel_position,
+    flag_spanned_segment,
+    flag_wrap_hard_edge,
+    force_palette_mode,
+    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    apply_brightness
+  );
+  return RgbwwColor(
+    R(colour32),  // Red
+    G(colour32),  // Green
+    B(colour32),  // Blue
+    W(colour32),  // White
+    white_warm_GetPaletteColour  // Cold White
+  );
+
+
+  
+  // if(palette_id != palette->loaded_palette_id)
+  // {
+  //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+  // }
+  
+  // /**
+  //  * @brief These functions always need called as they are dynamic
+  //  * I should make this a check here, if palette is dynamic, then load everytime
+  //  * 
+  //  * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
+  //  * ie have a new tSaved_DynamicUpdate 
+  //  */
+  // // else // else so it only tries this if the above "if" did not occur to stop double loads
+  // // test here, then move and phase out with ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS merge
+  // if(
+  //   (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+  //   (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+  // ){
+  //   LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  // }
+
+  // RgbwwColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
+  //   palette_id,
+  //   (uint8_t*)palette->pData.data(),
   //   pixel_position,
   //   encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   //   flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
@@ -5740,28 +5760,13 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
 
 CRGB mAnimatorLight::ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
-  if(SEGMENT.palette_id != SEGMENT.palette_container->loaded_palette_id)
+  if(SEGMENT.palette_id != SEGMENT.palette->loaded_palette_id)
   {
     SEGMENT.LoadPalette(SEGMENT.palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   }
   return ColorFromPalette(pal, index, brightness, blendType);
 }
 
-uint8_t mAnimatorLight::Segment::GetPaletteDiscreteWidth()
-{
-//   if(palette_id != palette_container->loaded_palette_id)
-//   {
-//     tkr_anim->LoadPalette(palette_id, tkr_anim->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-//   }
-
-//   return mPaletteI->GetPaletteDiscreteWidth(
-//     palette_id,
-//     (uint8_t*)palette_container->pData.data()
-//   );
-
-  return mPaletteI->GetColoursInPalette(palette_id);
-
-}
 
 /**
  * @brief 
@@ -7185,11 +7190,11 @@ JBI->Start();
     for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
     {
       JBI->Object_Start_F("Segment%d",seg_i);      
-        JBI->Add("dataLen", SEGMENT_I(seg_i).palette_container->pData.size());
+        JBI->Add("dataLen", SEGMENT_I(seg_i).palette->pData.size());
         JBI->Array_Start("data");
-        for(uint8_t i=0;i<SEGMENT_I(seg_i).palette_container->pData.size();i++)
+        for(uint8_t i=0;i<SEGMENT_I(seg_i).palette->pData.size();i++)
         {
-          JBI->Add(SEGMENT_I(seg_i).palette_container->pData[i]);
+          JBI->Add(SEGMENT_I(seg_i).palette->pData[i]);
         }
         JBI->Array_End();
       JBI->Object_End();
@@ -7207,9 +7212,9 @@ JBI->Start();
       for(uint8_t elem_i=0;elem_i<16;elem_i++)
       {
         JBI->Array_Start();
-          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
-          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
-          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
+          JBI->Add( SEGMENT_I(seg_i).palette->CRGB16Palette16_Palette.data[elem_i].r );
+          JBI->Add( SEGMENT_I(seg_i).palette->CRGB16Palette16_Palette.data[elem_i].g );
+          JBI->Add( SEGMENT_I(seg_i).palette->CRGB16Palette16_Palette.data[elem_i].b );
         JBI->Array_End();          
       }
       JBI->Array_End();
@@ -7218,9 +7223,9 @@ JBI->Start();
       for(uint8_t elem_i=0;elem_i<16;elem_i++)
       {
         JBI->Array_Start();
-          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
-          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
-          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
+          JBI->Add( SEGMENT_I(seg_i).palette->CRGB16Palette16_Palette.data[elem_i].r );
+          JBI->Add( SEGMENT_I(seg_i).palette->CRGB16Palette16_Palette.data[elem_i].g );
+          JBI->Add( SEGMENT_I(seg_i).palette->CRGB16Palette16_Palette.data[elem_i].b );
         JBI->Array_End();          
       }
       JBI->Array_End();
@@ -7482,8 +7487,8 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
         // JBI->Add("n", pal.friendly_name_ctr);
         // JBI->Add("i", pal.id);
         
-        uint8_t colours_in_palette = tkr_anim->GetNumberOfColoursInPalette(i);
-        JBI->Add("s",colours_in_palette);
+        // uint8_t colours_in_palette = tkr_anim->GetNumberOfColoursInPalette(i);
+        // JBI->Add("s",colours_in_palette);
 
 
 
@@ -8222,7 +8227,7 @@ void handleNotifications()
           selseg.options = (selseg.options & 0x0071U) | (udpIn[9 +ofs] & 0x0E); // ignore selected, freeze, reset & transitional
           // selseg.setOpacity(udpIn[10+ofs]);
           if (applyEffects) {
-            tkr_anim->setMode(id,  udpIn[11+ofs]);
+            tkr_anim->setEffect(id,  udpIn[11+ofs]);
             selseg.speed     = udpIn[12+ofs];
             selseg.intensity = udpIn[13+ofs];
             selseg.palette_id   = udpIn[14+ofs];
@@ -8262,7 +8267,7 @@ void handleNotifications()
         for (size_t i = 0; i < tkr_anim->getSegmentsNum(); i++) {
           mAnimatorLight::Segment& seg = tkr_anim->getSegment(i);
           if (!seg.isActive() || !seg.isSelected()) continue;
-          seg.setMode(udpIn[8]);
+          seg.setEffect(udpIn[8]);
           seg.speed =  udpIn[9];
           if (version > 2) seg.intensity = udpIn[16];
           if (version > 4) seg.setPalette(udpIn[19]);

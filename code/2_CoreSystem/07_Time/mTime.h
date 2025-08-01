@@ -195,6 +195,7 @@ class mTime :
     uint32_t MinutesUptime(void);
     String GetUptime(void);
     uint32_t MinutesPastMidnight(void);
+    uint32_t SecondsPastMidnight_SecondsOfCurrentDay(void);
     uint32_t RtcMillis(void);
     void BreakNanoTime(uint32_t time_input, uint32_t time_nanos, datetime_t &tm);
     void BreakTime(uint32_t time_input, datetime_t &tm);

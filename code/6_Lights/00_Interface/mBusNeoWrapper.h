@@ -783,6 +783,12 @@ static RgbwwColor getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uin
     // uint32_t __debug_time_start__ = micros();
     // #endif
 
+    /***
+     * KEEP: Excellent feature I need to test more
+     * Allows testing performance of 2000+ LEDs but visually seeing them on smaller connected hardware
+     * Should be tweaked that it always sends and gets from the bus, so say 20 virtual pixels are 5 real pixels
+     * index transmit 0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 .... 4 4 4 4 4 // hence bus timing is accurate, but virtually its condensed
+     */
     // Debug feature to map a large number of virtual pixels to a smaller physical display
     #ifdef ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS
     pix = pix % ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS; // Map to fewer pixels

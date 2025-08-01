@@ -1,0 +1,4 @@
+MQTT_BROKER = "192.168.3.70"
+MQTT_PORT = 1883
+MQTT_KEEPALIVE = 60
+# MQTT_TOPIC_PREFIX = "cm_office__pebble_playlists"

@@ -64,11 +64,23 @@
  **/
 #define PALETTE_WRAP_ON                 true
 #define PALETTE_WRAP_OFF                false
-#define PALETTE_DISCRETE_OFF            false
-#define PALETTE_DISCRETE_ON             true
+
+#define PALETTE_DISCRETE_OFF            0
+#define PALETTE_DISCRETE_ON             1
 #define PALETTE_DISCRETE_DEFAULT        2 // Use the prefered method depending on the palette. Gradients will be shown across the segment, discrete will be shown as a single colours sequenced
+
+#define PALETTE_MODE__DEFAULT         0  // Use palette as defined (gradient or discrete)
+#define PALETTE_MODE__FORCE_DISCRETE  1  // Force discrete interpretation
+#define PALETTE_MODE__FORCE_GRADIENT  2  // Force gradient interpretation
+
+#define PALETTE_INDEX__IS_SEGLEN_SPANNED  true
+#define PALETTE_INDEX__IS_PALETTE_INDEX   false    
+
 #define PALETTE_INDEX_SPANS_SEGLEN_ON   true
 #define PALETTE_INDEX_IS_INDEX_IN_PALETTE   false
+
+
+
 #define PALETTE_SPAN_OFF                false // PALETTE_INDEX_IS_INDEX_IN_PALETTE
 #define WLED_PALETTE_MAPPING_ARG_FALSE  false
 #define NO_ENCODED_VALUE                nullptr
@@ -249,8 +261,8 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 #define pSEGLEN               tkr_anim->_virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
 #define SEG_W            segments[getCurrSegmentId()].vWidth()
 #define SEG_H            segments[getCurrSegmentId()].vHeight()
-#define SEGPALETTE            SEGMENT.palette_container->CRGB16Palette16_Palette.data
-#define pSEGPALETTE            pSEGMENT.palette_container->CRGB16Palette16_Palette.data
+#define SEGPALETTE            SEGMENT.palette->CRGB16Palette16_Palette.data
+#define pSEGPALETTE            pSEGMENT.palette->CRGB16Palette16_Palette.data
 #define SEGIDX                getCurrSegmentId()
 
 // WLED Conversions
@@ -274,12 +286,7 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
-#ifndef ENABLE_DEVFEATURE_PALETTE__VERSION2
 #include "6_Lights/02_Palette/mPalette.h"
-#endif
-#ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2
-#include "6_Lights/02_Palette/mPalette2.h"
-#endif
 #include "6_Lights/02_Palette/mPaletteLoaded.h"
 
 #include "6_Lights/00_Interface/mInterfaceLight.h"
@@ -870,7 +877,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__TimeBased__HourProgress();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    uint16_t EffectAnim__Static_Palette_Varied();
+    uint16_t EffectAnim__Palette_Variation();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Stepping_Palette_With_Background();
@@ -1330,7 +1337,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,
       EFFECTS_FUNCTION__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH__ID,
       // EFFECTS_FUNCTION__RANDOMISE_GRADIENT_ANY_PALETTE_WITH_ZOOM_AND_SQUEEZE__ID, Make new effect that will take any palette, with or without grad indexs, and will zoom/stretch them. Ie 4 colours, which would have [0, 90,190, 255] as centre points, will have the 90 and 190 distances move around. This will depend on number of colours in a palette.
-      EFFECTS_FUNCTION__STATIC_PALETTE_VARIED__ID,
+      EFFECTS_FUNCTION__PALETTE_VARIATION__ID,
       #endif
 
       // General Level 2 Flashing Basic Effects
@@ -2785,7 +2792,7 @@ typedef struct Segment
 
 
 
-    mPaletteLoaded* palette_container = new mPaletteLoaded();
+    mPaletteLoaded* palette = new mPaletteLoaded();
     /**
      * Each segment will have its own animator
      * This will also need to share its index into the animation so it knows what segments to run
@@ -2794,7 +2801,7 @@ typedef struct Segment
 
 
     bool LoadPalette_AsyncLock = false;
-    void LoadPalette(uint8_t palette_id, mPaletteLoaded* palette_container = nullptr);
+    void LoadPalette(uint8_t palette_id, mPaletteLoaded* palette = nullptr);
 
     uint32_t tSaved_LastUpdated = millis();
     uint32_t tTick_maximum_call_ms = 10;
@@ -2852,7 +2859,7 @@ typedef struct Segment
       aux2 = 0;
       aux3 = 0;
 
-      palette_container = new mPaletteLoaded(); // duplicate of above, but needed for each segment
+      palette = new mPaletteLoaded(); // duplicate of above, but needed for each segment
       
     }
 
@@ -2972,7 +2979,7 @@ typedef struct Segment
     bool    setColor(uint8_t slot, RgbwwColor c); //returns true if changed
     void    setCCT(uint16_t k);
     void    setOption(uint8_t n, bool val);
-    void    setMode(uint8_t fx, bool loadDefaults = false);
+    void    setEffect(uint8_t fx, bool loadDefaults = false);
     void    setPalette(uint8_t pal);
     uint8_t differs(const Segment& b) const;
     void    refreshLightCapabilities(void);
@@ -3211,6 +3218,99 @@ typedef struct Segment
 
     
     /**
+     * @brief Depending on the build settings later, I will want to keep a Rgbcct and U32 palette method
+     * Hence a new U32 palette structure will exist that always foregoes the Rgbcct and handles in U32 format
+     * This may be hardcorded with a define, or use if to switch
+     * #ifdef XX
+     * #define GetPaletteColour GetPaletteColour_U32
+     * #else
+     * #define GetPaletteColour GetPaletteColourRGBCCT
+     * #endif
+     **/
+    // uint8_t white_warm_GetPaletteColour = 0;
+    [[gnu::hot]] uint32_t GetPaletteColour_ModeWrap(
+      /**
+       * @brief _pixel_position
+       * ** [0-SEGLEN]
+       * ** [0-255]   
+       */
+      uint16_t pixel_position = 0,
+      /**
+       * @brief flag_position_scaled255
+       * ** [true] : pixel_position should be between 0-255
+       * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
+       */
+      uint8_t     flag_position_scaled255 = false,
+      /**
+       * @brief force_palette_mode flag_crgb_exact_colour
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      uint8_t     force_palette_mode = false,
+      /**
+       * @brief flag_wrap_hard_edge
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      uint8_t     flag_wrap_hard_edge = false,
+      /**
+       * @brief encoded_value
+       * ** [uint32_t*] : encoded value from palette
+       */
+      uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+      /**
+       * @brief apply_brightness
+       * ** [false] : Apply brightness to the colour
+       * ** [true]  : Get the "full" 255 range colour object
+       */
+      bool apply_brightness = false,
+
+      uint8_t pbri = 255,
+
+      uint8_t mcol = 0
+    );
+
+    /*****
+     * Some effects allow for RGBWW to be generated, but this has performance implications
+     *****/
+    [[gnu::hot]] RgbwwColor GetPaletteColour_RGBWW_2025(
+      /**
+       * @brief _pixel_position
+       * ** [0-SEGLEN]
+       * ** [0-255]   
+       */
+      uint16_t pixel_position = 0,
+      /**
+       * @brief flag_position_scaled255
+       * ** [true] : pixel_position should be between 0-255
+       * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
+       */
+      uint8_t     flag_position_scaled255 = false,
+      /**
+       * @brief force_palette_mode flag_crgb_exact_colour
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      uint8_t     force_palette_mode = false,
+      /**
+       * @brief flag_wrap_hard_edge
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      uint8_t     flag_wrap_hard_edge = false,
+      /**
+       * @brief encoded_value
+       * ** [uint32_t*] : encoded value from palette
+       */
+      uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+
+      
+
+      bool apply_brightness = false
+    );
+
+    
+    /**
      * WLED Palette Conversion
      * 
      * Gets a single color from the currently selected palette.
@@ -3225,9 +3325,6 @@ typedef struct Segment
     inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
       return GetPaletteColour(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg*/true, pbri, mcol);
     }
-
-
-    uint8_t GetPaletteDiscreteWidth(); // Rename to colours in palette
 
     // 2D Blur: shortcuts for bluring columns or rows only (50% faster than full 2D blur)
     inline void blurCols(fract8 blur_amount, bool smear = false) { // blur all columns
@@ -3847,7 +3944,7 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
 
   void finalizeInit();
   void service(void);
-  void setMode(uint8_t segid, uint8_t m);
+  void setEffect(uint8_t segid, uint8_t m);
   void setColor(uint8_t slot, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0);
   void setColor(uint8_t slot, uint32_t c);
   void setCCT(uint16_t k);
@@ -3921,8 +4018,13 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   };
 
 
-    typedef uint16_t (mAnimatorLight::*EffectFunction)();        
+    typedef uint16_t (mAnimatorLight::*EffectFunction)();    
+    
+    #ifdef ENABLE_EFFECT_DESCRIPTIONS    
+    void addEffect(uint8_t id, EffectFunction function, const char* config = nullptr, const char* effect_description = nullptr, uint8_t development_stage = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
+    #else
     void addEffect(uint8_t id, EffectFunction function, const char* config = nullptr, uint8_t development_stage = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
+    #endif
 
     struct EFFECTS
     {
@@ -3931,8 +4033,10 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
       std::vector<const char*>        config;     // 
       std::vector<uint8_t>            development_stage; // 0:stable, 1:beta, 2:alpha, 3:dev
       std::vector<uint8_t>            id; // 1 byte per element // uses extra memory but allows compile time switching of the effects included in a build (it enum list remains a full list)
+      #ifdef ENABLE_EFFECT_DESCRIPTIONS
+      std::vector<const char*>        description;     //       
+      #endif
     }effects;
-
 
     void setupEffectData(void); // add default effects to the list; defined in FX.cpp
 
@@ -3997,13 +4101,6 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     uint32_t effect_start_time; // WLED "now", strip.now
     uint32_t timebase;
     uint32_t currentColor(uint32_t colorNew, uint8_t tNr);
-
-    
-
-    #ifndef ENABLE_DEVFEATURE_LIGHTING__REMOVE_RGBCCT
-    void setPixelColor_Rgbcct(int i, RgbwwColor col);
-    RgbwwColor getPixelColor_Rgbcct(uint16_t i);
-    #endif
 
     inline uint32_t getLastShow(void) { return _lastShow; }
     inline uint32_t segColor(uint8_t i) { return _colors_t_PHASE_OUT[i]; }

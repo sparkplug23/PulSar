@@ -1508,7 +1508,13 @@ public:
 
 
 
-typedef enum { NOBLEND=0, LINEARBLEND=1 } TBlendType;
+// typedef enum { NOBLEND=0, LINEARBLEND=1 } TBlendType;
+
+typedef enum {
+    NOBLEND=0,            ///< No interpolation between palette entries
+    LINEARBLEND=1,        ///< Linear interpolation between palette entries, with wrap-around from end to the beginning again
+    LINEARBLEND_NOWRAP=2  ///< Linear interpolation between palette entries, but no wrap-around
+} TBlendType;
 
 CRGB ColorFromPalette( const CRGBPalette16& pal,
                       uint8_t index,

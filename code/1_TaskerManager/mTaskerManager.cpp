@@ -514,7 +514,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
   addTasker(new mRotaryEncoder());
   #endif
-  #ifdef USE_MODULE_SENSORS_SUN_TRACKING
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
   addTasker(new mSunTracking());
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS

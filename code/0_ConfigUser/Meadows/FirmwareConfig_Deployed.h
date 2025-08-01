@@ -31,7 +31,8 @@
 // #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
 // #define DEVICE_MEADOWS__OFFICE__BLACK_STAND
 // #define DEVICE_OFFICE__DESK_LIGHTING
-// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
+#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
+// #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -172,7 +173,7 @@
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
  "}";
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -310,7 +311,7 @@
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
  "}";
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -552,7 +553,7 @@
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
  "}";
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1007,7 +1008,7 @@
 
 #ifdef ENABLE_TEMPLATE_SECTION__LIGHTS__NEOPIXELBUS
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025_NO_GPIO
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1313,7 +1314,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: Lighting Configs
   ************************************/    
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
 
   #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
@@ -1552,7 +1553,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    */
 
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1622,13 +1623,13 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 #ifdef DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
 
-#define ENABLE_DEVFEATURE_PALETTE__VERSION2
-#define ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
-// #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
 
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
 
-// #define ENABLE_DEBUG_LINE_HERE_TRACE
+  #define ENABLE_EFFECT_DESCRIPTIONS
 
 
 //   #define ENABLE_ADVANCED_DEBUGGING
@@ -1640,7 +1641,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 //   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
 //   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1656,7 +1657,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     ],
     "Segments":[
       {
-        "Name":"32 Inch Horizontal",
+        "Name":"Bus 1",
         "PixelRange": [
           0,
           201
@@ -1674,6 +1675,66 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
       }
     ],
     "BrightnessRGB": 25
+  }
+  )=====";
+
+#endif
+
+
+
+
+#ifdef DEVICE_MEADOWS__OFFICE__GARAGE_TREE
+
+// #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+
+
+
+// #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Tree",
+        "PixelRange": [
+          0,
+          200
+        ],
+        "ColourPalette":"Snowy 02",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 25
+      }
+    ],
+    "BrightnessRGB": 100
   }
   )=====";
 
@@ -2132,7 +2193,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
 
   // #define USE_LIGHTING_TEMPLATE__1_DEVICES
   #define USE_LIGHTING_TEMPLATE__n_DEVICES
@@ -3053,7 +3114,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
 //    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
 //  "}";
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -3517,7 +3577,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
  "}";
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -3690,7 +3750,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define USE_MODULE_NETWORK_WEBSERVER
   // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  
 
 
   /***********************************
@@ -4963,7 +5023,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
   // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
 
-  // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  // 
   // #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // R"=====(
@@ -5031,7 +5091,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
   // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
  
-   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+   
    #define USE_LIGHTING_TEMPLATE
    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
    R"=====(
@@ -5320,7 +5380,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
   // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
 
-  // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  // 
   // #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // R"=====(
@@ -5388,7 +5448,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
 //   #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
  
-   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+   
    #define USE_LIGHTING_TEMPLATE
    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
    R"=====(
@@ -5515,13 +5575,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   #define ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
 
-  #define ENABLE_DEVFEATURE_PALETTE__VERSION2
-  #define ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
-
-
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-
-  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
+    // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 

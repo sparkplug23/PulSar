@@ -213,7 +213,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   if (jtok = obj["PaletteMappingValues"]) { 
     if (jtok.isArray()) {
       // Pre-allocate space in the vector to avoid repeated memory allocation
-      auto& mapping_values = SEGMENT_I(segment_index).palette_container->mapping_values;
+      auto& mapping_values = SEGMENT_I(segment_index).palette->mapping_values;
       mapping_values.clear(); // reset old map
       mapping_values.reserve(16); // reserve space for 16 elements
       JsonParserArray arrobj = jtok;

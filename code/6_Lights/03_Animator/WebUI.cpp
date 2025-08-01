@@ -1434,19 +1434,15 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   }else
   {
-    ALOG_INF(PSTR("elem[\"fx\"].is<const char*>() == NUMBER"));
+    // ALOG_INF(PSTR("elem[\"fx\"].is<const char*>() == NUMBER"));
     if (getVal(elem["fx"], &fx, 0, getModeCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
-      ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);
-      
-
+      // ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);      
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
       if (!presetId && currentPlaylist>=0) unloadPlaylist(); // applying a preset unloads the playlist, may be needed here too?
       #endif
-
-
       // if (fx != seg.animation_mode_id)
       DEBUG_LINE_HERE; 
-      seg.setMode(fx, elem[F("fxdef")]);
+      seg.setEffect(fx, elem[F("fxdef")]); // elem[F("fxdef") effect default, if set, load in defined defaults
     }
   }
 
@@ -1478,8 +1474,13 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   // Map scale into internal rate
   if (elem["ep"].is<int>()) {
     seg.cycle_time__rate_ms = elem["ep"];//map(transition_slider_rate, 0,255, 0,10000);
-    ALOG_INF(PSTR("seg.cycle_time__rate_ms = %d"), seg.cycle_time__rate_ms);
+    ALOG_INF(PSTR("cycle_time__rate_ms = %d"), seg.cycle_time__rate_ms);
   }
+
+  /**
+   * @brief I see the issue right now, is load default is not actually pushing through ep, as its not the command sent. I need to print out the conversion from load default into effect defaults at end of string
+   * 
+   */
 
   // getVal(elem["tr"], &seg.cycle_time__rate_ms);
 
@@ -1518,6 +1519,10 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   getVal(elem["c3"], &cust3); // we can't pass reference to bifield
   seg.custom3 = constrain(cust3, 0, 31);
 
+  seg.cycle_time__rate_ms = elem["ep"] | seg.cycle_time__rate_ms;
+
+  ALOG_INF(PSTR("seg.cycle_time__rate_ms %d"),seg.cycle_time__rate_ms);
+
 
   seg.params_user[0] = elem["v0"] | 0;
   seg.params_user[1] = elem["v1"] | 0;
@@ -1532,7 +1537,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.check2 = elem["o2"] | seg.check2;
   seg.check3 = elem["o3"] | seg.check3;
   
-  ALOG_INF(PSTR("c1 %d"), seg.check1);
+  ALOG_INF(PSTR("o1 %d"), seg.check1);
 
   JsonArray iarr = elem[F("i")]; //set individual LEDs
   if (!iarr.isNull()) {
@@ -2299,7 +2304,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
   #endif
 
   DEBUG_LINE_HERE_TRACE
-    uint16_t colours_in_palette = GetNumberOfColoursInPalette(palette_id);
+    uint16_t colours_in_palette = SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInPalette(palette_id);
    
   DEBUG_LINE_HERE_TRACE
     // #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
@@ -2428,21 +2433,12 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           }
       } 
       // Handle random hue palettes
-      #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
       else if (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID && palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID) {
           // Add "r" for random color-based palettes
           for (int i = 0; i < 4; ++i) {
               curPalette_obj.add("r");
           }
       }
-      #else
-      else if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID) {
-          // Add "r" for random color-based palettes
-          for (int i = 0; i < 4; ++i) {
-              curPalette_obj.add("r");
-          }
-      }
-      #endif
 
       /**
        * @brief Palettes that the RGB data should be retrived
@@ -2559,21 +2555,12 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     }
 
     
-    #ifdef ENABLE_DEVFEATURE_PALETTE__VERSION2__MOVE_CRGB16RANDOMS
     if (
       (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID && 
        palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
     ) {  
         palette_display_as_banded_gradient = false; // These palettes use gradients
     }
-    #else
-    if (
-      (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID && 
-       palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID)
-    ) {  
-        palette_display_as_banded_gradient = false; // These palettes use gradients
-    }
-    #endif
 
     /***
      * Custom palettes

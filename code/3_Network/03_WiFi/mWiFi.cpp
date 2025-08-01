@@ -436,12 +436,12 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 }
 
 
-//chcked
 void mWiFi::ScanBestAndBeginWifi()
 {
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  ALOG_TST(PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
-  #endif// ENABLE_LOG_LEVEL_INFO
+
+  uint8_t log = LOG_LEVEL_INFO;
+
+  AddLog(log, PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
 
   static int8_t best_network_db;
 
@@ -574,14 +574,11 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
                 memcpy((void*) &connection.bssid, (void*) bssid_scan, sizeof(connection.bssid));
 
                 
-            AddLog_Array(LOG_LEVEL_DEV_TEST, "break", connection.bssid, (uint8_t)6);
+            AddLog_Array(log, "break", connection.bssid, (uint8_t)6);
 
             
               }
             }
-    #ifdef ENABLE_LOG_LEVEL_INFO
-            ALOG_TST(PSTR("break"));
-    #endif// ENABLE_LOG_LEVEL_INFO
             break;
           }else{
           
@@ -608,12 +605,8 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
                     (j==2?'3':
                     '-')));
           
-    #ifdef ENABLE_LOG_LEVEL_INFO
-            ALOG_INF(
-                        PSTR(DEBUG_INSERT_PAGE_BREAK D_LOG_WIFI "Network %d, AP%c, SSId %s, Channel %d, RSSI %d"), 
-                        i, known_c, ssid_scan.c_str(), chan_scan, rssi_scan
-                      );
-    #endif // ENABLE_LOG_LEVEL_INFO
+          AddLog(log, PSTR(DEBUG_INSERT_PAGE_BREAK D_LOG_WIFI "Network %d, AP%c, SSId %s, Channel %d, RSSI %d"), 
+                        i, known_c, ssid_scan.c_str(), chan_scan, rssi_scan);
         }
           
         delay(0);
@@ -624,19 +617,17 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
     // DEBUG_LINE_HERE;
     connection.scan_state = 0;
     // If bssid changed then (re)connect wifi
-    for (uint8_t i = 0; i < sizeof(connection.bssid); i++) {
-    
-      if (last_bssid[i] != connection.bssid[i]) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        ALOG_INF(PSTR(D_LOG_WIFI "last_bssid[i] != connection.bssid[i]"));
-    #endif// ENABLE_LOG_LEVEL_INFO
+    for (uint8_t i = 0; i < sizeof(connection.bssid); i++) 
+    {    
+      if (last_bssid[i] != connection.bssid[i]) 
+      {
+        AddLog(log, PSTR(D_LOG_WIFI "last_bssid[i] != connection.bssid[i]"));
         WifiBegin(ap, channel);                     // 0 (AP1), 1 (AP2) or 3 (default AP)
         break;
-      }else{
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        ALOG_INF(PSTR(D_LOG_WIFI "last_bssid[i] ================= connection.bssid[i]"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-
+      }
+      else
+      {
+        AddLog(log, PSTR(D_LOG_WIFI "last_bssid[i] ================= connection.bssid[i]"));
       }
     }
   }
