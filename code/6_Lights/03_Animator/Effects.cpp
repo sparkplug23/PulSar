@@ -39,6 +39,7 @@ static const char PM_EFFECT_CONFIG__##[] PROGMEM =
   "Effect Name@Speed,Intensity,Custom1Star,Custom2Cog,Custom3Visibility,Checkbox1Palette,Checkbox2Layers,Checkbox3Favourite,EffectPeriod,Grouping;SEGCOL_Fx,SEGCOL_Bg,SEGCOL_Col3,SEGCOL_Col4,SEGCOL_Col5;pal=21,ep=1000~DEBUG_LEVEL";
 
 @sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp;seg1,2,3,4,5;pal=21,ep=1000~DEBUG_LEVEL";
+@                                                 ;            ;                          " // sliders&checkbox ; segmentColours ; effectDefaults
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 Effect Name
@@ -311,58 +312,124 @@ static const char PM_EFFECT_DESCRI__PALETTE_VARIATION[] PROGMEM = "Varying/Aged 
  * @param Time     : Blend time controls the animation between current and desired colours using the dynamic buffer.
  ********************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description: Splits the current palette across the segment, optionally repeating it based on intensity or exact repeat. Ensures even distribution of all colours including remainder pixels.
+ * @note: check3 enables exact repeats (repeats = intensity + 1), otherwise repeats are mapped from 0–255 to 1–21
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Split_Palette_SegWidth()
 {
-  // Allocate dynamic buffer for both starting and desired colour (with brightness)
   if (!SEGMENT.allocateColourData(SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN)) {
     return USE_ANIMATOR;
   }
 
-  // Copy current pixel colours into starting buffer
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  // Determine number of palette colours
   uint8_t colours_in_palette = SEGMENT.palette->colours_in_palette;
 
-  // Intensity controls how many extra repetitions of the palette occur (0 = 1x, 1 = 2x, etc.)
-  uint16_t palette_repeats = map(SEGMENT.intensity,0,255, 0,20) + 1;
-  if(SEGMENT.check3) palette_repeats = SEGMENT.intensity + 1; // if check3, intensity is exact repeat, otherwise scaled
+  uint16_t palette_repeats = map(SEGMENT.intensity, 0, 255, 0, 20) + 1;
+  if (SEGMENT.check3) palette_repeats = SEGMENT.intensity + 1;
+
   uint16_t total_bands = colours_in_palette * palette_repeats;
 
-  // Avoid division by zero; ensure at least 1 band width
-  uint16_t band_width = (total_bands > 0) ? max<uint16_t>(1, SEGLEN / total_bands) : SEGLEN;
+  uint16_t base_band_width = (total_bands > 0) ? SEGLEN / total_bands : SEGLEN;
+  uint16_t leftover = (total_bands > 0) ? SEGLEN % total_bands : 0;
 
-  // Optional: offset shift for motion or symmetry
-  uint16_t offset_shift = 0; // Can later be animated
+  uint16_t pixel = 0;
+  for (uint16_t band = 0; band < total_bands; band++) {
+    uint16_t band_width = base_band_width + (band < leftover ? 1 : 0);
+    uint8_t palette_index = (band * 255) / max<uint16_t>(1, total_bands - 1);
 
-  for (uint16_t pixel = 0; pixel < SEGLEN; pixel++) {
-    uint16_t adjusted_pixel = (pixel + offset_shift) % SEGLEN;
-    uint16_t band_index = adjusted_pixel / band_width;
-    uint8_t palette_index = band_index % colours_in_palette;
-
-    // Get discrete palette colour
-    uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
-      palette_index,
-      PALETTE_INDEX__IS_PALETTE_INDEX,
-      PALETTE_MODE__FORCE_DISCRETE,
-      PALETTE_WRAP_OFF,
-      NO_ENCODED_VALUE,
-      ANIM_BRIGHTNESS_REQUIRED
-    );
-
-    // Store as desired colour
-    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+    for (uint16_t i = 0; i < band_width && pixel < SEGLEN; i++, pixel++) {
+      uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+        palette_index,
+        PALETTE_INDEX__IS_SEGLEN_SPANNED,
+        PALETTE_MODE__FORCE_GRADIENT,
+        PALETTE_WRAP_OFF,
+        NO_ENCODED_VALUE,
+        ANIM_BRIGHTNESS_REQUIRED
+      );
+      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+    }
   }
 
-  // Set animation blending function
+  may need to have a special case for crgb16 type, or discrete type, just for the bands case. IsCRGBPalette16() or IsGradient() to do conversion in 255
+
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
   });
 
   return USE_ANIMATOR;
 }
+
+// uint16_t mAnimatorLight::EffectAnim__Split_Palette_SegWidth()
+// {
+//   // Allocate dynamic buffer for both starting and desired colour (with brightness)
+//   if (!SEGMENT.allocateColourData(SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN)) {
+//     return USE_ANIMATOR;
+//   }
+
+//   // Copy current pixel colours into starting buffer
+//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//   // Determine number of palette colours
+//   uint8_t colours_in_palette = SEGMENT.palette->colours_in_palette;
+
+//   ALOG_INF(PSTR("Col %d"), colours_in_palette);
+
+//   // Determine how many times to repeat the palette
+//   uint16_t palette_repeats = SEGMENT.check3 
+//       ? SEGMENT.intensity + 1 
+//       : map(SEGMENT.intensity, 0, 255, 0, 20) + 1;
+
+//   uint16_t total_bands = colours_in_palette * palette_repeats;
+
+//   // Edge case: If palette empty, fallback
+//   if (total_bands == 0) return 1;
+
+//   // Determine base band width and how many pixels are leftover
+//   uint16_t base_band_width = SEGLEN / total_bands;
+//   uint16_t remainder_pixels = SEGLEN % total_bands;
+
+//   // Optional offset for shift (can later be animated)
+//   uint16_t offset_shift = 0;
+
+//   // Main drawing loop
+//   uint16_t pixel = 0;
+//   for (uint16_t band = 0; band < total_bands; ++band)
+//   {
+//     uint16_t this_band_width = base_band_width + (band < remainder_pixels ? 1 : 0);  // Distribute remainder evenly
+
+//     uint8_t palette_index = band % colours_in_palette;
+
+//     ALOG_INF(PSTR("p%d t%d"), palette_index, this_band_width);
+
+//     for (uint16_t i = 0; i < this_band_width && pixel < SEGLEN; ++i, ++pixel)
+//     {
+//       uint16_t adjusted_pixel = (pixel + offset_shift) % SEGLEN;
+
+//       uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+//         palette_index,
+//         PALETTE_INDEX__IS_PALETTE_INDEX, //not working on crgb??
+//         PALETTE_MODE__FORCE_DISCRETE,
+//         PALETTE_WRAP_OFF,
+//         NO_ENCODED_VALUE,
+//         ANIM_BRIGHTNESS_REQUIRED
+//       );
+
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(adjusted_pixel, colour);
+//     }
+//   }
+
+//   // Set animation blending function
+//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
+//   });
+
+//   return USE_ANIMATOR;
+// }
 static const char PM_EFFECT_CONFIG__SPLIT_PALETTE_SEGWIDTH[] PROGMEM = "Bands@!,Bands,,,,,,Exact,!;!,!,!,!,!;ix=0,sx=127,ep=3000,paln=RGBY,o1=0";
 static const char PM_EFFECT_DESCRI__SPLIT_PALETTE_SEGWIDTH[] PROGMEM = "Palette Elements As Blocks\n\rSX:!\n\rIX:Bands\n\rEP:!\n\rO3:Repeats";
+
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : All palettes are forced to create static gradient palettes using linear blending. 
