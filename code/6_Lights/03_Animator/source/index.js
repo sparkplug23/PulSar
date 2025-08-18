@@ -2898,22 +2898,61 @@ function setFX(ind = null)
 	requestJson(obj);
 }
 
+// function setPalette(paletteId = null)
+// {
+// 	if (paletteId === null) {
+// 		paletteId = parseInt(d.querySelector('#pallist input[name="palette"]:checked').value);
+// 	} else {
+// 		d.querySelector(`#pallist input[name="palette"][value="${paletteId}"]`).checked = true;
+// 	}
+
+// 	// Close palette dialog in simplified UI
+// 	if (simplifiedUI) {
+// 		gId("palw").lastElementChild.close();
+// 	}
+
+// 	var obj = {"seg": {"pal": paletteId}};
+// 	requestJson(obj);
+// }
+
+// Helper: read the P+ toggle state (falls back to localStorage if the button isn't in DOM yet)
+function isSecondaryPaletteMode() {
+  const btn = document.getElementById('secPalToggle');
+  if (btn) return btn.getAttribute('aria-pressed') === 'true';
+  return localStorage.getItem('useSecondaryPalette') === 'true';
+}
+
 function setPalette(paletteId = null)
 {
-	if (paletteId === null) {
-		paletteId = parseInt(d.querySelector('#pallist input[name="palette"]:checked').value);
-	} else {
-		d.querySelector(`#pallist input[name="palette"][value="${paletteId}"]`).checked = true;
-	}
+  // resolve selected palette id from the radio list if not passed in
+  if (paletteId === null) {
+    const checked = document.querySelector('#pallist input[name="palette"]:checked');
+    if (!checked) return;
+    paletteId = parseInt(checked.value, 10);
+  } else {
+    const radio = document.querySelector(`#pallist input[name="palette"][value="${paletteId}"]`);
+    if (radio) radio.checked = true;
+  }
 
-	// Close palette dialog in simplified UI
-	if (simplifiedUI) {
-		gId("palw").lastElementChild.close();
-	}
+  // Close palette dialog in simplified UI
+  if (typeof simplifiedUI !== 'undefined' && simplifiedUI) {
+    document.getElementById("palw").lastElementChild.close();
+  }
 
-	var obj = {"seg": {"pal": paletteId}};
-	requestJson(obj);
+  // If P+ is toggled, send secondary palette key (pal2). Otherwise, normal 'pal'.
+  // If you want a graceful fallback for older firmware, you can also set custom1 in the same payload.
+  const useSecondary = isSecondaryPaletteMode();
+
+  const segObj = useSecondary
+    ? { pal2: paletteId }         // NEW: firmware should read this as secondary palette
+    : { pal:  paletteId };        // existing primary palette behavior
+
+  // OPTIONAL compatibility: also mirror to custom1 when P+ is on
+  // segObj.c1 = paletteId;
+
+  requestJson({ seg: segObj });
 }
+
 
 function setBri()
 {
