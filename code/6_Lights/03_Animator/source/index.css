@@ -664,6 +664,35 @@ img {
 	width: 210px;
 }
 
+/* Header row that keeps the title centered while allowing a right-docked control */
+.pal-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* keeps "Color palette" centered */
+  gap: .5rem;
+}
+
+/* The right-docked P+ toggle */
+.pal-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 6px;
+  opacity: .75;
+}
+
+/* Active state for visual feedback */
+.pal-toggle.active,
+.pal-toggle[aria-pressed="true"] {
+  opacity: 1;
+  outline: 2px solid var(--c-3, #f44);
+}
+
+
 @keyframes fadein {
 	from {bottom: 0; opacity: 0;}
 	to {bottom: calc(var(--bh) + 22px); opacity: 1;}

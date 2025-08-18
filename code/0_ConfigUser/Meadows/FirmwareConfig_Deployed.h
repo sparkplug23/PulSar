@@ -1662,10 +1662,10 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
           0,
           201
         ],
-        "ColourPalette":"Snowy 02",
+        "ColourPalette":"RGPBY",
         "ColourType":3,
         "Effects": {
-          "Function":"Static",
+          "Function":"Stepping Palette Background",
           "Speed":255,
           "Intensity":127,
           "Grouping":1,

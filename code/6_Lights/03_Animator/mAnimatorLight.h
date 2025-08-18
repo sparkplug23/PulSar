@@ -79,6 +79,15 @@
 #define PALETTE_INDEX_SPANS_SEGLEN_ON   true
 #define PALETTE_INDEX_IS_INDEX_IN_PALETTE   false
 
+/**
+ * @brief 1D and 2D level of development
+ * Show the max level of error only when 2D is active, otherwise, ignore the 2D level
+ */
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#define EFFECT_DEVSTAGE_12D_CHECK(X,Y) max(X,Y) // Take the highest devstage
+#else
+#define EFFECT_DEVSTAGE_12D_CHECK(X,Y) X // Take only the 1D devstage, ignore the 2D devstage.
+#endif
 
 
 #define PALETTE_SPAN_OFF                false // PALETTE_INDEX_IS_INDEX_IN_PALETTE
@@ -890,7 +899,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Popping_Decay_Base(bool draw_palette_inorder, bool fade_to_black);
     #endif 
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    uint16_t EffectAnim__Split_Palette_SegWidth();
+    uint16_t EffectAnim__Bands_Palette_SegWidth();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Randomise_Gradient_Palette_SegWidth();
@@ -1331,7 +1340,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
       EFFECTS_FUNCTION__SOLID_COLOUR__ID,
       EFFECTS_FUNCTION__STATIC_PALETTE__ID,
-      EFFECTS_FUNCTION__SPLIT_PALETTE_SEGWIDTH__ID,
+      EFFECTS_FUNCTION__BANDS_PALETTE_SEGWIDTH__ID,
       EFFECTS_FUNCTION__FIREFLY__ID,
       EFFECTS_FUNCTION__CANDLE_SINGLE__ID,
       EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,
@@ -2488,6 +2497,7 @@ typedef struct Segment
     
 
     uint16_t palette_id = 0; 
+    uint16_t palette2_id = 0; // never loaded, but used as secondary instead of slider access
     uint8_t effect_id = 0;    
     uint8_t effect_id_next = 0;   //e.g. For rotating effect, preload the initial animation and then rotate it/
 
@@ -3750,6 +3760,101 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(
         }
     }
 }
+
+
+
+/**
+ * Brightness is already set, because this effect must get the previous state and redraws over it. 
+ * Without this, brightness would be re-applied on each effect call "crushing" the previous colour state
+ */
+// Temporary function until I decide what to do with brightness
+inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const AnimationParam& param) {
+    
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+  
+    float progress = param.progress;
+    uint8_t blendFactor = static_cast<uint8_t>(progress * 255);
+
+    for (int i = 0; i < virtualLength(); i++) {
+      // Serial.printf("buffer32 %d\n\r", i);
+        if (colour_width__used_in_effect_generate == 5) {
+            #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+            // Retrieve starting and desired colors for RGBWW
+            RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(i);
+            RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(i);
+
+            // Blend RGBWW colors and write the result
+            RgbwwColor blendedRgbww = RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
+            setPixelColor(i, blendedRgbww, BRIGHTNESS_ALREADY_SET);
+            #endif
+        } else {
+            // Retrieve starting and desired colors for RGB/WRGB
+            uint32_t startColor = Get_DynamicBuffer_StartingColour(i);
+            uint32_t desiredColor = Get_DynamicBuffer_DesiredColour(i);
+            // SERIAL_DEBUG_COL32i("startColor", startColor, i);
+            // SERIAL_DEBUG_COL32i("desiredColor", desiredColor, i);
+
+            // Blend RGB/WRGB colors and write the result
+            uint32_t blendedColor = ColourBlend(startColor, desiredColor, blendFactor);
+            // RgbwColor rgbw = RgbwColor::LinearBlend(RgbwColor(R(startColor), G(startColor), B(startColor), W(startColor)), RgbwColor(R(desiredColor), G(desiredColor), B(desiredColor), W(desiredColor)), param.progress);
+            // uint32_t blendedColor = RGBW32(rgbw.R, rgbw.G, rgbw.B, rgbw.W); // When debugging without a blend
+            // uint32_t blendedColor = desiredColor; // When debugging without a blend
+
+            setPixelColor(i, blendedColor, BRIGHTNESS_ALREADY_SET);
+
+            #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE
+            if(i < ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE) {              
+              SERIAL_DEBUG_COL32i(">>>startColor", startColor, i);
+              SERIAL_DEBUG_COL32i(">>>blendedColor", blendedColor, blendFactor);
+              SERIAL_DEBUG_COL32i(">>>desiredColor", desiredColor, i);
+            }
+            #endif
+        }
+    }
+    #else
+float progress = param.progress;
+    uint8_t blendFactor = static_cast<uint8_t>(progress * 255);
+
+    for (int i = 0; i < virtualLength(); i++) {
+      // Serial.printf("buffer32 %d\n\r", i);
+        if (colour_width__used_in_effect_generate == 5) {
+            #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+            // Retrieve starting and desired colors for RGBWW
+            RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(i);
+            RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(i);
+
+            // Blend RGBWW colors and write the result
+            RgbwwColor blendedRgbww = RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
+            setPixelColor(i, blendedRgbww);
+            #endif
+        } else {
+            // Retrieve starting and desired colors for RGB/WRGB
+            uint32_t startColor = Get_DynamicBuffer_StartingColour(i);
+            uint32_t desiredColor = Get_DynamicBuffer_DesiredColour(i);
+            // SERIAL_DEBUG_COL32i("startColor", startColor, i);
+            // SERIAL_DEBUG_COL32i("desiredColor", desiredColor, i);
+
+            // Blend RGB/WRGB colors and write the result
+            uint32_t blendedColor = ColourBlend(startColor, desiredColor, blendFactor);
+            // uint32_t blendedColor = desiredColor; // When debugging without a blend
+
+            setPixelColor(i, blendedColor);
+
+            #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE
+            if(i < ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE) {
+              SERIAL_DEBUG_COL32i(">>startColor", startColor, i);
+              SERIAL_DEBUG_COL32i(">>blendedColor", blendedColor, blendFactor);
+              SERIAL_DEBUG_COL32i(">>desiredColor", desiredColor, i);
+            }
+            #endif
+        }
+    }
+
+    #endif
+}
+
+
+
 
 inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const AnimationParam& param) {
     float progress = param.progress;

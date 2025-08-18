@@ -133,6 +133,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root["ix"]  = seg.intensity;
   root["ep"]  = seg.cycle_time__rate_ms;
   root["pal"] = seg.palette_id;
+  root["pal2"] = seg.palette2_id;
   root["c1"]  = seg.custom1;
   root["c2"]  = seg.custom2;
   root["c3"]  = seg.custom3;
@@ -1493,20 +1494,29 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   if(elem["pal"].is<const char*>())
   {
-
     const char* palName = elem["pal"];
-
     int16_t tmp_id = -1;
     if((tmp_id=GetPaletteIDbyName((char*)palName))>=0){
       ALOG_INF(PSTR("tmp_id=%d"),tmp_id);
       CommandSet_PaletteID(tmp_id, id);
     }
-
   }else{
-
     if (getVal(elem["pal"], &pal)) seg.setPalette(pal);
+  }
 
-
+  if(elem["pal2"].is<const char*>())
+  {
+    const char* palName = elem["pal2"];
+    int16_t tmp_id = -1;
+    if((tmp_id=GetPaletteIDbyName((char*)palName))>=0){
+      ALOG_INF(PSTR("tmp_id=%d"),tmp_id);
+      // CommandSet_PaletteID(tmp_id, id);
+      seg.palette2_id = tmp_id;
+    }
+  }else{
+    if (getVal(elem["pal2"], &pal))
+      seg.palette2_id = pal;
+      //  seg.setPalette(pal);
   }
 
 
@@ -2259,14 +2269,10 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
   int itemPerPage = 8;
   #endif
 
-  DEBUG_LINE_HERE_TRACE
-
   bool flag_request_is_for_full_visual_output = true;
 
   int palettesCount = mPaletteI->GetPaletteListLength(); //includes the dynamic!
   int customPalettes = tkr_anim->customPalettes.size();
-
-  // ALOG_HGL(PSTR("palettesCount=%d"), palettesCount); 
 
   int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
   if (page > maxPage) page = maxPage;
@@ -2277,19 +2283,16 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
   root[F("m")] = maxPage; // inform caller how many pages there are
   JsonObject palettes  = root.createNestedObject("p");
-  JsonObject palettes_style  = root.createNestedObject("s");
+  JsonObject palettes_style  = root.createNestedObject("s"); // Could be extended to encode other useful info
 
   uint8_t encoded_gradient = 0;
 
-  DEBUG_LINE_HERE_TRACE
   /**
    * @brief 
    * Start by sending the current palette loaded
    */
   for (int palette_id = start; palette_id < end; palette_id++) 
   {
-       
-  DEBUG_LINE_HERE_TRACE 
     bool palette_display_as_banded_gradient = false;
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
@@ -2297,24 +2300,21 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     ALOG_INF(PSTR("p=%d|s%d|e%d"),palette_id,start,end);
     #endif
 
-  DEBUG_LINE_HERE_TRACE
+    DEBUG_LINE_HERE_TRACE
+    #ifndef ENABLE_DEVFEATURE_LIGHTING__CRITICAL_DISABLE_LOAD_PALETTE  
+    SEGMENT.LoadPalette(palette_id); // Assume segment 1 exists, and use it to load all palettes. Effect should reset to active palette in main loop. Or here, have it then flip back. Though this may cause flickering midanimation. Animation may also need paused on esp32.
+    #endif
+    DEBUG_LINE_HERE_TRACE
 
-  #ifndef ENABLE_DEVFEATURE_LIGHTING__CRITICAL_DISABLE_LOAD_PALETTE  
-  SEGMENT.LoadPalette(palette_id); // Assume segment 1 exists, and use it to load all palettes. Effect should reset to active palette in main loop. Or here, have it then flip back. Though this may cause flickering midanimation. Animation may also need paused on esp32.
-  #endif
-
-  DEBUG_LINE_HERE_TRACE
     uint16_t colours_in_palette = SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInPalette(palette_id);
    
-  DEBUG_LINE_HERE_TRACE
-    // #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
-    // #endif
+    #endif
 
-    JsonArray curPalette_obj = palettes.createNestedArray(String(palette_id));
+    JsonArray curPalette_obj    = palettes.createNestedArray(String(palette_id));
     JsonObject curPalette_s_obj = palettes_style.createNestedObject(String(palette_id));
 
-  DEBUG_LINE_HERE_TRACE
     /**
      * @brief To reduce memory usage, the static gradients that are stored with less than 16 colours, shall be read directly
      **/
@@ -2323,7 +2323,6 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
       (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
     ){ 
 
-  DEBUG_LINE_HERE_TRACE
       uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
 
       byte tcp[72];
@@ -2347,13 +2346,11 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
       int indexstart = 0;
       while( indexstart < 255) {
         indexstart = u.index;
-
         JsonArray colors =  curPalette_obj.createNestedArray();
         colors.add(u.index);
         colors.add(u.r);
         colors.add(u.g);
         colors.add(u.b);
-
         ent++;
         u = *ent;
       }
@@ -2364,175 +2361,165 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     else
     {
     
-  DEBUG_LINE_HERE_TRACE
+      DEBUG_LINE_HERE_TRACE
       palette_display_as_banded_gradient = false;
 
       encoded_gradient = 0;
       
       RgbwwColor color;
 
-
       #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
       WDT_Reset();
       #endif
 
-  DEBUG_LINE_HERE_TRACE
-      /** first check if the palette is one that uses the colour picker*/       
+      /******************************************************************************************************************************************
+       * Generate RGB Colours *******************************************************************************************************************
+       ******************************************************************************************************************************************/
+
       // Handle RGBCCT color palettes
-      if (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID && palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID) {
-          
-  DEBUG_LINE_HERE_TRACE
-  const char* color_id = nullptr;
+      if (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID && palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID) 
+      {
+                
+        DEBUG_LINE_HERE_TRACE
+        const char* color_id = nullptr;
           switch (palette_id) {
-              case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID: color_id = "c1"; break;
-              case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_02__ID: color_id = "c2"; break;
-              case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_03__ID: color_id = "c3"; break;
-              case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_04__ID: color_id = "c4"; break;
-              case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_05__ID: color_id = "c5"; break;
+            case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID: color_id = "c1"; break;
+            case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_02__ID: color_id = "c2"; break;
+            case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_03__ID: color_id = "c3"; break;
+            case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_04__ID: color_id = "c4"; break;
+            case mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_05__ID: color_id = "c5"; break;
           }
           if (color_id) {
-              curPalette_obj.add(color_id);
+            curPalette_obj.add(color_id);
           }
       } 
       // Handle CRGBPalette16 paired palettes
-      else if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID && palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID) {
-          const char* color_ids[] = {"c1", "c2", "c3", "c4", "c5"};
-          int color_count = 0;
+      else if (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID && palette_id <= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID) 
+      {
+        
+        DEBUG_LINE_HERE_TRACE
+        const char* color_ids[] = {"c1", "c2", "c3", "c4", "c5"};
+        int color_count = 0;
 
-  DEBUG_LINE_HERE_TRACE
-          switch (palette_id) {
-              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID:
-                  color_count = 2;
-                  break;
-              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID:
-                  color_count = 3;
-                  break;
-              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID:
-                  color_count = 4;
-                  break;
-              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID:
-                  color_count = 5;
-                  break;
-              case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID:
-                  color_count = 5;
-                  for (int repeat = 0; repeat < 3; ++repeat) { // Repeat active colors three times
-                      for (int i = 0; i < color_count; ++i) {
-                          curPalette_obj.add(color_ids[i]);
-                      }
-                  }
-                  curPalette_obj.add("c5"); // Add one more "c5" as required
-                  break;
-          }
-
-          // Add the color IDs according to the count
-          for (int i = 0; i < color_count; ++i) {
-              curPalette_obj.add(color_ids[i]);
-              if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) {
-                  curPalette_obj.add(color_ids[i]); // Add the same color twice for the "two" palette
+        switch (palette_id) {
+          case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID:
+            color_count = 2;
+          break;
+          case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID:
+            color_count = 3;
+          break;
+          case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID:
+            color_count = 4;
+          break;
+          case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID:
+            color_count = 5;
+          break;
+          case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID:
+            color_count = 5;
+            for (int repeat = 0; repeat < 3; ++repeat) { // Repeat active colors three times
+              for (int i = 0; i < color_count; ++i) {
+                curPalette_obj.add(color_ids[i]);
               }
+            }
+            curPalette_obj.add("c5"); // Add one more "c5" as required
+          break;
+        }
+
+        // Add the color IDs according to the count
+        for (int i = 0; i < color_count; ++i) {
+          curPalette_obj.add(color_ids[i]);
+          if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) {
+            curPalette_obj.add(color_ids[i]); // Add the same color twice for the "two" palette
           }
+        }
       } 
       // Handle random hue palettes
       else if (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID && palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID) {
-          // Add "r" for random color-based palettes
-          for (int i = 0; i < 4; ++i) {
-              curPalette_obj.add("r");
-          }
+        // Add "r" for random color-based palettes
+        for (int i = 0; i < 4; ++i) {
+          curPalette_obj.add("r");
+        }
       }
-
       /**
        * @brief Palettes that the RGB data should be retrived
-       * 
-       */
+       **/
       else
       {
-  DEBUG_LINE_HERE_TRACE
+        DEBUG_LINE_HERE_TRACE
 
         #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
         ALOG_DBM(PSTR(DEBUG_INSERT_PAGE_BREAK "palette_id=%d"),palette_id);
         #endif
 
-        // /**
-        //  * @brief If the live palettes, just for the webui to get a preview, the colours in palette are expanded to 16
-        //  **/
-        // if(
-        //   (palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
-        // ){  
-        //   flag_request_is_for_full_visual_output = true;
-        //   colours_in_palette = 16; // for preview
-        // }
-
-
-
         for (int j = 0; j < colours_in_palette; j++) 
         {
-            JsonArray colors = curPalette_obj.createNestedArray();
+          DEBUG_LINE_HERE_TRACE
+          JsonArray colors = curPalette_obj.createNestedArray();
 
-            DEBUG_LINE_HERE_TRACE;
+          // Load temporary palette
+          color = GetColourFromUnloadedPalette3(
+              palette_id,
+              j,
+              PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colors, without gradients
+              &encoded_gradient,
+              flag_request_is_for_full_visual_output
+          );
 
-  DEBUG_LINE_HERE_TRACE
-            // Load temporary palette
-            color = GetColourFromUnloadedPalette3(
-                palette_id,
-                j,
-                PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colors, without gradients
-                &encoded_gradient,
-                flag_request_is_for_full_visual_output
-            );
+          #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+          Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient: ");
+          Serial.println(encoded_gradient);
+          Serial.flush();
+          #endif
 
-  DEBUG_LINE_HERE_TRACE
-            #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-            Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient: ");
-            Serial.println(encoded_gradient);
-            Serial.flush();
-            #endif
-
-            // Handle the encoded gradient
-            if (encoded_gradient > 0) 
+          // Handle the encoded gradient
+          if (encoded_gradient > 0) 
+          {
+            // Gradient exists, use the encoded value directly
+            colors.add(encoded_gradient); 
+          } 
+          else 
+          {
+            // If encoded gradient is 0, map j to create a smooth gradient
+            if (colours_in_palette > 1) 
             {
-              // Gradient exists, use the encoded value directly
-              colors.add(encoded_gradient); 
+              /*
+              Issue with Scaling Using colours_in_palette:
+                If you scale directly with colours_in_palette (i.e., mapping 0 to 255 across the range 0 to colours_in_palette), you end up with the following issue:
+                  You divide the range 0-255 into colours_in_palette equal segments.
+                  However, the last color in the palette, when mapped, gets placed beyond 255 (or at the last position), meaning it effectively doesn’t get visualized properly, and the gradient appears to be missing the final color.
+              Correct Scaling Using colours_in_palette - 1:
+                When you use colours_in_palette - 1:
+                  You ensure that the entire range of colors, including the first and last, is properly displayed.
+                  The colors will be evenly distributed from 0 to 255, and the last color will correctly align with 255.*/
+              colors.add(map(j, 0, colours_in_palette - 1, 0, 255));
             } 
             else 
             {
-              // If encoded gradient is 0, map j to create a smooth gradient
-              if (colours_in_palette > 1) 
-              {
-                /*
-                Issue with Scaling Using colours_in_palette:
-                  If you scale directly with colours_in_palette (i.e., mapping 0 to 255 across the range 0 to colours_in_palette), you end up with the following issue:
-                    You divide the range 0-255 into colours_in_palette equal segments.
-                    However, the last color in the palette, when mapped, gets placed beyond 255 (or at the last position), meaning it effectively doesn’t get visualized properly, and the gradient appears to be missing the final color.
-                Correct Scaling Using colours_in_palette - 1:
-                  When you use colours_in_palette - 1:
-                    You ensure that the entire range of colors, including the first and last, is properly displayed.
-                    The colors will be evenly distributed from 0 to 255, and the last color will correctly align with 255.*/
-                colors.add(map(j, 0, colours_in_palette - 1, 0, 255));
-              } 
-              else 
-              {
-                // If there's only one color, just add a default index
-                colors.add(0);  // Add a base index for a single-color palette
-              }
+              // If there's only one color, just add a default index
+              colors.add(0);  // Add a base index for a single-color palette
             }
+          }
 
-            // Add the RGB color components
-            colors.add(color.R);
-            colors.add(color.G);
-            colors.add(color.B);
+          // Add the RGB color components
+          colors.add(color.R);
+          colors.add(color.G);
+          colors.add(color.B);
 
-            #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-            ALOG_DBM(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"), j, encoded_gradient, color.red, color.green, color.blue);
-            #endif
+          #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+          ALOG_DBM(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"), j, encoded_gradient, color.red, color.green, color.blue);
+          #endif
         }
-
-
       }
 
-    } //end CSL colours
+    } // end CSL colours
 
+
+    /******************************************************************************************************************************************
+     * Generate Preview as Gradient or Discrete ***********************************************************************************************
+     ******************************************************************************************************************************************/
             
-    if (palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID && palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID) {  
+    if (palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID && palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID) 
+    {
       palette_display_as_banded_gradient = true; // Assume banded by default
 
       uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
@@ -2542,29 +2529,26 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           palette_display_as_banded_gradient = false; // Use gradient if index_gradient is set
       }
     }
-
-    if (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID && palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID) {  
+    else
+    if (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID && palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID) 
+    {
       palette_display_as_banded_gradient = false; // No gradient for segment palettes
     }
-
+    else
     if (
       (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID) ||
       (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID && palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
     ) {  
         palette_display_as_banded_gradient = false; // These palettes use gradients
     }
-
-    
+    else    
     if (
       (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID && 
        palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
     ) {  
         palette_display_as_banded_gradient = false; // These palettes use gradients
     }
-
-    /***
-     * Custom palettes
-     */
+    else // Custom Palettes
     if (palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED && palette_id < mPaletteI->GetPaletteListLength()) {
       uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
       palette_display_as_banded_gradient = true; // Assume banded for custom palettes
@@ -2907,7 +2891,6 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       serializeInfo(lDoc);     
     break;
     case JSON_PATH_PALETTES:
-      Serial.println("JSON_PATH_PALETTES"); Serial.flush();
       serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
     break;
     case JSON_PATH_EFFECTS:

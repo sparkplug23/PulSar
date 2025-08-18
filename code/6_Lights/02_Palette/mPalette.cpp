@@ -836,8 +836,20 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
     // Handle FORCE_DISCRETE mode — exact color steps only
     if (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE) {
-      uint8_t discrete_index = desired_index % 16;
-      pixel_position_adjust = pSEGMENT.palette->CRGB16Palette16_Palette.encoded_index[discrete_index];
+      if (rescale_seglen_index_to_255_range == PALETTE_INDEX__IS_PALETTE_INDEX) {
+        // Classic "encoded discrete"
+        uint8_t discrete_index = desired_index % 16;
+        pixel_position_adjust = pSEGMENT.palette->CRGB16Palette16_Palette.encoded_index[discrete_index];
+      } else {
+        // Treat as exact palette index, map 0–15 → 0–240
+        // Why 240 instead of 255?
+        // Because:
+        //   The FastLED CRGBPalette16 spans 0 to 255, but it's divided into 16 color slots.
+        //   Each slot occupies 16 positions (256 / 16 = 16).
+        //   The last index 15 should map to 240 to land on the start of the last color band.
+        //   If you go to 255, you hit the wraparound (blending back to index 0).
+        pixel_position_adjust = (desired_index * 240) / 15;
+      }
     }
     // Handle full gradient mode
     else{

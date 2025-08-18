@@ -1110,9 +1110,9 @@ function populateDevStage() {
 			  <div class="sliderdisplay"></div>
 			</div>
 			<output class="sliderbubble">4</output>
-			<span class="tooltiptext">DevStage</span>
 		  </div>
 		`;
+			// <span class="tooltiptext">DevStage</span>
 		sliderContainer.insertAdjacentHTML('beforeend', sliderHTML);
 	  }
 	  
@@ -3772,6 +3772,37 @@ function mergeDeep(target, ...sources)
 	}
 	return mergeDeep(target, ...sources);
 }
+
+// Global flag: when true, selecting from #pallist will send the "secondary palette" variable instead of the main one
+window.useSecondaryPalette = false;
+
+function initSecPalToggle() {
+  const btn = document.getElementById('secPalToggle');
+  if (!btn) return;
+
+  // restore persisted state
+  const saved = localStorage.getItem('useSecondaryPalette');
+  window.useSecondaryPalette = (saved === 'true');
+
+  btn.setAttribute('aria-pressed', String(window.useSecondaryPalette));
+  btn.classList.toggle('active', window.useSecondaryPalette);
+
+  btn.addEventListener('click', () => {
+    window.useSecondaryPalette = !window.useSecondaryPalette;
+    localStorage.setItem('useSecondaryPalette', String(window.useSecondaryPalette));
+    btn.setAttribute('aria-pressed', String(window.useSecondaryPalette));
+    btn.classList.toggle('active', window.useSecondaryPalette);
+  }, { passive: true });
+}
+
+// Call this once on load (your body already calls onLoad())
+const _onLoad_orig = window.onLoad;
+window.onLoad = function onLoadPatched() {
+  try { if (typeof _onLoad_orig === 'function') _onLoad_orig(); } catch(e) {}
+  initSecPalToggle();
+};
+
+
 
 
 function tooltip(cont=null)

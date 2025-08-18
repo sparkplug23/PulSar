@@ -13,9 +13,9 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__STATIC_PALETTE,
             Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__SPLIT_PALETTE_SEGWIDTH__ID,
+  addEffect(EFFECTS_FUNCTION__BANDS_PALETTE_SEGWIDTH__ID,
             &mAnimatorLight::EffectAnim__Spanned_Static_Palette,
-            PM_EFFECT_CONFIG__SPLIT_PALETTE_SEGWIDTH,
+            PM_EFFECT_CONFIG__BANDS_PALETTE_SEGWIDTH,
             Effect_DevStage::Beta);
 
   addEffect(EFFECTS_FUNCTION__FIREFLY__ID,

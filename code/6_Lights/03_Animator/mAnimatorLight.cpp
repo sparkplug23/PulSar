@@ -1296,7 +1296,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             Minimum: 1000 + 0 = 1000 ms (1 second).
             Maximum: 1000 + 25500 = 26500 ms (26.5 seconds).
         */
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-custom2))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
@@ -1324,7 +1324,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
       {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        uint8_t change_rate = custom3 ? custom3 : intensity ;
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
@@ -1348,7 +1349,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
       {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        uint8_t change_rate = custom3 ? custom3 : intensity ;
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
@@ -1375,7 +1377,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
       {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        uint8_t change_rate = custom3 ? custom3 : intensity ;
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
@@ -1399,7 +1402,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
       {        
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        uint8_t change_rate = custom3 ? custom3 : intensity ;
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - aux3 > new_colour_rate_ms)        
         {
@@ -1433,13 +1437,14 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
       (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
     ){
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-intensity))*100);
+        uint8_t change_rate = custom3 ? custom3 : intensity ;
+        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         if(new_colour_rate_ms > cycle_time__rate_ms) cycle_time__rate_ms = new_colour_rate_ms + 100;
     }
 
-
-    
   }
+
+  // ALOG_INF(PSTR("ColLen %d"), _palette_container->colours_in_palette);
 
   // On load now, number of pixels in palette MUST be set here
   // No longer reloading in realtime, but only calculating on Load to improve performance. 
@@ -3052,6 +3057,19 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
       if((tmp_id=tkr_anim->GetPaletteIDbyName(paletteName))>=0){
         ALOG_INF(PSTR("pal=%d"),tmp_id);
         palette_id = tmp_id;
+        LoadPalette(palette_id); // Force reload now palette has been changed
+      }
+    }
+
+    
+    if (tkr_anim->extractModeDefaults(fx, "pal2n", paletteName, sizeof(paletteName))) // Check for the "paln" command (palette name)
+    {
+      ALOG_INF(PSTR("pal2n=%s"), paletteName);
+      int16_t tmp_id = -1;
+      if((tmp_id=tkr_anim->GetPaletteIDbyName(paletteName))>=0){
+        ALOG_INF(PSTR("pal=%d"),tmp_id);
+        palette_id = tmp_id;
+        LoadPalette(palette_id); // Force reload now palette has been changed
       }
     }
 
@@ -3068,6 +3086,8 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
     sOpt = tkr_anim->extractModeDefaults(fx, "mi");   if (sOpt >= 0) mirror    = (bool)sOpt; // NOTE: setting this option is a risky business
     sOpt = tkr_anim->extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
     sOpt = tkr_anim->extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
+
+    flags.animator_first_run = true;
     
     if(mode_changed) tkr_anim->stateChanged = true; // send UDP/WS broadcast
  

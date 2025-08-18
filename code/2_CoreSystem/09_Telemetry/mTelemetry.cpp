@@ -44,7 +44,7 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
       }    
       
     break;
-    case TASK_UPTIME_1_MINUTES:
+    case TASK_UPTIME_10_MINUTES:
 
       if(tkr_time->IsBuildDateTimeElapsedBeyond(SECONDS_FROM_BUILDTIME_TO_ENABLE_SPLASHING_TELEMETRY))
       {
