@@ -1490,7 +1490,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   //   ALOG_INF(PSTR("getVal(elem[\"pal\"], &pal)"));
 
 
-  ALOG_HGL(PSTR("elem[\"pal\"].is<const char*>() %d"), elem["pal"].is<const char*>());
+  // ALOG_HGL(PSTR("elem[\"pal\"].is<const char*>() %d"), elem["pal"].is<const char*>());
 
   if(elem["pal"].is<const char*>())
   {
@@ -1517,6 +1517,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     if (getVal(elem["pal2"], &pal))
       seg.palette2_id = pal;
       //  seg.setPalette(pal);
+      ALOG_INF(PSTR("palette2_id=%d"),seg.palette2_id);
   }
 
 

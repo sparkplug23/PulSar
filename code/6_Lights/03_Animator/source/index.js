@@ -2921,10 +2921,53 @@ function isSecondaryPaletteMode() {
   if (btn) return btn.getAttribute('aria-pressed') === 'true';
   return localStorage.getItem('useSecondaryPalette') === 'true';
 }
+function getActiveSeg() {
+  // Adjust if your global differs; this matches typical WLED state shapes
+  if (window.lastinfo && Array.isArray(lastinfo.seg)) {
+    const sel = (typeof segId === 'number') ? segId : 0;
+    return lastinfo.seg[sel] || {};
+  }
+  return {};
+}
+
+function getActivePaletteIdForUI() {
+  const seg = getActiveSeg();
+  return isSecondaryPaletteMode() ? seg.pal2 : seg.pal;
+}
+function syncPaletteListSelectionWithMode() {
+  const id = getActivePaletteIdForUI();
+  if (typeof id !== 'number') return;
+
+  const prev = document.querySelector('#pallist input[name="palette"]:checked');
+  if (prev) prev.checked = false;
+
+  const radio = document.querySelector(`#pallist input[name="palette"][value="${id}"]`);
+  if (radio) radio.checked = true;
+}
+function initSecPalToggle() {
+  const btn = document.getElementById('secPalToggle');
+  if (!btn) return;
+
+  const saved = localStorage.getItem('useSecondaryPalette');
+  const active = (saved === 'true');
+  btn.setAttribute('aria-pressed', String(active));
+  btn.classList.toggle('active', active);
+
+  btn.addEventListener('click', () => {
+    const nowActive = !(btn.getAttribute('aria-pressed') === 'true');
+    btn.setAttribute('aria-pressed', String(nowActive));
+    btn.classList.toggle('active', nowActive);
+    localStorage.setItem('useSecondaryPalette', String(nowActive));
+
+    // reflect which palette is “active” in the list immediately
+    syncPaletteListSelectionWithMode();
+  }, { passive: true });
+}
+
 
 function setPalette(paletteId = null)
 {
-  // resolve selected palette id from the radio list if not passed in
+  // resolve selected id from radio list if not passed
   if (paletteId === null) {
     const checked = document.querySelector('#pallist input[name="palette"]:checked');
     if (!checked) return;
@@ -2939,18 +2982,12 @@ function setPalette(paletteId = null)
     document.getElementById("palw").lastElementChild.close();
   }
 
-  // If P+ is toggled, send secondary palette key (pal2). Otherwise, normal 'pal'.
-  // If you want a graceful fallback for older firmware, you can also set custom1 in the same payload.
   const useSecondary = isSecondaryPaletteMode();
-
-  const segObj = useSecondary
-    ? { pal2: paletteId }         // NEW: firmware should read this as secondary palette
-    : { pal:  paletteId };        // existing primary palette behavior
-
-  // OPTIONAL compatibility: also mirror to custom1 when P+ is on
-  // segObj.c1 = paletteId;
-
+  const segObj = useSecondary ? { pal2: paletteId } : { pal: paletteId };
   requestJson({ seg: segObj });
+
+  // keep the UI highlight aligned with the current mode/value
+  syncPaletteListSelectionWithMode();
 }
 
 
@@ -3399,6 +3436,9 @@ function loadPalettesData(callback = null)
 		redrawPalPrev();
 		if (callback) setTimeout(callback, 99);
 	});
+
+	syncPaletteListSelectionWithMode(); // not sure of location
+
 }
 
 
@@ -3837,8 +3877,9 @@ function initSecPalToggle() {
 // Call this once on load (your body already calls onLoad())
 const _onLoad_orig = window.onLoad;
 window.onLoad = function onLoadPatched() {
-  try { if (typeof _onLoad_orig === 'function') _onLoad_orig(); } catch(e) {}
+  try { if (typeof _onLoad_orig === 'function') _onLoad_orig(); } catch (e) {}
   initSecPalToggle();
+  syncPaletteListSelectionWithMode();
 };
 
 

@@ -664,16 +664,16 @@ img {
 	width: 210px;
 }
 
-/* Header row that keeps the title centered while allowing a right-docked control */
+/* Keep “Color palette” centered and dock P+ on the right */
 .pal-header {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center; /* keeps "Color palette" centered */
+  justify-content: center; /* centers the title */
   gap: .5rem;
 }
 
-/* The right-docked P+ toggle */
+/* Right-docked P+ toggle */
 .pal-toggle {
   position: absolute;
   right: 0;
@@ -685,12 +685,13 @@ img {
   opacity: .75;
 }
 
-/* Active state for visual feedback */
+/* Active visual state */
 .pal-toggle.active,
 .pal-toggle[aria-pressed="true"] {
   opacity: 1;
   outline: 2px solid var(--c-3, #f44);
 }
+
 
 
 @keyframes fadein {
