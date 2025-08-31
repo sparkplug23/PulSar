@@ -947,7 +947,11 @@ function populateEffects() {
 		  if (p.length > 0 && p[0] !== "" && !isNumeric(p[0])) nm += "&#x1F3A8;"; // 🎨 Palette icon
   
 		  let m = (eP.length < 4 || eP[3] === '') ? '1' : eP[3]; // flags
-		  if (id == 0) m = ''; // solid has no flags
+		  //   if (id == 0) m = ''; // solid has no flags
+
+		  console.log((eP.length < 4 || eP[3] === ''));
+		  console.log(eP[3]);
+		  console.log(m);
   
 		  // Add effect type icons
 		  if (m.length > 0) {

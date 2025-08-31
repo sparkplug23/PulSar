@@ -439,6 +439,12 @@ class mPalette
     uint8_t GetColoursInPalette(uint16_t palette_id);
     PALETTE_ENCODING_DATA findPaletteEncoding(uint16_t id);
 
+// --- sequence tracking state for discrete + 0..255 input ---
+uint16_t tracked_previous_palette_index = 0; // current slot cursor 0..(N-1)
+uint8_t  tracked_prev_v                = 0; // last 0..255 input
+uint8_t  tracked_frac                  = 0; // fractional accumulator (Bresenham-style)
+
+
     [[gnu::hot]] uint32_t ColorFromPaletteWLED(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
 
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
@@ -454,7 +460,7 @@ class mPalette
       // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
       uint8_t* encoded_index = nullptr,
       // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
-      uint8_t  rescale_seglen_index_to_255_range = 1,
+      uint8_t  palette_index__format = 1,
       // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
       uint8_t  rescale_index_wrap_for_hardedge = 1,
       // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
@@ -472,7 +478,7 @@ class mPalette
       uint8_t colours_in_palette = 0,
       PALETTE_ENCODING_DATA encoding = {0},
       uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     palette_index__format = 1, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
       uint8_t  force_palette_mode = false,
       bool     flag_forced_gradient = false
@@ -494,7 +500,7 @@ class mPalette
       uint8_t colours_in_palette = 0,
       PALETTE_ENCODING_DATA encoding = {0},
       uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      uint8_t  palette_index__format = 1, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
       uint8_t  force_palette_mode = false,
       bool     flag_forced_gradient = false
@@ -520,7 +526,7 @@ class mPalette
       // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
       uint8_t* encoded_index = nullptr,
       // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
-      uint8_t  rescale_seglen_index_to_255_range = 1,
+      uint8_t  palette_index__format = 1,
       // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
       uint8_t  rescale_index_wrap_for_hardedge = 1,
       // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"

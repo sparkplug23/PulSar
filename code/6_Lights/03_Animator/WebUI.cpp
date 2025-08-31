@@ -2307,7 +2307,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     #endif
     DEBUG_LINE_HERE_TRACE
 
-    uint16_t colours_in_palette = SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInPalette(palette_id);
+    uint16_t colours_in_palette = SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
    
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
@@ -2458,7 +2458,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           JsonArray colors = curPalette_obj.createNestedArray();
 
           // Load temporary palette
-          color = GetColourFromUnloadedPalette3(
+          color = GetUnloadedPaletteColour(
               palette_id,
               j,
               PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colors, without gradients

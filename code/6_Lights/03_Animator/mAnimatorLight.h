@@ -62,8 +62,27 @@
 /**
  * @brief GetColourPalette defines to make it visually easy to read
  **/
-#define PALETTE_WRAP_ON                 true
-#define PALETTE_WRAP_OFF                false
+#define PALETTE_WRAP_ON                 true //confusing to be replaced with below
+#define PALETTE_WRAP_OFF                false //confusing to be replaced with below
+// Palette wrap behaviour flag (used by *_ModeWrap APIs):
+//  - SMOOTH: allow circular blend between last and first entries (255 wraps to 0)
+//  - HARD_EDGE: clamp at the end; no blend back to start
+#define PALETTE_WRAP_SMOOTH    true   // circular wrap: 255→0 blends (use full 0..255 range)
+#define PALETTE_WRAP_HARDEDGE false  // no wrap: clamp at end (optionally pre-scale indices to 0..240 upstream)
+
+
+
+
+#define PALETTE_INDEX__IS_255_RANGE      0 // ie false for WLED compatibility
+
+
+// #define PALETTE_INDEX_SPANS_SEGLEN_ON   true       // PHASE OUT
+#define PALETTE_INDEX__IS_SEGLEN_RANGE   1 // ie true for WLED compatibility ie mapping happened so palette needs to scale seglen to 255 range
+
+// #define PALETTE_INDEX_IS_INDEX_IN_PALETTE   false  // PHASE OUT
+#define PALETTE_INDEX__IS_EXACT_COLOUR   2 // special method when I desire the precise colour at that index, without any scaling or mapping
+
+
 
 #define PALETTE_DISCRETE_OFF            0
 #define PALETTE_DISCRETE_ON             1
@@ -72,12 +91,6 @@
 #define PALETTE_MODE__DEFAULT         0  // Use palette as defined (gradient or discrete)
 #define PALETTE_MODE__FORCE_DISCRETE  1  // Force discrete interpretation
 #define PALETTE_MODE__FORCE_GRADIENT  2  // Force gradient interpretation
-
-#define PALETTE_INDEX__IS_SEGLEN_SPANNED  true
-#define PALETTE_INDEX__IS_PALETTE_INDEX   false    
-
-#define PALETTE_INDEX_SPANS_SEGLEN_ON   true
-#define PALETTE_INDEX_IS_INDEX_IN_PALETTE   false
 
 /**
  * @brief 1D and 2D level of development
@@ -93,7 +106,7 @@
 #define PALETTE_SPAN_OFF                false // PALETTE_INDEX_IS_INDEX_IN_PALETTE
 #define WLED_PALETTE_MAPPING_ARG_FALSE  false
 #define NO_ENCODED_VALUE                nullptr
-#define PALETTE_SOLID_WRAP              (paletteBlend == 1 || paletteBlend == 3)
+#define PALETTE_SOLID_WRAP              true//(paletteBlend == 1 || paletteBlend == 3)
 #define SET_BRIGHTNESS                  true
 #define BRIGHTNESS_ALREADY_SET          true
 #define BRIGHTNESS_NOT_YET_SET          false
@@ -637,7 +650,7 @@ char releaseString[7] = WLED_RELEASE_NAME; // must include the quotes when defin
     void CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
 
 
-    uint8_t GetNumberOfColoursInPalette(uint16_t palette_id);
+    uint8_t GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id);
 
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
@@ -892,11 +905,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Stepping_Palette_With_Background();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    uint16_t EffectAnim__Popping_Decay_Palette_To_Black();
-    uint16_t EffectAnim__Popping_Decay_Random_To_Black();
-    uint16_t EffectAnim__Popping_Decay_Palette_To_White();
-    uint16_t EffectAnim__Popping_Decay_Random_To_White();
-    uint16_t EffectAnim__Popping_Decay_Base(bool draw_palette_inorder, bool fade_to_black);
+    uint16_t EffectAnim__Twinkle_Out();
+    uint16_t EffectAnim__Twinkle_Decay();
+    uint16_t EffectAnim__Twinkle_Glow();
+    uint16_t EffectAnim__Twinkle_Base(bool fade_up, bool show_decay, bool apply_decay_blanking);
     #endif 
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Bands_Palette_SegWidth();
@@ -921,12 +933,6 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Twinkle_Palette_Onto_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    uint16_t EffectAnim__Twinkle_Out_Palette();
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    uint16_t EffectAnim__Twinkle_Decaying_Palette();
-    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // Static
     uint16_t EffectAnim__Palette_Lit_Pattern();
@@ -950,19 +956,15 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Dynamic_Smooth();
     uint16_t EffectAnim__TriColour_Wipe();
     uint16_t EffectAnim__Android();
-    uint16_t EffectAnim__Base_Running(bool saw, bool dual=false);
-    uint16_t EffectAnim__Base_Running(uint32_t color1, uint32_t color2, bool theatre = false);
+    uint16_t EffectAnim__Base_RunningWaves(bool saw, bool dual=false);
     uint16_t EffectAnim__Running_Colour();
     uint16_t EffectAnim__Running_Random();
     uint16_t EffectAnim__Base_Gradient(bool loading);
     uint16_t EffectAnim__Gradient();
     uint16_t EffectAnim__Loading();
     uint16_t EffectAnim__Rolling_Balls();
-    uint16_t EffectAnim__Base_Police(uint32_t color1, uint32_t color2, bool all);
-    uint16_t EffectAnim__Police();
-    uint16_t EffectAnim__Police_All();
     uint16_t EffectAnim__Fairy();
-    uint16_t EffectAnim__Fairy_Twinkle();
+    uint16_t EffectAnim__Twinkle_Fairy();
     uint16_t EffectAnim__Running_Dual();
     uint16_t EffectAnim__Two_Dots();
     uint16_t EffectAnim__Two_Areas();
@@ -993,11 +995,11 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Chase_Random();
     uint16_t EffectAnim__Chase_Rainbow();
     uint16_t EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
+    uint16_t EffectAnim__Chase_Theater();
+    uint16_t EffectAnim__Chase_Theatre_Rainbow();
     uint16_t EffectAnim__Chase_Flash();
     uint16_t EffectAnim__Chase_Flash_Random();
     uint16_t EffectAnim__Chase_Rainbow_White();
-    uint16_t EffectAnim__Chase_Theater();
-    uint16_t EffectAnim__Chase_Theatre_Rainbow();
     uint16_t EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
     uint16_t EffectAnim__Chase_TriColour();
     // Breathe/Fade/Pulse
@@ -1016,24 +1018,24 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     // Sparkle/Twinkle
     uint16_t EffectAnim__Solid_Glitter();
     uint16_t EffectAnim__Popcorn();
+    uint16_t EffectAnim__GlowSpots();
     uint16_t EffectAnim__Plasma();
     uint16_t EffectAnim__Sparkle();
     uint16_t EffectAnim__Sparkle_Flash();
     uint16_t EffectAnim__Sparkle_Hyper();
     uint16_t EffectAnim__Twinkle();
-    CRGB EffectAnim__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
-    uint16_t EffectAnim__Base_Twinkle_Fox(bool cat);
+    CRGB EffectAnim__Base_Twinkle_Smooth_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
+    uint16_t EffectAnim__Base_Twinkle_Smooth(bool cat);
     uint16_t EffectAnim__Twinkle_Colour();
-    uint16_t EffectAnim__Twinkle_Fox();
-    uint16_t EffectAnim__Twinkle_Cat();
-    uint16_t EffectAnim__Twinkle_Up();
+    uint16_t EffectAnim__Twinkle_Smooth();
+    uint16_t EffectAnim__Twinkle_Spark();
+    uint16_t EffectAnim__Twinkle_Rise();
     uint16_t EffectAnim__Halloween_Eyes();
     uint16_t EffectAnim__Saw();
     uint16_t EffectAnim__Base_Dissolve(uint32_t color);
     uint16_t EffectAnim__Dissolve();
     uint16_t EffectAnim__Dissolve_Random();
-    uint16_t EffectAnim__ColourFul();
-    uint16_t EffectAnim__Traffic_Light();
+    uint16_t EffectAnim__TriPops();
     // Blink/Strobe
     uint16_t EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
     uint16_t EffectAnim__Blink();
@@ -1360,17 +1362,14 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
       EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
       EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
-      EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,
       EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,
-      EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
       #endif
 
       // General Level 3 Flashing Extended Effects
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-      EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,
-      EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__ID,
-      EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_WHITE__ID,
-      EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_WHITE__ID,
+      EFFECTS_FUNCTION__TWINKLE_OUT__ID,
+      EFFECTS_FUNCTION__TWINKLE_DECAY__ID,
+      EFFECTS_FUNCTION__TWINKLE_GLOW__ID,
       EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID,
       EFFECTS_FUNCTION__TRISEGCOL_LIT_PATTERN__ID,
       EFFECTS_FUNCTION__PALETTES_INTERLEAVED_LIT_PATTERN__ID,
@@ -1401,12 +1400,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__GRADIENT__ID,
       EFFECTS_FUNCTION__LOADING__ID,
       EFFECTS_FUNCTION__ROLLINGBALLS__ID,
-      EFFECTS_FUNCTION__POLICE__ID,
-      EFFECTS_FUNCTION__POLICE_ALL__ID,
       EFFECTS_FUNCTION__FAIRY__ID,
       EFFECTS_FUNCTION__TWO_DOTS__ID,
       EFFECTS_FUNCTION__TWO_AREAS__ID,                
-      EFFECTS_FUNCTION__FAIRYTWINKLE__ID,                
+      EFFECTS_FUNCTION__TWINKLE_FAIRY__ID,                
       EFFECTS_FUNCTION__RUNNING_DUAL__ID,   
       EFFECTS_FUNCTION__MULTI_COMET__ID,
       EFFECTS_FUNCTION__OSCILLATE__ID,
@@ -1451,21 +1448,21 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
        **/
       EFFECTS_FUNCTION__SOLID_GLITTER__ID,
       EFFECTS_FUNCTION__POPCORN__ID,
+      EFFECTS_FUNCTION__GLOWSPOTS__ID,
       EFFECTS_FUNCTION__PLASMA__ID,
       EFFECTS_FUNCTION__SPARKLE__ID,
       EFFECTS_FUNCTION__FLASH_SPARKLE__ID,
       EFFECTS_FUNCTION__HYPER_SPARKLE__ID,
       EFFECTS_FUNCTION__TWINKLE__ID,
-      EFFECTS_FUNCTION__COLORTWINKLE__ID,
-      EFFECTS_FUNCTION__TWINKLE_FOX__ID,
-      EFFECTS_FUNCTION__TWINKLE_CAT__ID,
-      EFFECTS_FUNCTION__TWINKLE_UP__ID,
+      EFFECTS_FUNCTION__TWINKLE_COLOUR__ID,
+      EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
+      EFFECTS_FUNCTION__TWINKLE_SPARK__ID,
+      EFFECTS_FUNCTION__TWINKLE_RISE__ID,
       EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
       EFFECTS_FUNCTION__SAW__ID,
       EFFECTS_FUNCTION__DISSOLVE__ID,
       EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID,
-      EFFECTS_FUNCTION__COLORFUL__ID,
-      EFFECTS_FUNCTION__TRAFFIC_LIGHT__ID,
+      EFFECTS_FUNCTION__TRIPOPS__ID,
 
       /**
        * Fireworks
@@ -1702,6 +1699,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
        **/
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
       EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
+      // pulsing lights to music as music mode, instead of off or waves, go from 30% to 100% brightness in time with music beat
       #endif
 
       /**
@@ -2156,7 +2154,7 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
     ******************************************************************************************************************************************************************************/
 
     RgbwwColor IRAM_ATTR
-    GetColourFromUnloadedPalette3(
+    GetUnloadedPaletteColour(
       uint16_t palette_id,
       uint16_t desired_index_from_palette = 0,
       bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
@@ -2165,6 +2163,30 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
       uint8_t* encoded_index = nullptr,
       bool flag_request_is_for_full_visual_output = false
     );
+
+    RgbwwColor IRAM_ATTR GetUnloadedPaletteColour_ModeWrap(
+      uint16_t palette_id,
+      uint16_t index_or_pos = 0,
+      uint8_t  palette_index_mode = 0,           // e.g. PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_INDEX__IS_SEGLEN_RANGE
+      uint8_t  palette_mode = 0,                 // e.g. PALETTE_MODE__DEFAULT / __EXACT / __DISCRETE, etc.
+      uint8_t  palette_wrap = 0,                 // e.g. PALETTE_WRAP_OFF / __ON
+      uint8_t* encoded_value = nullptr,                // pass NO_ENCODED_VALUE if unused
+      bool     flag_request_is_for_full_visual_output = false
+    );
+
+    uint32_t IRAM_ATTR
+    GetColourFromUnloadedPalette3_U32(
+      uint16_t palette_id,
+      uint16_t desired_index_from_palette = 0,
+      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      uint8_t* encoded_index = nullptr,
+      bool flag_request_is_for_full_visual_output = false
+    ){
+      RgbwwColor crgb_ = GetUnloadedPaletteColour(palette_id, desired_index_from_palette, flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_colour, encoded_index, flag_request_is_for_full_visual_output);
+      return ((uint32_t)crgb_.CW << 24) | ((uint32_t)crgb_.R << 16) | ((uint32_t)crgb_.G << 8) | (uint32_t)crgb_.B;
+    }
 
     CRGB ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
     
@@ -2745,18 +2767,14 @@ typedef struct Segment
     bool     _colorScaled;             // color has been scaled prior to setPixelColor() call
     bool          _modeBlend = true;          // mode/effect blending semaphore
 
-    /**
-     * @brief AUX options going forward must only be internal effect save states, and NOT user defined options (these should be "effect_option")
-     * Internal multi-use variables
-     * Keep at least one U32 for millis storage
-     */
-    // struct INTERNAL_MULTIUSE_PARAMETERS
-    // {
-      uint16_t aux0 = 0;  // custom var
-      uint16_t aux1 = 0;  // custom var
-      uint16_t aux2 = 0;
-      uint32_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
-    // }params_internal;
+    
+    uint16_t aux0 = 0;  // custom var
+    uint16_t aux1 = 0;  // custom var
+    uint16_t aux2 = 0;
+    uint32_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
+    uint16_t aux4 = 0; // New when it is needed but not worth a struct data
+
+    uint32_t live_pal_timing = 0; //for live palette updates was previously aux3
 
     Decounter<uint16_t> auto_timeoff = Decounter<uint16_t>();
 
@@ -2809,6 +2827,8 @@ typedef struct Segment
      * */
     NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
 
+    uint8_t GetNumberOfColoursInPalette(){ return palette->colours_in_palette; };
+  
 
     bool LoadPalette_AsyncLock = false;
     void LoadPalette(uint8_t palette_id, mPaletteLoaded* palette = nullptr);
@@ -2990,6 +3010,7 @@ typedef struct Segment
     void    setCCT(uint16_t k);
     void    setOption(uint8_t n, bool val);
     void    setEffect(uint8_t fx, bool loadDefaults = false);
+    bool    parseSegColorHex(const char* in, uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& WW, uint8_t& CW);
     void    setPalette(uint8_t pal);
     uint8_t differs(const Segment& b) const;
     void    refreshLightCapabilities(void);
@@ -3331,10 +3352,113 @@ typedef struct Segment
      * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
      * @returns Single color from palette
      * Since inline functions are expanded at compile time and do not incur runtime overhead, you can use an inline function in a header file
+     * alternatively could seak DEFINE remaps
+     * 
+     * color_from_palette_forced_gradient is really teh default, all WLED acts on CRGBPalette16 and assumes never discrete/exact colour sampling so we should default mine to that too.
     */
     inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
-      return GetPaletteColour(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg*/true, pbri, mcol);
+      // // return GetPaletteColour(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg*/true, pbri, mcol); August2025, pbri not applied correctly this way, needs fixed later
+      // uint32_t c = GetPaletteColour(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function*/false, pbri, mcol);
+      // if(pbri != 255) { // apply brightness if not already done
+      //   byte r = R(c), g = G(c), b = B(c), w = W(c);
+      //   r = (uint16_t(r) * pbri) >> 8;
+      //   g = (uint16_t(g) * pbri) >> 8;
+      //   b = (uint16_t(b) * pbri) >> 8;
+      //   w = (uint16_t(w) * pbri) >> 8;
+      //   c = RGBW32(r, g, b, w);
+      // }
+      // return c;
+
+      // Map booleans to your enum constants
+
+      // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
+      const uint8_t idxMode   = mapping ? PALETTE_INDEX__IS_SEGLEN_RANGE : PALETTE_INDEX__IS_EXACT_COLOUR;
+      const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_ON               : PALETTE_WRAP_OFF;
+      const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
+
+      uint8_t encoded = 0; // non-null pointer expected by some impls
+      uint32_t c = GetPaletteColour(
+          i,
+          idxMode,
+          wrapMode,
+          discrete,
+          &encoded,
+          /*apply brightness*/ false,
+          255, // to be removed, handled below
+          mcol
+      );
+
+      if(pbri != 255) { // apply brightness if not already done
+        byte r = R(c), g = G(c), b = B(c), w = W(c);
+        r = (uint16_t(r) * pbri) >> 8;
+        g = (uint16_t(g) * pbri) >> 8;
+        b = (uint16_t(b) * pbri) >> 8;
+        w = (uint16_t(w) * pbri) >> 8;
+        c = RGBW32(r, g, b, w);
+      }
+
+      return c;
     }
+
+    /**
+     * Forced-gradient palette lookup.
+     *
+     * Always disables discrete/CRGB “exact color” sampling and requests interpolated
+     * gradient output, regardless of the palette’s native type.
+     *
+     * @param i      Palette index (or pixel index if mapping==true).
+     * @param mapping true: i spans seglen, false: i spans 0..255 space.
+     * @param wrap   If true, wrap smoothly end→start; else hard edge at ends.
+     * @param mcol   PHASEOUT: If default palette 0 is active, choose SEGCOLOR(mcol) instead (0..2); >2 uses a fallback (e.g., Party).
+     * @param pbri   Brightness scale (0..255) applied to the sampled color.
+     * 
+     * 
+     * color_from_palette(i, mapping, wrap, mcol, pbri)
+     * If mapping == false → i is always interpreted as 0–255.
+     * That’s the raw FastLED palette space.
+     * Good if you want “absolute positions” within a palette, independent of segment length.
+     * If mapping == true → i is treated as a pixel index in 0–SEGLEN-1, which gets rescaled internally to 0–255.
+     * So pixel #0 = palette index 0, pixel #SEGLEN-1 = palette index 255.
+     * This matches your assumption: default = false means “always 0–255, don’t rescale by SEGLEN”.
+
+
+     */
+    // inline uint32_t color_from_palette_forced_gradient(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255)
+    // {
+    //   // Map booleans to your enum constants
+
+    //   // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
+    //   const uint8_t idxMode   = mapping ? PALETTE_INDEX__IS_SEGLEN_RANGE : PALETTE_INDEX__IS_EXACT_COLOUR;
+
+
+    //   const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_ON               : PALETTE_WRAP_OFF;
+    //   const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
+
+    //   uint8_t encoded = 0; // non-null pointer expected by some impls
+    //   uint32_t c = GetPaletteColour(
+    //       i,
+    //       idxMode,
+    //       wrapMode,
+    //       discrete,
+    //       &encoded,
+    //       /*apply brightness*/ false,
+    //       255, // to be removed, handled below
+    //       mcol
+    //   );
+
+    //   if(pbri != 255) { // apply brightness if not already done
+    //     byte r = R(c), g = G(c), b = B(c), w = W(c);
+    //     r = (uint16_t(r) * pbri) >> 8;
+    //     g = (uint16_t(g) * pbri) >> 8;
+    //     b = (uint16_t(b) * pbri) >> 8;
+    //     w = (uint16_t(w) * pbri) >> 8;
+    //     c = RGBW32(r, g, b, w);
+    //   }
+
+    //   return c;
+
+    // }
+
 
     // 2D Blur: shortcuts for bluring columns or rows only (50% faster than full 2D blur)
     inline void blurCols(fract8 blur_amount, bool smear = false) { // blur all columns
@@ -4066,7 +4190,6 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   void show(void);
   void setTargetFps(uint8_t fps);
 
-  
   [[gnu::hot]] ColourBaseType getPixelColor(uint32_t i) const;
   void     setPixelColor(uint32_t n, ColourBaseType c);
   // using public variables to reduce code size increase due to inline function getSegment() (with bounds checking) and color transitions
@@ -4186,6 +4309,8 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
     inline uint8_t getTargetFps() { return _targetFps; }
     inline uint8_t getModeCount() { return effects.count; }
+
+    
 
     uint16_t
       ablMilliampsMax,

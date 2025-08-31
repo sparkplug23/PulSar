@@ -801,7 +801,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
   uint8_t* encoded_index,
   // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
-  uint8_t  rescale_seglen_index_to_255_range,
+  uint8_t  palette_index__format,
   // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
   uint8_t  rescale_index_wrap_for_hardedge,
   // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
@@ -818,11 +818,57 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
    * CRGBPALETTE16 palette
    * * Preloaded into CRGB16Palette16_Palette
    * * Default requires getting from pal_index in 0 to 255 range
-   * * * If rescale_seglen_index_to_255_range is true, then it will rescale the index to segment length
+   * * * If palette_index__format is true, then it will rescale the index to segment length
    * * * If rescale_index_wrap_for_hardedge is true, then it will rescale the index to 240, so that it does not wrap around.
    * * * If override_default_encoding is set to PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE, then it will use the encoded_index to get the exact colour from CRGB16Palette16_Palette by rescaling 0-16 into 0-240 range
    * 
   ***************************************************************/
+  // if(
+  //   ((id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+  //   ((id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
+  //   ((id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+  //   ((id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
+  // ){
+    
+  //   uint16_t pixel_position_adjust = desired_index;
+
+  //   TBlendType blend = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE) ? NOBLEND : LINEARBLEND;
+
+  //   // Handle FORCE_DISCRETE mode — exact color steps only
+  //   if (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE) {
+  //     if (palette_index__format == PALETTE_INDEX_IS_INDEX_IN_PALETTE) {
+  //       // Classic "encoded discrete"
+  //       uint8_t discrete_index = desired_index % 16;
+  //       pixel_position_adjust = pSEGMENT.palette->CRGB16Palette16_Palette.encoded_index[discrete_index];
+  //     } else {
+  //       // Treat as exact palette index, map 0–15 → 0–240
+  //       // Why 240 instead of 255?
+  //       // Because:
+  //       //   The FastLED CRGBPalette16 spans 0 to 255, but it's divided into 16 color slots.
+  //       //   Each slot occupies 16 positions (256 / 16 = 16).
+  //       //   The last index 15 should map to 240 to land on the start of the last color band.
+  //       //   If you go to 255, you hit the wraparound (blending back to index 0).
+  //       pixel_position_adjust = (desired_index * 240) / 15;
+  //     }
+  //   }
+  //   // Handle full gradient mode
+  //   else{
+  //     if (palette_index__format) {
+  //       pixel_position_adjust = (tkr_anim->_virtualSegmentLength == 1) ? 0 : (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
+  //     }
+
+  //     if (rescale_index_wrap_for_hardedge) {
+  //       pixel_position_adjust = scale8(pixel_position_adjust, 240);  // Avoid wraparound
+  //     }
+  //   }
+
+  //   CRGB fastled_col = ColorFromPaletteWLED(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
+  //   colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
+  //   #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+  //   colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
+  //   #endif
+
+  // } 
   if(
     ((id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
     ((id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
@@ -836,7 +882,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
     // Handle FORCE_DISCRETE mode — exact color steps only
     if (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE) {
-      if (rescale_seglen_index_to_255_range == PALETTE_INDEX__IS_PALETTE_INDEX) {
+      if (palette_index__format == PALETTE_INDEX__IS_EXACT_COLOUR) {
         // Classic "encoded discrete"
         uint8_t discrete_index = desired_index % 16;
         pixel_position_adjust = pSEGMENT.palette->CRGB16Palette16_Palette.encoded_index[discrete_index];
@@ -853,12 +899,14 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     }
     // Handle full gradient mode
     else{
-      if (rescale_seglen_index_to_255_range) {
+      if (palette_index__format) {
         pixel_position_adjust = (tkr_anim->_virtualSegmentLength == 1) ? 0 : (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
       }
 
       if (rescale_index_wrap_for_hardedge) {
         pixel_position_adjust = scale8(pixel_position_adjust, 240);  // Avoid wraparound
+        if(pixel_position_adjust > 235)
+        Serial.printf("rescale_index_wrap_for_hardedge %d \n\r", pixel_position_adjust);
       }
     }
 
@@ -869,6 +917,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     #endif
 
   } 
+
+
   /**************************************************************
    * 
    * Single Colour Palettes
@@ -925,7 +975,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       pSEGMENT.palette->colours_in_palette,
       static_palettes[palette_adjusted_id].encoding,
       encoded_index,
-      rescale_seglen_index_to_255_range,
+      palette_index__format,
       rescale_index_wrap_for_hardedge,
       force_palette_mode,
       false
@@ -939,10 +989,10 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       pSEGMENT.palette->colours_in_palette,
       static_palettes[palette_adjusted_id].encoding,
       encoded_index,
-      rescale_seglen_index_to_255_range,
+      palette_index__format,
       rescale_index_wrap_for_hardedge,
-      force_palette_mode,
-      false
+      force_palette_mode, // DEPRECIATE: was called override_default_encoding
+      false               // DEPRECIATE: was called flag_crgb_exact_colour = false (true: "CRGB exact colour", false: "U32 colour")
     );
     #endif
   }
@@ -968,7 +1018,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       pSEGMENT.palette->colours_in_palette,
       custom_palettes[palette_adjusted_id].encoding,
       encoded_index,
-      rescale_seglen_index_to_255_range,
+      palette_index__format,
       rescale_index_wrap_for_hardedge,
       force_palette_mode,
       false
@@ -982,7 +1032,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       pSEGMENT.palette->colours_in_palette,
       custom_palettes[palette_adjusted_id].encoding,
       encoded_index,
-      rescale_seglen_index_to_255_range,
+      palette_index__format,
       rescale_index_wrap_for_hardedge,
       force_palette_mode,
       false
@@ -1378,7 +1428,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBu
   // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
   uint8_t* encoded_index,
   // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
-  uint8_t  rescale_seglen_index_to_255_range,
+  uint8_t  palette_index__format,
   // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
   uint8_t  rescale_index_wrap_for_hardedge,
   // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
@@ -1397,7 +1447,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBu
                                                             data,
                                                             desired_index,
                                                             encoded_index,
-                                                            rescale_seglen_index_to_255_range,
+                                                            palette_index__format,
                                                             rescale_index_wrap_for_hardedge,
                                                             override_default_encoding,
                                                             flag_request_is_for_full_visual_output
@@ -2160,7 +2210,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_
 //   uint8_t colours_in_palette,
 //   PALETTE_ENCODING_DATA encoding,
 //   uint8_t* encoded_value, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-//   bool     rescale_seglen_index_to_255_range, 
+//   bool     palette_index__format, 
 //   bool     flag_wrap_hard_edge,        
 //   uint8_t  force_palette_mode, //needs changed to uint8_t
 //   bool     depreciated //flag_force_gradient
@@ -2183,7 +2233,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_
 
 
 //   /**
-//    * The check for !rescale_seglen_index_to_255_range prevents discrete palettes without gradient info from entering the discrete logic under PALETTE_MODE__DEFAULT. 
+//    * The check for !palette_index__format prevents discrete palettes without gradient info from entering the discrete logic under PALETTE_MODE__DEFAULT. 
 //    * But your new logic expects all non-gradient palettes to behave discrete by default — regardless of segment spanning.
 //    **/
 
@@ -2195,7 +2245,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_
 //   if (is_basic_sequence_palette) 
 //   {
 //     // Handle non-gradient palette colors, with or without segment spanning
-//     if (rescale_seglen_index_to_255_range && !is_forced_to_get_discrete && !is_not_gradient) {
+//     if (palette_index__format && !is_forced_to_get_discrete && !is_not_gradient) {
 //       pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
 //     }
     
@@ -2222,7 +2272,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_
 //   if (encoding.index_gradient || (force_palette_mode == PALETTE_MODE__FORCE_GRADIENT)) 
 //   {
 //     // Serial.println("FG");
-//     if (rescale_seglen_index_to_255_range) {
+//     if (palette_index__format) {
 //       pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
 //     }
 
@@ -2316,7 +2366,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_
 //    * DESC: Spanned palette ("Band" mode, causes discrete palette to repeat into sections)
 //    **/
 //   // Handle simple spanned palettes
-//   if (rescale_seglen_index_to_255_range) {
+//   if (palette_index__format) {
 //     pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
 //   }
 
@@ -2339,158 +2389,582 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_
 
 //   return colour;
 // }
+
+
+// IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
+//   uint8_t* palette_buffer,
+//   uint16_t _pixel_position, 
+//   uint8_t encoded_colour_width,
+//   uint8_t colours_in_palette,
+//   PALETTE_ENCODING_DATA encoding,
+//   uint8_t* encoded_value, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+//   bool     palette_index__format, 
+//   bool     flag_wrap_hard_edge,        
+//   uint8_t  force_palette_mode,
+//   bool     depreciated
+// ) {
+//   uint32_t colour;
+//   uint16_t pixel_position_adjust = _pixel_position;
+
+//   if (depreciated) {
+//     Serial.println("flag_force_gradient");
+//   }
+
+//   bool is_forced_to_get_discrete = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE);
+//   bool is_forced_to_get_gradient = (force_palette_mode == PALETTE_MODE__FORCE_GRADIENT);
+//   bool is_not_gradient = (encoding.index_gradient == false);
+//   bool is_basic_sequence_palette = is_forced_to_get_discrete || (is_not_gradient && !is_forced_to_get_gradient);
+
+//   /**
+//    * DESC: Discrete palette (no index)
+//    **/
+//   if (is_basic_sequence_palette) {
+    // if (palette_index__format && !is_forced_to_get_discrete && !is_not_gradient) {
+    //   pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+    // }
+
+//     pixel_position_adjust %= colours_in_palette;
+
+//     return SubGet_Encoded_Colour_ReadBuffer_U32(
+//       palette_buffer,
+//       pixel_position_adjust,
+//       encoded_value,
+//       encoding,
+//       encoded_colour_width
+//     );
+//   }
+
+//   /**
+//    * DESC: Gradient palette (contains index, or forced into gradient with equal spacing)
+//    **/
+//   if (encoding.index_gradient || is_forced_to_get_gradient) {
+//     if (palette_index__format) {
+//       pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+//     }
+
+//     std::vector<uint8_t> gradient_palettes(colours_in_palette);
+//     if (encoding.index_gradient) {
+//       for (uint8_t i = 0; i < colours_in_palette; ++i) {
+//         SubGet_Encoded_Colour_ReadBuffer_U32(
+//           palette_buffer,
+//           i,
+//           &gradient_palettes[i],
+//           encoding,
+//           encoded_colour_width
+//         );
+//       }
+//     } else {
+//       for (uint8_t i = 0; i < colours_in_palette; ++i) {
+//         if (flag_wrap_hard_edge) {
+//           gradient_palettes[i] = map(i, 0, colours_in_palette - 1, 0, 255);
+//         } else {
+//           gradient_palettes[i] = map(i, 0, colours_in_palette, 0, 255);
+//         }
+//       }
+//     }
+
+//     uint8_t lower_i = 0, upper_i = 0;
+//     uint8_t lower_v = 0, upper_v = 0;
+//     uint8_t progress = 0;
+
+//     if (pixel_position_adjust < gradient_palettes[0]) {
+//       lower_i = 0;
+//       upper_i = 1;
+//       lower_v = gradient_palettes[lower_i];
+//       upper_v = gradient_palettes[upper_i];
+//       progress = 0;
+//     }
+//     else if (pixel_position_adjust >= gradient_palettes[colours_in_palette - 1]) {
+//       lower_i = colours_in_palette - 1;
+//       if (flag_wrap_hard_edge || encoding.index_gradient) {
+//         upper_i = lower_i;
+//         lower_v = gradient_palettes[lower_i];
+//         upper_v = gradient_palettes[lower_i];
+//         progress = 0;
+//       } else {
+//         upper_i = 0;
+//         lower_v = gradient_palettes[lower_i];
+//         upper_v = 255;
+//         progress = map(pixel_position_adjust, lower_v, upper_v, 0, 255);
+//       }
+//     }
+//     else {
+//       for (uint8_t i = 0; i < colours_in_palette - 1; ++i) {
+//         if (pixel_position_adjust >= gradient_palettes[i] && pixel_position_adjust < gradient_palettes[i + 1]) {
+//           lower_i = i;
+//           upper_i = i + 1;
+//           lower_v = gradient_palettes[lower_i];
+//           upper_v = gradient_palettes[upper_i];
+//           progress = map(pixel_position_adjust, lower_v, upper_v, 0, 255);
+//           break;
+//         }
+//       }
+//     }
+
+//     uint32_t lower_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+//       palette_buffer,
+//       lower_i,
+//       nullptr,
+//       encoding,
+//       encoded_colour_width
+//     );
+//     uint32_t upper_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+//       palette_buffer,
+//       upper_i,
+//       nullptr,
+//       encoding,
+//       encoded_colour_width
+//     );
+
+//     colour = mAnimatorLight::ColourBlend(lower_colour, upper_colour, progress);
+
+//     if (encoded_value != nullptr) {
+//       *encoded_value = (pixel_position_adjust < 255) ? lower_v : upper_v;
+//     }
+
+//     return colour;
+//   }
+
+//   /**
+//    * DESC: Spanned palette ("Band" mode, causes discrete palette to repeat into sections)
+//    **/
+//   if (palette_index__format) {
+//     pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+//   }
+
+//   uint16_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
+
+//   return SubGet_Encoded_Colour_ReadBuffer_U32(
+//     palette_buffer,
+//     palette_index,
+//     encoded_value,
+//     encoding,
+//     encoded_colour_width
+//   );
+// }
+
+/***
+ * Notes
+
+palette_index__format is now a uint8_t and is expected to be one of:
+PALETTE_INDEX__IS_255_RANGE (treat _pixel_position as 0..255),
+PALETTE_INDEX__IS_SEGLEN_RANGE (map 0..SEGLEN-1 → 0..255 or → entry index),
+PALETTE_INDEX__IS_EXACT_COLOUR (use _pixel_position directly as the palette entry for discrete, or as 0..255 coordinate for gradient/banded).
+Discrete branch always resolves a final entry index (0..colours-1) and fetches it.
+Gradient branch normalizes to 0..255 (per mode), finds surrounding stops, and blends.
+Banded (“spanned”) branch normalizes to 0..255 then scales into an entry index.
+No other behavior changes; all your existing encoding paths are preserved.
+ */
+// IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
+//   uint8_t* palette_buffer,
+//   uint16_t _pixel_position, 
+//   uint8_t  encoded_colour_width,
+//   uint8_t  colours_in_palette,
+//   PALETTE_ENCODING_DATA encoding,
+//   uint8_t* encoded_value,              // Must be a valid address if you want encoded out; nullptr ok if not needed
+//   uint8_t  palette_index__format,      // PALETTE_INDEX__IS_255_RANGE / __IS_SEGLEN_RANGE / __IS_EXACT_COLOUR
+//   bool     flag_wrap_hard_edge,
+//   uint8_t  force_palette_mode,         // PALETTE_MODE__FORCE_DEFAULT / __FORCE_DISCRETE / __FORCE_GRADIENT
+//   bool     depreciated
+// ) {
+//   uint32_t colour;
+//   uint16_t pixel_position_adjust = _pixel_position;
+
+//   if (depreciated) {
+//     Serial.println("flag_force_gradient"); // legacy hook
+//   }
+
+//   const bool is_forced_discrete = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE);
+//   const bool is_forced_gradient = (force_palette_mode == PALETTE_MODE__FORCE_GRADIENT);
+//   const bool is_not_gradient    = (encoding.index_gradient == false);
+
+//   // "Basic sequence" == treat as discrete steps unless explicitly forced to gradient
+//   const bool is_basic_sequence_palette = is_forced_discrete || (is_not_gradient && !is_forced_gradient);
+
+//   /**************************************************************
+//    * DISCRETE PALETTES (no index) OR forced discrete
+//    * - Functional parity with your original logic.
+//    * - CRITICAL line is preserved: when the caller passes a SEGLEN-based
+//    *   index *and* the underlying palette is actually gradient and NOT forced
+//    *   discrete, we first rescale 0..SEGLEN-1 → 0..255 (same as your code).
+//    * - Final selection always folds to 0..(colours_in_palette-1).
+//    **************************************************************/
+//   if (is_basic_sequence_palette) {
+//     uint16_t pixel_position_adjust = _pixel_position;
+
+//     // *** CRITICAL: keep your original rescale-to-255 condition ***
+//     // Original: if (palette_index__format && !is_forced_to_get_discrete && !is_not_gradient)
+//     // With tri-state, “mapping happened” == PALETTE_INDEX__IS_SEGLEN_RANGE.
+//     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
+//         && !is_forced_discrete
+//         && !is_not_gradient) {
+//       pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
+//         ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+//         : 0;
+//     }
+
+//     // Normalize other input formats (no proportional scaling here).
+//     //  - 255-range: use low byte (like before), then modulo below.
+//     //  - exact-colour: leave as-is; modulo below.
+//     if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+//       pixel_position_adjust &= 0xFFu;
+//     }
+//     // PALETTE_INDEX__IS_EXACT_COLOUR → leave pixel_position_adjust as-is
+
+//     // Final fold into the palette entry range (unchanged behavior).
+//     pixel_position_adjust %= colours_in_palette;
+
+//     return SubGet_Encoded_Colour_ReadBuffer_U32(
+//         palette_buffer,
+//         (uint8_t)pixel_position_adjust,
+//         encoded_value,
+//         encoding,
+//         encoded_colour_width
+//     );
+//   }
+
+
+//   /**************************************************************
+//    * GRADIENT PALETTES (has index) OR forced gradient
+//    * - Preserve original: rescale to 0..255 ONLY when caller passed
+//    *   a SEGLEN-based index.
+//    **************************************************************/
+//   if (encoding.index_gradient || is_forced_gradient) {
+//     uint16_t pixel_position_adjust = _pixel_position;
+
+//     // Original behavior: when "mapping happened" (old boolean true),
+//     // convert 0..SEGLEN-1 → 0..255.
+//     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
+//       pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
+//         ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+//         : 0;
+//     } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+//       // Caller already gave a 0..255 domain. Keep it in range (parity with old code).
+//       pixel_position_adjust &= 0xFFu;
+//     }
+//     // EXACT_COLOUR → leave as provided (parity: old "false" path used value as-is)
+
+//     // Build positions of the gradient stops
+//     std::vector<uint8_t> gradient_positions(colours_in_palette);
+//     if (encoding.index_gradient) {
+//       for (uint8_t i = 0; i < colours_in_palette; ++i) {
+//         SubGet_Encoded_Colour_ReadBuffer_U32(
+//           palette_buffer, i, &gradient_positions[i],
+//           encoding, encoded_colour_width
+//         );
+//       }
+//     } else {
+//       // Forced gradient → evenly spaced stops (optionally hard-edge limited)
+//       for (uint8_t i = 0; i < colours_in_palette; ++i) {
+//         gradient_positions[i] = flag_wrap_hard_edge
+//           ? map(i, 0, colours_in_palette - 1, 0, 255)
+//           : map(i, 0, colours_in_palette,     0, 255);
+//       }
+//     }
+
+//     // Locate [lower, upper] span and compute progress
+//     uint8_t lower_i = 0, upper_i = 0;
+//     uint8_t lower_v = 0, upper_v = 0;
+//     uint8_t progress = 0;
+
+//     if (pixel_position_adjust < gradient_positions[0]) {
+//       lower_i = 0; upper_i = 1;
+//       lower_v = gradient_positions[lower_i];
+//       upper_v = gradient_positions[upper_i];
+//       progress = 0;
+//     } else if (pixel_position_adjust >= gradient_positions[colours_in_palette - 1]) {
+//       lower_i = colours_in_palette - 1;
+//       if (flag_wrap_hard_edge || encoding.index_gradient) {
+//         upper_i = lower_i;
+//         lower_v = gradient_positions[lower_i];
+//         upper_v = gradient_positions[lower_i];
+//         progress = 0;
+//       } else {
+//         upper_i = 0;
+//         lower_v = gradient_positions[lower_i];
+//         upper_v = 255;
+//         progress = map(pixel_position_adjust, lower_v, upper_v, 0, 255);
+//       }
+//     } else {
+//       for (uint8_t i = 0; i < colours_in_palette - 1; ++i) {
+//         if (pixel_position_adjust >= gradient_positions[i] &&
+//             pixel_position_adjust <  gradient_positions[i + 1]) {
+//           lower_i = i; upper_i = i + 1;
+//           lower_v = gradient_positions[lower_i];
+//           upper_v = gradient_positions[upper_i];
+//           progress = map(pixel_position_adjust, lower_v, upper_v, 0, 255);
+//           break;
+//         }
+//       }
+//     }
+
+//     // Fetch the bounding colours and blend
+//     const uint32_t lower_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+//         palette_buffer, lower_i, nullptr, encoding, encoded_colour_width);
+//     const uint32_t upper_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+//         palette_buffer, upper_i, nullptr, encoding, encoded_colour_width);
+
+//     colour = mAnimatorLight::ColourBlend(lower_colour, upper_colour, progress);
+
+//     if (encoded_value != nullptr) {
+//       *encoded_value = (pixel_position_adjust < 255) ? lower_v : upper_v;
+//     }
+//     return colour;
+//   }
+
+//   /**************************************************************
+//    * SPANNED (“band”) PALETTE
+//    * - Original: when caller had mapping (old true), convert to 0..255.
+//    * - Then scale 0..255 → 0..(colours-1).
+//    **************************************************************/
+//   {
+//     uint16_t pixel_position_adjust = _pixel_position;
+
+//     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
+//       pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
+//         ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+//         : 0;
+//     } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+//       pixel_position_adjust &= 0xFFu; // already 0..255
+//     }
+//     // EXACT_COLOUR → use as provided (parity with old false-path)
+
+//     const uint16_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
+
+//     return SubGet_Encoded_Colour_ReadBuffer_U32(
+//       palette_buffer,
+//       (uint8_t)palette_index,
+//       encoded_value,
+//       encoding,
+//       encoded_colour_width
+//     );
+//   }
+
+// }
+
 IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
   uint8_t* palette_buffer,
   uint16_t _pixel_position, 
-  uint8_t encoded_colour_width,
-  uint8_t colours_in_palette,
+  uint8_t  encoded_colour_width,
+  uint8_t  colours_in_palette,
   PALETTE_ENCODING_DATA encoding,
-  uint8_t* encoded_value, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-  bool     rescale_seglen_index_to_255_range, 
-  bool     flag_wrap_hard_edge,        
-  uint8_t  force_palette_mode,
+  uint8_t* encoded_value,              // Must be a valid address if you want encoded out; nullptr ok if not needed
+  uint8_t  palette_index__format,      // PALETTE_INDEX__IS_255_RANGE / __IS_SEGLEN_RANGE / __IS_EXACT_COLOUR
+  bool     flag_wrap_hard_edge,
+  uint8_t  force_palette_mode,         // PALETTE_MODE__FORCE_DEFAULT / __FORCE_DISCRETE / __FORCE_GRADIENT
   bool     depreciated
 ) {
   uint32_t colour;
-  uint16_t pixel_position_adjust = _pixel_position;
 
   if (depreciated) {
-    Serial.println("flag_force_gradient");
+    Serial.println("flag_force_gradient"); // legacy hook
   }
 
-  bool is_forced_to_get_discrete = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE);
-  bool is_forced_to_get_gradient = (force_palette_mode == PALETTE_MODE__FORCE_GRADIENT);
-  bool is_not_gradient = (encoding.index_gradient == false);
-  bool is_basic_sequence_palette = is_forced_to_get_discrete || (is_not_gradient && !is_forced_to_get_gradient);
+  const bool is_forced_discrete = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE);
+  const bool is_forced_gradient = (force_palette_mode == PALETTE_MODE__FORCE_GRADIENT);
+  const bool is_not_gradient    = (encoding.index_gradient == false);
 
-  /**
-   * DESC: Discrete palette (no index)
-   **/
+  // "Basic sequence" == treat as discrete steps unless explicitly forced to gradient
+  const bool is_basic_sequence_palette = is_forced_discrete || (is_not_gradient && !is_forced_gradient);
+
+  /**************************************************************
+   * DISCRETE PALETTES (no index) OR forced discrete
+   * - Functional parity with your original logic.
+   * - CRITICAL line is preserved: when the caller passes a SEGLEN-based
+   *   index *and* the underlying palette is actually gradient and NOT forced
+   *   discrete, we first rescale 0..SEGLEN-1 → 0..255 (same as your code).
+   * - Final selection always folds to 0..(colours_in_palette-1).
+   **************************************************************/
   if (is_basic_sequence_palette) {
-    if (rescale_seglen_index_to_255_range && !is_forced_to_get_discrete && !is_not_gradient) {
-      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+    uint16_t pixel_position_adjust = _pixel_position;
+
+    // Serial.print("DP ");
+    // Serial.print(_pixel_position);
+    // Serial.flush();
+    // delay(100);
+
+    // *** CRITICAL: keep your original rescale-to-255 condition ***
+    // Original: if (palette_index__format && !is_forced_to_get_discrete && !is_not_gradient)
+    // With tri-state, “mapping happened” == PALETTE_INDEX__IS_SEGLEN_RANGE.
+    if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
+        && !is_forced_discrete
+        && !is_not_gradient) {
+      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+        : 0;
+    }
+    // Serial.print("DP2 ");
+    // Serial.print(_pixel_position);
+    // Serial.flush();
+    // delay(100);
+
+
+    // // Normalize other input formats (no proportional scaling here).
+    // //  - 255-range: use low byte (like before), then modulo below.
+    // //  - exact-colour: leave as-is; modulo below.
+    // if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+    //   pixel_position_adjust &= 0xFFu;
+    // }
+    // // PALETTE_INDEX__IS_EXACT_COLOUR → leave pixel_position_adjust as-is
+
+    // B) Caller passed 0..255 → simple sequence tracking:
+    //    - if v==0: reset sequence
+    //    - else   : advance by 1 (wrap by N)
+    //    This yields RGBORGBO… cadence irrespective of the exact 0..255 value.
+    if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+      const uint8_t v = (uint8_t)(_pixel_position & 0xFFu);
+
+      if (colours_in_palette == 0) {
+        // Safety: nothing to index
+        return SubGet_Encoded_Colour_ReadBuffer_U32(
+          palette_buffer, 0, encoded_value, encoding, encoded_colour_width
+        );
+      }
+
+      if (v == 0) {
+        // Reset sequence at band/loop start
+        tracked_previous_palette_index = 0;
+      } else {
+        // Advance one step each call, rolling over palette length
+        tracked_previous_palette_index =
+          (uint16_t)((tracked_previous_palette_index + 1) % colours_in_palette);
+      }
+
+      return SubGet_Encoded_Colour_ReadBuffer_U32(
+        palette_buffer,
+        (uint8_t)tracked_previous_palette_index,
+        encoded_value,
+        encoding,
+        encoded_colour_width
+      );
     }
 
+
+    // Final fold into the palette entry range (unchanged behavior).
     pixel_position_adjust %= colours_in_palette;
 
     return SubGet_Encoded_Colour_ReadBuffer_U32(
-      palette_buffer,
-      pixel_position_adjust,
-      encoded_value,
-      encoding,
-      encoded_colour_width
+        palette_buffer,
+        (uint8_t)pixel_position_adjust,
+        encoded_value,
+        encoding,
+        encoded_colour_width
     );
   }
 
-  /**
-   * DESC: Gradient palette (contains index, or forced into gradient with equal spacing)
-   **/
-  if (encoding.index_gradient || is_forced_to_get_gradient) {
-    if (rescale_seglen_index_to_255_range) {
-      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
-    }
+  /**************************************************************
+   * GRADIENT PALETTES (has index) OR forced gradient
+   * - Preserve original: rescale to 0..255 ONLY when caller passed
+   *   a SEGLEN-based index. Otherwise use 0..255 as-is.
+   **************************************************************/
+  if (encoding.index_gradient || is_forced_gradient) {
+    uint16_t pixel_position_adjust = _pixel_position;
 
-    std::vector<uint8_t> gradient_palettes(colours_in_palette);
+    if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
+      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+        : 0;
+    } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+      pixel_position_adjust &= 0xFFu;
+    }
+    // EXACT_COLOUR → leave as provided
+
+    // Build positions of the gradient stops
+    std::vector<uint8_t> gradient_positions(colours_in_palette);
     if (encoding.index_gradient) {
       for (uint8_t i = 0; i < colours_in_palette; ++i) {
         SubGet_Encoded_Colour_ReadBuffer_U32(
-          palette_buffer,
-          i,
-          &gradient_palettes[i],
-          encoding,
-          encoded_colour_width
+          palette_buffer, i, &gradient_positions[i],
+          encoding, encoded_colour_width
         );
       }
     } else {
+      // Forced gradient → evenly spaced stops (optionally hard-edge limited)
       for (uint8_t i = 0; i < colours_in_palette; ++i) {
-        if (flag_wrap_hard_edge) {
-          gradient_palettes[i] = map(i, 0, colours_in_palette - 1, 0, 255);
-        } else {
-          gradient_palettes[i] = map(i, 0, colours_in_palette, 0, 255);
-        }
+        gradient_positions[i] = flag_wrap_hard_edge
+          ? map(i, 0, colours_in_palette - 1, 0, 255)
+          : map(i, 0, colours_in_palette,     0, 255);
       }
     }
 
+    // Locate [lower, upper] span and compute progress
     uint8_t lower_i = 0, upper_i = 0;
     uint8_t lower_v = 0, upper_v = 0;
     uint8_t progress = 0;
 
-    if (pixel_position_adjust < gradient_palettes[0]) {
-      lower_i = 0;
-      upper_i = 1;
-      lower_v = gradient_palettes[lower_i];
-      upper_v = gradient_palettes[upper_i];
+    if (pixel_position_adjust < gradient_positions[0]) {
+      lower_i = 0; upper_i = 1;
+      lower_v = gradient_positions[lower_i];
+      upper_v = gradient_positions[upper_i];
       progress = 0;
-    }
-    else if (pixel_position_adjust >= gradient_palettes[colours_in_palette - 1]) {
+    } else if (pixel_position_adjust >= gradient_positions[colours_in_palette - 1]) {
       lower_i = colours_in_palette - 1;
       if (flag_wrap_hard_edge || encoding.index_gradient) {
         upper_i = lower_i;
-        lower_v = gradient_palettes[lower_i];
-        upper_v = gradient_palettes[lower_i];
+        lower_v = gradient_positions[lower_i];
+        upper_v = gradient_positions[lower_i];
         progress = 0;
       } else {
         upper_i = 0;
-        lower_v = gradient_palettes[lower_i];
+        lower_v = gradient_positions[lower_i];
         upper_v = 255;
         progress = map(pixel_position_adjust, lower_v, upper_v, 0, 255);
       }
-    }
-    else {
+    } else {
       for (uint8_t i = 0; i < colours_in_palette - 1; ++i) {
-        if (pixel_position_adjust >= gradient_palettes[i] && pixel_position_adjust < gradient_palettes[i + 1]) {
-          lower_i = i;
-          upper_i = i + 1;
-          lower_v = gradient_palettes[lower_i];
-          upper_v = gradient_palettes[upper_i];
+        if (pixel_position_adjust >= gradient_positions[i] &&
+            pixel_position_adjust <  gradient_positions[i + 1]) {
+          lower_i = i; upper_i = i + 1;
+          lower_v = gradient_positions[lower_i];
+          upper_v = gradient_positions[upper_i];
           progress = map(pixel_position_adjust, lower_v, upper_v, 0, 255);
           break;
         }
       }
     }
 
-    uint32_t lower_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
-      palette_buffer,
-      lower_i,
-      nullptr,
-      encoding,
-      encoded_colour_width
-    );
-    uint32_t upper_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
-      palette_buffer,
-      upper_i,
-      nullptr,
-      encoding,
-      encoded_colour_width
-    );
+    // Fetch the bounding colours and blend
+    const uint32_t lower_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+        palette_buffer, lower_i, nullptr, encoding, encoded_colour_width);
+    const uint32_t upper_colour = SubGet_Encoded_Colour_ReadBuffer_U32(
+        palette_buffer, upper_i, nullptr, encoding, encoded_colour_width);
 
     colour = mAnimatorLight::ColourBlend(lower_colour, upper_colour, progress);
 
     if (encoded_value != nullptr) {
       *encoded_value = (pixel_position_adjust < 255) ? lower_v : upper_v;
     }
-
     return colour;
   }
 
-  /**
-   * DESC: Spanned palette ("Band" mode, causes discrete palette to repeat into sections)
-   **/
-  if (rescale_seglen_index_to_255_range) {
-    pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+  /**************************************************************
+   * SPANNED (“band”) PALETTE
+   * - Original: when caller had mapping (old true), convert to 0..255.
+   * - Then scale 0..255 → 0..(colours-1).
+   **************************************************************/
+  {
+    uint16_t pixel_position_adjust = _pixel_position;
+
+    if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
+      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+        : 0;
+    } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
+      pixel_position_adjust &= 0xFFu; // already 0..255
+    }
+    // EXACT_COLOUR → use as provided
+
+    const uint16_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
+
+    return SubGet_Encoded_Colour_ReadBuffer_U32(
+      palette_buffer,
+      (uint8_t)palette_index,
+      encoded_value,
+      encoding,
+      encoded_colour_width
+    );
   }
-
-  uint16_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
-
-  return SubGet_Encoded_Colour_ReadBuffer_U32(
-    palette_buffer,
-    palette_index,
-    encoded_value,
-    encoding,
-    encoded_colour_width
-  );
 }
-
 
 
 #endif

@@ -972,9 +972,9 @@ void mAnimatorLight::Segment::drawCharacter_UsingGradientPalletes(
         }
       }
 
-      RgbwwColor bgCol  = tkr_anim->GetColourFromUnloadedPalette3(
+      RgbwwColor bgCol  = tkr_anim->GetUnloadedPaletteColour(
         backgroundPaletteId, _pixel_position,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,  // Scale across the segment length
+        PALETTE_INDEX__IS_SEGLEN_RANGE,  // Scale across the segment length
         PALETTE_WRAP_ON,
         PALETTE_DISCRETE_OFF
       ); // Get the background color from the palette
@@ -987,13 +987,13 @@ void mAnimatorLight::Segment::drawCharacter_UsingGradientPalletes(
       uint32_t charColor;
       if (solidPerChar) {
         // Use a solid color for the entire character
-        charColor = GetPaletteColour(chr, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
+        charColor = GetPaletteColour(chr, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
       } else {
         // Apply a gradient either horizontally or vertically
         if (horizontalGradient) {
-          charColor = GetPaletteColour(constrain((x0 * 255 / cols), 0, 255), PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
+          charColor = GetPaletteColour(constrain((x0 * 255 / cols), 0, 255), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
         } else {
-          charColor = GetPaletteColour(constrain((y0 * 255 / rows), 0, 255), PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
+          charColor = GetPaletteColour(constrain((y0 * 255 / rows), 0, 255), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
         }
       }
 

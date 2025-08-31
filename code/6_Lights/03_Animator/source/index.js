@@ -7,6 +7,9 @@ var nlMode = false;
 var segLmax = 0; // size (in pixels) of largest selected segment
 var selectedFx = 0;
 var selectedPal = 0;
+var selectedPal2 = 0; // secondary palette for segments
+// // default: range mode (≤)
+let devStageExactMode = false;
 var csel = 0; // selected color slot (0-4)
 var currentPreset = -1;
 var lastUpdate = 0;
@@ -304,6 +307,8 @@ function onLoad()
 		sl.addEventListener('touchstart', toggleBubble);
 		sl.addEventListener('touchend', toggleBubble);
 	});
+	
+	initSecPalToggle();
 }
 
 
@@ -1024,25 +1029,43 @@ function populateEffects() {
 		  const match = fd.match(/~(\d)$/); // Match ~# at the end
 		  if (match) {
 			devStage = parseInt(match[1]); // Extract the dev stage
+			fd = fd.split("~")[0]; // keep only part before ~
 		  }
   
 		  // Process fxdata (palette and flags)
 		  let eP = fd === '' ? [] : fd.split(";"); // effect parameters
 		  let p = (eP.length < 3 || eP[2] === '') ? [] : eP[2].split(","); // palette data
+
+		  if(i==30)
+		  {
+		  console.log(eP);
+		  console.log(p);
+		  }
   
 		  // Add palette indicator
 		  if (p.length > 0 && p[0] !== "" && !isNumeric(p[0])) nm += "&#x1F3A8;"; // 🎨 Palette icon
-  
+  		  
 		  let m = (eP.length < 4 || eP[3] === '') ? '1' : eP[3]; // flags
-		  if (id == 0) m = ''; // solid has no flags
+		  //   if (id == 0) m = ''; // solid has no flags
+
+		  if(i==30)
+		  {
+		  console.log((eP.length < 4 || eP[3] === ''));
+		  console.log(eP[3]);
+		  console.log(m);
+		  }
+  
   
 		  // Add effect type icons
-		  if (m.length > 0) {
+		  if (m.length > 0) { 
+			if (m.includes('p')) nm += '+'; // P⁺; // P+, supports secondary palette
+			// if (m.includes('p')) nm += '&#10010;&#10133;'; // P⁺; // P+, supports secondary palette
 			if (m.includes('0')) nm += "&#8226;"; // 0D effects (PWM & On/Off)
 			if (m.includes('1')) nm += "&#8942;"; // 1D effects
 			if (m.includes('2')) nm += "&#9638;"; // 2D effects
 			if (m.includes('v')) nm += "&#9834;"; // volume effects
 			if (m.includes('f')) nm += "&#9835;"; // frequency effects
+			// if (m.includes('p')) nm += 'P&#8314;'; // P⁺; // P+, supports secondary palette
 		  }
   
 		  // Add devStage Unicode (if > 0)
@@ -1059,7 +1082,19 @@ function populateEffects() {
 	// Inject generated HTML into the effect list
 	gId('fxlist').innerHTML = html;
   }
-  
+
+  function toggleDevStageMode(btn) {
+  devStageExactMode = !devStageExactMode;
+  btn.setAttribute('aria-pressed', String(devStageExactMode));
+  btn.classList.toggle('active', devStageExactMode);
+  btn.title = devStageExactMode
+    ? 'Mode: = (exact dev stage)'
+    : 'Mode: ≤ (up to dev stage)';
+  // re-apply filter immediately with current slider value
+  const v = parseInt(gId('devStageInput').value, 10);
+  filterEffectsByDevStage(v);
+}
+
 
 function populateDevStage() {
 	if (!Array.isArray(fxdata)) {
@@ -1099,19 +1134,37 @@ function populateDevStage() {
 
 	if (hasDevStages) {
 		const sliderContainer = document.getElementById('sliders');
+		// const sliderHTML = `
+		//   <div id="devStageSlider" class="slider">
+		// 	<i class="icons slider-icon">&#128290;</i>
+		// 	<div class="sliderwrap il">
+		// 	  <input id="devStageInput" class="noslide" 
+		// 		onchange="filterEffectsByDevStage(this.value)" 
+		// 		oninput="updateSliderDisplay(this)" 
+		// 		max="4" min="0" step="1" type="range" value="4" />
+		// 	  <div class="sliderdisplay"></div>
+		// 	</div>
+		// 	<output class="sliderbubble">4</output>
+		//   </div>
+		// `;
 		const sliderHTML = `
-		  <div id="devStageSlider" class="slider">
-			<i class="icons slider-icon">&#128290;</i>
-			<div class="sliderwrap il">
-			  <input id="devStageInput" class="noslide" 
-				onchange="filterEffectsByDevStage(this.value)" 
-				oninput="updateSliderDisplay(this)" 
-				max="4" min="0" step="1" type="range" value="4" />
-			  <div class="sliderdisplay"></div>
+			<div id="devStageSlider" class="slider">
+				<i id="devStageModeBtn"
+				class="icons slider-icon"
+				title="Mode: ≤ (tap to switch)"
+				aria-pressed="false"
+				onclick="toggleDevStageMode(this)">&#128290;</i>
+				<div class="sliderwrap il">
+				<input id="devStageInput" class="noslide"
+					onchange="filterEffectsByDevStage(this.value)"
+					oninput="updateSliderDisplay(this)"
+					max="4" min="0" step="1" type="range" value="4" />
+				<div class="sliderdisplay"></div>
+				</div>
+				<output class="sliderbubble">4</output>
 			</div>
-			<output class="sliderbubble">4</output>
-		  </div>
-		`;
+			`;
+
 			// <span class="tooltiptext">DevStage</span>
 		sliderContainer.insertAdjacentHTML('beforeend', sliderHTML);
 	  }
@@ -1126,15 +1179,30 @@ function populateDevStage() {
   }
   
   
-  function filterEffectsByDevStage(stage) {
-	const stageThreshold = parseInt(stage);
+//   function filterEffectsByDevStage(stage) {
+// 	const stageThreshold = parseInt(stage);
   
-	// Hide/show effects based on devStage
-	document.querySelectorAll('#fxlist .fx-item').forEach((item, index) => {
-	  const devStage = devStages[index] || 0; // Default to 0 if not set
-	  item.style.display = devStage <= stageThreshold ? '' : 'none';
-	});
-  }
+// 	// Hide/show effects based on devStage
+// 	document.querySelectorAll('#fxlist .fx-item').forEach((item, index) => {
+// 	  const devStage = devStages[index] || 0; // Default to 0 if not set
+// 	  item.style.display = devStage <= stageThreshold ? '' : 'none';
+// 	});
+//   }
+  // devStages should be indexed by effect id (best), or in the same order as fxdata
+// If you currently push(), ensure idx you use below matches how you fill devStages.
+function filterEffectsByDevStage(v) {
+  v = parseInt(v, 10);
+  const items = document.querySelectorAll('#fxlist .fx-item');
+
+  items.forEach(item => {
+    const idx = parseInt(item.getAttribute('data-index'), 10); // you set this in populateEffects
+    const stage = devStages[idx] || 0; // default 0 if missing
+
+    const show = devStageExactMode ? (stage === v) : (stage <= v);
+    item.style.display = show ? '' : 'none';
+  });
+}
+
   
   
   
@@ -1526,7 +1594,9 @@ function updateUI()
 	gId('pxmb').style.display = (isM) ? "inline-block" : "none";
 
 	updateSelectedFx();
-	updateSelectedPalette(selectedPal); // must be after updateSelectedFx() to un-hide color slots for * palettes
+	// updateSelectedPalette(selectedPal); // must be after updateSelectedFx() to un-hide color slots for * palettes
+	updateSelectedPalette(getActivePaletteIdForUI()); // respects P+ (pal2) when toggled
+
 
 	updateTrail(gId('sliderBri'));
 	updateTrail(gId('sliderSpeed'));
@@ -1593,44 +1663,92 @@ function updateUI()
 // 		for (let i of cd) if (i.dataset.hide == '1') i.classList.add('hide');
 // 	}
 // }
-function updateSelectedPalette(s) {
-	var parent = gId('pallist');
-	var selPaletteInput = parent.querySelector(`input[name="palette"][value="${s}"]`);
-	if (selPaletteInput) selPaletteInput.checked = true;
+// function updateSelectedPalette(s) {
+// 	if (!Number.isFinite(s)) return; // NEW guard
+// 	var parent = gId('pallist');
+// 	var selPaletteInput = parent.querySelector(`input[name="palette"][value="${s}"]`);
+// 	if (selPaletteInput) selPaletteInput.checked = true;
   
-	var selElement = parent.querySelector('.selected');
-	if (selElement) selElement.classList.remove('selected');
+// 	var selElement = parent.querySelector('.selected');
+// 	if (selElement) selElement.classList.remove('selected');
   
-	var selectedPalette = parent.querySelector(`.lstI[data-id="${s}"]`);
-	if (selectedPalette) {
-	  // Safely add 'selected' class
-	  selectedPalette.classList.add('selected');
+// 	var selectedPalette = parent.querySelector(`.lstI[data-id="${s}"]`);
+// 	if (selectedPalette) {
+// 	  // Safely add 'selected' class
+// 	  selectedPalette.classList.add('selected');
   
-	  // Safely fetch and display the palette name
-	  let selectedNameElement = selectedPalette.querySelector(".lstIname");
-	  if (selectedNameElement) {
-		let selectedName = selectedNameElement.innerText;
-		if (simplifiedUI) {
-		  gId("palwbtn").innerText = "Palette: " + selectedName;
-		}
-	  } else {
-		console.warn(`.lstIname not found inside .lstI[data-id="${s}"]`);
-	  }
-	} else {
-	  console.warn(`.lstI[data-id="${s}"] not found in #pallist`);
-	}
+// 	  // Safely fetch and display the palette name
+// 	  let selectedNameElement = selectedPalette.querySelector(".lstIname");
+// 	  if (selectedNameElement) {
+// 		let selectedName = selectedNameElement.innerText;
+// 		if (simplifiedUI) {
+// 		  gId("palwbtn").innerText = "Palette: " + selectedName;
+// 		}
+// 	  } else {
+// 		console.warn(`.lstIname not found inside .lstI[data-id="${s}"]`);
+// 	  }
+// 	} else {
+// 	  console.warn(`.lstI[data-id="${s}"] not found in #pallist`);
+// 	}
   
-	// Handle special palettes (* Colors...)
-	let cd = gId('csl').children; // color selectors
-	if (s > 1 && s < 6) {
-	  cd[0].classList.remove('hide'); // * Color 1
-	  if (s > 2) cd[1].classList.remove('hide'); // * Color 1 & 2
-	  if (s == 5) cd[2].classList.remove('hide'); // all colors
-	} else {
-	  for (let i of cd) if (i.dataset.hide == '1') i.classList.add('hide');
-	}
+// 	// Handle special palettes (* Colors...)
+// 	let cd = gId('csl').children; // color selectors
+// 	if (s > 1 && s < 6) {
+// 	  cd[0].classList.remove('hide'); // * Color 1
+// 	  if (s > 2) cd[1].classList.remove('hide'); // * Color 1 & 2
+// 	  if (s == 5) cd[2].classList.remove('hide'); // all colors
+// 	} else {
+// 	  for (let i of cd) if (i.dataset.hide == '1') i.classList.add('hide');
+// 	}
+//   }
+  function updateSelectedPalette(s) {
+  if (!Number.isFinite(s)) return;
+  const parent = gId('pallist');
+
+  highlightSecondary = true;
+
+  // reset palette buttons before applying highlight
+  parent.querySelectorAll('.lstI').forEach(el => {
+    el.style.backgroundColor = ''; // restore default
+  });
+
+  // apply highlight to ALL palette buttons if P+ active
+  if (highlightSecondary && isSecondaryPaletteMode()) {
+    parent.querySelectorAll('.lstI').forEach(el => {
+      el.style.backgroundColor = 'rgb(70,0,0)'; // deep red (tweak as desired)
+    });
   }
-  
+
+  // normal “selected” highlight logic
+  const selPaletteInput = parent.querySelector(
+    `input[name="palette"][value="${s}"]`
+  );
+  if (selPaletteInput) selPaletteInput.checked = true;
+
+  const selElement = parent.querySelector('.selected');
+  if (selElement) selElement.classList.remove('selected');
+
+  const selectedPalette = parent.querySelector(`.lstI[data-id="${s}"]`);
+  if (selectedPalette) {
+    selectedPalette.classList.add('selected');
+    const selectedNameElement = selectedPalette.querySelector(".lstIname");
+    if (selectedNameElement && simplifiedUI) {
+      gId("palwbtn").innerText =
+        "Palette: " + selectedNameElement.innerText;
+    }
+  }
+
+  // Handle special *Colors...
+  const cd = gId('csl').children;
+  if (s > 1 && s < 6) {
+    cd[0].classList.remove('hide');
+    if (s > 2) cd[1].classList.remove('hide');
+    if (s == 5) cd[2].classList.remove('hide');
+  } else {
+    for (let i of cd) if (i.dataset.hide == '1') i.classList.add('hide');
+  }
+}
+
 
 
 function updateSelectedFx()
@@ -1654,7 +1772,7 @@ function updateSelectedFx()
 			let ds = fx.dataset;
 			if (ds.opt) {
 				let opts = ds.opt.split(";");
-				console.log(opts);
+				// console.log(opts);
 				if (ds.id>0) {
 					if (segLmax==0) fx.classList.add('hide'); // none of the segments selected (hide all effects)
 					else {
@@ -1868,6 +1986,7 @@ function readState(s,command=false)
 	}
 
 	selectedPal = i.pal;
+	selectedPal2 = (typeof i.pal2 === 'number') ? i.pal2 : selectedPal2;  // NEW
 	selectedFx = i.fx;
 	redrawPalPrev(); // if any color changed (random palette did at least)
 	updateUI();
@@ -2915,14 +3034,60 @@ function setFX(ind = null)
 // 	requestJson(obj);
 // }
 
-// Helper: read the P+ toggle state (falls back to localStorage if the button isn't in DOM yet)
-function isSecondaryPaletteMode() {
-  const btn = document.getElementById('secPalToggle');
-  if (btn) return btn.getAttribute('aria-pressed') === 'true';
-  return localStorage.getItem('useSecondaryPalette') === 'true';
-}
+
+////////////////////////////////////////////
+
+// // P+ state (reads button first, falls back to localStorage)
+// function isSecondaryPaletteMode() {
+//   const btn = document.getElementById('secPalToggle');
+//   if (btn) return btn.getAttribute('aria-pressed') === 'true';
+//   return localStorage.getItem('useSecondaryPalette') === 'true';
+// }
+
+// // Current segment (adjust if your global differs)
+// function getActiveSeg() {
+//   if (window.lastinfo && Array.isArray(lastinfo.seg)) {
+//     const sel = (typeof segId === 'number') ? segId : 0;
+//     return lastinfo.seg[sel] || {};
+//   }
+//   return {};
+// }
+
+// // Which palette id should the UI show as selected right now?
+// function getActivePaletteIdForUI() {
+//   return isSecondaryPaletteMode() ? selectedPal2 : selectedPal;  // UPDATED
+// }
+
+
+// // Initialize the P+ toggle and keep the list selection in sync
+// function initSecPalToggle() {
+//   const btn = document.getElementById('secPalToggle');
+//   if (!btn) return;
+
+//   const saved = localStorage.getItem('useSecondaryPalette');
+//   const active = (saved === 'true');
+//   btn.setAttribute('aria-pressed', String(active));
+//   btn.classList.toggle('active', active);
+
+//   // ensure list highlights the correct palette on init
+//   updateSelectedPalette(getActivePaletteIdForUI());
+
+//   btn.addEventListener('click', () => {
+//     const nowActive = !(btn.getAttribute('aria-pressed') === 'true');
+//     btn.setAttribute('aria-pressed', String(nowActive));
+//     btn.classList.toggle('active', nowActive);
+//     localStorage.setItem('useSecondaryPalette', String(nowActive));
+
+//     // immediately reflect which palette is “active” (pal vs pal2)
+//     updateSelectedPalette(getActivePaletteIdForUI());
+//   }, { passive: true });
+// }
+
+
+////////////////////////////////////////////
+
+// Current segment (adjust if your global differs)
 function getActiveSeg() {
-  // Adjust if your global differs; this matches typical WLED state shapes
   if (window.lastinfo && Array.isArray(lastinfo.seg)) {
     const sel = (typeof segId === 'number') ? segId : 0;
     return lastinfo.seg[sel] || {};
@@ -2930,44 +3095,43 @@ function getActiveSeg() {
   return {};
 }
 
+// Which palette id should the UI show as selected right now?
 function getActivePaletteIdForUI() {
-  const seg = getActiveSeg();
-  return isSecondaryPaletteMode() ? seg.pal2 : seg.pal;
+  return isSecondaryPaletteMode() ? selectedPal2 : selectedPal;  // UPDATED
 }
-function syncPaletteListSelectionWithMode() {
-  const id = getActivePaletteIdForUI();
-  if (typeof id !== 'number') return;
 
-  const prev = document.querySelector('#pallist input[name="palette"]:checked');
-  if (prev) prev.checked = false;
-
-  const radio = document.querySelector(`#pallist input[name="palette"][value="${id}"]`);
-  if (radio) radio.checked = true;
+function isSecondaryPaletteMode() {
+  const btn = document.getElementById('secPalToggle');
+  return btn ? (btn.getAttribute('aria-pressed') === 'true') : false;
 }
 function initSecPalToggle() {
   const btn = document.getElementById('secPalToggle');
   if (!btn) return;
 
-  const saved = localStorage.getItem('useSecondaryPalette');
-  const active = (saved === 'true');
-  btn.setAttribute('aria-pressed', String(active));
-  btn.classList.toggle('active', active);
+  // Always default to primary palette on page load
+  btn.setAttribute('aria-pressed', 'false');
+  btn.classList.remove('active');
 
+  // Ensure the list highlights the correct palette (primary)
+  updateSelectedPalette(getActivePaletteIdForUI());
+
+  // Toggle only affects the button state + list highlight
   btn.addEventListener('click', () => {
-    const nowActive = !(btn.getAttribute('aria-pressed') === 'true');
+    const nowActive = (btn.getAttribute('aria-pressed') !== 'true');
     btn.setAttribute('aria-pressed', String(nowActive));
     btn.classList.toggle('active', nowActive);
-    localStorage.setItem('useSecondaryPalette', String(nowActive));
 
-    // reflect which palette is “active” in the list immediately
-    syncPaletteListSelectionWithMode();
+    // Immediately reflect which palette is “active” in the list
+    updateSelectedPalette(getActivePaletteIdForUI());
   }, { passive: true });
 }
 
 
-function setPalette(paletteId = null)
-{
-  // resolve selected id from radio list if not passed
+
+
+
+
+function setPalette(paletteId = null) {
   if (paletteId === null) {
     const checked = document.querySelector('#pallist input[name="palette"]:checked');
     if (!checked) return;
@@ -2976,19 +3140,14 @@ function setPalette(paletteId = null)
     const radio = document.querySelector(`#pallist input[name="palette"][value="${paletteId}"]`);
     if (radio) radio.checked = true;
   }
-
-  // Close palette dialog in simplified UI
   if (typeof simplifiedUI !== 'undefined' && simplifiedUI) {
     document.getElementById("palw").lastElementChild.close();
   }
-
-  const useSecondary = isSecondaryPaletteMode();
-  const segObj = useSecondary ? { pal2: paletteId } : { pal: paletteId };
+  const segObj = isSecondaryPaletteMode() ? { pal2: paletteId } : { pal: paletteId };
   requestJson({ seg: segObj });
-
-  // keep the UI highlight aligned with the current mode/value
-  syncPaletteListSelectionWithMode();
 }
+
+
 
 
 function setBri()
@@ -3437,8 +3596,6 @@ function loadPalettesData(callback = null)
 		if (callback) setTimeout(callback, 99);
 	});
 
-	syncPaletteListSelectionWithMode(); // not sure of location
-
 }
 
 
@@ -3859,28 +4016,21 @@ function initSecPalToggle() {
   const btn = document.getElementById('secPalToggle');
   if (!btn) return;
 
-  // restore persisted state
   const saved = localStorage.getItem('useSecondaryPalette');
-  window.useSecondaryPalette = (saved === 'true');
-
-  btn.setAttribute('aria-pressed', String(window.useSecondaryPalette));
-  btn.classList.toggle('active', window.useSecondaryPalette);
+  const active = (saved === 'true');
+  btn.setAttribute('aria-pressed', String(active));
+  btn.classList.toggle('active', active);
 
   btn.addEventListener('click', () => {
-    window.useSecondaryPalette = !window.useSecondaryPalette;
-    localStorage.setItem('useSecondaryPalette', String(window.useSecondaryPalette));
-    btn.setAttribute('aria-pressed', String(window.useSecondaryPalette));
-    btn.classList.toggle('active', window.useSecondaryPalette);
+    const nowActive = !(btn.getAttribute('aria-pressed') === 'true');
+    btn.setAttribute('aria-pressed', String(nowActive));
+    btn.classList.toggle('active', nowActive);
+    localStorage.setItem('useSecondaryPalette', String(nowActive));
+
+    // show the correct “selected” pill immediately
+    updateSelectedPalette(getActivePaletteIdForUI());
   }, { passive: true });
 }
-
-// Call this once on load (your body already calls onLoad())
-const _onLoad_orig = window.onLoad;
-window.onLoad = function onLoadPatched() {
-  try { if (typeof _onLoad_orig === 'function') _onLoad_orig(); } catch (e) {}
-  initSecPalToggle();
-  syncPaletteListSelectionWithMode();
-};
 
 
 

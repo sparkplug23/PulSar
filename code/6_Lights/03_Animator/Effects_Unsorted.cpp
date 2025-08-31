@@ -765,7 +765,7 @@ void mAnimatorLight::EffectAnim__Christmas_Musical__01()
   desired_pixel=0;
     
   uint8_t pixel_position = 0;
-  uint8_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette_id);
+  uint8_t pixels_in_map = GetNumberOfColoursInUNLOADEDPalette(SEGMENT.palette_id);
 
   // AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
   
@@ -1505,7 +1505,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(tkr_iLight->animation.palette_id);
-//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInUNLOADEDPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -2554,7 +2554,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID);
-//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInUNLOADEDPalette(palette_p);
 //   AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -3001,7 +3001,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(tkr_iLight->animation.palette_id);
-//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInUNLOADEDPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -3550,7 +3550,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = "CHRISTMAS_
 //         for (uint16_t ii = 0; ii < random_amount; ii++){
 //           flashed_brightness = random(0,shared_flasher_parameters.alternate_brightness_max);        
 //           // For random, desired pixel from map will also be random
-//           desired_pixel = random(0,GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr));
+//           desired_pixel = random(0,GetNumberOfColoursInUNLOADEDPalette(mPaletteI->static_palettes.ptr));
 //           // get colour from palette
 //           flash_colour = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel,&pixel_position);
 //           flash_colour = RgbcctColor::ApplyBrightnesstoRgbcctColour(flash_colour,flashed_brightness);

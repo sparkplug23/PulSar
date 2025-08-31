@@ -12,83 +12,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-// control HTML elements for Slider and Color Control (original ported form WLED-SR)
-// Technical notes
-// ===============
-// If an effect name is followed by an @, slider and color control is effective.
-// If not effective then:
-//      - For AC effects (id<128) 2 sliders and 3 colors and the palette will be shown
-//      - For SR effects (id>128) 5 sliders and 3 colors and the palette will be shown
-// If effective (@)
-//      - a ; seperates slider controls (left) from color controls (middle) and palette control (right)
-//      - if left, middle or right is empty no controls are shown
-//      - a , seperates slider controls (max 5, then 3) or color controls via checkboxes(max 3). Palette has only one value
-//      - a ! means that the default is used.
-//             - For sliders: Effect speeds, Effect intensity, Custom 1, Custom 2, Custom 3
-//             - For colors: Fx color, Background color, Custom
-//             - For palette: prompt for color palette OR palette ID if numeric (will hide palette selection)
-//
-// Note: If palette is on and no colors are specified 1,2 and 3 is shown in each color circle.
-//       If a color is specified, the 1,2 or 3 is replaced by that specification.
-// Note: Effects can override default pattern behaviour
-//       - FadeToBlack can override the background setting
-//       - Defining SEGCOL(<i>) can override a specific palette using these values (e.g. Color Gradient)
-//////////////,,,,,,,!,!
-/***************************************************************************************************************************************************
-static const char PM_EFFECT_CONFIG__##[] PROGMEM = 
-  "Effect Name@Speed,Intensity,Custom1Star,Custom2Cog,Custom3Visibility,Checkbox1Palette,Checkbox2Layers,Checkbox3Favourite,EffectPeriod,Grouping;SEGCOL_Fx,SEGCOL_Bg,SEGCOL_Col3,SEGCOL_Col4,SEGCOL_Col5;pal=21,ep=1000~DEBUG_LEVEL";
-
-@sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp;seg1,2,3,4,5;pal=21,ep=1000~DEBUG_LEVEL";
-@                                                 ;            ;                          " // sliders&checkbox ; segmentColours ; effectDefaults
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-Effect Name
-@  //////////////////////////////////////// Delimiter is "@", 5 sliders + 3 checkboxes + 2 sliders
-Speed,                Slider1
-Intensity,            Slider2
-Custom1Star,          Slider3
-Custom2Cog,           Slider4
-Custom3Visibility,    Slider5
-Checkbox1Palette,     Checkbox1
-Checkbox2Layers,      Checkbox2
-Checkbox3Favourite,   Checkbox3
-EffectPeriod,         Slider6
-Grouping              Slider7
-; ////////////////////////////////////////// Delimiter is ";", Section 1: Five segment colour names below
-SEGCOL_Fx,
-SEGCOL_Bg,
-SEGCOL_Col3,
-SEGCOL_Col4,
-SEGCOL_Col5
-; ////////////////////////////////////////// Delimiter is ";", Section 2: ??
-name for the palette icon, "!" means use default name and include palette selection
-; ////////////////////////////////////////// Delimiter is ";", Section 3 below is 012vf that adds icons into effect name
-012vf 0=0D ie Solid, 1=1D ie strip, 2=2D ie matrix, v=volume, f=frequency
-; ////////////////////////////////////////// Delimiter is ";", Section 4: special commands below that are xml keys=value pairs, with comma delimiter
-"sx"  = speed
-"ix"  = intensity
-pal   = palette_id
-paln  = palette_id
-"ep"  = cycle_time__rate_ms
-"c1"  = custom1
-"c2"  = custom2
-"c3"  = custom3
-"m12" = map1D2D
-"si"  = soundSim
-"rev" = reverse
-"mi"  = mirror
-"rY"  = reverse_y
-"mY"  = mirror_y
-~ ////////////////////////////////////////// Delimiter is "~" for debug level below, single number/digit
-DEBUG_LEVEL
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-also, thought for later, maybe I want a "standby" mode for leds, ie a state I can activate that dims the lights, but getting back to the original means turning off standby mode, instead of requiring full brightness etc set again. Especially is standby is a complete different version (eg static and dim, vs bright and animated). Future idea. 
-
-***************************************************************************************************************************************************/
-
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -97,6 +21,7 @@ also, thought for later, maybe I want a "standby" mode for leds, ie a state I ca
  * 
  * Keeping both U32/RGBWW modes here, as its a useful demonstration of both coldata methods
  * The lower level wrapper will handle the colour conversion 
+ * Enable the colour palette, with default segcol "Colour 01", with 1 second refresh and no blend for instant colour change and low memory usage
  * 
  * @param Intensity: None
  * @param Speed    : None
@@ -130,7 +55,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
     #endif
   } else {
     // Handle RGB/WRGB cases
-    uint32_t desiredColour  = SEGMENT.GetPaletteColour(0, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t desiredColour  = SEGMENT.GetPaletteColour_ModeWrap(0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     uint32_t startingColour = SEGMENT.getPixelColor(0);
 
     // SERIAL_DEBUG_COL32i("des", desiredColour, 0);
@@ -155,8 +80,21 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
   return USE_ANIMATOR;
 
 }
-// Enable the colour palette, with default segcol "Colour 01", with 1 second refresh and no blend for instant colour change and low memory usage
-static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = "Solid@;;!;pal=0,sx=255,ep=1000"; //"NAME@Speed,Intensity,Custom1,C2,C3,Checkbox1,CB2,CB3,EffectPeriod,Grouping;"
+static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM =
+"Solid@"                                      // Name
+"Speed,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+""                                           // Segment Colour Names, "" Show all by sending blank
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"0"                                           // icon flags: '1' -> 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"pal=0,"
+"sx=255,"
+"ix=200,"
+"ep=100"
+;                                             // end special key=value defaults
 static const char PM_EFFECT_DESCRI__SOLID_COLOUR[] PROGMEM = "RGBW&CCT";
 
 
@@ -177,10 +115,6 @@ static const char PM_EFFECT_DESCRI__SOLID_COLOUR[] PROGMEM = "RGBW&CCT";
  * "Static Palette": Uses palette in its default state (discrete are single, graients span segment)
  * In "Gradient": All palettes converted into gradients, and intensity slider allows repeating X times inside segment width.
  * 
- * @param Intensity: None
- * @param Speed    : None
- * @param rate     : None
- * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Static_Palette()
@@ -194,7 +128,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
     uint32_t colour;
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
-      colour = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON);
+      colour = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE);
       SEGMENT.setPixelColor(pixel, colour);
     }
     // SERIAL_DEBUG_COL32i("last", colour, 0);
@@ -213,7 +147,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
       DEBUG_LINE_HERE_TRACE
-      colour = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      colour = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_COLOURS    
       Serial.printf("Static Colour --------------------------------------------------%d,%d,%d,%d\n\r", R(colour), G(colour), B(colour), W(colour));
@@ -229,14 +163,46 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
   }
 
 }
-// static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = "Static@Blend Speed,2,3,4,5,6,7,8,Period,Grouping;;name of palette;1;sx=255,ep=1000,paln=Snowy 02";
-static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = "Static@Blend Speed,,,,,,,,!,!;;!;1;sx=255,ep=1000,paln=Snowy 02";
-static const char PM_EFFECT_DESCRI__STATIC_PALETTE[] PROGMEM = "Palette Original\n\rSX:Blend Speed\n\rEP:Refresh\n\rGP:Grouping";
+static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM =
+"Static@"                                      // Name
+"Speed,,,,,,,,!,!"                              // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+",,,,"                                        // Segment Colour Names
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: '1' -> 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Snowy 02,"
+"sx=254,"
+"ep=1000"
+;                                             // end special key=value defaults
+static const char PM_EFFECT_DESCRI__STATIC_PALETTE[] PROGMEM =
+"PaletteOriginal\n\r"
+"SX:BlendSpeed\n\r"
+"EP:Refresh\n\r"
+"GP:Grouping";
 
 
 /**
- * @brief For low memory situations, call this function as default but direct method only (so maybe another method should be picked that does not use the animator??)
- * No Effect Config as its for internal call only
+ * @brief Fallback effect when memory allocation fails.
+ *
+ * PURPOSE
+ *   Provides a minimal “safe” rendering path when an effect cannot allocate its required
+ *   colour buffer (e.g. due to RAM pressure). Instead of leaving the segment blank or
+ *   unstable, this fallback draws a static palette with no blending.
+ *
+ * BEHAVIOUR
+ *   • Forces SEGMENT.speed = 0 so the palette is drawn instantaneously (no animator usage).
+ *   • Delegates to EffectAnim__Static_Palette() in no-blend mode.
+ *   • Avoids allocating any dynamic colour data.
+ *
+ * USAGE
+ *   • Not exposed in the UI; no effect config string.
+ *   • Intended for internal calls only, e.g. when an effect returns allocation failure.
+ *
+ * RETURNS
+ *   • FRAMETIME (from EffectAnim__Static_Palette).
  */
 uint16_t mAnimatorLight::EffectAnim__Static_Palette__NoBlend()
 {
@@ -249,65 +215,106 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette__NoBlend()
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @description    : Static Palette
- * @description:   : Static palette, with variation in the colour based on the intensity. The aim is to replicate vintage lights that have aged due to the heat of the bulb. We may also need a vintage red shift.
- * 
- * @param Intensity: None
- * @param time     : Blend time on first/only update
+ * @description:   : Static palette with per-pixel colour variation driven by Intensity.
+ *                   Mimics “aged/vintage” bulbs by jittering each channel within a bounded range.
+ *                   (Consider adding a global warm/red bias later if desired.)
+ *
+ * @param Intensity: 0..255 → ±0..80 channel jitter (clamped per channel)
+ * @param time     : Blend time on first/only update (not used here; this draws once)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palette_Variation()
 {
-  
   if (SEGMENT.effect_anim_section == 0)
   {
-    uint8_t variance = map(SEGMENT.intensity,0,255,0,80); // 0-80 produces good variation, anything larger and palette is lost
+    // 0–80 produces good variation; larger values wash out the palette identity
+    const uint8_t variance = map(SEGMENT.intensity, 0, 255, 0, 80);
 
+    // Hoist temporaries outside the loop
     uint32_t base;
-    int8_t r_offset, g_offset, b_offset, w_offset;
-    uint8_t r, g, b, w;
+    int8_t   r_off, g_off, b_off, w_off;
+    int16_t  r16,   g16,   b16,   w16;
+    uint8_t  r,     g,     b,     w;
 
-    for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+    for (uint16_t pixel = 0; pixel < SEGLEN; ++pixel)
     {
-      base = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON);
+      // Base colour from active palette, spanned across segment
+      base = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE);
 
-      r_offset = (int8_t)random8(2 * variance + 1) - variance;
-      g_offset = (int8_t)random8(2 * variance + 1) - variance;
-      b_offset = (int8_t)random8(2 * variance + 1) - variance;
-      w_offset = (int8_t)random8(2 * variance + 1) - variance;
+      // Symmetric jitter per channel in [-variance .. +variance]
+      r_off = (int8_t)random8(2 * variance + 1) - variance;
+      g_off = (int8_t)random8(2 * variance + 1) - variance;
+      b_off = (int8_t)random8(2 * variance + 1) - variance;
+      w_off = (int8_t)random8(2 * variance + 1) - variance;
 
-      r = constrain((int16_t)R(base) + r_offset, 0, 255);
-      g = constrain((int16_t)G(base) + g_offset, 0, 255);
-      b = constrain((int16_t)B(base) + b_offset, 0, 255);
-      w = constrain((int16_t)W(base) + w_offset, 0, 255);
+      // Do math in signed 16-bit, then clamp to 0..255
+      r16 = (int16_t)R(base) + r_off;
+      g16 = (int16_t)G(base) + g_off;
+      b16 = (int16_t)B(base) + b_off;
+      w16 = (int16_t)W(base) + w_off;
+
+      r = (uint8_t)constrain(r16, 0, 255);
+      g = (uint8_t)constrain(g16, 0, 255);
+      b = (uint8_t)constrain(b16, 0, 255);
+      w = (uint8_t)constrain(w16, 0, 255);
 
       SEGMENT.setPixelColor(pixel, RGBW32(r, g, b, w));
     }
 
-    SEGMENT.effect_anim_section = 1;
+    SEGMENT.effect_anim_section = 1; // draw once
   }
 
   return FRAMETIME_STATIC;
 }
-static const char PM_EFFECT_CONFIG__PALETTE_VARIATION[] PROGMEM = "Palette Varied@,Colour Variance;;!;1;ix=127"; // @sliders;colours;"!" for default palette;"1" for 1D
-static const char PM_EFFECT_DESCRI__PALETTE_VARIATION[] PROGMEM = "Varying/Aged Palette\n\rIX:+- Amount\n\rEP:Once\n\rGP:!";
+static const char PM_EFFECT_CONFIG__PALETTE_VARIATION[] PROGMEM =
+"Palette Varied@"                 // Name
+",Colour Variance"                // 1sx,2ix,... (only IX used)
+";"
+""
+";"
+"!"                               // palette picker
+";"
+"1"                               // 1D icon
+";"
+"ix=127"
+;
+static const char PM_EFFECT_DESCRI__PALETTE_VARIATION[] PROGMEM =
+"Varying/AgedPalette\n\r"
+"IX:+-Amount\n\r"
+"EP:Once\n\r"
+"GP:!";
 
 
-/********************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************
- * @description    : Palette Banding with Repeats
- * @description    : Creates discrete bands from the palette. Each palette colour is stretched over a region of the segment. The number of bands (i.e., repetitions of the palette) 
- *                   is controlled by the Intensity. This can be used to simulate visual blocky colour sections, useful for LED tiles or vintage-style lighting.
- *                   Gradient palettes are treated as discrete to enforce hard transitions between colours.
+/******************************************************************************************************************************************************************************
+ * EFFECT: Bands_Palette_SegWidth
  *
- * @param Intensity: Controls how many times the full palette is repeated across the segment. 
- *                   Intensity = 0 means one full palette mapped linearly across the segment.
- *                   Intensity > 0 increases the repetition count. If check3 is enabled, the repetition count is Intensity + 1 directly (no mapping).
+ * SUMMARY
+ *   Creates blocky, discrete palette bands across the segment.  
+ *   Each palette colour is stretched over a region; the number of repeats is controlled by Intensity (IX).  
+ *   Useful for LED tiles or vintage-style “block colour” looks.  
  *
- * @param check3   : Enables exact mapping from Intensity to repeat count (bypasses scaling).
+ * BEHAVIOUR
+ *   • Palette is always forced discrete (no gradients).  
+ *   • Total bands = (colours_in_palette × repeats).  
+ *   • Intensity (IX):
+ *       – Default: mapped 0..255 → 1..21 repeats.  
+ *       – If Exact (O3) is enabled: repeats = IX + 1 (direct).  
+ *   • Bands are evenly distributed; remainder pixels spread one-by-one.  
+ *   • Optional offset_shift (currently fixed at 0) can shift pattern.  
  *
- * @param Time     : Blend time controls the animation between current and desired colours using the dynamic buffer.
- ********************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+ * CONTROLS
+ *   SX : Blend speed (animator).  
+ *   IX : Band/repeat count.  
+ *   O3 : Exact toggle – IX directly = repeat count.  
+ *   EP : Effect period (default behaviour).  
+ *   Palette picker = primary palette used for band colours.  
+ *
+ * RETURNS
+ *   USE_ANIMATOR (with blending)
+ *
+ * CHANGED
+ *   31Aug2025 : Cleaned description & progmems. Forced discrete mode.  
+ ******************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Bands_Palette_SegWidth()
 {
   // Allocate dynamic buffer for both starting and desired colour (with brightness)
@@ -354,7 +361,7 @@ uint16_t mAnimatorLight::EffectAnim__Bands_Palette_SegWidth()
 
       uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
         palette_index,
-        PALETTE_INDEX__IS_PALETTE_INDEX,
+        PALETTE_INDEX__IS_EXACT_COLOUR,
         PALETTE_MODE__FORCE_DISCRETE,
         PALETTE_WRAP_OFF,
         NO_ENCODED_VALUE,
@@ -372,8 +379,24 @@ uint16_t mAnimatorLight::EffectAnim__Bands_Palette_SegWidth()
 
   return USE_ANIMATOR;
 }
-static const char PM_EFFECT_CONFIG__BANDS_PALETTE_SEGWIDTH[] PROGMEM = "Bands@!,Bands,,,,,,Exact,!;!,!,!,!,!;ix=0,sx=127,ep=3000,paln=RGBY,o1=0";
-static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM = "Palette Elements As Blocks\n\rSX:!\n\rIX:Bands\n\rEP:!\n\rO3:Repeats";
+static const char PM_EFFECT_CONFIG__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
+"Bands@"                        // Name
+"!,Bands,,,,,,Exact,!"                   // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav(=Exact)
+";"
+"" //all cols
+";"
+"!"                             // palette picker
+";"
+"1"
+";"
+"ix=0,sx=127,ep=3000,paln=RGBY,o3=0"
+;
+static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
+"PaletteBlocks\n\r"
+"IX:Bands(repeats)\n\r"
+"SX:BlendSpeed\n\r"
+"EP:!\n\r"
+"CB3:IX direct map";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -404,7 +427,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     {
       colour = SEGMENT.GetPaletteColour_ModeWrap(
         pixel,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__FORCE_GRADIENT,
         wrapoff
       );
@@ -430,7 +453,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     {
       colour = SEGMENT.GetPaletteColour_ModeWrap(
         pixel,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__FORCE_GRADIENT,
         wrapoff,
         NO_ENCODED_VALUE,
@@ -450,8 +473,24 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     return USE_ANIMATOR;
   }
 }                                                                                 //sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp
-static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM = "Gradient@!,Random Time,,,,Hard Edge,,,!;!,!,!,!,!;!;1;sx=127,ix=127,o1=0,ep=10000"; // @sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp;seg1,2,3,4,5
-static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
+"Gradient@"                       // Name
+"Speed,,,,,Hard edge,,,!"         // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+";"
+"!,!,!,!,!"                       // (no segment colours)
+";"
+"!"                               // primary palette picker
+";"
+"1"                               // 1D strip
+";"
+"sx=127,o1=0,ep=10000"            // defaults: mid speed, hard-edge off, long EP
+;
+static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
+"ForceGradient\n\r"
+"SX:Blend\n\r"
+"C1:HardEdge\n\r"
+"EP:!\n\r"
+"GP:!";
 
 
 /**
@@ -483,7 +522,7 @@ uint16_t mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
   if (SEGMENT.check1 == false)
   {
     SEGMENT.palette_id = mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;
-    return EffectAnim__Bands_Palette_SegWidth();
+    return EffectAnim__Gradient_Palette_SegWidth();
   }
 
   // Cycling enabled: operate within the random palette range
@@ -518,26 +557,43 @@ uint16_t mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
   }
 
   // Forward to standard split gradient renderer
-  return EffectAnim__Bands_Palette_SegWidth();
-}                                                                                                 // 1sx,2ix,3c1star,4c2cog,5c3vis,6cbPal,7cbLay,8cbFav,9ep,10grp
-static const char PM_EFFECT_CONFIG__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM = "Gradient Random@!,!,,New Palette Rate,5,Randomise Palettes,,,,;;!;1;sx=127,ix=224,o1=0,ep=10000";
-static const char PM_EFFECT_DESCRI__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM = "EF: Cycle Between Each Live Random Palette\nIX: Update Gradient\nSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+  return EffectAnim__Gradient_Palette_SegWidth();
+}
+static const char PM_EFFECT_CONFIG__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
+"Gradient Random@!,UpdateGrad,AutoCycle,NewPalRate,!, , , ,!,"
+";"
+""                  // no segment colours
+";"
+""                  // palette picker disabled
+";"
+"1"                 // 1D icon
+";"
+"sx=127,ix=224,o1=1,c2=127,ep=10000";
+static const char PM_EFFECT_DESCRI__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
+"RandomGradPalCycles\n\r"
+"IX:UpdateGrad\n\r"
+"C1:AutoCycle on/off\n\r"
+"C2:NewPalRate(5–60s)\n\r"
+"SX:!\n\r"
+"EP:!";
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name            : Firefly
- * @description:    : Randomly changes colours of pixels, and blends to the new one
- * 
- * @note            : Deciding
- * 
- * @param Intensity : 0-255 is how many should pixels should randomly change (0-255 scaled to 0-pixel_count)
- * @param Speed     : Blend time as percentage of cycle time (0-255, 255 is instant)
- * @param CycleTime : Period of time (ms) between updates
- * @param Grouping  : Multiple pixels combined
- * @param check1    : Optional user flag to disable updating all pixels on first run (default is to update all pixels on first run) so playlists can blend into this slowly
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+/**********************************************************************************************************************************
+ * EFFECT: Firefly
+ *
+ * SUMMARY
+ *   Randomly selects palette colours for a subset of pixels and blends them in.
+ *   On first run, all pixels update unless C1 is enabled.
+ *
+ * CONTROLS (order)
+ *   SX (Speed)   : Blend speed (255 = instant).
+ *   IX (Intensity): Pixels to change per cycle (0..SEG.vlength()).
+ *   C1 (DrawOver FirstRun): If ON, skip the “update all on first frame” step. Optional user flag to disable updating all pixels on first run (default is to update all pixels on first run) so playlists can blend into this slowly
+ *   EP / GP      : Standard (cycle period / grouping).
+ *
+ * NOTES
+ *   Uses dynamic start/desired colour buffers and linear blend animator.
+ **********************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Firefly()
 {
   // Allocate data buffer for starting and desired colors
@@ -565,8 +621,27 @@ uint16_t mAnimatorLight::EffectAnim__Firefly()
   return USE_ANIMATOR;
 
 }
-static const char PM_EFFECT_CONFIG__FIREFLY[] PROGMEM = "FireFly@Blend Speed,Pixels Changing,,,,DrawOver Previous,,,!,!;;!;1;ep=5000,ix=50,sx=127,o1=0";
-static const char PM_EFFECT_DESCRI__FIREFLY[] PROGMEM = "Blend Random PalCols\n\rIX:Pixels to Change\n\rSX:Blend Speed";
+static const char PM_EFFECT_CONFIG__FIREFLY[] PROGMEM =
+"Firefly@"                           // name
+"Blend Speed,Pixels Changing,DrawOver FirstRun,,,"  // 1sx,2ix,3c1,4c2,5c3
+";"
+""                                     // no segment colour names
+";"
+"!"                                    // primary palette picker
+";"
+"1"                                    // 1D icon
+";"
+"ep=5000,"                             // defaults
+"ix=50,"
+"sx=127,"
+"o1=0";                                // C1 off by default
+static const char PM_EFFECT_DESCRI__FIREFLY[] PROGMEM =
+"Blend Random PalCols\n\r"
+"IX:Pixels Changing\n\r"
+"SX:Blend Speed\n\r"
+"C1:Skip first full repaint\n\r"
+"EP:!\n\r"
+"GP:!";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -580,8 +655,8 @@ static const char PM_EFFECT_DESCRI__FIREFLY[] PROGMEM = "Blend Random PalCols\n\
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_palette_id)
 {
-  uint8_t pixels_in_primary_palette = GetNumberOfColoursInPalette(SEGMENT.palette_id);
-  uint8_t pixels_in_secondary_palette = GetNumberOfColoursInPalette(flicker_palette_id);
+  uint8_t pixels_in_primary_palette = SEGMENT.palette->colours_in_palette;
+  uint8_t pixels_in_secondary_palette = GetNumberOfColoursInUNLOADEDPalette(flicker_palette_id);
 
   ColourBaseType colour_pri = RGBW32(255,0,0,0);
   ColourBaseType colour_sec = RGBW32(0,255,0,0);
@@ -599,9 +674,9 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
   if (single_secondary_color)
   {
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    colour_sec   = GetColourFromUnloadedPalette3(flicker_palette_id, 0, true, true, true);
+    colour_sec = GetUnloadedPaletteColour_ModeWrap( flicker_palette_id, 0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
     #else
-    RgbwwColor c = GetColourFromUnloadedPalette3(flicker_palette_id, 0, true, true, true);
+    RgbwwColor c = GetUnloadedPaletteColour_ModeWrap( flicker_palette_id, 0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
     colour_sec = RGBW32(c.R, c.G, c.B, c.WW);
     #endif
   }
@@ -620,17 +695,9 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
 
   // step (how much to move closer to target per frame) coarsely set by speed
   uint8_t speedFactor = 4;
-  if (SEGMENT.speed > 252) { // epilepsy
-    speedFactor = 1;
-  }
-  else 
-  if (SEGMENT.speed > 99) { // regular candle
-    speedFactor = 2;
-  }
-  else 
-  if (SEGMENT.speed > 49) { // slower fade
-    speedFactor = 3;
-  }
+  if      (SEGMENT.speed > 252) { speedFactor = 1; } // epilepsy
+  else if (SEGMENT.speed > 99)  { speedFactor = 2; } // regular candle
+  else if (SEGMENT.speed > 49)  { speedFactor = 3; } // slower fade
 
   uint16_t numCandles = (use_multi) ? SEGLEN : 1;
 
@@ -646,9 +713,9 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
 
     uint16_t d = 0; // data location
 
-    uint8_t s        = SEGMENT.aux0, 
-            s_target = SEGMENT.aux1, 
-            fadeStep = SEGMENT.step;
+    uint8_t s        = SEGMENT.aux0; 
+    uint8_t s_target = SEGMENT.aux1; 
+    uint8_t fadeStep = SEGMENT.step;
 
     if (i > 0) {
       d = (i - 1) * 3;
@@ -688,22 +755,19 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
     {
       // Get primary color
       #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-      colour_pri = SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, true, true);
+      colour_pri = SEGMENT.GetPaletteColour_ModeWrap( i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
       #else
-      // RgbwwColor c = SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, true, true); 
-      // colour_pri = RGBW32(c.R, c.G, c.B, c.WW);
-      colour_pri = SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, true, true); 
+      colour_pri = SEGMENT.GetPaletteColour_ModeWrap( i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
       #endif
 
       #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
       if (!single_secondary_color) {
-          colour_sec = GetColourFromUnloadedPalette3(flicker_palette_id, i, true, true, true);
+        colour_sec    = GetUnloadedPaletteColour_ModeWrap( flicker_palette_id, i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
       }
       #else
       if (!single_secondary_color) {
-        RgbwwColor c2 = GetColourFromUnloadedPalette3(flicker_palette_id, i, true, true, true);
+        RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap( flicker_palette_id, i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
         colour_sec = RGBW32(c2.R, c2.G, c2.B, c2.WW);
-        // colour_sec = GetColourFromUnloadedPalette3(flicker_palette_id, i, true, true, true);
       }
       #endif
 
@@ -722,21 +786,19 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
       {
         // Get primary color for each pixel
         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-        colour_pri = SEGMENT.GetPaletteColour(p, PALETTE_INDEX_SPANS_SEGLEN_ON, true, true);
+        colour_pri = SEGMENT.GetPaletteColour_ModeWrap( p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
         #else
-        // RgbwwColor c = SEGMENT.GetPaletteColour(p, PALETTE_INDEX_SPANS_SEGLEN_ON, true, true);
-        // colour_pri = RGBW32(c.R, c.G, c.B, c.WW);
-        colour_pri = SEGMENT.GetPaletteColour(p, PALETTE_INDEX_SPANS_SEGLEN_ON, true, true);
+        colour_pri = SEGMENT.GetPaletteColour_ModeWrap( p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
         #endif
 
         // If only one color in secondary palette, reuse it, otherwise get a new color for each pixel
         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
         if (!single_secondary_color) {
-          colour_sec = GetColourFromUnloadedPalette3(flicker_palette_id, p, true, true, true);
+          colour_sec    = GetUnloadedPaletteColour_ModeWrap( flicker_palette_id, p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
         }
         #else
         if (!single_secondary_color) {
-          RgbwwColor c2 = GetColourFromUnloadedPalette3(flicker_palette_id, p, true, true, true);
+          RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap( flicker_palette_id, p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
           colour_sec = RGBW32(c2.R, c2.G, c2.B, c2.WW);
         }
         #endif
@@ -758,648 +820,562 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Flickers pixels by the same amount towards black
- * @note : Converted from WLED Effects "mode_candle"
+ * @description : Candle (single flame)
+ *   All pixels flicker together as one flame. Flicker depth controlled by Intensity, speed by Speed.
+ *   Uses the primary palette as the flame hue, fades toward black.
+ * @note : Converted from WLED effect "candle"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Candle_Single()
 {
   return EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__BLACK__ID);
 }
-static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = "Candle@!,!;!,!;!;1;sx=96,ix=224,ep=23";
-static const char PM_EFFECT_DESCRI__CANDLE_SINGLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM =
+"Candle@"                                  // Name
+"Speed,Intensity,,,,,,,,"                  // 10 fields after '@'
+";"
+""                                         // no segment colours
+";"
+"!"                                        // primary palette picker
+";"
+"1"                                        // 1D strip icon
+";"
+"sx=96,"
+"ix=224,"
+"ep=23"
+;
+static const char PM_EFFECT_DESCRI__CANDLE_SINGLE[] PROGMEM =
+"Single-source candle flicker (Pal→Black)\n\r"
+"SX:!\n\r"
+"IX:Flicker Depth";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Flickers by multiple levels towards black
- * @note : Converted from WLED Effects "mode_candle_multi"
+ * @description : Candles (multiple flames)
+ *   Each pixel flickers independently, simulating multiple small flames.
+ *   Uses the primary palette as the flame hue, each pixel fades toward black.
+ * @note : Converted from WLED effect "candle_multi"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Candle_Multiple()
 {
   return EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__BLACK__ID);
 }
-static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = "Candles@Speed,Intensity;!,!,!,!,!;sx=180,ix=224,paln=Warm White"; // 7 sliders + 4 options before first ;
-static const char PM_EFFECT_DESCRI__CANDLE_MULTIPLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM =
+"Candles@"                                 // Name
+"Speed,Intensity,,,,,,,,"                  // 10 fields after '@'
+";"
+""                                         // no segment colours
+";"
+"!"                                        // primary palette picker
+";"
+"1"                                        // 1D strip icon
+";"
+"sx=180,"
+"ix=224,"
+"paln=Warm White"
+;
+static const char PM_EFFECT_DESCRI__CANDLE_MULTIPLE[] PROGMEM =
+"Multiple independent candle flames across the segment.\n\r"
+"Each pixel flickers toward black with slight randomness.\n\r"
+"SX:!\n\r"
+"IX:Flicker Depth";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Flicker between primary and secondary palette
- * 
-           Desc: Animation, that fades from selected palette to anothor palette,
-                 The intensity of fade (closer to palette B) will depend on intensity value
-                 ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
-           
-           Using maps, the transition could have an option to be nonlinear, ie
-           
-           lower 10% and upper 10% are accurate
-           10->90% is either capped, or squeezed near 10% and 90% marks. That way even with randomness, either palette 1 or 2 is mostly showed with less probably of "white out" in the middle 
-           
- * @note : Modified from WLED candle_multi
+ * @description : Shimmering Two Palettes
+ *   Flickering crossfade between two palettes. The primary palette is blended against the secondary palette (palette2_id).
+ *   Intensity controls bias toward the secondary palette. Speed controls flicker rate.
+ * @note : Modified from WLED "candle_multi"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Shimmering_Two_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
 {
-  return EffectAnim__Flicker_Base(true, SEGMENT.custom1);
+  return EffectAnim__Flicker_Base(true, SEGMENT.palette2_id);
 }                                                                                         // 1sx,2ix,3c1star,4c2cog,5c3vis,6cbPal,7cbLay,8cbFav,9ep,10grp
-static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM = "Shimmering Palettes@Speed,Intensity,Secondary Pal,,,;!,!,!,!,!;!;;1;";
-static const char PM_EFFECT_DESCRI__SHIMMERING_TWO_PALETTES[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate";
+static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM =
+"Shimmering Palettes@"                     // Name
+"Speed,Intensity,,,,,,,,"                  // 10 fields after '@'
+";"
+""                                         // no segment colours (secondary palette is taken from palette2_id)
+";"
+"!"                                        // primary palette picker
+";"
+"1"                                        // 1D strip icon
+";"
+"sx=180,"
+"ix=200"
+;
+static const char PM_EFFECT_DESCRI__SHIMMERING_TWO_PALETTES[] PROGMEM =
+"Flickering crossfade between two palettes.\n\r"
+"Primary palette (picker) shimmers into Secondary (palette2).\n\r"
+"SX:!\n\r"
+"IX: bias toward secondary (higher = more of palette2).";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Flickers by multiple levels towards white, showing a shimmer of saturation
- * @note : Modified from WLED candle_multi
+ * @description : Shimmering Palette Saturation
+ *   Flickers between the primary palette and a desaturated/white tint, creating a shimmer effect of saturation loss.
+ *   Intensity sets how far the desaturation goes, Speed sets the flicker rate.
+ * @note : Modified from WLED "candle_multi"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
 {
   SEGMENT.segcol[0] = SegmentColour(40, 40, 40, 40, 40);
   return EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID);
 }                                                                                                 // 1sx,2ix,3c1star,4c2cog,5c3vis,6cbPal,7cbLay,8cbFav,9ep,10grp
-static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = "Shimmering Saturation@Speed,Intensity;SecPal,,,,;;1;";
-static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate";
+static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
+"Shimmering Saturation@"                   // Name
+"Speed,Intensity,,,,,,,,"                  // 10 fields after '@'
+";"
+""                                         // no segment colours (secondary comes from SegColour #1 internally)
+";"
+"!"                                        // primary palette picker
+";"
+"1"                                        // 1D strip icon
+";"
+"sx=180,"
+"ix=200"
+;
+static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
+"Flicker toward a desaturated/white\n\r"
+"SX:!\n\r"
+"IX: Desaturation depth\n\r"
+"Primary palette provides base hue; secondary is a light/white tint.";
+
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-
-
-
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description           : Based on accidently effect
- * @description:   : Colours are added (with various methods) then fade off
- * @note           : 
- * 
- * Ideas:
- * - param to enable "instant" or popping in, or to have the introduction of new colours actually fade on before decaying away (hence, the fade direction may be needed? may be too complex)
- * - fade off method, to have all fade together (using intensity), intensity should be for how many to pop-in, speed for how quickly they fade away
- * - params could be used to signifying all fade together, or later, randomly pick fade rates. Though, fade together is probably visually nicer. Option would be good
- * 
- * 
- * 
-
-Popping_Decay_Palette
-  - "Static Palette" pops in, in order, but fades out 
-Popping_Decay_Random
-  - "Randomly add from palette" pops in, but fades out
-Popping_Decay_Palette_Hue
-  - "Static Palette" pops in, in order, but fades to white (make the white dimmer too so its more brightness levelled)
-Popping_Decay_Random_Hue
-  - "Randomly add from palette" pops in, but fades to white (make the white dimmer too so its more brightness levelled)
-
-
-
-
- * 
- * @param intensity: Depth of variation from max/min brightness
- * @param speed    : How often it occurs
- * @param rate     : None
- * @param time     : None
- * @param aux0     : brightness saved
- * @param aux1     : target brightness
- * @param aux2     : (U) Second target palette
- * @param aux3     : Reserved for random palette refresh rate
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-/**
- * @description:   : 
- **/
-uint16_t mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black()
-{
-  return EffectAnim__Popping_Decay_Base(true, true);
-}
-static const char PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK[] PROGMEM = "Pop Fade@,,,,,,,!,!;!,!,!,!,!;!";
-static const char PM_EFFECT_DESCRI__POPPING_DECAY_PALETTE_TO_BLACK[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-/**
- * @description:   : 
- **/
-uint16_t mAnimatorLight::EffectAnim__Popping_Decay_Random_To_Black()
-{
-  return EffectAnim__Popping_Decay_Base(false, true);
-}
-static const char PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_BLACK[] PROGMEM = "Pop Fade Random@!,!,,,,,,,!;"; // SX,IX,,,,,,,EP,,
-static const char PM_EFFECT_DESCRI__POPPING_DECAY_RANDOM_TO_BLACK[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-/**
- * @description:   : 
- **/
-uint16_t mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_White()
-{
-  return EffectAnim__Popping_Decay_Base(true, false);
-}
-static const char PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_WHITE[] PROGMEM = "Pop White@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
-static const char PM_EFFECT_DESCRI__POPPING_DECAY_PALETTE_TO_WHITE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-/**
- * @description:   : 
- **/
-uint16_t mAnimatorLight::EffectAnim__Popping_Decay_Random_To_White()
-{
-  return EffectAnim__Popping_Decay_Base(false, false);
-}
-static const char PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_WHITE[] PROGMEM = "Pop White Random@,,,,,Repeat Rate (ms);!,!,!,!,!;;";
-static const char PM_EFFECT_DESCRI__POPPING_DECAY_RANDOM_TO_WHITE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-/**
- * @description:   : Base function for pop in, fade out
- * */
-uint16_t mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder, bool fade_to_black)
-{
-
-  // Redo later: Popping will probably be the "new thing for 2023" on the outside tree. I want it to pop colours in, then fade them out.
-
-
-  // options
-  // pop_in:   instant
-  // fade_out: fade rate (e.g. half brightness), depending on the intensity either randomly fade or fade them all.
-
-  /**
-   * @brief Step 1: Redraw buffer by preloading last state
-   * 
-   */
-
-
-  /**
-   * @brief Step 2: Pop_in random colours at full brightness
-   * 
-   */
-
-
-
-  if (!SEGMENT.allocateData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.virtualLength() )){ return USE_ANIMATOR; }
-  
-  /**
-   * @brief Intensity describes the amount of pixels to update
-   *  Intensity 0-255 ==> LED length 1 to length (since we cant have zero)
-   **/
-  uint16_t pixels_to_update = mapvalue(
-                                        SEGMENT.intensity, 
-                                        0,255, 
-                                        0,SEGMENT.virtualLength() // scaled over the virtual length
-                                      );
-
-  uint16_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette_id);
-
-  uint16_t pixel_index = 0;
-  uint32_t colour;
-
-  /**
-   * @brief On first run, all leds need set once
-   * */
-  if(SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
-    pixels_to_update = SEGMENT.virtualLength(); // only the virtual length
-  }
-
-  uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch to save time 
-
-  for(unsigned iter = 0; 
-                iter < pixels_to_update; 
-                iter++
-  ){
-    /**
-     * @brief 
-     * min: lower bound of the random value, inclusive.
-     * max: upper bound of the random value, exclusive.
-    **/
-    pixel_index = random(0, SEGMENT.virtualLength()+1); // Indexing must be relative to buffer, virtual length only
-
-    // On first run, I need a new way to set them all.
-    if(SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
-      pixel_index = iter;
-    }
-    
-    desired_pixel = random(0, pixels_in_map);
-  
-    colour = SEGMENT.GetPaletteColour(desired_pixel, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
-
-    #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-    ALOG_DBM(LOG_LEVEL_DEV_TEST, 
-      PSTR("New palettePixel=%d, pixel_index=v%d SL%d | SVL%d | DL%d, colour=%d,%d,%dT%d"), 
-        desired_pixel, pixel_index, 
-        SEGMENT.length(), SEGMENT.virtualLength(), SEGMENT.DataLength(),
-        colour.R, colour.G, colour.B,
-        SEGMENT.colour_width__used_in_effect_generate
-    ); 
-    #endif // ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-
-    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
-    
-    // colour = FadeU32(colour,brightness);
-
-      SEGMENT.Set_DynamicBuffer_DesiredColour(pixel_index, colour);
-
-  }
-
-
-
-  // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_WithFade(2);
-  SEGMENT.DynamicBuffer_StartingColour_GetAllSegment_WithFade(2);
-
-
-
-  /**
-   * @brief Step 3: Fade out colours, but make sure not to fade the new ones (hence step 2 and 3 should be randomly together, or too complex, just make sure pop_in is greater than fade_out)
-   * 
-   */
-
-
-
-
-
-
-SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) { SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param); });
-
-  // SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ 
-  //   this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//   ALOG_INF(PSTR("s=%d\t a0=%d\t a1=%d\t a2=%d"),    SEGMENT.step, SEGMENT.aux0, SEGMENT.aux1, SEGMENT.aux2);
-
-//   uint8_t pixels_in_palette = GetNumberOfColoursInPalette(SEGMENT.palette_id);
-
-//   RgbcctColor colour_pri;
-//   RgbcctColor colour_sec;
-//   RgbcctColor colour_out;
-
-//   // if (draw_palette_inorder)
-//   // {
-//   //   uint16_t dataSize = (SEGLEN-1) *3;
-//   //   if(!SEGMENT.allocateData(dataSize) ){ return FRAMETIME; }
-//   // }
-
-  
-//   if (!SEGMENT.allocateData( SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.virtualLength() )){ return FRAMETIME; } // Pixel_Width * Two_Channels * Pixel_Count
-    
-//   RgbcctColor colour = RgbcctColor();
-
-
-
-//   //max. flicker range controlled by intensity
-//   uint8_t valrange = SEGMENT.intensity;
-//   uint8_t rndval = valrange >> 1;
-
-//   #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-//   ALOG_DBG(PSTR("step=%d"),    SEGMENT.step);
-//   ALOG_DBG(PSTR("valrange=%d"),valrange);
-//   ALOG_DBG(PSTR("rndval=%d"),  rndval);
-//   #endif
-
-//   uint8_t pixel_palette_counter = 0;
-
-//   //step (how much to move closer to target per frame) coarsely set by speed
-//   uint8_t speedFactor = 4;
-
-//     uint16_t i = 0;
-
-//     #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-//     ALOG_DBG(PSTR("i=%d|%d"),i,numCandles);
-//     #endif
-
-//     uint16_t d = 0; //data location
-
-//     uint8_t s        = SEGMENT.aux0, 
-//             s_target = SEGMENT.aux1, 
-//             fadeStep = SEGMENT.step;
-
-//     // if (i > 0) {
-//     //   d = (i-1) *3;
-//     //   s = SEGMENT.data[d]; 
-//     //   s_target = SEGMENT.data[d+1]; 
-//     //   fadeStep = SEGMENT.data[d+2];
-//     // }
-
-//     // if (fadeStep == 0) { //init vals
-//     //   s = 128; s_target = 130 + random8(4); fadeStep = 1;
-//     // }
-
-//     // bool newTarget = false;
-//     // if (s_target > s) { //fade up
-
-//     //   #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-//     //   ALOG_DBG(PSTR("fade up s_target > s %d=%d"), s_target, s);
-//     //   #endif
-
-//     //   s = qadd8(s, fadeStep);
-//     //   if (s >= s_target) newTarget = true;
-//     // } else {
-//     //   s = qsub8(s, fadeStep);
-//     //   if (s <= s_target) newTarget = true;
-          
-//     //   #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-//     //   ALOG_DBG(PSTR("fade down=%d"),s);
-//     //   #endif
-
-//     // }
-
-//     // if (newTarget) {
-//     //   s_target = random8(rndval) + random8(rndval);
-//     //   if (s_target < (rndval >> 1)) s_target = (rndval >> 1) + random8(rndval);
-//     //   uint8_t offset = (255 - valrange) >> 1;
-//     //   s_target += offset;
-
-//     //   uint8_t dif = (s_target > s) ? s_target - s : s - s_target;
-    
-//     //   fadeStep = dif >> speedFactor;
-//     //   if (fadeStep == 0) fadeStep = 1;
-//     // }
-
-//     /**
-//      * @brief aux2
-//      * 
-//      */
-
-//     bool redraw_all_pixels = false;
-//     bool draw_random_pixels = false;
-//     bool do_fade = false;
-
-//     uint16_t* drawmode = &SEGMENT.aux2;
-//     // uint16_t* drawmode = &SEGMENT.aux3;
-
-// // Redraw and fade should happen on alternate cycles
-
-// // Buffer mode not going to work, since I need this effect to be called more often than the fade amount
-// // Another counter should therefore only update on certain intervals
-
-
-
-//     /*
-//     @ redraw when aux2 is zero
-//     */
-//     if(*drawmode == 0)
-//     {
-//       redraw_all_pixels = false;
-//       do_fade = false;
-//       *drawmode = *drawmode + 1;
-//     }else
-//     if(*drawmode>10) // Reset
-//     {
-//       *drawmode = 0;
-//       do_fade = false;
-//       *drawmode = *drawmode + 1;
-//     }else{
-//       // do_fade = true;
-//       // draw_random_pixels = true;
-
-//       if(*drawmode % 2)
-//       {
-//         do_fade = true;
-//       }else{
-//         draw_random_pixels = true;
-//       }
-
-//       *drawmode = *drawmode + 1;
-
-//     }
-
-//     /**
-//      * @brief ReDraw all (either as option, or first run of animation)
-//      * 
-//      */
-//     if(redraw_all_pixels)
-//     {
-
-//       ALOG_INF(PSTR("redraw_all_pixels"));
-
-//       pixel_palette_counter = 0;      
-//       for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
-//       {
-//         if(draw_palette_inorder)
-//         {
-//           // Cycle through palette index pal_i
-//           if(pixel_palette_counter++ >= pixels_in_palette-1){ pixel_palette_counter = 0; }
-//         }
-//         else
-//         {
-//           pixel_palette_counter = random(0, pixels_in_palette-1); // Randon colour from palette
-//         }
-
-//         colour = SEGMENT.GetPaletteColour(pixel_palette_counter);      
-//         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
-//         SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour);
-//       }
-
-//     }
-
-
-//     /**
-//      * @brief ReDraw all (either as option, or first run of animation)
-//      * 
-//      * needs revamped, so that:
-//      * ** picks random index in range, and uses that to either show the original (palette static) or selects random colour
-//     * ** the intensity gives how many random colour should be updated in SEGLEN, 
-//      */
-//     if(draw_random_pixels)
-//     {
-
-//       ALOG_INF(PSTR("draw_random_pixels"));
-
-//       uint16_t redraw_count = map(random(0,SEGMENT.intensity), 0,255, 0,SEGLEN);
-//       uint16_t random_pixel_to_update = 0;
-
-      
-//       ALOG_INF(PSTR("redraw_count %d"), redraw_count);
-
-
-
-//       pixel_palette_counter = 0;      
-//       for(uint16_t pixel = 0; pixel < redraw_count; pixel++)
-//       {
-//         if(draw_palette_inorder)
-//         {
-//           pixel_palette_counter = pixel;   //pixel from palette
-//           random_pixel_to_update = pixel; //pixel into output, these should be the same when in order
-//         }
-//         else
-//         {
-//           pixel_palette_counter = random(0, pixels_in_palette-1); // Randon colour from palette
-//           random_pixel_to_update = map(random(0,SEGMENT.intensity), 0,255, 0,SEGLEN); //repick a random pixel to change within segment
-//         }
-
-//         colour = SEGMENT.GetPaletteColour(pixel_palette_counter);      
-//         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
-//         SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel_to_update, SEGMENT.colour_width__used_in_effect_generate, colour);
-//         do_fade = false ; // block fade on update cycle, since fade relies on getting from the commited neopixel bus
-//       }
-
-//     }
-
-//     /**
-//      * @brief Decay test
-//      * 
-//      */
-//     if(do_fade)
-//     {
-      
-//       ALOG_INF(PSTR("do_fade"));
-
-//       for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
-//       {
-//         colour_out = SEGMENT.GetPixelColor(pixel);
-//         colour_out.Fade(2);// = RgbcctColor::ApplyBrightnesstoRgbcctColour(colour_out, tkr_iLight->getBriRGB_Global());       
-//         SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour_out);
-//       }
-//     }
-
-
-//     SEGMENT.aux0 = s; 
-//     SEGMENT.aux1 = s_target; 
-//     SEGMENT.step = fadeStep;
-
-  
-//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-//   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) { SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param); });
-
-
-
-  // SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
-
-  return USE_ANIMATOR;
-
-}
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED /////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC /////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Rotates by getting and setting pixel colours, with wrap around
- * @note : 
+ * @description : Rotates by getting and setting pixel colours, with wrap-around.
+ *                Single-pass block rotation (no per-step loops). Handles any movement >= 0, normalized to segment length.
+ * @note        : Used by effects that rotate either the current framebuffer or a freshly painted palette.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
 {
-  if (movement_amount == 0) 
-  {
-    ALOG_ERR(PSTR("I should not be here"));
-    return SPEED_FORMULA_L; // No rotation needed
-  }
+  if (SEGLEN == 0) return EFFECT_DEFAULT();
 
-  // ALOG_INF(PSTR("EffectAnim__Rotate_Base(%d,%d)"), movement_amount, direction);
-  // Save the edge colours to handle larger rotations
-  std::vector<uint32_t> edgePixels(movement_amount);
+  // Normalize movement to [0 .. SEGLEN-1]
+  uint16_t move = (SEGLEN > 0) ? (movement_amount % SEGLEN) : 0;
+  if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
 
-  if (direction) // Forward (right) rotation
-  {
-    for (uint16_t step = 0; step < movement_amount; step++)
-    {
-      // Save the last pixel(s) being rotated out
-      for (uint16_t j = 0; j < movement_amount; j++)
-      {
-        edgePixels[j] = SEGMENT.getPixelColor(SEGLEN - 1 - j);
-      }
+  // Save border run to a small temp buffer
+  std::vector<uint32_t> edge(move);
 
-      // Shift pixels forward
-      for (int16_t i = SEGLEN - 1; i >= movement_amount; i--)
-      {
-        SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i - movement_amount));
-      }
-
-      // Wrap the saved edge pixels to the start
-      for (uint16_t j = 0; j < movement_amount; j++)
-      {
-        SEGMENT.setPixelColor(j, edgePixels[movement_amount - 1 - j]);
-      }
+  if (direction) { // right (toward higher indices)
+    // Save tail [SEGLEN-move .. SEGLEN-1]
+    for (uint16_t j = 0; j < move; ++j) {
+      edge[j] = SEGMENT.getPixelColor(SEGLEN - move + j);
     }
-  }
-  else // Backward (left) rotation
-  {
-    for (uint16_t step = 0; step < movement_amount; step++)
-    {
-      // Save the first pixel(s) being rotated out
-      for (uint16_t j = 0; j < movement_amount; j++)
-      {
-        edgePixels[j] = SEGMENT.getPixelColor(j);
-      }
-
-      // Shift pixels backward
-      for (uint16_t i = 0; i < SEGLEN - movement_amount; i++)
-      {
-        SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i + movement_amount));
-      }
-
-      // Wrap the saved edge pixels to the end
-      for (uint16_t j = 0; j < movement_amount; j++)
-      {
-        SEGMENT.setPixelColor(SEGLEN - movement_amount + j, edgePixels[j]);
-      }
+    // Shift block up: [0 .. SEGLEN-move-1] -> [move .. SEGLEN-1]
+    for (int32_t i = (int32_t)SEGLEN - 1; i >= (int32_t)move; --i) {
+      SEGMENT.setPixelColor((uint16_t)i, SEGMENT.getPixelColor((uint16_t)(i - move)), BRIGHTNESS_ALREADY_SET);
+    }
+    // Wrap saved tail into head [0 .. move-1]
+    for (uint16_t j = 0; j < move; ++j) {
+      SEGMENT.setPixelColor(j, edge[j], BRIGHTNESS_ALREADY_SET);
+    }
+  } else {        // left (toward lower indices)
+    // Save head [0 .. move-1]
+    for (uint16_t j = 0; j < move; ++j) {
+      edge[j] = SEGMENT.getPixelColor(j);
+    }
+    // Shift block down: [move .. SEGLEN-1] -> [0 .. SEGLEN-move-1]
+    for (uint16_t i = 0; i < SEGLEN - move; ++i) {
+      SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i + move), BRIGHTNESS_ALREADY_SET);
+    }
+    // Wrap saved head into tail [SEGLEN-move .. SEGLEN-1]
+    for (uint16_t j = 0; j < move; ++j) {
+      SEGMENT.setPixelColor(SEGLEN - move + j, edge[j], BRIGHTNESS_ALREADY_SET);
     }
   }
 
-  return FRAMETIME_WITH_SPEED(5,1000); // from 5ms to 1000ms per frame
+  return FRAMETIME_WITH_SPEED(5, 1000); // from 5ms to 1000ms per frame
 }
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Rotates the currently displayed colours
- * @note : 
+ * @description : Rotate the currently displayed colours (pure framebuffer rotate).
+ *                - No repaint; rotates whatever is already shown on the LEDs.
+ *
+ * Controls:
+ *   SX (Speed)      → Base frame time. Rubber-banding scales the frame time only.
+ *   IX (Intensity)  → Pixels rotated per frame (stride). Typically 1; independent of rubber-banding.
+ *   c1 (custom1)    → 0 = manual mode (C2 used). 1..255 = auto-reverse; random interval in [3s..20s] mapped by slider.
+ *   C2 (checkbox)   → Manual reverse (ignored when c1>0).
+ *   C3 (checkbox)   → Rubber-banding: pre-slow into a flip (auto mode) and post-ramp after flips.
+ *
+ * Notes:
+ *   - Rubber-banding never changes IX (stride). It only stretches/squeezes frame time around reversals.
+ *   - Auto mode ignores C2 entirely.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 {
-  uint16_t pixels_to_move = map(SEGMENT.intensity, 0,255, 1,SEGLEN/2); // maxmimum of half the segment length (which would equate to toggling effect)
-  bool direction          = !SEGMENT.check3; // true for right, false for left
-  return EffectAnim__Rotate_Base(pixels_to_move, direction);
+  if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+  const uint32_t now          = effect_start_time;          // ms tick source
+  const uint16_t move_px_base = map(SEGMENT.intensity, 0, 255, 1,
+                                    (uint16_t)max<uint16_t>(1, SEGLEN/2)); // IX → pixels/frame
+  const bool     rubber_band  = SEGMENT.check3;             // C3: rubber-banding
+  const uint16_t c1_auto      = SEGMENT.custom1;            // c1: 0=off; 1..255 → max interval
+
+  // --------------------------------------------------------------------------------
+  // Direction & auto-reverse scheduling
+  // aux0 = direction (0=left,1=right)
+  // aux3 = next auto-flip deadline (abs ms)
+  // aux2 = pre/post window (ms for this cycle)
+  // aux4 = post-ramp end (abs ms)
+  // --------------------------------------------------------------------------------
+  bool direction = (SEGMENT.aux0 != 0);
+
+  auto map_c1_to_max = [](uint16_t c1)->uint32_t {
+    if (c1 == 0) return 0;
+    return 3000u + ((uint32_t)(c1 - 1u) * (20000u - 3000u)) / 254u; // 1..255 → 3..20s
+  };
+
+  // test knob for banding window size (applied everywhere)
+  constexpr float    RB_TEST_FACTOR = 1.0f; // raise to exaggerate window visually
+  constexpr uint16_t RB_MIN_MS      = 300;
+  constexpr uint16_t RB_MAX_MS      = 4000;
+
+  if (c1_auto == 0) {
+    // Manual mode: obey C2; snappy flip; optional post-ramp when C3
+    const bool manual_reverse = SEGMENT.check2;
+    const bool desired_dir    = !manual_reverse;   // true=right, false=left
+    if (desired_dir != direction) {
+      direction    = desired_dir;
+      SEGMENT.aux0 = direction ? 1 : 0;
+
+      if (rubber_band) {
+        // post-ramp from a nominal 20s window * 10%, scaled by test factor
+        const uint32_t nominal_ms = 20000u;
+        const uint16_t post_ms    = (uint16_t)constrain(
+          (uint32_t)(nominal_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+        SEGMENT.aux2 = post_ms;
+        SEGMENT.aux4 = now + post_ms; // post-ramp end
+      }
+    }
+  } else {
+    // Auto mode: ignore C2; schedule random flips in [3s .. mappedMax(c1)]
+    const uint32_t max_ms = map_c1_to_max(c1_auto);
+
+    if (SEGMENT.aux3 == 0) {
+      // first schedule
+      const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
+      const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
+      SEGMENT.aux3 = now + interval_ms;
+
+      const uint16_t win_ms = (uint16_t)constrain(
+        (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+      SEGMENT.aux2 = win_ms;
+    } else {
+      if (now >= SEGMENT.aux3) {
+        // time to flip
+        direction    = !direction;
+        SEGMENT.aux0 = direction ? 1 : 0;
+
+        // schedule next
+        const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
+        const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
+        SEGMENT.aux3 = now + interval_ms;
+
+        const uint16_t win_ms = (uint16_t)constrain(
+          (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+        SEGMENT.aux2 = win_ms;
+
+        if (rubber_band) SEGMENT.aux4 = now + win_ms; // start post-ramp
+      }
+      // pre-slow handled below
+    }
+  }
+
+  // --------------------------------------------------------------------------------
+  // Rubber-banding → frame time only (never touch move_px)
+  // Pre-slow (auto only): last aux2 ms before aux3
+  // Post-ramp: until aux4 expires
+  // ease ∈ [0.25..1.0] → ft_scaled = base_ft_ms * (1/ease)
+  // --------------------------------------------------------------------------------
+  float ease = 1.0f;
+
+  if (rubber_band) {
+    if (SEGMENT.aux4 && now < SEGMENT.aux4) {
+      // post-ramp 0.25 → 1.0
+      const uint32_t rem = SEGMENT.aux4 - now;
+      const uint32_t dur = (uint32_t)max<uint16_t>(SEGMENT.aux2, 1);
+      const float t   = 1.0f - (float)rem / (float)dur;
+      ease = 0.25f + 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t));
+    } else {
+      if (SEGMENT.aux4 && now >= SEGMENT.aux4) SEGMENT.aux4 = 0;
+
+      if (c1_auto > 0 && SEGMENT.aux3 && SEGMENT.aux2) {
+        // pre-slow 1.0 → 0.25
+        const uint16_t pre_ms = SEGMENT.aux2;
+        if (now + pre_ms >= SEGMENT.aux3 && now < SEGMENT.aux3) {
+          const uint32_t into_pre = pre_ms - (SEGMENT.aux3 - now);
+          const float t_pre = (float)into_pre / (float)pre_ms;
+          ease = 1.0f - 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t_pre));
+        }
+      }
+    }
+  }
+
+  // 1) rotate framebuffer using stride from IX (unchanged by banding)
+  const uint16_t move_px = move_px_base;
+  (void)EffectAnim__Rotate_Base(move_px, direction);  // ignore its return
+
+  // 2) compute frame time purely from SX, shaped by rubber-band ease
+  constexpr uint16_t FT_MIN = 15;//FRAMETIME;  // fast ceiling (~25 ms)
+  constexpr uint16_t FT_MAX = 2000;       // slow cap
+  // SX: 255 → FRAMETIME, 0 → 1000 ms (change 1000 if you want a slower extreme)  
+  // Linear mapping of speed
+  // const uint16_t base_ft_ms = (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (400u - FT_MIN)) / 255u);
+  // Quadratic mapping of speed (more low-end resolution). 250u chosen to keep mid-speed near 500ms
+  const uint16_t base_ft_ms = (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (250u - FT_MIN) * (255 - SEGMENT.speed)) / (255u*255u));
+
+
+  const float   inv   = (ease > 0.001f) ? (1.0f / ease) : 4.0f; // cap ~4x slower
+  uint32_t      ft_ms = (uint32_t)((float)base_ft_ms * inv + 0.5f);
+  if (ft_ms < FT_MIN) ft_ms = FT_MIN;
+  if (ft_ms > FT_MAX) ft_ms = FT_MAX;
+
+  // Optional debug
+  // ALOG_DBG(PSTR("prev-rotate dir %u mov %u ease %u ft %u"),
+  //   (unsigned)direction, (unsigned)move_px, (unsigned)(ease*100.0f), (unsigned)ft_ms);
+
+  // bookkeeping (just rotation progress)
+  if (move_px > 1) SEGMENT.call += (move_px - 1);
+  if (SEGMENT.call >= SEGLEN) SEGMENT.call = 0;
+
+  return (uint16_t)ft_ms;
 }
-static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM = "Rotate Previous@!,Shift,,,,,,Reverse;;!;!;ix=0,sx=240";
-static const char PM_EFFECT_DESCRI__ROTATING_PREVIOUS_ANIMATION[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM =
+"Rotate Previous@"                                  // Name
+"Speed,Shift,Auto-reverse,,,,Reverse,Rubber band"   // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+";"
+""                                                  // Segment Colour Names (none)
+";"
+"!"                                                 // keep palette picker for UI consistency
+";"
+"1"                                                 // 1D strip icon
+";"
+"ix=1,"                                             // stride: 1 px/frame
+"sx=240,"                                           // fast default
+"c1=0,"                                             // auto-reverse off by default
+"o1=0,o2=0,o3=0"                                    // C1 unused here, C2 reverse OFF, C3 rubber band OFF
+;
+static const char PM_EFFECT_DESCRI__ROTATING_PREVIOUS_ANIMATION[] PROGMEM =
+"Rotate framebuffer (no repaint).\n\r"
+"IX:Shift px/frame (1..SEGLEN/2)\n\r"
+"SX:Frame time; rubber-band scales at flips\n\r"
+"C1>0:Auto-flip 3-20s\n\r"
+"C2:Manual dir (ignored if C1>0)\n\r"
+"C3:Rubber-band slow+speed ramp";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Will rotate a palette, redrawing the palette on each wrap stop errors/loss of colour
- * @note : Combined with random/live palettes, this will enable new palettes at the end of every rotation
+ * @description : Rotate a freshly painted palette across the segment.
+ *                - Paints the current palette across SEGLEN (DEFAULT palette mode, wrap per C1) when:
+ *                  • first_run is set, or
+ *                  • the repaint signature (palette_id + brightness) changes.
+ *                - Rotation is a pure framebuffer rotate (no repaint on flips).
+ *
+ * Controls:
+ *   SX (Speed)      → Base frame time. Rubber-banding scales the frame time only.
+ *   IX (Intensity)  → Pixels rotated per frame (stride). Typically 1; independent of rubber-banding.
+ *   C1 (checkbox)   → Hard-edge vs smooth wrap for gradients at the seam.
+ *   c1 (custom1)    → 0 = manual mode (C2 used). 1..255 = auto-reverse; random interval in [3s..20s] mapped by slider.
+ *   C2 (checkbox)   → Manual reverse (ignored when c1>0).
+ *   C3 (checkbox)   → Rubber-banding: pre-slow into a flip (auto mode) and post-ramp after every flip.
+ *
+ * Notes:
+ *   - Rubber-banding never changes IX (stride). It only stretches/squeezes frame time around reversals.
+ *   - Auto mode ignores C2 entirely.
+ *   - Repaint signature (palette_id + brightness) ensures palette/brightness changes repaint once, then rotate.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Rotating_Palette()
 {
-  uint16_t pixels_to_move = map(SEGMENT.intensity, 0,255, 1,SEGLEN/2); // maxmimum of half the segment length (which would equate to toggling effect)
-  bool direction          = !SEGMENT.check3; // true for right, false for left
+  if (SEGLEN == 0) return EFFECT_DEFAULT();
 
-  // ALOG_INF(PSTR("call %d"), SEGMENT.call);
+  const uint32_t now          = effect_start_time;          // ms tick source
+  const uint16_t move_px_base = map(SEGMENT.intensity, 0, 255, 1,
+                                    (uint16_t)max<uint16_t>(1, SEGLEN/2)); // IX → pixels/frame
+  const bool     hard_edge    = SEGMENT.check1;             // C1: hard edge vs smooth wrap
+  const bool     rubber_band  = SEGMENT.check3;             // C3: rubber-banding
+  const uint16_t c1_auto      = SEGMENT.custom1;            // c1: 0=off; 1..255 → max interval
 
-  // Repaint the palette when SEGMENT.call == 0 (before the first rotation loop)
-  if (SEGMENT.call <= 1) // It is reset to 0 below, but effect caller will already incrememnt it by 1 on recall
-  {
-    ALOG_INF(PSTR("Repainting palette %d"), SEGMENT.call);
-    uint32_t colour;
-    for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
-    {
-      // Get palette colour for the current pixel
-      colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
-      // Set pixel colour
-      SEGMENT.setPixelColor(pixel, colour);
+  // --- repaint signature (palette + brightness). repaint on change or first_run ---
+  const uint16_t new_sig      = (uint16_t)(SEGMENT.palette_id + SEGMENT.getBrightnessRGB());
+  const bool     need_repaint = SEGMENT.flags.animator_first_run || (new_sig != SEGMENT.aux1);
+
+  if (need_repaint) {
+    const bool wrap_mode = hard_edge ? PALETTE_WRAP_HARDEDGE : PALETTE_WRAP_SMOOTH;
+    for (uint16_t p = 0; p < SEGLEN; ++p) {
+      const uint32_t col = SEGMENT.GetPaletteColour_ModeWrap(
+        p,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
+        PALETTE_MODE__DEFAULT,
+        wrap_mode,
+        NO_ENCODED_VALUE,
+        ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+      );
+      SEGMENT.setPixelColor(p, col, BRIGHTNESS_ALREADY_SET);
     }
-
-    // SEGMENT.setPixelColor(0,RGBW32(255,255,255,255)); // Debug pixel, to show the start of the segment
+    SEGMENT.aux1 = new_sig;
+    SEGMENT.flags.animator_first_run = false;
   }
 
-  // Call the base rotation function
-  uint16_t frametime = EffectAnim__Rotate_Base(pixels_to_move, direction);
+  // --------------------------------------------------------------------------------
+  // Direction & auto-reverse scheduling
+  // aux0 = direction (0=left,1=right)
+  // aux3 = next auto-flip deadline (abs ms)
+  // aux2 = pre/post window (ms for this cycle)
+  // aux4 = post-ramp end (abs ms)
+  // --------------------------------------------------------------------------------
+  bool direction = (SEGMENT.aux0 != 0);
 
-  if(pixels_to_move > 1){ SEGMENT.call += (pixels_to_move - 1); } // Increment the call counter by the movement amount (excluding the already incrementing call)
-  if (SEGMENT.call >= SEGLEN){ SEGMENT.call = 0;  }               // Reset SEGMENT.call after a full rotation
+  auto map_c1_to_max = [](uint16_t c1)->uint32_t {
+    if (c1 == 0) return 0;
+    return 3000u + ((uint32_t)(c1 - 1u) * (20000u - 3000u)) / 254u; // 1..255 → 3..20s
+  };
 
-  return frametime;
+  // test knob for banding window size (applied everywhere)
+  constexpr float    RB_TEST_FACTOR = 1.0f; // raise to exaggerate window visually
+  constexpr uint16_t RB_MIN_MS      = 300;
+  constexpr uint16_t RB_MAX_MS      = 4000;
+
+  if (c1_auto == 0) {
+    // Manual mode: obey C2; snappy flip; optional post-ramp when C3
+    const bool manual_reverse = SEGMENT.check2;
+    const bool desired_dir    = !manual_reverse;   // true=right, false=left
+    if (desired_dir != direction) {
+      direction    = desired_dir;
+      SEGMENT.aux0 = direction ? 1 : 0;
+
+      if (rubber_band) {
+        // post-ramp from a nominal 20s window * 10%, scaled by test factor
+        const uint32_t nominal_ms = 20000u;
+        const uint16_t post_ms    = (uint16_t)constrain(
+          (uint32_t)(nominal_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+        SEGMENT.aux2 = post_ms;
+        SEGMENT.aux4 = now + post_ms; // post-ramp end
+      }
+    }
+  } else {
+    // Auto mode: ignore C2; schedule random flips in [3s .. mappedMax(c1)]
+    const uint32_t max_ms = map_c1_to_max(c1_auto);
+
+    if (SEGMENT.aux3 == 0) {
+      // first schedule
+      const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
+      const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
+      SEGMENT.aux3 = now + interval_ms;
+
+      const uint16_t win_ms = (uint16_t)constrain(
+        (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+      SEGMENT.aux2 = win_ms;
+    } else {
+      if (now >= SEGMENT.aux3) {
+        // time to flip
+        direction    = !direction;
+        SEGMENT.aux0 = direction ? 1 : 0;
+
+        // schedule next
+        const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
+        const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
+        SEGMENT.aux3 = now + interval_ms;
+
+        const uint16_t win_ms = (uint16_t)constrain(
+          (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+        SEGMENT.aux2 = win_ms;
+
+        if (rubber_band) SEGMENT.aux4 = now + win_ms; // start post-ramp
+      }
+      // pre-slow handled below
+    }
+  }
+
+  // --------------------------------------------------------------------------------
+  // Rubber-banding → frame time only (never touch move_px)
+  // Pre-slow (auto only): last aux2 ms before aux3
+  // Post-ramp: until aux4 expires
+  // ease ∈ [0.25..1.0] → ft_scaled = base_ft_ms * (1/ease)
+  // --------------------------------------------------------------------------------
+  float ease = 1.0f;
+
+  if (rubber_band) {
+    if (SEGMENT.aux4 && now < SEGMENT.aux4) {
+      // post-ramp 0.25 → 1.0
+      const uint32_t rem = SEGMENT.aux4 - now;
+      const uint32_t dur = (uint32_t)max<uint16_t>(SEGMENT.aux2, 1);
+      const float t   = 1.0f - (float)rem / (float)dur;
+      ease = 0.25f + 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t));
+    } else {
+      if (SEGMENT.aux4 && now >= SEGMENT.aux4) SEGMENT.aux4 = 0;
+
+      if (c1_auto > 0 && SEGMENT.aux3 && SEGMENT.aux2) {
+        // pre-slow 1.0 → 0.25
+        const uint16_t pre_ms = SEGMENT.aux2;
+        if (now + pre_ms >= SEGMENT.aux3 && now < SEGMENT.aux3) {
+          const uint32_t into_pre = pre_ms - (SEGMENT.aux3 - now);
+          const float t_pre = (float)into_pre / (float)pre_ms;
+          ease = 1.0f - 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t_pre));
+        }
+      }
+    }
+  }
+
+  // 1) rotate framebuffer using stride from IX (unchanged by banding)
+  const uint16_t move_px = move_px_base;
+  (void)EffectAnim__Rotate_Base(move_px, direction);  // ignore its return
+
+  // 2) compute frame time purely from SX, shaped by rubber-band ease
+  constexpr uint16_t FT_MIN = 15;//FRAMETIME;  // fast ceiling (~25 ms)
+  constexpr uint16_t FT_MAX = 2000;       // slow cap
+  // SX: 255 → FRAMETIME, 0 → 1000 ms (tweak 1000 if you want a different slow bound)
+  // const uint16_t base_ft_ms =    (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (1000u - FT_MIN)) / 255u);
+  // Quadratic mapping of speed (more low-end resolution). 250u chosen to keep mid-speed near 500ms
+  const uint16_t base_ft_ms = (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (250u - FT_MIN) * (255 - SEGMENT.speed)) / (255u*255u));
+
+  const float   inv   = (ease > 0.001f) ? (1.0f / ease) : 4.0f; // cap ~4x slower
+  uint32_t      ft_ms = (uint32_t)((float)base_ft_ms * inv + 0.5f);
+  if (ft_ms < FT_MIN) ft_ms = FT_MIN;
+  if (ft_ms > FT_MAX) ft_ms = FT_MAX;
+
+  // Debug (optional)
+  // ALOG_DBG(PSTR("dir %u mov %u ease %u ft %u"), (unsigned)direction, (unsigned)move_px, (unsigned)(ease*100.0f), (unsigned)ft_ms);
+
+  // bookkeeping
+  if (move_px > 1) SEGMENT.call += (move_px - 1);
+  if (SEGMENT.call >= SEGLEN) SEGMENT.call = 0;
+
+  return (uint16_t)ft_ms;
 }
-static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM = "Rotate Palette@!,Shift,,,,,,Reverse;!;!;ix=0,sx=40,paln=Rainbow 16";
-static const char PM_EFFECT_DESCRI__ROTATING_PALETTE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM =
+"Rotate Palette@"                                  // Name
+"Speed,Shift,Auto-reverse EN>0,,,Hard edge,Reverse,Rubber band"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+";"
+""                                                 // Segment Colour Names (none)
+";"
+"!"                                                // palette picker (primary)
+";"
+"1"                                                // 1D strip icon
+";"
+"ix=1,"                                            // stride: 1 px/frame
+"sx=240,"                                          // fast default
+"c1=127,"                                          // auto-reverse mid strength
+"o1=0,o2=0,o3=0,"                                  // C1 hard edge OFF, C2 reverse OFF, C3 rubber band OFF
+"paln=Lava Fire"
+;
+static const char PM_EFFECT_DESCRI__ROTATING_PALETTE[] PROGMEM =
+"Rotate palette across strip.\n\r"
+"IX:Shift px/frame (1..SEGLEN/2)\n\r"
+"SX:Frame time; rubber-band scales at flips\n\r"
+"C1>0:Auto-flip 3-20s\n\r"
+"C2:Manual dir (ignored if C1>0)\n\r"
+"C3:Rubber-band slow+speed ramp\n\r"
+"Hard edge: no blend seam";
+
 
 
 /**********************************************************************************************************************************************************************************
@@ -1466,7 +1442,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
   const uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * len;
   if (!SEGMENT.allocateColourData(dataSize)) { SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION; return USE_ANIMATOR; }
 
-  const uint8_t n = GetNumberOfColoursInPalette(SEGMENT.palette_id);
+  const uint8_t n = SEGMENT.palette->colours_in_palette;
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
   if (n == 0) {
@@ -1494,9 +1470,14 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
     for (uint16_t i = 0; i < len; ++i) {
       uint8_t slot   = (uint8_t)(i % vis_nonzero);  // fixed slot id along the strip
       uint8_t palidx = (uint8_t)(slot % n);         // initial palette mapping
-      uint32_t c = SEGMENT.GetPaletteColour(
-          palidx, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF,
-          &dummy, ANIM_BRIGHTNESS_REQUIRED);
+          uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+            palidx,
+            PALETTE_INDEX__IS_EXACT_COLOUR,
+            PALETTE_MODE__DEFAULT,
+            PALETTE_WRAP_HARDEDGE,
+            NO_ENCODED_VALUE,
+            ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+          );
       SEGMENT.Set_DynamicBuffer_DesiredColour(i, c);
     }
     write_slot     = 0;
@@ -1508,9 +1489,14 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
     const uint8_t vis_nonzero = (visible ? visible : 1);
     for (uint16_t i = write_slot; i < len; i += vis_nonzero) {
       uint8_t palidx = (uint8_t)(next_pal % n);
-      uint32_t c = SEGMENT.GetPaletteColour(
-          palidx, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF,
-          &dummy, ANIM_BRIGHTNESS_REQUIRED);
+      uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+            palidx,
+            PALETTE_INDEX__IS_EXACT_COLOUR,
+            PALETTE_MODE__DEFAULT,
+            PALETTE_WRAP_HARDEDGE,
+            NO_ENCODED_VALUE,
+            ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+          );
       SEGMENT.Set_DynamicBuffer_DesiredColour(i, c);
     }
     // Advance: next frame updates the next slot; entering colour walks through all n entries
@@ -1525,8 +1511,28 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
   return USE_ANIMATOR;
 
 }
-static const char PM_EFFECT_CONFIG__STEPPING_PALETTE[] PROGMEM = "Stepping Palette@!,!,,,,,,,!;;1;ep=1000,ix=127"; 
-static const char PM_EFFECT_DESCRI__STEPPING_PALETTE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__STEPPING_PALETTE[] PROGMEM =
+"Stepping Palette@"                        // Name
+"Speed,Visible colours,,,,,,,"             // Controls: SX, IX
+";"
+""                                         // Segment colour names (none)
+";"
+"!"                                        // Primary palette picker
+";"
+"1"                                        // 1D strip icon
+";"
+"ep=1000,"                                 // effect period (ms between blends)
+"sx=127,"                                  // default speed (mid)
+"ix=1,"                                    // default visible colour count (min)
+"paln=Colourful"                           // default palette
+;
+static const char PM_EFFECT_DESCRI__STEPPING_PALETTE[] PROGMEM =
+"Step palette cols w/ staged slot updates.\n\r"
+"IX:Visible colours (2..n)\n\r"
+"SX:Blend rate\n\r"
+"EP:Slot update period (ms)\n\r"
+"Palette:Primary source";
+
 
 /**********************************************************************************************************************************************************************************
  * SUMMARY
@@ -1569,13 +1575,14 @@ uint16_t mAnimatorLight::EffectAnim__TimeBased__HourProgress()
 
   // Fill desired colours for current progress
   for (uint16_t pixel = 0; pixel < progress; pixel++) {
-    uint32_t colour = SEGMENT.GetPaletteColour(
-        pixel,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,
-        PALETTE_WRAP_OFF,
-        PALETTE_DISCRETE_ON,
-        NO_ENCODED_VALUE,
-        ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+            pixel,
+            PALETTE_INDEX__IS_SEGLEN_RANGE,
+            PALETTE_MODE__DEFAULT,
+            PALETTE_WRAP_HARDEDGE,
+            NO_ENCODED_VALUE,
+            ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+          );
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
   }
 
@@ -1601,44 +1608,67 @@ uint16_t mAnimatorLight::EffectAnim__TimeBased__HourProgress()
 
   return USE_ANIMATOR;
 }
-static const char PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS[] PROGMEM = "Hour Progress@!,,,,,Repeat Rate (ms);!,!,!,!,!;!;1;sx=127"; // 7 sliders + 4 options before first ;
-static const char PM_EFFECT_DESCRI__TIMEBASED__HOUR_PROGRESS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
+"Hour Progress@Speed,,,,,,Tick ms,,;,,,,;!;1;sx=127,ep=1000";
+static const char PM_EFFECT_DESCRI__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
+"Hour bar fills L→R by seconds.\n\r"
+"SX: blend (0≈60s→255 instant)\n\r"
+"EP: tick ms\n\r"
+"Palette: discrete across SEGLEN";
 
 
 /*********************************************************************************************************************************************************************************
  * EFFECT: Stepping Palette With Background
  *
  * SUMMARY
- *   A two-layer effect:
- *     • Foreground = a fixed number of palette colours shown as discrete “slots” across the segment.
- *       - Slots are spaced apart by a configurable skip distance (custom2).
- *       - At each animation step, only one slot group is updated with the next colour from the palette (FIFO style).
- *       - This creates a marching / stepping sequence where old colours hold in place until their slot updates.
- *     • Background = drawn on every pixel not occupied by the foreground slots.
- *       - Rendered from a secondary “unloaded” palette (custom1).
- *       - Can be gradient (smooth span) or banded (discrete), controlled by check1.
- *       - Background re-renders every frame, allowing live gradients or animated palettes to show motion independently.
- *       - Optional brightness scaling (custom3) applies a non-linear quadratic emphasis for fine control.
+ *   Two-layer composition:
  *
- * ARGUMENTS / CONTROLS
- *   SEGMENT.palette_id   : Primary palette for foreground colours.
- *   SEGMENT.intensity    : Number of foreground slots (maps 0..255 to 2..(n-1) if n>=3, else all colours shown).
- *   SEGMENT.custom2      : Skip spacing between foreground slots (0..255 → 0..SEGLEN).
- *   SEGMENT.custom1      : Background palette id (secondary “unloaded” palette).
- *   SEGMENT.check1       : Background discrete toggle (true = banded, false = gradient).
- *   SEGMENT.custom3      : Background brightness scaling (0..31 → quadratic 0..255).
+ *   1) Foreground (PRIMARY palette, SEGMENT.palette_id)
+ *      - A fixed number of palette colours are shown as discrete “slots” across the strip.
+ *      - The number of simultaneously visible colours is derived from Intensity (IX).
+ *        • If the primary palette has ≥3 entries: IX maps 0..255 → 2..(n-1), holding one colour “staged”.
+ *        • If the palette has 1–2 entries: all entries are visible.
+ *      - Slots are spaced using Custom2 (skip): number of background pixels placed between foreground slots.
+ *        • stride = skip + 1, period = visible * stride
+ *        • Slot positions are s*stride (s in [0..visible-1]) repeating every ‘period’.
+ *      - At each animation step, only ONE slot group updates to the next palette entry (FIFO). Others hold,
+ *        producing a clean marching/stepping look without global churn.
+ *
+ *   2) Background (SECONDARY palette, SEGMENT.palette2_id)
+ *      - Every non-foreground pixel is filled from the background palette each frame.
+ *      - Gradient or discrete rendering is toggled by Check1:
+ *        • Check1 = OFF → gradient span (smooth across segment)
+ *        • Check1 = ON  → discrete/banded (forced discrete)
+ *      - Background brightness is scaled with Custom3 (0..31), quadratic response for better low-end control.
  *
  * BEHAVIOUR
- *   • Foreground pixels are “reserved” first (slot positions). Background pass explicitly skips these indices.
- *   • Background is re-drawn fully each frame for dynamic motion.
- *   • Foreground stepping logic only updates one slot group per frame, leaving others visually static.
- *   • Supports seamless reseed when intensity or skip changes (aux2 and step cached).
+ *   • Foreground slot positions are masked out so background never overwrites them.
+ *   • Background re-renders every frame (good for live/animated palettes).
+ *   • Foreground updates one slot group per frame; the rest remain visually static until their turn.
+ *   • Reseed occurs when IX changes the visible count or Custom2 changes skip spacing.
+ *
+ * CONTROLS (UI mapping, order matters)
+ *   1) SX (Speed)            : Blend rate (handled by your animator blend callback).
+ *   2) IX (Intensity)        : Number of simultaneously visible foreground colours (see above).
+ *   3) C1 (Custom1)          : (unused in this effect)
+ *   4) C2 (Custom2)          : Skip spacing between foreground slots (0..255 → 0..SEGLEN).
+ *   5) C3 (Custom3, 0..31)   : Background brightness scaling (quadratic).
+ *   6) cbPal (Palette picker): Primary palette chooser (foreground).
+ *   7) cbLay                 : Layer toggle (reserved/unused here).
+ *   8) cbFav                 : Favourite toggle (UI).
+ *   9) EP (Effect Period)    : Animator period (external; this effect uses the animator callback).
+ *  10) GRP (Group)           : Output grouping (external; not modified here).
+ *
+ * NOTES
+ *   • Background uses: GetUnloadedPaletteColour_ModeWrap(…, IS_SEGLEN_RANGE, DEFAULT/Discrete, WRAP_SMOOTH, …).
+ *   • Foreground uses: GetPaletteColour_ModeWrap(…, IS_EXACT_COLOUR, DEFAULT, WRAP_HARDEDGE, …) so we address exact entries.
+ *   • Uses ANIM_BRIGHTNESS_REQUIRED only when painting desired colours; your animator applies the blend.
  *
  * RETURNS
- *   USE_ANIMATOR : Signals animation blending should continue.
+ *   USE_ANIMATOR  (continue animator-driven blending)
  *
  * CHANGED
- *   15Aug25 : Added background layer using GetColourFromUnloadedPalette3, with skip logic to avoid overwriting foreground.
+ *   15 Aug 2025 : Added background layer + mask. Switched to *_ModeWrap APIs and exact-index foreground addressing.
  *********************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
 {
@@ -1658,7 +1688,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
   uint32_t &skip_cached    = SEGMENT.step;  // last skip (to trigger reseed)
 
   // ---------- Foreground palette + visible mapping (matches EffectAnim__Stepping_Palette) ----------
-  const uint8_t n = GetNumberOfColoursInPalette(SEGMENT.palette_id);
+  const uint8_t n = SEGMENT.palette->colours_in_palette;
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
   // Intensity → visible: if n>=3, 2..(n-1) (keeps one staged/hidden); else show all (n=1 or 2)
@@ -1675,7 +1705,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
 
   // ==================== BACKGROUND (live every frame) ====================
   // Draw background for every pixel EXCEPT those that belong to the foreground pattern.
-  const uint8_t bg_pid        = (uint8_t)SEGMENT.custom1;  // background palette id
+  const uint8_t bg_pid        = (uint8_t)SEGMENT.palette2_id;  // background palette id
   const bool    bg_discrete   = SEGMENT.check1;            // false: gradient span, true: discrete/banded
   const uint8_t bg_scale_0_31 = (uint8_t)min<uint16_t>(SEGMENT.custom3, 31);
 
@@ -1705,21 +1735,21 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
                        ? i
                        : (len > 1 ? (uint16_t)((uint32_t)i * 255u / (len - 1)) : 0);
 
-    uint8_t encoded = 0; // non-null address
-    RgbwwColor bgc = GetColourFromUnloadedPalette3(
-        bg_pid,
-        pos,
-        flag_spanned_segment,    // gradient vs discrete position handling
-        /*flag_wrap_hard_edge*/ false,
-        /*flag_crgb_exact_colour*/ bg_discrete,
-        &encoded,
-        /*flag_request_is_for_full_visual_output*/ true);
+    RgbwwColor bgc = GetUnloadedPaletteColour_ModeWrap(
+      bg_pid,
+      i,  // position along segment
+      PALETTE_INDEX__IS_SEGLEN_RANGE,
+      bg_discrete ? PALETTE_MODE__FORCE_DISCRETE : PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_SMOOTH,
+      NO_ENCODED_VALUE
+    );
 
     // Apply additional background scale (0..255) to RGB (extend to WW/CW if desired)
     uint8_t r = (uint8_t)((uint16_t)bgc.R * bg_scale / 255u);
     uint8_t g = (uint8_t)((uint16_t)bgc.G * bg_scale / 255u);
     uint8_t b = (uint8_t)((uint16_t)bgc.B * bg_scale / 255u);
-    const uint32_t bg_u32 = (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
+    uint8_t w = (uint8_t)((uint16_t)bgc.CW * bg_scale / 255u);
+    const uint32_t bg_u32 = RGBW32(r, g, b, w);
 
     SEGMENT.Set_DynamicBuffer_DesiredColour(i, bg_u32);
   }
@@ -1729,14 +1759,18 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
 
   if (need_reseed) {
     // Seed: slot s uses palette colour s (0..visible-1) at j = s*stride, s*stride+period, ...
-    uint8_t dummy = 0;
     for (uint8_t s = 0; s < visible; ++s) {
       const uint16_t offset = (uint16_t)(s * stride);
       for (uint16_t j = offset; j < len; j += (period ? period : 1)) {
         const uint8_t palidx = (uint8_t)(s % n);
-        const uint32_t c = SEGMENT.GetPaletteColour(
-            palidx, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF,
-            &dummy, ANIM_BRIGHTNESS_REQUIRED);
+        const uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+          palidx,
+          PALETTE_INDEX__IS_EXACT_COLOUR,
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE,
+          ANIM_BRIGHTNESS_REQUIRED
+        );
         SEGMENT.Set_DynamicBuffer_DesiredColour(j, c);
       }
     }
@@ -1750,10 +1784,15 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
     uint8_t dummy = 0;
     const uint16_t offset = (uint16_t)(write_slot * stride);
     for (uint16_t j = offset; j < len; j += (period ? period : 1)) {
-      const uint8_t palidx = (uint8_t)(next_pal % n);
-      const uint32_t c = SEGMENT.GetPaletteColour(
-          palidx, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF,
-          &dummy, ANIM_BRIGHTNESS_REQUIRED);
+      const uint8_t palidx = (uint8_t)(next_pal % n);          
+        const uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+          palidx,
+          PALETTE_INDEX__IS_EXACT_COLOUR,
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE,
+          ANIM_BRIGHTNESS_REQUIRED
+        );
       SEGMENT.Set_DynamicBuffer_DesiredColour(j, c);
     }
 
@@ -1769,8 +1808,31 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
 
   return USE_ANIMATOR;
 }                                                                                    // 1sx,2ix,3c1star,4c2cog,5c3vis,6cbPal,7cbLay,8cbFav,9ep,10grp
-static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM = "Stepping Palette Bkg@!,Amount of Primary Palette,Bkg Pal ID,Skip Prim,Bkg Brt,Grad/Discrete,7,8,9,10;!,!,!,!,!;!;1;ix=0,sx=127,c1=164,c2=5,c3=10"; // 7 sliders + 4 options before first ;
-static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
+"Stepping Palette + Bkg@"                // Name
+"Speed,Visible colours,,Skip (fg),Bkg Bright,Grad/Discrete,,,!,"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+";"
+""                                       // Segment Colour Names (none)
+";"
+"!"                                      // Primary palette picker (foreground)
+";"
+"1"                                      // 1D strip icon
+";"
+"sx=127,"                                // default speed (mid)
+"ix=100,"                                  // default visible (maps to 2..(n-1) when n>=3)
+"c2=5,"                                  // default skip (foreground spacing)
+"c3=31,"                                  // default background brightness (0..31)
+"pal2=0,"  
+"ep=1000,"                               // effect period (ms between blends)
+"s0=fff"
+;
+static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
+"Step palette cols w/ bg fill\n\r"
+"IX:Visible P colours (2..n)\n\r"
+"C2:FG skip spacing\n\r"
+"C1:BG brightness (0-255, quad)\n\r"
+"SX:Blend rate\n\r"
+"Grad/Disc:BG render mode";
 
 
 /**********************************************************************************************************************************************************************************
@@ -1784,7 +1846,7 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
  *          Intensity 0   → mostly linear (roughly uniform switching)
  *          Intensity 255 → strongly back-loaded (slow start, many flips near end) – pulse-like
  *  - Speed 0..255 → window period 60s..1s.
- *  - Secondary palette id comes from SEGMENT.custom1.
+ *  - Secondary palette id comes from SEGMENT.palette2_id.
  *
  * STATE:
  *   aux1: rand_seed   (16-bit per-cycle random seed)
@@ -1851,7 +1913,7 @@ uint16_t mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 
   // ---------- Palettes ----------
   const uint8_t pid_primary   = SEGMENT.palette_id;
-  const uint8_t pid_secondary = (uint8_t)SEGMENT.custom1;
+  const uint8_t pid_secondary = (uint8_t)SEGMENT.palette2_id;
 
   // Hash to get a stable per-pixel activation value for the cycle
   auto hash16 = [](uint16_t i, uint16_t s)->uint16_t {
@@ -1880,14 +1942,14 @@ uint16_t mAnimatorLight::EffectAnim__Blend_Two_Palettes()
       // Primary via segment helper (with brightness handling)
       c = SEGMENT.GetPaletteColour(
             i,
-            PALETTE_INDEX_SPANS_SEGLEN_ON,
+            PALETTE_INDEX__IS_SEGLEN_RANGE,
             PALETTE_WRAP_OFF,
             PALETTE_DISCRETE_OFF,
             &dummy,
             ANIM_BRIGHTNESS_REQUIRED);
     } else {
       // Secondary via "unloaded" palette accessor (full visual output path)
-      RgbwwColor cc = GetColourFromUnloadedPalette3(
+      RgbwwColor cc = GetUnloadedPaletteColour(
             pid,
             /*_pixel_position*/ i,
             /*flag_spanned_segment*/ true,     // index spans segment
@@ -1911,13 +1973,13 @@ uint16_t mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 }
 static const char PM_EFFECT_CONFIG__BLEND_TWO_PALETTES[] PROGMEM =
 "Blend Two Palettes@"                         // Name
-"Speed,Intensity,Secondary Palette,,,,,,!,"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"Speed,Intensity,,,,,,,!,"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 ",,,,"                                        // Segment Colour Names
 ";"                                           // ----------------------------------------- SegCols/PalPicker
 "!"                                           // palette picker (primary palette)
 ";"                                           // ----------------------------------------- PalPicker/is1D2D
-"1"                                           // icon flags: '1' -> 1D/strip
+"1p"                                           // icon flags: '1' -> 1D/strip
 ";"                                           // ----------------------------------------- is1D2D/Defaults
 "paln=Colourful,"
 "c1=0,"
@@ -1925,197 +1987,58 @@ static const char PM_EFFECT_CONFIG__BLEND_TWO_PALETTES[] PROGMEM =
 "ix=200,"
 "ep=500"
 ;                                             // end special key=value defaults
-static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM =
+"Alt-cycle blend A↔B (palette2).\n\r"
+"Per-cycle random pixel order.\n\r"
+"SX: period 60s→1s\n\r"
+"IX: pulse shape (linear→back-loaded)";
 
 
-// /********************************************************************************************************************************************************************************************************************
-//  *******************************************************************************************************************************************************************************************************************
-//  * @description : NOTDONE Blend Palette Between Another Palette
-//  * @note : Using a static palette (in order), the effect will change from static_palette (palette_id) to a different palette (palette_id saved as aux0)
-//  *         The "0%", ie least saturated, will be set by the intensity value scaled from 255 to 100 range
-//  * 
-//  * @param  "Intensity" :: 0-255 value is mapped into 0-100 and controls the amount to blend into the second one. ie 0%=palette_id and 100%=aux0_palette
-//  * @param  "Time"      :: If unset (ie set to 0), then the speed will assume the DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD as 10 seconds
-//  *         "Speed"     :: If the time is set to zero, then the Speed will scale from sweep of saturation time between DEFAULT_MINIMUM_ANIMATION_SPEED_PERIOD (1 second) and DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD (10 second)
-//  *          
-//  * This effect later needs intensity to define the brightness difference between the base palette and the secondary "flash" palette
-//  * The speed must also be made to work like it does for WLED, instead of setting a manual ratems
-//  * 
-//      * Desc: Draws palette_primary in order, then randomly takes from a second palette (saved by aux0)
-//      *       This will allow white palettes to work, or else applying coloured twinkles over a white palette too
-//      * 
-//      * 
-//      * This needs split, this version should be "Glow palette over another" in NPB animations, then "Twinkle" should be instant version without animator
-//      * Then have a special case that is white twinkles without setting the palette 2
-//      * Lets create brand new ones, then phase these out when happy to remove confusion with old and new?
-
-// These twinkles require brightness to be set within the effect, and use a flag, force the Luminescence to be set to 255, and then the brightness to be set by the effect
-// Edited: Jan 2025: With NPBLg, since brightness is set by the bus, we must instead set the base palette brightness here and twinkle palette is the full brightness
-
-
-// params_user[0]: palette to twinkle over
-// params_user[1]: brightness of twinkle palette
-// params_user[2]: base brightness
-
-
-//  *******************************************************************************************************************************************************************************************************************
-//  ********************************************************************************************************************************************************************************************************************/
-// uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
-// {
-//   uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.virtualLength();
-
-//   if (!SEGMENT.allocateColourData(dataSize)){    
-//     ALOG_ERR( PM_MEMORY_INSUFFICIENT );
-//     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
-//     return USE_ANIMATOR;
-//   }
-
-//   // For backwards comptability, if param2 is not set, then default base brightness to 100
-//   uint8_t brightness_base = SEGMENT.params_user[2] > 0 ? SEGMENT.params_user[2] : 100;
-
-//   /**
-//    * @brief Step 1: Draw palette 1 as base
-//    **/
-//   uint32_t colour = 0;
-//   for(uint16_t pixel = 0; 
-//                pixel < SEGMENT.virtualLength(); 
-//                pixel++
-//   ){
-
-//     colour = SEGMENT.GetPaletteColour(pixel);    
-//     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
-//     colour = AdjustColourWithBrightness(colour,brightness_base);
-//     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
-
-//     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
-//     #endif
-
-//   }
-
-//   /**
-//    * @brief Step 2: Draw over randomly with palette 2
-//    * Intensity will pick how many to randomly pick
-//    * 
-//    * For xmas2022, forced as white
-//    */
-
-//   uint32_t overdraw_colour = 0;//RgbcctColor();
-
-  
-//   uint16_t pixels_to_update = mapvalue(
-//                                       SEGMENT.intensity, 
-//                                       0,255, 
-//                                       0,SEGMENT.length()
-//                                     );
-
-//   uint16_t palette_to_draw_ontop = SEGMENT.params_user[0];
-//   uint16_t palette_over_length = GetNumberOfColoursInPalette(palette_to_draw_ontop)-1; //since we need 0 to length-1 (eg 6 colours, means indexs 0 to 5)
-
-//   // ALOG_INF(PSTR("palette_over_length %d"), palette_over_length);
-//   // ALOG_INF(PSTR("[0] %d"), SEGMENT.params_user[0]);
-//   // ALOG_INF(PSTR("[1] %d"), SEGMENT.params_user[1]);
-
-//   for(uint16_t pixel = 0; 
-//                 pixel < pixels_to_update; 
-//                 pixel++
-//   ){
-
-//     // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, pixel);
-    
-//     // if(SEGMENT.flags.brightness_applied_during_colour_generation){
-//     //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
-//     // }
-
-//     /**
-//      * @brief 
-//      * Contrary to expected, where we may want to select only from the colours by length in palette,
-//      * we actually want to select by the segment length, and hence, gradients will be picked randomly on full calculated length.
-//      * Discrete palettes, should still be retrieved as solid colours, as the modulo is used to wrap/iter over the palettes that are not gradients
-//      */
-//     uint16_t random_pic = random(0,SEGLEN);
-
-//     RgbwwColor c = GetColourFromUnloadedPalette3(SEGMENT.params_user[0], random_pic); // We want seglen, because gradient palettes should be drawn in their expected gradient
-    
-//     overdraw_colour = RGBW32(c.R, c.G, c.B, c.WW);
-    
-    
-//     // overdraw_colour = GetColourFromUnloadedPalette3(0, random(0,palette_over_length));
-
-//     // if(pixel==0) ALOG_INF(PSTR("overdraw %d %d %d %d %d"), SEGMENT.params_user[0], random_pic, overdraw_colour[0], overdraw_colour[1], overdraw_colour[2]);
-
-//     /**
-//      * @brief If palette is one of the segment colours, then use its built in brightness as the palette over brightness
-//      **/
-//     if(palette_to_draw_ontop < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
-//     {
-//       overdraw_colour = AdjustColourWithBrightness(overdraw_colour,255);//.WithBrightness(); // Use already set SegColour 
-//     }else{
-//       // overdraw_colour = overdraw_colour.WithBrightness(SEGMENT.params_user[1]); // Param1 is brightness control of Palette2
-//       overdraw_colour = AdjustColourWithBrightness(overdraw_colour,SEGMENT.params_user[1]);
-//     }
-
-//     // overdraw_colour.debug_print("overdraw_colour");
-
-//     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random(0,SEGMENT.length()), SEGMENT.colour_width__used_in_effect_generate, overdraw_colour);
-//     SEGMENT.Set_DynamicBuffer_DesiredColour(random(0,SEGMENT.length()), overdraw_colour);
-
-//     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(SEGMENT.palette_id), colour.R );
-//     #endif
-
-//   }
-
-
-
-//   /**
-//    * @brief Update outputs
-//    * 
-//    */
-
-//   // Get starting positions already on show
-//   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-//   // Call the animator to blend from previous to new
-  
-//     SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-//       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-//     });
-
-// return USE_ANIMATOR;
-
-// }
-/**Default
- * Twinkle White over Colour Default Palette
- * param[0]:    (I change my palette orders that much, although inefficient, I will use the palette name) "paln" where "pal" is the index, and paln is the name version
- * 
- * 
- * Here’s a clean rewrite that uses custom1..3 (not params_user) for the sliders, and creates a pulse-style twinkle of a secondary palette over the base palette:
-
-Speed (SEGMENT.speed 0..255) → cycle period 60 s → 1 s.
-
-Intensity (SEGMENT.intensity 0..255) shapes the pulse curve of how many pixels twinkle over the window (0 = linear, 255 = back-loaded “burst” near mid).
-
-custom1 = Twinkle palette ID (secondary).
-
-custom2 = Twinkle brightness (0..255).
-
-custom3 = Base brightness (0..255; default 100 if 0).
-
-Each cycle uses a new random seed (in aux1) to choose a per-pixel activation order; within a window, a fraction Q(u) of pixels displays the twinkle palette; others show the base palette.
-
-We fetch palette colours without applying global brightness and apply effect brightness ourselves (per NPBLg note).
- */
-
- uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Twinkle – Secondary Palette Over Primary Palette
+ *
+ * SUMMARY
+ * - Draw the PRIMARY palette (SEGMENT.palette_id) as the base/background across the strip.
+ * - Each frame, randomly overdraw a subset of pixels with colours from the SECONDARY palette (SEGMENT.palette2_id).
+ * - Result: persistent base + constantly changing “sparkle/twinkle” flecks.
+ *
+ * CONTROLS (UI order; 1..10)
+ * 1) SX (Speed)      : Frame cadence (non-animator path; effect returns FRAMETIME).
+ * 2) IX (Intensity)  : Twinkle density (0..255 → 0..100% per-pixel chance each frame).
+ * 3) C1 (Custom1)    : Twinkle brightness scale (0..255; default 255).
+ * 4) C2 (Custom2)    : Base brightness scale    (0..255; default 200).
+ * 5) C3 (Custom3)    : Unused.
+ * 6) cbPal           : Primary palette picker (base layer).
+ * 7) cbLay / 8) cbFav: Standard UI toggles (not used by logic).
+ * 9) EP (EffectPeriod): ! (default handling; not used here).
+ * 10) GRP (Group)     : ! (renderer handles grouping).
+ *
+ * DETAILS
+ * - Base layer:
+ *   • Sample primary palette with PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF.
+ *   • Scale by base brightness (C2), write directly (no animator).
+ * - Twinkle layer:
+ *   • A 16-bit per-frame seed (aux1) evolves for spatial variety.
+ *   • For each pixel i, hash(i, seed) ≤ threshold(IX) → draw twinkle colour.
+ *   • Twinkle colour = secondary palette at i (spanned), scaled by C1, overwrites base pixel.
+ *
+ * PERFORMANCE / NOTES
+ * - Non-animator effect: direct writes; returns FRAMETIME.
+ * - Optionally prefetch secondary colours into a temp buffer per frame (freed before return).
+ * - Brightness scaling is applied inside the effect per pixel.
+ *
+ * STATE
+ * - aux1: evolving 16-bit seed for the spatial hash.
+ **********************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 {
   // Date Modified: 17Aug2025
   // Non-animator twinkle: draw primary (preloaded) palette as background, then randomly overdraw pixels from a secondary (unloaded) palette.
   // Controls:
   //   - SEGMENT.palette_id     : base palette
-  //   - SEGMENT.custom1 (uint8): twinkle palette ID (secondary)
-  //   - SEGMENT.custom2 (uint8): twinkle brightness (0..255, default 255)
-  //   - SEGMENT.custom3 (uint8): base brightness    (0..255, default 100)
+  //   - SEGMENT.palette2_id (uint8): twinkle palette ID (secondary)
+  //   - SEGMENT.custom1 (uint8): twinkle brightness (0..255, default 255)
+  //   - SEGMENT.custom2 (uint8): base brightness    (0..255, default 100)
   //   - SEGMENT.intensity      : twinkle density per frame (0..255)
 
   const uint16_t len = SEGMENT.length();
@@ -2123,9 +2046,9 @@ We fetch palette colours without applying global brightness and apply effect bri
 
   // --- Controls ---
   const uint8_t pid_primary   = SEGMENT.palette_id;         // background
-  const uint8_t pid_secondary = (uint8_t)SEGMENT.custom1;   // twinkle
-  const uint8_t bri_twinkle   = SEGMENT.custom2 ? (uint8_t)SEGMENT.custom2 : 255;
-  const uint8_t bri_base      = SEGMENT.custom3 ? (uint8_t)SEGMENT.custom3 : 100;
+  const uint8_t pid_secondary = (uint8_t)SEGMENT.palette2_id;   // twinkle
+  const uint8_t bri_twinkle   = SEGMENT.custom1 ? (uint8_t)SEGMENT.custom1 : 255;
+  const uint8_t bri_base      = SEGMENT.custom2 ? (uint8_t)SEGMENT.custom2 : 255;
 
   // Intensity → probability threshold (16-bit) per pixel this frame
   const uint16_t twinkle_thresh = (uint16_t)((uint32_t)SEGMENT.intensity * 257u); // 0..65535
@@ -2160,7 +2083,7 @@ We fetch palette colours without applying global brightness and apply effect bri
     uint8_t dummy_enc = 0;
     uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
         i,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__DEFAULT,
         PALETTE_WRAP_OFF,
         NO_ENCODED_VALUE);
@@ -2180,7 +2103,7 @@ We fetch palette colours without applying global brightness and apply effect bri
   if (tw_buf) {
     for (uint16_t i = 0; i < len; ++i) {
       uint8_t enc2 = 0;
-      RgbwwColor tw = GetColourFromUnloadedPalette3(
+      RgbwwColor tw = GetUnloadedPaletteColour(
           pid_secondary,
           /*_pixel_position*/ i,
           /*flag_spanned_segment*/ true,   // span across segment for gradients
@@ -2201,7 +2124,7 @@ We fetch palette colours without applying global brightness and apply effect bri
         tw_u32 = tw_buf[i];
       } else {
         uint8_t enc2 = 0;
-        RgbwwColor tw = GetColourFromUnloadedPalette3(
+        RgbwwColor tw = GetUnloadedPaletteColour(
             pid_secondary,
             i,
             /*flag_spanned_segment*/ true,
@@ -2229,252 +2152,395 @@ We fetch palette colours without applying global brightness and apply effect bri
   SEGMENT.cycle_time__rate_ms = FRAMETIME;  // run at FPS speed
   return FRAMETIME;
 }
-
-
 static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM =
-  "Twinkle Palette Two on One@"
-  "Speed,Intensity,Twinkle Palette ID,Twinkle Brightness,Base Brightness,,,,,"   /* 5 sliders used; 3 checkboxes blank; ep/grp blank */
-  ";"
-  "SEGCOL_Fx,SEGCOL_Bg,SEGCOL_Col3,SEGCOL_Col4,SEGCOL_Col5"                       /* color names */
-  ";"
-  "!"                                                                              /* primary palette picker enabled */
-  ";"
-  "1"                                                                              /* icon flags: '1' = 1D/strip */
-  ";"
-  "c2=255,c3=100,paln=Snowy 02";                                                   /* defaults: twinkle=255, base=100, base palette name */
-
-  // default should be twinkle white on colour
-
-static const char PM_EFFECT_DESCRI__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-
-uint16_t mAnimatorLight::EffectAnim__Twinkle_Out_Palette()
-{
-  uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.virtualLength();
-
-  if (!SEGMENT.allocateColourData(dataSize)){    
-    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
-    SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
-    return USE_ANIMATOR;
-  }
-
-  uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch to save time 
-  
-  /**
-   * @brief Step 1: Draw palette 1 as base
-   * 
-   */
-  uint32_t colour = 0;//RgbcctColor();
-  for(uint16_t pixel = 0; 
-                pixel < SEGMENT.virtualLength(); 
-                pixel++
-  ){
-
-    colour = SEGMENT.GetPaletteColour(pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, pixel);    
-    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
-    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
-
-    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
-    #endif
-
-  }
-
-  /**
-   * @brief Step 2: Draw over randomly with palette 2
-   * Intensity will pick how many to randomly pick
-   * 
-   * For xmas2022, forced as white
-   */
-
-  uint32_t overdraw_colour = 0;//RgbcctColor();
+"Twinkle Palettes@"
+"Speed,Intensity,Twinkle Brightness,Base Brightness,,,,,!"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+";"
+""                                                          // segment colour names (none)
+";"
+"!"                                                         // primary palette picker
+";"
+"1p"                                                        // 1D strip icon
+";"
+"sx=127,"
+"ix=96,"
+"c1=255,"
+"c2=200,"
+"paln=Snowy 02"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM =
+"Base=primary; twinkles=secondary.\n\r"
+"SX:!\n\r"
+"IX:twinkle density\n\r"
+"C1:twinkle brightness\n\r"
+"C2:base brightness\n\r"
+"EP/GP:!";
 
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Compact twinkle particle (8 bytes)
+// r,g,b are pre‑scaled spawn colour from pal2; life decays 255→0
+// amp is a small per-spark jitter amplitude (0..31); pad reserved.
+// ─────────────────────────────────────────────────────────────────────────────
+struct Twinkle {
+  uint16_t pos;
+  uint8_t  r, g, b;
+  uint8_t  life;
+  uint8_t  amp;
+  uint8_t  pad;
+};
 
-
-
-
-
-
-  // colour = RgbcctColor(255,255,255);
-  uint16_t random_pixel = 0;
-  
-  uint16_t pixels_to_update = mapvalue(
-                                      SEGMENT.intensity, 
-                                      0,255, 
-                                      0,SEGMENT.length()
-                                    );
-
-  for(uint16_t pixel = 0; 
-                pixel < pixels_to_update; 
-                pixel++
-  ){
-
-    // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, pixel);
-    
-    // if(SEGMENT.flags.brightness_applied_during_colour_generation){
-    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
-    // }
-
-    random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
-
-    overdraw_colour = 0;//RgbcctColor();  //GetColourFromUnloadedPalette2(SEGMENT.params_user[0], random_pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.aux0, pixel);
-
-    // overdraw_colour.debug_print("overdraw_colour");
-
-    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_width__used_in_effect_generate, overdraw_colour);
-    SEGMENT.Set_DynamicBuffer_DesiredColour(random_pixel, overdraw_colour);
-
-    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
-    #endif
-
-  }
-
-
-
-  /**
-   * @brief Update outputs
-   * 
-   */
-
-  // Get starting positions already on show
-  SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-  // Call the animator to blend from previous to new
-  
-    SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-      SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-    });
-
-
-return USE_ANIMATOR;
-
+// safe capacity chooser (keep memory bounded)
+static inline uint16_t twinkleCapacity(uint16_t len) {
+#if defined(ESP8266)
+  if (len <= 64)  return 64;
+  if (len <= 96)  return 96;
+  return 128;
+#else
+  if (len <= 128) return 128;
+  if (len <= 192) return 192;
+  return 256;
+#endif
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_OUT_PALETTE[] PROGMEM = "Twinkle Out Palette@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-static const char PM_EFFECT_DESCRI__TWINKLE_OUT_PALETTE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : NOTDONE Blend Palette Between Another Palette
- * @note : 
- * 
- * Is this reduntant with the popping
- * 
- * 
-     * Desc: Picks colours from palette and randomly adds them as full brightness
-     *       With each call of the animation (as new colours are added), all pixels will
-     *       decay in brightness (easiest by half each time until 0).
-     *       Note: The decay must happen first, so the new draws are still at full brightness
-     *       This will require saving the total output in the buffer.
-     * 
-     * Para: 
-     * 
-     * ^^ This is the one I aciddenly made on and recorded on video. 
-     * 
-     * I simply want random leds to turn on, then everything evenally fades together until off.
-     * The amount of on/darkness will depend on intensity
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
-{
-  uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.virtualLength();
-
-// effect not written yet, copied from another
-
-  if (!SEGMENT.allocateColourData(dataSize)){    
-    ALOG_ERR( PM_MEMORY_INSUFFICIENT );
-    SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
-    return USE_ANIMATOR;
-  }
-  
-  uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch to save time 
-
-  /**
-   * @brief Step 1: Draw palette 1
-   * 
-   */
-  uint32_t colour = 0;//RgbcctColor();
-  for(uint16_t pixel = 0; 
-                pixel < SEGMENT.virtualLength(); 
-                pixel++
-  ){
-
-    colour = SEGMENT.GetPaletteColour(pixel); // mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, pixel);
-        
-    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
-    SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
-
-    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
-    #endif
-
-  }
-
-  /**
-   * @brief Step 2: Draw over randomly with palette 2
-   * Intensity will pick how many to randomly pick
-   * 
-   * For xmas2022, forced as white
-   */
-  colour = RGBW32(255,255,255,255);// RgbcctColor(255,255,255);
-  uint16_t random_pixel = 0;
-  
-  uint16_t pixels_to_update = mapvalue(
-                                      SEGMENT.intensity, 
-                                      0,255, 
-                                      0,SEGMENT.length()
-                                    );
-
-  for(uint16_t pixel = 0; 
-                pixel < pixels_to_update; 
-                pixel++
-  ){
-
-    // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, pixel);
-    
-    // if(SEGMENT.flags.brightness_applied_during_colour_generation){
-    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
-    // }
-
-    random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
-
-    // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_width__used_in_effect_generate, colour);
-    SEGMENT.Set_DynamicBuffer_DesiredColour(random_pixel, colour);
-
-    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.start, SEGMENT.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
-    #endif
-
-  }
-
-
-
-  /**
-   * @brief Update outputs
-   * 
-   */
-
-  // Get starting positions already on show
-  SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-  // Call the animator to blend from previous to new
-  
-    SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-      SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-    });
-
-  return USE_ANIMATOR;
-
+/************************************************************************************************************************************
+ * @description : Twinkle Out — instant on, no visible decay; twinkles out via random blanking toward SEGCOLOR(1).
+ * @note        : Delegates to base with (fade_up=false, show_decay=false, apply_decay_blanking=true)
+ ************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Out() {
+  return EffectAnim__Twinkle_Base(/*fade_up*/false, /*show_decay*/false, /*apply_decay_blanking*/true);
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE[] PROGMEM = "Twinkle Decaying Palette@,,,,,Repeat Rate (ms);!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-static const char PM_EFFECT_DESCRI__TWINKLE_DECAYING_PALETTE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE_OUT[] PROGMEM =
+"Twinkle Out@"
+"Speed,Intensity,Blanking strength,,,,,,,,"      // sx, ix, c1
+";"
+""                                          // seg color labels (unused)
+";"
+"!"                                             // palette picker (primary)
+";"
+"1"                                            // flags: 1D + supports P+ UI
+";"
+"paln=Colourful,"
+"sx=127,"
+"ix=160,"
+"c1=128,"
+"s1=0"
+;
+
+static const char PM_EFFECT_DESCRI__TWINKLE_OUT[] PROGMEM =
+"Instant-on twinkles that wink out toward the background.\n\r"
+"SX: Base timing (spawn/decay cadence)\n\r"
+"IX: Concurrent twinkles (1..~70% of segment)\n\r"
+"C1: Blanking strength/probability\n\r"
+"SEGCOL(1): Background blend color\n\r";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT BASE: Twinkle_Base(fade_up, show_decay, apply_decay_blanking)
+ *
+ * PURPOSE
+ *   General-purpose “twinkle” engine you can skin three ways (Twinkle_Out, Twinkle_Decay, Twinkle_Glow) with only three booleans.
+ *   It renders a solid background every frame, then spawns/updates short-lived per-pixel “twinkles” that never overwrite each other.
+ *   Runs without the animator (direct writes). All per-twinkle state lives in SEGMENT.data as an array of Twinkle structs.
+ *
+ * LOOK / MODES (how to call it)
+ *   • Twinkle_Out    → fade_up=false, show_decay=false, apply_decay_blanking=true
+ *       Instant on (no continuous decay curve), with rare 1–2 frame “winks” to background ⇒ star-like twinkle out.
+ *   • Twinkle_Decay  → fade_up=false, show_decay=true,  apply_decay_blanking=true
+ *       Instant on + smooth ease-out, with occasional winks during the decay.
+ *   • Twinkle_Glow   → fade_up=true,  show_decay=true,  apply_decay_blanking=true
+ *       Smooth ease-in and ease-out (like Glow Spots), plus subtle winks for sparkle.
+ *
+ * CONTROLS (read from SEGMENT)
+ *   • SX (speed)        : Full twinkle lifetime window per pixel   →  0 → ~10s, 255 → ~0.5s (each twinkle jitters ±50% to avoid sync).
+ *   • IX (intensity)    : Max active density                       →  1 .. ~70% of SEGLEN (spawns toward this target each frame).
+ *   • C1 (custom1)      : “Twinkle” blanking strength 0..255       →  Higher = slightly more frequent winks (still sparse).
+ *   • Palette/Check1    : Colour source:
+ *                           - Check1=ON: force segment-spanned gradient sampling from primary palette (smooth across SEGLEN).
+ *                           - Check1=OFF: default palette sampling via GetPaletteColour_ModeWrap(...).
+ *   • SEGCOLOR(1)       : Background colour each frame (twinkles are blended over this).
+ *
+ * IMPLEMENTATION NOTES
+ *   • Background is filled first (SEGCOLOR(1)), then twinkles are blended (bg → twinkle colour by per-twinkle brightness).
+ *   • Per-twinkle state: {pos, life(0..255), rgb, amp(180..255 peak), pad(8-bit blank window/cooldown)}.
+ *   • Spawning:
+ *       - We never overwrite actives: new spawn picks an unoccupied pixel (up to ~12 tries); if none found, we skip.
+ *       - SpawnBudget ~ 10% of current deficit toward the target active count (1..8 per frame), avoiding “fill then lock”.
+ *   • Timing / curves:
+ *       - life advances by (FRAMETIME / period) * 255; period = map(SX) with per-twinkle ±50% jitter by pixel position.
+ *       - Brightness envelope b(t) uses smoothstep (u*u*(3-2u)) for fade-up/down as selected by the booleans.
+ *   • Blanking (“winks”):
+ *       - When enabled, a twinkle may briefly blank (1–2 frames) during its brighter half/decay, then sets a cooldown.
+ *       - Rate is intentionally conservative; C1 scales probability, but remains visually sparse.
+ *
+ * MEMORY / PERF
+ *   • Allocates SEGMENT.data for up to `slots` Twinkle structs, capped by FAIR_DATA_PER_SEG and active segment count.
+ *   • No animator buffer or blends; returns FRAMETIME (fixed cadence).
+ *
+ * RETURN
+ *   • FRAMETIME
+ *
+ * QUICK HOOKS
+ *   • To colour twinkles from the secondary palette instead, replace samplePaletteU32() to read SEGMENT.palette2_id.
+ *   • To pin maximum density: clamp ‘maxActive’ computation (currently ~0.7*SEGLEN at IX=255).
+ **********************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Base(bool fade_up, bool show_decay, bool apply_decay_blanking)
+{
+  if (SEGLEN == 0) return FRAMETIME;
+
+  // 1) draw backdrop every frame
+  const uint32_t bg = SEGCOLOR(1);
+  SEGMENT.fill(bg);
+
+  // 2) capacity by intensity (1 .. ~0.7*SEGLEN)
+  uint16_t maxActive = 1 + (uint32_t)SEGMENT.intensity * (SEGLEN * 7 / 10) / 255u;
+  if (maxActive > SEGLEN) maxActive = SEGLEN;
+
+  // memory cap
+  unsigned maxData = FAIR_DATA_PER_SEG;
+  unsigned segs    = getActiveSegmentsNum();
+  if (segs <= (getMaxSegments()/2)) maxData *= 2;
+  if (segs <= (getMaxSegments()/4)) maxData *= 2;
+  uint16_t maxSlotsMem = maxData / sizeof(Twinkle);
+  uint16_t slots = (maxActive > maxSlotsMem) ? maxSlotsMem : maxActive;
+  if (slots < 1) slots = 1;
+
+  if (!SEGMENT.allocateData(slots * sizeof(Twinkle))) return FRAMETIME;
+
+  Twinkle* tw = reinterpret_cast<Twinkle*>(SEGMENT.data);
+
+  // 3) timing: 0->10s, 255->0.5s full cycle; per‑twinkle jitter later
+  const float T_min_ms = 500.0f;
+  const float T_max_ms = 10000.0f;
+  float basePeriodMs = T_max_ms - (float(SEGMENT.speed) * (T_max_ms - T_min_ms) / 255.0f);
+  if (basePeriodMs < T_min_ms) basePeriodMs = T_min_ms;
+  const float dt_ms = float(FRAMETIME);
+
+  // palette sampler: checkbox1 forces gradient (segment‑spanned)
+  auto samplePaletteU32 = [&](uint16_t idx) -> uint32_t {
+    if (SEGMENT.check1) {
+      return GetColourFromUnloadedPalette3_U32(
+        SEGMENT.palette_id,
+        idx,
+        /*spanned*/ true,
+        /*hard edge wrap*/ false,
+        /*exact*/ false,
+        /*encoded*/ nullptr,
+        /*full visual*/ true
+      );
+    }
+    return SEGMENT.GetPaletteColour_ModeWrap(
+      idx,
+      PALETTE_INDEX__IS_SEGLEN_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_OFF,
+      NO_ENCODED_VALUE
+    );
+  };
+
+  // 4) count active
+  uint16_t activeCount = 0;
+  for (uint16_t i = 0; i < slots; i++) if (tw[i].life) activeCount++;
+
+  // 5) spawn budget per frame (don’t fill in one go)
+  //    proportional to deficit + a small base; clamp to keep bursts modest
+  uint16_t deficit = (activeCount < maxActive) ? (maxActive - activeCount) : 0;
+  uint8_t spawnBudget = 0;
+  if (deficit) {
+    // scale spawn ~10% of deficit, at least 1, at most 8 / frame
+    spawnBudget = (deficit + 9) / 10;
+    if (spawnBudget < 1) spawnBudget = 1;
+    if (spawnBudget > 8) spawnBudget = 8;
+  }
+
+  auto isOccupied = [&](uint16_t pos)->bool {
+    for (uint16_t i = 0; i < slots; i++) if (tw[i].life && tw[i].pos == pos) return true;
+    return false;
+  };
+
+  // 6) spawn loop
+  while (spawnBudget--) {
+    // find a free struct slot
+    int16_t si = -1;
+    for (uint16_t i = 0; i < slots; i++) { if (tw[i].life == 0) { si = i; break; } }
+    if (si < 0) break;
+
+    // find a free pixel
+    bool placed = false;
+    for (uint8_t attempt = 0; attempt < 12; attempt++) {
+      uint16_t pos = random16(SEGLEN);
+      if (!isOccupied(pos)) {
+        uint32_t c = samplePaletteU32(pos);
+        tw[si].pos  = pos;
+        tw[si].r    = (c >> 16) & 0xFF;
+        tw[si].g    = (c >>  8) & 0xFF;
+        tw[si].b    = (c      ) & 0xFF;
+        tw[si].life = 1;                           // start at beginning of phase
+        tw[si].amp  = 180 + (random8() % 76);      // 180..255 peak
+        tw[si].pad  = 0;                           // no blink window yet
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) break;
+  }
+
+  // 7) update + render
+  const uint8_t blankStrength = SEGMENT.custom1; // 0..255 “how often to twinkle (blink)”
+  for (uint16_t i = 0; i < slots; i++) {
+    if (!tw[i].life) continue;
+
+    // stable per‑twinkle period jitter (50%..150%) from position
+    uint8_t salt = (tw[i].pos * 131) ^ 0x5A;
+    float T = basePeriodMs * (0.5f + float(salt)/255.0f);
+
+    float t = tw[i].life / 255.0f; // 0..1
+    // brightness envelope
+    float b = 1.0f;
+    if (fade_up) {
+      if (show_decay) {
+        // smooth up then smooth down
+        if (t < 0.5f) {
+          float u = t * 2.0f;
+          b = u*u*(3.f - 2.f*u);
+        } else {
+          float d = (1.0f - t) * 2.0f;
+          b = d*d*(3.f - 2.f*d);
+        }
+      } else {
+        float u = (t < 0.5f) ? (t*2.0f) : 1.0f;
+        b = u*u*(3.f - 2.f*u);
+      }
+    } else {
+      if (show_decay) {
+        float d = 1.0f - t;
+        b = d*d*(3.f - 2.f*d);
+      } else {
+        b = 1.0f;
+      }
+    }
+
+    // twinkle “blink window”: short, sparse blackout bursts with cooldown
+    bool blankNow = false;
+    if (apply_decay_blanking && blankStrength) {
+      uint8_t state = tw[i].pad;
+
+      if (state & 0x80) {
+        // --- currently in a blackout window ---
+        uint8_t framesLeft = state & 0x7F;
+        blankNow = true;
+        if (framesLeft > 0) {
+          tw[i].pad = 0x80 | (framesLeft - 1);      // continue window
+        } else {
+          tw[i].pad = 8 + (random8() & 0x0F);       // cooldown: 8..23 frames
+        }
+      } else {
+        // --- cooldown or ready ---
+        if (state > 0) {
+          tw[i].pad = state - 1;                     // tick cooldown down
+        } else {
+          // only attempt to start a window when we’re decaying & bright enough
+          // b is your 0..1 brightness fraction; bias toward the brighter half
+          const bool inDecayAndBright = (b > 0.45f);
+          if (inDecayAndBright) {
+            // very conservative gate: scale blankStrength heavily
+            uint8_t gate = scale8(blankStrength, 8); // MUCH rarer than before
+            // add a little bias based on brightness (kept small)
+            gate = qadd8(gate, uint8_t(b * 16.0f));
+            if (random8() < gate) {
+              // start a short window (1–2 frames)
+              tw[i].pad = 0x80 | (1 + (random8() & 0x01));
+              blankNow = true;
+            }
+          }
+        }
+      }
+    }
+
+
+    // compose output
+    uint8_t br = scale8(tw[i].amp, uint8_t(constrain(b*255.f, 0.f, 255.f)));
+    uint32_t twc = RGBW32(tw[i].r, tw[i].g, tw[i].b, 0);
+    uint32_t out = blankNow ? bg : color_blend(bg, twc, br); // lerp bg->twinkle by brightness
+    SEGMENT.setPixelColor(tw[i].pos, out);
+
+    // advance life by dt/T
+    float dl = (dt_ms / T) * 255.0f;
+    uint16_t next = uint16_t(tw[i].life) + uint16_t(dl);
+    if (next >= 255) {
+      tw[i].life = 0;                // free slot
+      tw[i].pad  = 0;
+    } else {
+      tw[i].life = uint8_t(next);
+    }
+  }
+
+  return FRAMETIME;
+}
+
+
+/************************************************************************************************************************************
+ * @description : Twinkle Decay — instant on, then fades down; includes random blanking during decay.
+ * @note        : Delegates to base with (fade_up=false, show_decay=true, apply_decay_blanking=true)
+ ************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Decay() {
+  return EffectAnim__Twinkle_Base(/*fade_up*/false, /*show_decay*/true, /*apply_decay_blanking*/true);
+}
+static const char PM_EFFECT_CONFIG__TWINKLE_DECAY[] PROGMEM =
+"Twinkle Decay@"
+"Speed,Intensity,Blanking strength,,,,,,,,"      // sx, ix, c1
+";"
+""
+";"
+"!"
+";"
+"1p"
+";"
+"paln=Colourful,"
+"sx=127,"
+"ix=160,"
+"c1=96,s1=0"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_DECAY[] PROGMEM =
+"Instant-on twinkles that gracefully fade down, with occasional winks to background.\n\r"
+"SX: Base decay timing (0=slow .. 255=fast)\n\r"
+"IX: Concurrent twinkles (1..~70% of segment)\n\r"
+"C1: Blanking strength/probability\n\r"
+"SEGCOL(1): Background blend color\n\r";
+
+
+/************************************************************************************************************************************
+ * @description : Twinkle Glow — fade up, then fade down; includes random blanking to add sparkle.
+ * @note        : Delegates to base with (fade_up=true, show_decay=true, apply_decay_blanking=true)
+ ************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Glow() {
+  return EffectAnim__Twinkle_Base(/*fade_up*/true, /*show_decay*/true, /*apply_decay_blanking*/true);
+}
+static const char PM_EFFECT_CONFIG__TWINKLE_GLOW[] PROGMEM =
+"Twinkle Glow@"
+"Speed,Intensity,Blanking strength,,,,,,,,"      // sx, ix, c1
+";"
+""
+";"
+"!"
+";"
+"1p"
+";"
+"paln=Colourful,"
+"sx=127,"
+"ix=160,"
+"c1=80,s1=0"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
+"Soft glow twinkles that rise and fall, with subtle sparkle blanking.\n\r"
+"SX: Base rise/fall timing (0=slow .. 255=fast)\n\r"
+"IX: Concurrent twinkles (1..~70% of segment)\n\r"
+"C1: Blanking strength/probability\n\r"
+"SEGCOL(1): Background blend color\n\r";
+
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC  SECITON END ////////////////////////////////////////////////////////
-
-
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -2499,7 +2565,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01()
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -2533,7 +2599,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_P
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -2569,7 +2635,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01()
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -2726,7 +2792,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
 
       uint32_t colour = SEGMENT.GetPaletteColour(
         palette_index,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_WRAP_ON,
         PALETTE_DISCRETE_OFF,
         NO_ENCODED_VALUE
@@ -2944,7 +3010,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool 
 
       uint32_t colour = SEGMENT.GetPaletteColour(
         palette_index,
-        PALETTE_INDEX_SPANS_SEGLEN_ON,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_WRAP_ON,
         PALETTE_DISCRETE_OFF,
         NO_ENCODED_VALUE
@@ -3050,7 +3116,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azim
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -3085,7 +3151,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -3322,7 +3388,7 @@ uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevatio
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTE* ptr = &mPaletteI->static_palettes[SEGMENT.palette_id];
-//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInUNLOADEDPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -3663,7 +3729,7 @@ uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, 
     // RgbcctColor colour = RgbcctColor();
     // colour = SEGMENT.GetPaletteColour(color_index);      
 
-    uint32_t colour = SEGMENT.GetPaletteColour(color_index, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour(color_index, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel_index, colour);
 
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
@@ -3712,13 +3778,13 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
     // colour = SEGMENT.GetPaletteColour(color);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
-    uint32_t colour = SEGMENT.GetPaletteColour(color, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     SEGMENT.Set_DynamicBuffer_DesiredColour(startPos, colour);
 
     if ( dots == 2 ) 
     {
 
-      uint32_t colour = SEGMENT.GetPaletteColour(color, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      uint32_t colour = SEGMENT.GetPaletteColour(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
       SEGMENT.Set_DynamicBuffer_DesiredColour(startPos+1, colour);
 
 
@@ -4235,7 +4301,7 @@ uint16_t mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRand
   else
   if(useIterateOverPalette)
   {
-    col_wipe = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    col_wipe = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
   }
   else
   {
@@ -4256,11 +4322,11 @@ uint16_t mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRand
     else
     if(useIterateOverPalette)
     {
-      col_base = SEGMENT.GetPaletteColour(SEGMENT.aux0, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+      col_base = SEGMENT.GetPaletteColour(SEGMENT.aux0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     }
     else
     {
-      col_base = SEGMENT.GetPaletteColour(indexPixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+      col_base = SEGMENT.GetPaletteColour(indexPixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     }
 
     if (i < ledIndex) 
@@ -4679,11 +4745,13 @@ static const char PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE[] PROGMEM = "Cycle Betwe
 
 
 /********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : Alternating pixels running function.
- * @note : running
- *******************************************************************************************************************************************************************************************************************
+ * @description : Chase Theater (Base)
+ * @note        : Core engine for “theater chase” effects.
+ *                - Alternating blocks of foreground vs. background color run along the strip.
+ *                - Foreground can be palette-driven or rainbow.
+ *                - `theatre` flag selects classic Adafruit-style (every Nth pixel) or a wider window mode.
+ *                IX (Gap size) : width of lit window / size of gap.
+ *                SX (Speed)    : chase speed (smaller cycle time = faster).
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool theatre)
 {
@@ -4695,7 +4763,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_
 
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint32_t col = color2;
-    if (usePalette) color1 = SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    if (usePalette) color1 = SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
     if (theatre) {
       if ((i % width) == SEGMENT.aux0) col = color1;
     } else {
@@ -4715,34 +4783,113 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_
 }
 
 
-/**
- * Theatre-style crawling lights.
- * Inspired by the Adafruit examples.
- * @note : mode_theater_chase
- */
+/********************************************************************************************************************************************************************************************************************
+ * @description : Theater Chase
+ * @note        : Alternating “marquee” windows that advance along the strip.
+ *                Foreground = palette, background = SEGCOLOR(1).
+ *                IX (Gap size) : window width (larger = wider lit blocks / larger gaps).
+ *                SX (Speed)    : chase speed (higher = faster).
+ ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Theater(void) {
   return EffectAnim__Base_Chase_Theater(SEGCOLOR(0), SEGCOLOR(1), true);
 }
-static const char PM_EFFECT_CONFIG__THEATER_CHASE[] PROGMEM = "Theater@!,Gap size;!,!;!";
-static const char PM_EFFECT_DESCRI__THEATER_CHASE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__THEATER_CHASE[] PROGMEM =
+"Theater@"
+"Speed,Gap size,,,,,,,,"      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
+""
+";"
+"!"                           // palette picker (foreground uses palette)
+";"
+"1"                          // flags: 1D strip, supports secondary palette UI
+";"
+"pal=0,"
+"sx=127,"
+"ix=32,"
+"s0=00F," // segment colours s0,..,s5 as RGB or RRGGBB hex values supporting RGBWC
+"s1=F10" // segment colours s0,..,s5 as RGB or RRGGBB hex values supporting RGBWC
+;
+static const char PM_EFFECT_DESCRI__THEATER_CHASE[] PROGMEM =
+"Marquee-style alternating windows (palette FG over BG).\n\r"
+"IX: Gap/window size\n\r"
+"SX: Speed"
+;
 
 
-/**
- * Theatre-style crawling lights with rainbow effect.
- * Inspired by the Adafruit examples.
- * @note : mode_theater_chase_rainbow
- */
+/********************************************************************************************************************************************************************************************************************
+ * @description : Theater Chase — Rainbow
+ * @note        : Alternating “marquee” windows with a rainbow foreground head.
+ *                Background = SEGCOLOR(1), palette ignored for FG.
+ *                IX (Gap size) : window width (larger = wider lit blocks / larger gaps).
+ *                SX (Speed)    : chase speed (higher = faster).
+ ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow(void) {
-  return EffectAnim__Base_Chase_Theater( SEGMENT.color_wheel(SEGMENT.step), SEGCOLOR(1), true);
+  return EffectAnim__Base_Chase_Theater(SEGMENT.color_wheel(SEGMENT.step), SEGCOLOR(1), true);
 }
-static const char PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW[] PROGMEM = "Theater Rainbow@!,Gap size;,!;!";
-static const char PM_EFFECT_DESCRI__THEATER_CHASE_RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW[] PROGMEM =
+"Theater Rainbow@"
+"Speed,Gap size,,,,,,,,"      // 10 fields after '@'
+";"
+""
+";"
+""                            // no palette picker (rainbow ignores palette for FG)
+";"
+"1"                           // flags: 1D strip
+";"
+"sx=127,"
+"ix=32,"
+"s1=111" // segment colours s0,..,s5 as RGB or RRGGBB hex values supporting RGBWC
+;
+static const char PM_EFFECT_DESCRI__THEATER_CHASE_RAINBOW[] PROGMEM =
+"Marquee windows with rainbow foreground (palette ignored for FG).\n\r"
+"IX: Gap/window size\n\r"
+"SX: Speed"
+;
+
+
+/********************************************************************************************************************************************************************************************************************
+ * @description : Running Blocks
+ * @note        : Alternating rectangular bands of foreground vs. background color that move along the strip.
+ *                Foreground = palette, background = SEGCOLOR(1).
+ *                IX (Block width) : width of lit block / gap.
+ *                SX (Speed)       : chase speed (higher = faster).
+ ********************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Running_Colour(void) {
+  return EffectAnim__Base_Chase_Theater(SEGCOLOR(0), SEGCOLOR(1), false);
+}
+static const char PM_EFFECT_CONFIG__RUNNING_COLOR[] PROGMEM =
+"Threate Blocks@"
+"Speed,Block width,,,,,,,,"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
+",,,,"
+";"
+"!"                           // palette picker (foreground uses palette)
+";"
+"1"                           // flags: 1D strip
+";"
+"pal=0,"
+"sx=127,"
+"ix=32,"
+"s0=00F," // segment colours s0,..,s5 as RGB or RRGGBB hex values supporting RGBWC
+"s1=111"  // background color
+;
+static const char PM_EFFECT_DESCRI__RUNNING_COLOR[] PROGMEM =
+"Alternating foreground/background blocks running along the strip.\n\r"
+"IX: Block width\n\r"
+"SX: Speed"
+;
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Tricolor chase function
- * @note : Converted from WLED Effects "tricolor_chase"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Tricolor Chase (base)
+ * @note        : Three repeating windows advance along the strip: [color1] → [color2] → [palette].
+ *                - Window width is set by IX (1..16 per color block).
+ *                - Speed is set by SX (larger = faster; internal cycle = 50 + 2*(255-SX) ms).
+ *                - Third band pulls from the current palette (solid wrap, index=1).
+ *                Rendering order is reversed to SEGLEN - i - 1 for a classic chasing look.
+ *                IX (Size)  : width of each color band (gap/segment size).
+ *                SX (Speed) : chase rate.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t color2)
 {
   uint32_t cycleTime = 50 + ((255 - SEGMENT.speed)<<1);
@@ -4764,14 +4911,32 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase_TriColour(uint32_t color1, uint3
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Tricolor chase mode
- * @note : Converted from WLED Effects "mode_tricolor_chase"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Tricolor Chase
+ * @note        : Three-band chase: SEGCOLOR(2) → SEGCOLOR(0) → Palette band (index 1), repeating.
+ *                IX (Size)  : width of each band.
+ *                SX (Speed) : chase rate.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_TriColour(void) {
   return EffectAnim__Base_Chase_TriColour(SEGCOLOR(2), SEGCOLOR(0));
 }
-static const char PM_EFFECT_CONFIG__TRICOLOR_CHASE[] PROGMEM = "Chase 3@!,Size;1,2,3;!";
-static const char PM_EFFECT_DESCRI__TRICOLOR_CHASE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TRICOLOR_CHASE[] PROGMEM =
+"Chase 3@"                                   // Name
+"Speed,Size,,,,,,,,"                         // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+"1,2,3,,"                                    // Segment Colour Names (uses SEGCOLOR slots 1..3 labels)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (third band uses palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                          // icon flags: '1' = 1D strip, 'p' = supports secondary palette UI
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"pal=0,"                                      // default palette id
+"sx=127,"                                     // default speed
+"ix=16"                                       // default band width (1..16 typical)
+;                                             // end special key=value defaults
+static const char PM_EFFECT_DESCRI__TRICOLOR_CHASE[] PROGMEM =
+"Three-band chase: C2 → C0 → Palette.\n\r"
+"IX: Band size\n\r"
+"SX: Speed";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -4813,11 +4978,12 @@ static const char PM_EFFECT_DESCRI__CHASE_RANDOM[] PROGMEM = "Cycle Between Each
 
 
 /********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Exploding fireworks effect
- * @note : Converted from WLED Effect
- * @note : mode_breath
- *******************************************************************************************************************************************************************************************************************
+ * @description : Breath
+ * @note        : Soft “breathing” brightness pulse that blends the current palette over a background segment color.
+ *                - Background color: SEGCOLOR(1)
+ *                - Foreground: palette across the segment (spans SEGLEN, wraps)
+ *                SX (Speed) : breathing rate (higher = faster)
+ *                IX         : (not used)
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Breath()
 {
@@ -4833,14 +4999,30 @@ uint16_t mAnimatorLight::EffectAnim__Breath()
   uint8_t lum = 30 + var;
   for(unsigned i = 0; i < SEGLEN; i++) 
   {
-    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR(1), SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON), lum) );
+    // SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR(1), SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON), lum) );
+    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR(1), SEGMENT.GetPaletteColour_ModeWrap(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH), lum) );
   }
 
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM = "Breath@!;!,!;!;01";
-static const char PM_EFFECT_DESCRI__BREATH[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM =
+"Breath@"                                     // Name
+"Speed,,,,,,,,,"                              // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+",,,,"                                      // Segment Colour names (SEGCOLOR slots; uses Bg = SEGCOLOR(1))
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (foreground uses palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"01"                                          // flags: '1' -> 1D strip, 'p' -> supports Secondary Palette UI
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"sx=127,"                                      // default breathing speed
+"s1=000"
+;                                             // end special key=value defaults
+static const char PM_EFFECT_DESCRI__BREATH[] PROGMEM =
+"Soft palette breath over background color.\n\r"
+"BG: SEGCOLOR(1)\n\r"
+"SX: Breathing speed";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -4855,7 +5037,7 @@ uint16_t mAnimatorLight::EffectAnim__Fade()
   uint8_t lum = triwave16(counter) >> 8;
 
   for(unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR_U32(1), SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON), lum) );
+    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR_U32(1), SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON), lum) );
   }
 
   return FRAMETIME;
@@ -5596,30 +5778,6 @@ static const char PM_EFFECT_DESCRI__HYPER_SPARKLE[] PROGMEM = "Cycle Between Eac
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : A very short twinkle routine with fade-in and dual controls. By Andrew Tuline.
- * @note : Converted from WLED Effects "mode_twinkleup"
- ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Twinkle_Up() // Firework_Rain
-{
-  unsigned prevSeed = random16_get_seed();      // save seed so we can restore it at the end of the function
-  random16_set_seed(535);                       // The randomizer needs to be re-set each time through the loop in order for the same 'random' numbers to be the same each time through.
-
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    unsigned ranstart = random8();               // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
-    unsigned pixBri = sin8_t(ranstart + 16 * effect_start_time/(256-SEGMENT.speed));
-    if (random8() > SEGMENT.intensity) pixBri = 0;
-    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(random8()+effect_start_time/100, false, PALETTE_SOLID_WRAP, 0), pixBri));
-  }
-
-  random16_set_seed(prevSeed); // restore original seed so other effects can use "random" PRNG
-  return FRAMETIME;
-  
-}
-static const char PM_EFFECT_CONFIG__TWINKLE_UP[] PROGMEM = "Twinkle Up@!,Intensity;!,!;!;;m12=0";
-static const char PM_EFFECT_DESCRI__TWINKLE_UP[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-/*******************************************************************************************************************************************************************************************************************
  * @description : Lights all LEDs up in one random color. Then switches them to the next random color.
  * @note : Converted from WLED Effect "mode_random_color"
  ********************************************************************************************************************************************************************************************************************/
@@ -5651,7 +5809,7 @@ uint16_t mAnimatorLight::EffectAnim__Random_Colour()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM = "Random Colors@!,Fade time;;!;01";
+static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM = "Random Colors@!,Fade time;;!;1";
 static const char PM_EFFECT_DESCRI__RANDOM_COLOR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
@@ -5682,7 +5840,7 @@ static const char PM_EFFECT_DESCRI__RAINBOW_CYCLE[] PROGMEM = "Cycle Between Eac
  * @description : Running lights effect with smooth sine transition base.
  * @note : Converted from WLED Effects "running"
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Base_Running(bool saw, bool dual)
+uint16_t mAnimatorLight::EffectAnim__Base_RunningWaves(bool saw, bool dual)
 {
 
   unsigned x_scale = SEGMENT.intensity >> 2;
@@ -5722,7 +5880,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Running(bool saw, bool dual)
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Running_Lights()
 {
-  return EffectAnim__Base_Running(false);
+  return EffectAnim__Base_RunningWaves(false);
 }
 static const char PM_EFFECT_CONFIG__RUNNING_LIGHTS[] PROGMEM = "Running@!,Wave width;!,!;!";
 static const char PM_EFFECT_DESCRI__RUNNING_LIGHTS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
@@ -5734,10 +5892,22 @@ static const char PM_EFFECT_DESCRI__RUNNING_LIGHTS[] PROGMEM = "Cycle Between Ea
  *********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Saw()
 {
-  return EffectAnim__Base_Running(true);
+  return EffectAnim__Base_RunningWaves(true);
 }
 static const char PM_EFFECT_CONFIG__SAW[] PROGMEM = "Saw@!,Width;!,!;!";
 static const char PM_EFFECT_DESCRI__SAW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Running lights in opposite directions.
+ *                Idea: Make the gap width controllable with a third slider in the future
+ * @note : Converted from WLED Effects "mode_running_dual"
+ ********************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Running_Dual()
+{
+  return EffectAnim__Base_RunningWaves(false, true);
+}
+static const char PM_EFFECT_CONFIG__RUNNING_DUAL[] PROGMEM = "Running Dual@!,Wave width;L,!,R;!";
+static const char PM_EFFECT_DESCRI__RUNNING_DUAL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -5919,67 +6089,14 @@ static const char PM_EFFECT_DESCRI__ANDROID[] PROGMEM = "Cycle Between Each Live
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Red - Amber - Green - Blue lights running
- * @note : Converted from WLED Effects "mode_colorful"
+ * @description : Triplet parade that cycles per 3‑LED block: 
+ *                Phase 0 → Red, Phase 1 → Red+Amber, Phase 2 → Green, Phase 3 → Amber. 
+ *                Background is prefilled from the active palette; the four phases overlay the slots.
+ *                Speed controls dwell time (faster with higher SX). 
+ *                “US style” (skip Red+Amber) engages when INTENSITY > 140.
+ * @note        : Converted from WLED “traffic light”, rethemed as TriPops (ordered, rhythmic, non‑random).
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__ColourFul()
-{
-
-  uint8_t numColors = 4; //3, 4, or 5
-  uint32_t cols[9]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC};
-  if (SEGMENT.intensity > 160 || SEGMENT.palette_id) { //palette or color
-    // If RGBCCT palette, use the first 3 colors
-    if (SEGMENT.palette_id == mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) {
-      numColors = 5;
-      for (size_t i = 0; i < 5; i++) cols[i] = SEGCOLOR_U32(i);
-    } 
-    else
-    {
-      uint16_t fac = 80;
-      // if (SEGMENT.palette_id == mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__C9__ID) {numColors = 5; fac = 61;} //C9 2 has 5 colors
-      for (size_t i = 0; i < numColors; i++) 
-      {
-        cols[i] = SEGMENT.GetPaletteColour(i*fac, PALETTE_SPAN_OFF, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);  
-      }
-    }
-  } 
-  else 
-  if (SEGMENT.intensity < 80) //pastel (easter) colors
-  {
-    cols[0] = 0x00FF8040;
-    cols[1] = 0x00E5D241;
-    cols[2] = 0x0077FF77;
-    cols[3] = 0x0077F0F0;
-  }
-  for (size_t i = numColors; i < numColors*2 -1U; i++) cols[i] = cols[i-numColors];
-
-  uint32_t cycleTime = 50 + (8 * (uint32_t)(255 - SEGMENT.speed));
-  uint32_t it = effect_start_time / cycleTime;
-  if (it != SEGMENT.step)
-  {
-    if (SEGMENT.speed > 0) SEGMENT.aux0++;
-    if (SEGMENT.aux0 >= numColors) SEGMENT.aux0 = 0;
-    SEGMENT.step = it;
-  }
-
-  for (int i = 0; i < SEGLEN; i+= numColors)
-  {
-    for (int j = 0; j < numColors; j++) SEGMENT.setPixelColor(i + j, cols[SEGMENT.aux0 + j]);
-  }
-  
-  DIRECT_MODE(FRAMETIME);
-  return FRAMETIME;
-  
-}
-static const char PM_EFFECT_CONFIG__COLORFUL[] PROGMEM = "Colourful@!,Saturation;1,2,3;!";
-static const char PM_EFFECT_DESCRI__COLORFUL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-/*******************************************************************************************************************************************************************************************************************
- * @description : Emulates a traffic light.
- * @note : Converted from WLED Effects "mode_traffic_light"
- ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Traffic_Light()
+uint16_t mAnimatorLight::EffectAnim__TriPops()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
   for (unsigned i=0; i < SEGLEN; i++)
@@ -6008,50 +6125,15 @@ uint16_t mAnimatorLight::EffectAnim__Traffic_Light()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__TRAFFIC_LIGHT[] PROGMEM = "Traffic Light@!,US style;,!;!";
-static const char PM_EFFECT_DESCRI__TRAFFIC_LIGHT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TRIPOPS[] PROGMEM =
+"TriPops@!,US style;,!;!";
+static const char PM_EFFECT_DESCRI__TRIPOPS[] PROGMEM =
+"Triplet parade over repeating 3-LED blocks.\n\r"
+"SX: Cycle rate (dwell per phase)\n\r"
+"IX: —\n\r"
+"Note: US style (skip Red+Amber) when INTENSITY > 140.";
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : Alternating pixels running function.
- * @note : Converted from WLED Effects "running"
- ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Base_Running(uint32_t color1, uint32_t color2, bool theatre)
-{
-  int width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
-  uint32_t cycleTime = 50 + (255 - SEGMENT.speed);
-  uint32_t it = effect_start_time / cycleTime;
-  bool usePalette = color1 == SEGCOLOR(0);
-
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    uint32_t col = color2;
-    if (usePalette) color1 = SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
-    if (theatre) {
-      if ((i % width) == SEGMENT.aux0) col = color1;
-    } else {
-      int pos = (i % (width<<1));
-      if ((pos < SEGMENT.aux0-width) || ((pos >= SEGMENT.aux0) && (pos < SEGMENT.aux0+width))) col = color1;
-    }
-    SEGMENT.setPixelColor(i,col);
-  }
-
-  if (it != SEGMENT.step) {
-    SEGMENT.aux0 = (SEGMENT.aux0 +1) % (theatre ? width : (width<<1));
-    SEGMENT.step = it;
-  }
-  DIRECT_MODE(FRAMETIME);
-  return FRAMETIME;
-    
-}
-
-/*
- * Alternating color/sec pixels running.
- */
-uint16_t mAnimatorLight::EffectAnim__Running_Colour(void) {
-  return EffectAnim__Base_Running(SEGCOLOR(0), SEGCOLOR(1));
-}
-static const char PM_EFFECT_CONFIG__RUNNING_COLOR[] PROGMEM = "Running 2@!,Width;!,!;!";
-static const char PM_EFFECT_DESCRI__RUNNING_COLOR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -6151,111 +6233,104 @@ static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM = "Loading@!,Fade;!,!;!;;i
 static const char PM_EFFECT_DESCRI__LOADING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : Converted from WLED Effects
- * //American Police Light with all LEDs Red and Blue 
-
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-uint16_t mAnimatorLight::EffectAnim__Base_Police(uint32_t color1, uint32_t color2, bool all)
-{
-
-  uint16_t counter = millis() * ((SEGMENT.speed >> 2) +1);
-  uint16_t idexR = (counter * SEGLEN) >> 16;
-  if (idexR >= SEGLEN) idexR = 0;
-
-  uint16_t topindex = SEGLEN >> 1;
-  uint16_t idexB = (idexR > topindex) ? idexR - topindex : idexR + topindex;
-  if (SEGMENT.call == 0) SEGMENT.aux0 = idexR;
-  if (idexB >= SEGLEN) idexB = 0; //otherwise overflow on odd number of LEDs
-
-  if (all) { //different algo, ensuring immediate fill
-    if (idexB > idexR) {
-      fill(color2);
-      for (uint16_t i = idexR; i < idexB; i++) SEGMENT.setPixelColor(i, color1);
-    } else {
-      fill(color1);
-      for (uint16_t i = idexB; i < idexR; i++) SEGMENT.setPixelColor(i, color2);
-    } 
-  } else { //regular dot-only mode
-    uint8_t size = 1 + SEGMENT.intensity >> 3;
-    if (size > SEGLEN/2) size = 1+ SEGLEN/2;
-    for (uint8_t i=0; i <= size; i++) {
-      SEGMENT.setPixelColor(idexR+i, color1);
-      SEGMENT.setPixelColor(idexB+i, color2);
-    }
-    if (SEGMENT.aux0 != idexR) {
-      uint8_t gap = (SEGMENT.aux0 < idexR)? idexR - SEGMENT.aux0:SEGLEN - SEGMENT.aux0 + idexR;
-      for (uint8_t i = 0; i <= gap ; i++) {
-        if ((idexR - i) < 0) idexR = SEGLEN-1 + i;
-        if ((idexB - i) < 0) idexB = SEGLEN-1 + i;
-        SEGMENT.setPixelColor(idexR-i, color1);
-        SEGMENT.setPixelColor(idexB-i, color2);
-      }
-      SEGMENT.aux0 = idexR;
-    }
-  }
-  
-  return FRAMETIME;
-  
-}
-
-
-//American Police Light with all LEDs Red and Blue 
-uint16_t mAnimatorLight::EffectAnim__Police_All()
-{  
-  return EffectAnim__Base_Police(RED, BLUE, true);
-}
-static const char PM_EFFECT_CONFIG__POLICE_ALL[] PROGMEM = "Police All@!,Width;,Bg;0";
-static const char PM_EFFECT_DESCRI__POLICE_ALL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-//Police Lights Red and Blue 
-uint16_t mAnimatorLight::EffectAnim__Police()
-{
-  fill(SEGCOLOR_U32(1));
-  return EffectAnim__Base_Police(RED, BLUE, false);
-}
-static const char PM_EFFECT_CONFIG__POLICE[] PROGMEM = "Police@!,Width;,Bg;0";
-static const char PM_EFFECT_DESCRI__POLICE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-//Police All with custom colors
-uint16_t mAnimatorLight::EffectAnim__Two_Areas()
-{  
-  return EffectAnim__Base_Police(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
-}
-static const char PM_EFFECT_CONFIG__TWO_AREAS[] PROGMEM = "Two Areas@!,Dot size,,,,,,,Overlay;1,2,Bg;!";
-static const char PM_EFFECT_DESCRI__TWO_AREAS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-/*******************************************************************************************************************************************************************************************************************
- * @description : Two dots running
- * @note : Converted from WLED Effects "mode_two_dots"
- ********************************************************************************************************************************************************************************************************************/
+/************************************************************************************************************************************
+ * @description : Two runners 180° apart. Optional fading tail and optional backfill between frames.
+ *   - Speed  : travel rate around the strip
+ *   - Intensity : head width (max ~SEGLEN/2)
+ *   - C1 (Tail persistence) : higher = longer trails (slower fade)
+ *   - o1 (Tail fade) : enable per‑frame fade toward BG (SEGCOLOR(2))
+ *   - o2 (Backfill)  : draw continuous trail from previous head pos to current (no gaps)
+ *   Colors:
+ *     SEGCOLOR(0) = head A, SEGCOLOR(1) = head B, SEGCOLOR(2) = background
+ ************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Two_Dots()
 {
-  if (SEGLEN == 1) return EFFECT_DEFAULT();
-  unsigned delay = 1 + (FRAMETIME<<3) / SEGLEN;  // longer segments should change faster
-  uint32_t it = effect_start_time / map(SEGMENT.speed, 0, 255, delay<<4, delay);
-  unsigned offset = it % SEGLEN;
-  unsigned width = ((SEGLEN*(SEGMENT.intensity+1))>>9); //max width is half the strip
+  if (SEGLEN <= 1) return EFFECT_DEFAULT();
+
+  // Timebase scaled by strip length (longer strips sweep faster like original)
+  const unsigned baseDelay = 1 + ((FRAMETIME << 3) / SEGLEN);
+  const uint32_t it  = effect_start_time / map(SEGMENT.speed, 0, 255, baseDelay<<4, baseDelay);
+  unsigned offset    = it % SEGLEN;
+
+  // Head width (like original Two Dots)
+  unsigned width = ((SEGLEN * (SEGMENT.intensity + 1)) >> 9);
   if (!width) width = 1;
-  if (!SEGMENT.check2) SEGMENT.fill(SEGCOLOR(2));
-  const uint32_t color1 = SEGCOLOR(0);
-  const uint32_t color2 = (SEGCOLOR(1) == SEGCOLOR(2)) ? color1 : SEGCOLOR(1);
-  for (unsigned i = 0; i < width; i++) {
-    unsigned indexR = (offset + i) % SEGLEN;
-    unsigned indexB = (offset + i + (SEGLEN>>1)) % SEGLEN;
-    SEGMENT.setPixelColor(indexR, color1);
-    SEGMENT.setPixelColor(indexB, color2);
+  if (width > SEGLEN/2) width = SEGLEN/2;
+
+  // Colors
+  const uint32_t bg    = SEGCOLOR(2);
+  const uint32_t c1    = SEGCOLOR(0);
+  const uint32_t c2raw = SEGCOLOR(1);
+  const uint32_t c2    = (c2raw == bg) ? c1 : c2raw;
+
+  // Opposite head position (180° apart)
+  unsigned offsetB = (offset + (SEGLEN >> 1)) % SEGLEN;
+
+  // Optional: fade existing pixels toward background first (tail)
+  if (SEGMENT.check1) { // o1 = Tail fade ON
+    // C1 = tail persistence (0..255). Higher => slower fade.
+    // Convert persistence to per‑frame blend step toward bg (1..64)
+    const uint8_t persist = SEGMENT.custom1; 
+    uint8_t step = 1 + ((uint16_t)(255 - persist) >> 2); // 1..64 (gentle)
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
+      uint32_t cur = SEGMENT.getPixelColor(i);
+      SEGMENT.setPixelColor(i, color_blend(cur, bg, step));
+    }
+  } else {
+    // If no tail fading, (re)paint background unless “overlay” mode (check2 in legacy) is desired
+    if (!SEGMENT.check2) SEGMENT.fill(bg);
   }
+
+  // Draw heads (solid)
+  for (unsigned i = 0; i < width; ++i) {
+    SEGMENT.setPixelColor((offset + i) % SEGLEN, c1);
+    SEGMENT.setPixelColor((offsetB + i) % SEGLEN, c2);
+  }
+
+  // Optional backfill (continuous trail between last and current positions)
+  if (SEGMENT.check2) { // o2 = Backfill ON
+    unsigned prev = (SEGMENT.call == 0) ? offset : (unsigned)SEGMENT.aux0;
+
+    // Distance (wrap‑aware)
+    auto spanFill = [&](unsigned from, unsigned to, uint32_t col){
+      if (from == to) return;
+      // walk forward wrapping until we reach 'to'
+      unsigned p = from;
+      while (p != to) {
+        SEGMENT.setPixelColor(p, col);
+        p = (p + 1) % SEGLEN;
+      }
+    };
+
+    // Fill path for both heads
+    spanFill(prev, offset,  c1);
+    spanFill((prev + (SEGLEN>>1)) % SEGLEN, offsetB, c2);
+  }
+
+  // Remember current offset for next backfill step
+  SEGMENT.aux0 = offset;
+
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__TWO_DOTS[] PROGMEM = "Two Dots@!,Dot size,,,,,,,Overlay;1,2,Bg;!";
-static const char PM_EFFECT_DESCRI__TWO_DOTS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWO_DOTS[] PROGMEM =
+"Two Dots (Trails)@"
+"Speed,Dot size,Tail persistence,,,,,,,"  // sx, ix, c1
+";"
+"1,2,Bg"                                   // segment colors: headA, headB, background
+";"
+""
+";"
+"1"                                        // 1D strip icon
+";"
+"sx=128,ix=64,c1=200,o1=1,o2=0"            // defaults: medium speed, small heads, long trails ON, backfill OFF
+;
+static const char PM_EFFECT_DESCRI__TWO_DOTS[] PROGMEM =
+"Two runners 180° apart.\n\r"
+"IX: Dot size\n\r"
+"SX: Travel speed\n\r"
+"C1: Tail persistence (higher = longer)\n\r"
+"o1: Tail fade\n\r"
+"o2: Backfill trail";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -6350,11 +6425,11 @@ static const char PM_EFFECT_DESCRI__FAIRY[] PROGMEM = "Cycle Between Each Live R
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Fairytwinkle. Like Colortwinkle, but starting from all lit and not relying on getPixelColor
+ * @description : TWINKLE_FAIRY. Like TWINKLE_COLOUR, but starting from all lit and not relying on getPixelColor
  *         Warning: Uses 4 bytes of segment data per pixel
- * @note : Converted from WLED Effects "mode_fairytwinkle"
+ * @note : Converted from WLED Effects "mode_twinkle_fairy"
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Fairy_Twinkle(void) {
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Fairy(void) {
 
   unsigned dataSize = sizeof(flasher) * SEGLEN;
   if (!SEGMENT.allocateData(dataSize)) return EFFECT_DEFAULT(); //allocation failed
@@ -6398,8 +6473,8 @@ uint16_t mAnimatorLight::EffectAnim__Fairy_Twinkle(void) {
   }
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__FAIRYTWINKLE[] PROGMEM = "Fairytwinkle@!,!;!,!;!;;m12=0";
-static const char PM_EFFECT_DESCRI__FAIRYTWINKLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE_FAIRY[] PROGMEM = "Twinkle Fairy@!,!;!,!;!;;m12=0";
+static const char PM_EFFECT_DESCRI__TWINKLE_FAIRY[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -6493,19 +6568,6 @@ static const char PM_EFFECT_DESCRI__TRICOLOR_FADE[] PROGMEM = "Cycle Between Eac
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Running lights in opposite directions.
- *                Idea: Make the gap width controllable with a third slider in the future
- * @note : Converted from WLED Effects "mode_running_dual"
- ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Running_Dual()
-{
-  return EffectAnim__Base_Running(false, true);
-}
-static const char PM_EFFECT_CONFIG__RUNNING_DUAL[] PROGMEM = "Running Dual@!,Wave width;L,!,R;!";
-static const char PM_EFFECT_DESCRI__RUNNING_DUAL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-/*******************************************************************************************************************************************************************************************************************
  * @description : Creates random comets
  *         Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/MultiComet.h
  * @note : Converted from WLED Effects "mode_multi_comet"
@@ -6548,69 +6610,129 @@ static const char PM_EFFECT_DESCRI__MULTI_COMET[] PROGMEM = "Cycle Between Each 
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Oscillating bars of color, updated with standard framerate
- * @note : Converted from WLED Effects "mode_oscillate"
+ * @description : Oscillating color bars. Count = C1, width = IX, speed = SX.
+ *                - C1 (custom1): number of oscillators (1..20)
+ *                - IX: bar width in pixels (mapped 1..SEGLEN/2)
+ *                - SX: motion speed
+ *                Bars bounce between ends; overlaps blend 50/50.
  ********************************************************************************************************************************************************************************************************************/
 typedef struct Oscillator {
-  int16_t pos;
-  int8_t  size;
-  int8_t  dir;
-  int8_t  speed;
+  int16_t pos;   // center position
+  int8_t  size;  // half-width in pixels
+  int8_t  dir;   // -1 or +1
+  int8_t  speed; // step per tick (1..4-ish)
 } oscillator;
-
 uint16_t mAnimatorLight::EffectAnim__Oscillate()
 {
+  if (SEGLEN == 0) return FRAMETIME;
 
-  constexpr unsigned numOscillators = 3;
-  constexpr unsigned dataSize = sizeof(oscillator) * numOscillators;
+  // --- controls ---
+  const uint8_t  oscCount = (uint8_t)max<int>(1, map(SEGMENT.custom1, 0, 255, 1, 20));        // C1: 1..20
+  const uint16_t widthPx  = (uint16_t)max<int>(1, map(SEGMENT.intensity, 0, 255, 1, SEGLEN/2)); // IX: width
+  const int8_t   halfW    = (int8_t)max<int>(1, (int)widthPx / 2);
 
-  if (!SEGMENT.allocateData(dataSize)) return EFFECT_DEFAULT(); //allocation failed
+  // --- storage sized by current count ---
+  const unsigned dataSize = sizeof(oscillator) * oscCount;
+  if (!SEGMENT.allocateData(dataSize)) return EFFECT_DEFAULT();
+  oscillator* osc = reinterpret_cast<oscillator*>(SEGMENT.data);
 
-  Oscillator* oscillators = reinterpret_cast<Oscillator*>(SEGMENT.data);
-
-  if (SEGMENT.call == 0)
-  {    
-    oscillators[0].pos = SEGLEN/4;     oscillators[0].size = SEGLEN/8;  oscillators[0].dir = 1;    oscillators[0].speed = 1; // oscillators[0] = {(uint16_t)(SEGLEN/4),   (uint8_t)(SEGLEN/8),  1, 1};
-    oscillators[0].pos = SEGLEN/4*3;   oscillators[0].size = SEGLEN/8;  oscillators[0].dir = 1;    oscillators[0].speed = 2; // oscillators[1] = {(uint16_t)(SEGLEN/4*3), (uint8_t)(SEGLEN/8),  1, 2};
-    oscillators[0].pos = SEGLEN/4*2;   oscillators[0].size = SEGLEN/8;  oscillators[0].dir = -1;   oscillators[0].speed = 1; // oscillators[2] = {(uint16_t)(SEGLEN/4*2), (uint8_t)(SEGLEN/8), -1, 1};    
+  // re-init on first call or when count changes
+  if (SEGMENT.call == 0 || SEGMENT.aux3 != oscCount) {
+    for (uint8_t i = 0; i < oscCount; ++i) {
+      osc[i].pos   = (SEGLEN * (i + 1)) / (oscCount + 1);   // spread across strip
+      osc[i].size  = halfW;
+      osc[i].dir   = (i & 1) ? +1 : -1;                     // alternate dirs
+      osc[i].speed = 1 + (i % 2);                           // small integer step (1..2)
+    }
+    SEGMENT.aux3 = oscCount;
+    SEGMENT.step = 0; // reset tick counter
   }
 
-  uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - SEGMENT.speed));
-  uint32_t it = effect_start_time / cycleTime;
+  
+  // --- SPEED: cubic-eased tick period (ms) from slow→fast ---
+  const uint32_t baseSlow = 1000;                                 // 1s/tick at SX=0
+  const uint32_t baseFast = max<uint32_t>(16, (uint32_t)FRAMETIME); // ~per-frame at SX=255
 
-  for (unsigned i = 0; i < numOscillators; i++) {
-    // if the counter has increased, move the oscillator by the random step
-    if (it != SEGMENT.step) oscillators[i].pos += oscillators[i].dir * oscillators[i].speed;
-    oscillators[i].size = SEGLEN/(3+SEGMENT.intensity/8);
-    if((oscillators[i].dir == -1) && (oscillators[i].pos <= 0)) {
-      oscillators[i].pos = 0;
-      oscillators[i].dir = 1;
-      // make bigger steps for faster speeds
-      oscillators[i].speed = SEGMENT.speed > 100 ? hw_random8(2, 4):hw_random8(1, 3);
-    }
-    if((oscillators[i].dir == 1) && (oscillators[i].pos >= (SEGLEN - 1))) {
-      oscillators[i].pos = SEGLEN - 1;
-      oscillators[i].dir = -1;
-      oscillators[i].speed = SEGMENT.speed > 100 ? hw_random8(2, 4):hw_random8(1, 3);
-    }
-  }
+  const uint32_t s   = SEGMENT.speed;           // 0..255
+  const uint32_t s2  = s * s;                   // 0..65025
+  const uint32_t s3  = s2 * s;                  // 0..16,581,375
+  const uint32_t N   = 255UL * 255UL * 255UL;   // 16,581,375
 
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    uint32_t color = BLACK;
-    for (unsigned j = 0; j < numOscillators; j++) {
-      if(i >= (unsigned)oscillators[j].pos - oscillators[j].size && i <= oscillators[j].pos + oscillators[j].size) {
-        color = (color == BLACK) ? SEGCOLOR(j) : color_blend(color, SEGCOLOR(j), uint8_t(128));
+  // cycleTime eases from baseSlow → baseFast with s^3
+  const uint32_t cycleTime =
+    baseSlow - ((baseSlow - baseFast) * s3) / N;
+
+  // ticks since last render
+  const uint32_t ticksNow = (cycleTime ? (effect_start_time / cycleTime) : effect_start_time);
+  uint32_t dTicks = ticksNow - SEGMENT.step;
+  if (dTicks > 3) dTicks = 3; // cap catch-up for smoothness
+
+  // advance motion: keep per-tick position delta small & stable
+  while (dTicks--) {
+    for (uint8_t i = 0; i < oscCount; ++i) {
+      osc[i].size = halfW;
+      // 1 px per tick (plus the existing tiny random “speed” jitter you already use)
+      osc[i].pos += (osc[i].dir * max<int8_t>(1, osc[i].speed));
+
+      // bounce with mild speed variety (no big jumps)
+      if (osc[i].dir < 0 && osc[i].pos <= 0) {
+        osc[i].pos = 0; osc[i].dir = +1;
+        osc[i].speed = (SEGMENT.speed > 160) ? 2 : 1;
+      } else if (osc[i].dir > 0 && osc[i].pos >= (int16_t)(SEGLEN - 1)) {
+        osc[i].pos = SEGLEN - 1; osc[i].dir = -1;
+        osc[i].speed = (SEGMENT.speed > 160) ? 2 : 1;
       }
     }
-    SEGMENT.setPixelColor(i, color);
+    SEGMENT.step++; // consumed one tick
   }
 
-  SEGMENT.step = it;
+
+  // pick a hard, discrete entry from the current palette for oscillator j
+  uint8_t colours_in_palette = SEGMENT.palette->colours_in_palette;
+  if (colours_in_palette == 0) colours_in_palette = 1; // safety
+
+  // draw
+  for (uint16_t p = 0; p < SEGLEN; ++p) {
+    uint32_t out = BLACK;
+    for (uint8_t j = 0; j < oscCount; ++j) {
+      const int16_t L = osc[j].pos - osc[j].size;
+      const int16_t R = osc[j].pos + osc[j].size;
+      if ((int16_t)p >= L && (int16_t)p <= R) {
+
+        ////// Use Segcolours
+        // const uint32_t c = SEGCOLOR_U32(j % 5); // s0..s4
+        // Use palette colours
+        uint16_t adjusted_pixel = j % colours_in_palette;
+        uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+          adjusted_pixel,
+          PALETTE_INDEX__IS_EXACT_COLOUR,
+          PALETTE_MODE__FORCE_DISCRETE,
+          PALETTE_WRAP_OFF,
+          NO_ENCODED_VALUE,
+          ANIM_BRIGHTNESS_REQUIRED
+        );
+
+        out = (out == BLACK) ? c : color_blend(out, c, (uint8_t)128);
+      }
+    }
+    SEGMENT.setPixelColor(p, out);
+  }
+
   return FRAMETIME;
-  
 }
-static const char PM_EFFECT_CONFIG__OSCILLATE[] PROGMEM = "Oscillate@";
-static const char PM_EFFECT_DESCRI__OSCILLATE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__OSCILLATE[] PROGMEM =
+"Oscillate@"
+"Speed,Width,Count m20,,,,,,,"   // SX (speed), IX (shown as Width but mapped to intensity internally), C1 (count)
+";"
+",,,,"
+";"
+"!;1;"
+"sx=140,ix=30,c1=96,paln=Colourful";
+static const char PM_EFFECT_DESCRI__OSCILLATE[] PROGMEM =
+"Oscillating color bars that bounce across the strip.\n\r"
+"SX: Motion speed (faster → more movement)\n\r"
+"IX: Bar width\n\r"
+"C1: Number of bars (1-20)";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -6793,11 +6915,10 @@ static const char PM_EFFECT_CONFIG__PALETTE[] PROGMEM = "Palette2@Shift,Size,Rot
 static const char PM_EFFECT_DESCRI__PALETTE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : ColorWavesWithPalettes by Mark Kriegsman: https://gist.github.com/kriegsman/8281905786e8b2632aeb
- *         This function draws color waves with an ever-changing,
- *         widely-varying set of parameters, using a color palette.
- * @note : Converted from WLED Effects "mode_colorwaves"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Palette‑driven color waves. Evenly spaced hues flow along the strip with sine‑modulated brightness; blends 50/50 over existing pixels.
+ * @note        : Converted from WLED effect "mode_colorwaves"
+ *                SX = tempo (faster animation). IX = hue spacing per LED (tighter ↔ wider color bands).
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__ColourWaves()
 {
@@ -6840,30 +6961,73 @@ uint16_t mAnimatorLight::EffectAnim__ColourWaves()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM = "Colour Waves@!,Hue;!;!pal=15";
-static const char PM_EFFECT_DESCRI__COLORWAVES[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM =
+"Colour Waves@"                               // Name
+"Speed,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+""                                            // Segment Colour Names (none)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Party 16,"                             // default palette name
+"sx=140,"                                     // default speed (tempo)
+"ix=160"                                     // default intensity (hue spacing)
+;                                             // end
+static const char PM_EFFECT_DESCRI__COLORWAVES[] PROGMEM =
+"Palette-driven color waves with sine-modulated brightness; blends 50/50 over current pixels."
+"\n\rSX: Tempo (higher = faster flow)"
+"\n\rIX: Hue spacing per LED (higher = wider color bands)"
+"\n\rUses the active palette; segment colors are ignored.";
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : Colored stripes pulsing at a defined Beats-Per-Minute (BPM)
- * @note : Converted from WLED Effects "mode_bpm"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Colored stripes pulsing at a Beats-Per-Minute rate. Palette colors form stripes across the strip; brightness follows a sinusoidal beat.
+ * @note        : Converted from WLED effect "mode_bpm"
+ *                SX = BPM tempo (speed of pulsing). IX not used.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__BPM()
 {
   uint32_t stp = (effect_start_time / 20) & 0xFF;
   uint8_t beat = beatsin8_t(SEGMENT.speed, 64, 255);
   for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(stp + (i * 2), false, PALETTE_SOLID_WRAP, 0, beat - stp + (i * 10)));
+    SEGMENT.setPixelColor(
+      i,
+      SEGMENT.color_from_palette(
+        stp + (i * 2),
+        false,
+        PALETTE_SOLID_WRAP,
+        0,
+        beat - stp + (i * 10)
+      )
+    );
   }
   return FRAMETIME;   
 }
-static const char PM_EFFECT_CONFIG__BPM[] PROGMEM = "BPM@!;!;!;;sx=64";
-static const char PM_EFFECT_DESCRI__BPM[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__BPM[] PROGMEM =
+"BPM@"                                        // Name
+"Speed,,,,,,,,!,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+""                                            // Segment Colour Names (none)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Party,"                                 // default palette
+"sx=64,"                                      // default BPM tempo
+"ep=500"                                      // extra param slot (reserved)
+;                                             // end
+static const char PM_EFFECT_DESCRI__BPM[] PROGMEM =
+"Palette-striped pattern pulsing at a beats-per-minute tempo."
+"\n\rSX: BPM tempo (higher = faster pulse)"
+"\n\rUses the active palette; segment colors are ignored.";
 
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
- * @note : Converted from WLED Effects "mode_colortwinkle"
+ * @note : Converted from WLED Effects "mode_twinkle_colour"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
 {
@@ -6917,13 +7081,14 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__COLORTWINKLE[] PROGMEM = "Colortwinkles@Fade speed,Spawn speed;;!;;m12=0"; //pixels
-static const char PM_EFFECT_DESCRI__COLORTWINKLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE_COLOUR[] PROGMEM = "Twinkle Colours@Fade speed,Spawn speed;;!;;m12=0"; //pixels
+static const char PM_EFFECT_DESCRI__TWINKLE_COLOUR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : Calm effect, like a lake at night
- * @note : Converted from WLED Effects "mode_lake"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Calm water-like ripples, reminiscent of a lake at night. Multiple sine waves blend to modulate palette colors softly.
+ * @note        : Converted from WLED effect "mode_lake"
+ *                SX = wave tempo (higher = faster ripples). IX unused.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Lake()
 {
@@ -6941,19 +7106,33 @@ uint16_t mAnimatorLight::EffectAnim__Lake()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM = "Lake@!;Fx;!";
-static const char PM_EFFECT_DESCRI__LAKE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM =
+"Lake@"                                       // Name
+"Speed,,,,,,,,!,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+""                                            // Segment Colour Names (none)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Ocean,"                                 // default palette
+"sx=128,"                                     // default ripple tempo
+"ep=500"                                      // reserved slot
+;                                             // end
+static const char PM_EFFECT_DESCRI__LAKE[] PROGMEM =
+"Soft rippling pattern like a calm lake at night."
+"\n\rSX: Wave tempo (higher = faster ripples)"
+"\n\rUses the active palette; ignores fixed segment colors.";
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : meteor effect & meteor smooth (merged by @dedehai)
-           send a meteor from begining to to the end of the strip with a trail that randomly decays.
-           adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
- * @note : Converted from WLED Effects "mode_meteor"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Meteor effect. A bright head travels along the strip with a fading trail; trail intensity decays randomly for a natural look.
+ * @note        : Converted from WLED effect "mode_meteor"
+ *                SX = meteor speed. IX = trail decay. C1 = use gradient palette (on/off). C2 = smooth mode (on/off).
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Meteor()
 {
-
   if (SEGLEN == 1) return EFFECT_DEFAULT();
   if (!SEGMENT.allocateData(SEGLEN)) return EFFECT_DEFAULT(); //allocation failed
   const bool meteorSmooth = SEGMENT.check3;
@@ -6976,8 +7155,7 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
         int change = trail[i] + 4 - hw_random8(24); //change each time between -20 and +4
         trail[i] = constrain(change, 0, max);
         col = SEGMENT.check1 ? SEGMENT.color_from_palette(i, true, false, 0,  trail[i]) : SEGMENT.color_from_palette(trail[i], false, true, 255);
-        }
-        else {
+      } else {
         trail[i] = scale8(trail[i], 128 + hw_random8(127));
         int index = trail[i];
         int idx = 255;
@@ -6997,11 +7175,10 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
   for (unsigned j = 0; j < meteorSize; j++) {
     unsigned index = (meteorstart + j) % SEGLEN;
     if(meteorSmooth) {
-        trail[index] = max;
-        uint32_t col = SEGMENT.check1 ? SEGMENT.color_from_palette(index, true, false, 0, trail[index]) : SEGMENT.color_from_palette(trail[index], false, true, 255);
-        SEGMENT.setPixelColor(index, col);
-    }
-    else{
+      trail[index] = max;
+      uint32_t col = SEGMENT.check1 ? SEGMENT.color_from_palette(index, true, false, 0, trail[index]) : SEGMENT.color_from_palette(trail[index], false, true, 255);
+      SEGMENT.setPixelColor(index, col);
+    } else {
       int idx = 255;
       int i = trail[index] = max;
       if (!SEGMENT.check1) {
@@ -7016,75 +7193,29 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
   SEGMENT.step += SEGMENT.speed +1;
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM = "Meteor@!,Trail,,,,Gradient,,Smooth;;!;1";
-static const char PM_EFFECT_DESCRI__METEOR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
-/*******************************************************************************************************************************************************************************************************************
- * @description : This function loops over each pixel, calculates the adjusted 'clock' that this pixel should use, and calls
- *         "CalculateOneTwinkle" on each pixel.  It then displays either the twinkle color of the background color, 
- *         whichever is brighter.
- * @note : Converted from WLED Effects "twinklefox_base"
- ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Base_Twinkle_Fox(bool cat)
-{
-  // "PRNG16" is the pseudorandom number generator
-  // It MUST be reset to the same starting value each time
-  // this function is called, so that the sequence of 'random'
-  // numbers that it generates is (paradoxically) stable.
-  uint16_t PRNG16 = 11337;
-
-  // Calculate speed
-  if (SEGMENT.speed > 100) SEGMENT.aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
-  else SEGMENT.aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
-
-  // Set up the background color, "bg".
-  CRGB bg = CRGB(SEGCOLOR(1));
-  unsigned bglight = bg.getAverageLight();
-  if (bglight > 64) {
-    bg.nscale8_video(16); // very bright, so scale to 1/16th
-  } else if (bglight > 16) {
-    bg.nscale8_video(64); // not that bright, so scale to 1/4th
-  } else {
-    bg.nscale8_video(86); // dim, scale to 1/3rd.
-  }
-
-  unsigned backgroundBrightness = bg.getAverageLight();
-
-  for (unsigned i = 0; i < SEGLEN; i++) {
-
-    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
-    unsigned myclockoffset16= PRNG16; // use that number as clock offset
-    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
-    // use that number as clock speed adjustment factor (in 8ths, from 8/8ths to 23/8ths)
-    unsigned myspeedmultiplierQ5_3 =  ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
-    uint32_t myclock30 = (uint32_t)((effect_start_time * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
-    unsigned  myunique8 = PRNG16 >> 8; // get 'salt' value for this pixel
-
-    // We now have the adjusted 'clock' for this pixel, now we call
-    // the function that computes what color the pixel should be based
-    // on the "brightness = f( time )" idea.
-    CRGB c = EffectAnim__Base_Twinkle_Fox_One_Twinkle(myclock30, myunique8, cat);
-
-    unsigned cbright = c.getAverageLight();
-    int deltabright = cbright - backgroundBrightness;
-    if (deltabright >= 32 || (!bg)) {
-      // If the new pixel is significantly brighter than the background color,
-      // use the new color.
-      SEGMENT.setPixelColor(i, c);
-    } else if (deltabright > 0) {
-      // If the new pixel is just slightly brighter than the background color,
-      // mix a blend of the new color and the background color
-      SEGMENT.setPixelColor(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), uint8_t(deltabright * 8)));
-    } else {
-      // if the new pixel is not at all brighter than the background color,
-      // just use the background color.
-      SEGMENT.setPixelColor(i, bg);
-    }
-  }
-  return FRAMETIME;
-  
-}
+static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM =
+"Meteor@"                                     // Name
+"Speed,Trail,,,,Gradient,Smooth,,!,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+""                                            // Segment Colour Names (none)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Party,"                                 // default palette
+"sx=96,"                                      // default speed
+"ix=128,"                                     // default trail decay
+"c1=1,"                                       // gradient on
+"c2=0,"                                       // smooth off
+"ep=500"                                      // reserved
+;                                             // end
+static const char PM_EFFECT_DESCRI__METEOR[] PROGMEM =
+"A meteor head travels along the strip with a fading trail that decays randomly."
+"\n\rSX: Meteor speed"
+"\n\rIX: Trail decay"
+"\n\rC1: Use gradient palette (toggle)"
+"\n\rC2: Smooth mode (toggle)";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -7093,7 +7224,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Twinkle_Fox(bool cat)
  *         Colors are chosen from a palette. Read more about this effect using the link above!
  * @note : Converted from WLED Effects "twinklefox_one_twinkle"
  ********************************************************************************************************************************************************************************************************************/
-CRGB mAnimatorLight::EffectAnim__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
+CRGB mAnimatorLight::EffectAnim__Base_Twinkle_Smooth_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
 {
   // Overall twinkle speed (changed)
   unsigned ticks = ms / SEGMENT.aux0;
@@ -7150,33 +7281,175 @@ CRGB mAnimatorLight::EffectAnim__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8
 }
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_twinklefox"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Base for Twinkle effects. Loops each pixel, computes a stable pseudo-randomized clock, and calls
+ *                "CalculateOneTwinkle" to generate per-pixel sparkle. Chooses either the twinkle color or a dimmed background color.
+ * @note        : Converted from WLED effect "twinklefox_base"
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Twinkle_Fox()
+uint16_t mAnimatorLight::EffectAnim__Base_Twinkle_Smooth(bool cat)
 {
-  return EffectAnim__Base_Twinkle_Fox(false);
+  uint16_t PRNG16 = 11337;
+
+  // Calculate speed mapping
+  if (SEGMENT.speed > 100) SEGMENT.aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
+  else SEGMENT.aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
+
+  // Background color
+  CRGB bg = CRGB(SEGCOLOR(1));
+  unsigned bglight = bg.getAverageLight();
+  if (bglight > 64)      bg.nscale8_video(16);
+  else if (bglight > 16) bg.nscale8_video(64);
+  else                   bg.nscale8_video(86);
+
+  unsigned backgroundBrightness = bg.getAverageLight();
+
+  for (unsigned i = 0; i < SEGLEN; i++) {
+    // advance PRNG
+    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384;
+    unsigned myclockoffset16 = PRNG16;
+    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384;
+    unsigned myspeedmultiplierQ5_3 = ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
+
+    uint32_t myclock30 = (uint32_t)((effect_start_time * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
+    unsigned myunique8 = PRNG16 >> 8;
+
+    CRGB c = EffectAnim__Base_Twinkle_Smooth_One_Twinkle(myclock30, myunique8, cat);
+
+    unsigned cbright = c.getAverageLight();
+    int deltabright = cbright - backgroundBrightness;
+    if (deltabright >= 32 || (!bg)) {
+      SEGMENT.setPixelColor(i, c);
+    } else if (deltabright > 0) {
+      SEGMENT.setPixelColor(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), uint8_t(deltabright * 8)));
+    } else {
+      SEGMENT.setPixelColor(i, bg);
+    }
+  }
+  return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_FOX[] PROGMEM = "Twinkle SlowIn/SlowOut@!,Twinkle rate,,,,Cool;!,!;!";
-static const char PM_EFFECT_DESCRI__TWINKLE_FOX[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_twinklecat"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Twinkle Smooth
+ *                Classic “soft twinkle”. Each pixel fades in and out gently, resembling natural starlight.
+ *                SX = sparkle rate. IX = twinkle density. C1 = Cool (tint control).
+ * @note        : Converted from WLED effect "mode_twinklefox"
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Twinkle_Cat()
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Smooth()
 {
-  return EffectAnim__Base_Twinkle_Fox(true);
+  return EffectAnim__Base_Twinkle_Smooth(false);
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_CAT[] PROGMEM = "Twinkle FastIn/SlowOut@!,Twinkle rate,,,,Cool;!,!;!";
-static const char PM_EFFECT_DESCRI__TWINKLE_CAT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE_SMOOTH[] PROGMEM =
+"Twinkle Smooth@"                              // Name
+"Speed,Intensity,,,,Cool,,,,,"                 // 10 fields after '@': 1s,2i,3c1,... 
+";"                                            // -----------------------------------------
+""                                             // Segment Colour Names (none)
+";"                                            // -----------------------------------------
+"!"                                            // Palette picker
+";"                                            // -----------------------------------------
+"1"                                            // icon flags: 1D strip
+";"                                            // -----------------------------------------
+"paln=Fairy,"                                  // defaults
+"sx=120,"                                      // sparkle tempo
+"ix=128,"                                      // density
+"c1=0,"                                        // Cool off
+"s1=0"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_SMOOTH[] PROGMEM =
+"Soft fade-in and fade-out twinkles for a natural look."
+"\n\rSX: Sparkle rate (higher = faster twinkles)"
+"\n\rIX: Twinkle density (higher = more stars)"
+"\n\rC1: Cool tint adjustment (adds reddish warmth when dim)";
+
+
+/********************************************************************************************************************************************************************************************************************
+ * @description : Twinkle Spark
+ *                Sharp “sparkle” variant. Pixels flash on quickly then fade slowly, producing crisp glitter.
+ *                SX = sparkle rate. IX = density. C1 = Cool tint.
+ * @note        : Converted from WLED effect "mode_twinklecat"
+ ********************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Spark()
+{
+  return EffectAnim__Base_Twinkle_Smooth(true);
+}
+static const char PM_EFFECT_CONFIG__TWINKLE_SPARK[] PROGMEM =
+"Twinkle Spark@"                               // Name
+"Speed,Intensity,,,,Cool,,,,,"                 // 10 fields
+";"
+""                                             // no seg colours
+";"
+"!"                                            // palette
+";"
+"1"                                            // 1D icon
+";"
+"paln=Fairy,"
+"sx=120,"
+"ix=128,"
+"c1=0,"
+"s1=0"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_SPARK[] PROGMEM =
+"Sharp twinkles with instant-on and smooth fade-out."
+"\n\rSX: Sparkle rate (higher = faster)"
+"\n\rIX: Density (more twinkles)"
+"\n\rC1: Cool tint adjustment (adds reddish warmth when dim)";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_halloween_eyes"
+ * @description : Twinkle Rise
+ *         Creates short, sharp twinkles across the segment.
+ *         Each pixel ramps up slowly and then cuts off quickly,
+ *         resembling rising sparks that vanish suddenly.
+ *         Speed controls the twinkle frequency.
+ *         Intensity controls the density (how many are active).
+ * @note : Converted from WLED Effect "mode_twinkleup" (Andrew Tuline).
+ ********************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Twinkle_Rise() // Firework_Rain
+{
+  unsigned prevSeed = random16_get_seed();      // save seed so we can restore it at the end of the function
+  random16_set_seed(535);                       // ensure stable pseudo-random pattern across frames
+
+  for (unsigned i = 0; i < SEGLEN; i++) {
+    unsigned ranstart = random8();               // consistent per-pixel seed
+    unsigned pixBri = sin8_t(ranstart + 16 * effect_start_time/(256-SEGMENT.speed));
+    if (random8() > SEGMENT.intensity) pixBri = 0; // density control
+    SEGMENT.setPixelColor(i,
+      color_blend(SEGCOLOR(1),
+                  SEGMENT.color_from_palette(random8()+effect_start_time/100,
+                                             false,
+                                             PALETTE_SOLID_WRAP,
+                                             0),
+                  pixBri));
+  }
+
+  random16_set_seed(prevSeed); // restore PRNG for other effects
+  return FRAMETIME;
+}
+static const char PM_EFFECT_CONFIG__TWINKLE_RISE[] PROGMEM =
+"Twinkle Rise@"                // Name
+"Speed,Intensity"              // Controls
+";"                            // -------------------------------- Sliders/SegCols
+""                             // Segment Colours
+";"                            // -------------------------------- SegCols/PalPicker
+"!"                            // Palette picker
+";"                            // -------------------------------- PalPicker/is1D2D
+"1"                            // is1D2D flags (default strip)
+";"                            // -------------------------------- is1D2D/Defaults
+"m12=0"                        // Defaults: map as 1D strip
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_RISE[] PROGMEM =
+"Short, sharp twinkles with fade-up and quick vanish\n\r"
+"SX: Controls twinkle frequency (speed)\n\r"
+"IX: Controls twinkle density (intensity)\n\r"
+"Colours are sampled from active palette";
+
+
+/********************************************************************************************************************************************************************************************************************
+ * @description : Halloween Eyes
+ *                Pairs of glowing “eyes” randomly appear, fade in, occasionally blink, then disappear after a random duration.
+ *                SX = Eyes-off time (longer = more darkness). IX = Eyes-on time (longer = eyes remain visible).
+ *                C1 = Overlay background color toggle.
+ * @note        : Converted from WLED effect "mode_halloween_eyes"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Halloween_Eyes()
 {
@@ -7332,8 +7605,27 @@ uint16_t mAnimatorLight::EffectAnim__Halloween_Eyes()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__HALLOWEEN_EYES[] PROGMEM = "Halloween Eyes@Eye off time,Eye on time,,,,,,,Overlay;!,!;!;12";
-static const char PM_EFFECT_DESCRI__HALLOWEEN_EYES[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__HALLOWEEN_EYES[] PROGMEM =
+"Halloween Eyes@"                             // Name
+"Speed,Intensity,,,,Overlay,,,,,"             // 10 fields after '@': 1s,2i,3c1...
+";"                                           // -----------------------------------------
+""                                            // Segment Colour Names (none)
+";"                                           // -----------------------------------------
+"!"                                           // palette picker
+";"                                           // -----------------------------------------
+"1"                                           // icon flags: 1D strip
+";"                                           // -----------------------------------------
+"paln=Orange,"                                // default palette
+"sx=128,"                                     // default eyes-off time
+"ix=128,"                                     // default eyes-on time
+"c1=1,"                                       // overlay background enabled
+"s1=1"
+;
+static const char PM_EFFECT_DESCRI__HALLOWEEN_EYES[] PROGMEM =
+"Pairs of glowing eyes appear, fade in, occasionally blink, then vanish."
+"\n\rSX: Eyes-off time (higher = eyes hidden longer)"
+"\n\rIX: Eyes-on time (higher = eyes stay visible longer)"
+"\n\rC1: Overlay background color toggle";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -7514,6 +7806,219 @@ static const char PM_EFFECT_CONFIG__POPCORN[] PROGMEM = "Popcorn@!,!,,,,,,,Overl
 static const char PM_EFFECT_DESCRI__POPCORN[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
+/************************************************************************************************************************************
+ * @description : Glow Spots — randomly spawn single-pixel pulses that fade up then down (symmetrical), each with a random duration
+ * @note        : Speed maps total pulse period from 10s (speed=0) to 0.5s (speed=255). Intensity controls concurrent spots.
+ *                Intensity 0..255 -> 1 .. floor(0.7*SEGLEN). Colors come from primary palette at pixel position.
+ *                Background blends to SEGCOLOR(1). No animator used; runs at FRAMETIME.
+ ************************************************************************************************************************************/
+
+// Reuse your twinkle struct shape
+typedef struct Twinkle2 {
+  uint16_t pos;     // pixel index
+  uint8_t  r, g, b; // base colour locked at spawn (RGB)
+  uint8_t  life;    // unused here (kept for future use / alignment)
+  uint8_t  amp;     // unused here (kept for future use)
+  uint8_t  pad;     // unused here (kept for alignment)
+  uint32_t t0;      // start time (ms)
+  uint32_t dur;     // full pulse period (up+down), ms (randomized per spot around base)
+  bool     active;  // is this spot currently alive?
+} GlowSpot;
+
+// Small easing: sin(pi * x) -> 0..1..0, symmetric rise/fall
+static inline uint8_t ease_sin_u8(float x01) {
+  if (x01 <= 0.0f) return 0;
+  if (x01 >= 1.0f) return 0;
+  float v = sinf(3.14159265f * x01);
+  // gamma-ish lift for a softer glow; comment out if you want linear
+  v = v * v; 
+  int out = int(v * 255.0f + 0.5f);
+  return (out < 0) ? 0 : (out > 255 ? 255 : out);
+}
+
+// Map speed (0..255) -> base pulse period (ms): 10000..500
+static inline uint32_t glow_base_period_ms(uint8_t spd) {
+  // linear: 0->10000, 255->500
+  // 10000 - (spd * (9500/255))
+  return 10000u - ((uint32_t)spd * 9500u) / 255u;
+}
+
+// Choose a free pixel index in an unbiased way (no creeping bias)
+static inline int16_t pick_free_pixel_random(uint16_t seqlen, const GlowSpot* spots, uint16_t nspots) {
+  if (seqlen == 0) return -1;
+
+  // Check if occupied
+  auto isOcc = [&](uint16_t idx)->bool{
+    for (uint16_t i=0; i<nspots; ++i) {
+      if (spots[i].active && spots[i].pos == idx) return true;
+    }
+    return false;
+  };
+
+  // permutation via random start + coprime stride
+  uint16_t start  = random16(seqlen);
+  uint16_t stride = (random16(seqlen - 1) + 1); // 1..seqlen-1
+  auto gcd = [](uint16_t a, uint16_t b){ while (b) { uint16_t t=a%b; a=b; b=t; } return a; };
+  uint8_t guard=16;
+  while (gcd(stride, seqlen) != 1 && guard--) stride = (random16(seqlen - 1) + 1);
+  if (gcd(stride, seqlen) != 1) stride = 1;
+
+  uint16_t idx = start;
+  for (uint16_t tries=0; tries<seqlen; ++tries) {
+    if (!isOcc(idx)) return (int16_t)idx;
+    idx += stride; if (idx >= seqlen) idx -= seqlen;
+  }
+  return -1; // none free
+}
+
+uint16_t mAnimatorLight::EffectAnim__GlowSpots()
+{
+  const uint16_t len = SEGLEN;
+  if (len == 0) return FRAMETIME;
+
+  // Target concurrent glow spots: 1 .. floor(0.7*SEGLEN)
+  const uint16_t maxByIntensity = 1u + ((uint32_t)SEGMENT.intensity * (uint32_t)((len*7u)/10u)) / 255u;
+
+  // How many records do we keep in memory? Make room for the target.
+  const uint16_t wantRecords = maxByIntensity > 0 ? maxByIntensity : 1;
+  const uint16_t dataSize    = wantRecords * sizeof(GlowSpot);
+
+  if (!SEGMENT.allocateData(dataSize)) {
+    return FRAMETIME; // graceful fallback
+  }
+
+  GlowSpot* spots = reinterpret_cast<GlowSpot*>(SEGMENT.data);
+  // On first call after allocation/size change, clear actives
+  if (SEGMENT.flags.animator_first_run) {
+    for (uint16_t i=0;i<wantRecords;++i) spots[i].active = false;
+  }
+
+  const uint32_t now = effect_start_time;
+
+  // Background colour
+  const uint32_t bg_u32 = SEGCOLOR(1);
+  const uint8_t  bgR = (bg_u32 >> 16) & 0xFF;
+  const uint8_t  bgG = (bg_u32 >>  8) & 0xFF;
+  const uint8_t  bgB = (bg_u32      ) & 0xFF;
+
+  // Base period (ms), each spot randomizes ±50%
+  const uint32_t basePeriod = glow_base_period_ms(SEGMENT.speed);
+
+  // 1) Fade/update existing spots; free up finished
+  uint16_t activeCount = 0;
+  for (uint16_t i=0;i<wantRecords;++i) {
+    if (!spots[i].active) continue;
+
+    const uint32_t elapsed = now - spots[i].t0;
+    if (elapsed >= spots[i].dur) {
+      spots[i].active = false; // finished full up+down
+      continue;
+    }
+    ++activeCount;
+
+    // Brightness over symmetric up+down: x in [0..1]
+    const float x01 = float(elapsed) / float(spots[i].dur);
+    const uint8_t b = ease_sin_u8(x01);
+
+    // Blend spot colour to background by 'b'
+    const uint8_t r = (uint8_t)(((uint16_t)spots[i].r * b + (uint16_t)bgR * (255 - b)) / 255u);
+    const uint8_t g = (uint8_t)(((uint16_t)spots[i].g * b + (uint16_t)bgG * (255 - b)) / 255u);
+    const uint8_t bch= (uint8_t)(((uint16_t)spots[i].b * b + (uint16_t)bgB * (255 - b)) / 255u);
+
+    SEGMENT.setPixelColor(spots[i].pos, RGBW32(r,g,bch,0));
+  }
+
+  // 2) Fill the rest with background (pixels not touched this frame)
+  //    For speed, only paint bg if nothing wrote there.
+  //    Simple path: write bg everywhere, then rewrite actives again (small strips cost negligible)
+  if (activeCount == 0) {
+    SEGMENT.fill(bg_u32);
+  } else {
+    // Write bg everywhere, then actives have already overwritten.
+    SEGMENT.fill(bg_u32);
+    for (uint16_t i=0;i<wantRecords;++i) {
+      if (!spots[i].active) continue;
+      const uint32_t elapsed = now - spots[i].t0;
+      const float x01 = float(elapsed) / float(spots[i].dur);
+      const uint8_t b = ease_sin_u8(x01);
+      const uint8_t r = (uint8_t)(((uint16_t)spots[i].r * b + (uint16_t)bgR * (255 - b)) / 255u);
+      const uint8_t g = (uint8_t)(((uint16_t)spots[i].g * b + (uint16_t)bgG * (255 - b)) / 255u);
+      const uint8_t bl= (uint8_t)(((uint16_t)spots[i].b * b + (uint16_t)bgB * (255 - b)) / 255u);
+      SEGMENT.setPixelColor(spots[i].pos, RGBW32(r,g,bl,0));
+    }
+  }
+
+  // 3) Spawn new spots to reach the target concurrency
+  //    Limit per-frame spawns for visual smoothness.
+  uint16_t toSpawn = (maxByIntensity > activeCount) ? (maxByIntensity - activeCount) : 0;
+  if (toSpawn > 3) toSpawn = 3;
+
+  while (toSpawn--) {
+    // Find a free slot
+    int slot = -1;
+    for (uint16_t i=0;i<wantRecords;++i) { if (!spots[i].active) { slot = i; break; } }
+    if (slot < 0) break;
+
+    // Pick a free pixel (don’t stomp an active one)
+    int16_t p = pick_free_pixel_random(len, spots, wantRecords);
+    if (p < 0) break; // fully occupied
+
+    // Lock base colour from palette at this position (preloaded access)
+    uint32_t col = SEGMENT.GetPaletteColour_ModeWrap(
+      (uint16_t)p,
+      PALETTE_INDEX__IS_SEGLEN_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_OFF,
+      NO_ENCODED_VALUE
+    );
+    uint8_t sr = (col >> 16) & 0xFF;
+    uint8_t sg = (col >>  8) & 0xFF;
+    uint8_t sb = (col      ) & 0xFF;
+
+    // Randomize duration around basePeriod: 50%..150%
+    // Keep within bounds (200..20000ms) just in case
+    uint16_t scale = 50 + random8(101); // 50..150
+    uint32_t dur   = (basePeriod * scale) / 100u;
+    if (dur < 200u)   dur = 200u;
+    if (dur > 20000u) dur = 20000u;
+
+    // Activate
+    spots[slot].pos    = (uint16_t)p;
+    spots[slot].r      = sr;
+    spots[slot].g      = sg;
+    spots[slot].b      = sb;
+    spots[slot].t0     = now;
+    spots[slot].dur    = dur;
+    spots[slot].active = true;
+  }
+
+  return FRAMETIME; // run at frame cadence
+}
+static const char PM_EFFECT_CONFIG__GLOW_SPOTS[] PROGMEM =
+"Glow Spots@"
+"Speed,Intensity,,,,,,,,"  // sliders: sx, ix, (c1..c3 empty), (o1..o3 empty), ep, grp
+";"
+""                      // segment colour labels (unused)
+";"
+"!"                         // palette picker (use primary palette)
+";"
+"1"                        // flags: 1D + supports P+ secondary palette in UI
+";"
+"paln=Colourful,"           // defaults
+"sx=127,"
+"ix=160,"
+"ep=25,"
+"s1=0"
+;
+static const char PM_EFFECT_DESCRI__GLOW_SPOTS[] PROGMEM =
+"Single-pixel pulses that glow up, then down, at random positions.\n\r"
+"SX: Pulse speed (0=10s, 255=0.5s full cycle)\n\r"
+"IX: Concurrent spots (1..~70\% of segment)\n\r"
+"SEGCOL(1): Background blend color\n\r";
+
+
+
+
 /*******************************************************************************************************************************************************************************************************************
  * @description : Plasma Effect adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino 
  * @note : Converted from WLED Effects "mode_plasma"
@@ -7594,52 +8099,45 @@ static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM = "Percent@,% of fill,,,,O
 static const char PM_EFFECT_DESCRI__PERCENT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description :  "Pacifica"
-            Gentle, blue-green ocean waves.
-            December 2019, Mark Kriegsman and Mary Corey March.
-            For Dan.
+/********************************************************************************************************************************************************************************************************************
+ * @description : Pacifica — gentle blue-green ocean waves. Four independent wave layers are summed; aligned peaks create bright “whitecaps” and a final pass deepens blues/greens.
+ * @note        : Converted from WLED effect "mode_pacifica"
+ *                In this animation, there are four "layers" of waves of light.
 
+ *                Each layer moves independently, and each is scaled separately.
 
-            In this animation, there are four "layers" of waves of light.
+ *                All four wave layers are added together on top of each other, and then another filter is applied that adds "whitecaps" of brightness where the
+ *                waves line up with each other more.  Finally, another pass is taken over the led array to 'deepen' (dim) the blues and greens.
 
-            Each layer moves independently, and each is scaled separately.
+ *                The speed and scale and motion each layer varies slowly within independent
+ *                hand-chosen ranges, which is why the code has a lot of low-speed 'beatsin8' functions
+ *                with a lot of oddly specific numeric ranges.
 
-            All four wave layers are added together on top of each other, and then
-            another filter is applied that adds "whitecaps" of brightness where the
-            waves line up with each other more.  Finally, another pass is taken
-            over the led array to 'deepen' (dim) the blues and greens.
+ *                These three custom blue-green color palettes were inspired by the colors found in
+ *                the waters off the southern coast of California, https://goo.gl/maps/QQgd97jjHesHZVxQ7
 
-            The speed and scale and motion each layer varies slowly within independent
-            hand-chosen ranges, which is why the code has a lot of low-speed 'beatsin8' functions
-            with a lot of oddly specific numeric ranges.
-
-            These three custom blue-green color palettes were inspired by the colors found in
-            the waters off the southern coast of California, https://goo.gl/maps/QQgd97jjHesHZVxQ7
-
-            Modified for WLED, based on https://github.com/FastLED/FastLED/blob/master/examples/Pacifica/Pacifica.ino
-
-            Add one layer of waves into the led array
- * @note : Converted from WLED Effects "mode_pacifica"
+ *                Modified for WLED, based on https://github.com/FastLED/FastLED/blob/master/examples/Pacifica/Pacifica.ino
+ *                SX = overall motion speed. IX = wave density (higher = tighter, more frequent bands).
+ *                If no palette is selected, the internal Pacifica palettes are used; otherwise the active palette drives all layers.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Pacifica()
 {
   uint32_t nowOld = effect_start_time;
 
-  CRGBPalette16 pacifica_palette_1 =
+  CRGBPalette16 pacifica_palette_1 = // dark → teal-green highlights
     { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117,
       0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x14554B, 0x28AA50 };
-  CRGBPalette16 pacifica_palette_2 =
+  CRGBPalette16 pacifica_palette_2 = // dark → emerald-green highlights
     { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117,
       0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x0C5F52, 0x19BE5F };
-  CRGBPalette16 pacifica_palette_3 =
+  CRGBPalette16 pacifica_palette_3 = // dark → deep-blue highlights
     { 0x000208, 0x00030E, 0x000514, 0x00061A, 0x000820, 0x000927, 0x000B2D, 0x000C33,
       0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
 
-  if (SEGMENT.palette_id) {
-    pacifica_palette_1 = SEGPALETTE;
-    pacifica_palette_2 = SEGPALETTE;
-    pacifica_palette_3 = SEGPALETTE;
+  if (SEGMENT.check1) {
+    pacifica_palette_1 = SEGMENT.palette->CRGB16Palette16_Palette.data; // this is fine, as later when non-crgb16 is set, loaded_palette will create a psuedoversion in crgb16palette_data
+    pacifica_palette_2 = SEGMENT.palette->CRGB16Palette16_Palette.data;
+    pacifica_palette_3 = SEGMENT.palette->CRGB16Palette16_Palette.data;
   }
 
   // Increment the four "color index start" counters, one for each wave layer.
@@ -7661,9 +8159,6 @@ uint16_t mAnimatorLight::EffectAnim__Pacifica()
   SEGMENT.aux0 = sCIStart1; SEGMENT.aux1 = sCIStart2;
   SEGMENT.step = (sCIStart4 << 16) | (sCIStart3 & 0xFFFF);
 
-  // Clear out the LED array to a dim background blue-green
-  //SEGMENT.fill(132618);
-
   unsigned basethreshold = beatsin8_t( 9, 55, 65);
   unsigned wave = beat8( 7 );
 
@@ -7672,8 +8167,8 @@ uint16_t mAnimatorLight::EffectAnim__Pacifica()
     // Render each of four layers, with different scales and speeds, that vary over time
     c += EffectAnim__Pacifica_Base_OneLayer(i, pacifica_palette_1, sCIStart1, beatsin16_t(3, 11 * 256, 14 * 256), beatsin8_t(10, 70, 130), 0-beat16(301));
     c += EffectAnim__Pacifica_Base_OneLayer(i, pacifica_palette_2, sCIStart2, beatsin16_t(4,  6 * 256,  9 * 256), beatsin8_t(17, 40,  80),   beat16(401));
-    c += EffectAnim__Pacifica_Base_OneLayer(i, pacifica_palette_3, sCIStart3,                         6 * 256 , beatsin8_t(9, 10,38)   , 0-beat16(503));
-    c += EffectAnim__Pacifica_Base_OneLayer(i, pacifica_palette_3, sCIStart4,                         5 * 256 , beatsin8_t(8, 10,28)   ,   beat16(601));
+    c += EffectAnim__Pacifica_Base_OneLayer(i, pacifica_palette_3, sCIStart3,                           6 * 256 , beatsin8_t(9, 10,38)   , 0-beat16(503));
+    c += EffectAnim__Pacifica_Base_OneLayer(i, pacifica_palette_3, sCIStart4,                           5 * 256 , beatsin8_t(8, 10,28)   ,   beat16(601));
 
     // Add extra 'white' to areas where the four layers of light have lined up brightly
     unsigned threshold = scale8( sin8_t( wave), 20) + basethreshold;
@@ -7696,8 +8191,26 @@ uint16_t mAnimatorLight::EffectAnim__Pacifica()
   effect_start_time = nowOld;
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__PACIFICA[] PROGMEM = "Pacifica@!,Angle;;!;;pal=51";
-static const char PM_EFFECT_DESCRI__PACIFICA[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PACIFICA[] PROGMEM =
+"Pacifica@"                                    // Name
+"!,!,,,,Use Palette,,,,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                            // ----------------------------------------- Sliders/SegCols
+""                                             // Segment Colour Names (none)
+";"                                            // ----------------------------------------- SegCols/PalPicker
+"!"                                            // palette picker (primary palette)
+";"                                            // ----------------------------------------- PalPicker/is1D2D
+"1"                                            // icon flags: 1D/strip
+";"                                            // ----------------------------------------- is1D2D/Defaults
+"paln=Ocean 16,"                               // default palette name (used if user selects one)
+"sx=140,"                                      // default overall speed
+"ix=150,"                                      // default wave density
+"c1=0"                                         // Use hardcoded colours, set true to override and allow palettes
+;                                              // end
+static const char PM_EFFECT_DESCRI__PACIFICA[] PROGMEM =
+"Gentle blue-green ocean waves formed by four additive layers and bright whitecaps where peaks align."
+"\n\rSX: Motion speed (higher = faster waves)"
+"\n\rIX: Wave density (higher = tighter bands)"
+"\n\rIf no palette is chosen, uses internal Pacifica palettes; otherwise uses the active palette.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -7902,66 +8415,128 @@ static const char PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN[] PROGMEM = "Cycle Bet
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : New effect of "Static Palette Mix"
- * 
- * The aim is to make the "Colour and Warm White Stripe" but in a way I can mix them. 
- * 
- * Palette1 ABCD
- * Palette2 abcde
- * 
- * So mix would be AaBbCcDdAe (notice shorter palettes that mix already)
- * 
- * Sliders control lit and width
- * 
- * @note : 
+ * @description : Palettes Interleaved (Lit Pattern) — using *_ModeWrap APIs
+ *                C1=0: SX/IX are per-band lengths (px). Alternate pal1/pal2 bands; each band maps that palette’s full 0→255.
+ *                C1=1: Both palettes span the full segment (0→255 over SEGLEN); SX/IX only switch which palette shows.
+ *                Primary palette via SEGMENT.GetPaletteColour_ModeWrap; secondary via GetUnloadedPaletteColour_ModeWrap.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
 {
-  
-  // Get lengths of both palettes
-  uint16_t palette1Length = mPaletteI->GetColoursInPalette(SEGMENT.palette_id); // Palette 1
-  uint16_t palette2Length = mPaletteI->GetColoursInPalette(SEGMENT.aux0); // Palette 2
-  
-  uint16_t lit = 1 + SEGMENT.speed; // Lit pattern duration
-  uint16_t unlit = 1 + SEGMENT.intensity; // Unlit pattern duration
+  if (SEGLEN == 0) return EFFECT_DEFAULT();
 
-  bool drawingLit = true; // Flag to track whether lit or unlit
-  uint16_t cnt = 0; // Counter for current lit/unlit streak
-  
-  // Track indices for palettes
-  uint16_t index1 = 0; // Palette 1 index
-  uint16_t index2 = 0; // Palette 2 index
+  const uint16_t len1 = (uint16_t)max<int>(1, SEGMENT.speed);     // Pal1 band length (px)
+  const uint16_t len2 = (uint16_t)max<int>(1, SEGMENT.intensity); // Pal2 band length (px)
+  const bool span_segment = SEGMENT.check1;                       // C1: 0=per-band index, 1=span full segment
 
-  for (uint16_t i = 0; i < SEGLEN; i++) {
-    uint32_t colour;
+  if (!span_segment)
+  {
+    // Per-band indexing: pal1(len1) then pal2(len2), repeating
+    bool use_pal1 = true;
+    uint16_t run_left = len1;
+    uint16_t offset_in_run = 0;
 
-    // Interleave palettes
-    if (i % 2 == 0) {
-      // Use Palette 1 for even indices
-      colour = SEGMENT.GetPaletteColour(index1, PALETTE_INDEX_IS_INDEX_IN_PALETTE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
-      index1 = (index1 + 1) % palette1Length; // Wrap Palette 1
-    } else {
-      // Use Palette 2 for odd indices
-      colour = SEGMENT.GetPaletteColour(index2, PALETTE_INDEX_IS_INDEX_IN_PALETTE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
-      index2 = (index2 + 1) % palette2Length; // Wrap Palette 2
+    for (uint16_t i = 0; i < SEGLEN; ++i)
+    {
+      const uint16_t run_len = use_pal1 ? len1 : len2;
+
+      // exclusive-top mapping: 0..run_len-1 -> 0..255
+      const uint8_t idx8 = (run_len <= 1) ? 0 : (uint8_t)((offset_in_run * 256u) / run_len);
+
+      uint32_t col;
+      if (use_pal1) {
+        col = SEGMENT.GetPaletteColour_ModeWrap(
+          idx8,
+          PALETTE_INDEX__IS_255_RANGE,   // we generated a 0–255 index
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE
+        );
+      } else {
+        const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
+          SEGMENT.palette2_id,
+          idx8,
+          PALETTE_INDEX__IS_255_RANGE,
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE
+        );
+        col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
+      }
+
+      SEGMENT.setPixelColor(i, col);
+
+      ++offset_in_run;
+      if (--run_left == 0) {
+        use_pal1 = !use_pal1;
+        run_left = use_pal1 ? len1 : len2;
+        offset_in_run = 0;
+      }
     }
+  }
+  else
+  {
+    // Span full segment: both palettes map 0..255 over SEGLEN; SX/IX only switch which palette is active
+    const uint16_t cycle_len = len1 + len2;
+    uint16_t pos_in_cycle = 0;
 
-    // Set pixel colour based on drawingLit
-    SEGMENT.setPixelColor(i, (drawingLit) ? colour : SEGCOLOR_U32(1));
+    for (uint16_t i = 0; i < SEGLEN; ++i)
+    {
+      // map 0..SEGLEN-1 -> 0..255
+      const uint8_t gidx = (SEGLEN <= 1) ? 0 : (uint8_t)((i * 256u) / SEGLEN);
 
-    // Update lit/unlit counter
-    cnt++;
-    if (cnt >= ((drawingLit) ? lit : unlit)) {
-      cnt = 0;
-      drawingLit = !drawingLit;
+      uint32_t col;
+      if (pos_in_cycle < len1) {
+        col = SEGMENT.GetPaletteColour_ModeWrap(
+          gidx,
+          PALETTE_INDEX__IS_255_RANGE,   // already scaled to 0–255
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE
+        );
+      } else {
+        const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
+          SEGMENT.palette2_id,
+          gidx,
+          PALETTE_INDEX__IS_255_RANGE,
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE,
+          /*full_visual*/ true
+        );
+        col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
+      }
+
+      SEGMENT.setPixelColor(i, col);
+
+      if (++pos_in_cycle >= cycle_len) pos_in_cycle = 0;
     }
   }
 
   return FRAMETIME;
-  
 }
-static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM = "Palettes InterLit@Fg size,Bg size;Fg,!;!;;pal=19";
-static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
+"Palettes InterLit@"                        // Name
+"Pal1 size,Pal2 size,,,,Span segment,,,,,"     // 10 fields after '@'
+";"
+""                                             // no seg colours
+";"
+"!"                                            // primary palette picker
+";"
+"1p"                                            // 1D strip icon & Pal+
+";"
+"paln=Rainbow 16,"
+"pal2n=Cold White,"
+"sx=20,"
+"ix=8,"
+"c1=0,"
+"ep=500"
+;
+static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
+"Interleave two palettes along the strip."
+"\n\rC1=0: SX/IX are per-band lengths (pixels). Each band compresses its palette over that run."
+"\n\rC1=1: Both palettes span the full segment; SX/IX only switch which palette is active."
+"\n\rSX: Pal1 band length   IX: Pal2 band length"
+"\n\rPrimary palette via picker; secondary = palette2_id.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -7991,11 +8566,11 @@ uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved()
     // Alternate between Palette 1 and Palette 2
     if (i % 2 == 0) {
       // Use Palette 1 for even indices
-      colour = SEGMENT.GetPaletteColour(index1, PALETTE_INDEX_IS_INDEX_IN_PALETTE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+      colour = SEGMENT.GetPaletteColour(index1, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
       index1 = (index1 + 1) % palette1Length; // Wrap Palette 1
     } else {
       // Use Palette 2 for odd indices
-      colour = SEGMENT.GetPaletteColour(index2, PALETTE_INDEX_IS_INDEX_IN_PALETTE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+      colour = SEGMENT.GetPaletteColour(index2, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
       index2 = (index2 + 1) % palette2Length; // Wrap Palette 2
     }
 
@@ -8038,7 +8613,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2
   if (color == color1 && do_palette)
   {
     for (int i = 0; i < SEGLEN; i++) {
-      SEGMENT.setPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE));
+      SEGMENT.setPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE));
     }
   }
   else
@@ -8304,8 +8879,8 @@ static const char PM_EFFECT_DESCRI__FIRE_2012[] PROGMEM = "Cycle Between Each Li
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Railway Crossing / Christmas Fairy lights
- * @note : Converted from WLED Effects "mode_railway"
+ * @description : Alternating railway-crossing style lights. Even/odd LEDs ramp in/out from the active palette. Speed sets period; Intensity sets ramp length (smoothness).
+ * @note        : Converted from WLED effect "mode_railway"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Railway()
 {
@@ -8336,14 +8911,36 @@ uint16_t mAnimatorLight::EffectAnim__Railway()
   SEGMENT.step += FRAMETIME;
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__RAILWAY[] PROGMEM = "Railway@!,Smoothness;1,2;!;;pal=3";
-static const char PM_EFFECT_DESCRI__RAILWAY[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__RAILWAY[] PROGMEM =
+"Railway@"                                    // Name
+"Speed,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+""                                            // Segment Colour Names (none shown)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: '1' -> 1D/strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Colourful,"                             // default palette name
+"sx=127,"                                     // medium cycle rate
+"ix=180,"                                     // longer ramp (smoother)
+"ep=500"                                      // default extra param slot
+;                                             // end special key=value defaults
+static const char PM_EFFECT_DESCRI__RAILWAY[] PROGMEM =
+"Alternating even/odd LEDs fade against each other (rail crossing)."
+"\n\rSX: Cycle rate (higher = faster swaps)"
+"\n\rIX: Ramp smoothness (higher = softer transitions)"
+"\n\rUses the active palette only; ignores fixed segment colours.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Modulates the brightness similar to a heartbeat
- *         (unimplemented?) tries to draw an ECG approximation on a 2D matrix
- * @note : Converted from WLED Effects "mode_heartbeat"
+ * @description : Heartbeat
+ * @note        : Modulates brightness in a double-beat envelope (lub‑dub). Foreground comes from the active palette; it blends over SEGCOLOR(1) as background.
+ *                Beat timing: BPM = 40 + (SX >> 3); a shorter second beat occurs at ~1/3 of the beat period.
+ *                Envelope/decay uses IX to soften and lengthen the falloff.
+ *                FG: palette (spans SEGLEN, solid wrap), BG: SEGCOLOR(1).
+ *                SX (Speed) : overall BPM / beat timing.
+ *                IX (Intensity) : decay/softness (higher = softer/longer envelope).
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Heartbeat()
 {
@@ -8372,8 +8969,26 @@ uint16_t mAnimatorLight::EffectAnim__Heartbeat()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__HEARTBEAT[] PROGMEM = "Heartbeat@!,!;!,!;!;01;m12=1";
-static const char PM_EFFECT_DESCRI__HEARTBEAT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__HEARTBEAT[] PROGMEM =
+"Heartbeat@"                                  // Name
+"Speed,Intensity,,,,,,,,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+"Bg,,,,"                                      // Segment Colour Names (BG uses SEGCOLOR(1))
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (foreground uses palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // flags: '1' = 1D strip
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"sx=127,"                                     // default speed
+"ix=128,"                                     // default decay softness
+"m12=1,"                                       // default map1D2D (kept from previous config)
+"s1=000"
+;                                             // end special key=value defaults
+static const char PM_EFFECT_DESCRI__HEARTBEAT[] PROGMEM =
+"Heartbeat-like brightness modulation.\n\r"
+"FG: palette, BG: SEGCOLOR(1)\n\r"
+"SX: BPM / speed\n\r"
+"IX: Decay softness";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -9445,8 +10060,11 @@ static const char PM_EFFECT_DESCRI__ROLLINGBALLS[] PROGMEM = "Cycle Between Each
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Sinelon stolen from FASTLED examples
- * @note : Converted from WLED Effects "sinelon_base"
+ * @description : Base_Sinelon (core)
+ * @note        : Single bouncing “comet” with a fading trail. Optional mirrored second comet (dual) and optional rainbow head (ignores palette).
+ *                Uses palette for head color unless rainbow==true. Trail length is controlled by fade-out each frame.
+ *                IX (Trail) : fade strength per frame (higher = shorter trail)
+ *                SX (Speed) : comet speed (beatsin rate)
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
 {
@@ -9485,37 +10103,50 @@ uint16_t mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_sinelon"
+ * @description : Sinelon
+ * @note        : One bouncing comet with a fading trail. Color from current palette.
+ *                IX (Trail) : fade strength per frame (higher = shorter trail)
+ *                SX (Speed) : comet speed
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Sinelon(void) {
   return EffectAnim__Base_Sinelon(false);
 }
 static const char PM_EFFECT_CONFIG__SINELON[] PROGMEM = "Sinelon@!,Trail;!,!,!;!";
-static const char PM_EFFECT_DESCRI__SINELON[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_DESCRI__SINELON[] PROGMEM =
+  "One bouncing comet with a fading trail.\n"
+  "IX: Trail fade (higher = shorter)\n"
+  "SX: Speed";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_sinelon_dual"
+ * @description : Sinelon Dual
+ * @note        : Two mirrored comets moving toward/away from each other with fading trails. Colors from current palette (secondary head mirrors).
+ *                IX (Trail) : fade strength per frame (higher = shorter trail)
+ *                SX (Speed) : comet speed
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Sinelon_Dual(void) {
   return EffectAnim__Base_Sinelon(true);
 }
 static const char PM_EFFECT_CONFIG__SINELON_DUAL[] PROGMEM = "Sinelon Dual@!,Trail;!,!,!;!";
-static const char PM_EFFECT_DESCRI__SINELON_DUAL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
+static const char PM_EFFECT_DESCRI__SINELON_DUAL[] PROGMEM =
+  "Two mirrored comets with fading trails.\n"
+  "IX: Trail fade (higher = shorter)\n"
+  "SX: Speed";
 
 /********************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_sinelon_rainbow"
+ * @description : Sinelon Rainbow
+ * @note        : One bouncing comet with fading trail; head color cycles rainbow (palette ignored for head).
+ *                IX (Trail) : fade strength per frame (higher = shorter trail)
+ *                SX (Speed) : comet speed
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Sinelon_Rainbow(void) {
   return EffectAnim__Base_Sinelon(false, true);
 }
 static const char PM_EFFECT_CONFIG__SINELON_RAINBOW[] PROGMEM = "Sinelon Rainbow@!,Trail;,,!;!";
-static const char PM_EFFECT_DESCRI__SINELON_RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
+static const char PM_EFFECT_DESCRI__SINELON_RAINBOW[] PROGMEM =
+  "Rainbow comet with a fading trail (palette ignored for head).\n"
+  "IX: Trail fade (higher = shorter)\n"
+  "SX: Speed";
 
 /********************************************************************************************************************************************************************************************************************
  * @description : Drip Effect ported of: https://www.youtube.com/watch?v=sru2fXh4r7k
@@ -9608,7 +10239,9 @@ static const char PM_EFFECT_DESCRI__DRIP[] PROGMEM = "Cycle Between Each Live Ra
 
 /********************************************************************************************************************************************************************************************************************
  * @description : Flow Stripe
- * @note : Converted from WLED Effects "mode_FlowStripe"
+ * @note        : Sine‑warped flowing stripe rendered in HSV (no palette). 
+ *                SX (Hue speed)   : rate of hue drift over time.
+ *                IX (Effect speed): flow/phase speed of the stripe animation.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__FlowStripe()
 {
@@ -9627,29 +10260,57 @@ uint16_t mAnimatorLight::EffectAnim__FlowStripe()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__FLOWSTRIPE[] PROGMEM = "Flow Stripe@Hue speed,Effect speed;;";
-static const char PM_EFFECT_DESCRI__FLOWSTRIPE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__FLOWSTRIPE[] PROGMEM =  "Flow Stripe@Hue speed,Effect speed;;;1";   // sliders; NO colors; NO palette; flags(1=1D)
+static const char PM_EFFECT_DESCRI__FLOWSTRIPE[] PROGMEM =
+  "Sine‑warped flowing stripe (HSV).\n"
+  "SX: Hue drift speed\n"
+  "IX: Flow/phase speed\n"
+  "No palette (uses HSV)";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Wavesins Uses beatsin8() + phase shifting. By: Andrew Tuline
- * @note : Converted from WLED Effects "mode_wavesins"
+ * @description : WaveSins
+ * @note        : Uses beatsin8() with phase shifting (by Andrew Tuline). Palette-driven sine waves of color + brightness variation.
+ *                IX (Brightness variation) : strength of sine brightness modulation.
+ *                C1 (Starting color)       : low end of palette index range.
+ *                C2 (Range of colors)      : span of palette indices (added to C1).
+ *                C3 (Color variation)      : phase offset per pixel (reduced-resolution slider).
+ *                SX (Speed)                : sine oscillation speed.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__WaveSins()
 {
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint8_t bri = sin8_t(effect_start_time/4 + i * SEGMENT.intensity);
     uint8_t index = beatsin8_t(SEGMENT.speed, SEGMENT.custom1, SEGMENT.custom1+SEGMENT.custom2, 0, i * (SEGMENT.custom3<<3)); // custom3 is reduced resolution slider
-    //SEGMENT.setPixelColor(i, ColorFromPalette(SEGPALETTE, index, bri, LINEARBLEND));
     SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, bri));
   }
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__WAVESINS[] PROGMEM = "Wavesins@!,Brightness variation,Starting color,Range of colors,Color variation;!;!";
-static const char PM_EFFECT_DESCRI__WAVESINS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
+static const char PM_EFFECT_CONFIG__WAVESINS[] PROGMEM =
+"Wavesins@"                                   // Name
+"Speed,Brightness variation,Starting color,Range of colors,Color variation,,,,,," // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                           // ----------------------------------------- Sliders/SegCols
+"!"                                           // Segment Colour Names (unused)
+";"                                           // ----------------------------------------- SegCols/PalPicker
+"!"                                           // palette picker (primary palette)
+";"                                           // ----------------------------------------- PalPicker/is1D2D
+"1"                                           // icon flags: '1' -> 1D/strip, 'p' -> supports secondary palette (P+)
+";"                                           // ----------------------------------------- is1D2D/Defaults
+"paln=Rainbow 16,"                            // default palette id (0) – change to paln=... if you prefer a named default
+"sx=21,"                                       // Speed (oscillation rate)
+"ix=1,"                                       // Brightness variation depth
+"c1=0,"                                       // Starting color index
+"c2=255,"                                      // Range of colors (span)
+"c3=31"                                        // Color phase variation (reduced-res slider)
+;                                             // end special key=value defaults
+static const char PM_EFFECT_DESCRI__WAVESINS[] PROGMEM =
+  "Palette-driven sine wave effect.\n\r"
+  "SX: Oscillation speed\n\r"
+  "IX: Brightness variation\n\r"
+  "C1: Starting color index\n\r"
+  "C2: Range of colors\n\r"
+  "C3: Color phase variation";
 
 
 
@@ -10248,7 +10909,7 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
   // RgbcctColor colour = RgbcctColor();
   // for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   // {    
-  //   colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+  //   colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
   //   SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour);
   // }
 
@@ -10499,7 +11160,7 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
   uint32_t colour = 0;//RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
   
   
@@ -10537,7 +11198,7 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
   uint32_t colour = 0;//RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
-    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
   
   
@@ -11450,7 +12111,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
 
   for (uint16_t i = 0; i < SEGLEN; i++) {
     SEGMENT.setPixelColor(i, 
-      (drawingLit) ? SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE) : SEGCOLOR_U32(1)
+      (drawingLit) ? SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE) : SEGCOLOR_U32(1)
     );
     cnt++;
     if (cnt >= ((drawingLit) ? lit : unlit)) {
@@ -13007,7 +13668,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__ScrollingText()
   for (int i = 0; i < numberOfLetters; i++) {
     int xoffset = int(cols) - int(SEGMENT.aux0) + rotLW*i;
     if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-    uint32_t col1 = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t col1 = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
     uint32_t col2 = BLACK;
     if (SEGMENT.check1 && SEGMENT.palette_id == 0) {
       col1 = SEGCOLOR_U32(0); //SEGCOLOR_U32(0);
@@ -15133,6 +15794,14 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
+  addEffect(EFFECTS_FUNCTION__PALETTE_VARIATION__ID,
+            &mAnimatorLight::EffectAnim__Palette_Variation,
+            PM_EFFECT_CONFIG__PALETTE_VARIATION,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PALETTE_VARIATION,
+            #endif
+            Effect_DevStage::Release);
+
   addEffect(EFFECTS_FUNCTION__CANDLE_SINGLE__ID,
             &mAnimatorLight::EffectAnim__Candle_Single,
             PM_EFFECT_CONFIG__CANDLE_SINGLE,
@@ -15149,13 +15818,6 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
             
-  addEffect(EFFECTS_FUNCTION__PALETTE_VARIATION__ID,
-            &mAnimatorLight::EffectAnim__Palette_Variation,
-            PM_EFFECT_CONFIG__PALETTE_VARIATION,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PALETTE_VARIATION,
-            #endif
-            Effect_DevStage::Release);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
   // General Level 2 Flashing Basic Effects
@@ -15182,7 +15844,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__ROTATING_PALETTE,
             #endif
-            EFFECT_DEVSTAGE_12D_CHECK(Effect_DevStage::Beta,Effect_DevStage::Dev) );
+            EFFECT_DEVSTAGE_12D_CHECK(Effect_DevStage::Release,Effect_DevStage::Dev) );
 
   addEffect(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,
             &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,
@@ -15190,7 +15852,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__ROTATING_PREVIOUS_ANIMATION,
             #endif
-            Effect_DevStage::Dev);
+            Effect_DevStage::Release);
 
   addEffect(EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,
             &mAnimatorLight::EffectAnim__Stepping_Palette_With_Background,
@@ -15215,22 +15877,6 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__BLEND_TWO_PALETTES,
             #endif
             Effect_DevStage::Release);
-
-  addEffect(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,
-            PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWINKLE_OFF_PALETTE__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Out_Palette,
-            PM_EFFECT_CONFIG__TWINKLE_OUT_PALETTE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE_OUT_PALETTE,
-            #endif
-            Effect_DevStage::Dev);
             
   addEffect(EFFECTS_FUNCTION__TIMEBASED__HOUR_PROGRESS__ID,
             &mAnimatorLight::EffectAnim__TimeBased__HourProgress,
@@ -15240,1076 +15886,1044 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,
-            PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE_DECAYING_PALETTE,
-            #endif
-            Effect_DevStage::Dev);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
   // General Level 3 Flashing Extended Effects
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,
-            &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black,
-            PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POPPING_DECAY_PALETTE_TO_BLACK,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__ID,
-            &mAnimatorLight::EffectAnim__Popping_Decay_Random_To_Black,
-            PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_BLACK,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POPPING_DECAY_RANDOM_TO_BLACK,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_WHITE__ID,
-            &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_White,
-            PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_WHITE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POPPING_DECAY_PALETTE_TO_WHITE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_WHITE__ID,
-            &mAnimatorLight::EffectAnim__Popping_Decay_Random_To_White,
-            PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM_TO_WHITE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POPPING_DECAY_RANDOM_TO_WHITE,
-            #endif
-            Effect_DevStage::Dev);
-
+       
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
-  // General Level 4 Flashing Complete Effects
+  // // General Level 4 Flashing Complete Effects
   
-  addEffect(EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID,
-            &mAnimatorLight::EffectAnim__Palette_Lit_Pattern,
-            PM_EFFECT_CONFIG__PALETTE_LIT_PATTERN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PALETTE_LIT_PATTERN,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID,
+  //           &mAnimatorLight::EffectAnim__Palette_Lit_Pattern,
+  //           PM_EFFECT_CONFIG__PALETTE_LIT_PATTERN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PALETTE_LIT_PATTERN,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__TRISEGCOL_LIT_PATTERN__ID,
-            &mAnimatorLight::EffectAnim__TriSegCol_Lit_Pattern,
-            PM_EFFECT_CONFIG__TRISEGCOL_LIT_PATTERN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__TRISEGCOL_LIT_PATTERN__ID,
+  //           &mAnimatorLight::EffectAnim__TriSegCol_Lit_Pattern,
+  //           PM_EFFECT_CONFIG__TRISEGCOL_LIT_PATTERN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED_LIT_PATTERN__ID,
-            &mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern,
-            PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED_LIT_PATTERN__ID,
+  //           &mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern,
+  //           PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED__ID,
-            &mAnimatorLight::EffectAnim__Palettes_Interleaved,
-            PM_EFFECT_CONFIG__PALETTES_INTERLEAVED,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PALETTES_INTERLEAVED,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED__ID,
+  //           &mAnimatorLight::EffectAnim__Palettes_Interleaved,
+  //           PM_EFFECT_CONFIG__PALETTES_INTERLEAVED,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PALETTES_INTERLEAVED,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__SPOTS__ID,
-            &mAnimatorLight::EffectAnim__Spots,
-            PM_EFFECT_CONFIG__SPOTS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SPOTS,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__SPOTS__ID,
+  //           &mAnimatorLight::EffectAnim__Spots,
+  //           PM_EFFECT_CONFIG__SPOTS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SPOTS,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__PERCENT__ID,
-            &mAnimatorLight::EffectAnim__Percent,
-            PM_EFFECT_CONFIG__PERCENT,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PERCENT,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PERCENT__ID,
+  //           &mAnimatorLight::EffectAnim__Percent,
+  //           PM_EFFECT_CONFIG__PERCENT,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PERCENT,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         
-            &mAnimatorLight::EffectAnim__Random_Colour,                         
-            PM_EFFECT_CONFIG__RANDOM_COLOR,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RANDOM_COLOR,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         
+  //           &mAnimatorLight::EffectAnim__Random_Colour,                         
+  //           PM_EFFECT_CONFIG__RANDOM_COLOR,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RANDOM_COLOR,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,
-            &mAnimatorLight::EffectAnim__TriColour_Wipe,
-            PM_EFFECT_CONFIG__TRICOLOR_WIPE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TRICOLOR_WIPE,
-            #endif
-            Effect_DevStage::Dev);
-  /**
-   * Wipe/Sweep/Runners 
-   **/
-  addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,
-            &mAnimatorLight::EffectAnim__Colour_Wipe,
-            PM_EFFECT_CONFIG__COLOR_WIPE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLOR_WIPE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,
+  //           &mAnimatorLight::EffectAnim__TriColour_Wipe,
+  //           PM_EFFECT_CONFIG__TRICOLOR_WIPE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TRICOLOR_WIPE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+  // /**
+  //  * Wipe/Sweep/Runners 
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,
+  //           &mAnimatorLight::EffectAnim__Colour_Wipe,
+  //           PM_EFFECT_CONFIG__COLOR_WIPE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLOR_WIPE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,
-            &mAnimatorLight::EffectAnim__Colour_Wipe_Random,
-            PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLOR_WIPE_RANDOM,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,
+  //           &mAnimatorLight::EffectAnim__Colour_Wipe_Random,
+  //           PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLOR_WIPE_RANDOM,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,
-            &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,
-            PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLOR_WIPE_PALETTE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,
+  //           &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,
+  //           PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLOR_WIPE_PALETTE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP__ID,
-            &mAnimatorLight::EffectAnim__Colour_Sweep,
-            PM_EFFECT_CONFIG__COLOR_SWEEP,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLOR_SWEEP,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__COLOR_SWEEP__ID,
+  //           &mAnimatorLight::EffectAnim__Colour_Sweep,
+  //           PM_EFFECT_CONFIG__COLOR_SWEEP,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLOR_SWEEP,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,
-            &mAnimatorLight::EffectAnim__Colour_Sweep_Random,
-            PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLOR_SWEEP_RANDOM,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,
+  //           &mAnimatorLight::EffectAnim__Colour_Sweep_Random,
+  //           PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLOR_SWEEP_RANDOM,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,
-            &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,
-            PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLOR_SWEEP_PALETTE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,
+  //           &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,
+  //           PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLOR_SWEEP_PALETTE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__DYNAMIC__ID,
-            &mAnimatorLight::EffectAnim__Dynamic,
-            PM_EFFECT_CONFIG__DYNAMIC,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DYNAMIC,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__DYNAMIC__ID,
+  //           &mAnimatorLight::EffectAnim__Dynamic,
+  //           PM_EFFECT_CONFIG__DYNAMIC,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DYNAMIC,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__DYNAMIC_SMOOTH__ID,
-            &mAnimatorLight::EffectAnim__Dynamic_Smooth,
-            PM_EFFECT_CONFIG__DYNAMIC_SMOOTH,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DYNAMIC_SMOOTH,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__DYNAMIC_SMOOTH__ID,
+  //           &mAnimatorLight::EffectAnim__Dynamic_Smooth,
+  //           PM_EFFECT_CONFIG__DYNAMIC_SMOOTH,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DYNAMIC_SMOOTH,
+  //           #endif
+  //           Effect_DevStage::Dev);
             
-  addEffect(EFFECTS_FUNCTION__RUNNING_COLOR__ID,
-            &mAnimatorLight::EffectAnim__Running_Colour,
-            PM_EFFECT_CONFIG__RUNNING_COLOR,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RUNNING_COLOR,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__RUNNING_COLOR__ID,
+  //           &mAnimatorLight::EffectAnim__Running_Colour,
+  //           PM_EFFECT_CONFIG__RUNNING_COLOR,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RUNNING_COLOR,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__RUNNING_RANDOM__ID,
-            &mAnimatorLight::EffectAnim__Running_Random,
-            PM_EFFECT_CONFIG__RUNNING_RANDOM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RUNNING_RANDOM,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__RUNNING_RANDOM__ID,
+  //           &mAnimatorLight::EffectAnim__Running_Random,
+  //           PM_EFFECT_CONFIG__RUNNING_RANDOM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RUNNING_RANDOM,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__RUNNING_DUAL__ID,
+  //           &mAnimatorLight::EffectAnim__Running_Dual,
+  //           PM_EFFECT_CONFIG__RUNNING_DUAL,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RUNNING_DUAL,
+  //           #endif
+  //           Effect_DevStage::Dev);            
   
-  addEffect(EFFECTS_FUNCTION__ANDROID__ID,               
-            &mAnimatorLight::EffectAnim__Android,            
-            PM_EFFECT_CONFIG__ANDROID,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__ANDROID,
-            #endif
-            Effect_DevStage::Dev);  
+  // addEffect(EFFECTS_FUNCTION__ANDROID__ID,               
+  //           &mAnimatorLight::EffectAnim__Android,            
+  //           PM_EFFECT_CONFIG__ANDROID,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__ANDROID,
+  //           #endif
+  //           Effect_DevStage::Dev);  
 
-  addEffect(EFFECTS_FUNCTION__GRADIENT__ID,
-            &mAnimatorLight::EffectAnim__Gradient,
-            PM_EFFECT_CONFIG__GRADIENT,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__GRADIENT,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__GRADIENT__ID,
+  //           &mAnimatorLight::EffectAnim__Gradient,
+  //           PM_EFFECT_CONFIG__GRADIENT,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__GRADIENT,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__LOADING__ID,
-            &mAnimatorLight::EffectAnim__Loading,
-            PM_EFFECT_CONFIG__LOADING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__LOADING,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__LOADING__ID,
+  //           &mAnimatorLight::EffectAnim__Loading,
+  //           PM_EFFECT_CONFIG__LOADING,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__LOADING,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__ROLLINGBALLS__ID,
-            &mAnimatorLight::EffectAnim__Rolling_Balls,
-            PM_EFFECT_CONFIG__ROLLINGBALLS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__ROLLINGBALLS,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__ROLLINGBALLS__ID,
+  //           &mAnimatorLight::EffectAnim__Rolling_Balls,
+  //           PM_EFFECT_CONFIG__ROLLINGBALLS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__ROLLINGBALLS,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__POLICE__ID,
-            &mAnimatorLight::EffectAnim__Police,
-            PM_EFFECT_CONFIG__POLICE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POLICE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__FAIRY__ID,
+  //           &mAnimatorLight::EffectAnim__Fairy,
+  //           PM_EFFECT_CONFIG__FAIRY,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FAIRY,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__POLICE_ALL__ID,
-            &mAnimatorLight::EffectAnim__Police_All,
-            PM_EFFECT_CONFIG__POLICE_ALL,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POLICE_ALL,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__FAIRY__ID,
-            &mAnimatorLight::EffectAnim__Fairy,
-            PM_EFFECT_CONFIG__FAIRY,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FAIRY,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWO_DOTS__ID,
-            &mAnimatorLight::EffectAnim__Two_Dots,
-            PM_EFFECT_CONFIG__TWO_DOTS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWO_DOTS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWO_AREAS__ID,
-            &mAnimatorLight::EffectAnim__Two_Areas,
-            PM_EFFECT_CONFIG__TWO_AREAS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWO_AREAS,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__TWO_DOTS__ID,
+  //           &mAnimatorLight::EffectAnim__Two_Dots,
+  //           PM_EFFECT_CONFIG__TWO_DOTS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWO_DOTS,
+  //           #endif
+  //           Effect_DevStage::Dev);
             
-  addEffect(EFFECTS_FUNCTION__FAIRYTWINKLE__ID,
-            &mAnimatorLight::EffectAnim__Fairy_Twinkle,
-            PM_EFFECT_CONFIG__FAIRYTWINKLE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FAIRYTWINKLE,
-            #endif
-            Effect_DevStage::Dev);
-            
-  addEffect(EFFECTS_FUNCTION__RUNNING_DUAL__ID,
-            &mAnimatorLight::EffectAnim__Running_Dual,
-            PM_EFFECT_CONFIG__RUNNING_DUAL,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RUNNING_DUAL,
-            #endif
-            Effect_DevStage::Dev);            
+  // addEffect(EFFECTS_FUNCTION__MULTI_COMET__ID,
+  //           &mAnimatorLight::EffectAnim__Multi_Comet,
+  //           PM_EFFECT_CONFIG__MULTI_COMET,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__MULTI_COMET,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__MULTI_COMET__ID,
-            &mAnimatorLight::EffectAnim__Multi_Comet,
-            PM_EFFECT_CONFIG__MULTI_COMET,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__MULTI_COMET,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__OSCILLATE__ID,
+  //           &mAnimatorLight::EffectAnim__Oscillate,
+  //           PM_EFFECT_CONFIG__OSCILLATE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__OSCILLATE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__OSCILLATE__ID,
-            &mAnimatorLight::EffectAnim__Oscillate,
-            PM_EFFECT_CONFIG__OSCILLATE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__OSCILLATE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__BPM__ID,
+  //           &mAnimatorLight::EffectAnim__BPM,
+  //           PM_EFFECT_CONFIG__BPM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__BPM,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__BPM__ID,
-            &mAnimatorLight::EffectAnim__BPM,
-            PM_EFFECT_CONFIG__BPM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__BPM,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__JUGGLE__ID,
+  //           &mAnimatorLight::EffectAnim__Juggle,
+  //           PM_EFFECT_CONFIG__JUGGLES,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__JUGGLES,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__JUGGLE__ID,
-            &mAnimatorLight::EffectAnim__Juggle,
-            PM_EFFECT_CONFIG__JUGGLES,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__JUGGLES,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PALETTE__ID,
+  //           &mAnimatorLight::EffectAnim__Palette,
+  //           PM_EFFECT_CONFIG__PALETTE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PALETTE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__PALETTE__ID,
-            &mAnimatorLight::EffectAnim__Palette,
-            PM_EFFECT_CONFIG__PALETTE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PALETTE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__COLORWAVES__ID,
+  //           &mAnimatorLight::EffectAnim__ColourWaves,
+  //           PM_EFFECT_CONFIG__COLORWAVES,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__COLORWAVES,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__COLORWAVES__ID,
-            &mAnimatorLight::EffectAnim__ColourWaves,
-            PM_EFFECT_CONFIG__COLORWAVES,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLORWAVES,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__LAKE__ID,
+  //           &mAnimatorLight::EffectAnim__Lake,
+  //           PM_EFFECT_CONFIG__LAKE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__LAKE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__LAKE__ID,
-            &mAnimatorLight::EffectAnim__Lake,
-            PM_EFFECT_CONFIG__LAKE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__LAKE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__GLITTER__ID,
+  //           &mAnimatorLight::EffectAnim__Glitter,
+  //           PM_EFFECT_CONFIG__GLITTER,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__GLITTER,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__GLITTER__ID,
-            &mAnimatorLight::EffectAnim__Glitter,
-            PM_EFFECT_CONFIG__GLITTER,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__GLITTER,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__METEOR__ID,
+  //           &mAnimatorLight::EffectAnim__Meteor,
+  //           PM_EFFECT_CONFIG__METEOR,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__METEOR,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__METEOR__ID,
-            &mAnimatorLight::EffectAnim__Meteor,
-            PM_EFFECT_CONFIG__METEOR,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__METEOR,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PRIDE_2015__ID,
+  //           &mAnimatorLight::EffectAnim__Pride_2015,
+  //           PM_EFFECT_CONFIG__PRIDE_2015,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PRIDE_2015,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__PRIDE_2015__ID,
-            &mAnimatorLight::EffectAnim__Pride_2015,
-            PM_EFFECT_CONFIG__PRIDE_2015,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PRIDE_2015,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PACIFICA__ID,
+  //           &mAnimatorLight::EffectAnim__Pacifica,
+  //           PM_EFFECT_CONFIG__PACIFICA,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PACIFICA,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__PACIFICA__ID,
-            &mAnimatorLight::EffectAnim__Pacifica,
-            PM_EFFECT_CONFIG__PACIFICA,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PACIFICA,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__SUNRISE__ID,
+  //           &mAnimatorLight::EffectAnim__Sunrise,
+  //           PM_EFFECT_CONFIG__SUNRISE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SUNRISE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__SUNRISE__ID,
-            &mAnimatorLight::EffectAnim__Sunrise,
-            PM_EFFECT_CONFIG__SUNRISE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SUNRISE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__SINEWAVE__ID,
+  //           &mAnimatorLight::EffectAnim__Sinewave,
+  //           PM_EFFECT_CONFIG__SINEWAVE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SINEWAVE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__SINEWAVE__ID,
-            &mAnimatorLight::EffectAnim__Sinewave,
-            PM_EFFECT_CONFIG__SINEWAVE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SINEWAVE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__FLOW__ID,
+  //           &mAnimatorLight::EffectAnim__Flow,
+  //           PM_EFFECT_CONFIG__FLOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FLOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__FLOW__ID,
-            &mAnimatorLight::EffectAnim__Flow,
-            PM_EFFECT_CONFIG__FLOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FLOW,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__RUNNING_LIGHTS__ID,
+  //           &mAnimatorLight::EffectAnim__Running_Lights,
+  //           PM_EFFECT_CONFIG__RUNNING_LIGHTS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RUNNING_LIGHTS,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__RUNNING_LIGHTS__ID,
-            &mAnimatorLight::EffectAnim__Running_Lights,
-            PM_EFFECT_CONFIG__RUNNING_LIGHTS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RUNNING_LIGHTS,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,
+  //           &mAnimatorLight::EffectAnim__Rainbow_Cycle,
+  //           PM_EFFECT_CONFIG__RAINBOW_CYCLE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RAINBOW_CYCLE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,
-            &mAnimatorLight::EffectAnim__Rainbow_Cycle,
-            PM_EFFECT_CONFIG__RAINBOW_CYCLE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RAINBOW_CYCLE,
-            #endif
-            Effect_DevStage::Dev);
+  // /**
+  //  * Chase
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Colour,
+  //           PM_EFFECT_CONFIG__CHASE_COLOR,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHASE_COLOR,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  /**
-   * Chase
-   **/
-  addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,
-            &mAnimatorLight::EffectAnim__Chase_Colour,
-            PM_EFFECT_CONFIG__CHASE_COLOR,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHASE_COLOR,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_RANDOM__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Random,
+  //           PM_EFFECT_CONFIG__CHASE_RANDOM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHASE_RANDOM,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_RANDOM__ID,
-            &mAnimatorLight::EffectAnim__Chase_Random,
-            PM_EFFECT_CONFIG__CHASE_RANDOM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHASE_RANDOM,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Rainbow,
+  //           PM_EFFECT_CONFIG__CHASE_RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHASE_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Chase_Rainbow,
-            PM_EFFECT_CONFIG__CHASE_RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHASE_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_FLASH__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Flash,
+  //           PM_EFFECT_CONFIG__CHASE_FLASH,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHASE_FLASH,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_FLASH__ID,
-            &mAnimatorLight::EffectAnim__Chase_Flash,
-            PM_EFFECT_CONFIG__CHASE_FLASH,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHASE_FLASH,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Flash_Random,
+  //           PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHASE_FLASH_RANDOM,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,
-            &mAnimatorLight::EffectAnim__Chase_Flash_Random,
-            PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHASE_FLASH_RANDOM,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Rainbow_White,
+  //           PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,
-            &mAnimatorLight::EffectAnim__Chase_Rainbow_White,
-            PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_THEATER__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Theater,
+  //           PM_EFFECT_CONFIG__THEATER_CHASE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__THEATER_CHASE,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_THEATER__ID,
-            &mAnimatorLight::EffectAnim__Chase_Theater,
-            PM_EFFECT_CONFIG__THEATER_CHASE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__THEATER_CHASE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow,
+  //           PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__THEATER_CHASE_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow,
-            PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__THEATER_CHASE_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__CHASE_TRICOLOR__ID,
+  //           &mAnimatorLight::EffectAnim__Chase_TriColour,
+  //           PM_EFFECT_CONFIG__TRICOLOR_CHASE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TRICOLOR_CHASE,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__CHASE_TRICOLOR__ID,
-            &mAnimatorLight::EffectAnim__Chase_TriColour,
-            PM_EFFECT_CONFIG__TRICOLOR_CHASE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TRICOLOR_CHASE,
-            #endif
-            Effect_DevStage::Dev);
+  // /**
+  //  *  Breathe/Fade/Pulse
+  //  **/      
+  // addEffect(EFFECTS_FUNCTION__BREATH__ID,
+  //           &mAnimatorLight::EffectAnim__Breath,
+  //           PM_EFFECT_CONFIG__BREATH,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__BREATH,
+  //           #endif
+  //           Effect_DevStage::Release);
 
-  /**
-   *  Breathe/Fade/Pulse
-   **/      
-  addEffect(EFFECTS_FUNCTION__BREATH__ID,
-            &mAnimatorLight::EffectAnim__Breath,
-            PM_EFFECT_CONFIG__BREATH,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__BREATH,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__FADE__ID,
+  //           &mAnimatorLight::EffectAnim__Fade,
+  //           PM_EFFECT_CONFIG__FADE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FADE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__FADE__ID,
-            &mAnimatorLight::EffectAnim__Fade,
-            PM_EFFECT_CONFIG__FADE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FADE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,
+  //           &mAnimatorLight::EffectAnim__Fade_TriColour,
+  //           PM_EFFECT_CONFIG__TRICOLOR_FADE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TRICOLOR_FADE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,
-            &mAnimatorLight::EffectAnim__Fade_TriColour,
-            PM_EFFECT_CONFIG__TRICOLOR_FADE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TRICOLOR_FADE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__FADE_SPOTS__ID,
-            &mAnimatorLight::EffectAnim__Fade_Spots,
-            PM_EFFECT_CONFIG__SPOTS_FADE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SPOTS_FADE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__FADE_SPOTS__ID,
+  //           &mAnimatorLight::EffectAnim__Fade_Spots,
+  //           PM_EFFECT_CONFIG__SPOTS_FADE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SPOTS_FADE,
+  //           #endif
+  //           Effect_DevStage::Dev);
   
-  /**
-   * Sparkle/Twinkle
-   **/
-  addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,
-            &mAnimatorLight::EffectAnim__Solid_Glitter,
-            PM_EFFECT_CONFIG__SOLID_GLITTER,
+  // /**
+  //  * Sparkle/Twinkle
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,
+  //           &mAnimatorLight::EffectAnim__Solid_Glitter,
+  //           PM_EFFECT_CONFIG__SOLID_GLITTER,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SOLID_GLITTER,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__POPCORN__ID,
+  //           &mAnimatorLight::EffectAnim__Popcorn,
+  //           PM_EFFECT_CONFIG__POPCORN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__POPCORN,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__GLOWSPOTS__ID,
+            &mAnimatorLight::EffectAnim__GlowSpots,
+            PM_EFFECT_CONFIG__GLOW_SPOTS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SOLID_GLITTER,
+            PM_EFFECT_DESCRI__GLOW_SPOTS,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__POPCORN__ID,
-            &mAnimatorLight::EffectAnim__Popcorn,
-            PM_EFFECT_CONFIG__POPCORN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__POPCORN,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__PLASMA__ID,
+  //           &mAnimatorLight::EffectAnim__Plasma,
+  //           PM_EFFECT_CONFIG__PLASMA,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PLASMA,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__PLASMA__ID,
-            &mAnimatorLight::EffectAnim__Plasma,
-            PM_EFFECT_CONFIG__PLASMA,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PLASMA,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__SPARKLE__ID,
+  //           &mAnimatorLight::EffectAnim__Sparkle,
+  //           PM_EFFECT_CONFIG__SPARKLE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SPARKLE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__SPARKLE__ID,
-            &mAnimatorLight::EffectAnim__Sparkle,
-            PM_EFFECT_CONFIG__SPARKLE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SPARKLE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__FLASH_SPARKLE__ID,
+  //           &mAnimatorLight::EffectAnim__Sparkle_Flash,
+  //           PM_EFFECT_CONFIG__FLASH_SPARKLE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FLASH_SPARKLE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__FLASH_SPARKLE__ID,
-            &mAnimatorLight::EffectAnim__Sparkle_Flash,
-            PM_EFFECT_CONFIG__FLASH_SPARKLE,
+  // addEffect(EFFECTS_FUNCTION__HYPER_SPARKLE__ID,
+  //           &mAnimatorLight::EffectAnim__Sparkle_Hyper,
+  //           PM_EFFECT_CONFIG__HYPER_SPARKLE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HYPER_SPARKLE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+       
+  addEffect(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,
+            PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FLASH_SPARKLE,
+            PM_EFFECT_DESCRI__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI,
             #endif
-            Effect_DevStage::Dev);
+            Effect_DevStage::Alpha);
 
-  addEffect(EFFECTS_FUNCTION__HYPER_SPARKLE__ID,
-            &mAnimatorLight::EffectAnim__Sparkle_Hyper,
-            PM_EFFECT_CONFIG__HYPER_SPARKLE,
+  addEffect(EFFECTS_FUNCTION__TWINKLE_OUT__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Out,
+            PM_EFFECT_CONFIG__TWINKLE_OUT,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HYPER_SPARKLE,
+            PM_EFFECT_DESCRI__TWINKLE_OUT,
             #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWINKLE__ID,
-            &mAnimatorLight::EffectAnim__Twinkle,
-            PM_EFFECT_CONFIG__TWINKLE,
+            Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_DECAY__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Decay,
+            PM_EFFECT_CONFIG__TWINKLE_DECAY,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE,
+            PM_EFFECT_DESCRI__TWINKLE_DECAY,
             #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__COLORTWINKLE__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Colour,
-            PM_EFFECT_CONFIG__COLORTWINKLE,
+            Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_GLOW__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Glow,
+            PM_EFFECT_CONFIG__TWINKLE_GLOW,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLORTWINKLE,
+            PM_EFFECT_DESCRI__TWINKLE_GLOW,
             #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWINKLE_FOX__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Fox,
-            PM_EFFECT_CONFIG__TWINKLE_FOX,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE_FOX,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWINKLE_CAT__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Cat,
-            PM_EFFECT_CONFIG__TWINKLE_CAT,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE_CAT,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TWINKLE_UP__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Up,
-            PM_EFFECT_CONFIG__TWINKLE_UP,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TWINKLE_UP,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
-            &mAnimatorLight::EffectAnim__Halloween_Eyes,
-            PM_EFFECT_CONFIG__HALLOWEEN_EYES,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HALLOWEEN_EYES,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__SAW__ID,
-            &mAnimatorLight::EffectAnim__Saw,
-            PM_EFFECT_CONFIG__SAW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SAW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__DISSOLVE__ID,
-            &mAnimatorLight::EffectAnim__Dissolve,
-            PM_EFFECT_CONFIG__DISSOLVE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DISSOLVE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID,
-            &mAnimatorLight::EffectAnim__Dissolve_Random,
-            PM_EFFECT_CONFIG__DISSOLVE_RANDOM,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DISSOLVE_RANDOM,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__COLORFUL__ID,
-            &mAnimatorLight::EffectAnim__ColourFul,
-            PM_EFFECT_CONFIG__COLORFUL,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__COLORFUL,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TRAFFIC_LIGHT__ID,
-            &mAnimatorLight::EffectAnim__Traffic_Light,
-            PM_EFFECT_CONFIG__TRAFFIC_LIGHT,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TRAFFIC_LIGHT,
-            #endif
-            Effect_DevStage::Dev);
-
-  /**
-   * Fireworks
-   **/
-  addEffect(EFFECTS_FUNCTION__FIREWORKS__ID,                     
-            &mAnimatorLight::EffectAnim__Fireworks,                    
-            PM_EFFECT_CONFIG__FIREWORKS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FIREWORKS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID,           
-            &mAnimatorLight::EffectAnim__Exploding_Fireworks,          
-            PM_EFFECT_CONFIG__EXPLODING_FIREWORKS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__EXPLODING_FIREWORKS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_STARBURST__ID,           
-            &mAnimatorLight::EffectAnim__Fireworks_Starburst,          
-            PM_EFFECT_CONFIG__STARBURST,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__STARBURST,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__RAIN__ID,                          
-            &mAnimatorLight::EffectAnim__Rain,                         
-            PM_EFFECT_CONFIG__RAIN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RAIN,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TETRIX__ID,                          
-            &mAnimatorLight::EffectAnim__Tetrix,                         
-            PM_EFFECT_CONFIG__TETRIX,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TETRIX,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__FIRE_FLICKER__ID,                          
-            &mAnimatorLight::EffectAnim__Fire_Flicker,                         
-            PM_EFFECT_CONFIG__FIRE_FLICKER,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FIRE_FLICKER,
-            #endif
-            Effect_DevStage::Dev);
-  
-  addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID,     
-            &mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch,    
-            PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__EXPLODING_FIREWORKS_NOLAUNCH,
-            #endif
-            Effect_DevStage::Dev);
-
-  /**
-   * Blink/Strobe
-   **/
-  addEffect(EFFECTS_FUNCTION__BLINK__ID,
-            &mAnimatorLight::EffectAnim__Blink,
-            PM_EFFECT_CONFIG__BLINK,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__BLINK,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Blink_Rainbow,
-            PM_EFFECT_CONFIG__BLINK_RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__BLINK_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__STROBE__ID,
-            &mAnimatorLight::EffectAnim__Strobe,
-            PM_EFFECT_CONFIG__STROBE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__STROBE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__MULTI_STROBE__ID,
-            &mAnimatorLight::EffectAnim__Strobe_Multi,
-            PM_EFFECT_CONFIG__MULTI_STROBE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__MULTI_STROBE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Strobe_Rainbow,
-            PM_EFFECT_CONFIG__STROBE_RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__STROBE_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Rainbow,
-            PM_EFFECT_CONFIG__RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__LIGHTNING__ID,
-            &mAnimatorLight::EffectAnim__Lightning,
-            PM_EFFECT_CONFIG__LIGHTNING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__LIGHTNING,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__FIRE_2012__ID,
-            &mAnimatorLight::EffectAnim__Fire_2012,
-            PM_EFFECT_CONFIG__FIRE_2012,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FIRE_2012,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__RAILWAY__ID,
-            &mAnimatorLight::EffectAnim__Railway,
-            PM_EFFECT_CONFIG__RAILWAY,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RAILWAY,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__HEARTBEAT__ID,
-            &mAnimatorLight::EffectAnim__Heartbeat,
-            PM_EFFECT_CONFIG__HEARTBEAT,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HEARTBEAT,
-            #endif
-            Effect_DevStage::Dev);
-
-  /**
-   * Noise
-   **/
-  addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,
-            &mAnimatorLight::EffectAnim__FillNoise8,
-            PM_EFFECT_CONFIG__FILLNOISE8,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FILLNOISE8,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__NOISE16_1__ID,
-            &mAnimatorLight::EffectAnim__Noise16_1,
-            PM_EFFECT_CONFIG__NOISE16_1,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__NOISE16_1,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__NOISE16_2__ID,
-            &mAnimatorLight::EffectAnim__Noise16_2,
-            PM_EFFECT_CONFIG__NOISE16_2,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__NOISE16_2,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__NOISE16_3__ID,
-            &mAnimatorLight::EffectAnim__Noise16_3,
-            PM_EFFECT_CONFIG__NOISE16_3,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__NOISE16_3,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__NOISE16_4__ID,
-            &mAnimatorLight::EffectAnim__Noise16_4,
-            PM_EFFECT_CONFIG__NOISE16_4,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__NOISE16_4,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__NOISEPAL__ID,
-            &mAnimatorLight::EffectAnim__Noise_Pal,
-            PM_EFFECT_CONFIG__NOISEPAL,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__NOISEPAL,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__PHASEDNOISE__ID,
-            &mAnimatorLight::EffectAnim__PhasedNoise,
-            PM_EFFECT_CONFIG__PHASEDNOISE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PHASEDNOISE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__PHASED__ID,
-            &mAnimatorLight::EffectAnim__Phased,
-            PM_EFFECT_CONFIG__PHASED,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__PHASED,
-            #endif
-            Effect_DevStage::Dev);
-
-  /**
-   * Scan
-   **/
-  addEffect(EFFECTS_FUNCTION__SCAN__ID,
-            &mAnimatorLight::EffectAnim__Scan,
-            PM_EFFECT_CONFIG__SCAN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SCAN,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__DUAL_SCAN__ID,
-            &mAnimatorLight::EffectAnim__Scan_Dual,
-            PM_EFFECT_CONFIG__DUAL_SCAN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DUAL_SCAN,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__LARSON_SCANNER__ID,
-            &mAnimatorLight::EffectAnim__Larson_Scanner,
-            PM_EFFECT_CONFIG__LARSON_SCANNER,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__LARSON_SCANNER,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID,
-            &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,
-            PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DUAL_LARSON_SCANNER,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__ICU__ID,
-            &mAnimatorLight::EffectAnim__ICU,
-            PM_EFFECT_CONFIG__ICU,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__ICU,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__RIPPLE__ID,
-            &mAnimatorLight::EffectAnim__Ripple,
-            PM_EFFECT_CONFIG__RIPPLE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RIPPLE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Ripple_Rainbow,
-            PM_EFFECT_CONFIG__RIPPLE_RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__COMET__ID,
-            &mAnimatorLight::EffectAnim__Comet,
-            PM_EFFECT_CONFIG__COMET,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__CHUNCHUN__ID,
-            &mAnimatorLight::EffectAnim__Chunchun,
-            PM_EFFECT_CONFIG__CHUNCHUN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHUNCHUN,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__DANCING_SHADOWS__ID,
-            &mAnimatorLight::EffectAnim__Dancing_Shadows,
-            PM_EFFECT_CONFIG__DANCING_SHADOWS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DANCING_SHADOWS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__WASHING_MACHINE__ID,
-            &mAnimatorLight::EffectAnim__Washing_Machine,
-            PM_EFFECT_CONFIG__WASHING_MACHINE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__WASHING_MACHINE,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__BLENDS__ID,
-            &mAnimatorLight::EffectAnim__Blends,
-            PM_EFFECT_CONFIG__BLENDS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__BLENDS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__TV_SIMULATOR__ID,
-            &mAnimatorLight::EffectAnim__TV_Simulator,
-            PM_EFFECT_CONFIG__TV_SIMULATOR,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__TV_SIMULATOR,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__BOUNCINGBALLS__ID,
-            &mAnimatorLight::EffectAnim__Bouncing_Balls,
-            PM_EFFECT_CONFIG__BOUNCINGBALLS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__BOUNCINGBALLS,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__SINELON__ID,
-            &mAnimatorLight::EffectAnim__Sinelon,
-            PM_EFFECT_CONFIG__SINELON,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SINELON,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__SINELON_DUAL__ID,
-            &mAnimatorLight::EffectAnim__Sinelon_Dual,
-            PM_EFFECT_CONFIG__SINELON_DUAL,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SINELON_DUAL,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__SINELON_RAINBOW__ID,
-            &mAnimatorLight::EffectAnim__Sinelon_Rainbow,
-            PM_EFFECT_CONFIG__SINELON_RAINBOW,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SINELON_RAINBOW,
-            #endif
-            Effect_DevStage::Dev);
-
-  addEffect(EFFECTS_FUNCTION__DRIP__ID,
-            &mAnimatorLight::EffectAnim__Drip,
-            PM_EFFECT_CONFIG__DRIP,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DRIP,
-            #endif
-            Effect_DevStage::Dev);
+            Effect_DevStage::Alpha);
             
-  addEffect(EFFECTS_FUNCTION__FLOWSTRIPE__ID,  
-            &mAnimatorLight::EffectAnim__FlowStripe, 
-            PM_EFFECT_CONFIG__FLOWSTRIPE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__FLOWSTRIPE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__TWINKLE_FAIRY__ID,
+  //           &mAnimatorLight::EffectAnim__Twinkle_Fairy,
+  //           PM_EFFECT_CONFIG__TWINKLE_FAIRY,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWINKLE_FAIRY,
+  //           #endif
+  //           Effect_DevStage::Alpha);
             
-  addEffect(EFFECTS_FUNCTION__WAVESINS__ID,  
-            &mAnimatorLight::EffectAnim__WaveSins, 
-            PM_EFFECT_CONFIG__WAVESINS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__WAVESINS,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__TWINKLE__ID,
+  //           &mAnimatorLight::EffectAnim__Twinkle,
+  //           PM_EFFECT_CONFIG__TWINKLE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWINKLE,
+  //           #endif
+  //           Effect_DevStage::Alpha);
+
+  // addEffect(EFFECTS_FUNCTION__TWINKLE_COLOUR__ID,
+  //           &mAnimatorLight::EffectAnim__Twinkle_Colour,
+  //           PM_EFFECT_CONFIG__TWINKLE_COLOUR,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWINKLE_COLOUR,
+  //           #endif
+  //           Effect_DevStage::Alpha);
+
+  // addEffect(EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
+  //           &mAnimatorLight::EffectAnim__Twinkle_Smooth,
+  //           PM_EFFECT_CONFIG__TWINKLE_SMOOTH,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWINKLE_SMOOTH,
+  //           #endif
+  //           Effect_DevStage::Release);
+
+  // addEffect(EFFECTS_FUNCTION__TWINKLE_SPARK__ID,
+  //           &mAnimatorLight::EffectAnim__Twinkle_Spark,
+  //           PM_EFFECT_CONFIG__TWINKLE_SPARK,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWINKLE_SPARK,
+  //           #endif
+  //           Effect_DevStage::Alpha);
+
+  // addEffect(EFFECTS_FUNCTION__TWINKLE_RISE__ID,
+  //           &mAnimatorLight::EffectAnim__Twinkle_Rise,
+  //           PM_EFFECT_CONFIG__TWINKLE_RISE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TWINKLE_RISE,
+  //           #endif
+  //           Effect_DevStage::Alpha);
+
+  // addEffect(EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
+  //           &mAnimatorLight::EffectAnim__Halloween_Eyes,
+  //           PM_EFFECT_CONFIG__HALLOWEEN_EYES,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HALLOWEEN_EYES,
+  //           #endif
+  //           Effect_DevStage::Release);
+
+  // addEffect(EFFECTS_FUNCTION__SAW__ID,
+  //           &mAnimatorLight::EffectAnim__Saw,
+  //           PM_EFFECT_CONFIG__SAW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SAW,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__DISSOLVE__ID,
+  //           &mAnimatorLight::EffectAnim__Dissolve,
+  //           PM_EFFECT_CONFIG__DISSOLVE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DISSOLVE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID,
+  //           &mAnimatorLight::EffectAnim__Dissolve_Random,
+  //           PM_EFFECT_CONFIG__DISSOLVE_RANDOM,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DISSOLVE_RANDOM,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__TRIPOPS__ID,
+  //           &mAnimatorLight::EffectAnim__TriPops,
+  //           PM_EFFECT_CONFIG__TRIPOPS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TRIPOPS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // /**
+  //  * Fireworks
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__FIREWORKS__ID,                     
+  //           &mAnimatorLight::EffectAnim__Fireworks,                    
+  //           PM_EFFECT_CONFIG__FIREWORKS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FIREWORKS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID,           
+  //           &mAnimatorLight::EffectAnim__Exploding_Fireworks,          
+  //           PM_EFFECT_CONFIG__EXPLODING_FIREWORKS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__EXPLODING_FIREWORKS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__FIREWORKS_STARBURST__ID,           
+  //           &mAnimatorLight::EffectAnim__Fireworks_Starburst,          
+  //           PM_EFFECT_CONFIG__STARBURST,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__STARBURST,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__RAIN__ID,                          
+  //           &mAnimatorLight::EffectAnim__Rain,                         
+  //           PM_EFFECT_CONFIG__RAIN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RAIN,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__TETRIX__ID,                          
+  //           &mAnimatorLight::EffectAnim__Tetrix,                         
+  //           PM_EFFECT_CONFIG__TETRIX,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TETRIX,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__FIRE_FLICKER__ID,                          
+  //           &mAnimatorLight::EffectAnim__Fire_Flicker,                         
+  //           PM_EFFECT_CONFIG__FIRE_FLICKER,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FIRE_FLICKER,
+  //           #endif
+  //           Effect_DevStage::Dev);
   
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  // addEffect(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID,     
+  //           &mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch,    
+  //           PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__EXPLODING_FIREWORKS_NOLAUNCH,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  /**
-   * Hardware Installation Helpers
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-  addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
-            PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
-            #endif
-            Effect_DevStage::Dev);
+  // /**
+  //  * Blink/Strobe
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__BLINK__ID,
+  //           &mAnimatorLight::EffectAnim__Blink,
+  //           PM_EFFECT_CONFIG__BLINK,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__BLINK,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,
-            PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Blink_Rainbow,
+  //           PM_EFFECT_CONFIG__BLINK_RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__BLINK_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
-            &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,
-            PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE,
-            #endif
-            Effect_DevStage::Dev);
+  // addEffect(EFFECTS_FUNCTION__STROBE__ID,
+  //           &mAnimatorLight::EffectAnim__Strobe,
+  //           PM_EFFECT_CONFIG__STROBE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__STROBE,
+  //           #endif
+  //           Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
-            PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
-            #endif
-            Effect_DevStage::Dev);
-  #endif
+  // addEffect(EFFECTS_FUNCTION__MULTI_STROBE__ID,
+  //           &mAnimatorLight::EffectAnim__Strobe_Multi,
+  //           PM_EFFECT_CONFIG__MULTI_STROBE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__MULTI_STROBE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Strobe_Rainbow,
+  //           PM_EFFECT_CONFIG__STROBE_RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__STROBE_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Rainbow,
+  //           PM_EFFECT_CONFIG__RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__LIGHTNING__ID,
+  //           &mAnimatorLight::EffectAnim__Lightning,
+  //           PM_EFFECT_CONFIG__LIGHTNING,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__LIGHTNING,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__FIRE_2012__ID,
+  //           &mAnimatorLight::EffectAnim__Fire_2012,
+  //           PM_EFFECT_CONFIG__FIRE_2012,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FIRE_2012,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__RAILWAY__ID,
+  //           &mAnimatorLight::EffectAnim__Railway,
+  //           PM_EFFECT_CONFIG__RAILWAY,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RAILWAY,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__HEARTBEAT__ID,
+  //           &mAnimatorLight::EffectAnim__Heartbeat,
+  //           PM_EFFECT_CONFIG__HEARTBEAT,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HEARTBEAT,
+  //           #endif
+  //           Effect_DevStage::Release);
+
+  // /**
+  //  * Noise
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,
+  //           &mAnimatorLight::EffectAnim__FillNoise8,
+  //           PM_EFFECT_CONFIG__FILLNOISE8,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FILLNOISE8,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__NOISE16_1__ID,
+  //           &mAnimatorLight::EffectAnim__Noise16_1,
+  //           PM_EFFECT_CONFIG__NOISE16_1,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__NOISE16_1,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__NOISE16_2__ID,
+  //           &mAnimatorLight::EffectAnim__Noise16_2,
+  //           PM_EFFECT_CONFIG__NOISE16_2,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__NOISE16_2,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__NOISE16_3__ID,
+  //           &mAnimatorLight::EffectAnim__Noise16_3,
+  //           PM_EFFECT_CONFIG__NOISE16_3,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__NOISE16_3,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__NOISE16_4__ID,
+  //           &mAnimatorLight::EffectAnim__Noise16_4,
+  //           PM_EFFECT_CONFIG__NOISE16_4,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__NOISE16_4,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__NOISEPAL__ID,
+  //           &mAnimatorLight::EffectAnim__Noise_Pal,
+  //           PM_EFFECT_CONFIG__NOISEPAL,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__NOISEPAL,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__PHASEDNOISE__ID,
+  //           &mAnimatorLight::EffectAnim__PhasedNoise,
+  //           PM_EFFECT_CONFIG__PHASEDNOISE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PHASEDNOISE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__PHASED__ID,
+  //           &mAnimatorLight::EffectAnim__Phased,
+  //           PM_EFFECT_CONFIG__PHASED,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__PHASED,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // /**
+  //  * Scan
+  //  **/
+  // addEffect(EFFECTS_FUNCTION__SCAN__ID,
+  //           &mAnimatorLight::EffectAnim__Scan,
+  //           PM_EFFECT_CONFIG__SCAN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SCAN,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__DUAL_SCAN__ID,
+  //           &mAnimatorLight::EffectAnim__Scan_Dual,
+  //           PM_EFFECT_CONFIG__DUAL_SCAN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DUAL_SCAN,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__LARSON_SCANNER__ID,
+  //           &mAnimatorLight::EffectAnim__Larson_Scanner,
+  //           PM_EFFECT_CONFIG__LARSON_SCANNER,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__LARSON_SCANNER,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID,
+  //           &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,
+  //           PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DUAL_LARSON_SCANNER,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__ICU__ID,
+  //           &mAnimatorLight::EffectAnim__ICU,
+  //           PM_EFFECT_CONFIG__ICU,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__ICU,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__RIPPLE__ID,
+  //           &mAnimatorLight::EffectAnim__Ripple,
+  //           PM_EFFECT_CONFIG__RIPPLE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RIPPLE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Ripple_Rainbow,
+  //           PM_EFFECT_CONFIG__RIPPLE_RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__COMET__ID,
+  //           &mAnimatorLight::EffectAnim__Comet,
+  //           PM_EFFECT_CONFIG__COMET,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__CHUNCHUN__ID,
+  //           &mAnimatorLight::EffectAnim__Chunchun,
+  //           PM_EFFECT_CONFIG__CHUNCHUN,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__CHUNCHUN,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__DANCING_SHADOWS__ID,
+  //           &mAnimatorLight::EffectAnim__Dancing_Shadows,
+  //           PM_EFFECT_CONFIG__DANCING_SHADOWS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DANCING_SHADOWS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__WASHING_MACHINE__ID,
+  //           &mAnimatorLight::EffectAnim__Washing_Machine,
+  //           PM_EFFECT_CONFIG__WASHING_MACHINE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__WASHING_MACHINE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__BLENDS__ID,
+  //           &mAnimatorLight::EffectAnim__Blends,
+  //           PM_EFFECT_CONFIG__BLENDS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__BLENDS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__TV_SIMULATOR__ID,
+  //           &mAnimatorLight::EffectAnim__TV_Simulator,
+  //           PM_EFFECT_CONFIG__TV_SIMULATOR,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__TV_SIMULATOR,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__BOUNCINGBALLS__ID,
+  //           &mAnimatorLight::EffectAnim__Bouncing_Balls,
+  //           PM_EFFECT_CONFIG__BOUNCINGBALLS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__BOUNCINGBALLS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__SINELON__ID,
+  //           &mAnimatorLight::EffectAnim__Sinelon,
+  //           PM_EFFECT_CONFIG__SINELON,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SINELON,
+  //           #endif
+  //           Effect_DevStage::Release);
+
+  // addEffect(EFFECTS_FUNCTION__SINELON_DUAL__ID,
+  //           &mAnimatorLight::EffectAnim__Sinelon_Dual,
+  //           PM_EFFECT_CONFIG__SINELON_DUAL,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SINELON_DUAL,
+  //           #endif
+  //           Effect_DevStage::Release);
+
+  // addEffect(EFFECTS_FUNCTION__SINELON_RAINBOW__ID,
+  //           &mAnimatorLight::EffectAnim__Sinelon_Rainbow,
+  //           PM_EFFECT_CONFIG__SINELON_RAINBOW,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__SINELON_RAINBOW,
+  //           #endif
+  //           Effect_DevStage::Release);
+
+  // addEffect(EFFECTS_FUNCTION__DRIP__ID,
+  //           &mAnimatorLight::EffectAnim__Drip,
+  //           PM_EFFECT_CONFIG__DRIP,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__DRIP,
+  //           #endif
+  //           Effect_DevStage::Dev);
+            
+  // addEffect(EFFECTS_FUNCTION__FLOWSTRIPE__ID,  
+  //           &mAnimatorLight::EffectAnim__FlowStripe, 
+  //           PM_EFFECT_CONFIG__FLOWSTRIPE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__FLOWSTRIPE,
+  //           #endif
+  //           Effect_DevStage::Release);
+            
+  // addEffect(EFFECTS_FUNCTION__WAVESINS__ID,  
+  //           &mAnimatorLight::EffectAnim__WaveSins, 
+  //           PM_EFFECT_CONFIG__WAVESINS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__WAVESINS,
+  //           #endif
+  //           Effect_DevStage::Release);
+  
+  // #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+  // /**
+  //  * Hardware Installation Helpers
+  //  **/
+  // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  // addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
+  //           &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
+  //           PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
+  //           &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,
+  //           PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
+  //           &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,
+  //           PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE,
+  //           #endif
+  //           Effect_DevStage::Dev);
+
+  // addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
+  //           &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
+  //           PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
+  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
+  //           PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
+  //           #endif
+  //           Effect_DevStage::Dev);
+  // #endif
 
   /**
    * Sun Position
@@ -17141,3 +17755,84 @@ void mAnimatorLight::LoadEffects()
  * Create effect like Luminance example, only use three colour method for it. Ie to replicate, the centre would be black. The linearbelnd from edge to centre is the thing that will change, using a sinwave so its nonlinear. will look good.
  * 
  */
+
+ 
+// control HTML elements for Slider and Color Control (original ported form WLED-SR)
+// Technical notes
+// ===============
+// If an effect name is followed by an @, slider and color control is effective.
+// If not effective then:
+//      - For AC effects (id<128) 2 sliders and 3 colors and the palette will be shown
+//      - For SR effects (id>128) 5 sliders and 3 colors and the palette will be shown
+// If effective (@)
+//      - a ; seperates slider controls (left) from color controls (middle) and palette control (right)
+//      - if left, middle or right is empty no controls are shown
+//      - a , seperates slider controls (max 5, then 3) or color controls via checkboxes(max 3). Palette has only one value
+//      - a ! means that the default is used.
+//             - For sliders: Effect speeds, Effect intensity, Custom 1, Custom 2, Custom 3
+//             - For colors: Fx color, Background color, Custom
+//             - For palette: prompt for color palette OR palette ID if numeric (will hide palette selection)
+//
+// Note: If palette is on and no colors are specified 1,2 and 3 is shown in each color circle.
+//       If a color is specified, the 1,2 or 3 is replaced by that specification.
+// Note: Effects can override default pattern behaviour
+//       - FadeToBlack can override the background setting
+//       - Defining SEGCOL(<i>) can override a specific palette using these values (e.g. Color Gradient)
+//////////////,,,,,,,!,!
+/***************************************************************************************************************************************************
+static const char PM_EFFECT_CONFIG__##[] PROGMEM = 
+  "Effect Name@Speed,Intensity,Custom1Star,Custom2Cog,Custom3Visibility,Checkbox1Palette,Checkbox2Layers,Checkbox3Favourite,EffectPeriod,Grouping;SEGCOL_Fx,SEGCOL_Bg,SEGCOL_Col3,SEGCOL_Col4,SEGCOL_Col5;pal=21,ep=1000~DEBUG_LEVEL";
+
+@sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp;seg1,2,3,4,5;pal=21,ep=1000~DEBUG_LEVEL";
+@                                                 ;            ;                          " // sliders&checkbox ; segmentColours ; effectDefaults
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+Effect Name
+@  //////////////////////////////////////// Delimiter is "@", 5 sliders + 3 checkboxes + 2 sliders
+Speed,                Slider1
+Intensity,            Slider2
+Custom1Star,          Slider3
+Custom2Cog,           Slider4
+Custom3Visibility,    Slider5
+Checkbox1Palette,     Checkbox1
+Checkbox2Layers,      Checkbox2
+Checkbox3Favourite,   Checkbox3
+EffectPeriod,         Slider6
+Grouping              Slider7
+; ////////////////////////////////////////// Delimiter is ";", Section 1: Five segment colour names below
+SEGCOL_Fx,
+SEGCOL_Bg,
+SEGCOL_Col3,
+SEGCOL_Col4,
+SEGCOL_Col5
+; ////////////////////////////////////////// Delimiter is ";", Section 2: ??
+name for the palette icon, "!" means use default name and include palette selection
+; ////////////////////////////////////////// Delimiter is ";", Section 3 below is 012vf that adds icons into effect name
+012vf 0=0D ie Solid, 1=1D ie strip, 2=2D ie matrix, v=volume, f=frequency, p=Palette2 is used
+; ////////////////////////////////////////// Delimiter is ";", Section 4: special commands below that are xml keys=value pairs, with comma delimiter
+"sx"  = speed
+"ix"  = intensity
+"s#"  = Setting SegColours 0-4
+pal   = palette_id
+paln  = palette_id
+pal2   = palette2_id
+pal2n  = palette2_id
+"ep"  = cycle_time__rate_ms
+"c1"  = custom1
+"c2"  = custom2
+"c3"  = custom3
+"m12" = map1D2D
+"si"  = soundSim
+"rev" = reverse
+"mi"  = mirror
+"rY"  = reverse_y
+"mY"  = mirror_y
+~ ////////////////////////////////////////// Delimiter is "~" for debug level below, single number/digit
+DEBUG_LEVEL
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+also, thought for later, maybe I want a "standby" mode for leds, ie a state I can activate that dims the lights, but getting back to the original means turning off standby mode, instead of requiring full brightness etc set again. Especially is standby is a complete different version (eg static and dim, vs bright and animated). Future idea. 
+This may actually be a sort of preset, but not stored in the presets, just a quick toggle state.
+Or simply, have an ifdef that enables preloading a preset on boot, or when turning on from off state.
+
+***************************************************************************************************************************************************/

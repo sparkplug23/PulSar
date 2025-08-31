@@ -664,30 +664,18 @@ img {
 	width: 210px;
 }
 
-/* Keep “Color palette” centered and dock P+ on the right */
-.pal-header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center; /* centers the title */
-  gap: .5rem;
-}
 
-/* Right-docked P+ toggle */
-.pal-toggle {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+/* P+ toggle button now inline with other toolbar buttons */
+#secPalToggle {
+  margin-left: 4px;      /* consistent spacing */
+  opacity: .75;
+  border-radius: 50%;   /* force circle */
   line-height: 1;
   padding: 2px 6px;
-  border-radius: 6px;
-  opacity: .75;
 }
-
 /* Active visual state */
-.pal-toggle.active,
-.pal-toggle[aria-pressed="true"] {
+#secPalToggle.active,
+#secPalToggle[aria-pressed="true"] {
   opacity: 1;
   outline: 2px solid var(--c-3, #f44);
 }
@@ -1111,7 +1099,7 @@ textarea {
 #csl button {
 	width: 44px;
 	height: 44px;
-	margin: 5px;
+	margin: 3px;
 	border: 2px solid var(--c-d) !important;
 	background-color: #000;
 }

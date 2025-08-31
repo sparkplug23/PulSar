@@ -90,11 +90,6 @@ void mAnimatorLight::LoadEffects()
             &mAnimatorLight::EffectAnim__TimeBased__HourProgress,
             PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS);
 
-  addEffect(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,
-            PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE);
-  #endif
-
   // General Level 3 Flashing Extended Effects
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,
@@ -370,21 +365,21 @@ void mAnimatorLight::LoadEffects()
             &mAnimatorLight::EffectAnim__Twinkle,
             PM_EFFECT_CONFIG__TWINKLE);
 
-  addEffect(EFFECTS_FUNCTION__COLORTWINKLE__ID,
+  addEffect(EFFECTS_FUNCTION__TWINKLE_COLOUR__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Colour,
-            PM_EFFECT_CONFIG__COLORTWINKLE);
+            PM_EFFECT_CONFIG__TWINKLE_COLOUR);
 
-  addEffect(EFFECTS_FUNCTION__TWINKLE_FOX__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Fox,
-            PM_EFFECT_CONFIG__TWINKLE_FOX);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Smooth,
+            PM_EFFECT_CONFIG__TWINKLE_SMOOTH);
 
-  addEffect(EFFECTS_FUNCTION__TWINKLE_CAT__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Cat,
-            PM_EFFECT_CONFIG__TWINKLE_CAT);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_SPARK__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Spark,
+            PM_EFFECT_CONFIG__TWINKLE_SPARK);
 
-  addEffect(EFFECTS_FUNCTION__TWINKLE_UP__ID,
-            &mAnimatorLight::EffectAnim__Twinkle_Up,
-            PM_EFFECT_CONFIG__TWINKLE_UP);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_RISE__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Rise,
+            PM_EFFECT_CONFIG__TWINKLE_RISE);
 
   addEffect(EFFECTS_FUNCTION__SAW__ID,
             &mAnimatorLight::EffectAnim__Saw,

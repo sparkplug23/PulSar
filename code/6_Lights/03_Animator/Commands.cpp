@@ -946,7 +946,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
                     ALOG_INF(PSTR("OnPixel %d (processed %d)"), pixelIndex, count);
 
                     // Get the color from the palette
-                    colour = SEGMENT.GetPaletteColour(pixel++, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+                    colour = SEGMENT.GetPaletteColour(pixel++, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
 
 brightness = 255;
 // colour = RgbcctColor(255,255,255,255,255);
@@ -1093,7 +1093,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
                             colour = RgbcctColor(255, 255, 255, 255, 255);
                         } else {
                             // Get color from the palette using the current palette index
-                            colour = SEGMENT.GetPaletteColour(paletteIndex, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+                            colour = SEGMENT.GetPaletteColour(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
                         }
 
                         // Apply brightness and set the pixel

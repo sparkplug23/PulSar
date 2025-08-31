@@ -462,7 +462,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
   }
 #endif
 
-  Serial.println("Sending live data to WS client");
+  // Serial.println("Sending live data to WS client");
   for (size_t i = 0; pos < bufSize -2; i += n)
   {
 #ifndef WLED_DISABLE_2D
@@ -1298,7 +1298,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         */
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-custom2))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
+        if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), 255, random8(128, 255)),
@@ -1313,8 +1313,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), 255, 255)
           );
           ALOG_INF(PSTR("new_colour_rate_ms=%d"), new_colour_rate_ms);
-          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , aux3 , new_colour_rate_ms);
-          aux3 = millis();
+          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , live_pal_timing , new_colour_rate_ms);
+          live_pal_timing = millis();
 
           
           _palette_container->encoded_colour_width = 3;
@@ -1327,7 +1327,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         uint8_t change_rate = custom3 ? custom3 : intensity ;
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
+        if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
           //                 CHSV(random8(), random8(204, 255), 255),
@@ -1341,7 +1341,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(40, 100), random8(220, 255)),
             CHSV(random8(), random8(40, 100), random8(220, 255))
           );               
-          aux3 = millis();
+          live_pal_timing = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1352,7 +1352,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         uint8_t change_rate = custom3 ? custom3 : intensity ;
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
+        if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), random8(153, 255), 255),
@@ -1369,7 +1369,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), (pastel_index == 2) ? random8(40, 100) : random8(153, 255), 255),
             CHSV(random8(), (pastel_index == 3) ? random8(40, 100) : random8(153, 255), 255)
           );
-          aux3 = millis();
+          live_pal_timing = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1380,7 +1380,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         uint8_t change_rate = custom3 ? custom3 : intensity ;
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
+        if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), random8(153, 217), 255),
@@ -1394,7 +1394,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(100, 217), random8(10, 255)),
             CHSV(random8(), random8(100, 217), random8(10, 255))
           );                        
-          aux3 = millis();
+          live_pal_timing = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1405,7 +1405,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
         uint8_t change_rate = custom3 ? custom3 : intensity ;
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - aux3 > new_colour_rate_ms)        
+        if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
         //   palette->CRGB16Palette16_Palette.data = CRGBPalette16(
         //                   CHSV(random8(), random8(0, 255), 255),
@@ -1419,7 +1419,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(153, 217), random8(127, 190)),
             CHSV(random8(), random8(153, 217), random8(190, 255))
           );                                                  
-          aux3 = millis();
+          live_pal_timing = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1974,10 +1974,12 @@ void mAnimatorLight::SubTask_Effects()
 } // SubTask_Effects
 
 
-uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
+uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
 {
+  // ah, unloaded one needs called this way.
 
-  Serial.println("PO");//PHASE OUT!!!! OR MAKE SURE NEVER REALTIME CALL NEVER CALLED?? why");
+  // Serial.println("PO");//PHASE OUT!!!! OR MAKE SURE NEVER REALTIME CALL NEVER CALLED?? why");
+  // return SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
 
 
 // when preloaded, use mPalette.colours_in_palette
@@ -2477,7 +2479,7 @@ bool mAnimatorLight::isAsterisksOnly(const char* str, byte maxLen)
 RgbwwColor mAnimatorLight::ColourBlend(RgbwwColor color1, RgbwwColor color2, uint8_t blend) 
 {
   Serial.println("here1");
-  return RgbwwColor::LinearBlend(color1, color2, mSupport::mapfloat(blend, 0,255, 0.0f, 1.0f));
+  return RgbwwColor::LinearBlend(color1, color2, blend);//mSupport::mapfloat(blend, 0,255, 0.0f, 1.0f));
 }
 
 uint32_t mAnimatorLight::ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend) 
@@ -2900,7 +2902,7 @@ void mAnimatorLight::Segment::resetIfRequired() {
      * @brief Potential issue with WLED effects, but removing aux options from reset since they may be used as config options
      * 
      */
-    aux0 = 0; aux1 = 0;  aux2 = 0;  aux3 = 0; 
+    aux0 = 0; aux1 = 0;  aux2 = 0;  aux3 = 0;   aux4 = 0;  live_pal_timing = 0;
     
     
     reset = false; // setOption(SEG_OPTION_RESET, false);
@@ -3048,6 +3050,9 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
     sOpt = tkr_anim->extractModeDefaults(fx, "sx");   if (sOpt >= 0) speed   = sOpt;
     sOpt = tkr_anim->extractModeDefaults(fx, "ix");   if (sOpt >= 0) intensity   = sOpt;
     sOpt = tkr_anim->extractModeDefaults(fx, "pal");   if (sOpt >= 0) setPalette(sOpt);
+
+
+    sOpt = tkr_anim->extractModeDefaults(fx, "pal2");   if (sOpt >= 0) palette2_id = sOpt;
     
     char paletteName[32]; // Buffer to store the extracted palette name
     if (tkr_anim->extractModeDefaults(fx, "paln", paletteName, sizeof(paletteName))) // Check for the "paln" command (palette name)
@@ -3067,9 +3072,9 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
       ALOG_INF(PSTR("pal2n=%s"), paletteName);
       int16_t tmp_id = -1;
       if((tmp_id=tkr_anim->GetPaletteIDbyName(paletteName))>=0){
-        ALOG_INF(PSTR("pal=%d"),tmp_id);
-        palette_id = tmp_id;
-        LoadPalette(palette_id); // Force reload now palette has been changed
+        ALOG_INF(PSTR("pal2n=%d"),tmp_id);
+        palette2_id = tmp_id;
+        // LoadPalette(palette_id); // Force reload now palette has been changed
       }
     }
 
@@ -3087,6 +3092,24 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
     sOpt = tkr_anim->extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
     sOpt = tkr_anim->extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
 
+    // --- New: s# = segment color defaults (s0..s4), hex in RGBWC (short/long) ---
+    // examples: s1=111111 (white RGB), s0=F (R=FF), s2=abcde (a,b,c,d,e => R,G,B,W,C)
+    for (uint8_t sidx = 0; sidx < 5; ++sidx) {
+      char key[4]; // "s0".."s4"
+      snprintf(key, sizeof(key), "s%u", sidx);
+
+      char hexBuf[16] = {0};
+      if (tkr_anim->extractModeDefaults(fx, key, hexBuf, sizeof(hexBuf))) {
+        uint8_t r,g,b,ww,cw;
+        RgbwwColor col_org = segcol[sidx].colour;
+        r = col_org.R; g = col_org.G; b = col_org.B; ww = col_org.WW; cw = col_org.CW; // preserve missing channels
+        if (parseSegColorHex(hexBuf, r,g,b,ww,cw)) {
+          segcol[sidx] = SegmentColour(r, g, b, cw, ww);
+          ALOG_INF(PSTR("s%d=%s => R=%d G=%d B=%d WW=%d CW=%d"), sidx, hexBuf, r,g,b,ww,cw);
+        }
+      }
+    }
+
     flags.animator_first_run = true;
     
     if(mode_changed) tkr_anim->stateChanged = true; // send UDP/WS broadcast
@@ -3101,37 +3124,185 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
 
 // extracts mode parameter defaults from last section of mode data (e.g. "Juggle@!,Trail;!,!,;!;sx=16,ix=240,1d")
 //;sx=16,ix=240,1d
+// int16_t mAnimatorLight::extractModeDefaults(uint8_t mode, const char *segVar)
+// {
+//   if (mode < getModeCount()) {
+//     char lineBuffer[200] = "";
+//     strncpy_P(lineBuffer, getModeData_Config(mode), 199);
+//     lineBuffer[200] = '\0'; // terminate string
+
+
+//     ALOG_INF(PSTR("if (mode < getModeCount()) %d < %d %s"), mode, getModeCount(), lineBuffer);
+
+//     if (lineBuffer[0] != 0) {
+//       char* startPtr = strrchr(lineBuffer, ';'); // last ";" in FX data
+//       if (!startPtr) return -1;
+
+//       char* stopPtr = strstr(startPtr, segVar);
+//       if (!stopPtr) return -1;
+
+//       stopPtr += strlen(segVar) +1; // skip "="
+//       return atoi(stopPtr);
+//     }
+//   }
+//   return -1;
+// }
 int16_t mAnimatorLight::extractModeDefaults(uint8_t mode, const char *segVar)
 {
-  if (mode < getModeCount()) {
-    char lineBuffer[128] = "";
-    strncpy_P(lineBuffer, getModeData_Config(mode), 127);
-    lineBuffer[127] = '\0'; // terminate string
+  if (mode >= getModeCount()) return -1;
 
+  char lineBuffer[200];
+  const size_t bufsize = sizeof(lineBuffer);
 
-    // ALOG_INF(PSTR("if (mode < getModeCount()) %d < %d %s"), mode, getModeCount(), lineBuffer);
+  // Copy FX config from PROGMEM safely and NUL-terminate
+  strncpy_P(lineBuffer, getModeData_Config(mode), bufsize - 1);
+  lineBuffer[bufsize - 1] = '\0';
 
-    if (lineBuffer[0] != 0) {
-      char* startPtr = strrchr(lineBuffer, ';'); // last ";" in FX data
-      if (!startPtr) return -1;
+  ALOG_DBM(PSTR("if (mode < getModeCount()) %u < %u %s"), mode, getModeCount(), lineBuffer);
 
-      char* stopPtr = strstr(startPtr, segVar);
-      if (!stopPtr) return -1;
+  if (lineBuffer[0] == '\0') return -1;
 
-      stopPtr += strlen(segVar) +1; // skip "="
-      return atoi(stopPtr);
+  // Find the last ';' (defaults section)
+  char* startPtr = strrchr(lineBuffer, ';');
+  if (!startPtr) return -1;
+
+  // Search key from the defaults section onward
+  char* stopPtr = strstr(startPtr, segVar);
+  if (!stopPtr) return -1;
+
+  // Expect "key=value" → advance past "key="
+  stopPtr += strlen(segVar);
+  if (*stopPtr != '=') return -1;   // malformed, bail
+  ++stopPtr;
+
+  // Parse signed integer (stops at first non-digit)
+  // e.g., "127,ix=200" → returns 127
+  long v = strtol(stopPtr, nullptr, 10);
+  if (v < INT16_MIN || v > INT16_MAX) return -1;
+
+  return static_cast<int16_t>(v);
+}
+
+// Parse hex like: f / ff / fff / ffffff / abcde / aabbccddeeff  (RGBWC)
+// Rules:
+// - strip '#' and spaces
+// - odd length  => 1 hex per channel:  [R][G][B][W][C]
+// - even length => 2 hex per channel: [RR][GG][BB][WW][CW]
+// - up to 5 channels; missing channels default to 0
+
+// - special case: "0" => all black (0,0,0,0,0)
+bool mAnimatorLight::Segment::parseSegColorHex(const char* in,
+                                               uint8_t& R, uint8_t& G,
+                                               uint8_t& B, uint8_t& WW,
+                                               uint8_t& CW)
+{
+  if (!in) return false;
+
+  // 1) copy only hex chars (ignore '#', spaces, commas, etc.)
+  char hex[16]; // enough for 10 hex digits (+NUL) = 5 channels * 2
+  size_t n = 0;
+  for (const char* p = in; *p && n < sizeof(hex)-1; ++p) {
+    char c = *p;
+    if ((c >= '0' && c <= '9') ||
+        (c >= 'a' && c <= 'f') ||
+        (c >= 'A' && c <= 'F')) {
+      hex[n++] = (char)tolower(c);
     }
   }
-  return -1;
+  hex[n] = '\0';
+  if (n == 0) return false;
+
+  // special case: single char "0" means full black
+  if (n == 1 && hex[0] == '0') {
+    R = G = B = WW = CW = 0;
+    return true;
+  }
+
+  auto hex1 = [&](size_t i)->uint8_t {
+    char c = hex[i];
+    return (uint8_t)((c <= '9') ? (c - '0') : (c - 'a' + 10));
+  };
+  auto hex2 = [&](size_t i)->uint8_t {
+    return (uint8_t)((hex1(i) << 4) | hex1(i+1));
+  };
+  auto dup = [&](uint8_t h)->uint8_t { return (uint8_t)((h << 4) | h); };
+
+  R = G = B = WW = CW = 0;
+
+  if (n & 1) {
+    // ODD: short form, 1 nibble per channel: RGBWC
+    if (n >= 1) R  = dup(hex1(0));
+    if (n >= 2) G  = dup(hex1(1));
+    if (n >= 3) B  = dup(hex1(2));
+    if (n >= 4) WW = dup(hex1(3));
+    if (n >= 5) CW = dup(hex1(4));
+  } else {
+    // EVEN: long form, 2 nibbles per channel: RR GG BB WW CW
+    if (n >= 2)  R  = hex2(0);
+    if (n >= 4)  G  = hex2(2);
+    if (n >= 6)  B  = hex2(4);
+    if (n >= 8)  WW = hex2(6);
+    if (n >= 10) CW = hex2(8);
+  }
+  return true;
 }
+// bool mAnimatorLight::Segment::parseSegColorHex(const char* in, uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& WW, uint8_t& CW)
+// {
+//   if (!in) return false;
+
+//   // 1) copy only hex chars (ignore '#', spaces, commas, etc.)
+//   char hex[16]; // enough for 10 hex digits (+NUL) = 5 channels * 2
+//   size_t n = 0;
+//   for (const char* p = in; *p && n < sizeof(hex)-1; ++p) {
+//     char c = *p;
+//     if ((c >= '0' && c <= '9') ||
+//         (c >= 'a' && c <= 'f') ||
+//         (c >= 'A' && c <= 'F')) {
+//       hex[n++] = (char)tolower(c);
+//     }
+//   }
+//   hex[n] = '\0';
+//   if (n == 0) return false;
+
+//   auto hex1 = [&](size_t i)->uint8_t {
+//     char c = hex[i];
+//     return (uint8_t)((c <= '9') ? (c - '0') : (c - 'a' + 10));
+//   };
+//   auto hex2 = [&](size_t i)->uint8_t {
+//     return (uint8_t)((hex1(i) << 4) | hex1(i+1));
+//   };
+//   auto dup = [&](uint8_t h)->uint8_t { return (uint8_t)((h << 4) | h); };
+
+//   R = G = B = WW = CW = 0;
+
+//   if (n & 1) {
+//     // ODD: short form, 1 nibble per channel: RGBWC
+//     // abcde => a=R, b=G, c=B, d=W, e=C
+//     if (n >= 1) R  = dup(hex1(0));
+//     if (n >= 2) G  = dup(hex1(1));
+//     if (n >= 3) B  = dup(hex1(2));
+//     if (n >= 4) WW = dup(hex1(3));
+//     if (n >= 5) CW = dup(hex1(4));
+//   } else {
+//     // EVEN: long form, 2 nibbles per channel: RR GG BB WW CW
+//     // length can be 2/4/6/8/10 (1..5 channels)
+//     if (n >= 2)  R  = hex2(0);
+//     if (n >= 4)  G  = hex2(2);
+//     if (n >= 6)  B  = hex2(4);
+//     if (n >= 8)  WW = hex2(6);
+//     if (n >= 10) CW = hex2(8);
+//   }
+//   return true;
+// }
+
 
 bool mAnimatorLight::extractModeDefaults(uint8_t mode, const char *segVar, char *outBuffer, size_t bufferSize)
 {
   if (mode < getModeCount())
   {
-    char lineBuffer[128] = "";
-    strncpy_P(lineBuffer, getModeData_Config(mode), 127);
-    lineBuffer[127] = '\0'; // Ensure null-termination
+    char lineBuffer[200] = "";
+    strncpy_P(lineBuffer, getModeData_Config(mode), 199);
+    lineBuffer[199] = '\0'; // Ensure null-termination
 
     if (lineBuffer[0] != 0)
     {
@@ -5378,7 +5549,8 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
    */
   bool apply_brightness,
   
-  uint8_t pbri,
+  uint8_t pbri,  // this needs removed, as the apply brightness above means the seg/global brightness, not an internal one. The wrapper from WLED needs to do that instead.
+  // might need a u8 to describe different levels of brightness application, none, seg/global, internal
 
   uint8_t mcol
 ){
@@ -5445,9 +5617,6 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
     white_warm_GetPaletteColour = (mPaletteI->colour32_white_cold * scale) >> 8; // Rescale bypass W2
     #endif
   }
-
-
-
 
   return colour;
 
@@ -5573,7 +5742,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour_ModeWrap(
    * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
    * ** [2]: preffered
    */
-  uint8_t     flag_spanned_segment, 
+  uint8_t     palette_index__format, 
   /**
    * @brief force_palette_mode flag_crgb_exact_colour
    * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
@@ -5641,7 +5810,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour_ModeWrap(
     (uint8_t*)palette->pData.data(),
     pixel_position,
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    palette_index__format, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
     force_palette_mode
   );
@@ -5792,7 +5961,7 @@ CRGB mAnimatorLight::ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t
  * @brief 
  * The problem is this function will still cause a reload if a LoadPalette type is used. So preference is to use a CRGBPalette type as overdraw when needed
  */
-RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
+RgbwwColor IRAM_ATTR mAnimatorLight::GetUnloadedPaletteColour(
   uint16_t palette_id,
   uint16_t _pixel_position,
   bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
@@ -5888,6 +6057,76 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetColourFromUnloadedPalette3(
 
   #endif
 }
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : SUCCESSOR API — GetUnloadedPaletteColour_ModeWrap
+ *                Reordered args to match GetPaletteColour_ModeWrap so calls can rely on header defaults.
+ *                Internally maps (index_mode, palette_mode, wrap) to legacy boolean flags.
+ ********************************************************************************************************************************************************************************************************************/
+RgbwwColor IRAM_ATTR mAnimatorLight::GetUnloadedPaletteColour_ModeWrap(
+  uint16_t palette_id,
+  uint16_t index_or_pos,
+  uint8_t  palette_index_mode,           // e.g. PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_INDEX__IS_SEGLEN_RANGE
+  uint8_t  palette_mode,                 // e.g. PALETTE_MODE__DEFAULT / __EXACT / __DISCRETE, etc.
+  uint8_t  palette_wrap,                 // e.g. PALETTE_WRAP_OFF / __ON
+  uint8_t* encoded_value,                // pass NO_ENCODED_VALUE if unused
+  bool     flag_request_is_for_full_visual_output
+){
+  // --- translate Mode/Wrap to legacy flags used by palette backends ---
+  const bool flag_spanned_segment  = (palette_index_mode == PALETTE_INDEX__IS_SEGLEN_RANGE);
+  const bool flag_wrap_hard_edge   = (palette_wrap       == PALETTE_WRAP_ON);
+  const bool flag_crgb_exact_color = (palette_mode       == PALETTE_INDEX__IS_EXACT_COLOUR);
+
+  // --- direct, no-load paths (static / generated palettes) ---
+  if (
+    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                  && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))                 ||
+    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                 && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))          ||
+    ((palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))||
+    ((palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID)                             && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID))                  ||
+    ((palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID)                            && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
+  ) {
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+      return mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
+        palette_id, nullptr,
+        index_or_pos, encoded_value,
+        flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_color,
+        flag_request_is_for_full_visual_output
+      );
+    #else
+      const uint32_t c32 = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
+        palette_id, nullptr,
+        index_or_pos, encoded_value,
+        flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_color,
+        flag_request_is_for_full_visual_output
+      );
+      return RgbwwColor(R(c32), G(c32), B(c32), W(c32), 0);
+    #endif
+  }
+
+  // --- load-once path for other palette types ---
+  mPaletteLoaded palette_container_temp;
+  SEGMENT.LoadPalette(palette_id, &palette_container_temp);
+
+  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    return mPaletteI->GetColourFromPreloadedPaletteBuffer_RGBWW(
+      palette_id, &palette_container_temp.pData[0],
+      index_or_pos, encoded_value,
+      flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_color,
+      flag_request_is_for_full_visual_output
+    );
+  #else
+    const uint32_t c32 = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
+      palette_id, &palette_container_temp.pData[0],
+      index_or_pos, encoded_value,
+      flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_color,
+      flag_request_is_for_full_visual_output
+    );
+    return RgbwwColor(R(c32), G(c32), B(c32), W(c32), 0);
+  #endif
+}
+
+
 
 
 #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
@@ -7507,7 +7746,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
         // JBI->Add("n", pal.friendly_name_ctr);
         // JBI->Add("i", pal.id);
         
-        // uint8_t colours_in_palette = tkr_anim->GetNumberOfColoursInPalette(i);
+        // uint8_t colours_in_palette = tkr_anim->GetNumberOfColoursInUNLOADEDPalette(i);
         // JBI->Add("s",colours_in_palette);
 
 
