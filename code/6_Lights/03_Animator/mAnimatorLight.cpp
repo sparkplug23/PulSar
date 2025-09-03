@@ -1296,8 +1296,9 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             Minimum: 1000 + 0 = 1000 ms (1 second).
             Maximum: 1000 + 25500 = 26500 ms (26.5 seconds).
         */
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-custom2))*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
+        // ALOG_INF(PSTR("palix%d,new_colour_rate_ms=%d"),palette_live_intensity,new_colour_rate_ms);
         if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
@@ -1324,8 +1325,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
       {        
-        uint8_t change_rate = custom3 ? custom3 : intensity ;
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
@@ -1349,8 +1350,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
       {        
-        uint8_t change_rate = custom3 ? custom3 : intensity ;
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
@@ -1377,8 +1378,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
       {        
-        uint8_t change_rate = custom3 ? custom3 : intensity ;
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
@@ -1402,8 +1403,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
       {        
-        uint8_t change_rate = custom3 ? custom3 : intensity ;
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - live_pal_timing > new_colour_rate_ms)        
         {
@@ -1437,8 +1438,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
       (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
     ){
-        uint8_t change_rate = custom3 ? custom3 : intensity ;
-        uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-change_rate))*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
         if(new_colour_rate_ms > cycle_time__rate_ms) cycle_time__rate_ms = new_colour_rate_ms + 100;
     }
 
@@ -1798,6 +1799,9 @@ void mAnimatorLight::SubTask_Effects()
     
     // reset the segment runtime data if needed
     seg.resetIfRequired();
+
+    // Temporary fix to make sure WLED effects run with my UI, may simply need reset added above
+    // if(seg.flags.animator_first_run) seg.call = 0; // reset call counter if first run
 
     if (!seg.isActive())
     {
@@ -2885,7 +2889,8 @@ void mAnimatorLight::Segment::deallocateColourData()
   * may free that data buffer.
   */
 void mAnimatorLight::Segment::resetIfRequired() {
-  if (reset) {
+  if (!reset) return;
+  // if (reset) {
     
   // ALOG_INF(PSTR(D_LOG_PIXEL "resetIfRequired AuxOptions Segment = %d,%d,%d,%d"),
   //   aux0,
@@ -2907,7 +2912,7 @@ void mAnimatorLight::Segment::resetIfRequired() {
     
     reset = false; // setOption(SEG_OPTION_RESET, false);
     // Serial.println(DEBUG_INSERT_PAGE_BREAK "mAnimatorLight::Segment::resetIfRequired()"); //delay(5000);
-  }
+  // }
 }
 
 // void mAnimatorLight::Segment::setUpLeds() {
@@ -3111,6 +3116,7 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
     }
 
     flags.animator_first_run = true;
+    markForReset(); // reset runtime settings (next loop)
     
     if(mode_changed) tkr_anim->stateChanged = true; // send UDP/WS broadcast
  
@@ -3365,19 +3371,20 @@ uint16_t mAnimatorLight::Segment::virtualHeight() const {
   return vHeight;
 }
 
-uint16_t mAnimatorLight::Segment::nrOfVStrips() const {
-  uint16_t vLen = 1;
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  if (is2D()) {
-    switch (map1D2D) {
-      case M12_pBar:
-        vLen = virtualWidth();
-        break;
-    }
-  }
-#endif
-  return vLen;
-}
+// uint16_t mAnimatorLight::Segment::nrOfVStrips() const {
+//   uint16_t vLen = 1;
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   if (is2D()) {
+//     switch (map1D2D) {
+//       case M12_pBar:
+//         vLen = virtualWidth();
+//         break;
+//     }
+//   }
+// #endif
+//   return vLen;
+// }
+
 
 // // 1D strip
 // uint16_t mAnimatorLight::Segment::virtualLength() const {
@@ -3595,44 +3602,140 @@ uint16_t mAnimatorLight::Segment::virtualLength() const {
 
 // }
 
-#ifdef USE_AA_PIXELS
+// #ifdef USE_AA_PIXELS
 // anti-aliased normalized version of setPixelColor()
+// void mAnimatorLight::Segment::setPixelColor(float i, uint32_t col, bool aa)
+// {
+
+//   // Serial.println(F("setPixelColor(float i, uint32_t col, bool aa)"));
+
+//   if (!isActive()) return; // not active
+//   int vStrip = int(i/10.0f); // hack to allow running on virtual strips (2D segment columns/rows)
+//   i -= int(i);
+
+//   if (i<0.0f || i>1.0f) return; // not normalized
+
+//   float fC = i * (virtualLength()-1);
+//   if (aa) {
+//     uint16_t iL = roundf(fC-0.49f);
+//     uint16_t iR = roundf(fC+0.49f);
+//     float    dL = (fC - iL)*(fC - iL);
+//     float    dR = (iR - fC)*(iR - fC);
+//     ColourBaseType cIL = getPixelColor(iL | (vStrip<<16));
+//     ColourBaseType cIR = getPixelColor(iR | (vStrip<<16));
+//     if (iR!=iL) {
+//       // blend L pixel
+//       cIL = color_blend(col, cIL, uint8_t(dL*255.0f));
+//       setPixelColor(iL | (vStrip<<16), cIL);
+//       // blend R pixel
+//       cIR = color_blend(col, cIR, uint8_t(dR*255.0f));
+//       setPixelColor(iR | (vStrip<<16), cIR);
+//     } else {
+//       // exact match (x & y land on a pixel)
+//       setPixelColor(iL | (vStrip<<16), col);
+//     }
+//   } else {
+//     setPixelColor(uint16_t(roundf(fC)) | (vStrip<<16), col);
+//   }
+
+// }
+
+
+/**
+ * @brief Set a pixel using a *normalized* floating position with optional anti-aliasing,
+ *        while also encoding a “virtual strip” index into the same argument.
+ *
+ * HOW IT WORKS (two tricks in one):
+ * 1) **Virtual-strip encoding in the integer part**  
+ *    Callers pass `i` as `i = (stripNr+1)*10.0f + frac`, where:
+ *      - `(stripNr+1)*10.0f` is the **integer part** and encodes which virtual strip/column this
+ *        1D effect should draw on in a 2D segment. (e.g., 10.0 → strip 0, 20.0 → strip 1, …)
+ *      - `frac` is the **fractional part** in [0..1], the normalized position along that strip.
+ *    Inside this function we recover `vStrip = int(i/10.0f)` and then remove the integer part so
+ *    that `i` only contains the fractional [0..1] position.  
+ *    Later, we pack `vStrip` back into the upper 16 bits when calling the integer
+ *    `setPixelColor(index | (vStrip<<16), col)`, matching WLED’s virtual-strip convention.
+ *
+ * 2) **Anti-aliasing (sub-pixel blending)**  
+ *    When `aa == true`, we compute the exact float location `fC` along the strip and blend the
+ *    color between the two nearest pixel centers. This reduces “stepping” and produces smooth
+ *    motion of dots/lines at sub-pixel positions:
+ *      - Find `iL` (left pixel) and `iR` (right pixel) around `fC`.
+ *      - Compute weights based on squared distance to each center (simple smooth falloff).
+ *      - Blend your input color with the current pixel colors at `iL` and `iR`, then write back.
+ *
+ * IMPORTANT NOTES:
+ * - The “×10” you noticed is **not** for random smearing. It’s purely a compact channel to carry
+ *   the virtual-strip index in the integer part of the float. The *fractional* part carries the
+ *   normalized [0..1] position used for anti-aliasing.
+ * - This relies on the companion integer overload of `setPixelColor(int, uint32_t)` to *unpack*
+ *   `vStrip` from the upper 16 bits (i.e., `int vStrip = i >> 16; i &= 0xFFFF;`) and route the
+ *   pixel to the correct 2D coordinate.
+ * - `virtualLength()` is used as the logical length of the strip dimension this 1D effect draws on.
+ */
 void mAnimatorLight::Segment::setPixelColor(float i, uint32_t col, bool aa)
 {
+  // Bail if segment is inactive.
+  if (!isActive()) return;
 
-  Serial.println(F("setPixelColor(float i, uint32_t col, bool aa)"));
+  // --- Extract virtual-strip index from the integer part of the float --------------------------
+  // The caller encodes vStrip as (stripNr+1)*10.0f added to the normalized position.
+  // Example: 23.42f  -> vStrip = 2, fractional position = 0.342
+  int vStrip = int(i / 10.0f);
 
-  if (!isActive()) return; // not active
-  int vStrip = int(i/10.0f); // hack to allow running on virtual strips (2D segment columns/rows)
+  // Remove the integer part: keep only [0..1] normalized position along the strip.
   i -= int(i);
 
-  if (i<0.0f || i>1.0f) return; // not normalized
+  // Position must be normalized; out-of-range → ignore.
+  if (i < 0.0f || i > 1.0f) return;
 
-  float fC = i * (virtualLength()-1);
-  if (aa) {
-    uint16_t iL = roundf(fC-0.49f);
-    uint16_t iR = roundf(fC+0.49f);
-    float    dL = (fC - iL)*(fC - iL);
-    float    dR = (iR - fC)*(iR - fC);
-    ColourBaseType cIL = getPixelColor(iL | (vStrip<<16));
-    ColourBaseType cIR = getPixelColor(iR | (vStrip<<16));
-    if (iR!=iL) {
-      // blend L pixel
-      cIL = color_blend(col, cIL, uint8_t(dL*255.0f));
-      setPixelColor(iL | (vStrip<<16), cIL);
-      // blend R pixel
-      cIR = color_blend(col, cIR, uint8_t(dR*255.0f));
-      setPixelColor(iR | (vStrip<<16), cIR);
-    } else {
-      // exact match (x & y land on a pixel)
-      setPixelColor(iL | (vStrip<<16), col);
+  // Convert normalized [0..1] to float index in [0..virtualLength()-1].
+  const float fC = i * (virtualLength() - 1);
+
+  if (aa)
+  {
+    // ---- Anti-aliased write: blend between the two neighboring pixel centers -----------------
+    // We define a small window around fC and pick the “left” and “right” integer indices.
+    // The 0.49 offset gives a symmetric region around each pixel center for smoother blending.
+    const uint16_t iL = roundf(fC - 0.49f);
+    const uint16_t iR = roundf(fC + 0.49f);
+
+    // Squared distance from fC to each neighbor; used as blend weights (soft falloff).
+    const float dL = (fC - iL) * (fC - iL);
+    const float dR = (iR - fC) * (iR - fC);
+
+    // Fetch current colors at the neighbors (with the vStrip encoded in upper 16 bits).
+    ColourBaseType cIL = getPixelColor(iL | (vStrip << 16));
+    ColourBaseType cIR = getPixelColor(iR | (vStrip << 16));
+
+    if (iR != iL)
+    {
+      // Left pixel: blend the new color into the existing pixel by a factor from distance.
+      // Larger distance → higher alpha → less influence (simple, fast AA).
+      cIL = color_blend(col, cIL, uint8_t(dL * 255.0f));
+      setPixelColor(iL | (vStrip << 16), cIL);
+
+      // Right pixel: same, with its own distance weight.
+      cIR = color_blend(col, cIR, uint8_t(dR * 255.0f));
+      setPixelColor(iR | (vStrip << 16), cIR);
     }
-  } else {
-    setPixelColor(uint16_t(roundf(fC)) | (vStrip<<16), col);
+    else
+    {
+      // Degenerate case: fC lands exactly on a pixel center (or both round to same index).
+      setPixelColor(iL | (vStrip << 16), col);
+    }
   }
-
+  else
+  {
+    // ---- Nearest-neighbor write: no AA, just pick the closest pixel --------------------------
+    const uint16_t idx = uint16_t(roundf(fC));
+    setPixelColor(idx | (vStrip << 16), col);
+  }
 }
-#endif
+
+
+
+// #endif
 
 // uint32_t mAnimatorLight::Segment::getPixelColor(int i)
 // {
@@ -5511,7 +5614,7 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
 }
 
 /*WrapEdge and Discrete should be flipped*/
-uint32_t mAnimatorLight::Segment::GetPaletteColour(
+uint32_t mAnimatorLight::Segment::GetPaletteColour_Legacy(
   /**
    * @brief _pixel_position
    * ** [0-SEGLEN]
@@ -5560,6 +5663,9 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
   {
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   }
+
+  if(pixel_position==0)
+    Serial.println("PO: GetPaletteColour_Legacy");
 
 
   // uint32_t color = SEGCOLOR(mcol < NUM_COLORS ? mcol : 0);
@@ -5657,7 +5763,7 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
   bool apply_brightness
 ){
 
-  uint32_t colour32 = GetPaletteColour(
+  uint32_t colour32 = GetPaletteColour_Legacy(
     pixel_position,
     flag_spanned_segment,
     flag_wrap_hard_edge,
@@ -5875,7 +5981,7 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW_2025(
   bool apply_brightness
 ){
 
-  uint32_t colour32 = GetPaletteColour(
+  uint32_t colour32 = GetPaletteColour_Legacy(
     pixel_position,
     flag_spanned_segment,
     flag_wrap_hard_edge,
@@ -6136,6 +6242,9 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
 ,bool flag_brightness_already_applied
 #endif
 ){
+
+  int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows) REQUIRED for bouncing balls effect. Assumes this means int is 32 bit here?
+  i &= 0xFFFF;
 
   // #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
   // if(i<10)

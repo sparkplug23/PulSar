@@ -131,8 +131,8 @@
  * 
  * 
  **/
-// #define color_from_palette(i,mapping,wrap,mcol)    GetPaletteColour(i,mapping,wrap,mcol)inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
-//   return GetPaletteColour(i, mapping, wrap, mcol, pbri);
+// #define color_from_palette(i,mapping,wrap,mcol)    GetPaletteColour_Legacy(i,mapping,wrap,mcol)inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
+//   return GetPaletteColour_Legacy(i, mapping, wrap, mcol, pbri);
 // }
 
 
@@ -155,9 +155,9 @@ isMatrix                                                               isMatrix
 color_from_palette                                                           c
 SEGMENT.params_internal.aux1                                                                 SEGMENT.params_internal.aux1
 SEGCOLOR                                    SEGCOLOR_U32                                  
-SEGMENT.color_from_palette((band * 35), false, PALETTE_SOLID_WRAP, 0);                       SEGMENT.GetPaletteColour((band * 35), WLED_PALETTE_MAPPING_ARG_FALSE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE).getU32()      
+SEGMENT.color_from_palette((band * 35), false, PALETTE_SOLID_WRAP, 0);                       SEGMENT.GetPaletteColour_Legacy((band * 35), WLED_PALETTE_MAPPING_ARG_FALSE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE).getU32()      
 
-#define color_from_palette(a,b,c,d)    GetPaletteColour(a,b,c,d).getU32()
+#define color_from_palette(a,b,c,d)    GetPaletteColour_Legacy(a,b,c,d).getU32()
 
  * 
  * 
@@ -2523,6 +2523,8 @@ typedef struct Segment
     uint8_t effect_id = 0;    
     uint8_t effect_id_next = 0;   //e.g. For rotating effect, preload the initial animation and then rotate it/
 
+    uint8_t palette_live_intensity = 127;
+
     /**
      * @brief Note with union here not having a name, all options are accesible directly in Segment
      **/
@@ -2720,6 +2722,14 @@ typedef struct Segment
     }
     #define vLength() virtualLength() //tmp fix    
     // inline static unsigned vWidth()                        { return virtualLength(); }
+    
+    inline unsigned nrOfVStrips() const {        // returns number of virtual vertical strips in 2D matrix (used to expand 1D effects into 2D)
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+      return (is2D() &&  map1D2D == M12_pBar) ? virtualWidth() : 1;
+    #else
+      return 1;
+    #endif
+    }
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
     struct PERFORMANCE{
@@ -3113,12 +3123,12 @@ typedef struct Segment
     void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
     void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) {      setPixelColor(n, RGBW32(r,g,b,w));    }
     void setPixelColor(int n, CRGB c) {            setPixelColor(n, RGBW32(c.r, c.g, c.b,0));    }
-    #ifdef USE_AA_PIXELS
+    // #ifdef USE_AA_PIXELS
     // Anti-aliasing functions
     void setPixelColor(float i, uint32_t c, bool aa = true);
     void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
     void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
-    #endif
+    // #endif
     #endif
     
       
@@ -3160,13 +3170,13 @@ typedef struct Segment
      * Hence a new U32 palette structure will exist that always foregoes the Rgbcct and handles in U32 format
      * This may be hardcorded with a define, or use if to switch
      * #ifdef XX
-     * #define GetPaletteColour GetPaletteColour_U32
+     * #define GetPaletteColour_Legacy GetPaletteColour_U32
      * #else
-     * #define GetPaletteColour GetPaletteColourRGBCCT
+     * #define GetPaletteColour_Legacy GetPaletteColourRGBCCT
      * #endif
      **/
     uint8_t white_warm_GetPaletteColour = 0;
-    [[gnu::hot]] uint32_t GetPaletteColour(
+    [[gnu::hot]] uint32_t GetPaletteColour_Legacy(
       /**
        * @brief _pixel_position
        * ** [0-SEGLEN]
@@ -3253,9 +3263,9 @@ typedef struct Segment
      * Hence a new U32 palette structure will exist that always foregoes the Rgbcct and handles in U32 format
      * This may be hardcorded with a define, or use if to switch
      * #ifdef XX
-     * #define GetPaletteColour GetPaletteColour_U32
+     * #define GetPaletteColour_Legacy GetPaletteColour_U32
      * #else
-     * #define GetPaletteColour GetPaletteColourRGBCCT
+     * #define GetPaletteColour_Legacy GetPaletteColourRGBCCT
      * #endif
      **/
     // uint8_t white_warm_GetPaletteColour = 0;
@@ -3357,8 +3367,8 @@ typedef struct Segment
      * color_from_palette_forced_gradient is really teh default, all WLED acts on CRGBPalette16 and assumes never discrete/exact colour sampling so we should default mine to that too.
     */
     inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
-      // // return GetPaletteColour(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg*/true, pbri, mcol); August2025, pbri not applied correctly this way, needs fixed later
-      // uint32_t c = GetPaletteColour(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function*/false, pbri, mcol);
+      // // return GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg*/true, pbri, mcol); August2025, pbri not applied correctly this way, needs fixed later
+      // uint32_t c = GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function*/false, pbri, mcol);
       // if(pbri != 255) { // apply brightness if not already done
       //   byte r = R(c), g = G(c), b = B(c), w = W(c);
       //   r = (uint16_t(r) * pbri) >> 8;
@@ -3377,16 +3387,28 @@ typedef struct Segment
       const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
 
       uint8_t encoded = 0; // non-null pointer expected by some impls
-      uint32_t c = GetPaletteColour(
+      // uint32_t c = GetPaletteColour_Legacy(
+      //     i,
+      //     idxMode,
+      //     wrapMode,
+      //     discrete,
+      //     &encoded,
+      //     /*apply brightness*/ false,
+      //     255, // to be removed, handled below
+      //     mcol
+      // );
+
+      uint32_t c = GetPaletteColour_ModeWrap(
           i,
           idxMode,
-          wrapMode,
           discrete,
+          wrapMode,
           &encoded,
           /*apply brightness*/ false,
           255, // to be removed, handled below
           mcol
       );
+
 
       if(pbri != 255) { // apply brightness if not already done
         byte r = R(c), g = G(c), b = B(c), w = W(c);
@@ -3435,7 +3457,7 @@ typedef struct Segment
     //   const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
 
     //   uint8_t encoded = 0; // non-null pointer expected by some impls
-    //   uint32_t c = GetPaletteColour(
+    //   uint32_t c = GetPaletteColour_Legacy(
     //       i,
     //       idxMode,
     //       wrapMode,
@@ -3478,7 +3500,7 @@ typedef struct Segment
     #define vWidth() virtualWidth() //tmp fix
     uint16_t virtualHeight(void) const;
     #define vHeight() virtualHeight() //tmp fix
-    uint16_t nrOfVStrips(void) const;
+    // uint16_t nrOfVStrips(void) const;
 
 
     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS

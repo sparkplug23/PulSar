@@ -60,7 +60,7 @@
 			</div>
 		</div>
 		<div id="vwrap" class="slider">
-			<div title="Value/Brightness" class="sliderwrap il">
+			<div title="Segment Colour Brightness" class="sliderwrap il">
 				<input id="sliderV" class="noslide" oninput="fromV()" onchange="setColor(0)" max="100" min="0" type="range" value="100" step="any" />
 				<div class="sliderdisplay"></div>
 			</div>
@@ -92,13 +92,13 @@
 			</div>
 		</div>
 		<div id="wwrap" class="slider">
-			<div id="whibri" title="White channel" class="sliderwrap il">
+			<div id="whibri" title="White" class="sliderwrap il">
 				<input id="sliderW" class="noslide" oninput="fromW()" onchange="setColor(0)" max="255" min="0" type="range" value="128" />
 				<div class="sliderdisplay"></div>
 			</div>
 		</div>
 		<div id="wbal" class="slider">
-			<div title="White balance" class="sliderwrap il">
+			<div title="White Balance" class="sliderwrap il">
 				<input id="sliderA" class="noslide" onchange="setBalance(this.value)" max="255" min="0" type="range" value="128" />
 				<div class="sliderdisplay"></div>
 			</div>
@@ -106,13 +106,13 @@
 
 
 		<div id="rgbbriwrap" class="slider">
-			<div title="RGBBri" class="sliderwrap il">
+			<div title="Seg Colour Brightness" class="sliderwrap il">
 				<input id="sliderrgbbri" class="noslide" onchange="setRGBBri(this.value)" max="255" min="0" type="range" value="128" />
 				<div class="sliderdisplay"></div>
 			</div>
 		</div>
 		<div id="cctbriwrap" class="slider">
-			<div title="CCTBri" class="sliderwrap il">
+			<div title="Seg White Brightness" class="sliderwrap il">
 				<input id="slidercctbri" class="noslide" onchange="setCCTBri(this.value)" max="255" min="0" type="range" value="128" />
 				<div class="sliderdisplay"></div>
 			</div>
@@ -153,6 +153,17 @@
 			<button class="btn btn-xs" title="Add custom palette" type="button" onclick="window.location.href=getURL('/cpal.htm')"><i class="icons btn-icon">&#xe18a;</i></button>
 			<button class="btn btn-xs" title="Remove last custom palette" type="button" id="rmPal" onclick="palettesData=null;localStorage.removeItem('wledPalx');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons btn-icon">&#xe037;</i></button>
 			<button class="btn btn-xs" title="Secondary Palette (P+)" type="button" id="secPalToggle" aria-pressed="false">P+</button>
+		</div>
+		
+		<!-- Add new live palette intensity slider -->
+		<div id="palixwrap" class="slider">
+  			<div class="sliderlabel">Live Palette Intensity 1→25sec</div>
+			<div title="Live Palette Update (IX)" class="sliderwrap il">
+				<input id="sliderpalix" class="noslide"
+					onchange="setPaletteLiveIX(this.value)"
+					max="255" min="0" type="range" value="128" />
+				<div class="sliderdisplay"></div>
+			</div>
 		</div>
 
 		<p class="labels hd" id="pall"><i class="icons sel-icon" onclick="tglHex()">&#xe2b3;</i> Color palette</p>

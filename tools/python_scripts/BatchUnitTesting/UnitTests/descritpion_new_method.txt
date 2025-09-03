@@ -1,0 +1,31 @@
+Will create a new class, that calls modules. 
+Each module, will be a test set for an effect.
+    
+    A default test effect will be used when I have not yet made a special one.
+
+effect_test
+* load_default
+* test_across_palette_types ie discrete, drgb16palette, live palette
+* test_speeds, run across speeds
+* one effect, iter over all palettes 
+* one palette, iter over all effects 
+
+Then we can have special modules for each effect I want special testing, such as check box, or customs etc 
+
+mqtt json will have a new "this is a debug test" and this will cause effects to reply "status I am still alive".
+If this is not got after X seconds, that effect is failed. 
+Only then do we move on to the next unit test. 
+So this wrapper will need the option to "continue with fail, or stop on fail"
+
+At all times, we will listen for that module "rebooting" and hence, it died and should end test early as unstable. 
+
+future option could be, a debug option which sends the live view back over a special mqtt topic, which this script records. We can then plot as colorbars later to view all. So probably record to file, then another module automatically or on demand shows what was recorded.
+Similarly, a nice log that records these events, as TX and RX and success. 
+
+This all will lay the foundation for equivalent testing of pulsar, where we can add what we want tested and the devices mqtt name. Likewise, make sure we do it so we can iter multiple devices. 
+Although time consuming, this means we could have a complete test of many or all devices. 
+
+We may also want to add a "reset" command after a test, so we make sure they are in a healthy default/known state. prior to, we should request and logdump all telemetry so we know its state before a reset. 
+
+Thus, each module in pulsar will need its own test module, with its own test sequence and pass/fail. probably best to save their logs into the same layout of folder layouts as found in pulsar. we could also make it so we timestamp the logs, and have an optional
+only keep 5 previously logs, so any older are erased. Unless we add "KEEP" to the filename (ie if that has some important old test state, we can reuse it later and auto delete will skip it.)

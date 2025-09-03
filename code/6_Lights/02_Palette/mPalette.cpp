@@ -1008,7 +1008,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     uint16_t palette_adjusted_id = id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
     data = &custom_palettes[palette_adjusted_id].data[0];
 
-    Serial.printf("pal %d %d \n\r", id, palette_adjusted_id);
+    // Serial.printf("pal %d %d \n\r", id, palette_adjusted_id);
 
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(

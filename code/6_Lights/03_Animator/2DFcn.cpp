@@ -987,13 +987,13 @@ void mAnimatorLight::Segment::drawCharacter_UsingGradientPalletes(
       uint32_t charColor;
       if (solidPerChar) {
         // Use a solid color for the entire character
-        charColor = GetPaletteColour(chr, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
+        charColor = GetPaletteColour_Legacy(chr, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
       } else {
         // Apply a gradient either horizontally or vertically
         if (horizontalGradient) {
-          charColor = GetPaletteColour(constrain((x0 * 255 / cols), 0, 255), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
+          charColor = GetPaletteColour_Legacy(constrain((x0 * 255 / cols), 0, 255), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
         } else {
-          charColor = GetPaletteColour(constrain((y0 * 255 / rows), 0, 255), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
+          charColor = GetPaletteColour_Legacy(constrain((y0 * 255 / rows), 0, 255), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF);
         }
       }
 

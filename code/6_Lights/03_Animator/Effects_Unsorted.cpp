@@ -805,7 +805,7 @@ void mAnimatorLight::EffectAnim__Christmas_Musical__01()
       desired_pixel = *indexes_counter_p ? index_1 : index_2;
     }
     
-    colour = SEGMENT.GetPaletteColour(desired_pixel, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, &pixel_position);
+    colour = SEGMENT.GetPaletteColour_Legacy(desired_pixel, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, &pixel_position);
     
     colour = RgbcctColor::ApplyBrightnesstoRgbcctColour(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
 

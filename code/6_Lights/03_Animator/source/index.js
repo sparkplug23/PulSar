@@ -257,26 +257,26 @@ function onLoad()
 
 	if (localStorage.getItem('pcm') == "true" || (!/Mobi/.test(navigator.userAgent) && localStorage.getItem('pcm') == null)) togglePcMode(true);
 	applyCfg();
-	if (cfg.comp.hdays) { //load custom holiday list
-		fetch(getURL("/holidays.json"), {	// may be loaded from external source
-			method: 'get'
-		})
-		.then((res)=>{
-			//if (!res.ok) showErrorToast();
-			return res.json();
-		})
-		.then((json)=>{
-			if (Array.isArray(json)) hol = json;
-			//TODO: do some parsing first
-		})
-		.catch((e)=>{
-			console.log("No array of holidays in holidays.json. Defaults loaded.");
-		})
-		.finally(()=>{
-			loadBg();
-		});
-	} else
-		loadBg();
+	// if (cfg.comp.hdays) { //load custom holiday list
+	// 	fetch(getURL("/holidays.json"), {	// may be loaded from external source
+	// 		method: 'get'
+	// 	})
+	// 	.then((res)=>{
+	// 		//if (!res.ok) showErrorToast();
+	// 		return res.json();
+	// 	})
+	// 	.then((json)=>{
+	// 		if (Array.isArray(json)) hol = json;
+	// 		//TODO: do some parsing first
+	// 	})
+	// 	.catch((e)=>{
+	// 		console.log("No array of holidays in holidays.json. Defaults loaded.");
+	// 	})
+	// 	.finally(()=>{
+	// 		loadBg();
+	// 	});
+	// } else
+	// 	loadBg();
 
 	selectSlot(0);
 	updateTablinks(0);
@@ -1585,6 +1585,30 @@ function updatePA()
 		if (acv) acv.classList.add('selected');
 	}
 }
+/**
+ * Update visibility + value for the Live Palette IX slider.
+ * Called after seg state is updated.
+ *
+ * Live palette IDs = 155..166 inclusive.
+ */
+function updatePalLiveIXView() {
+  const wrap   = gId('palixwrap');
+  const slider = gId('sliderpalix');
+  if (!wrap || !slider) return;
+
+  // live palette ids: 155..166
+  const inRange = v => Number.isFinite(v) && v >= 155 && v <= 166;
+
+  const pid1 = Number(selectedPal);
+  const pid2 = Number(typeof selectedPal2 === 'number' ? selectedPal2 : NaN);
+
+  const show = inRange(pid1) || inRange(pid2);
+  wrap.style.display = show ? '' : 'none';
+
+  if (show && typeof updateTrail === 'function') updateTrail(slider);
+}
+
+
 
 function updateUI()
 {
@@ -1616,6 +1640,9 @@ function updateUI()
 	}
 	if (hasWhite) updateTrail(gId('sliderW'));
 	if (hasWhite) updateTrail(gId('slidercctbri'));
+
+	// update visibility + sync value if provided from backend
+	// updatePalLiveIXView();
 
 	var ccfg = cfg.comp.colors;
 	gId('wwrap').style.display   = (hasWhite) ? "block":"none";               // white channel
@@ -1949,6 +1976,7 @@ function readState(s,command=false)
 	
 	gId('sliderrgbbri').value = i.rgbbri;
 	gId('slidercctbri').value = i.cctbri;
+	gId('sliderpalix').value = i.PalIX;
 
 
 	if (s.error && s.error != 0) {
@@ -1988,6 +2016,12 @@ function readState(s,command=false)
 	selectedPal = i.pal;
 	selectedPal2 = (typeof i.pal2 === 'number') ? i.pal2 : selectedPal2;  // NEW
 	selectedFx = i.fx;
+
+
+	// reflect visibility based on the *new* palettes
+	updatePalLiveIXView();
+
+
 	redrawPalPrev(); // if any color changed (random palette did at least)
 	updateUI();
 	return true;
@@ -2021,139 +2055,13 @@ function readState(s,command=false)
  * Slider 2: Custom 1
  * Slider 3: Custom 2
  * Slider 4: Custom 3
- * Slider 5: Effect Time Period (ie Cycle Time, previously rate_ms)
- * Slider 6: Grouping 
  * Checkbox 0: Option 1
  * Checkbox 1: Option 2 = layered icon, for layering effects
  * Checkbox 2: Option 3
+ * Slider 5: Effect Time Period (ie Cycle Time, previously rate_ms)
+ * Slider 6: Grouping 
  * 
  */
-
-	
-// function setEffectParameters(idx)
-// {
-// 	if (!(Array.isArray(fxdata) && fxdata.length>idx)) return;
-// 	var controlDefined = fxdata[idx].length;
-// 	var effectPar = fxdata[idx];
-// 	var effectPars = (effectPar == '')?[]:effectPar.split(";");
-// 	var slOnOff = (effectPars.length==0 || effectPars[0]=='')?[]:effectPars[0].split(",");
-// 	var coOnOff = (effectPars.length<2  || effectPars[1]=='')?[]:effectPars[1].split(",");
-// 	var paOnOff = (effectPars.length<3  || effectPars[2]=='')?[]:effectPars[2].split(",");
-
-// 	let nSliders = 7; // 4+my Three timers
-// 	// set html slider items on/off
-// 	d.querySelectorAll("#sliders .sliderwrap").forEach((slider, i)=>{
-// 		let text = slider.getAttribute("title");
-// 		if ((!controlDefined && i<((idx<128)?2:nSliders)) || (slOnOff.length>i && slOnOff[i]!="")) {
-// 			if (slOnOff.length>i && slOnOff[i]!="!") text = slOnOff[i];
-// 			else if (i==0)                           text = "Speed";
-// 			else if (i==1)                           text = "Intensity";
-// 			else if (i==5)                           text = "Cycle Time";
-// 			else if (i==6)                           text = "Grouping";
-// 			else                                     text = "Custom" + (i-1);
-// 			slider.setAttribute("title", text);
-// 			slider.parentElement.classList.remove('hide');
-// 		} else
-// 			slider.parentElement.classList.add('hide');
-// 	});
-
-// 	if (slOnOff.length > nSliders) { // up to 3 checkboxes
-// 		gId('fxopt').classList.remove('fade');
-// 		d.querySelectorAll("#sliders .ochkl").forEach((check, i)=>{
-// 			let text = check.getAttribute("title");
-// 			if (nSliders+i<slOnOff.length && slOnOff[nSliders+i]!=='') {
-// 				if (slOnOff.length>nSliders+i && slOnOff[nSliders+i]!="!") text = slOnOff[nSliders+i];
-// 				check.setAttribute("title", text);
-// 				check.classList.remove('hide');
-// 			} else
-// 				check.classList.add('hide');
-// 		});
-// 	} else gId('fxopt').classList.add('fade');
-
-// 	// set the bottom position of selected effect (sticky) as the top of sliders div
-// 	function setSelectedEffectPosition() {
-// 		if (simplifiedUI) return;
-// 		let top = parseInt(getComputedStyle(gId("sliders")).height);
-// 		top += 5;
-// 		let sel = d.querySelector('#fxlist .selected');
-// 		if (sel) sel.style.bottom = top + "px"; // we will need to remove this when unselected (in setFX())
-// 	}
-
-// 	setSelectedEffectPosition();
-// 	setInterval(setSelectedEffectPosition,750);
-// 	// set html color items on/off
-// 	var cslLabel = '';
-// 	var sep = '';
-// 	var cslCnt = 0, oCsel = csel;
-// 	d.querySelectorAll("#csl button").forEach((e,i)=>{
-// 		var btn = gId("csl" + i);
-// 		// if no controlDefined or coOnOff has a value
-// 		if (coOnOff.length>i && coOnOff[i] != "") {
-// 			btn.classList.remove('hide');
-// 			btn.dataset.hide = 0;
-// 			if (coOnOff[i] != "!") {
-// 				var abbreviation = coOnOff[i].substr(0,2);
-// 				btn.innerHTML = abbreviation;
-// 				if (abbreviation != coOnOff[i]) {
-// 					cslLabel += sep + abbreviation + '=' + coOnOff[i];
-// 					sep = ', ';
-// 				}
-// 			}
-// 			else if (i==0) btn.innerHTML = "Fx";
-// 			else if (i==1) btn.innerHTML = "Bg";
-// 			else btn.innerHTML = "Cs";
-// 			if (!cslCnt || oCsel==i) selectSlot(i); // select 1st displayed slot or old one
-// 			cslCnt++;
-// 		} else if (!controlDefined) { // if no controls then all buttons should be shown for color 1..3
-// 			btn.classList.remove('hide');
-// 			btn.dataset.hide = 0;
-// 			btn.innerHTML = `${i+1}`;
-// 			if (!cslCnt || oCsel==i) selectSlot(i); // select 1st displayed slot or old one
-// 			cslCnt++;
-// 		} else {
-// 			btn.classList.add('hide');
-// 			btn.dataset.hide = 1;
-// 			btn.innerHTML = `${i+1}`; // name hidden buttons 1..3 for * palettes
-// 		}
-// 	});
-// 	gId("cslLabel").innerHTML = cslLabel;
-// 	if (cslLabel!=="") gId("cslLabel").classList.remove("hide");
-// 	else               gId("cslLabel").classList.add("hide");
-
-// 	// set palette on/off
-// 	var palw = gId("palw"); // wrapper
-// 	var pall = gId("pall");	// label
-// 	var icon = '<i class="icons sel-icon" onclick="tglHex()">&#xe2b3;</i> ';
-// 	var text = 'Color palette';
-// 	// if not controlDefined or palette has a value
-// 	if (hasRGB && ((!controlDefined) || (paOnOff.length>0 && paOnOff[0]!="" && isNaN(paOnOff[0])))) {
-// 		palw.style.display = "inline-block";
-// 		if (paOnOff.length>0 && paOnOff[0].indexOf("=")>0) {
-// 			// embeded default values
-// 			var dPos = paOnOff[0].indexOf("=");
-// 			var v = Math.max(0,Math.min(255,parseInt(paOnOff[0].substr(dPos+1))));
-// 			paOnOff[0] = paOnOff[0].substring(0,dPos);
-// 		}
-// 		if (paOnOff.length>0 && paOnOff[0] != "!") text = paOnOff[0];
-// 	} else {
-// 		// disable palette list
-// 		text += ' not used';
-// 		palw.style.display = "none";
-// 		// Close palette dialog if not available
-// 		if (gId("palw").lastElementChild.tagName == "DIALOG") {
-// 			gId("palw").lastElementChild.close();
-// 		}
-// 	}
-// 	pall.innerHTML = icon + text;
-// 	// not all color selectors shown, hide palettes created from color selectors
-// 	// NOTE: this will disallow user to select "* Color ..." palettes which may be undesirable in some cases or for some users
-// 	//for (let e of (gId('pallist').querySelectorAll('.lstI')||[])) {
-// 	//	let fltr = "* C";
-// 	//	if (cslCnt==1 && csel==0) fltr = "* Colors";
-// 	//	else if (cslCnt==2) fltr = "* Colors Only";
-// 	//	if (cslCnt < 3 && e.querySelector('.lstIname').innerText.indexOf(fltr)>=0) e.classList.add('hide'); else e.classList.remove('hide');
-// 	//}
-// }
 
 function setEffectParameters(idx) {
 	/**
@@ -3145,6 +3053,10 @@ function setPalette(paletteId = null) {
   }
   const segObj = isSecondaryPaletteMode() ? { pal2: paletteId } : { pal: paletteId };
   requestJson({ seg: segObj });
+
+  // show/hide Live Palette IX based on the chosen palette id
+//   updatePalLiveIXView({ paletteId });
+
 }
 
 
@@ -3490,6 +3402,12 @@ function setRGBBri(rgb_brightness)
 function setCCTBri(cct_brightness)
 {
 	var obj = {"seg": {"cctbri": parseInt(cct_brightness)}};
+	requestJson(obj);
+}
+
+function setPaletteLiveIX(v)
+{
+	var obj = {"seg": {"PalIX": parseInt(v)}};
 	requestJson(obj);
 }
 
