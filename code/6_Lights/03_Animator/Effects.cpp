@@ -4477,85 +4477,46 @@ static const char PM_EFFECT_CONFIG__DYNAMIC_SMOOTH[] PROGMEM = "Dynamic Smooth@!
 static const char PM_EFFECT_DESCRI__DYNAMIC_SMOOTH[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
-
-
-// #ifndef ENABLE_DEVFEATURE_REMOVE__color_from_palette__
-// /*
-//  * Gets a single color from the currently selected palette.
-//  * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
-//  * @param mapping if true, LED position in segment is considered for color
-//  * @param wrap FastLED palettes will usally wrap back to the start smoothly. Set false to get a hard edge
-//  * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
-//  * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
-//  * @returns Single color from palette
-//  */
-// uint32_t mAnimatorLight::color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri)
-// {
-  
-//   #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   
-//   ALOG_DBG(PSTR("f::color_from_palette to be phased out"));
-//   #endif
-
-//   if (SEGMENT.palette_id == 0 && mcol < 3) return SEGCOLOR_U32(mcol); //WS2812FX default
-//   uint8_t paletteIndex = i;
-//   if (mapping) paletteIndex = (i*255)/(_virtualSegmentLength -1);  // This scales out segment_index to SEGLEN as 0 to 255
-//   // ALOG_TST(PSTR("paletteIndex=%d"),paletteIndex);
-//   if (!wrap) paletteIndex = scale8(paletteIndex, 240); //cut off blend at palette "end"
-//   CRGB fastled_col;
-//   fastled_col = ColorFromPalette_WithLoad( SEGMENT.palette->CRGB16Palette16_Palette.data, paletteIndex, pbri, (paletteBlend == 3)? NOBLEND:LINEARBLEND);
-//   return  fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
-
-// }
-// #endif // ENABLE_DEVFEATURE_REMOVE__color_from_palette__
-
-
-/*
- * Put a value 0 to 255 in to get a color value.
- * The colours are a transition r -> g -> b -> back to r
- * Inspired by the Adafruit examples.
- */
-// uint32_t mAnimatorLight::color_wheel(uint8_t pos) const{
-
-// #ifdef ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-
-//   // if (SEGMENT.palette_id){ // when default, so it skips this, causes brightness error
-//   //   // Again this assumes palette colour index is ranged 0 to 255, so I NEED to fix mine to be the same
-//   //   return SEGMENT.GetPaletteColour_Legacy(pos, PALETTE_SPAN_OFF, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
-//   // }else
-//   // {
-
-//   //   ALOG_ERR(PSTR("Likely brightness error"));
-  
-//     pos = 255 - pos;
-//     if(pos < 85) {
-//       return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
-//     } else if(pos < 170) {
-//       pos -= 85;
-//       return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
-//     } else {
-//       pos -= 170;
-//       return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
-//     }
-
-//   // }
-
-
-// #else
-//   float hue_f = mSupport::mapfloat(pos, 0, 255, 0.0f, 1.0f);
-//   HsbColor colh = HsbColor(hue_f,1,1);
-//   return RgbcctColor::GetU32Colour(colh);
-// #endif
-
-
-
-// }
-
 /*******************************************************************************************************************************************************************************************************************
- * color chase function.
- * color1 = background color
- * color2 and color3 = colors of two adjacent leds
- * @note : Converted from WLED Effects "chase"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Core chase renderer used by higher-level chase effects.
+ *                Draws a moving pair of colored bands (color2, color3) over a background. The bands’ start
+ *                position advances with time; their width is derived from IX (intensity). Wrapping is handled
+ *                so the bands traverse end→start seamlessly.
+ *
+ *                Inputs
+ *                  • color1        Background color if do_palette == false. If do_palette == true the background
+ *                                   is painted from the active palette, and color1 is ignored (except the
+ *                                   “chase_random” variant which overrides the tail region a..end).
+ *                  • color2        Fill color for the first band [a .. b).
+ *                  • color3        Fill color for the second band [b .. c).
+ *                  • do_palette    If true, prefill background with palette (Color 1 label in UI). If false,
+ *                                   fill with color1.
+ *
+ *                Controls (via SEGMENT)
+ *                  • SX (speed)    Sets advance rate; counter = t * ((SX>>2)+1). Bigger SX → faster ‘a’.
+ *                  • IX (intensity)Band width: size = 1 + ((IX * SEGLEN) >> 10).
+ *                                   (Note: >>10 yields max ≈ SEGLEN/4 at IX=255; use >>9 to reach ~SEGLEN/2.)
+ *                  • effect_id     If == EFFECTS_FUNCTION__CHASE_RAINBOW__ID, enable “chase_random” mode:
+ *                                     - On wrap (a < step) pick a new wheel hue (aux0) and remember previous in aux1.
+ *                                     - Background ‘tail’ [a .. end) is filled with previous hue for a nice handoff.
+ *                  • step/aux0/aux1 Internal state (current head position and previous/current random wheel indices).
+ *
+ *                Algorithm
+ *                  1) Compute head ‘a’ from time and SX; derive ‘b’ and ‘c’ by adding ‘size’ twice (with wrap).
+ *                  2) Paint background:
+ *                       - palette path: color_from_palette(i, …, index=1)
+ *                       - solid path : color1
+ *                     If chase_random: repaint [a .. end) with previous wheel hue (aux1) to smooth the swap.
+ *                  3) Paint band #1 over [a .. b) with color2 (wrapping if needed).
+ *                  4) Paint band #2 over [b .. c) with color3 (wrapping if needed).
+ *
+ *                Notes / gotchas
+ *                  • Comment mismatch below (“fill between points b and c with color2”) actually paints with color3.
+ *                  • If you truly want max band width ≈ SEGLEN/2, change the size shift from >>10 to >>9.
+ *                  • Consider resetting aux0/aux1 when SEGMENT.call == 0 so “chase_random” starts deterministic.
+ *
+ * @note        : Converted from WLED Effects "chase".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
 {
 
@@ -4581,7 +4542,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2
   uint16_t c = b + size;
   if (c > SEGLEN) c -= SEGLEN;
 
-  //background
+  // background
   if (do_palette)
   {
     for (unsigned i = 0; i < SEGLEN; i++) {
@@ -4589,7 +4550,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2
     }
   } else SEGMENT.fill(color1);
 
-  //if random, fill old background between a and end
+  // if random, fill old background between a and end
   if (chase_random)
   {
     color1 = SEGMENT.color_wheel(SEGMENT.aux1);
@@ -4597,7 +4558,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2
       SEGMENT.setPixelColor(i, color1);
   }
 
-  //fill between points a and b with color2
+  // fill between points a and b with color2
   if (a < b)
   {
     for (unsigned i = a; i < b; i++)
@@ -4609,7 +4570,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2
       SEGMENT.setPixelColor(i, color2);
   }
 
-  //fill between points b and c with color2
+  // fill between points b and c with color3 
   if (b < c)
   {
     for (unsigned i = b; i < c; i++)
@@ -4627,21 +4588,50 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Bicolor chase, more primary color.
- * @note : Converted from WLED Effects "mode_chase_color"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Chase Colour — two adjacent “heads” sweep across a palette-painted background.
+ *                Controls
+ *                  • SX (Speed) : motion rate of the chase.
+ *                  • IX (Width) : trail length (size of each colored band).
+ *                  • Colors     : Color 0 = primary head, Color 2 = secondary head (fallback to Color 0), palette = background.
+ *                Implementation
+ *                  • Background painted from active palette (do_palette = true).
+ *                  • Compute head start ‘a’ and two band edges (b,c) from IX; fill [a..b) with Color 2 and [b..c) with Color 0.
+ * @note        : Converted from WLED Effects "mode_chase_color".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Colour()
 {
   return EffectAnim__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
 }
-static const char PM_EFFECT_CONFIG__CHASE_COLOR[] PROGMEM = "Chase@!,Width;!,!,!;!";
-static const char PM_EFFECT_DESCRI__CHASE_COLOR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
+static const char PM_EFFECT_CONFIG__CHASE_COLOR[] PROGMEM =
+"Chase@"                                      // Name
+"Speed,Width,,,,,,,,,"                        // 10 fields
+";"
+"Bg,Fx,Alt"                                   // Color 1 (Bg), Color 0 (Fx), Color 2 (Alt)
+";"
+"!"                                           // palette picker (background)
+";"
+"1"                                           // 1D icon
+";"
+"paln=Party 16,"
+"sx=128,"
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__CHASE_COLOR[] PROGMEM =
+"Two adjacent heads sweep over a palette background.\n\r"
+"SX: Speed\n\r"
+"IX: Band width\n\r"
+"Color 0 = primary head, Color 2 = secondary head; background from palette.";
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Primary, secondary running on rainbow.
- * @note : Converted from WLED Effects "mode_chase_rainbow"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Chase Rainbow — primary/secondary heads run on a dynamic rainbow background (not palette).
+ *                Controls
+ *                  • SX (Speed) : motion rate of the chase.
+ *                  • IX (Width) : trail length.
+ *                  • Colors     : Color 0 = primary head, Color 1 = secondary head; background is computed rainbow.
+ *                Implementation
+ *                  • Background hue uses wheel((step * sep + call)&0xFF) across the strip (do_palette = false).
+ * @note        : Converted from WLED Effects "mode_chase_rainbow".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Rainbow()
 {
   unsigned color_sep = 256 / SEGLEN;
@@ -4653,14 +4643,36 @@ uint16_t mAnimatorLight::EffectAnim__Chase_Rainbow()
   SET_DIRECT_MODE();
   
 }
-static const char PM_EFFECT_CONFIG__CHASE_RAINBOW[] PROGMEM = "Chase Rainbow@!,Width;!,!;!";
-static const char PM_EFFECT_DESCRI__CHASE_RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CHASE_RAINBOW[] PROGMEM =
+"Chase Rainbow@"                              // Name
+"Speed,Width,,,,,,,,,"                        // 10 fields
+";"
+"Bg,Fx,Alt"                                   // labels kept consistent (Bg not used; heads use Color 0 & 1)
+";"
+"!"                                           // palette picker (unused here but consistent UI)
+";"
+"1"                                           // 1D
+";"
+"paln=Party 16,"
+"sx=128,"
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__CHASE_RAINBOW[] PROGMEM =
+"Primary and secondary heads chase over a generated rainbow background.\n\r"
+"SX: Speed\n\r"
+"IX: Band width\n\r"
+"Heads use Color 0 and Color 1; background rainbow ignores palette.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Sec flashes running on prim.
- * @note : Converted from WLED Effects "mode_chase_flash"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Chase Flash — flashing pair steps along the strip over a palette-painted background.
+ *                Controls
+ *                  • SX (Speed) : advance rate for the position; also sets flash cadence.
+ *                  • Colors     : Color 1 = flash color; background from active palette.
+ *                Implementation
+ *                  • Every cycle: draw palette background, then short double-flash on indices [n, n+1], advance after flash window.
+ * @note        : Converted from WLED Effects "mode_chase_flash".
+ *******************************************************************************************************************************************************************************************************************/
 #define FLASH_COUNT 4
 uint16_t mAnimatorLight::EffectAnim__Chase_Flash(){
 
@@ -4689,14 +4701,34 @@ uint16_t mAnimatorLight::EffectAnim__Chase_Flash(){
   return delay;
   
 }
-static const char PM_EFFECT_CONFIG__CHASE_FLASH[] PROGMEM = "Chase Flash@!;Bg,Fx;!";
-static const char PM_EFFECT_DESCRI__CHASE_FLASH[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CHASE_FLASH[] PROGMEM =
+"Chase Flash@"                                 // Name
+"Speed,,,,,,,,,,,"                              // 10 fields
+";"
+"Bg,Fx"                                         // Bg (palette bg label), Fx = Color 1 flash
+";"
+"!"                                             // palette picker
+";"
+"1"                                             // 1D
+";"
+"paln=Party 16,"
+"sx=128"
+;
+static const char PM_EFFECT_DESCRI__CHASE_FLASH[] PROGMEM =
+"Double-flash “step” walking over a palette background.\n\r"
+"SX: Step cadence\n\r"
+"Color 1 = flash color; background uses active palette.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Prim flashes running, followed by random color.
- * @note : Converted from WLED Effects "mode_chase_flash_random"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Chase Flash Random — like Chase Flash, but the background segment between flashes is a random wheel hue that changes each wrap.
+ *                Controls
+ *                  • SX (Speed) : step rate / flash cadence.
+ *                  • Colors     : Color 0 = flash color; Color 1 used transiently in off-phase.
+ *                Implementation
+ *                  • On wrap (aux1→0) choose a new wheel hue (aux0). Between flash frames, repaint the two pixels with wheel hue.
+ * @note        : Converted from WLED Effects "mode_chase_flash_random".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Flash_Random()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -4730,14 +4762,34 @@ uint16_t mAnimatorLight::EffectAnim__Chase_Flash_Random()
   return delay;
 
 }
-static const char PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM[] PROGMEM = "Chase Flash Rnd@!;!,!;!";
-static const char PM_EFFECT_DESCRI__CHASE_FLASH_RANDOM[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM[] PROGMEM =
+"Chase Flash Rnd@"                             // Name
+"Speed,,,,,,,,,,,"                              // 10 fields
+";"
+"Fx,Alt"                                        // Color 0 = Fx (flash), Color 1 = Alt/off-phase
+";"
+"!"                                             // palette picker (not used; consistent UI)
+";"
+"1"                                             // 1D
+";"
+"sx=128"
+;
+static const char PM_EFFECT_DESCRI__CHASE_FLASH_RANDOM[] PROGMEM =
+"Double-flash step with a random wheel-colored background segment per wrap.\n\r"
+"SX: Step cadence\n\r"
+"Color 0 = flash color.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Primary running on rainbow.
- * @note : Converted from WLED Effects "mode_chase_rainbow_white"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Rainbow Runner — background from Color 0; the two chase heads are dynamic rainbows.
+ *                Controls
+ *                  • SX (Speed) : motion rate of the chase.
+ *                  • IX (Size)  : trail length (band width).
+ *                  • Colors     : Color 0 = background (solid); heads are rainbow (ignore palette).
+ *                Implementation
+ *                  • Compute rainbow colors for indices n and n+1; pass background Color 0 to base (no palette background).
+ * @note        : Converted from WLED Effects "mode_chase_rainbow_white".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chase_Rainbow_White()
 {
 
@@ -4751,8 +4803,24 @@ uint16_t mAnimatorLight::EffectAnim__Chase_Rainbow_White()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE[] PROGMEM = "Rainbow Runner@!,Size;Bg;!";
-static const char PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE[] PROGMEM =
+"Rainbow Runner@"                               // Name
+"Speed,Size,,,,,,,,,"                           // 10 fields
+";"
+"Bg"                                            // Color 0 background
+";"
+"!"                                             // palette picker (not used by heads)
+";"
+"1"                                             // 1D
+";"
+"sx=128,"
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE[] PROGMEM =
+"Two rainbow heads chase over a solid background (Color 0).\n\r"
+"SX: Speed\n\r"
+"IX: Band width\n\r"
+"Heads ignore palette; background uses Color 0.";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -5556,7 +5624,6 @@ static const char PM_EFFECT_DESCRI__EXPLODING_FIREWORKS[] PROGMEM =
 uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
 {
 
-
   if (SEGLEN == 1) return EFFECT_DEFAULT();
   const int cols = SEGMENT.is2D() ? SEG_W : 1;
   const int rows = SEGMENT.is2D() ? SEG_H : SEGLEN;
@@ -5706,6 +5773,7 @@ static const char PM_EFFECT_DESCRI__EXPLODING_FIREWORKS_NOLAUNCH[] PROGMEM =
 "CB3:Blur\n\r"
 "EP:!\n\r"
 "GP:!";
+
 
 /************************************************************************************************************************************
  * EFFECT: Rain
@@ -6091,9 +6159,18 @@ static const char PM_EFFECT_DESCRI__HYPER_SPARKLE[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Lights all LEDs up in one random color. Then switches them to the next random color.
- * @note : Converted from WLED Effect "mode_random_color"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Fills the whole segment with a single random color, then cross-fades to the next random color.
+ *                The dwell time per color is driven by SX (speed); the cross-fade duration is driven by IX (intensity).
+ *                Timing
+ *                  • cycleTime = 200 + (255 - SX) * 50  → lower SX = longer hold between color changes
+ *                  • fade dur = (cycleTime * IX) / 255  → higher IX = longer, smoother cross-fade
+ *                State
+ *                  • aux0 = current wheel index; aux1 = previous wheel index (for blend); step = last “it” tick
+ *                Rendering
+ *                  • Fill with lerp( wheel(aux1), wheel(aux0), fade ), where fade advances only during the first
+ *                    ‘fade dur’ ms of each cycle; after that it holds solid until the next cycle.
+ * @note        : Converted from WLED Effect "mode_random_color".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Random_Colour()
 {
   uint32_t cycleTime = 200 + (255 - SEGMENT.speed)*50;
@@ -6122,14 +6199,36 @@ uint16_t mAnimatorLight::EffectAnim__Random_Colour()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM = "Random Colors@!,Fade time;;!;1";
-static const char PM_EFFECT_DESCRI__RANDOM_COLOR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM =
+"Random Colors@"                          // Name
+"Speed,Fade time,,,,,,,,"                 // 10 fields (sliders/checkbox slots)
+";"
+""                                        // no segment color labels
+";"
+""                                        // no palette picker (uses random wheel)
+";"
+"1"                                       // icon flags: 1D
+";"
+"sx=128,"                                 // defaults
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__RANDOM_COLOR[] PROGMEM =
+"Whole strip shows one random color, then fades to the next.\n\r"
+"SX: Hold time per color (lower = longer)\n\r"
+"IX: Fade duration (higher = longer)";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Cycles a rainbow over the entire string of LEDs.
- * @note : Converted from WLED Effect "mode_rainbow_cycle"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Classic “rainbow cycle” over the entire strip. Hue index advances with time and by position; IX controls band size.
+ *                Controls
+ *                  • SX (speed)  : temporal advance rate of the rainbow
+ *                  • IX (size)   : spatial step; larger values = wider color bands (coarser gradient)
+ *                Implementation
+ *                  • counter = (millis() * ((SX>>2)+2)) >> 8
+ *                  • index(i) = counter + i * (16 << (IX/29)) / SEGLEN
+ *                  • Pixel color = wheel( index(i) )
+ * @note        : Converted from WLED Effect "mode_rainbow_cycle".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Rainbow_Cycle()
 {
 
@@ -6145,14 +6244,45 @@ uint16_t mAnimatorLight::EffectAnim__Rainbow_Cycle()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__RAINBOW_CYCLE[] PROGMEM = "Rainbow Cylcle@!,Size;;!";
-static const char PM_EFFECT_DESCRI__RAINBOW_CYCLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__RAINBOW_CYCLE[] PROGMEM =
+"Rainbow Cycle@"                           // Name (fixed typo)
+"Speed,Size,,,,,,,,"                       // 10 fields
+";"
+""                                         // no segment color labels
+";"
+""                                         // no palette picker (uses wheel)
+";"
+"1"                                        // icon flags: 1D
+";"
+"sx=96,"                                   // defaults
+"ix=64"
+;
+static const char PM_EFFECT_DESCRI__RAINBOW_CYCLE[] PROGMEM =
+"Cycles a full rainbow across the strip.\n\r"
+"SX: Rainbow flow speed\n\r"
+"IX: Band size (higher = wider bands)";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Running lights effect with smooth sine transition base.
- * @note : Converted from WLED Effects "running"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Running-waves core. Draws a palette-colored wave blended over Color 1 (and optionally a mirrored second wave).
+ *                Modes
+ *                  • saw=false  → use smooth sin8_t() (classic running lights)
+ *                  • saw=true   → use a shaped saw/sine hybrid for snappier edges
+ *                  • dual=true  → render a second wave mirrored about the strip center; result is a 50/50 blend of both
+ *                Controls (via SEGMENT)
+ *                  • SX (speed)      : phase advance rate (counter = t * SX >> 9)
+ *                  • IX (wave width) : horizontal scale; larger IX shrinks wavelength (x_scale = IX >> 2)
+ *                  • Palette         : color_from_palette(i, ... , slot=0) for wave A, slot=2 for wave B; Color 1 is the base
+ *                Rendering
+ *                  1) For each i, compute phase a = i*x_scale - counter (optionally shape if saw=true).
+ *                  2) s = sin8_t(a) or sin_gap(a); ca = blend(Color1, Palette(i, slot=0), s).
+ *                  3) If dual: compute mirrored phase at (SEGLEN-1-i), build cb from slot=2, then ca = blend(ca, cb, 127).
+ *                  4) Write ca to pixel i.
+ *                Notes
+ *                  • sin_gap() yields a gap around the minima/maxima, emphasizing contrast for the dual case.
+ *                  • To change base fill, adjust the Color 1 choice or prefill the strip before calling.
+ * @note        : Converted from WLED Effects "running".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_RunningWaves(bool saw, bool dual)
 {
 
@@ -6286,10 +6416,24 @@ static const char PM_EFFECT_DESCRI__RUNNING_DUAL[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Blink several LEDs in random colors on, reset, repeat.
- *               Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
- * @note : Converted from WLED Effects "mode_twinkle"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Twinkle — progressively lights up a random set of pixels, then resets and repeats.
+ *                Behavior
+ *                  • Each frame fades the whole segment (soft tails).
+ *                  • A PRNG selects distinct LED indices; the active set size grows from 1 → maxOn, where maxOn scales with IX.
+ *                  • When the active count reaches maxOn, a new PRNG seed is chosen and the cycle restarts.
+ *
+ *                Controls
+ *                  • SX (Speed)   : cadence of new picks (higher = faster updates).
+ *                  • IX (Density) : maximum number of simultaneously lit pixels (maps 0..255 → 1..SEGLEN).
+ *                  • Palette      : active palette provides the twinkle color at index=j.
+ *
+ *                Implementation
+ *                  • step holds the last “frame bucket” computed from effect_start_time / cycleTime.
+ *                  • aux0 = current active-pick count, aux1 = PRNG seed (16-bit LCG).
+ *                  • Fades via fade_out(224) for mellow trails; each chosen j is painted from the palette.
+ *
+ * @note        : Converted from WLED Effects "mode_twinkle".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Twinkle()
 {
   
@@ -6322,14 +6466,46 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__TWINKLE[] PROGMEM = "Twinkle@!,!;!,!;!;;m12=0"; //pixels
-static const char PM_EFFECT_DESCRI__TWINKLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE[] PROGMEM =
+"Twinkle@"                                    // Name
+"Speed,Density,,,,,,,,,"                      // 10 fields
+";"
+""                                            // no segment colour labels
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D icon
+";"
+"paln=Fairy,"                                 // defaults
+"sx=120,"
+"ix=160"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE[] PROGMEM =
+"Randomly lights a growing set of pixels, then reseeds and repeats.\n\r"
+"SX: Update cadence (faster = more picks per time)\n\r"
+"IX: Max simultaneous pixels (density)\n\r"
+"Uses the active palette for color.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description: Dissolve function
- * @note : Converted from WLED Effects
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Dissolve core — toggles pixels between two targets using per-LED state bits.
+ *                Behavior
+ *                  • A 1-bit map per LED stores whether that LED is “fading up” (to primary/palette) or “fading down” (to secondary).
+ *                  • On each frame, a set of candidates is sampled; those with matching state flip to the target color and toggle their bit.
+ *                  • After a duration based on SX, the global direction flips (aux0) and the bitfield is reinitialized.
+ *
+ *                Controls (as used by wrappers)
+ *                  • SX (Repeat speed) : time between global direction flips.
+ *                  • IX (Dissolve speed): spawn probability per frame (higher = more pixels switch per frame).
+ *                  • Colors            : SEGCOLOR(0) (primary) / SEGCOLOR(1) (secondary) as targets; or random/palette for primary branch.
+ *
+ *                Implementation
+ *                  • data   : ceil(SEGLEN/8) bytes; each bit = “fade up” (1) or “fade down” (0).
+ *                  • aux0   : global direction; aux0=1 → dissolve toward primary/palette; aux0=0 → toward secondary.
+ *                  • step   : counts frames; when > (255 - SX)+15, flips aux0 and resets bitfield.
+ *
+ * @note        : Converted from WLED Effects (base for “Dissolve” / “Dissolve Random”).
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Dissolve(uint32_t color)
 {
   unsigned dataSize = (SEGLEN+7) >> 3; //1 bit per LED
@@ -6380,36 +6556,96 @@ uint16_t mAnimatorLight::EffectAnim__Base_Dissolve(uint32_t color)
 }
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description: Blink several LEDs on and then off
- * @note : Converted from WLED Effects "mode_dissolve"
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Dissolve — pixels flip between palette/primary and secondary using stochastic “spawn” events.
+ *                Controls
+ *                  • SX (Repeat speed)  : how quickly the global direction flips.
+ *                  • IX (Dissolve speed): spawn probability per frame (higher = more pixels switch).
+ *                  • C1 (Random)        : when ON, primary branch uses random colors; otherwise palette/SEGCOLOR(0).
+ *                  • Colors             : SEGCOLOR(1) is the “secondary” target for the down branch.
+ *
+ * @note        : Wrapper over Base_Dissolve.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Dissolve()
 {
   return EffectAnim__Base_Dissolve(SEGMENT.check1 ? SEGMENT.color_wheel(hw_random8()) : SEGCOLOR(0));
 }
-static const char PM_EFFECT_CONFIG__DISSOLVE[] PROGMEM = "Dissolve@Repeat speed,Dissolve speed,,,,Random;!,!;!";
-static const char PM_EFFECT_DESCRI__DISSOLVE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__DISSOLVE[] PROGMEM =
+"Dissolve@"                                   // Name
+"Repeat speed,Dissolve speed,,,,Random,,,,,"  // 10 fields
+";"
+"Bg,Fx"                                       // SEGCOLOR(1)=Bg, SEGCOLOR(0)=Fx (primary when Random=off)
+";"
+"!"                                           // palette picker (for primary branch)
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"                                 // defaults
+"sx=96,"
+"ix=160,"
+"c1=0"                                        // Random off
+;
+static const char PM_EFFECT_DESCRI__DISSOLVE[] PROGMEM =
+"Pixels stochastically flip between primary/palette and secondary colors.\n\r"
+"SX: Repeat speed (global direction flip rate)\n\r"
+"IX: Dissolve speed (spawn probability)\n\r"
+"C1: Random primary (on = random, off = palette/SEGCOLOR0)\n\r"
+"Secondary target = SEGCOLOR(1).";
 
 
-/********************************************************************************************************************************************************************************************************************
- * @description: Blink several LEDs on and then off in random colors
- * @note : Converted from WLED Effects "mode_dissolve_random"
- ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Dissolve Random — like Dissolve, but primary branch always uses random colors.
+ *                Controls
+ *                  • SX (Repeat speed)  : flip cadence for global direction.
+ *                  • IX (Dissolve speed): spawn probability per frame.
+ *                  • Colors             : SEGCOLOR(1) is the “secondary” target; primary is random (ignores palette/SEGCOLOR0).
+ *
+ * @note        : Wrapper over Base_Dissolve with random primary colors.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Dissolve_Random()
 {
   return EffectAnim__Base_Dissolve( SEGMENT.color_wheel(hw_random8()) );
 }
-static const char PM_EFFECT_CONFIG__DISSOLVE_RANDOM[] PROGMEM = "Dissolve Random@Repeat speed,Dissolve speed;,!;!";
-static const char PM_EFFECT_DESCRI__DISSOLVE_RANDOM[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__DISSOLVE_RANDOM[] PROGMEM =
+"Dissolve Random@"                            // Name
+"Repeat speed,Dissolve speed,,,,,,,,,"        // 10 fields
+";"
+"Bg"                                          // SEGCOLOR(1) used as secondary
+";"
+"!"                                           // palette picker (kept for consistency; primary is random)
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"                                 // defaults
+"sx=96,"
+"ix=160"
+;
+static const char PM_EFFECT_DESCRI__DISSOLVE_RANDOM[] PROGMEM =
+"Random-color primary branch dissolves against secondary color.\n\r"
+"SX: Repeat speed (flip cadence)\n\r"
+"IX: Dissolve speed (spawn probability)\n\r"
+"Secondary target = SEGCOLOR(1); primary is random each spawn.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Android loading circle
- * @note : Converted from WLED Effects "mode_android"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Android loading ring — a shrinking/expanding arc (“gap”) rotating over a palette-filled background.
+ *                Behavior
+ *                  • Background is prefilled from the active palette (slot 1).
+ *                  • A rotating window of length AUX1 is painted with SEGCOLOR(0); AUX0 toggles grow/shrink phases.
+ *                  • The window wraps at segment ends to form a continuous ring.
+ *
+ *                Controls
+ *                  • SX (Speed)     : overall rotation rate (lower = slower per-step cadence).
+ *                  • IX (Width)     : target arc length; the ring grows until AUX1 ≈ (IX * SEGLEN)/255, then shrinks.
+ *                  • Colors         : SEGCOLOR(0) = arc color; palette supplies the background.
+ *
+ *                Implementation
+ *                  • step (low 16b) = current head position a. AUX1 = current arc length. AUX0 = grow/shrink flag.
+ *                  • Per frame, either advance a or adjust AUX1 based on a 3-frame cadence; always wrap indices.
+ *                  • Uses DIRECT_MODE and per-frame cycle_time__rate_ms for a smooth, timer-like feel.
+ *
+ * @note        : Converted from WLED Effects "mode_android".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Android()
 {
   for (unsigned i = 0; i < SEGLEN; i++) {
@@ -6459,18 +6695,48 @@ uint16_t mAnimatorLight::EffectAnim__Android()
   return FRAMETIME;
 
 }
-static const char PM_EFFECT_CONFIG__ANDROID[] PROGMEM = "Android@!,Width;!,!;!;;m12=1"; //vertical
-static const char PM_EFFECT_DESCRI__ANDROID[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__ANDROID[] PROGMEM =
+"Android@"                                    // Name
+"Speed,Width,,,,,,,,,"                        // 10 fields after '@'
+";"
+"Arc"                                         // Segment colour labels (SEGCOLOR(0) = arc)
+";"
+"!"                                           // palette picker (background fill)
+";"
+"1"                                           // 1D icon
+";"
+"paln=Party 16,"                              // defaults
+"sx=96,"                                      // rotation speed
+"ix=128,"                                     // target arc length
+"s1=0"                                        // reserved
+;
+static const char PM_EFFECT_DESCRI__ANDROID[] PROGMEM =
+"Rotating loading ring with a growing/shrinking arc over a palette background.\n\r"
+"SX: Rotation speed\n\r"
+"IX: Arc length (target)\n\r"
+"Arc color = SEGCOLOR(0); background = active palette.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Triplet parade that cycles per 3‑LED block: 
- *                Phase 0 → Red, Phase 1 → Red+Amber, Phase 2 → Green, Phase 3 → Amber. 
- *                Background is prefilled from the active palette; the four phases overlay the slots.
- *                Speed controls dwell time (faster with higher SX). 
- *                “US style” (skip Red+Amber) engages when INTENSITY > 140.
- * @note        : Converted from WLED “traffic light”, rethemed as TriPops (ordered, rhythmic, non‑random).
- ********************************************************************************************************************************************************************************************************************/
+ * @description : TriPops — rhythmic 3-LED parade (traffic-light cadence) over a palette background.
+ *                Pattern
+ *                  • LEDs are grouped in repeating blocks of 3. Across phases:
+ *                        0 → Red on slot 0
+ *                        1 → Red + Amber on slots 0..1
+ *                        2 → Green on slot 2
+ *                        3 → Amber on slot 1
+ *                  • Background is prefilled from the active palette (slot 1) each frame; phase overlays are solid.
+ *
+ *                Controls
+ *                  • SX (Speed)     : dwell time per phase (higher = shorter dwell / faster cycle).
+ *                  • IX (Style)     : if IX > 140, skips phase 1 (Red+Amber) to mimic US-style sequence.
+ *
+ *                Notes
+ *                  • Uses AUX0 as the phase counter (0..3), advances when elapsed > mdelay derived from SX.
+ *                  • Hardcoded overlay colors: Red(FF0000), Amber(EECC00), Green(00FF00).
+ *
+ * @note        : Converted from WLED “traffic light”, rethemed as TriPops (ordered, rhythmic, non-random).
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__TriPops()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -6501,14 +6767,24 @@ uint16_t mAnimatorLight::EffectAnim__TriPops()
   
 }
 static const char PM_EFFECT_CONFIG__TRIPOPS[] PROGMEM =
-"TriPops@!,US style;,!;!";
+"TriPops@"                                    // Name
+"Speed,Intensity,,,,,,,,,"                    // 10 fields
+";"
+""                                            // no segment colour labels (overlays are fixed)
+";"
+"!"                                           // palette picker (background)
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"                                 // defaults
+"sx=96,"                                      // phase tempo
+"ix=128"                                      // style threshold midpoint
+;
 static const char PM_EFFECT_DESCRI__TRIPOPS[] PROGMEM =
-"Triplet parade over repeating 3-LED blocks.\n\r"
-"SX: Cycle rate (dwell per phase)\n\r"
-"IX: —\n\r"
-"Note: US style (skip Red+Amber) when INTENSITY > 140.";
-
-
+"Triplet parade over repeating 3-LED blocks with a traffic-light cadence.\n\r"
+"SX: Cycle rate (phase dwell)\n\r"
+"IX: Style threshold — when >140, skip Red+Amber for US-style sequence\n\r"
+"Background = active palette; overlays are solid Red/Amber/Green.";
 
 
 /***************************************************************************************************************************************
@@ -6580,9 +6856,22 @@ static const char PM_EFFECT_DESCRI__RUNNING_RANDOM[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Gradient run base function
- * @note : Converted from WLED Effects "gradient_base"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Gradient (base) — traveling blend window between a solid segment color and the active palette.
+ *                How it works
+ *                  • A phase “pp” (0..SEGLEN-1) advances with SX (speed). For each LED i, we compute a distance to the moving center.
+ *                  • The distance is mapped to a blend factor 0..255 using a “border” width (brd) derived from IX (intensity).
+ *                  • Pixels near the center blend more toward SEGCOLOR(0); farther pixels blend toward the palette color at i.
+ *                  • When loading==true, the window acts one-sided (hard front); otherwise it wraps symmetrically (soft gradient band).
+ *
+ *                Controls
+ *                  • SX (Speed) : motion speed of the gradient center.
+ *                  • IX (Spread): effective half-width of the gradient band (higher = wider/softer).
+ *                  • Palette    : provides the secondary color; primary is SEGCOLOR(0).
+ *
+ *                Notes
+ *                  • The base performs all math; “Gradient” uses the soft band, “Loading” uses the hard front.
+ *                  • Converted from WLED effect "gradient_base".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Gradient(bool loading)
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -6609,26 +6898,67 @@ uint16_t mAnimatorLight::EffectAnim__Base_Gradient(bool loading)
   
 }
 
+
 /*******************************************************************************************************************************************************************************************************************
- * @description : Gradient run
- * @note : Converted from WLED Effects "mode_gradient"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Gradient — soft, symmetric gradient band that travels along the strip, mixing SEGCOLOR(0) with the active palette.
+ *                • SX (Speed)  : travel speed of the band center.
+ *                • IX (Spread) : band half-width (higher = broader/softer).
+ *                • Palette     : supplies the “background” color field blended against SEGCOLOR(0).
+ * @note        : Converted from WLED effect "mode_gradient".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Gradient(void) {
   return EffectAnim__Base_Gradient(false);
 }
-static const char PM_EFFECT_CONFIG__GRADIENT[] PROGMEM = "Gradient 2@!,Spread;!,!;!;;ix=16";
-static const char PM_EFFECT_DESCRI__GRADIENT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__GRADIENT[] PROGMEM =
+"Gradient@"                                   // Name
+"Speed,Spread,,,,,,,,,"                       // 10 fields after '@'
+";"
+"Primary"                                     // Segment Colour Names (SEGCOLOR(0) = foreground)
+";"
+"!"                                           // palette picker (secondary/background field)
+";"
+"1"                                           // 1D icon
+";"
+"paln=Rainbow 16,"                            // defaults
+"sx=96,"                                      // default speed
+"ix=16"                                       // default spread
+;
+static const char PM_EFFECT_DESCRI__GRADIENT[] PROGMEM =
+"Soft traveling band blending Primary color with the active palette.\n\r"
+"SX: Band speed\n\r"
+"IX: Band spread (width)\n\r"
+"Primary = SEGCOLOR(0)";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Gradient run with hard transition
- * @note : Converted from WLED Effects "mode_loading"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Loading — hard-front “loading bar” that sweeps across the strip, fading into the palette field behind it.
+ *                • SX (Speed) : sweep rate of the front.
+ *                • IX (Fade)  : front thickness / fade-behind amount (higher = broader, softer falloff).
+ *                • Palette    : field color; the advancing front blends from SEGCOLOR(0) into the palette behind it.
+ * @note        : Converted from WLED effect "mode_loading".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Loading(void) {
   return EffectAnim__Base_Gradient(true);
 }
-static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM = "Loading@!,Fade;!,!;!;;ix=16";
-static const char PM_EFFECT_DESCRI__LOADING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM =
+"Loading@"                                    // Name
+"Speed,Fade,,,,,,,,,"                         // 10 fields
+";"
+"Primary"                                     // SEGCOLOR(0) = front color
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D
+";"
+"paln=Rainbow 16,"                            // defaults
+"sx=96,"                                      // default speed
+"ix=16"                                       // default fade thickness
+;
+static const char PM_EFFECT_DESCRI__LOADING[] PROGMEM =
+"Hard-front loading sweep that blends into the active palette.\n\r"
+"SX: Sweep speed\n\r"
+"IX: Front thickness / fade\n\r"
+"Primary = SEGCOLOR(0)";
 
 
 /************************************************************************************************************************************
@@ -6732,10 +7062,26 @@ static const char PM_EFFECT_DESCRI__TWO_DOTS[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Fairy, inspired by https://www.youtube.com/watch?v=zeOw5MZWq24
- * @note : Converted from WLED Effects "mode_fairy"
- ********************************************************************************************************************************************************************************************************************/
-
+ * @description : Fairy — palette “field” with independent flasher pixels that flicker on/off at varied rates, plus global shimmer coupling.
+ *                • Base field: every pixel is assigned a stable pseudo-random palette color (seeded so it doesn’t change each frame).
+ *                • Flashers: a sparse subset of pixels independently toggles ON/OFF with randomized durations, easing the first 255 ms.
+ *                • Shimmer: when many flashers are bright in the same zone, non-flasher pixels dim slightly (simulates voltage sag).
+ *
+ * Controls
+ *   • SX (Speed)   : changes typical ON/OFF durations of flashers (faster = snappier flicker).
+ *   • IX (Density) : how many flashers exist (0 = none; 255 ≈ every pixel is eligible).
+ *   • Palette      : drives both base field and flasher color tones. SEGCOLOR(1) is used to warm/cool the flasher blend.
+ *
+ * Implementation
+ *   • Deterministic PRNG seeds a per-pixel base palette index (unchanged across frames).
+ *   • Flashers are distributed in zones; each flasher keeps (stateOn, stateStart, stateDur). First 255 ms of a state are used to compute
+ *     a fade ramp; zone-average brightness yields a globalPeakBri to create subtle “shimmer” across neighbors.
+ *
+ * Notes
+ *   • Memory: sizeof(Flasher) * numFlashers (dynamic per intensity).
+ *   • Time base: effect_start_time (ms), 16-bit local snapshot for state timers.
+ *   • Converted from WLED effect "mode_fairy".
+ *******************************************************************************************************************************************************************************************************************/
 //4 bytes
 typedef struct Flasher {
   uint16_t stateStart;
@@ -6818,15 +7164,43 @@ uint16_t mAnimatorLight::EffectAnim__Fairy(void) {
   }
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__FAIRY[] PROGMEM = "Fairy@!,# of flashers;!,!;!";
-static const char PM_EFFECT_DESCRI__FAIRY[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__FAIRY[] PROGMEM =
+"Fairy@"                                      // Name
+"Speed,Flash density,,,,,,,Overlay,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
+"Fx"                                          // Segment Colour Names (SEGCOLOR(1) = flasher blend tone)
+";"
+"!"                                           // palette picker (primary palette)
+";"
+"1"                                           // 1D strip icon
+";"
+"paln=Fairy,"                                 // defaults
+"sx=128,"                                     // medium flicker tempo
+"ix=160"                                      // moderate density
+;
+static const char PM_EFFECT_DESCRI__FAIRY[] PROGMEM =
+"Palette field with randomized flashers + subtle global shimmer.\n\r"
+"SX: Flicker tempo\n\r"
+"IX: Flasher density\n\r"
+"SEGCOL(1): Flasher blend tone";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : TWINKLE_FAIRY. Like TWINKLE_COLOUR, but starting from all lit and not relying on getPixelColor
- *         Warning: Uses 4 bytes of segment data per pixel
- * @note : Converted from WLED Effects "mode_twinkle_fairy"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Twinkle Fairy — per-pixel flasher model (all pixels have their own ON/OFF state), producing dense twinkling that rises/falls smoothly.
+ *
+ * Controls
+ *   • SX (Speed)   : sets rise/fall time and OFF cadence (faster = snappier twinkle).
+ *   • IX (Mood)    : biases maximum ON duration (lower = more “sparkly”, higher = longer glows).
+ *   • Palette      : per-pixel color tones. SEGCOLOR(1) blends in to warm/cool the output.
+ *
+ * Implementation
+ *   • Each pixel stores a Flasher (stateOn, stateStart, stateDur). A per-pixel 16-bit PRNG ensures adjacent pixels differ in hue.
+ *   • Brightness envelope uses gamma shaping over a configurable riseFallTime; state durations adapt to SX/IX in real-time.
+ *
+ * Notes
+ *   • Memory: 4 bytes per pixel (Flasher) — heavier than “Fairy” but enables dense, independent twinkles.
+ *   • Converted from WLED effect "mode_twinkle_fairy".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Twinkle_Fairy(void) {
 
   unsigned dataSize = sizeof(flasher) * SEGLEN;
@@ -6871,14 +7245,41 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Fairy(void) {
   }
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_FAIRY[] PROGMEM = "Twinkle Fairy@!,!;!,!;!;;m12=0";
-static const char PM_EFFECT_DESCRI__TWINKLE_FAIRY[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE_FAIRY[] PROGMEM =
+"Twinkle Fairy@"                              // Name
+"Speed,Intensity,,,,,,,,,"                    // 10 fields
+";"
+"Fx"                                          // SEGCOLOR(1) as blend tone
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D
+";"
+"paln=Fairy,"                                 // defaults
+"sx=128,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_FAIRY[] PROGMEM =
+"Dense per-pixel twinkle with smooth rise/fall.\n\r"
+"SX: Twinkle tempo\n\r"
+"IX: Max ON bias (mood)\n\r"
+"SEGCOL(1): Blend tone";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Custom mode by Aircoookie. Color Wipe, but with 3 colors
- * @note : Converted from WLED Effects "mode_tricolor_wipe"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Tri-Color Wipe — wipes three colors (C0→C1→C2) across the strip in sequence, over a palette-tinted background.
+ *
+ * Controls
+ *   • Colors       : SEGCOLOR(0), SEGCOLOR(1), SEGCOLOR(2) are the three wipe colors.
+ *   • SX (Speed)   : wipe rate (via frame time base). IX not used.
+ *   • Palette      : used to prefill the background; wipes draw solid SEGCOLORs over it.
+ *
+ * Implementation
+ *   • Computes a 0..(3*SEGLEN) position and selects which phase (0,1,2) to wipe; draws up to the offset each frame.
+ *
+ * Notes
+ *   • Converted from WLED effect "mode_tricolor_wipe".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__TriColour_Wipe()
 {
   uint32_t cycleTime = 1000 + (255 - SEGMENT.speed)*200;
@@ -6914,16 +7315,39 @@ uint16_t mAnimatorLight::EffectAnim__TriColour_Wipe()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__TRICOLOR_WIPE[] PROGMEM = "Tri Wipe@!;1,2,3;!";
-static const char PM_EFFECT_DESCRI__TRICOLOR_WIPE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TRICOLOR_WIPE[] PROGMEM =
+"Tri Wipe@"                                   // Name
+"Speed,,,,,,,,,,"                             // 10 fields
+";"
+"1,2,3"                                       // Segment Colour Names (C0,C1,C2)
+";"
+"!"                                           // palette picker (background tint)
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"                                 // defaults
+"sx=128"
+;
+static const char PM_EFFECT_DESCRI__TRICOLOR_WIPE[] PROGMEM =
+"Three-color wipe over a palette background.\n\r"
+"SX: Wipe speed\n\r"
+"Colors: C0,C1,C2";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Fades between 3 colors
- *         Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/TriFade.h
- *         Modified by Aircoookie
- * @note : Converted from WLED Effects "mode_tricolor_fade"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Tri-Color Fade — continuously crossfades C0→C1→C2→C0 while preserving palette accents along the strip.
+ *
+ * Controls
+ *   • SX (Speed)   : overall fade tempo.
+ *   • Colors       : SEGCOLOR(0..2) define the three corner colors.
+ *   • Palette      : blended in per-pixel to preserve spatial variation.
+ *
+ * Implementation
+ *   • A 0..768 phase selects the current pair to blend (C0↔C1, C1↔C2, C2↔C0) and the in-between fraction; per-pixel palette tint is mixed into the pair.
+ *
+ * Notes
+ *   • Converted from WLED effect "mode_tricolor_fade".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Fade_TriColour()
 {
   unsigned counter = effect_start_time * ((SEGMENT.speed >> 3) +1);
@@ -6961,15 +7385,41 @@ uint16_t mAnimatorLight::EffectAnim__Fade_TriColour()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__TRICOLOR_FADE[] PROGMEM = "Tri Fade@!;1,2,3;!";
-static const char PM_EFFECT_DESCRI__TRICOLOR_FADE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TRICOLOR_FADE[] PROGMEM =
+"Tri Fade@"                                   // Name
+"Speed,,,,,,,,,,"                             // 10 fields
+";"
+"1,2,3"                                       // Segment Colour Names (C0,C1,C2)
+";"
+"!"                                           // palette picker (tint)
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"                                 // defaults
+"sx=128"
+;
+static const char PM_EFFECT_DESCRI__TRICOLOR_FADE[] PROGMEM =
+"Crossfades C0→C1→C2 over a palette tint.\n\r"
+"SX: Fade tempo\n\r"
+"Colors: C0,C1,C2";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Creates random comets
- *         Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/MultiComet.h
- * @note : Converted from WLED Effects "mode_multi_comet"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Multi Comet — up to 8 short comet heads spawn and run the strip with fading trails; optional alternating accent color.
+ *
+ * Controls
+ *   • SX (Speed)   : update cadence for comet advancement.
+ *   • IX (Trail)   : trail persistence (higher = longer/brighter trails).
+ *   • Palette      : comet head color(s) from palette; SEGCOLOR(2) can override every other comet for contrast.
+ *
+ * Implementation
+ *   • Keeps an array of comet indices. Each frame, fade background (based on IX), advance active comets, randomly spawn new ones at index 0.
+ *   • Colors: if C2 set, alternate between palette and C2; otherwise all palette.
+ *
+ * Notes
+ *   • Up to MAX_COMETS (8) active. Lightweight: only 16 bytes of indices plus fade pass.
+ *   • Converted from WLED effect "mode_multi_comet".
+ *******************************************************************************************************************************************************************************************************************/
 #define MAX_COMETS 8
 uint16_t mAnimatorLight::EffectAnim__Multi_Comet()
 {
@@ -7003,8 +7453,25 @@ uint16_t mAnimatorLight::EffectAnim__Multi_Comet()
   SEGMENT.step = it;
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__MULTI_COMET[] PROGMEM = "Multi Comet@!,Speed;!,!;!;1";
-static const char PM_EFFECT_DESCRI__MULTI_COMET[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__MULTI_COMET[] PROGMEM =
+"Multi Comet@"                                // Name
+"Speed,Trail,,,,,,,,,"                        // 10 fields
+";"
+"Alt"                                         // Segment Colour Names (SEGCOLOR(2) = alternate comet color)
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"                                 // defaults
+"sx=96,"                                      // moderate pace
+"ix=160"                                      // medium-long trail
+;
+static const char PM_EFFECT_DESCRI__MULTI_COMET[] PROGMEM =
+"Multiple short comets with fading trails; C2 alternates as an accent.\n\r"
+"SX: Comet speed\n\r"
+"IX: Trail persistence\n\r"
+"C2: Alternate comet color (optional)";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -7134,27 +7601,32 @@ static const char PM_EFFECT_DESCRI__OSCILLATE[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Pride2015
- *         Animated, ever-changing rainbows.
- *         by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
- * @note : Converted from WLED Effects "mode_pride_2015"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Pride2015 — animated, ever-changing rainbow waves.
+ * Behavior
+ *   • Generates evolving hue, brightness, and saturation using multiple beatsin88 oscillators.
+ *   • Blends CHSV-based rainbow colors across the segment with smooth temporal changes.
+ * Controls
+ *   • SX (Speed) : controls the temporal rate (duration multiplier).
+ *   • IX         : unused (effect is fully procedural).
+ *   • Palette    : ignored (always rainbow).
+ * @note : Converted from WLED Effects "mode_pride_2015".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Pride_2015()
 {
   unsigned duration = 10 + SEGMENT.speed;
   unsigned sPseudotime = SEGMENT.step;
   unsigned sHue16 = SEGMENT.aux0;
 
-  uint8_t sat8 = beatsin88_t( 87, 220, 250);
-  uint8_t brightdepth = beatsin88_t( 341, 96, 224);
-  unsigned brightnessthetainc16 = beatsin88_t( 203, (25 * 256), (40 * 256));
+  uint8_t sat8 = beatsin88_t(87, 220, 250);
+  uint8_t brightdepth = beatsin88_t(341, 96, 224);
+  unsigned brightnessthetainc16 = beatsin88_t(203, (25 * 256), (40 * 256));
   unsigned msmultiplier = beatsin88_t(147, 23, 60);
 
-  unsigned hue16 = sHue16;//gHue * 256;
+  unsigned hue16 = sHue16;
   unsigned hueinc16 = beatsin88_t(113, 1, 3000);
 
   sPseudotime += duration * msmultiplier;
-  sHue16 += duration * beatsin88_t( 400, 5,9);
+  sHue16 += duration * beatsin88_t(400, 5, 9);
   unsigned brightnesstheta16 = sPseudotime;
 
   for (unsigned i = 0 ; i < SEGLEN; i++) {
@@ -7162,10 +7634,10 @@ uint16_t mAnimatorLight::EffectAnim__Pride_2015()
     uint8_t hue8 = hue16 >> 8;
 
     brightnesstheta16  += brightnessthetainc16;
-    unsigned b16 = sin16_t( brightnesstheta16  ) + 32768;
+    unsigned b16 = sin16_t(brightnesstheta16) + 32768;
 
-    unsigned bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
-    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+    unsigned bri16 = (uint32_t)b16 * (uint32_t)b16 / 65536;
+    uint8_t bri8 = (uint32_t)bri16 * brightdepth / 65536;
     bri8 += (255 - brightdepth);
 
     CRGB newcolor = CHSV(hue8, sat8, bri8);
@@ -7175,42 +7647,110 @@ uint16_t mAnimatorLight::EffectAnim__Pride_2015()
   SEGMENT.aux0 = sHue16;
 
   return FRAMETIME;
-  
 }
-static const char PM_EFFECT_CONFIG__PRIDE_2015[] PROGMEM = "Pride@!;;";
-static const char PM_EFFECT_DESCRI__PRIDE_2015[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PRIDE_2015[] PROGMEM =
+"Rainbow Waves@"                  // Name
+"Speed,,,,,,,,,,"             // 10 slider/field entries
+";"
+""                            // no segment colors
+";"
+""                            // no palette
+";"
+"1"                           // 1D strip
+";"
+"sx=32"                       // default speed
+;
+static const char PM_EFFECT_DESCRI__PRIDE_2015[] PROGMEM =
+"Animated rainbow waves with evolving hue, saturation, and brightness.\n\r"
+"SX: Temporal speed\n\r"
+"Palette ignored (always rainbow)";
+
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : eight colored dots, weaving in and out of sync with each other
- * @note : Converted from WLED Effects "mode_juggle"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Juggle — eight colored dots weaving in and out of sync.
+ * Behavior
+ *   • Eight points oscillate along the segment at varying beatsin88 frequencies.
+ *   • Each dot blends its palette color (or raw HSV hue if no palette).
+ *   • Fading trail is applied to create motion persistence.
+ * Controls
+ *   • SX (Speed) : oscillation frequency scaling.
+ *   • IX (Trail) : fade strength (higher = shorter trail).
+ *   • Palette    : colors for the dots (if defined).
+ * @note : Converted from WLED Effects "mode_juggle".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Juggle()
 {
-
   if (SEGLEN == 1) return EFFECT_DEFAULT();
 
-  SEGMENT.fadeToBlackBy(192 - (3*SEGMENT.intensity/4));
+  SEGMENT.fadeToBlackBy(192 - (3 * SEGMENT.intensity / 4));
   CRGB fastled_col;
   byte dothue = 0;
+
   for (int i = 0; i < 8; i++) {
-    int index = 0 + beatsin88_t((16 + SEGMENT.speed)*(i + 7), 0, SEGLEN -1);
+    int index = beatsin88_t((16 + SEGMENT.speed) * (i + 7), 0, SEGLEN - 1);
     fastled_col = CRGB(SEGMENT.getPixelColor(index));
-    fastled_col |= (SEGMENT.palette_id==0)?CHSV(dothue, 220, 255):CRGB(ColorFromPalette(SEGPALETTE, dothue, 255));
+    fastled_col |= (SEGMENT.palette_id == 0)
+      ? CHSV(dothue, 220, 255)
+      : CRGB(ColorFromPalette(SEGPALETTE, dothue, 255));
     SEGMENT.setPixelColor(index, fastled_col);
     dothue += 32;
   }
+
   return FRAMETIME;
-  
 }
-static const char PM_EFFECT_CONFIG__JUGGLES[] PROGMEM = "Juggle@!,Trail;;!;;sx=64,ix=128"; // Pixels, Beatsin
-static const char PM_EFFECT_DESCRI__JUGGLES[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__JUGGLE[] PROGMEM =
+"Juggle@"                     // Name
+"Speed,Trail,,,,,,,,,"        // 10 fields (SX, IX)
+";"
+""                            // no segment colors
+";"
+"!"                           // palette enabled
+";"
+"1"                           // 1D strip
+";"
+"sx=64,"                      // default speed
+"ix=128"                      // default trail
+;
+static const char PM_EFFECT_DESCRI__JUGGLE[] PROGMEM =
+"Eight colored dots weave in and out of sync.\n\r"
+"SX: Speed of oscillation\n\r"
+"IX: Trail fade length\n\r"
+"Palette used for colors (HSV fallback if none)";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_palette"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Rotated palette mapper (1D & 2D). Treats the active palette as a color-filled “infinite” strip, then projects it onto your segment by
+ *                rotating and scaling a virtual rectangle. Each pixel’s color is sampled from the X-position within that rotated space, so the palette
+ *                can appear as angled bands, moving gradients, or multiple repeats—depending on the controls.
+ *
+ * Controls
+ *   • SX (Shift)      : Palette phase/offset. With CB1 (Animate Shift) enabled, SX sets the animation rate instead of a static offset.
+ *   • IX (Size)       : Palette scale. ≤128 shows a fraction of the palette; >128 repeats the palette multiple times (coarser bands).
+ *   • C1 (Rotation)   : Base rotation angle of the palette bands. With CB2 (Animate Rotation) enabled, C1 sets rotation rate.
+ *   • CB1 (AnimShift) : Animate the palette shift over time (tempo derived from SX).
+ *   • CB2 (AnimRot)   : Animate the rotation angle over time (tempo derived from C1).
+ *   • CB3 (Anamorph)  : Anamorphic mapping. Off = square-preserving (uniform); On = stretch to segment aspect (more dramatic diagonals on non-square maps).
+ *
+ * Behavior
+ *   • Computes sin/cos of the (static or animated) rotation.
+ *   • Derives a scale factor so the rotated palette fully covers the target without “dead” color zones.
+ *   • Maps each pixel (x,y) to a sourceX on the virtual rectangle, clamps to [0..width], normalizes to [0..255], then:
+ *       – Applies IX to zoom/repeat the palette domain.
+ *       – Applies SX (or time-driven shift) to phase the palette.
+ *   • Samples the active palette via color_wheel(index) and writes directly to the strip (1D) or XY (2D).
+ *
+ * Implementation Notes
+ *   • Uses float math on ESP32 and fixed-point on ESP8266 (same algorithm, type-switched at compile time).
+ *   • 2D: Renders full matrix in a single call. 1D-with-virtual-strips: renders one “line” per call based on current segment ID.
+ *   • No dynamic allocations; O(SEGLEN) work per frame.
+ *
+ * Limits & Tips
+ *   • For fine, continuous gradients use lower IX (≤128). For bold, repeated bands increase IX (>128).
+ *   • Animated shift and rotation can be combined for complex motion; leave CB3 off if you need square-preserving geometry.
+ *
+ * @note        : Converted from WLED Effects "mode_palette".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palette()
 {
   // Set up some compile time constants so that we can handle integer and float based modes using the same code base.
@@ -7309,14 +7849,55 @@ uint16_t mAnimatorLight::EffectAnim__Palette()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__PALETTE[] PROGMEM = "Palette2@Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic;;!;12;ix=112,c1=0,o1=1,o2=0,o3=1";
-static const char PM_EFFECT_DESCRI__PALETTE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PALETTE[] PROGMEM =
+"Palette2@"                                   // Name
+"Shift,Size,Rotation,,,Animate Shift,Animate Rotation,Anamorphic,,," // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
+""                                            // Segment Colour Names (none)
+";"
+"!"                                           // palette picker (primary palette)
+";"
+"12"                                          // icons/flags: supports 1D and 2D
+";"
+"ix=112,"                                     // defaults
+"c1=0,"
+"o1=1,"                                       // CB1 Animate Shift ON by default
+"o2=0,"                                       // CB2 Animate Rotation OFF by default
+"o3=1"                                        // CB3 Anamorphic ON by default
+;
+static const char PM_EFFECT_DESCRI__PALETTE[] PROGMEM =
+"Rotated palette projection (1D/2D).\n\r"
+"SX: Shift (or rate when CB1)\n\r"
+"IX: Palette scale (≤128 fraction, >128 repeats)\n\r"
+"C1: Rotation (or rate when CB2)\n\r"
+"CB1: Animate Shift  CB2: Animate Rotation  CB3: Anamorphic\n\r"
+"Uses the active palette.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Palette‑driven color waves. Evenly spaced hues flow along the strip with sine‑modulated brightness; blends 50/50 over existing pixels.
- * @note        : Converted from WLED effect "mode_colorwaves"
- *                SX = tempo (faster animation). IX = hue spacing per LED (tighter ↔ wider color bands).
+ * @description : Palette-driven color waves that “flow” along the strip. Evenly spaced hues advance over time while per-pixel brightness is sine-modulated.
+ *                The result is smooth, layered color motion that blends 50/50 over existing pixels (additive look without hard overwrites).
+ *
+ * Controls
+ *   • SX (Speed/Tempo) : base tempo of the wave evolution (higher = faster).
+ *   • IX (Hue Spacing) : spacing between successive pixel hues (higher = wider color bands).
+ *   • Palette          : source of hues for the waves (primary palette).
+ *
+ * Behavior
+ *   • Uses a time-evolving hue accumulator (hue16) and a brightness oscillator (sin16) per pixel.
+ *   • Per-frame “pseudotime” drives both hue drift and brightness modulation; intensity scales hue increment.
+ *   • Each pixel blends the palette color at hue8 with its current buffer color at 128/255 (50%).
+ *
+ * Implementation
+ *   • sPseudotime (SEGMENT.step) and sHue16 (SEGMENT.aux0) persist across frames to keep motion continuous.
+ *   • beatsin88_t() shapes brightness depth, brightness phase increment, and the time multiplier for organic variation.
+ *   • Palette lookup uses PALETTE_SOLID_WRAP and a per-pixel brightness ‘bri8’ derived from squared sine for smoother peaks.
+ *
+ * Notes & Limits
+ *   • 1D effect (works on strips); for 2D segments it renders along the mapped 1D index order.
+ *   • Does not allocate extra RAM; cost is O(SEGLEN) math + 1 palette read per pixel.
+ *
+ * @note        : Converted from WLED effect "mode_colorwaves".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__ColourWaves()
 {
@@ -7374,16 +7955,34 @@ static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM =
 "ix=160"                                     // default intensity (hue spacing)
 ;                                             // end
 static const char PM_EFFECT_DESCRI__COLORWAVES[] PROGMEM =
-"Palette-driven color waves with sine-modulated brightness; blends 50/50 over current pixels."
-"\n\rSX: Tempo (higher = faster flow)"
-"\n\rIX: Hue spacing per LED (higher = wider color bands)"
-"\n\rUses the active palette; segment colors are ignored.";
+"Palette-driven color waves with sine-modulated brightness; blends 50/50 over current pixels.\n\r"
+"SX: Tempo (higher = faster flow)\n\r"
+"IX: Hue spacing per LED (higher = wider bands)\n\r"
+"Uses the active palette.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Colored stripes pulsing at a Beats-Per-Minute rate. Palette colors form stripes across the strip; brightness follows a sinusoidal beat.
- * @note        : Converted from WLED effect "mode_bpm"
- *                SX = BPM tempo (speed of pulsing). IX not used.
+ * @description : Palette stripes pulsing at a beats-per-minute rate. Color stripes are formed from the active palette and their brightness follows a sinusoidal beat.
+ *
+ * Controls
+ *   • SX (BPM Tempo) : beat frequency (higher = faster pulse).
+ *   • Palette        : stripe colors (primary palette). IX is unused.
+ *
+ * Behavior
+ *   • A base phase (stp) advances with time; each pixel offsets that phase by its index to form stripes.
+ *   • Brightness per pixel = sin8(tempo) with a slight per-pixel offset, producing moving/“breathing” stripes.
+ *   • Colors are read from the active palette using (phase + index*2) as the palette index.
+ *
+ * Implementation
+ *   • No persistent state beyond time; no dynamic allocation.
+ *   • Uses beatsin8_t(SEGMENT.speed, 64, 255) for a smooth beat and applies it as the palette brightness parameter.
+ *   • PALETTE_SOLID_WRAP sampling ensures continuous palette wrapping across the strip.
+ *
+ * Notes & Limits
+ *   • 1D effect; on 2D segments it uses linearized index order.
+ *   • IX slider is ignored by design to match the original behavior.
+ *
+ * @note        : Converted from WLED effect "mode_bpm".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__BPM()
 {
@@ -7418,14 +8017,35 @@ static const char PM_EFFECT_CONFIG__BPM[] PROGMEM =
 "ep=500"                                      // extra param slot (reserved)
 ;                                             // end
 static const char PM_EFFECT_DESCRI__BPM[] PROGMEM =
-"Palette-striped pattern pulsing at a beats-per-minute tempo."
-"\n\rSX: BPM tempo (higher = faster pulse)"
-"\n\rUses the active palette; segment colors are ignored.";
+"Palette-striped pattern pulsing at a beats-per-minute tempo.\n\r"
+"SX: BPM tempo (higher = faster pulse)\n\r"
+"Uses the active palette.";
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : Based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
- * @note : Converted from WLED Effects "mode_twinkle_colour"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Single-pixel twinkles that fade up, then fade down. New twinkles spawn randomly on dark pixels; active ones brighten until any RGB channel clips, then decay.
+ *
+ * Controls
+ *   • SX (Fade Speed) : rate of both fade-up and fade-down (higher = faster changes).
+ *   • IX (Spawn Rate) : probability of spawning new twinkles per frame (higher = more twinkles).
+ *   • Palette         : twinkle color source (primary palette); per-spawn index is random, no blending.
+ *
+ * Behavior
+ *   • Each LED carries a 1-bit state (“fade up” vs “fade down”) stored in a packed bitfield (SEGMENT.data, 1 bit/LED).
+ *   • On “fade up”, the pixel is incrementally brightened; if any channel reaches 255, the state flips to “fade down”.
+ *   • On “fade down”, the pixel fades toward black; once near black it may be chosen for a new twinkle.
+ *   • Spawn attempts are limited each frame (≤1 per ~50 LEDs) and only occur on pixels currently black to avoid stomping.
+ *
+ * Implementation
+ *   • Allocates (SEGLEN+7)/8 bytes for the per-LED bitfield; returns fallback if allocation fails.
+ *   • Fade amounts use fract8 and scale with global brightness for consistent look at low brightness.
+ *   • Color selection uses ColorFromPalette(SEGPALETTE, random8(), 64, NOBLEND) at spawn time and then intensity is managed by fade math.
+ *
+ * Notes & Limits
+ *   • 1D effect; works on linearized order for 2D segments.
+ *   • The bitfield avoids per-pixel structs and keeps RAM bounded; computational cost is O(SEGLEN) per frame.
+ *
+ * @note        : Converted from WLED effect "mode_twinkle_colour".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
 {
@@ -7479,14 +8099,37 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__TWINKLE_COLOUR[] PROGMEM = "Twinkle Colours@Fade speed,Spawn speed;;!;;m12=0"; //pixels
-static const char PM_EFFECT_DESCRI__TWINKLE_COLOUR[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__TWINKLE_COLOUR[] PROGMEM =
+"Twinkle Colours@"                             // Name
+"Fade speed,Spawn rate,,,,,,,,"
+";"
+""                                             // no segment colour labels
+";"
+"!"                                            // palette picker (primary)
+";"
+"1"                                            // 1D icon
+";"
+"paln=Fairy,"
+"sx=128,"
+"ix=160,"
+"m12=0"
+;
+static const char PM_EFFECT_DESCRI__TWINKLE_COLOUR[] PROGMEM =
+"Single-pixel twinkles that fade up then down using the active palette.\n\r"
+"SX: Fade speed\n\r"
+"IX: Spawn rate";
 
 
 /********************************************************************************************************************************************************************************************************************
  * @description : Calm water-like ripples, reminiscent of a lake at night. Multiple sine waves blend to modulate palette colors softly.
- * @note        : Converted from WLED effect "mode_lake"
- *                SX = wave tempo (higher = faster ripples). IX unused.
+ * Controls
+ *   • SX (Speed) : wave tempo (higher = faster ripples)
+ *   • IX         : unused
+ *   • Palette    : used for coloring
+ * Implementation
+ *   • Three phase-shifted oscillators (cos8/cubicwave8) build an index + luminance field per pixel.
+ *   • Final color is sampled from the active palette with per-pixel luminance.
+ * @note        : Converted from WLED effect "mode_lake".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Lake()
 {
@@ -7502,32 +8145,41 @@ uint16_t mAnimatorLight::EffectAnim__Lake()
     SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, false, 0, lum));
   }
 
-  return FRAMETIME;  
+  return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM =
 "Lake@"                                       // Name
-"Speed,,,,,,,,!,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-";"                                           // ----------------------------------------- Sliders/SegCols
+"Speed,,,,,,,,,,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
 ""                                            // Segment Colour Names (none)
-";"                                           // ----------------------------------------- SegCols/PalPicker
+";"
 "!"                                           // palette picker (primary palette)
-";"                                           // ----------------------------------------- PalPicker/is1D2D
-"1"                                           // icon flags: 1D/strip
-";"                                           // ----------------------------------------- is1D2D/Defaults
-"paln=Ocean,"                                 // default palette
-"sx=128,"                                     // default ripple tempo
+";"
+"1"                                           // 1D strip icon
+";"
+"paln=Ocean,"                                 // defaults
+"sx=128,"                                     // ripple tempo
+"ix=0,"                                       // IX unused, keep explicit
 "ep=500"                                      // reserved slot
-;                                             // end
+;
 static const char PM_EFFECT_DESCRI__LAKE[] PROGMEM =
-"Soft rippling pattern like a calm lake at night."
-"\n\rSX: Wave tempo (higher = faster ripples)"
-"\n\rUses the active palette; ignores fixed segment colors.";
+"Soft rippling pattern like a calm lake at night.\n\r"
+"SX: Wave tempo (higher = faster)\n\r"
+"Uses the active palette.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Meteor effect. A bright head travels along the strip with a fading trail; trail intensity decays randomly for a natural look.
- * @note        : Converted from WLED effect "mode_meteor"
- *                SX = meteor speed. IX = trail decay. C1 = use gradient palette (on/off). C2 = smooth mode (on/off).
+ * @description : Meteor effect — a bright head travels along the strip with a fading trail. Trail intensity decays randomly for a natural look.
+ * Controls
+ *   • SX (Speed) : meteor speed
+ *   • IX (Trail) : trail decay strength
+ *   • CB1        : use gradient palette addressing (on/off)
+ *   • CB2        : smooth mode (on/off)
+ *   • Palette    : used for coloring
+ * Implementation
+ *   • Per-pixel trail buffer (byte) decays each frame (randomized), head re-energizes to max.
+ *   • “Smooth” mode uses continuous index/luma; otherwise discrete decay.
+ * @note        : Converted from WLED effect "mode_meteor".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Meteor()
 {
@@ -7536,84 +8188,83 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
   const bool meteorSmooth = SEGMENT.check3;
   byte* trail = SEGMENT.data;
 
-  const unsigned meteorSize = 1 + SEGLEN / 20; // 5%
+  const unsigned meteorSize = 1 + SEGLEN / 20; // ~5%
   uint16_t meteorstart;
-  if(meteorSmooth) meteorstart = map((SEGMENT.step >> 6 & 0xFF), 0, 255, 0, SEGLEN -1);
-  else {
+  if (meteorSmooth) {
+    meteorstart = map((SEGMENT.step >> 6 & 0xFF), 0, 255, 0, SEGLEN - 1);
+  } else {
     unsigned counter = effect_start_time * ((SEGMENT.speed >> 2) + 8);
     meteorstart = (counter * SEGLEN) >> 16;
   }
 
   const int max = SEGMENT.palette_id==5 || !SEGMENT.check1 ? 240 : 255;
-  // fade all leds to colors[1] in LEDs one step
+
+  // fade / decay
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint32_t col;
     if (hw_random8() <= 255 - SEGMENT.intensity) {
-      if(meteorSmooth) { 
-        int change = trail[i] + 4 - hw_random8(24); //change each time between -20 and +4
+      if (meteorSmooth) {
+        int change = trail[i] + 4 - hw_random8(24);     // -20..+4
         trail[i] = constrain(change, 0, max);
-        col = SEGMENT.check1 ? SEGMENT.color_from_palette(i, true, false, 0,  trail[i]) : SEGMENT.color_from_palette(trail[i], false, true, 255);
+        col = SEGMENT.check1
+          ? SEGMENT.color_from_palette(i, true, false, 0,  trail[i])
+          : SEGMENT.color_from_palette(trail[i], false, true, 255);
       } else {
         trail[i] = scale8(trail[i], 128 + hw_random8(127));
         int index = trail[i];
         int idx = 255;
-        int bri = SEGMENT.palette_id==35 || SEGMENT.palette_id==36 ? 255 : trail[i];
-        if (!SEGMENT.check1) {
-          idx = 0;
-          index = map(i,0,SEGLEN,0,max);
-          bri = trail[i];
-        }
-        col = SEGMENT.color_from_palette(index, false, false, idx, bri);  // full brightness for Fire
+        int bri = (SEGMENT.palette_id==35 || SEGMENT.palette_id==36) ? 255 : trail[i];
+        if (!SEGMENT.check1) { idx = 0; index = map(i,0,SEGLEN,0,max); bri = trail[i]; }
+        col = SEGMENT.color_from_palette(index, false, false, idx, bri);
       }
       SEGMENT.setPixelColor(i, col);
     }
   }
 
-  // draw meteor
+  // head
   for (unsigned j = 0; j < meteorSize; j++) {
     unsigned index = (meteorstart + j) % SEGLEN;
-    if(meteorSmooth) {
+    if (meteorSmooth) {
       trail[index] = max;
-      uint32_t col = SEGMENT.check1 ? SEGMENT.color_from_palette(index, true, false, 0, trail[index]) : SEGMENT.color_from_palette(trail[index], false, true, 255);
+      uint32_t col = SEGMENT.check1
+        ? SEGMENT.color_from_palette(index, true, false, 0, trail[index])
+        : SEGMENT.color_from_palette(trail[index], false, true, 255);
       SEGMENT.setPixelColor(index, col);
     } else {
       int idx = 255;
       int i = trail[index] = max;
-      if (!SEGMENT.check1) {
-        i = map(index,0,SEGLEN,0,max);
-        idx = 0;
-      }
-      uint32_t col = SEGMENT.color_from_palette(i, false, false, idx, 255); // full brightness
+      if (!SEGMENT.check1) { i = map(index,0,SEGLEN,0,max); idx = 0; }
+      uint32_t col = SEGMENT.color_from_palette(i, false, false, idx, 255);
       SEGMENT.setPixelColor(index, col);
     }
   }
 
-  SEGMENT.step += SEGMENT.speed +1;
+  SEGMENT.step += SEGMENT.speed + 1;
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM =
 "Meteor@"                                     // Name
-"Speed,Trail,,,,Gradient,Smooth,,!,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-";"                                           // ----------------------------------------- Sliders/SegCols
+"Speed,Trail,,,,Gradient,Smooth,,,,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"
 ""                                            // Segment Colour Names (none)
-";"                                           // ----------------------------------------- SegCols/PalPicker
-"!"                                           // palette picker (primary palette)
-";"                                           // ----------------------------------------- PalPicker/is1D2D
-"1"                                           // icon flags: 1D/strip
-";"                                           // ----------------------------------------- is1D2D/Defaults
-"paln=Party,"                                 // default palette
-"sx=96,"                                      // default speed
-"ix=128,"                                     // default trail decay
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D strip
+";"
+"paln=Party,"                                 // defaults
+"sx=96,"                                      // speed
+"ix=128,"                                     // trail decay
 "c1=1,"                                       // gradient on
 "c2=0,"                                       // smooth off
 "ep=500"                                      // reserved
-;                                             // end
+;
 static const char PM_EFFECT_DESCRI__METEOR[] PROGMEM =
-"A meteor head travels along the strip with a fading trail that decays randomly."
-"\n\rSX: Meteor speed"
-"\n\rIX: Trail decay"
-"\n\rC1: Use gradient palette (toggle)"
-"\n\rC2: Smooth mode (toggle)";
+"A bright head travels with a fading, randomly decaying trail.\n\r"
+"SX: Meteor speed\n\r"
+"IX: Trail decay\n\r"
+"CB1: Use gradient palette\n\r"
+"CB2: Smooth mode";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -8027,9 +8678,16 @@ static const char PM_EFFECT_DESCRI__HALLOWEEN_EYES[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "spots_base"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Spots (base) — renders repeating zones; within each zone a triwave ‘spot’ appears where wave > threshold and blends palette over background.
+ *                Controls (driven by caller):
+ *                  • threshold         : 16-bit cutoff inside triwave; higher threshold → narrower/brighter spot core.
+ *                  • IX (Intensity)    : number of zones (more zones with higher IX).
+ *                  • Background        : SEGCOLOR(1); when check2 is false, zones are painted over this background.
+ *                Implementation
+ *                  • zones = 1 + (IX * (SEGLEN/4)) >> 8; zoneLen = SEGLEN / zones; centered with ‘offset’.
+ *                  • For each LED in zone, wave = triwave16(i * 0xFFFF / zoneLen); if wave > threshold → blend palette vs. background by mapped wave amount.
+ * @note        : Converted from WLED Effects "spots_base".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Spots(uint16_t threshold)
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -8059,21 +8717,52 @@ uint16_t mAnimatorLight::EffectAnim__Base_Spots(uint16_t threshold)
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : intensity slider sets number of "lights", speed sets LEDs per light
- * @note : Converted from WLED Effects "mode_spots"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Spots — multiple “lights” across the strip. IX sets how many zones; SX sets spot width (via threshold).
+ *                Controls
+ *                  • SX (Width)     : higher SX → lower threshold → wider spots.
+ *                  • IX (Spread)    : more zones as IX increases.
+ *                  • Overlay        : when enabled, don’t prefill background each frame (lets prior pixels show through).
+ *                  • Palette        : used for spot color; background is SEGCOLOR(1).
+ *                Implementation
+ *                  • threshold = (255 - SX) << 8; passes to Base_Spots().
+ * @note        : Converted from WLED Effects "mode_spots".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Spots()
 {
   return EffectAnim__Base_Spots((255 - SEGMENT.speed) << 8);  
 }
-static const char PM_EFFECT_CONFIG__SPOTS[] PROGMEM = "Spots@Spread,Width,,,,,,,Overlay;!,!;!";
-static const char PM_EFFECT_DESCRI__SPOTS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SPOTS[] PROGMEM =
+"Spots@"                                      // Name
+"Spread,Width,,,,,,,,Overlay"                 // 10 fields
+";"
+"Bg"                                          // segment colour labels (SEGCOLOR1 = background)
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // icon flags: 1D
+";"
+"paln=Party 16,"
+"sx=128,"
+"ix=128,"
+"m12=0"                                       // no 2D expansion
+;
+static const char PM_EFFECT_DESCRI__SPOTS[] PROGMEM =
+"Multiple palette “spots” over a background.\n\r"
+"SX: Spot width (higher = wider)\n\r"
+"IX: Number of zones\n\r"
+"SEGCOLOR(1) is the background; enable Overlay to preserve trails.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : intensity slider sets number of "lights", LEDs per light fade in and out
- * @note : Converted from WLED Effects "mode_spots_fade"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Spots Fade — same zoning as Spots, but spot width breathes over time (tri-wave) for soft pulsing.
+ *                Controls
+ *                  • SX (Width base) : affects the timebase of the triwave (faster motion with higher SX).
+ *                  • IX (Spread)     : zone count, like Spots.
+ *                  • Overlay         : preserve trails if enabled.
+ *                Implementation
+ *                  • t = triwave16(effect_time * ((SX>>2)+8)); threshold = (t>>1)+(t>>2); passes to Base_Spots().
+ * @note        : Converted from WLED Effects "mode_spots_fade".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Fade_Spots()
 {
   unsigned counter = effect_start_time * ((SEGMENT.speed >> 2) +8);
@@ -8081,23 +8770,47 @@ uint16_t mAnimatorLight::EffectAnim__Fade_Spots()
   unsigned tr = (t >> 1) + (t >> 2);
   return EffectAnim__Base_Spots(tr);  
 }
-static const char PM_EFFECT_CONFIG__SPOTS_FADE[] PROGMEM = "Spots Fade@Spread,Width,,,,Repeat Rate (ms),,Overlay;!,!;!"; // 7 sliders + 4 options before first ;
-static const char PM_EFFECT_DESCRI__SPOTS_FADE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SPOTS_FADE[] PROGMEM =
+"Spots Fade@"                                 // Name
+"Spread,Width,,,,,,,,Overlay"                 // 10 fields (keep UI stable; ‘Repeat Rate’ not used here)
+";"
+"Bg"                                          // segment colour labels
+";"
+"!"                                           // palette
+";"
+"1"                                           // 1D
+";"
+"paln=Party 16,"
+"sx=128,"
+"ix=128,"
+"m12=0"
+;
+static const char PM_EFFECT_DESCRI__SPOTS_FADE[] PROGMEM =
+"Spots that gently breathe in width over time.\n\r"
+"SX: Motion/width base\n\r"
+"IX: Number of zones\n\r"
+"Overlay preserves prior frame for trails.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : utility function that will add random glitter to SEGMENT
- * @note : Converted from WLED Effects "mode_glitter"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Glitter (base utility) — with probability ‘intensity/255’ lights a random pixel to ‘col’, leaving everything else untouched.
+ *                Typical use: sprinkle on top of a background (palette or solid).
+ * @note        : Converted from WLED Effects "mode_glitter".
+ *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Glitter_Base(uint8_t intensity, uint32_t col) {
   if (intensity > hw_random8()) SEGMENT.setPixelColor(hw_random16(SEGLEN), col);
 }
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Glitter with palette background, inspired by https://gist.github.com/kriegsman/062e10f7f07ba8518af6
- * @note : Converted from WLED Effects "mode_glitter"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Glitter — palette background (unless Overlay) with random sparkles using Color 3 (or ultra-white fallback).
+ *                Controls
+ *                  • SX: (unused) background scroll if desired via speed path; kept for uniform UI.
+ *                  • IX: Glitter density (spawn chance).
+ *                  • Overlay: if off, repaint palette background each frame; if on, only add sparkles.
+ *                  • Color 3: glitter color override (else ultra-white).
+ * @note        : Converted from WLED Effects "mode_glitter".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Glitter()
 {
   if (!SEGMENT.check2) { // use "* Color 1" palette for solid background (replacing "Solid glitter")
@@ -8117,28 +8830,74 @@ uint16_t mAnimatorLight::EffectAnim__Glitter()
   EffectAnim__Glitter_Base(SEGMENT.intensity, SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__GLITTER[] PROGMEM = "Glitter@!,!,,,,,Overlay;,,Glitter color;!;;pal=25,m12=0"; //pixels
-static const char PM_EFFECT_DESCRI__GLITTER[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__GLITTER[] PROGMEM =
+"Glitter@"                                    // Name
+"Speed,Intensity,,,,,,,,Overlay"              // 10 fields
+";"
+",,Glitter color"                             // segment colour labels: (C3) glitter color
+";"
+"!"                                           // palette picker (background palette)
+";"
+"1"                                           // 1D
+";"
+"paln=Party 16,"
+"sx=64,"
+"ix=128,"
+"m12=0"
+;
+static const char PM_EFFECT_DESCRI__GLITTER[] PROGMEM =
+"Palette background with random sparkles.\n\r"
+"IX: Sparkle density\n\r"
+"Overlay on = add-only; off = repaint background each frame\n\r"
+"Color 3 selects sparkle color (else ultra-white).";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Solid colour background with glitter (can be replaced by Glitter)
- * @note : Converted from WLED Effects "mode_solid_glitter"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Solid Glitter — solid Color 1 background plus glitter in Color 3 (or ultra-white).
+ *                Controls
+ *                  • IX: Glitter density.
+ *                  • Bg (Color 1): background.
+ *                  • Glitter color (Color 3): sparkle color.
+ * @note        : Converted from WLED Effects "mode_solid_glitter".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Solid_Glitter()
 {
   SEGMENT.fill(SEGCOLOR(0));
   EffectAnim__Glitter_Base(SEGMENT.intensity, SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__SOLID_GLITTER[] PROGMEM = "Solid Glitter@,!;Bg,,Glitter color;;;m12=0";
-static const char PM_EFFECT_DESCRI__SOLID_GLITTER[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SOLID_GLITTER[] PROGMEM =
+"Solid Glitter@"                               // Name
+"Speed,Intensity,,,,,,,,,"                     // 10 fields (speed unused; kept for UI consistency)
+";"
+"Bg,,Glitter color"                            // color labels
+";"
+""                                             // no palette picker (solid bg)
+";"
+"1"                                            // 1D
+";"
+"sx=64,"
+"ix=128,"
+"m12=0"
+;
+static const char PM_EFFECT_DESCRI__SOLID_GLITTER[] PROGMEM =
+"Solid background with random sparkles.\n\r"
+"IX: Sparkle density\n\r"
+"Bg = Color 1; Glitter color = Color 3 (or ultra-white).";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : POPCORN modified from https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Popcorn.h with palette background, inspired by https://gist.github.com/kriegsman/062e10f7f07ba8518af6
- * @note : Converted from WLED Effects "mode_popcorn"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Popcorn — kernels “pop” from the start then arc upward under gravity; color per kernel from palette (or per-color slots). Works on 1D and virtual strips.
+ *                Controls
+ *                  • SX (Gravity)   : higher SX → stronger gravity → quicker arcs.
+ *                  • IX (Density)   : number of simultaneous kernels (per virtual strip).
+ *                  • Overlay        : when off, background is filled (palette or Color 2); when on, trails can persist.
+ *                  • Colors         : if no palette, kernels use Color slots; Color 2 toggles background behavior.
+ *                Implementation
+ *                  • Per v-strip array of Spark {pos, vel, colIndex}; inactive kernels randomly pop; vel integrates with gravity scaled to SEGLEN.
+ *                  • setPixelColor(indexToVStrip(...)) encodes v-strip in upper 16 bits to multiplex across columns.
+ * @note        : Converted from WLED Effects "mode_popcorn".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Popcorn()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -8200,8 +8959,26 @@ uint16_t mAnimatorLight::EffectAnim__Popcorn()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__POPCORN[] PROGMEM = "Popcorn@!,!,,,,,,,Overlay;!,!,!;!;;m12=1"; //bar
-static const char PM_EFFECT_DESCRI__POPCORN[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__POPCORN[] PROGMEM =
+"Popcorn@"                                     // Name
+"Gravity,Density,,,,,,,,Overlay"               // 10 fields
+";"
+"Bg,Fx"                                        // color labels: background, (unused) second slot retained
+";"
+"!"                                            // palette picker (kernel colors)
+";"
+"1"                                            // 1D icon (supports v-strips via index packing)
+";"
+"paln=Party,"
+"sx=96,"
+"ix=160,"
+"m12=1"                                        // bar/column expansion friendly
+;
+static const char PM_EFFECT_DESCRI__POPCORN[] PROGMEM =
+"Popping kernels that arc under gravity; colors from palette or color slots.\n\r"
+"SX: Gravity strength (higher = faster fall)\n\r"
+"IX: Active kernel count\n\r"
+"Overlay preserves trails; without palette, kernels use color slots.";
 
 
 /************************************************************************************************************************************
@@ -8442,12 +9219,26 @@ static const char PM_EFFECT_DESCRI__GLOW_SPOTS[] PROGMEM =
 "BG:SEGCOL1";
 
 
-
-
 /*******************************************************************************************************************************************************************************************************************
- * @description : Plasma Effect adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino 
- * @note : Converted from WLED Effects "mode_plasma"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Plasma — two low-frequency phase fields summed to index the active palette; brightness is modulated by a third beat for “depth”.
+ *                Behavior
+ *                  • thisPhase/thatPhase are slow beats that drift the interference pattern along the strip.
+ *                  • Each pixel’s palette index is the sum of a cubic-wave and a cosine at different spatial frequencies.
+ *                  • Brightness is reduced by a slow sine (qsub8) whose span is controlled by IX, creating soft “breathing” contrast.
+ *
+ *                Controls
+ *                  • SX (Speed) : increases spatial frequency and motion rate (faster, tighter ripples).
+ *                  • IX (Depth) : raises the brightness subtraction range (higher IX = darker troughs, higher contrast).
+ *                  • Palette    : any palette; indexes use the synthesized colorIndex.
+ *
+ *                Implementation
+ *                  • On first call, aux0 randomizes the phase set so multiple segments don’t sync.
+ *                  • colorIndex = cubicwave8( k1*i + thisPhase )/2 + cos8_t( k2*i + thatPhase )/2, with k1/k2 derived from SX.
+ *                  • thisBright = qsub8(colorIndex, beatsin8_t(7, 0, 128-IX/2)).
+ *                  • color_from_palette(index, …, bri=thisBright) paints each pixel; repeats every frame.
+ *
+ * @note        : Converted from WLED Effects "mode_plasma".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Plasma()
 {
   // initialize phases on start
@@ -8466,14 +9257,47 @@ uint16_t mAnimatorLight::EffectAnim__Plasma()
 
   return FRAMETIME;  
 } 
-static const char PM_EFFECT_CONFIG__PLASMA[] PROGMEM = "Plasma@Phase,!;!;!";
-static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PLASMA[] PROGMEM =
+"Plasma@"                                     // Name
+"Speed,Depth,,,,,,,,,"                        // 10 fields
+";"
+""                                            // no segment colour labels
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D icon
+";"
+"paln=Party 16,"                              // defaults
+"sx=96,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM =
+"Interference ‘plasma’ indexed into the active palette with sine-modulated brightness.\n\r"
+"SX: Motion & spatial frequency\n\r"
+"IX: Contrast depth (darker troughs)\n\r"
+"Uses the active palette.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Percentage display Intensity values from 0-100 turn on the leds.
- * @note : Converted from WLED Effects "mode_percent"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Percent — visual gauge from 0–100%. Lights a proportional section while the remainder shows background; above 100% the lit region shrinks from the far end.
+ *                Behavior
+ *                  • IX (Percent) maps to a target lit length: 0..100 fills left→right; 100..200 empties right→left (for “return” sweep).
+ *                  • SX (Smoothing) controls how quickly aux1 (current lit length) eases toward the target (larger SX → bigger step size).
+ *                  • Optional “One color” mode (C1) uses a single palette index derived from percent; otherwise each lit LED uses its own index.
+ *
+ *                Controls
+ *                  • IX (Percent) : 0..100 = fill; 100..200 = unfill (mirror). Default 50.
+ *                  • SX (Speed)   : easing step size per frame (higher = snappier transitions).
+ *                  • C1 (One color): ON = solid hue from palette at a percent-based index; OFF = per-LED palette indexing.
+ *                  • Colors       : SEGCOLOR(1) = background when unlit.
+ *
+ *                Implementation
+ *                  • active_leds is computed from IX; aux1 is eased toward it by ‘size’, which is a function of SX (or clamps to 255 if SX=255).
+ *                  • Two passes handle <=100 and >100 logic so lit vs. background halves are symmetric.
+ *                  • When C1 is set, lit pixels use color_from_palette(mappedPercent, …); else they use color_from_palette(i, …).
+ *
+ * @note        : Converted from WLED Effects "mode_percent".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Percent()
 {
 	unsigned percent = SEGMENT.intensity;
@@ -8520,8 +9344,27 @@ uint16_t mAnimatorLight::EffectAnim__Percent()
 
  	return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM = "Percent@,% of fill,,,,One color;!,!;!";
-static const char PM_EFFECT_DESCRI__PERCENT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM =
+"Percent@"                                    // Name
+"Speed,% of fill,,,,One color,,,,,"           // 10 fields
+";"
+"Bg"                                          // segment colour labels (SEGCOLOR1 = background)
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D icon
+";"
+"paln=Party,"                                 // defaults
+"sx=64,"                                      // smoothing rate
+"ix=50,"                                      // 50%
+"c1=0"                                        // one-color off
+;
+static const char PM_EFFECT_DESCRI__PERCENT[] PROGMEM =
+"Percentage gauge: fills up to 100%, then empties toward 200%.\n\r"
+"SX: Smoothing step (higher = faster)\n\r"
+"IX: Percent (0–100 fill, 100–200 unfill)\n\r"
+"C1: One color (derive hue from percent)\n\r"
+"SEGCOLOR(1) is the background.";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8659,9 +9502,20 @@ CRGB mAnimatorLight::EffectAnim__Pacifica_Base_OneLayer(uint16_t i, CRGBPalette1
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Mode simulates a gradual sunrise
- * @note : Converted from WLED Effects "mode_sunrise"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Mode simulates a gradual sunrise / sunset across the segment.
+ * Behavior
+ *   • SX (Speed):
+ *       0        → static “sun” (no progression)
+ *       1..60    → sunrise duration in minutes
+ *       61..120  → sunset duration in minutes (SX-60)
+ *       >120     → quick “breathe” cycle (tri-wave)
+ *   • IX (Width): broadens/narrows the bright core (mix factor on triwave response).
+ *   • Palette   : uses the current palette; default to a warm “Fire” palette for natural look.
+ * Implementation
+ *   • Tracks start time (millis) to drive a normalized progress “stage” (0..65535).
+ *   • Mirrors left/right for a centered sun. Uses triwave mapping and clips to white above threshold.
+ * @note : Converted from WLED Effects "mode_sunrise".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Sunrise()
 {
   
@@ -8710,15 +9564,38 @@ uint16_t mAnimatorLight::EffectAnim__Sunrise()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__SUNRISE[] PROGMEM = "Sunrise@Time [min],Width;;!;;pal=35,sx=60";
-static const char PM_EFFECT_DESCRI__SUNRISE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SUNRISE[] PROGMEM =
+"Sunrise@"                       // Name
+"Time (min),Width,,,,,,,,,"      // 10 fields (SX, IX, then gaps)
+";"
+""                                // no segment color labels
+";"
+"!"                               // palette picker ON
+";"
+"1"                               // 1D icon
+";"
+"paln=Fire,"
+"sx=60,"                          // default: 60 min sunrise
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__SUNRISE[] PROGMEM =
+"Gradual sunrise/sunset.\n\r"
+"SX: Minutes (1-60 up / 61-120 down / >120 breathe)\n\r"
+"IX: Core width\n\r"
+"Pal: Warm (Fire)";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Sine waves that have controllable phase change speed, frequency and cutoff. By Andrew Tuline.
- *         SEGMENT.speed ->Speed, SEGMENT.intensity -> Frequency (SEGMENT.fft1 -> Color change, SEGMENT.fft2 -> PWM cutoff)
- * @note : Converted from WLED Effects "mode_sinewave"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Sinewave — phase-animated sine brightness with palette color indexing.
+ * Controls
+ *   • SX (Speed) : phase advance per frame (animation rate).
+ *   • IX (Scale) : spatial frequency (how many wave lobes across SEGLEN).
+ *   • Palette    : color look-up for per-pixel index; blended over SEGCOLOR(1) background.
+ * Implementation
+ *   • Uses cubicwave8 for smooth brightness curve.
+ *   • Palette index derived from i*(time/32) for chroma drift.
+ * @note : Converted from WLED Effects "mode_sinewave".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Sinewave()
 {
   unsigned colorIndex = effect_start_time/32; //(256 - SEGMENT.fft1);  // Amount of colour change.
@@ -8735,14 +9612,36 @@ uint16_t mAnimatorLight::EffectAnim__Sinewave()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__SINEWAVE[] PROGMEM = "Sine@!,Scale;;!";
-static const char PM_EFFECT_DESCRI__SINEWAVE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SINEWAVE[] PROGMEM =
+"Sine@"                          // Name
+"Speed,Scale,,,,,,,,,"           // 10 fields
+";"
+""                                // no segment color labels
+";"
+"!"                               // palette picker ON
+";"
+"1"                               // 1D icon
+";"
+"paln=Rainbow 16,"
+"sx=127,"
+"ix=64"
+;
+static const char PM_EFFECT_DESCRI__SINEWAVE[] PROGMEM =
+"Palette sine fade.\n\r"
+"SX: Phase speed\n\r"
+"IX: Spatial scale";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Best of both worlds from Palette and Spot effects. By Aircoookie
- * @note : Converted from WLED Effects "mode_flow"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Flow — alternating zones flowing with palette gradients (“best of palette and spots”).
+ * Controls
+ *   • SX (Speed) : flow rate of the gradient sweep.
+ *   • IX (Zones) : number of alternating zones (even, >=2). Each zone renders a palette ramp, reversing every other zone.
+ *   • Palette    : gradient source for each zone.
+ * 2D Mapping
+ *   • Defaults to vertical bar expansion (m12=1), so 1D pattern fills columns in 2D segments.
+ * @note : Converted from WLED Effects "mode_flow".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Flow()
 {
   
@@ -8777,8 +9676,25 @@ uint16_t mAnimatorLight::EffectAnim__Flow()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__FLOW[] PROGMEM = "Flow@!,Zones;;!;;m12=1"; //vertical
-static const char PM_EFFECT_DESCRI__FLOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__FLOW[] PROGMEM =
+"Flow@"                          // Name
+"Speed,Zones,,,,,,,,,"           // 10 fields
+";"
+""                                // no segment color labels
+";"
+"!"                               // palette picker ON
+";"
+"1"                               // 1D icon
+";"
+"m12=1,"                          // expand vertically on 2D by default
+"sx=127,"
+"ix=160"
+;
+static const char PM_EFFECT_DESCRI__FLOW[] PROGMEM =
+"Alternating palette zones in flow.\n\r"
+"SX: Flow speed\n\r"
+"IX: Zone count (even)\n\r"
+"M12: Vertical bars";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -8965,16 +9881,20 @@ static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : New effect of "Static Palette Mix"
- * 
- * The aim is to make the "Colour and Warm White Stripe" but in a way I can mix them. 
- * 
- * Palette1 ABCD
- * Palette2 abcde
- * 
- * So mix would be AaBbCcDdAe (notice shorter palettes that mix already)
- * @note : 
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Interleaves two palettes across the strip: even pixels from Palette 1, odd pixels from Palette 2.
+ *                Example
+ *                  P1 = A B C D
+ *                  P2 = a b c d e
+ *                  Output sequence (by LED index): A a B b C c D d A e B a ...
+ *                Details
+ *                  • Palette 1 source: SEGMENT.palette_id (selected via the normal palette picker)
+ *                  • Palette 2 source: SEGMENT.intensity (interpreted as a palette index, not a brightness)
+ *                  • Each palette index counter wraps independently to its own palette length.
+ *                Rendering
+ *                  • i % 2 == 0 → take next color from P1
+ *                  • i % 2 == 1 → take next color from P2
+ * @note        : New effect “Static Palette Mix”.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved()
 {
   // Get lengths of both palettes
@@ -9005,17 +9925,39 @@ uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED[] PROGMEM = "Palettes Interleaved@Fg size,Bg size;Fg,!;!;;pal=19";
-static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED[] PROGMEM =
+"Palettes Interleaved@"                      // Name
+"Speed,Palette 2 ID,,,,,,,,,"                // 10 fields (IX is used as Palette 2 id by your code)
+";"
+""                                           // no segment color names
+";"
+"!"                                          // primary palette picker (Palette 1)
+";"
+"1"                                          // icon flags: 1D
+";"
+"paln=Warm White Stripe,"                    // default Palette 1 (adjust to your naming)
+"sx=0,"                                      // Speed unused by logic, keep at 0
+"ix=19"                                      // Palette 2 default id (e.g., 19)
+;
+static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED[] PROGMEM =
+"Interleave two palettes: even LEDs from Palette 1, odd LEDs from Palette 2.\n\r"
+"IX: Palette 2 (numeric id)\n\r"
+"Palette picker selects Palette 1.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Blink/strobe function
- * @note : Converted from WLED Effects
- * 
- * Alternate between color1 and color2
- * if(strobe == true) then create a strobe effect
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Base blink/strobe engine. Alternates between color1 and color2 with optional strobe behavior.
+ *                Timing
+ *                  • cycleTime = (255 - SX) * 20  (+2*FRAMETIME bias)
+ *                  • onTime    = FRAMETIME when strobe=true
+ *                                 otherwise FRAMETIME + (cycleTime * IX)/255   (duty rises with IX)
+ *                State
+ *                  • step holds last ‘it’ bucket; each new bucket forces one on-frame to guarantee visibility.
+ *                Rendering
+ *                  • do_palette=true → when “on”, per-pixel color = palette(i); when “off”, fill color2
+ *                  • do_palette=false → fill color1 / color2
+ * @note        : Converted from WLED Effects (blink/strobe base).
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
 {
 
@@ -9059,8 +10001,24 @@ uint16_t mAnimatorLight::EffectAnim__Blink()
 {
   return EffectAnim__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), false, true);  
 }
-static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM = "Blink@!,Duty cycle;!,!;!;01";
-static const char PM_EFFECT_DESCRI__BLINK[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM =
+"Blink@"                                     // Name
+"Speed,Duty cycle,,,,,,,,,"                  // 10 fields
+";"
+""                                           // no segment color labels
+";"
+"!"                                          // palette picker (used when 'on')
+";"
+"1"                                          // 1D icon
+";"
+"sx=128,"                                    // defaults
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__BLINK[] PROGMEM =
+"Standard blink between Color 1 (on) and Color 2 (off).\n\r"
+"SX: Frequency (higher = faster)\n\r"
+"IX: Duty cycle (higher = longer ON)\n\r"
+"Palette used for ON phase when enabled.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -9071,8 +10029,23 @@ uint16_t mAnimatorLight::EffectAnim__Blink_Rainbow()
 {
   return EffectAnim__Base_Blink( SEGMENT.color_wheel(SEGMENT.call & 0xFF), SEGCOLOR(1), false, false );  
 }
-static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM = "Blink Rainbow@Frequency,Blink duration;!,!;!;01";
-static const char PM_EFFECT_DESCRI__BLINK_RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM =
+"Blink Rainbow@"                             // Name
+"Frequency,Blink duration,,,,,,,,,"          // 10 fields
+";"
+""                                           // no segment color labels
+";"
+""                                           // no palette picker (uses wheel)
+";"
+"1"                                          // 1D icon
+";"
+"sx=128,"                                    // defaults
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__BLINK_RAINBOW[] PROGMEM =
+"Classic blink where the ON color cycles through the rainbow.\n\r"
+"SX: Frequency (higher = faster)\n\r"
+"IX: Blink ON duration.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -9083,14 +10056,36 @@ uint16_t mAnimatorLight::EffectAnim__Strobe()
 {
   return EffectAnim__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
 }
-static const char PM_EFFECT_CONFIG__STROBE[] PROGMEM = "Strobe@!;!,!;!;01";
-static const char PM_EFFECT_DESCRI__STROBE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__STROBE[] PROGMEM =
+"Strobe@"                                    // Name
+"Speed,,,,,,,,,,"                            // 10 fields (IX ignored in strobe mode)
+";"
+""                                           // no segment color labels
+";"
+"!"                                          // palette picker (used for ON)
+";"
+"01"                                          // 1D icon
+";"
+"sx=192"                                     // default strobe speed
+;
+static const char PM_EFFECT_DESCRI__STROBE[] PROGMEM =
+"Hard strobe between Color 1 (on) and Color 2 (off).\n\r"
+"SX: Strobe rate (higher = faster)\n\r"
+"IX: — (ignored).";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Strobe effect with different strobe count and pause, controlled by speed.
- * @note : Converted from WLED Effects "mode_multi_strobe"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Multi-strobe burst. Plays a short burst of flashes, then pauses; both the burst cadence and pause scale with SX and IX.
+ *                Behavior
+ *                  • Background: palette fill each frame; ON frames override to Color 1.
+ *                  • Burst size: count = 2 * ((IX/10) + 1)  → 2,4,6,... flashes per burst.
+ *                  • Timing: base pause = 50 + 20*(255-SX); inner flash dwell uses 15ms/50ms for ON/OFF substeps.
+ *                State
+ *                  • aux1 = sub-step index within current burst.
+ *                  • aux0 = per-step delay (ms) computed from speed and sub-state.
+ *                  • step = last timestamp used to advance the sub-state.
+ * @note        : Converted from WLED Effects "mode_multi_strobe".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Strobe_Multi()
 {
   for (unsigned i = 0; i < SEGLEN; i++) {
@@ -9117,34 +10112,61 @@ uint16_t mAnimatorLight::EffectAnim__Strobe_Multi()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__MULTI_STROBE[] PROGMEM = "Strobe Multi@!,!;!,!;!;01";
-static const char PM_EFFECT_DESCRI__MULTI_STROBE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__MULTI_STROBE[] PROGMEM =
+"Strobe Multi@"                               // Name
+"Speed,Burst size,,,,,,,,,"                   // 10 fields
+";"
+""                                            // no segment color labels
+";"
+"!"                                           // palette picker (bg when not flashing)
+";"
+"1"                                           // 1D icon
+";"
+"sx=160,"                                     // default speed
+"ix=128"                                      // default burst size midpoint
+;
+static const char PM_EFFECT_DESCRI__MULTI_STROBE[] PROGMEM =
+"Strobe bursts with a pause in between.\n\r"
+"SX: Burst cadence / pause\n\r"
+"IX: Flashes per burst (even counts)\n\r"
+"ON frames use Color 1; background uses palette.";
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : 
- * Classic Strobe effect. Cycling through the rainbow.
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Rainbow strobe. Hard strobe that alternates between a wheel-based rainbow head and Color 2 (off/secondary).
+ *                Timing from Base_Blink with strobe=true (fixed ON slice per frame; SX controls rate).
+ *                Wheel index advances each call via SEGMENT.call.
+ * @note        : Converted from WLED Effects "mode_strobe_rainbow".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Strobe_Rainbow()
 {
   return EffectAnim__Base_Blink( SEGMENT.color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), true, false);
 }
-static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM = "Strobe Rainbow@!;,!;!;01";
-static const char PM_EFFECT_DESCRI__STROBE_RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM =
+"Strobe Rainbow@"                              // Name
+"Speed,,,,,,,,,,"                              // 10 fields (IX unused)
+";"
+""                                             // no segment color labels
+";"
+""                                             // no palette picker (uses wheel)
+";"
+"1"                                            // 1D icon
+";"
+"sx=192"                                       // default fast strobe
+;
+static const char PM_EFFECT_DESCRI__STROBE_RAINBOW[] PROGMEM =
+"Hard strobe that cycles the ON color through the rainbow.\n\r"
+"SX: Strobe rate (higher = faster)\n\r"
+"IX: —.";
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : Converted from WLED Effects
- * Cycles all LEDs at once through a rainbow.
- * Note: SEGMENT.intensity < 128 = pastel rainbow, SEGMENT.intensity > 128 = full saturation rainbow
- * @note : mode_rainbow
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Colorloop (global rainbow). Entire segment fades through the color wheel; low IX blends toward white for pastel tones.
+ *                Mapping
+ *                  • Hue step = (millis * ((SX>>2)+2)) >> 8
+ *                  • IX < 128 → pastel: blend(hue, white, 128-IX); IX >= 128 → full saturation hue
+ * @note        : Converted from WLED Effects "mode_rainbow".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Rainbow()
 {
 
@@ -9160,14 +10182,37 @@ uint16_t mAnimatorLight::EffectAnim__Rainbow()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__RAINBOW[] PROGMEM = "Colorloop@!,Saturation;;!;01";
-static const char PM_EFFECT_DESCRI__RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__RAINBOW[] PROGMEM =
+"Colorloop@"                                   // Name
+"Speed,Saturation,,,,,,,,,"                    // 10 fields
+";"
+""                                             // no segment color labels
+";"
+""                                             // no palette (wheel)
+";"
+"1"                                            // 1D icon
+";"
+"sx=128,"                                      // default speed
+"ix=192"                                       // default toward saturated
+;
+static const char PM_EFFECT_DESCRI__RAINBOW[] PROGMEM =
+"Global rainbow sweep across the whole segment.\n\r"
+"SX: Rotation speed\n\r"
+"IX: Saturation (below 128 → pastel blend toward white).";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_lightning"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Lightning strikes. Random leader flash followed by a burst of return strokes with variable spacing and brightness.
+ *                Behavior
+ *                  • Chooses random start and run length per strike, brightness varies per stroke.
+ *                  • First entry initializes a burst count from IX and sets a leader delay; subsequent strokes decrement aux1.
+ *                State
+ *                  • aux1 = remaining sub-flashes *2 (even phases are ON frames), resets to 0 between strikes
+ *                  • aux0 = ms delay until next stroke (leader vs. inter-stroke vs. inter-storm)
+ *                  • step = timestamp of last phase change
+ *                  • Background fill from Color 2 unless Overlay is enabled elsewhere.
+ * @note        : Converted from WLED Effects "mode_lightning".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Lightning()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -9209,8 +10254,25 @@ uint16_t mAnimatorLight::EffectAnim__Lightning()
   }
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__LIGHTNING[] PROGMEM = "Lightning@!,!,,,,,,,Overlay;!,!;!";
-static const char PM_EFFECT_DESCRI__LIGHTNING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__LIGHTNING[] PROGMEM =
+"Lightning@"                                   // Name
+"Speed,Intensity,,,,,,,,Overlay"               // 10 fields (last is a toggle label)
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker for tinting the flash
+";"
+"1"                                            // 1D icon
+";"
+"paln=Cold,"                                   // default palette
+"sx=160,"                                      // default speed
+"ix=180"                                       // default number of flashes tendency
+;
+static const char PM_EFFECT_DESCRI__LIGHTNING[] PROGMEM =
+"Randomized lightning leader + return strokes.\n\r"
+"SX: Cadence (delays between strokes)\n\r"
+"IX: Typical number of strokes per strike\n\r"
+"Background uses Color 2; flash uses palette-tinted Color 1.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -9417,9 +10479,15 @@ static const char PM_EFFECT_DESCRI__HEARTBEAT[] PROGMEM =
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_fillnoise8"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : 8-bit Perlin noise (2D slice) mapped to the active palette. The noise field is sampled at (x=i*SEGLEN, y=step+i*SEGLEN);
+ *                step jitters forward each frame by a small, beat-scaled amount so the pattern gently morphs.
+ *                Mapping
+ *                  • Color index = inoise8(x,y) → 0..255 → palette index.
+ *                  • SX controls the frame step (beatsin8) magnitude; higher SX = faster morphing.
+ *                State
+ *                  • On first call, step is randomized for variation.
+ * @note        : Converted from WLED Effects "mode_fillnoise8".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__FillNoise8()
 {
   if (SEGMENT.call == 0) SEGMENT.step = hw_random();
@@ -9431,14 +10499,35 @@ uint16_t mAnimatorLight::EffectAnim__FillNoise8()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__FILLNOISE8[] PROGMEM = "Fill Noise@!;!;!";
-static const char PM_EFFECT_DESCRI__FILLNOISE8[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__FILLNOISE8[] PROGMEM =
+"Fill Noise@"                                  // Name
+"Speed,,,,,,,,,,"                              // 10 fields (only SX used)
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"sx=128"                                       // default speed
+;
+static const char PM_EFFECT_DESCRI__FILLNOISE8[] PROGMEM =
+"Soft 8-bit noise animated through the current palette.\n\r"
+"SX: Morph speed\n\r"
+"IX: — (unused).";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_noise16_1"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : 16-bit Perlin noise with moving XY offsets and Z-time evolution; index is sine-warped for smoother palette travel.
+ *                Mapping
+ *                  • real_x = (i + shift_x)*scale, real_y = (i + shift_y)*scale, real_z = step
+ *                  • noise = inoise16(x,y,z) >> 8; index = sin8(noise*3)
+ *                Controls
+ *                  • SX speeds step (Z) advance; higher SX = faster flow.
+ *                Look
+ *                  • Gentle diagonal noise “bands” that breathe in color and brightness.
+ * @note        : Converted from WLED Effects "mode_noise16_1".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Noise16_1()
 {
 
@@ -9459,14 +10548,33 @@ uint16_t mAnimatorLight::EffectAnim__Noise16_1()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__NOISE16_1[] PROGMEM = "Noise 1@!;!;!;;pal=20";
-static const char PM_EFFECT_DESCRI__NOISE16_1[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__NOISE16_1[] PROGMEM =
+"Noise 1@"                                     // Name
+"Speed,,,,,,,,,,"                              // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"sx=128"                                       // default speed
+;
+static const char PM_EFFECT_DESCRI__NOISE16_1[] PROGMEM =
+"Flowing 16-bit noise with drifting XY and time evolution.\n\r"
+"SX: Motion speed\n\r"
+"IX: —.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_noise16_2"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : 16-bit Perlin noise scrolling along X only; brightness derives from noise, and the palette index is sine-warped for smooth bands.
+ *                Mapping
+ *                  • real_x = (i + t)*scale, z fixed, y=0
+ *                  • noise = inoise16(x,0,4223)>>8; index = sin8(noise*3); bri = noise
+ *                Controls
+ *                  • SX directly increases t advance (faster scroll at higher SX).
+ * @note        : Converted from WLED Effects "mode_noise16_2".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Noise16_2()
 {
   unsigned scale = 1000;                                        // the "zoom factor" for the noise
@@ -9483,14 +10591,33 @@ uint16_t mAnimatorLight::EffectAnim__Noise16_2()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__NOISE16_2[] PROGMEM = "Noise 2@!;!;!;;pal=43";
-static const char PM_EFFECT_DESCRI__NOISE16_2[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__NOISE16_2[] PROGMEM =
+"Noise 2@"                                     // Name
+"Speed,,,,,,,,,,"                              // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"sx=144"                                       // default speed
+;
+static const char PM_EFFECT_DESCRI__NOISE16_2[] PROGMEM =
+"One-axis 16-bit noise scroll with sine-warped indexing and noise-based brightness.\n\r"
+"SX: Scroll speed\n\r"
+"IX: —.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_noise16_3"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : 16-bit Perlin noise with fixed XY offsets and rapidly advancing Z; yields twitchier, sparkly flow.
+ *                Mapping
+ *                  • real_x = (i+4223)*scale, real_y = (i+1234)*scale, real_z = step*8
+ *                  • noise = inoise16(x,y,z)>>8; index = sin8(noise*3); bri = noise
+ *                Controls
+ *                  • SX drives step strongly (higher SX = brisk evolution).
+ * @note        : Converted from WLED Effects "mode_noise16_3".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Noise16_3()
 {
   unsigned scale = 800;                                       // the "zoom factor" for the noise
@@ -9510,14 +10637,32 @@ uint16_t mAnimatorLight::EffectAnim__Noise16_3()
 
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__NOISE16_3[] PROGMEM = "Noise 3@!;!;!;;pal=35";
-static const char PM_EFFECT_DESCRI__NOISE16_3[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__NOISE16_3[] PROGMEM =
+"Noise 3@"                                     // Name
+"Speed,,,,,,,,,,"                              // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"sx=160"                                       // default speed
+;
+static const char PM_EFFECT_DESCRI__NOISE16_3[] PROGMEM =
+"Fast-evolving 16-bit noise with fixed XY offsets for a lively shimmer.\n\r"
+"SX: Evolution speed\n\r"
+"IX: —.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : https://github.com/aykevl/ledstrip-spark/blob/master/ledino
- * @note : Converted from WLED Effects "mode_noise16_4"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Minimal 16-bit noise line: X sampled at high resolution (<<12), Z from time*speed. Index is taken directly from inoise16.
+ *                Mapping
+ *                  • index = inoise16(i<<12, step) → palette index
+ *                Controls
+ *                  • SX scales step (time) directly.
+ * @note        : Converted from WLED Effects "mode_noise16_4". Source ref: https://github.com/aykevl/ledstrip-spark/blob/master/ledino
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Noise16_4()
 {
   uint32_t stp = (effect_start_time * SEGMENT.speed) >> 7;
@@ -9527,14 +10672,38 @@ uint16_t mAnimatorLight::EffectAnim__Noise16_4()
   }
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__NOISE16_4[] PROGMEM = "Noise 4@!;!;!;;pal=26";
-static const char PM_EFFECT_DESCRI__NOISE16_4[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__NOISE16_4[] PROGMEM =
+"Noise 4@"                                     // Name
+"Speed,,,,,,,,,,"                              // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"sx=128"                                       // default speed
+;
+static const char PM_EFFECT_DESCRI__NOISE16_4[] PROGMEM =
+"High-resolution X sampling with time-based Z for a clean, fine-grained noise ribbon.\n\r"
+"SX: Motion speed\n\r"
+"IX: —.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Peaceful noise that's slow and with gradually changing palettes. Does not support WLED palettes or default colours or controls. Slow noise palette by Andrew Tuline.
- * @note : Converted from WLED Effects "mode_noisepal"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Slow “calm” noise with drifting, self-blending palettes (Andrew Tuline style).
+ *                Behavior
+ *                  • Two CRGBPalette16 objects: palettes[0] (current) blends toward palettes[1] (target) over time.
+ *                  • Every 4–6.5s, a new random target palette is generated (unless an explicit palette is active).
+ *                  • Index = inoise8(i*scale, aux0 + i*scale) through the blended palette; aux0 advances by a slow beatsin.
+ *                Controls
+ *                  • SX sets the target-palette change interval (faster change at higher SX).
+ *                  • IX sets spatial scale (bigger scale = zoomed-out bands).
+ *                State
+ *                  • step = timestamp of last target palette change.
+ *                  • aux0 = secondary coordinate drifting via beatsin8.
+ * @note        : Converted from WLED Effects "mode_noisepal".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Noise_Pal()
 {
   unsigned scale = 15 + (SEGMENT.intensity >> 2); //default was 30
@@ -9569,14 +10738,41 @@ uint16_t mAnimatorLight::EffectAnim__Noise_Pal()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__NOISEPAL[] PROGMEM = "Noise Pal@!,Scale;;!";
-static const char PM_EFFECT_DESCRI__NOISEPAL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__NOISEPAL[] PROGMEM =
+"Noise Pal@"                                   // Name
+"Speed,Scale,,,,,,,,,"                         // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker (overrides generated)
+";"
+"1"                                            // 1D icon
+";"
+"sx=96,"                                       // moderate palette change rate
+"ix=128"                                       // mid spatial scale
+;
+static const char PM_EFFECT_DESCRI__NOISEPAL[] PROGMEM =
+"Slow, peaceful noise with a softly morphing palette.\n\r"
+"SX: Palette change rate\n\r"
+"IX: Spatial scale (band size)\n\r"
+"Selecting a palette locks the target; otherwise it auto-drifts.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Effects by Andrew Tuline. Making sine waves here.
- * @note : Converted from WLED Effects "phased_base"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Phased (base)
+ *                Builds multi-frequency sine waves across the strip and modulates each pixel’s phase so the wave “fans out”.
+ *                Core idea:
+ *                  • Base frequency = allfreq (fixed). For pixel i, start at val = (i+1)*allfreq so LED 0 participates.
+ *                  • A running phase term (stored by reinterpreting SEGMENT.step as a float) advances each frame by SX/32.
+ *                  • The per-pixel phase contribution is scaled by (i % modVal + 1)/2 so different pixels advance with different phase rates.
+ *                Controls:
+ *                  • SX (Speed)      → how quickly the phase term advances (faster wave motion).
+ *                  • IX (Cutoff)     → clamps low parts of the sine; higher IX means more of the wave is clipped to background (shorter/brighter ridges).
+ *                  • moder==1        → replaces modVal with Perlin noise to vary modulus along the strip (more organic).
+ *                Color:
+ *                  • Each pixel blends from Color 1 (background) to the active palette at a rotating index; the index increments uniformly along the strip.
+ * @note        : Converted from WLED Effects "phased_base".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Phased(uint8_t moder)
 {
   unsigned allfreq = 16;                                          // Base frequency.
@@ -9610,8 +10806,24 @@ uint16_t mAnimatorLight::EffectAnim__Base_Phased(uint8_t moder)
 uint16_t mAnimatorLight::EffectAnim__Phased(void) {
   return EffectAnim__Base_Phased(0);
 }
-static const char PM_EFFECT_CONFIG__PHASED[] PROGMEM = "Phased@!,!;!,!;!";
-static const char PM_EFFECT_DESCRI__PHASED[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PHASED[] PROGMEM =
+"Phased@"                                      // Name
+"Speed,Cutoff,,,,,,,,,"                        // 10 fields after '@'
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"paln=Party 16,"                               // defaults
+"sx=128,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__PHASED[] PROGMEM =
+"Multi-frequency sine with per-pixel phase offsets.\n\r"
+"SX: Wave motion speed\n\r"
+"IX: Cutoff (clips low parts of the wave).";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -9621,14 +10833,40 @@ static const char PM_EFFECT_DESCRI__PHASED[] PROGMEM = "Cycle Between Each Live 
 uint16_t mAnimatorLight::EffectAnim__PhasedNoise(void) {
   return EffectAnim__Base_Phased(1);
 }
-static const char PM_EFFECT_CONFIG__PHASEDNOISE[] PROGMEM = "Phased Noise@!,!;!,!;!";
-static const char PM_EFFECT_DESCRI__PHASEDNOISE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__PHASEDNOISE[] PROGMEM =
+"Phased Noise@"                                // Name
+"Speed,Cutoff,,,,,,,,,"                        // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"paln=Party 16,"
+"sx=128,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__PHASEDNOISE[] PROGMEM =
+"Like Phased, but the per-pixel modulus is noise-modulated for a more organic spread.\n\r"
+"SX: Wave motion speed\n\r"
+"IX: Cutoff (clips low parts of the wave).";
 
 
-/********************************************************************************************************************************************************************************************************************
- * @description : Base function for scanners
- * @note : Converted from WLED Effects "scan"
- ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Scan (base)
+ *                A bright “scanner” bar sweeps back and forth with optional mirrored head.
+ *                Core steps:
+ *                  • cycleTime = 750 + (255−SX)*150 → faster with higher SX.
+ *                  • Progress (0..65535) maps to a linear “ping-pong” position; width = 1 + (IX * SEGLEN)/512.
+ *                  • If Overlay is OFF, fill background with Color 1; otherwise leave prior pixels (trail).
+ *                  • If dual==true, mirror a second head from the opposite end (uses palette slot 2 if Color 2 is set).
+ *                Controls:
+ *                  • SX (Speed)   → cycle time of the sweep.
+ *                  • IX (Width)   → number of lit pixels in the head.
+ *                  • Overlay (cb) → keep prior frame content instead of repainting background.
+ * @note        : Converted from WLED Effects "scan".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Base_Scan(bool dual)
 {
 
@@ -9667,8 +10905,25 @@ uint16_t mAnimatorLight::EffectAnim__Scan()
 {
   return EffectAnim__Base_Scan(false);
 }
-static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM = "Scan@!,# of dots,,,,,,,Overlay;!,!,!;!";
-static const char PM_EFFECT_DESCRI__SCAN[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM =
+"Scan@"                                        // Name
+"Speed,# of dots,,,,,,,Overlay,"               // 10 fields (cb3 used for 'Overlay')
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"paln=Party,"                                  // defaults
+"sx=128,"
+"ix=64"
+;
+static const char PM_EFFECT_DESCRI__SCAN[] PROGMEM =
+"Single scanner head with adjustable width.\n\r"
+"SX: Sweep speed\n\r"
+"IX: Head size\n\r"
+"Overlay: keep previous pixels (trail).";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -9679,13 +10934,39 @@ uint16_t mAnimatorLight::EffectAnim__Scan_Dual()
 {
   return EffectAnim__Base_Scan(true);
 }
-static const char PM_EFFECT_CONFIG__DUAL_SCAN[] PROGMEM = "Scan Dual@!,# of dots,,,,,,,Overlay;!,!,!;!";
-static const char PM_EFFECT_DESCRI__DUAL_SCAN[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__DUAL_SCAN[] PROGMEM =
+"Scan Dual@"                                   // Name
+"Speed,# of dots,,,,,,,Overlay,"               // 10 fields
+";"
+""                                             // no segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D icon
+";"
+"paln=Party,"
+"sx=128,"
+"ix=64"
+;
+static const char PM_EFFECT_DESCRI__DUAL_SCAN[] PROGMEM =
+"Two scanner heads mirrored end-to-end.\n\r"
+"SX: Sweep speed\n\r"
+"IX: Head size\n\r"
+"Overlay: keep previous pixels (trail).";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : K.I.T.T.
- * @note : Converted from WLED Effects "mode_larson_scanner"
+ * @description : Larson Scanner (K.I.T.T.)
+ *                A single “comet” scans the strip back and forth:
+ *                  • SX (Speed) sets how fast the head advances. Internally we derive a per-frame pixel step from SX and FRAMETIME.
+ *                  • IX (Trail) controls fade strength each frame (higher = shorter trail).
+ *                  • C1 (Delay) adds a pause at the turnarounds (ms ≈ C1*25). If “Bi-delay” is off, only one end pauses.
+ *                  • Dual (o1) mirrors a second head; if Color 2 is set it’s used for the mirrored head, else palette color is reused.
+ *                  • Bi-delay (o2) enables the turnaround pause on both ends.
+ *                Implementation notes:
+ *                  • We fade the whole segment each frame, then paint the head over the faded background.
+ *                  • Position bookkeeping uses aux0 (direction), aux1 (progress within the current sweep), and step (frame timer / pause gate).
+ * @note        : Converted from WLED Effects "mode_larson_scanner".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Larson_Scanner()
 {
@@ -9731,26 +11012,79 @@ uint16_t mAnimatorLight::EffectAnim__Larson_Scanner()
   }
   return FRAMETIME;  
 }
-static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM = "Scanner@!,Trail,Delay,,,Dual,Bi-delay;!,!,!;!;;m12=0,c1=0";
-static const char PM_EFFECT_DESCRI__LARSON_SCANNER[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM =
+"Scanner@"                                    // Name
+"Speed,Trail,Delay,,,,Dual,Bi-delay,,"        // 10 fields after '@' (1=sx,2=ix,3=c1,7=o1,8=o2)
+";"
+"Bg,Fx,Alt"                                   // Segment color labels (C1=Bg, C2=Fx, C3=Alt/mirror)
+";"
+"!"                                           // Palette picker
+";"
+"1"                                           // 1D icon
+";"
+"paln=Party,"                                 // defaults
+"sx=128,"                                     // speed
+"ix=160,"                                     // trail fade
+"c1=10,"                                      // turnaround delay unit (25ms * c1)
+"o1=0,"                                       // Dual off
+"o2=0,"                                       // Bi-delay off
+"m12=0"                                       // no 2D expansion
+;
+static const char PM_EFFECT_DESCRI__LARSON_SCANNER[] PROGMEM =
+"KITT-style scanner with optional mirrored head and per-end pauses.\n\r"
+"SX: Scan speed\n\r"
+"IX: Trail length (higher = shorter trail)\n\r"
+"C1: Turnaround delay (≈25ms * value)\n\r"
+"Dual / Bi-delay: mirror head / pause at both ends.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Creates two Larson scanners moving in opposite directions
- *         Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/DualLarson.h
- * @note : Converted from WLED Effects "mode_dual_larson_scanner"
+ * @description : Dual Larson Scanner
+ *                Convenience wrapper that enables the “Dual” flag and runs the Larson Scanner base logic.
+ *                Color 2 (if set) is used for the mirrored head; otherwise it mirrors the palette-derived head color.
+ * @note        : Converted from WLED Effects "mode_dual_larson_scanner".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Larson_Scanner_Dual(void){
   SEGMENT.check1 = true;
   return EffectAnim__Larson_Scanner();
 }
-static const char PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER[] PROGMEM = "Scanner Dual@!,Trail,Delay,,,Dual,Bi-delay;!,!,!;!;;m12=0,c1=0";
-static const char PM_EFFECT_DESCRI__DUAL_LARSON_SCANNER[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER[] PROGMEM =
+"Scanner Dual@"                               // Name
+"Speed,Trail,Delay,,,,Dual,Bi-delay,,"        // same UI as single
+";"
+"Bg,Fx,Alt"
+";"
+"!"
+";"
+"1"
+";"
+"paln=Party,"
+"sx=128,"
+"ix=160,"
+"c1=10,"
+"o1=1,"                                       // Dual ON by default here
+"o2=0,"
+"m12=0"
+;
+static const char PM_EFFECT_DESCRI__DUAL_LARSON_SCANNER[] PROGMEM =
+"Two KITT-style scanner heads mirrored end-to-end.\n\r"
+"SX: Scan speed\n\r"
+"IX: Trail length (higher = shorter trail)\n\r"
+"C1: Turnaround delay (≈25ms * value)\n\r"
+"Bi-delay: pause at both ends.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : ICU mode
- * @note : Converted from WLED Effects "mode_icu"
+ * @description : ICU
+ *                Two “eyes” track together across the strip, pause, occasionally blink, then seek a new destination.
+ *                Controls:
+ *                  • SX (Speed): movement rate (lower frame delay ⇒ faster travel).
+ *                  • IX (Spacing): sets the gap between the two eyes (≈ SEGLEN / (IX>>3 + 2)).
+ *                  • Overlay: if ON, leaves prior frame content (eyes draw over palette/solid); if OFF, background repaints with Color 1.
+ *                Behavior details:
+ *                  • Eyes pick a random target, walk one pixel per frame until the destination, then pause (1–3s), sometimes blink.
+ *                  • Eye color sampled from the active palette by mapping current position to 0..255.
+ * @note        : Converted from WLED Effects "mode_icu".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__ICU()
 {
@@ -9788,15 +11122,41 @@ uint16_t mAnimatorLight::EffectAnim__ICU()
 
   return SPEED_FORMULA_L;  
 }
-static const char PM_EFFECT_CONFIG__ICU[] PROGMEM = "ICU@!,!,,,,,,,Overlay;!,!;!";
-static const char PM_EFFECT_DESCRI__ICU[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__ICU[] PROGMEM =
+"ICU@"                                        // Name
+"Speed,Spacing,,,,,,,Overlay,"                // 10 fields (1=sx,2=ix,10=o1 overlay)
+";"
+"Bg,Fx"                                       // we repaint Bg when Overlay is off; Fx unused (kept for consistency)
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D icon
+";"
+"paln=Party,"
+"sx=96,"                                      // a bit slower by default (more “eye-like”)
+"ix=128,"                                     // mid spacing
+"o1=0"                                        // Overlay off by default (paint background)
+;
+static const char PM_EFFECT_DESCRI__ICU[] PROGMEM =
+"Two ‘eyes’ roam, pause, and blink.\n\r"
+"SX: Travel speed\n\r"
+"IX: Eye spacing\n\r"
+"Overlay: keep previous frame instead of repainting background.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Water ripple
- *         propagation velocity from speed
- *         drop rate from intensity
- * @note : Converted from WLED Effects "ripple_base"
+ * @description : Water Ripple (base)
+ *                Core ripple simulator used by ripple variants.
+ *                • States: Each ripple keeps {state, color, pos}. When inactive (state==0) it may spawn based on IX (drop rate).
+ *                • Propagation: Radius grows with SX (speed). For 1D, two lobes expand left/right; for 2D, a circle is drawn.
+ *                • Amplitude: Early frames use a triwave burst, then decay toward 0; faster SX slightly increases decay rate.
+ *                • Blur: Final pass applies configurable blur to soften rings and blend overlaps.
+ *                Controls
+ *                  SX (Speed)   → propagation velocity & decay coupling
+ *                  IX (Wave #)  → spawn rate (effective number of simultaneous ripples)
+ *                  C1 (Blur)    → post-blur amount (0..255), given by blurAmount parameter
+ *                  Overlay      → if caller requested, background is preserved; otherwise caller may prefill
+ * @note        : Converted from WLED Effects "ripple_base".
  ********************************************************************************************************************************************************************************************************************/
 //4 bytes
 typedef struct Ripple {
@@ -9864,8 +11224,16 @@ uint16_t mAnimatorLight::EffectAnim__Base_Ripple(uint8_t blurAmount)
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_ripple"
+ * @description : Ripple
+ *                Spawns palette-colored drops that expand outward as soft rings.
+ *                • Background: if Overlay ON or Blur>0, trails accumulate (fade_out); else a solid Bg repaint.
+ *                • Uses Base_Ripple with Blur=C1>>1 (so C1 slider is coarse and safe).
+ *                Controls
+ *                  SX (Speed)   → ring growth rate + mild decay link
+ *                  IX (Wave #)  → effective number of active ripples / spawn pressure
+ *                  C1 (Blur)    → post-blur amount (strength/softness of rings)
+ *                  Overlay (o1) → keep previous frame content (accumulating trails)
+ * @note        : Converted from WLED Effects "mode_ripple".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Ripple(void) {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -9876,13 +11244,40 @@ uint16_t mAnimatorLight::EffectAnim__Ripple(void) {
 
   return EffectAnim__Base_Ripple(SEGMENT.custom1>>1);
 }
-static const char PM_EFFECT_CONFIG__RIPPLE[] PROGMEM = "Ripple@!,Wave #,Blur,,,,Overlay;,!;!;12;c1=0";
-static const char PM_EFFECT_DESCRI__RIPPLE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__RIPPLE[] PROGMEM =
+"Ripple@"                                     // Name
+"Speed,Wave #,Blur,,,,Overlay,,,"             // 10 fields after '@' (1=sx,2=ix,3=c1,7=o1)
+";"
+"Bg,Fx"                                       // Segment color labels
+";"
+"!"                                           // Palette picker
+";"
+"12"                                          // icon flags: supports 1D & 2D
+";"
+"paln=Ocean,"                                 // defaults
+"sx=128,"                                     // propagation speed
+"ix=128,"                                     // spawn pressure
+"c1=32,"                                      // blur amount (coarse)
+"o1=0"                                        // overlay off
+;
+static const char PM_EFFECT_DESCRI__RIPPLE[] PROGMEM =
+"Palette ripples expand from random drops.\n\r"
+"SX: Propagation speed\n\r"
+"IX: Wave count / spawn rate\n\r"
+"C1: Blur (ring softness)\n\r"
+"Overlay: accumulate trails.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : 
- * @note : Converted from WLED Effects "mode_ripple_rainbow"
+ * @description : Ripple Rainbow
+ *                Like Ripple, but fills the background with a slowly shifting rainbow tone and renders ripples over it.
+ *                • Color drift: two wheel indices (aux0→aux1) march towards each other for a subtle hue flow.
+ *                • Background: dimmed wheel color blended with black; rings use Base_Ripple coloring.
+ *                Controls
+ *                  SX (Speed)   → propagation velocity & decay coupling
+ *                  IX (Wave #)  → spawn rate (number of concurrent ripples)
+ *                Notes: ignores palette for the background fill; rings still use Base_Ripple’s palette sampling.
+ * @note        : Converted from WLED Effects "mode_ripple_rainbow".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Ripple_Rainbow(void) {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -9900,13 +11295,36 @@ uint16_t mAnimatorLight::EffectAnim__Ripple_Rainbow(void) {
   SEGMENT.fill(color_blend(SEGMENT.color_wheel(SEGMENT.aux0),BLACK,uint8_t(235)));
   return EffectAnim__Base_Ripple();
 }
-static const char PM_EFFECT_CONFIG__RIPPLE_RAINBOW[] PROGMEM = "Ripple Rainbow@!,Wave #;;!;12";
-static const char PM_EFFECT_DESCRI__RIPPLE_RAINBOW[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__RIPPLE_RAINBOW[] PROGMEM =
+"Ripple Rainbow@"                              // Name
+"Speed,Wave #,,,,,,,,,"                        // 10 fields (1=sx,2=ix)
+";"
+""                                             // Segment color labels (none)
+";"
+"!"                                            // palette picker (rings still may sample palette)
+";"
+"12"                                           // 1D & 2D
+";"
+"paln=Party,"
+"sx=128,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__RIPPLE_RAINBOW[] PROGMEM =
+"Rainbow-washed background with expanding ripple rings.\n\r"
+"SX: Propagation speed\n\r"
+"IX: Wave count / spawn rate.";
 
 
 /********************************************************************************************************************************************************************************************************************
- * @description : Firing comets from one end. "Lighthouse"
- * @note : Converted from WLED Effects "mode_comet"
+ * @description : Comet (Lighthouse)
+ *                A single bright head travels the strip while the trail fades out each frame.
+ *                • Head position advances with SX (Speed). The trail length is set by IX via fade strength.
+ *                • Palette lookup is by LED index, creating gentle color variation along the path.
+ *                Implementation: use fade_out(IX) then paint head; on wrap, optionally backfill a short gap to avoid a visible jump.
+ *                Controls
+ *                  SX (Speed) → head advance rate
+ *                  IX (Fade)  → trail decay per frame (higher IX = shorter trail)
+ * @note        : Converted from WLED Effects "mode_comet".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Comet()
 {
@@ -9931,14 +11349,36 @@ uint16_t mAnimatorLight::EffectAnim__Comet()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__COMET[] PROGMEM = "Comet@!,Fade rate;!,!;!";
-static const char PM_EFFECT_DESCRI__COMET[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__COMET[] PROGMEM =
+"Comet@"                                      // Name
+"Speed,Fade rate,,,,,,,,,"                    // 10 fields (1=sx,2=ix)
+";"
+"Bg,Fx"                                       // colors (Bg unused at runtime, Fx = head color if palette is off)
+";"
+"!"                                           // palette picker
+";"
+"1"                                           // 1D
+";"
+"paln=Party,"
+"sx=128,"
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__COMET[] PROGMEM =
+"Single bright head with a fading trail.\n\r"
+"SX: Head speed\n\r"
+"IX: Trail decay (higher = shorter).";
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : Dots waving around in a sine/pendulum motion.
- *         Little pixel birds flying in a circle. By Aircoookie
- * @note : Converted from WLED Effects "mode_chunchun"
+/********************************************************************************************************************************************************************************************************************
+ * @description : Chunchun
+ *                “Little birds” (dots) glide in a pendulum/sine motion and leave subtle trails.
+ *                • Number of birds ≈ 2 + SEGLEN/8; spacing between birds is derived from IX.
+ *                • Each bird’s position uses a phase-shifted sin16; colors come from the active palette.
+ *                • A light fade_out each frame creates motion blur without heavy persistence.
+ *                Controls
+ *                  SX (Speed) → oscillation rate
+ *                  IX (Gap)   → spacing between birds (phase separation)
+ * @note        : Converted from WLED Effects "mode_chunchun".
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Chunchun()
 {
@@ -9958,16 +11398,46 @@ uint16_t mAnimatorLight::EffectAnim__Chunchun()
   }
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__CHUNCHUN[] PROGMEM = "Chunchun@!,Gap size;!,!;!";
-static const char PM_EFFECT_DESCRI__CHUNCHUN[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__CHUNCHUN[] PROGMEM =
+"Chunchun@"                                   // Name
+"Speed,Gap size,,,,,,,,,"                     // 10 fields (1=sx,2=ix)
+";"
+"Bg,Fx"
+";"
+"!"
+";"
+"1"
+";"
+"paln=Party,"
+"sx=128,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__CHUNCHUN[] PROGMEM =
+"Dots glide in a pendulum/sine motion with soft trails.\n\r"
+"SX: Oscillation rate\n\r"
+"IX: Phase spacing between birds.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Spotlights moving back and forth that cast dancing shadows.
- *                Shine this through tree branches/leaves or other close-up objects that cast
- *                interesting shadows onto a ceiling or tarp. By Steve Pomeroy @xxv
- * @note : Converted from WLED Effects "mode_dancing_shadows"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Dancing Shadows
+ *                Moving “spotlights” sweep back and forth and blend into the frame, creating shifting bright zones and dark “shadow” gaps.
+ *                • Each spotlight has {speed, colorIdx, position, lastUpdateTime, width, type}.
+ *                • Position integrates over real time (millis), scaled by SX; instances respawn once they exit the segment.
+ *                • Type controls the footprint:
+ *                    0 SOLID         → flat bar
+ *                    1 GRADIENT      → single lobe with cubic fade
+ *                    2 2×GRADIENT    → tighter, steeper lobe (double frequency)
+ *                    3 2×DOT         → dotted: every 2nd pixel lit within width
+ *                    4 3×DOT         → dotted: every 3rd
+ *                    5 4×DOT         → dotted: every 4th
+ *                • Width is random per spotlight (1..9). Color is palette-indexed (colorIdx).
+ *                Controls
+ *                  SX (Speed)      → global motion multiplier (higher = faster sweeps)
+ *                  IX (# shadows)  → number of concurrent spotlights (2..SPOT_MAX_COUNT)
+ *                Notes
+ *                  Background is cleared to BLACK each frame; spotlights are blended (alpha 128 or gradient alpha).
+ * @note        : Converted from WLED Effects "mode_dancing_shadows".
+ *******************************************************************************************************************************************************************************************************************/
 //13 bytes
 typedef struct Spotlight {
   float speed;
@@ -10105,14 +11575,39 @@ uint16_t mAnimatorLight::EffectAnim__Dancing_Shadows()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__DANCING_SHADOWS[] PROGMEM = "Dancing Shadows@!,# of shadows;!;!";
-static const char PM_EFFECT_DESCRI__DANCING_SHADOWS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__DANCING_SHADOWS[] PROGMEM =
+"Dancing Shadows@"                             // Name
+"Speed,# of shadows,,,,,,,,,"                  // 10 fields (1=sx,2=ix)
+";"
+""                                             // Segment color labels
+";"
+"!"                                            // palette picker
+";"
+"1"                                            // 1D
+";"
+"paln=Party,"
+"sx=128,"
+"ix=160"                                       // default crowd
+;
+static const char PM_EFFECT_DESCRI__DANCING_SHADOWS[] PROGMEM =
+"Moving spotlights that create shifting bright/dark bands.\n\r"
+"SX: Sweep speed\n\r"
+"IX: Number of spotlights\n\r"
+"Types: solid/gradient/dots; colors from palette.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Imitates a washing machine, rotating same waves forward, then pause, then backward.  By Stefan Seegel
- * @note : Converted from WLED Effects "mode_washing_machine"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Washing Machine
+ *                A sine “foam” pattern that rotates forward, pauses, then reverses — like a drum tumble.
+ *                • Motion: tristate_square8 builds a forward–pause–reverse gait; mapped by SX to step rate.
+ *                • Pixels: per-LED phase = (harmonic based on IX) + global step; color sampled from palette (with solid wrap).
+ *                Controls
+ *                  SX (Speed)  → rotation cadence (affects how quickly step advances)
+ *                  IX (Scale)  → spatial frequency (more waves around the ring)
+ *                Notes
+ *                  Uses palette index mode 3 for a crisp gradient look.
+ * @note        : Converted from WLED Effects "mode_washing_machine".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Washing_Machine()
 {
   int speed = tristate_square8(effect_start_time >> 7, 90, 15);
@@ -10126,15 +11621,40 @@ uint16_t mAnimatorLight::EffectAnim__Washing_Machine()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__WASHING_MACHINE[] PROGMEM = "Washing Machine@!,!;;!";
-static const char PM_EFFECT_DESCRI__WASHING_MACHINE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__WASHING_MACHINE[] PROGMEM =
+"Washing Machine@"                              // Name
+"Speed,Scale,,,,,,,,,"                          // 10 fields (1=sx,2=ix)
+";"
+""                                              // no seg color names
+";"
+"!"                                             // palette picker
+";"
+"1"                                             // 1D
+";"
+"paln=Ocean,"
+"sx=128,"
+"ix=96"
+;
+static const char PM_EFFECT_DESCRI__WASHING_MACHINE[] PROGMEM =
+"Rotating sine bands that go forward, pause, then reverse.\n\r"
+"SX: Tumble rate\n\r"
+"IX: Number of waves\n\r"
+"Uses palette for color bands.";
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Blends random colors across palette
-  Modified, originally by Mark Kriegsman https://gist.github.com/kriegsman/1f7ccbbfa492a73c015e
- * @note : Converted from WLED Effects "mode_blends"
- ********************************************************************************************************************************************************************************************************************/
+ * @description : Blends
+ *                Slow, liquid color morphing: each logical “pixel slot” maintains its own color and blends toward a shifting palette sample.
+ *                • Per-slot state: a persistent RGB value stored in SEGMENT.data, length=min(SEGLEN, 255)+1 for reuse/tiling.
+ *                • Each frame: for slot i → blend old color toward palette index (shift + quadwave8((i+1)*16)).
+ *                • Output: write the cycling buffer across the full segment (tiles if SEGLEN > pixelLen).
+ *                Controls
+ *                  SX (Shift speed) → how quickly the palette index base (shift) advances
+ *                  IX (Blend speed) → lerp factor toward new color (higher = faster morph)
+ *                Notes
+ *                  Very smooth, no abrupt resets; honors the active palette.
+ * @note        : Converted from WLED Effects "mode_blends".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Blends()
 {
   unsigned pixelLen = SEGLEN > UINT8_MAX ? UINT8_MAX : SEGLEN;
@@ -10157,8 +11677,25 @@ uint16_t mAnimatorLight::EffectAnim__Blends()
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__BLENDS[] PROGMEM = "Blends@Shift speed,Blend speed;;!";
-static const char PM_EFFECT_DESCRI__BLENDS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__BLENDS[] PROGMEM =
+"Blends@"                                       // Name
+"Shift speed,Blend speed,,,,,,,,,"              // 10 fields (1=sx,2=ix)
+";"
+""                                              // seg color names
+";"
+"!"                                             // palette picker
+";"
+"1"                                             // 1D
+";"
+"paln=Party 16,"
+"sx=96,"
+"ix=128"
+;
+static const char PM_EFFECT_DESCRI__BLENDS[] PROGMEM =
+"Per-pixel colors slowly morph toward a moving palette target.\n\r"
+"SX: Palette shift rate\n\r"
+"IX: Blend speed (higher = faster morph)\n\r"
+"Smooth, continuous color flow.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -10772,10 +12309,33 @@ static const char PM_EFFECT_DESCRI__SINELON_RAINBOW[] PROGMEM =
 "SX:Speed";
 
 
-/********************************************************************************************************************************************************************************************************************
- * @description : Drip Effect ported of: https://www.youtube.com/watch?v=sru2fXh4r7k
- * @note : Converted from WLED Effects "mode_drip"
- ********************************************************************************************************************************************************************************************************************/
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Drip
+ *                A “faucet” at the top (end of segment) forms droplets, which then fall under gravity, splashing/bouncing at the bottom.
+ *                Per-virtual-strip state is an array of Spark structs {pos, vel, col, colIndex, colIndex used as state}.
+ *                Lifecycle per drop:
+ *                  • State 0 → init: reset at source (end), zero velocity, small brightness seed (sourcedrop).
+ *                  • State 1 → forming: grows brightness over time; randomly “lets go” based on current brightness.
+ *                  • State 2 → falling: position integrates by velocity; velocity integrates by gravity (negative). While falling,
+ *                    paints a short fading “tail” below current pos to look like motion blur.
+ *                  • Impact: when pos ≤ 0, transitions to a bounce:
+ *                      – First impact (state 2): invert/dampen velocity (−v/4), advance to state 5 (bouncing), set a brighter splash col.
+ *                      – Later impact (state >2): return to forming state 0 to create another drop.
+ *                Rendering notes:
+ *                  • A dim “water source” pixel is drawn at the end (pSEGLEN−1) each frame.
+ *                  • During bouncing (>2), a bit of water glow is rendered at the floor (index 0).
+ *                  • Background is filled with Color 2 unless “Overlay” is enabled (check2=false → fill background).
+ *                Controls
+ *                  • SX (Speed)     : increases gravitational acceleration magnitude and speeds up “forming” growth.
+ *                  • IX (# of drips): 1..4 active droplets per virtual strip.
+ *                  • Colors         : Color 1 = droplet/stream, Color 2 = background (if overlay off). Palette unused here.
+ *                2D/Virtual strips
+ *                  • Effect is executed per virtual strip; indices are packed with indexToVStrip(index, stripNr).
+ *                Implementation details
+ *                  • Gravity = −0.0005 − SX/50000, scaled by segment length for consistent visuals.
+ *                  • Tail painting uses a small loop ahead of the falling drop with decreasing brightness.
+ * @note        : Converted from WLED Effects "mode_drip".
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Drip()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
@@ -10857,8 +12417,27 @@ uint16_t mAnimatorLight::EffectAnim__Drip()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__DRIP[] PROGMEM = "Drip@Gravity,# of drips,,,,,,,Overlay;!,!;!;;m12=1"; //bar
-static const char PM_EFFECT_DESCRI__DRIP[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__DRIP[] PROGMEM =
+"Drip@"                                        // Name
+"Gravity,# of drips,,,,,,,,Overlay"            // 10 fields after '@' (1=sx,2=ix, 10=overlay toggle displayed via check2)
+";"
+"Bg,Fx"                                        // Segment colour names: Bg = background (C2), Fx = droplet (C1)
+";"
+"!"                                            // Palette picker (not used by the shader, but keep for consistency)
+";"
+"1"                                            // Icon flags: 1D/strip (use with virtual strips / bar mapping m12=1)
+";"
+"paln=Party,"                                  // harmless default
+"sx=128,"                                      // mid gravity/speed
+"ix=96,"                                       // ~2–3 drops
+"m12=1"                                        // bar/virtual mapping
+;
+static const char PM_EFFECT_DESCRI__DRIP[] PROGMEM =
+"Forming droplets fall under gravity and bounce at the bottom; dim source at the top.\n\r"
+"SX: Gravity / forming rate (higher = faster, heavier)\n\r"
+"IX: Number of simultaneous drips per virtual strip\n\r"
+"C1: Droplet color   C2: Background (if Overlay is off)\n\r"
+"Runs per virtual strip; background fill disabled when Overlay is on.";
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -10950,232 +12529,6 @@ static const char PM_EFFECT_DESCRI__WAVESINS[] PROGMEM =
 
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-
-
-// #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-// /********************************************************************************************************************************************************************************************************************
-//  *******************************************************************************************************************************************************************************************************************
-//  * @description : Test case used for developing new animations
-//  * @note : Shows pixels from palette, in order. Gradients can either be displayed over total length of segment, or repeated by X pixels
-//  * 
-//  * @param : "cycle_time__rate_ms" : How often it changes
-//  * @param : "time_ms" : How often it changes
-//  * @param : "pixels to update" : How often it changes
-//  * @param : "cycle_time__rate_ms" : How often it changes 
-//  * 
-//  *******************************************************************************************************************************************************************************************************************
-//  ********************************************************************************************************************************************************************************************************************/
-// uint16_t mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_01()
-// {
-
-
-//  SEGMENT.palette->CRGB16Palette16_Palette.data = Test_p;
-//  tkr_anim->_virtualSegmentLength = 50;
-//  tkr_anim->paletteBlend = 3;
- 
-// uint8_t index = 15;
-
-// uint8_t paletteIndex = 0; 
-
-// CRGB colour;
-//       uint8_t pbri = 255;
-
-//  uint16_t j = 0;
-//  uint16_t i = 0;
-//     tkr_anim->SEGMENT.setPixelColor(j, mPaletteI->GetColourFromPreloadedPalette (SEGMENT.palette_id, i, nullptr, true, false, 10));
-//   for(unsigned i = 0; i < 50; i++) {
-    
-//     j = i;//map(i,0,50,0,255);
-//   //  tkr_anim->SEGMENT.setPixelColor(j, mPaletteI->color_from_palette_internal(0, i, true, true, 10));
-//     // tkr_anim->SEGMENT.setPixelColor(i, mPaletteI->color_from_palette_internal(i, true, true, 10));
-//   index = i;
-  
-// paletteIndex = i*((255/16)-1);//map(i,);//((255/16)*index)-1; 
-// colour = ColorFromPalette_WithLoad( Test_p, paletteIndex, pbri, NOBLEND);
-
-// uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
-
-
-//     tkr_anim->SEGMENT.setPixelColor(i, col);
-  
-//   }
-//     // tkr_anim->SEGMENT.setPixelColor(0, RgbColor(255,0,0));
-//   SEGMENT.cycle_time__rate_ms = FRAMETIME;
-
-// // CRGB colour;
-// //  = ColorFromPalette_WithLoad( Test_p, paletteIndex, pbri, NOBLEND);
-// // ALOG_TST(PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
-
-
-
-
-
-
-
-//   // uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-
-//   // //ALOG_TST(PSTR("dataSize = %d"), dataSize);
-
-//   // if (!SEGMENT.allocateData(dataSize))
-//   // {
-//   //   ALOG_TST(PSTR("Not Enough Memory"));
-//   //   SEGMENT.effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
-//   // }
-  
-  
-//   // // Pick new colours
-//   //  SEGMENT.color_wheelBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette_id, SEGIDX);
-  
-//   // // Get starting positions already on show
-//   // SEGMENT. SEGMENT.color_wheelBuffer_StartingColour_GetAllSegment();
-
-//   // // Call the animator to blend from previous to new
-//   // SetSegment_AnimFunctionCallback(  SEGIDX, 
-//   //   [this](const AnimationParam& param){ 
-//   //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-//   //   }
-//   // );
-
-
-//   SET_DIRECT_MODE();
-  
-
-// }
-
-
-// /********************************************************************************************************************************************************************************************************************
-//  *******************************************************************************************************************************************************************************************************************
-//  * @description : Test case used for developing new animations
-//  * @note : Shows pixels from palette, in order. Gradients can either be displayed over total length of segment, or repeated by X pixels
-//  * 
-//  * @param : "cycle_time__rate_ms" : How often it changes
-//  * @param : "time_ms" : How often it changes
-//  * @param : "pixels to update" : How often it changes
-//  * @param : "cycle_time__rate_ms" : How often it changes 
-//  * 
-//  * Currently using to test all palettes as they are converted into one method
-//  * 
-//  *******************************************************************************************************************************************************************************************************************
-//  ********************************************************************************************************************************************************************************************************************/
-// uint16_t mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
-// {
-
-
-//   ALOG_INF( PSTR("SubTask_Flasher_Animate_Function_Tester_02") );
-
-
-//   // SEGMENT.palette->CRGB16Palette16_Palette.data = Test_p;
-//   // tkr_anim->_virtualSegmentLength = 50;
-//   // tkr_anim->paletteBlend = 3;
-
-//   // uint8_t index = 15;
-
-//   // uint8_t paletteIndex = 0; 
-
-//   // CRGB colour;
-//   // uint8_t pbri = 255;
-
-//   // uint16_t j = 0;
-//   // uint16_t i = 0;
-//   // tkr_anim->SEGMENT.setPixelColor(j, mPaletteI->color_from_pale tte_Intermediate(i, true, false, 10));
-//   // for(unsigned i = 0; i < 50; i++) {
-
-//   //   j = i;//map(i,0,50,0,255);
-//   //   //  tkr_anim->SEGMENT.setPixelColor(j, mPaletteI->color_from_palette_internal(0, i, true, true, 10));
-//   //   // tkr_anim->SEGMENT.setPixelColor(i, mPaletteI->color_from_palette_internal(i, true, true, 10));
-//   //   index = i;
-
-//   //   paletteIndex = i*((255/16)-1);//map(i,);//((255/16)*index)-1; 
-//   //   colour = ColorFromPalette_WithLoad( Test_p, paletteIndex, pbri, NOBLEND);
-
-//   //   uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
-
-
-//   //   tkr_anim->SEGMENT.setPixelColor(i, col, true);
-
-//   // }
-
-//   uint8_t colours_in_palette = 0;
-
-//   RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(tkr_anim->SEGMENT_I(0).palette_id,0,nullptr,true,true,false,255,&colours_in_palette);
-
-//   // RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(mPaletteI->PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,0,nullptr,true,true,255,&colours_in_palette);
-
-//   // SEGMENT.palette_id = mPaletteI->PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID;
-
-//   ALOG_INF( PSTR("pID{%d}, colours_in_palette = %d"), tkr_anim->SEGMENT_I(0).palette_id, colours_in_palette );
-
-//   // SEGMENT.setPixelColor(0,colour,true);
-// //  for(int i=0;i<50;i++)
-// //   {
-// //     SEGMENT.setPixelColor(i, RgbColor(0));
-// //   }
-
-//   for(int i=0;i<256;i++)
-//   {
-
-//     colour = mPaletteI->GetColourFromPaletteAdvanced(tkr_anim->SEGMENT_I(0).palette_id,i,nullptr,true,true,true,255,&colours_in_palette);
-
-//     SEGMENT.setPixelColor(i, colour, true);
-
-//     // ALOG_INF( PSTR("pID{%d}, colours_in_palette = %d"),tkr_anim->SEGMENT_I(0).palette_id, colours_in_palette );
-
-//     // if(i>colours_in_palette)
-//     // {
-//     //   break;
-//     // }
-
-
-//   }
-
-
-
-//     // tkr_anim->SEGMENT.setPixelColor(0, RgbColor(255,0,0));
-//   // SEGMENT.cycle_time__rate_ms = FRAMETIME;
-
-// // CRGB colour;
-// //  = ColorFromPalette_WithLoad( Test_p, paletteIndex, pbri, NOBLEND);
-// // ALOG_TST(PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
-
-
-// // DEBUG_LINE_HERE;
-// #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-//           Serial.print("@1");
-//           #endif 
-// tkr_iLight->ShowInter face();
-
-
-
-
-//   // uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-
-//   // //ALOG_TST(PSTR("dataSize = %d"), dataSize);
-
-//   // if (!SEGMENT.allocateData(dataSize))
-//   // {
-//   //   ALOG_TST(PSTR("Not Enough Memory"));
-//   //   SEGMENT.effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
-//   // }
-  
-  
-//   // // Pick new colours
-//   // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette_id, SEGIDX);
-  
-//   // // Get starting positions already on show
-//   // SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-//   // // Call the animator to blend from previous to new
-//   // SetSegment_AnimFunctionCallback(  SEGIDX, 
-//   //   [this](const AnimationParam& param){ 
-//   //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-//   //   }
-//   // );
-
-
-//   SET_DIRECT_MODE();
-  
-// }
-// #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
@@ -12582,14 +13935,21 @@ static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
    */
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : Converted from WLED Effects
- * Speed slider sets amount of LEDs lit, intensity sets unlit
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Debug: Visualize Busses
+ *                Renders each physical bus in a distinct hue, with a short white index “tag” at the bus start
+ *                (the number of white pixels equals the bus index). Helpful to verify start/length wiring.
+ *                Controls
+ *                  • — (no sliders used)
+ *                Colors
+ *                  • Ignores palette and segment colors; assigns hues per bus and white tags.
+ *                Notes
+ *                  • Logs start/length per bus.
+ *                  • Safe on any 1D segment; does not honor reverse/mirror/grouping.
+ * @note        : Converted from WLED Effects.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
 {
 
@@ -12635,19 +13995,27 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
   
   return FRAMETIME;
   
-}
-static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS[] PROGMEM = "Debug Visualise Bus@Fg size,Bg size;Fg,!;!;;pal=19";
-static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+}static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS[] PROGMEM =
+"Debug: Visualize Busses@!;;";  // no sliders, no segment color pickers, no palette
+static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS[] PROGMEM =
+"Color-codes each physical bus and marks its start with white tag pixels.\n\r"
+"No controls. Use to validate bus ordering and lengths.";
+
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : Converted from WLED Effects
- * Speed slider sets amount of LEDs lit, intensity sets unlit
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Debug: View Pixel Range
+ *                Highlights a contiguous pixel range for inspection (e.g., a suspect span).
+ *                Controls
+ *                  • params_user[0] = start index (inclusive)
+ *                  • params_user[1] = end index   (exclusive)
+ *                Colors
+ *                  • Background = C1 (Primary); highlighted range may be customized in code.
+ *                Notes
+ *                  • Sliders are intentionally unused; range is fed via params_user[].
+ * @note        : Converted from WLED Effects.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting()
 {
   
@@ -12697,18 +14065,30 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM = "Debug Pixel Counting@Fg size,Bg size;Fg,!;!;;pal=19";
-static const char PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
+"Debug: Pixel Range@!;;";  // parameters come from params_user[], not UI
+
+static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
+"Shows a supplied [start,end) pixel range for quick diagnostics.\n\r"
+"Supply indices via params_user[0] and params_user[1].";
+
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Name
- * @note : Converted from WLED Effects
- * Speed slider sets amount of LEDs lit, intensity sets unlit
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Debug: Light-Sensor Indexing
+ *                Alternating runs of “lit” and “unlit” pixels to help a photosensor map physical positions:
+ *                lit run uses the current palette across the strip; unlit run uses Color 2.
+ *                Controls
+ *                  • SX (Lit run length)   : number of consecutive lit pixels
+ *                  • IX (Unlit run length) : number of consecutive unlit pixels
+ *                Colors
+ *                  • Lit = palette gradient; Unlit = C2 (Secondary).
+ *                Notes
+ *                  • Pattern repeats for the full segment; helpful for auto-indexing setups.
+ * @note        : Converted from WLED Effects.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
 {
 
@@ -12756,22 +14136,39 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
   return FRAMETIME;
   
 }
-static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Debug Light Sensor Indexing@Fg size,Bg size;Fg,!;!;;pal=19";
-static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
+"Debug: Sensor Indexing@Lit run,Unlit run;Unlit,!"  // two sliders, name the secondary color
+";"                                                // (no palette row labels)
+"!"                                                // allow palette selection for the lit gradient
+";"
+"1"                                                // 1D icon flag
+;
+
+static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
+"Alternates lit (palette) and unlit (C2) runs for camera/light-sensor mapping.\n\r"
+"SX: Lit run length   IX: Unlit run length";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
 
-/*******************************************************************************************************************************************************************************************************************
- * @description : Manual__PixelSetElsewhere
- * @note : Temporary effect before realtime can take over
- ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-uint16_t mAnimatorLight::EffectAnim__Manual__ControlledFromAnotherModule()
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Module Controlled (no-op)
+ *                Placeholder effect that renders nothing; intended for external/realtime modules to take over pixel control.
+ *                Controls
+ *                  • — (no sliders used)
+ *                Notes
+ *                  • Leaves the frame timing active but does not draw.
+ * @note        : Temporary effect before realtime can take over.
+ *******************************************************************************************************************************************************************************************************************/
+ uint16_t mAnimatorLight::EffectAnim__Manual__ControlledFromAnotherModule()
 {  
   return FRAMETIME; 
 }
-static const char PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM = "Module Controlled@Fg size,Bg size;Fg,!;!;;";
-static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM =
+"Module Controlled@!;;";
+
+static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM =
+"Does not render; reserved for external/realtime control.";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
 
 
@@ -16562,21 +17959,21 @@ void mAnimatorLight::LoadEffects()
   //           #endif
   //           Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__SPOTS__ID,
-  //           &mAnimatorLight::EffectAnim__Spots,
-  //           PM_EFFECT_CONFIG__SPOTS,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__SPOTS,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__SPOTS__ID,
+            &mAnimatorLight::EffectAnim__Spots,
+            PM_EFFECT_CONFIG__SPOTS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SPOTS,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PERCENT__ID,
-  //           &mAnimatorLight::EffectAnim__Percent,
-  //           PM_EFFECT_CONFIG__PERCENT,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PERCENT,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PERCENT__ID,
+            &mAnimatorLight::EffectAnim__Percent,
+            PM_EFFECT_CONFIG__PERCENT,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PERCENT,
+            #endif
+            Effect_DevStage::Dev);
 
   // addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         
   //           &mAnimatorLight::EffectAnim__Random_Colour,                         
@@ -16586,16 +17983,16 @@ void mAnimatorLight::LoadEffects()
   //           #endif
   //           Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,
-  //           &mAnimatorLight::EffectAnim__TriColour_Wipe,
-  //           PM_EFFECT_CONFIG__TRICOLOR_WIPE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TRICOLOR_WIPE,
-  //           #endif
-  //           Effect_DevStage::Dev);
-  // /**
-  //  * Wipe/Sweep/Runners 
-  //  **/
+  addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,
+            &mAnimatorLight::EffectAnim__TriColour_Wipe,
+            PM_EFFECT_CONFIG__TRICOLOR_WIPE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TRICOLOR_WIPE,
+            #endif
+            Effect_DevStage::Dev);
+  /**
+   * Wipe/Sweep/Runners 
+   **/
   // addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,
   //           &mAnimatorLight::EffectAnim__Colour_Wipe,
   //           PM_EFFECT_CONFIG__COLOR_WIPE,
@@ -16684,29 +18081,29 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);            
   
-  // addEffect(EFFECTS_FUNCTION__ANDROID__ID,               
-  //           &mAnimatorLight::EffectAnim__Android,            
-  //           PM_EFFECT_CONFIG__ANDROID,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__ANDROID,
-  //           #endif
-  //           Effect_DevStage::Dev);  
+  addEffect(EFFECTS_FUNCTION__ANDROID__ID,               
+            &mAnimatorLight::EffectAnim__Android,            
+            PM_EFFECT_CONFIG__ANDROID,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__ANDROID,
+            #endif
+            Effect_DevStage::Dev);  
 
-  // addEffect(EFFECTS_FUNCTION__GRADIENT__ID,
-  //           &mAnimatorLight::EffectAnim__Gradient,
-  //           PM_EFFECT_CONFIG__GRADIENT,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__GRADIENT,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__GRADIENT__ID,
+            &mAnimatorLight::EffectAnim__Gradient,
+            PM_EFFECT_CONFIG__GRADIENT,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__GRADIENT,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__LOADING__ID,
-  //           &mAnimatorLight::EffectAnim__Loading,
-  //           PM_EFFECT_CONFIG__LOADING,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__LOADING,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__LOADING__ID,
+            &mAnimatorLight::EffectAnim__Loading,
+            PM_EFFECT_CONFIG__LOADING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__LOADING,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__ROLLINGBALLS__ID,
             &mAnimatorLight::EffectAnim__Rolling_Balls,
@@ -16716,133 +18113,133 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__FAIRY__ID,
-  //           &mAnimatorLight::EffectAnim__Fairy,
-  //           PM_EFFECT_CONFIG__FAIRY,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__FAIRY,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__FAIRY__ID,
+            &mAnimatorLight::EffectAnim__Fairy,
+            PM_EFFECT_CONFIG__FAIRY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__FAIRY,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__TWO_DOTS__ID,
-  //           &mAnimatorLight::EffectAnim__Two_Dots,
-  //           PM_EFFECT_CONFIG__TWO_DOTS,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWO_DOTS,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__TWO_DOTS__ID,
+            &mAnimatorLight::EffectAnim__Two_Dots,
+            PM_EFFECT_CONFIG__TWO_DOTS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWO_DOTS,
+            #endif
+            Effect_DevStage::Dev);
             
-  // addEffect(EFFECTS_FUNCTION__MULTI_COMET__ID,
-  //           &mAnimatorLight::EffectAnim__Multi_Comet,
-  //           PM_EFFECT_CONFIG__MULTI_COMET,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__MULTI_COMET,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__MULTI_COMET__ID,
+            &mAnimatorLight::EffectAnim__Multi_Comet,
+            PM_EFFECT_CONFIG__MULTI_COMET,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__MULTI_COMET,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__OSCILLATE__ID,
-  //           &mAnimatorLight::EffectAnim__Oscillate,
-  //           PM_EFFECT_CONFIG__OSCILLATE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__OSCILLATE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__OSCILLATE__ID,
+            &mAnimatorLight::EffectAnim__Oscillate,
+            PM_EFFECT_CONFIG__OSCILLATE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__OSCILLATE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__BPM__ID,
-  //           &mAnimatorLight::EffectAnim__BPM,
-  //           PM_EFFECT_CONFIG__BPM,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__BPM,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__BPM__ID,
+            &mAnimatorLight::EffectAnim__BPM,
+            PM_EFFECT_CONFIG__BPM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__BPM,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__JUGGLE__ID,
-  //           &mAnimatorLight::EffectAnim__Juggle,
-  //           PM_EFFECT_CONFIG__JUGGLES,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__JUGGLES,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__JUGGLE__ID,
+            &mAnimatorLight::EffectAnim__Juggle,
+            PM_EFFECT_CONFIG__JUGGLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__JUGGLE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PALETTE__ID,
-  //           &mAnimatorLight::EffectAnim__Palette,
-  //           PM_EFFECT_CONFIG__PALETTE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PALETTE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PALETTE__ID,
+            &mAnimatorLight::EffectAnim__Palette,
+            PM_EFFECT_CONFIG__PALETTE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PALETTE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COLORWAVES__ID,
-  //           &mAnimatorLight::EffectAnim__ColourWaves,
-  //           PM_EFFECT_CONFIG__COLORWAVES,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLORWAVES,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__COLORWAVES__ID,
+            &mAnimatorLight::EffectAnim__ColourWaves,
+            PM_EFFECT_CONFIG__COLORWAVES,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLORWAVES,
+            #endif
+            Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__LAKE__ID,
-  //           &mAnimatorLight::EffectAnim__Lake,
-  //           PM_EFFECT_CONFIG__LAKE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__LAKE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__LAKE__ID,
+            &mAnimatorLight::EffectAnim__Lake,
+            PM_EFFECT_CONFIG__LAKE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__LAKE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__GLITTER__ID,
-  //           &mAnimatorLight::EffectAnim__Glitter,
-  //           PM_EFFECT_CONFIG__GLITTER,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__GLITTER,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__GLITTER__ID,
+            &mAnimatorLight::EffectAnim__Glitter,
+            PM_EFFECT_CONFIG__GLITTER,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__GLITTER,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__METEOR__ID,
-  //           &mAnimatorLight::EffectAnim__Meteor,
-  //           PM_EFFECT_CONFIG__METEOR,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__METEOR,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__METEOR__ID,
+            &mAnimatorLight::EffectAnim__Meteor,
+            PM_EFFECT_CONFIG__METEOR,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__METEOR,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PRIDE_2015__ID,
-  //           &mAnimatorLight::EffectAnim__Pride_2015,
-  //           PM_EFFECT_CONFIG__PRIDE_2015,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PRIDE_2015,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PRIDE_2015__ID,
+            &mAnimatorLight::EffectAnim__Pride_2015,
+            PM_EFFECT_CONFIG__PRIDE_2015,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PRIDE_2015,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PACIFICA__ID,
-  //           &mAnimatorLight::EffectAnim__Pacifica,
-  //           PM_EFFECT_CONFIG__PACIFICA,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PACIFICA,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__PACIFICA__ID,
+            &mAnimatorLight::EffectAnim__Pacifica,
+            PM_EFFECT_CONFIG__PACIFICA,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PACIFICA,
+            #endif
+            Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__SUNRISE__ID,
-  //           &mAnimatorLight::EffectAnim__Sunrise,
-  //           PM_EFFECT_CONFIG__SUNRISE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__SUNRISE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__SUNRISE__ID,
+            &mAnimatorLight::EffectAnim__Sunrise,
+            PM_EFFECT_CONFIG__SUNRISE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SUNRISE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__SINEWAVE__ID,
-  //           &mAnimatorLight::EffectAnim__Sinewave,
-  //           PM_EFFECT_CONFIG__SINEWAVE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__SINEWAVE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__SINEWAVE__ID,
+            &mAnimatorLight::EffectAnim__Sinewave,
+            PM_EFFECT_CONFIG__SINEWAVE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SINEWAVE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__FLOW__ID,
-  //           &mAnimatorLight::EffectAnim__Flow,
-  //           PM_EFFECT_CONFIG__FLOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__FLOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__FLOW__ID,
+            &mAnimatorLight::EffectAnim__Flow,
+            PM_EFFECT_CONFIG__FLOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__FLOW,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__RUNNING_LIGHTS__ID,
             &mAnimatorLight::EffectAnim__Running_Lights,
@@ -16954,40 +18351,40 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,
-  //           &mAnimatorLight::EffectAnim__Fade_TriColour,
-  //           PM_EFFECT_CONFIG__TRICOLOR_FADE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TRICOLOR_FADE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,
+            &mAnimatorLight::EffectAnim__Fade_TriColour,
+            PM_EFFECT_CONFIG__TRICOLOR_FADE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TRICOLOR_FADE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__FADE_SPOTS__ID,
-  //           &mAnimatorLight::EffectAnim__Fade_Spots,
-  //           PM_EFFECT_CONFIG__SPOTS_FADE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__SPOTS_FADE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__FADE_SPOTS__ID,
+            &mAnimatorLight::EffectAnim__Fade_Spots,
+            PM_EFFECT_CONFIG__SPOTS_FADE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SPOTS_FADE,
+            #endif
+            Effect_DevStage::Dev);
   
-  // /**
-  //  * Sparkle/Twinkle
-  //  **/
-  // addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,
-  //           &mAnimatorLight::EffectAnim__Solid_Glitter,
-  //           PM_EFFECT_CONFIG__SOLID_GLITTER,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__SOLID_GLITTER,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  /**
+   * Sparkle/Twinkle
+   **/
+  addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,
+            &mAnimatorLight::EffectAnim__Solid_Glitter,
+            PM_EFFECT_CONFIG__SOLID_GLITTER,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SOLID_GLITTER,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__POPCORN__ID,
-  //           &mAnimatorLight::EffectAnim__Popcorn,
-  //           PM_EFFECT_CONFIG__POPCORN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__POPCORN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__POPCORN__ID,
+            &mAnimatorLight::EffectAnim__Popcorn,
+            PM_EFFECT_CONFIG__POPCORN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__POPCORN,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__GLOWSPOTS__ID,
             &mAnimatorLight::EffectAnim__GlowSpots,
@@ -16997,13 +18394,13 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PLASMA__ID,
-  //           &mAnimatorLight::EffectAnim__Plasma,
-  //           PM_EFFECT_CONFIG__PLASMA,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PLASMA,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PLASMA__ID,
+            &mAnimatorLight::EffectAnim__Plasma,
+            PM_EFFECT_CONFIG__PLASMA,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PLASMA,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__SPARKLE__ID,
             &mAnimatorLight::EffectAnim__Sparkle,
@@ -17059,29 +18456,29 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Alpha);
             
-  // addEffect(EFFECTS_FUNCTION__TWINKLE_FAIRY__ID,
-  //           &mAnimatorLight::EffectAnim__Twinkle_Fairy,
-  //           PM_EFFECT_CONFIG__TWINKLE_FAIRY,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWINKLE_FAIRY,
-  //           #endif
-  //           Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_FAIRY__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Fairy,
+            PM_EFFECT_CONFIG__TWINKLE_FAIRY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWINKLE_FAIRY,
+            #endif
+            Effect_DevStage::Alpha);
             
-  // addEffect(EFFECTS_FUNCTION__TWINKLE__ID,
-  //           &mAnimatorLight::EffectAnim__Twinkle,
-  //           PM_EFFECT_CONFIG__TWINKLE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWINKLE,
-  //           #endif
-  //           Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE__ID,
+            &mAnimatorLight::EffectAnim__Twinkle,
+            PM_EFFECT_CONFIG__TWINKLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWINKLE,
+            #endif
+            Effect_DevStage::Alpha);
 
-  // addEffect(EFFECTS_FUNCTION__TWINKLE_COLOUR__ID,
-  //           &mAnimatorLight::EffectAnim__Twinkle_Colour,
-  //           PM_EFFECT_CONFIG__TWINKLE_COLOUR,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWINKLE_COLOUR,
-  //           #endif
-  //           Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_COLOUR__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Colour,
+            PM_EFFECT_CONFIG__TWINKLE_COLOUR,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWINKLE_COLOUR,
+            #endif
+            Effect_DevStage::Alpha);
 
   // addEffect(EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
   //           &mAnimatorLight::EffectAnim__Twinkle_Smooth,
@@ -17107,13 +18504,13 @@ void mAnimatorLight::LoadEffects()
   //           #endif
   //           Effect_DevStage::Alpha);
 
-  // addEffect(EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
-  //           &mAnimatorLight::EffectAnim__Halloween_Eyes,
-  //           PM_EFFECT_CONFIG__HALLOWEEN_EYES,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__HALLOWEEN_EYES,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
+            &mAnimatorLight::EffectAnim__Halloween_Eyes,
+            PM_EFFECT_CONFIG__HALLOWEEN_EYES,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HALLOWEEN_EYES,
+            #endif
+            Effect_DevStage::Release);
 
   addEffect(EFFECTS_FUNCTION__SAW__ID,
             &mAnimatorLight::EffectAnim__Saw,
@@ -17123,29 +18520,29 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DISSOLVE__ID,
-  //           &mAnimatorLight::EffectAnim__Dissolve,
-  //           PM_EFFECT_CONFIG__DISSOLVE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DISSOLVE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DISSOLVE__ID,
+            &mAnimatorLight::EffectAnim__Dissolve,
+            PM_EFFECT_CONFIG__DISSOLVE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DISSOLVE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID,
-  //           &mAnimatorLight::EffectAnim__Dissolve_Random,
-  //           PM_EFFECT_CONFIG__DISSOLVE_RANDOM,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DISSOLVE_RANDOM,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID,
+            &mAnimatorLight::EffectAnim__Dissolve_Random,
+            PM_EFFECT_CONFIG__DISSOLVE_RANDOM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DISSOLVE_RANDOM,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__TRIPOPS__ID,
-  //           &mAnimatorLight::EffectAnim__TriPops,
-  //           PM_EFFECT_CONFIG__TRIPOPS,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TRIPOPS,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__TRIPOPS__ID,
+            &mAnimatorLight::EffectAnim__TriPops,
+            PM_EFFECT_CONFIG__TRIPOPS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TRIPOPS,
+            #endif
+            Effect_DevStage::Dev);
 
   /**
    * Fireworks
