@@ -1085,6 +1085,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Hardware__Manual_Pixel_Counting();
     uint16_t EffectAnim__Hardware__View_Pixel_Range();
     uint16_t EffectAnim__Hardware__Light_Sensor_Pixel_Indexing();
+    void LightSensorIndexing__SaveResults_To_File();
+    void LightSensorIndexing__LoadResults_To_File();
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
     uint16_t EffectAnim__SunPositions__Sunrise_Alarm_01();

@@ -196,6 +196,29 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA // FORCE ON
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#ifdef FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING     
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+    // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+  #define USE_MAXELEVATION_CALC_JULY2025
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING
+
+#endif
+
+
+
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
   
   // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE // Inherit base config
@@ -281,7 +304,9 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
   // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES // need to introduce a basic/lite version when only being used for palettes.
   // this is probably the angles etc, so module needs split effeciently for full data, or just palette info very minute for performance
+  #ifndef USE_MODULE_SENSORS_SUN_TRACKING
   #define USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE
+  #endif
   
   #define ENABLE_NEW_LIVE_PALETTES
 
@@ -407,25 +432,6 @@ This enables switching to newer firmware versions, but falling back when an issu
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-
-#ifdef FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-
-  #define USE_MODULE_SENSORS_SUN_TRACKING     
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-    // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
-
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-  #define USE_MAXELEVATION_CALC_JULY2025
-
-  #define USE_MODULE_SENSORS_SUN_TRACKING
-
-#endif
 
 
 

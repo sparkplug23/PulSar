@@ -15,18 +15,28 @@
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 /********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description           : Solid Colour
- * @description:   : For full RGBCCT colour
+ * @function              : EffectAnim__Solid_Colour
+ * @description           : 
+ *   A static solid-colour effect that fills the entire segment with a single colour. 
+ *   Supports both classic RGB/WRGB (uint32_t) colour modes and extended RGBWW (RgbwwColor) 
+ *   depending on the configured colour width.  
  * 
- * Keeping both U32/RGBWW modes here, as its a useful demonstration of both coldata methods
- * The lower level wrapper will handle the colour conversion 
- * Enable the colour palette, with default segcol "Colour 01", with 1 second refresh and no blend for instant colour change and low memory usage
+ *   For RGB/WRGB:
+ *     - Uses `SEGMENT.GetPaletteColour_ModeWrap()` to retrieve the target palette colour.
+ *     - Stores both the starting colour (current pixels) and desired colour into the dynamic buffer.
  * 
- * @param Intensity: None
- * @param Speed    : None
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+ *   For RGBWW:
+ *     - Uses `SEGMENT.GetPaletteColour_RGBWW()` to retrieve the target colour in full RGBCCT format.
+ *     - Stores starting and desired values into the transition buffer with `RgbwwColor` support.  
+ * 
+ *   The blending between colours is handled by the segment’s animation callback, which applies a 
+ *   linear transition from the starting colour to the desired colour. This enables smooth palette 
+ *   updates or instant changes (depending on configuration).
+ * 
+ * @notes
+ *   - Demonstrates dual colour handling: `uint32_t` (RGB/WRGB) and `RgbwwColor` (RGB+CCT).
+ *   - Palette mode defaults to "Colour 01" with no blend, low memory use, and 1-second refresh.
+ * ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Solid_Colour() 
 {
  
@@ -34,6 +44,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
 
   // Retrieve the desired color from the palette
   if (SEGMENT.colour_width__used_in_effect_generate == ColourType::COLOUR_TYPE__RGBWW__ID) {
+
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
     RgbwwColor desiredColour = SEGMENT.GetPaletteColour_RGBWW();
     RgbwwColor startingColour = SEGMENT.getPixelColorRgbww(0);
@@ -53,7 +64,9 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
     // Serial.printf("Solid Colour RGBWW %d,%d,%d\n\r", desiredColour.R, desiredColour.G, desiredColour.B); 
     AddLog_Array_Block(3, PSTR("Data()"), SEGMENT.Data(), SEGMENT.DataLength(), 5, true);
     #endif
+
   } else {
+
     // Handle RGB/WRGB cases
     uint32_t desiredColour  = SEGMENT.GetPaletteColour_ModeWrap(0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     uint32_t startingColour = SEGMENT.getPixelColor(0);
@@ -66,6 +79,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
     SEGMENT.Set_DynamicBuffer_StartingColour(0, startingColour);
     // AddLog_Array_Block(3, PSTR("ColourData()"), SEGMENT.ColourData(), SEGMENT.ColourDataLength(), 6, true);
     // AddLog_Array_Block(3, PSTR("Data()"), SEGMENT.ColourData(), 24, 6, true);
+
   }
 
   // Set up the animation function callback
@@ -81,21 +95,27 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
 
 }
 static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM =
-"Solid@"                                      // Name
-"Speed,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-";"                                           // ----------------------------------------- Sliders/SegCols
-""                                           // Segment Colour Names, "" Show all by sending blank
-";"                                           // ----------------------------------------- SegCols/PalPicker
-"!"                                           // palette picker (primary palette)
-";"                                           // ----------------------------------------- PalPicker/is1D2D
-"0"                                           // icon flags: '1' -> 1D/strip
-";"                                           // ----------------------------------------- is1D2D/Defaults
-"pal=0,"
-"sx=255,"
-"ix=200,"
-"ep=100"
-;                                             // end special key=value defaults
-static const char PM_EFFECT_DESCRI__SOLID_COLOUR[] PROGMEM = "RGBW&CCT";
+"Solid Colour@"                                // Name
+"Speed,Intensity,,,,,,,!,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                            // ----------------------------------------- Sliders/SegCols
+""                                             // Segment Colour Names (blank = show all)
+";"                                            // ----------------------------------------- SegCols/PalPicker
+"!"                                            // Palette picker (primary)
+";"                                            // ----------------------------------------- PalPicker/is1D2D
+"0"                                            // Icon flags
+";"                                            // ----------------------------------------- is1D2D/Defaults
+"pal=0,"                                       // default palette id
+"sx=255,"                                      // Speed (unused here)
+"ix=200,"                                      // Intensity (unused here)
+"ep=100"                                       // Extra param (e.g., 1s refresh in your system)
+;                                              // end
+static const char PM_EFFECT_DESCRI__SOLID_COLOUR[] PROGMEM =
+"Solid colour fill for RGB/WRGB/RGBWW.\n\r"
+"Uses the active palette (segcol \"Colour 01\" by default); lower layer handles RGBCCT conversion.\n\r"
+"Instant colour changes (no blend), low memory.\n\r"
+"SX: —\n\r"
+"IX: —"
+;
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -212,8 +232,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette__NoBlend()
 }
 
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
+/*******************************************************************************************************************************************************************************************************************
  * @description    : Static Palette
  * @description:   : Static palette with per-pixel colour variation driven by Intensity.
  *                   Mimics “aged/vintage” bulbs by jittering each channel within a bounded range.
@@ -221,7 +240,6 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette__NoBlend()
  *
  * @param Intensity: 0..255 → ±0..80 channel jitter (clamped per channel)
  * @param time     : Blend time on first/only update (not used here; this draws once)
- *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palette_Variation()
 {
@@ -494,7 +512,7 @@ static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "GP:!";
 
 
-/**
+/************************************************************************************************************************************
  * @brief
  *   EffectAnim__Randomise_Gradient_Palette_SegWidth
  * 
@@ -515,7 +533,7 @@ static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
  * NOTE: Takes control of palette, so palette selector is not active
  * 
  * @return uint16_t - result of `EffectAnim__Bands_Palette_SegWidth()`
- */
+ ***********************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
 {
 
@@ -1388,7 +1406,6 @@ static const char PM_EFFECT_DESCRI__ROTATING_PALETTE[] PROGMEM =
 "Hard edge: no blend seam";
 
 
-
 /**********************************************************************************************************************************************************************************
  * SUMMARY
  *   EffectAnim__Stepping_Palette
@@ -2238,7 +2255,6 @@ static const char PM_EFFECT_CONFIG__TWINKLE_OUT[] PROGMEM =
 "c1=128,"
 "s1=0"
 ;
-
 static const char PM_EFFECT_DESCRI__TWINKLE_OUT[] PROGMEM =
 "Instant-on twinkles that wink out toward the background.\n\r"
 "SX: Base timing (spawn/decay cadence)\n\r"
@@ -2863,20 +2879,100 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
   return FRAMETIME;
 }
 
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Sun Elevation (Day)
+ *                Draws a centered “sun” disc across a 1D strip, with surrounding sky gradient.
+ *                Controls
+ *                  • SX (Sun Width) : diameter of the sun core
+ *                  • IX (Sky Width) : span of the surrounding sky
+ *                  • Sky Fade       : gradient falloff into background
+ *                  • Use Palette    : enable palette-based coloring instead of fixed colors
+ *                  • Mirror         : mirror sky colors around the center
+ *                  • Markers        : toggle sun/sky boundary markers
+ *                Colors
+ *                  • C1 = Sun core color
+ *                  • C2 = Sky base color
+ *                Notes
+ *                  • Default = no palette, mirror on.
+ * @note        : Converted from WLED Effects (customized for elevation/day).
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
 {
   return EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(false);
 }
-static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Sun Elevation Day@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,;;name of palette;1;ep=1000,paln=Yellow,ix=0,c1=186,c2=50,o1=0,o3=1"; // default not to use palette, enable mirror of colours
-static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM =
+"Sun Elevation Day@"
+",Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,"
+";"
+""                                  // Segment Colour Names (none)
+";"
+"name of palette"                   // Palette picker label
+";"
+"1"                                 // icon flags: 1D/strip
+";"
+"ep=1000,"                          // defaults
+"paln=Yellow,"
+"ix=0,"
+"c1=186,"
+"c2=50,"
+"o1=0,"
+"o3=1"
+;
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM =
+"Sun elevation daytime renderer\n\r"
+"SX: Sun width\n\r"
+"IX: Sky width\n\r"
+"Extra: Sky fade, palette toggle, mirror/markers\n\r"
+"C1: Sun color\n\r"
+"C2: Sky color";
 
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Sun Elevation (Dusk/Dawn)
+ *                Variant of the Day effect, with extended blending for dusk and dawn transitions.
+ *                Controls
+ *                  • SX (Sun Width) : diameter of the sun disc
+ *                  • IX (Sky Width) : span of blended dusk/dawn sky
+ *                  • Sky Fade       : transition smoothness into night background
+ *                  • Use Palette    : palette-based color blending
+ *                  • Mirror         : mirror sky gradient around center
+ *                  • Markers        : show/hide markers at sun/sky boundaries
+ *                Colors
+ *                  • C1 = Sun glow color
+ *                  • C2 = Sky horizon color
+ *                Notes
+ *                  • Defaults favor smoother transitions with mirrored colors.
+ * @note        : Converted from WLED Effects (customized for elevation/dusk-dawn).
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
 {
   return EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(true);
 }// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
-static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM = "Sun Elevation DuskDawn@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,;;name of palette;1;ep=1000,paln=Yellow,ix=0,c1=186,c2=50,o1=0,o3=1";
-static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM =
+"Sun Elevation DuskDawn@"
+",Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,"
+";"
+""                                  // Segment Colour Names (none)
+";"
+"name of palette"                   // Palette picker label
+";"
+"1"                                 // icon flags: 1D/strip
+";"
+"ep=1000,"                          // defaults
+"paln=Yellow,"
+"ix=0,"
+"c1=186,"
+"c2=50,"
+"o1=0,"
+"o3=1"
+;
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM =
+"Sun elevation dusk/dawn renderer with extended blending\n\r"
+"SX: Sun width\n\r"
+"IX: Sky width\n\r"
+"Extra: Fade, palette, mirror/markers\n\r"
+"C1: Sun glow\n\r"
+"C2: Horizon color";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
 
@@ -13202,806 +13298,194 @@ static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
-/**
- * @brief
- * Uses a segments four RGBCCT colours to describe the four corners of a rear/edge lit backlight (e.g. a gradient ambilight)
- **/
-
-// // Limit ambilight to addressible type, else I will just use "scene"
-// uint16_t mAnimatorLight::init_Ambilight(){
-
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(tkr_iLight->HUE_N2F(8),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(330),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
-//   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
-//   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
-//   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
-
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(50));
-
-
-
-//   #ifdef   DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
-  
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(tkr_iLight->HUE_N2F(0),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(340),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(120),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].top.size = 42;
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 44; // 2 extra pixels on centre inlay
-//   ambilightsettings.screens[SCREEN_CENTRE].left.size = 23;
-//   ambilightsettings.screens[SCREEN_CENTRE].right.size = 23;
-//   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 0;
-//   ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage = 0;
-
-
-//   #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
-
-//   #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(tkr_iLight->HUE_N2F(8),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(tkr_iLight->HUE_N2F(240),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(tkr_iLight->HUE_N2F(330),tkr_iLight->SatN2F(100),tkr_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
-//   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
-//   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
-//   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
-
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(tkr_iLight->HUE_N2F(20),tkr_iLight->SatN2F(95),tkr_iLight->BrtN2F(50));
-
-
-
-
-//   #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
-  
-
-// }
-
-// uint16_t mAnimatorLight::SubTask_Ambilight_Main(){
-
-//   // Add mode to allow orientations, for when screens rotate so they respect top/bottom
-
-//   // if(abs(millis()-ambilightsettings.tSavedUpdate)>ambilightsettings.ratemsSavedUpdate){ambilightsettings.tSavedUpdate=millis();
-//   //   ALOG_DBG(PSTR(D_LOG_NEO "ambilight"));
-//   // }
-
-  
-//   // ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbColor(255,0,0);
-//   // ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbColor(0,255,0); 
-//   // ambilightsettings.screens[SCREEN_CENTRE].left.colour   = RgbColor(0,0,255);
-//   // ambilightsettings.screens[SCREEN_CENTRE].right.colour  = RgbColor(255,0,255);
-
-
-//   //switch modes : USE presets
-//   switch(ambilightsettings.ambilight_mode){
-//     case AMBILIGHT_PRESETS_ID:
-
-//     break;
-//     case AMBILIGHT_SIDES_ID: // IE DELL of dual tone from the past
-//       // not even splits, setting split point (ie bottom edge only 0%, 25% way up sides, half way 50%)
-//       if(abs(millis()-ambilightsettings.tSavedUpdate)>ambilightsettings.ratemsSavedUpdate){ambilightsettings.tSavedUpdate=millis();
-//         ALOG_DBG(PSTR(D_LOG_NEO "ambilight"));
-//         Ambilight_Sides();
-//         StartAnimationAsBlendFromStartingColorToDesiredColor();
-//       }
-//     break;
-//     case AMBILIGHT_INPUT_STREAM_ID:{
-//       //serial input
-//     }break;
-//   }
-
-// } // END function
-
-
-
-
-// uint16_t mAnimatorLight::Ambilight_Sides(){
-//   #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   ALOG_DBG(PSTR(D_LOG_NEO "f::Ambilight_Sides()"));
-//   #endif
-
-
-//   #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_RIGHT
-
-//   float progress;
-//   RgbcctColor colour_tmp;
-
-//   uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
-//   uint8_t bottom_start = 0;
-//   for(int bottom=0;bottom<bottom_size;bottom++){
-//     animation_colours[bottom_start+bottom].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
-//   }
-
-//   uint8_t left_size = ambilightsettings.screens[SCREEN_CENTRE].left.size;
-//   uint8_t left_start = 33;
-//   for(int left=0;left<left_size;left++){
-//     //if(ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage>=0){ //if set
-//       progress = (float)(left)/(float)(left_size);
-//       colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-//                                          RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-//                                          progress);
-//     //}
-//     animation_colours[left_start+left].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].left.colour;
-//   }
-
-//   uint8_t top_size = ambilightsettings.screens[SCREEN_CENTRE].top.size;
-//   uint8_t top_start = 52;
-//   for(int top=0;top<top_size;top++){
-//     animation_colours[top_start+top].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
-//   }
-
-//   uint8_t right_size = ambilightsettings.screens[SCREEN_CENTRE].right.size;
-//   uint8_t right_start = 85;
-//   for(int right=0;right<right_size;right++){
-//     progress = (float)(right)/(float)(right_size);
-//     colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-//                                        RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-//                                        progress);
-//     animation_colours[right_start+right].DesiredColour = colour_tmp;
-//   }
-
-  
-//      // #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-//       for(int i=0;i<STRIP_SIZE_MAX;i++)
-//       {
-//         // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
-//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global());
-
-// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global(), tkr_iLight->getBriCCT_Global());
-
-//         // }
-//       }
-//  //     #endif
-
-
-
-//   #endif
-
-  
-//   #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
-
-
-//   switch(1)
-//   {
-//     case 0: // method 4 different sides
-//     { 
-
-//       float progress;
-//       RgbcctColor colour_tmp;
-
-//       uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
-//       uint8_t bottom_start = 0;
-//       for(int bottom=0;bottom<bottom_size;bottom++){
-//         animation_colours[bottom_start+bottom].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
-//       }
-
-//       uint8_t right_size = ambilightsettings.screens[SCREEN_CENTRE].right.size;
-//       uint8_t right_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
-//       for(int right=0;right<right_size;right++){
-//         //if(ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage>=0){ //if set
-//           // progress = (float)(right)/(float)(right_size);
-//           // colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-//           //                                    RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-//           //                                    progress);
-//         //}
-//         // animation_colours[right_start+right].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].right.colour;
-//         animation_colours[right_start+right].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].right.colour;
-//       }
-
-//       uint8_t top_size = ambilightsettings.screens[SCREEN_CENTRE].top.size;
-//       uint8_t top_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size+ambilightsettings.screens[SCREEN_CENTRE].right.size;
-//       for(int top=0;top<top_size;top++){
-//         animation_colours[top_start+top].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
-//       }
-
-//       uint8_t left_size = ambilightsettings.screens[SCREEN_CENTRE].left.size;
-//       uint8_t left_start = top_start + top_size;
-//       for(int left=0;left<left_size;left++){
-//         // progress = (float)(left)/(float)(left_size);
-//         // colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-//         //                                    RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-//         //                                    progress);
-//         // animation_colours[left_start+left].DesiredColour = colour_tmp;
-//         animation_colours[left_start+left].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].left.colour;;
-//       }
-
-//       // animation_colours[0].DesiredColour = RgbColor(255,0,0);
-//       // animation_colours[43].DesiredColour = RgbColor(255,0,0);
-
-//       // animation_colours[44].DesiredColour = RgbColor(0,255,0);
-//       // animation_colours[66].DesiredColour = RgbColor(0,255,0);
-
-//       // animation_colours[67].DesiredColour = RgbColor(0,0,255);
-//       // animation_colours[108].DesiredColour = RgbColor(0,0,255);
-
-//       // animation_colours[109].DesiredColour = RgbwColor(0,0,0,255);
-//       // animation_colours[130].DesiredColour = RgbwColor(0,0,0,255);
-      
-//       // animation_colours[131].DesiredColour = RgbwColor(255,0,0,255);
-//       // animation_colours[132].DesiredColour = RgbwColor(0,255,0,255);
-//       // animation_colours[133].DesiredColour = RgbwColor(0,0,255,255);
-//       // animation_colours[131].DesiredColour = RgbwColor(255,0,255,255);
-      
-//       }
-//       break;
-//       case 1: //blend top and bottom colour only, sides are linear
-//       {
-
-
-//       float progress;
-//       RgbcctColor colour_tmp;
-
-//       uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
-//       uint8_t bottom_start = 0;
-//       for(int bottom=0;bottom<bottom_size;bottom++){
-//         animation_colours[bottom_start+bottom].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
-//       }
-
-//       uint8_t right_size = ambilightsettings.screens[SCREEN_CENTRE].right.size;
-//       uint8_t right_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
-//       for(int right=0;right<right_size;right++){
-//         if(ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage>=0){ //if set
-//           progress = (float)(right)/(float)(right_size);
-//           colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-//                                              RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-//                                              progress);
-//         }
-//         animation_colours[right_start+right].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].right.colour;
-//         // animation_colours[right_start+right].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].right.colour;
-//       }
-
-//       uint8_t top_size = ambilightsettings.screens[SCREEN_CENTRE].top.size;
-//       uint8_t top_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size+ambilightsettings.screens[SCREEN_CENTRE].right.size;
-//       for(int top=0;top<top_size;top++){
-//         animation_colours[top_start+top].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
-//       }
-
-//       uint8_t left_size = ambilightsettings.screens[SCREEN_CENTRE].left.size;
-//       uint8_t left_start = top_start + top_size;
-//       for(int left=0;left<left_size;left++){
-//         progress = (float)(left)/(float)(left_size);
-//         colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-//                                            RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-//                                            progress);
-//         animation_colours[left_start+left].DesiredColour = colour_tmp;
-//         // animation_colours[left_start+left].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].left.colour;;
-//       }
-
-//       #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-//       for(int i=0;i<STRIP_SIZE_MAX;i++)
-//       {
-//         // if(tkr_iLight->animation.flags.brightness_applied_during_colour_generation){
-//           // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global());
-
-// animation_colours[i].DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, tkr_iLight->getBriRGB_Global(), tkr_iLight->getBriCCT_Global());
-
-//         // }
-//       }
-//       #endif
-
-//       }
-//       break;
-//   }//end switch
-
-//   #endif
-
-
-
-// }
-
-
-// // uint16_t mAnimatorLight::parsesub_ModeAmbilight(){
-
-// //    // Create local dereferenced variable
-// //   // JsonObject obj = (*_obj); 
-
-// //   int8_t tmp_id = 0;
-  
-
-// //   char buffer[50];
-
-// // // // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-
-// // //   if(!obj[D_NAME].isNull()){ 
-// // //     const char* scenectr = obj[D_NAME];
-// // //     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
-// // //       scene.name_id = tmp_id;
-// // //       tkr_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
-// // //       ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_SVALUE),D_NAME,GetSceneName(buffer));
-// // //       // Response_mP(S_JSON_COMMAND_SVALUE,D_NAME,GetSceneName(buffer));
-// // //       data_buffer.isserviced++;
-// // //     }else{
-// // //       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_SVALUE),D_NAME,scenectr);
-// // //     }
-// // //   }
-
-// // //   // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-
-// // //   // USe pointers
-// // //   //side
-// // //   // struct AMBILIGHT_SCREEN_SETTINGS.SCREENS[0]::
-// // //   // ambilightsettings.screens[SCREEN_CENTRE].top
-// // //   //screen
-  
-// // //   if(!obj[F("top")][F(D_HUE)].isNull()){ 
-// // //     uint16_t hue = obj[F("top")][F(D_HUE)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_HUE,hue);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = tkr_iLight->HUE_N2F(hue);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-// // //     data_buffer.isserviced++;
-// // //   }
-// // //   if(!obj[F("top")][F(D_SAT)].isNull()){ 
-// // //     uint8_t sat = obj[F("top")][F(D_SAT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_SAT,sat);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = tkr_iLight->SatN2F(sat);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-// // //     data_buffer.isserviced++;
-// // //   }
-// // //   if(!obj[F("top")][F(D_BRT)].isNull()){ 
-// // //     uint8_t brt = obj[F("top")][F(D_BRT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_BRT,brt);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = tkr_iLight->animation.brightness = tkr_iLight->BrtN2F(brt);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,tkr_iLight->animation.brightness);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,tkr_iLight->animation.brightness);
-// // //     data_buffer.isserviced++;
-// // //   }
-
-
-
-// // //   if(!obj[F("bottom")][F(D_HUE)].isNull()){ 
-// // //     uint16_t hue = obj[F("bottom")][F(D_HUE)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_HUE,hue);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = tkr_iLight->HUE_N2F(hue);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-// // //     data_buffer.isserviced++;
-// // //   }
-// // //   if(!obj[F("bottom")][F(D_SAT)].isNull()){ 
-// // //     uint8_t sat = obj[F("bottom")][F(D_SAT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_SAT,sat);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = tkr_iLight->SatN2F(sat);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-// // //     data_buffer.isserviced++;
-// // //   }
-// // //   if(!obj[F("bottom")][F(D_BRT)].isNull()){ 
-// // //     uint8_t brt = obj[F("bottom")][F(D_BRT)];
-// // //     // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_NVALUE),D_BRT,brt);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = tkr_iLight->animation.brightness = tkr_iLight->BrtN2F(brt);
-// // //     // ALOG_DBG(PSTR(D_LOG_NEO D_PARSING_MATCHED D_COMMAND_FVALUE),D_BRT,tkr_iLight->animation.brightness);
-// // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_BRT,tkr_iLight->animation.brightness);
-// // //     data_buffer.isserviced++;
-// // //   }
-
-
-
-
-// // //   if(!obj[D_RGB].isNull()){
-// // //     const char* rgbpacked = obj[D_RGB];
-// // //     uint32_t colour32bit = 0;
-// // //     if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
-// // //     }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
-// // //     RgbColor rgb;
-// // //     rgb.R = colour32bit >> 16; //RGB
-// // //     rgb.G = colour32bit >> 8 & 0xFF; //RGB
-// // //     rgb.B = colour32bit & 0xFF; //RGB
-// // //     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-// // //     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-// // //     // // ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-// // //     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-// // //     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-// // //   }
-
-// // //   // TIME with different units
-// // //   if(!obj[D_TIME].isNull()){ //default to secs
-// // //     tkr_iLight->animation.time_ms.val = obj["time"];
-// // //     tkr_iLight->animation.time_ms.val *= 1000;
-// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),tkr_iLight->animation.time_ms.val);  
-// // //   }else
-// // //   if(!obj[D_TIME].isNull()){
-// // //     tkr_iLight->animation.time_ms.val = obj["time_secs"];
-// // //     tkr_iLight->animation.time_ms.val *= 1000;
-// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),tkr_iLight->animation.time_ms.val);  
-// // //   }else
-// // //   if(!obj[D_TIME_MS].isNull()){
-// // //     tkr_iLight->animation.time_ms.val = obj["time_ms"];
-// // //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),tkr_iLight->animation.time_ms.val);  
-// // //   }
-
-  
-// // // Flash colour needs to NOT be a scene, but part of a manual direct mode
-// // // if(strstr(scenectr,"FLASHCOLOUR")){
-// // //       scene_reseting.name_id = scene.name_id; // remember scene to return to
-// // //       scene.name_id = MODE_SINGLECOLOUR_FLASHCOLOUR_ID;
-// // //     }
-// // //     // Parse out flashcolour info if it exists
-// // //     if(scene.name_id == MODE_SINGLECOLOUR_FLASHCOLOUR_ID){
-
-// // //       if(tempctr = obj["hue"]){
-// // //         scene_reseting.hue = obj["hue"];
-// // //       }
-// // //       if(tempctr = obj["sat"]){
-// // //         scene_reseting.sat = obj["sat"];
-// // //       }
-// // //       if(tempctr = obj["brt"]){
-// // //         scene_reseting.brt = obj["brt"];
-// // //       }
-// // //       if(tempctr = obj["time"]){
-// // //         scene_reseting.tOnTime = obj["time"];
-// // //       }
-// // //     }
-  
-  
-
-
-
-// // //   // create easier names
-// // //   // char* topic_ctr = data_buffer.topic.ctr;
-// // //   // uint8_t topic_len = data_buffer.topic.len;
-// // //   // char* payload_ctr = data_buffer.payload.ctr;
-// // //   // uint8_t payload_len = data_buffer.payload.len;
-
-// // //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/center",sizeof("/center")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /center");
-
-// // //     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
-
-// // //     uint16_t index = 0;
-
-// // //     ambilightsettings.colour.found_idx = 0;
-
-// // //     StaticJsonDocument<300> doc;
-// // //     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-// // //     JsonObject root = doc.as<JsonObject>();
-
-// // //     if(root["RGB"].is<JsonArray>()){
-
-// // //       JsonArray colourarray = root["RGB"];
-// // //       int array_length = colourarray.size();
-
-// // //       const char* pixelcolour;
-// // //       for(JsonVariantConst v : colourarray) {
-// // //         pixelcolour = v.as<const char*>();
-
-// // //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-// // //         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-// // //           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-// // //           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-// // //           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-
-// // //         ambilightsettings.colour.found_idx++;
-// // //         index++;
-// // //       }
-// // //       pCONT->mso->MessagePrint("ENDambilightsettings.col.found_idx");
-// // //       pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //       pCONT->mso->MessagePrintln(index);
-
-// // //     }
-// // //     // else if(root["RGB"].is<const char*>()){ //one colour = string
-// // //     //
-// // //     //   const char* pixelcolour;
-// // //     //   pixelcolour = root["RGB"];
-// // //     //
-// // //     //   //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-// // //     //   if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-// // //     //   }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-// // //     //
-// // //     //   ambilightsettings.colour.r[ambilightsettings.colour.found_idx] = colour32bit >> 16; //RGB
-// // //     //   ambilightsettings.colour.g[ambilightsettings.colour.found_idx] = colour32bit >> 8 & 0xFF; //RGB
-// // //     //   ambilightsettings.colour.b[ambilightsettings.colour.found_idx] = colour32bit & 0xFF; //RGB
-// // //     //
-// // //     //   // Serial.println(parsed.col.r[parsed.col.found_idx]);
-// // //     //   // Serial.println(parsed.col.g[parsed.col.found_idx]);
-// // //     //   // Serial.println(parsed.col.b[parsed.col.found_idx]);
-// // //     //
-// // //     //   ambilightsettings.colour.found_idx++;
-// // //     // }
-
-// // //     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
-// // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //     //tkr_iLight->settings.light_size_count
-// // //     //ambilightsettings.colour.found_idx
-// // //     for(int i=0;i<index;i++){
-// // //         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
-// // //     }stripbus->Show();
-
-
-// // // } // END center
-
-
-// // // #ifdef DEVICE_RGBDELL
-
-// // //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/left",sizeof("/left")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /left");
-
-// // //     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
-
-// // //     ambilightsettings.colour.found_idx = 0;
-
-// // //     StaticJsonDocument<300> doc;
-// // //     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-// // //     JsonObject root = doc.as<JsonObject>();
-
-// // //   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
-
-// // //     if(root["RGB"].is<JsonArray>()){
-// // //       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
-
-// // //       JsonArray colourarray = root["RGB"];
-// // //       int array_length = colourarray.size();
-
-// // //       const char* pixelcolour;
-// // //       for(JsonVariantConst v : colourarray) {
-// // //         pixelcolour = v.as<const char*>();
-
-// // //         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
-
-// // //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-// // //         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-// // //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-// // //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-// // //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-// // //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
-// // //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
-// // //          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
-
-// // //         ambilightsettings.colour.found_idx++;
-// // //       }
-
-// // //     }else if(root["RGB"].is<const char*>()){ //one colour = string
-
-// // //       const char* pixelcolour;
-// // //       pixelcolour = root["RGB"];
-
-// // //       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-// // //       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-// // //       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-// // //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-// // //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-// // //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-// // //       // Serial.println(parsed.col.r[parsed.col.found_idx]);
-// // //       // Serial.println(parsed.col.g[parsed.col.found_idx]);
-// // //       // Serial.println(parsed.col.b[parsed.col.found_idx]);
-
-// // //       ambilightsettings.colour.found_idx++;
-// // //     }
-
-// // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //     //tkr_iLight->settings.light_size_count
-// // //     //ambilightsettings.colour.found_idx
-// // //     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
-// // //     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
-// // //     //  }
-// // //     // /stripbus->Show();
-
-// // //     uint32_t c; //colourrgb
-// // //     pinMode(RGB_DATA_LEFT_PIN,OUTPUT);
-// // //     pinMode(RGB_CLOCK_LEFT_PIN,OUTPUT);
-
-// // //     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
-// // //     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
-// // //       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
-// // //       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
-// // //       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
-// // //     }
-// // //     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
-
-
-
-// // // } // END left
-
-
-
-// // //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/right",sizeof("/right")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /right");
-
-// // //     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
-
-// // //     ambilightsettings.colour.found_idx = 0;
-
-// // //     StaticJsonDocument<300> doc;
-// // //     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-// // //     JsonObject root = doc.as<JsonObject>();
-
-// // //   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
-
-// // //     if(root["RGB"].is<JsonArray>()){
-// // //       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
-
-// // //       JsonArray colourarray = root["RGB"];
-// // //       int array_length = colourarray.size();
-
-// // //       const char* pixelcolour;
-// // //       for(JsonVariantConst v : colourarray) {
-// // //         pixelcolour = v.as<const char*>();
-
-// // //         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
-
-// // //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-// // //         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-// // //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-// // //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-// // //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-// // //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
-// // //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
-// // //          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
-
-// // //         ambilightsettings.colour.found_idx++;
-// // //       }
-
-// // //     }else if(root["RGB"].is<const char*>()){ //one colour = string
-
-// // //       const char* pixelcolour;
-// // //       pixelcolour = root["RGB"];
-
-// // //       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-// // //       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-// // //       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-// // //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-// // //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-// // //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-// // //       // Serial.println(parsed.col.r[parsed.col.found_idx]);
-// // //       // Serial.println(parsed.col.g[parsed.col.found_idx]);
-// // //       // Serial.println(parsed.col.b[parsed.col.found_idx]);
-
-// // //       ambilightsettings.colour.found_idx++;
-// // //     }
-
-// // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// // //     //tkr_iLight->settings.light_size_count
-// // //     //ambilightsettings.colour.found_idx
-// // //     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
-// // //     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
-// // //     // }
-// // //     // mrgbneo_ani->setBrightness(255);
-// // //     // mrgbneo_ani->show();
-
-// // //     uint32_t c; //colourrgb
-// // //     pinMode(RGB_DATA_RIGHT_PIN,OUTPUT);
-// // //     pinMode(RGB_CLOCK_RIGHT_PIN,OUTPUT);
-
-// // //     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
-// // //     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
-// // //       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
-// // //       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
-// // //       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
-// // //     }
-// // //     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
-
-
-
-// // // } // END left
-
-// // //       //fShowPanelUpdate = true;
-// // //     //}
-
-
-// // // //  }
-
-// // //   //switch modes : USE serial input stream
-// // //   //send as json array?
-// // //   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
-// // //   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
-
-// // //   tkr_iLight->animation.mode_id = MODE_AMBILIGHT_ID;
-// // //   fForcePanelUpdate = true;
-
-// //   // return 0;
-
-// // } // END FUNCTION
-
-
-
-
-
-  /**
-   * @brief 
-   * 
-   * Ideas
-   * 
-   * (1) Flash pixels on a bus in sequence. The pixels on that bus should also have colours in 50s of RGB for easy counting.
-   * (2) Enable turning on pixels within a range only (when indexed at 0, this will also include showing progress). Base/off pixels should be option, either dark red or off. drawing over should be white, with different colours showing the 50th (so first red = 50, second green = 100)
-   *          50 - red
-   *         100 - green
-   *         150 - blue
-   *         200 - magenta
-   *         250 - yellow
-   *         300 - cyan
-   *         350 - orange
-   *         400 - hotpink
-   *         450 - purple
-   *         500 - limegreen, then after this repeat pattern
-   * (3) Indentify pixel with light sensor. A new method I should create a 3d box that the light gets inserted into/held against, with an "ident" button (starts sequence).
-   *        - another button to also "remove led", so one to add and another too remove from section.
-   *        - then via mqtt commands, trigger which group the current ident values are being added to (vectorise the IDs as vector of vectors) 
-   * 
-   * 
-   * 
-   */
-
-
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Debug: Visualize Busses
- *                Renders each physical bus in a distinct hue, with a short white index “tag” at the bus start
- *                (the number of white pixels equals the bus index). Helpful to verify start/length wiring.
+ * @description : Debug: Visualize Busses (Hue)
+ *                Colors each physical bus with a unique hue. Solid fills per bus for quick wiring validation.
  *                Controls
- *                  • — (no sliders used)
- *                Colors
- *                  • Ignores palette and segment colors; assigns hues per bus and white tags.
+ *                  • IX (Intensity) : saturation for alternating buses (when CB2 is ON).
+ *                  • SX (Speed)     : not used.
+ *                  • CB1            : highlight bus start pixel in white.
+ *                  • CB2            : alternate saturation between buses.
  *                Notes
- *                  • Logs start/length per bus.
- *                  • Safe on any 1D segment; does not honor reverse/mirror/grouping.
- * @note        : Converted from WLED Effects.
+ *                  • Ignores palette/segment colors; assigns hues directly.
+ *                  • Safe for any 1D arrangement; does not honor reverse/mirror/grouping.
  *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
 {
+  // Grab total bus count
+  const uint8_t buscount = tkr_iLight->bus_manager->getNumBusses();
+  if (buscount == 0) return FRAMETIME;
 
-  // ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus"));
-  
-  uint16_t lit = 1 + SEGMENT.speed;
-  uint16_t unlit = 1 + SEGMENT.intensity;
-  bool drawingLit = true;
-  uint16_t cnt = 0;
+  // Precompute whether alternating saturation is enabled
+  const bool useAlternateSat = SEGMENT.check2;
+  const uint8_t altSat = SEGMENT.intensity;          // saturation for alternating buses
 
-  uint8_t buscount = tkr_iLight->bus_manager->getNumBusses();
-
-  for(uint8_t bus_i = 0; bus_i < buscount; bus_i++)
+  // Paint each bus in a distinct hue
+  for (uint8_t bus_i = 0; bus_i < buscount; ++bus_i)
   {
+    const uint16_t start  = tkr_iLight->bus_manager->getBus(bus_i)->getStart();
+    const uint16_t length = tkr_iLight->bus_manager->getBus(bus_i)->getLength();
 
-    uint16_t start = tkr_iLight->bus_manager->getBus(bus_i)->getStart();
-    uint16_t length = tkr_iLight->bus_manager->getBus(bus_i)->getLength();
+    // Map bus index to hue in [0..360)
+    const uint16_t hue = map(bus_i, 0, buscount, 0, 360);
 
-    ALOG_INF(PSTR("EffectAnim__Hardware__Show_Bus %d/%d (%d/%d\t%d)"), bus_i, buscount, start, length, start + length);
+    // Decide saturation: full (255) or alternate (Intensity) for odd buses when enabled
+    const uint8_t sat = (useAlternateSat && (bus_i & 0x01)) ? altSat : 255;
 
-    uint16_t hue = map(bus_i, 0, buscount, 0, 360);
-    uint8_t sat = 255;
-
-    if(bus_i%2)
-      sat = 255;
-
-    uint32_t colour = HueSatBrt(hue,sat,1.0f);
-
-    for(unsigned i = start; i < start + length; i++)
-    {
-      if(i < start + 1 + bus_i) // let the number of one white pixels be the bus index
-      {
-        SEGMENT.setPixelColor(i, RGBW32(255,255,255,255) );
-        ALOG_INF(PSTR("Bus i < start  %d (%d/%d\t%d)\ti=%d hue=%d"), bus_i, start, length, start + length, i, hue);
-      }else{
-        SEGMENT.setPixelColor(i, colour);
-      }
+    // Convert to packed color and fill the bus range
+    const uint32_t col = HueSatBrt(hue, sat, 255);
+    const uint32_t end = start + length;
+    for (uint32_t i = start; i < end; ++i) {
+      SEGMENT.setPixelColor(i, col);
     }
 
-
+    if(SEGMENT.check1) SEGMENT.setPixelColor(start, 0xFFFFFF);
   }
 
-  
   return FRAMETIME;
-  
-}static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS[] PROGMEM =
-"Debug: Visualize Busses@!;;";  // no sliders, no segment color pickers, no palette
+}
+static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS[] PROGMEM =
+"Debug: Visualize Busses (Hue)@"  // Name
+",Saturation,,,,StartPiX,Alternate,,,"    // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                // ----------------------------------------- Sliders/SegCols
+""                                 // Segment Colour Names (none)
+";"                                // ----------------------------------------- SegCols/PalPicker
+"!"                                 // palette picker (not used)
+";"                                // ----------------------------------------- PalPicker/is1D2D
+"1"                                 // icon flags: 1D/strip
+";"                                // ----------------------------------------- is1D2D/Defaults
+"ix=255,"                           // default saturation for alternating buses
+"o2=1"                              // enable "Alternate" by default (check2)
+"o1=1"                             // enable "StartPix" by default (check1)
+;
 static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS[] PROGMEM =
-"Color-codes each physical bus and marks its start with white tag pixels.\n\r"
-"No controls. Use to validate bus ordering and lengths.";
+"Colors each bus with a unique hue.\n\r"
+"IX: Alt-bus saturation\n\r"
+"CB1: White start marker\n\r"
+"CB2: Alternate saturation";
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+/********************************************************************************************************************************************************************************************************************
+ * @function      : EffectAnim__Hardware__Manual_Pixel_Counting
+ * @description   :
+ *   Draws a fixed “counting aid” pattern for quickly locating indices on a real strip:
+ *   • Pass 1: Dim white background (fault-friendly, easy to read).
+ *   • Pass 2: Focus pixels every 10 LEDs:
+ *       - Even decades  (0,20,40,...)  → colored markers cycling through kHueList.
+ *       - Odd  decades (10,30,50,...)  → bright white markers.
+ *     → Counting only colored markers gives 0/20/40/… quickly; white markers help anchor in-between.
+ *   • Pass 3 (optional, gated by SEGMENT.check3): Blink markers at every 100th pixel:
+ *       - Pixel P where P % 100 == 0 and P > 0 blinks (P/100) times per cycle.
+ *       - Default cycle = 1000 ms; if SEGLEN > 1000, cycle = 5000 ms.
+ *       - Slots are 100 ms wide; within each slot, the pixel is ON for the first 50 ms.
+ *       - Max blinks per cycle = cycle_ms / 100 (→ 10 for 1s, 50 for 5s).
+ *
+ * @return        : FRAMETIME
+ ********************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting()
+{
+  if (SEGLEN == 0) return FRAMETIME;
+
+  // ----------------------------
+  // Tunables
+  // ----------------------------
+  constexpr uint8_t  kBackgroundR = 5;     // dim white background
+  constexpr uint8_t  kBackgroundG = 5;
+  constexpr uint8_t  kBackgroundB = 5;
+
+  constexpr uint8_t  kBrightWhite  = 50;   // white focus pixel brightness (decade markers)
+  constexpr uint16_t kSpacing      = 10;   // place a focus pixel every 10 LEDs
+
+  // Hue markers for even decades (0, 20, 40, 60, ...)
+  static const uint16_t kHueList[] = { 0, 120, 240, 340, 50, 180, 14, 350, 280 };
+  constexpr uint16_t    kHueCount  = sizeof(kHueList)/sizeof(kHueList[0]);
+
+  // ----------------------------
+  // Pass 1: uniform background
+  // ----------------------------
+  SEGMENT.fill(RGBW32(kBackgroundR, kBackgroundG, kBackgroundB, 0));
+
+  // ----------------------------
+  // Pass 2: focus pixels every 10
+  // ----------------------------
+  uint16_t hueIndex = 0;
+
+  for (uint16_t i = 0; i < SEGLEN; i++) {
+    if ((i % kSpacing) != 0) continue;  // only decade markers
+
+    uint16_t decade = i / kSpacing;
+
+    if ((decade % 2) == 0) {
+      // Colored markers at 0,20,40,60,...
+      float hue = float(kHueList[hueIndex % kHueCount]) / 360.0f;
+      SEGMENT.setPixelColor(i, HsbColor(hue, 1.0f, 1.0f));
+      hueIndex++;
+    } else {
+      // Bright white markers at 10,30,50,70,...
+      SEGMENT.setPixelColor(i, RgbColor(kBrightWhite));
+    }
+  }
+
+  // ----------------------------
+  // Pass 3: blinking hundreds (optional)
+  //   Enabled via SEGMENT.check3
+  //   Every 100th pixel (100,200,300,...) blinks N = (index/100) times per cycle.
+  //   Cycle: 1s if SEGLEN ≤ 1000, else 5s.
+  //   Slot: 100 ms; ON for first 50 ms of each slot.
+  // ----------------------------
+  if (SEGMENT.check3) {
+    const uint32_t cycle_ms = (SEGLEN > 1000) ? 5000u : 1000u;
+    const uint32_t slot_ms  = 100u;
+    const uint32_t on_ms    = 50u;
+    const uint16_t maxBlinksPerCycle = cycle_ms / slot_ms; // 10 for 1s, 50 for 5s
+
+    const uint32_t t_in_cycle = effect_start_time % cycle_ms;
+
+    // Walk every 100th pixel (skip index 0 to avoid a “0 blinks” case)
+    for (uint16_t idx = 100; idx < SEGLEN; idx += 100) {
+      uint16_t blinkCount = idx / 100;                       // 100->1, 200->2, ...
+      if (blinkCount > maxBlinksPerCycle) blinkCount = maxBlinksPerCycle;
+
+      // Determine if we are inside one of this pixel's slots
+      // Slots are [0..100), [100..200), ..., [N*100..(N+1)*100)
+      // We'll light the pixel for the first 50 ms of each of its blinkCount slots.
+      if (blinkCount > 0) {
+        uint32_t slotIndex = t_in_cycle / slot_ms;           // 0..(maxBlinksPerCycle-1)
+        if (slotIndex < blinkCount) {
+          uint32_t msIntoSlot = t_in_cycle % slot_ms;
+          if (msIntoSlot < on_ms) {
+            // Overlay a strong white for the blink
+            SEGMENT.setPixelColor(idx, RGBW32(255,255,255,0));
+          }
+        }
+      }
+    }
+  }
+
+  return FRAMETIME;
+}
+static const char PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM =
+"Debug: Pixel Counting@"                 // Name
+",,,,,,,Blinks,,"                        // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                      // ----------------------------------------- Sliders/SegCols
+""                                       // Segment Colour Names (none)
+";"                                      // ----------------------------------------- SegCols/PalPicker
+"!"                                      // palette picker (primary palette)
+";"                                      // ----------------------------------------- PalPicker/is1D2D
+"1"                                      // icon flags: '1' -> 1D/strip
+";"                                      // ----------------------------------------- is1D2D/Defaults
+"ep=500"                                 // defaults/reserved
+;
+static const char PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM =
+"Marks every 10th LED (bright white) and every 20th LED (colored) over a dim background."
+"\n\rBlinks: when enabled, 100th LED blinks once per second; 200th LED blinks twice per second."
+"\n\rUseful for counting/verification; no speed/intensity controls.";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 /*******************************************************************************************************************************************************************************************************************
@@ -14016,94 +13500,31 @@ static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS[] PROGMEM =
  *                  • Sliders are intentionally unused; range is fed via params_user[].
  * @note        : Converted from WLED Effects.
  *******************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting()
-{
-  
-  SEGMENT.fill(RGBW32(5,5,5,0));
-
-  uint16_t hue_list[] = {0,120,240,340,50,180,14,350,280};
-  uint8_t used_hue = 0;  
-  
-  uint32_t colour = 0;//RgbcctColor();
-
-
-  for (uint16_t i = 0; i < SEGLEN; i++)
-  {
-
-    if((i%10)==0) // Every 10th should be bright white
-    {
-      
-      if((i%20)==0) // If its every 50th, then use hue map instead of the bright white
-      {
-
-        float hue = (float)hue_list[used_hue++]/360.0f;
-        // Serial.println(hue);
-
-        SEGMENT.setPixelColor(i, HsbColor(hue,1.0f,1.0f));
-        
-        // ALOG_INF(PSTR("50i %d"), i);
-
-        if(used_hue >= ARRAY_SIZE(hue_list))
-          used_hue = 0;
-
-      }else{
-
-        SEGMENT.setPixelColor(i, RgbColor(50));
-
-      }
-
-    }
-
-
-  }
-
-
-
-
-  // SEGMENT.setPixelColor(0, RgbcctColor(255,0,0));
-  
-  return FRAMETIME;
-  
-}
-static const char PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
-"Debug: Pixel Range@!;;";  // parameters come from params_user[], not UI
-
-static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
-"Shows a supplied [start,end) pixel range for quick diagnostics.\n\r"
-"Supply indices via params_user[0] and params_user[1].";
-
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-
-
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-/*******************************************************************************************************************************************************************************************************************
- * @description : Debug: Light-Sensor Indexing
- *                Alternating runs of “lit” and “unlit” pixels to help a photosensor map physical positions:
- *                lit run uses the current palette across the strip; unlit run uses Color 2.
- *                Controls
- *                  • SX (Lit run length)   : number of consecutive lit pixels
- *                  • IX (Unlit run length) : number of consecutive unlit pixels
- *                Colors
- *                  • Lit = palette gradient; Unlit = C2 (Secondary).
- *                Notes
- *                  • Pattern repeats for the full segment; helpful for auto-indexing setups.
- * @note        : Converted from WLED Effects.
- *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
 {
+  // Fill entire segment with background color (SegColor 1)
+  SEGMENT.fill(SEGCOLOR_U32(1));
 
-  SEGMENT.fill(SEGCOLOR_U32(0));
-  
-  for (uint32_t i = SEGMENT.params_user[0]; i < SEGMENT.params_user[1]; i++)
-  {
-    // SEGMENT.setPixelColor(i,SEGCOLOR_U32(1));
+  // Read params once
+  uint32_t start = SEGMENT.params_user[0];
+  uint32_t end   = SEGMENT.params_user[1];
+
+  // Safety checks
+  if (end > SEGLEN) end = SEGLEN;
+  if (start >= end) return FRAMETIME;  // nothing to draw if invalid range
+
+  // Draw range in foreground color (SegColor 0)
+  for (uint32_t i = start; i < end; i++) {
+    SEGMENT.setPixelColor(i, SEGCOLOR_U32(0));
   }
-    
+
   return FRAMETIME;
-  
 }
-static const char PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM = "Debug Pixel Range@Fg size,Bg size;Fg,!;!;;pal=0";
-static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
+"DB Pixel Range@!;Fx,Bg;";  // parameters come from params_user[], not UI
+static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
+"Shows a supplied [start,end] pixel range for quick diagnostics.\n\r"
+"Supply indices via params_user[0] and params_user[1].";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
 /********************************************************************************************************************************************************************************************************************
@@ -14114,39 +13535,1670 @@ static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM = "Cycl
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
-{
-  
-  uint16_t lit = 1 + SEGMENT.speed;
-  uint16_t unlit = 1 + SEGMENT.intensity;
-  bool drawingLit = true;
-  uint16_t cnt = 0;
 
-  for (uint16_t i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, 
-      (drawingLit) ? SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE) : SEGCOLOR_U32(1)
-    );
-    cnt++;
-    if (cnt >= ((drawingLit) ? lit : unlit)) {
-      cnt = 0;
-      drawingLit = !drawingLit;
+/***
+ * Idea: Make functions that "dumps" the buffer (allocateData/allocateColourData) into filesystem as csv file or json file. 
+ * Hence, I can trigger a "save".
+ * Another effect should be added that can take this, and display those pixels on (ie replay capture)
+ * Also need to use one of the check buttons to do "show captured". OR, if aquire is not active, then it should show those in buffer!! better idea.
+ * 
+ * 
+ * 
+ */
+
+/***************************************************************************************************************************************
+ * @function    : GetMeasuredBrightness (TEMP STUB)
+ * @brief       : Test harness for the light sensor. For ~1 second, returns low values (<100),
+ *                then for ~one frame every ~5 seconds returns a high value (>1000), to simulate a “detected” moment.
+ *                Replace with your real sensor (e.g., BH1750/LDR sampling) later.
+ ***************************************************************************************************************************************/
+// static inline uint16_t GetMeasuredBrightness()
+// {
+//   // crude pseudo-periodic spike: ~every 5s, emit a brief "bright" window
+//   // (effect_start_time is assumed to be available like in your other effects)
+//   uint32_t t = effect_start_time % 5000UL; // 5-second cycle
+//   if (t < 120) {
+//     // short "bright" window (simulate LED shoved into the jig)
+//     return 1200 + (hw_random16() & 0x1FF); // >1000
+//   }
+//   // otherwise "dark"
+//   return (hw_random16() & 0x3F); // < 100
+// }
+/*******************************************************************************************
+ * Sensor-backed light measurement for the pixel-indexing jig.
+ * If PIXEL_LIGHT_SENSOR__DIGITAL_PIN is defined, we use digitalRead() (module’s onboard
+ * comparator). Otherwise, if PIXEL_LIGHT_SENSOR__ANALOG_PIN is defined, we use analogRead().
+ * Returns a "brightness-like" uint16_t so your confirm thresholds still work:
+ *   - bright  ≈ 1200
+ *   - dark    ≈   50
+ *******************************************************************************************/
+// uint16_t GetMeasuredBrightness()
+// {
+// #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//   // Digital "wins" if both are defined. HIGH = bright hit, LOW = dark.
+//   int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
+//   return !v ? 1200 : 50;
+
+// #elif defined(PIXEL_LIGHT_SENSOR__ANALOG_PIN)
+//   // Small oversample to smooth jitter without slowing the loop.
+//   // Keep it fast so your scan pace stays snappy.
+//   uint32_t acc = 0;
+//   constexpr uint8_t kSamples = 4;
+//   for (uint8_t i = 0; i < kSamples; i++) acc += analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN);
+//   acc /= kSamples;
+
+//   // Map to a ~0..1500-ish domain so your existing THRESH_HIGH/LOW (1000/100) work well.
+//   // Use full ADC scale per platform.
+//   #ifdef ARDUINO_ARCH_ESP32
+//     constexpr uint16_t ADC_MAX = 4095;
+//   #else
+//     constexpr uint16_t ADC_MAX = 1023;
+//   #endif
+
+//   // Scale dark≈0 → ~50, bright≈ADC_MAX → ~1400–1500
+//   uint32_t scaled = (acc * 1400UL) / ADC_MAX;
+//   return (uint16_t)(scaled + 50);
+
+// #else
+//   // Nothing defined -> stay dark. (Keeps effect functional without a sensor.)
+//   return 0;
+// #endif
+// }
+
+// ============================================================================
+// Hardware light sensor reading (single place to maintain)
+// Returns a 0..4095-ish "brightness" level regardless of sensor type.
+// If both DIGITAL and ANALOG are defined, DIGITAL takes precedence.
+// Define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW if your digital module pulls LOW when bright.
+// ============================================================================
+static uint16_t GetMeasuredBrightness()
+{
+  // --- Digital module takes precedence if present ---
+#ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+  const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
+  #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+    // Bright => LOW
+    return (v == LOW) ? 4095 : 0;
+  #else
+    // Bright => HIGH
+    return (v == HIGH) ? 4095 : 0;
+  #endif
+#endif
+
+  // --- Otherwise analog LDR divider (ESP32 ADC typically 0..4095) ---
+#ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+  return (uint16_t)analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN);
+#endif
+
+  // --- Fallback simulator (no pins defined) ---
+  // Rare spikes (bright) with mostly dark background
+  return (random(0, 255) > 240) ? (uint16_t) (3500 + random(0, 595))  // bright-ish
+                              : (uint16_t) random(0, 150);          // dark-ish
+}
+
+
+/**
+ * @brief 
+ * 
+ * We will do these in stages next, but here are more ideas: 
+ * * I will be adding a function that when called, will dump the data buffers into filesystem for later download. 
+ * Another effect later will also be made that can read this and show the save indexes 
+ * 
+ * * when aquire is not active, you should be showing those previously recorded as turned on using 
+ * palette descrete. 
+ * 
+ * * An optional pair of physical buttons will be added, so I can press "save this" and "remove this". 
+ * In both cases, you will rrepeform the detection to find those and add or remove as directed 
+ * 
+ * * using the last index saved, you should blink that LED so I know you have found what I thought. 
+ * 
+ * 
+ * dont giv e mme the code yet, I just want to point out I expect us to integrate this, with the buttons 
+ * ifdef so its optional. We will also need to use the custom sliders 1-3 as additonal off/on states for more options. 
+ * Which when it makes sense may want to move current options our of the checkboxes, we will address this later for 
+ * example, we probably want to place the filesystem save into the checkbox, so we can have it active, and hence every 
+ * new pixel found is immediately saved into memory by default
+ * 
+ */
+// // ============================================================================
+// // Pixel Indexing via Light Sensor (with ±N disambiguation sweep)
+// // Scans LEDs one-by-one; when a bright edge is seen after darkness (armed),
+// // performs a widening search around the candidate: -1,+1,-2,+2,..., -N,+N.
+// // The first probe that reads bright becomes the target pixel, then a confirm
+// // blink sequence runs (requiring both HIGH and LOW). Indices are stored in a
+// // compact buffer: [count(uint16_t)] + indices(uint16_t[]).
+// //
+// // UI:
+// //   CB1 (check1): acquire on/off
+// //   CB2 (check2): pop last saved index
+// //   CB3 (check3): print now
+// //   SX  (speed) : scan dwell (faster with higher SX)
+// //   C2  (custom2): blink step (50..200 ms)
+// //   C3  (custom3): saved marker brightness (0..31 -> ~0..248; 0 uses 255)
+// //
+// // Internal:
+// //   SEGMENT.aux0 : state (S_*)
+// //   SEGMENT.aux1 : current pixel (and target after disambiguation)
+// //   SEGMENT.aux2 : step (disambiguation or confirm toggles)
+// //   SEGMENT.aux3 : last ms tick
+// //   ColourData[0] bits: 0=saw_hi, 1=saw_lo, 2=armed (saw dark)
+// // ============================================================================
+// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+// {
+//   if (SEGLEN == 0) return FRAMETIME;
+
+//   // -------- logging level --------
+//   const uint8_t loglevel = LOG_LEVEL_INFO;
+
+//   // -------- one-time pin init --------
+//   if (SEGMENT.call == 0) {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
+//   #endif
+//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
+//   #endif
+//   }
+
+//   // -------- thresholds / constants --------
+//   const uint16_t THRESH_HIGH    = 1000;  // analog high (ignored for digital)
+//   const uint16_t THRESH_LOW     = 100;   // analog low  (ignored for digital)
+//   const uint8_t  BLINKS_TOTAL   = 5;     // 5 on phases (10 toggles)
+//   const uint8_t  MAX_SPREAD     = 5;     // widen search ±1..±MAX_SPREAD
+//   const uint16_t COOLDOWN_MS    = 300;
+//   const uint16_t PRINT_DELAY_MS = 3000;
+//   const uint8_t  BG_DIM         = 2;
+
+//   // -------- UI snapshot --------
+//   const uint8_t ui_speed    = SEGMENT.speed;    // SX: dwell
+//   const uint8_t ui_c2       = SEGMENT.custom2;  // C2: blink rate
+//   const uint8_t ui_c3       = SEGMENT.custom3;  // C3: marker brightness
+//   const bool    ui_acquire  = SEGMENT.check1;   // CB1
+//   const bool    ui_popLast  = SEGMENT.check2;   // CB2
+//   const bool    ui_printNow = SEGMENT.check3;   // CB3
+
+//   // -------- state machine fields --------
+//   enum : uint16_t { S_SCAN=0, S_DISAMBIG=1, S_CONFIRM=2, S_COOLDOWN=3 };
+
+//   uint16_t &sm_state = SEGMENT.aux0;
+//   uint16_t &sm_px    = SEGMENT.aux1;
+//   uint16_t &sm_step  = SEGMENT.aux2;   // disambig step or confirm toggle
+//   uint32_t &sm_tLast = SEGMENT.aux3;
+
+//   // -------- timings / derived --------
+//   const uint16_t dwellMs     = map(ui_speed, 0, 255, 60, 5);
+//   const uint16_t blinkStepMs = 50 + ((uint16_t)ui_c2 * 150) / 255;  // 50..200
+//   const uint16_t guardTimeout= (uint16_t)BLINKS_TOTAL * 2 * blinkStepMs + 200;
+//   const uint8_t  savedBri    = (ui_c3 ? (ui_c3 * 8) : 255);
+
+//   // -------- storage: [count] + list[] --------
+//   const uint16_t cap  = (SEGLEN < 512) ? SEGLEN : 512;
+//   const uint16_t need = 2U + cap * 2U;
+//   if (!SEGMENT.allocateData(need)) return FRAMETIME;
+//   uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
+//   uint16_t &count = buf[0];
+//   uint16_t *list  = &buf[1];
+
+//   // -------- flags byte --------
+//   if (!SEGMENT.allocateColourData(1)) { /* optional */ }
+//   uint8_t *cd = SEGMENT.ColourData(); // bits: 0=saw_hi,1=saw_lo,2=armed
+
+//   // -------- helpers --------
+//   auto isHigh = [&](uint16_t meas)->bool {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     return meas >= 2048; // digital bright maps to ~4095 in GetMeasuredBrightness()
+//   #else
+//     return meas >= THRESH_HIGH;
+//   #endif
+//   };
+//   auto isLow = [&](uint16_t meas)->bool {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     return meas <  2048; // digital dark maps to 0
+//   #else
+//     return meas <= THRESH_LOW;
+//   #endif
+//   };
+//   auto wrapIdx = [&](int idx)->uint16_t {
+//     int m = idx % (int)SEGLEN;
+//     if (m < 0) m += SEGLEN;
+//     return (uint16_t)m;
+//   };
+//   // map disambiguation step (k=0..2*MAX_SPREAD-1) to offsets: -1,+1,-2,+2,...
+//   auto offsetFromK = [&](uint16_t k)->int {
+//     int mag  = (k / 2) + 1;
+//     int sign = (k % 2 == 0) ? -1 : +1;
+//     return sign * mag;
+//   };
+
+//   // -------- one-shot UI actions --------
+//   if (ui_popLast) {
+//     if (count > 0) count--;
+//     SEGMENT.check2 = 0;
+//   }
+//   if (ui_printNow) {
+//     AddLog(loglevel, PSTR("[PIX-INDEX][MANUAL PRINT] count=%u"), count);
+//     for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
+//     SEGMENT.check3 = 0;
+//   }
+
+//   // -------- background + markers --------
+//   SEGMENT.fill(RGBW32(BG_DIM, BG_DIM, BG_DIM, 0));
+//   for (uint16_t i=0; i<count; i++) {
+//     const uint16_t idx = list[i];
+//     if (idx < SEGLEN) {
+//       uint32_t mark = SEGCOLOR_U32(0);
+//       if (mark == 0) mark = RGBW32(0, savedBri, 0, 0); // bright green fallback
+//       SEGMENT.setPixelColor(idx, mark);
+//     }
+//   }
+
+//   // delayed print of full list
+//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
+//     AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
+//     for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
+//     SEGMENT.step = 0;
+//   }
+
+//   // idle view when not acquiring
+//   if (!ui_acquire) {
+//     if (sm_px >= SEGLEN) sm_px = 0;
+//     SEGMENT.setPixelColor(sm_px, RGBW32(255,255,255,0));
+//     return FRAMETIME;
+//   }
+
+//   // clamp px
+//   if (sm_px >= SEGLEN) sm_px = 0;
+
+//   // ======================== STATE: SCAN ========================
+//   if (sm_state == S_SCAN) {
+//     // highlight current candidate
+//     SEGMENT.setPixelColor(sm_px, RGBW32(255,255,255,0));
+
+//     const uint16_t meas = GetMeasuredBrightness();
+//     if (cd && isLow(meas)) cd[0] |= 0x04; // armed when we first see darkness
+
+//     if (isHigh(meas) && cd && (cd[0] & 0x04)) {
+//       // move to disambiguate with an initial settle frame
+//       sm_state = S_DISAMBIG;
+//       sm_step  = 0;                 // 0 = settle, then 1..(2*MAX_SPREAD) = tests
+//       sm_tLast = effect_start_time;
+//       if (cd) cd[0] = 0;           // clear flags
+//       AddLog(loglevel, PSTR("[PIX-INDEX] disambiguate around @%u"), sm_px);
+//     } else {
+//       // normal advance by dwell
+//       if (effect_start_time - sm_tLast >= dwellMs) {
+//         sm_tLast = effect_start_time;
+//         sm_px = (sm_px + 1) % SEGLEN;
+//       }
+//     }
+
+//   // ===================== STATE: DISAMBIG =======================
+//   } else if (sm_state == S_DISAMBIG) {
+//     // Step 0: settle-dark frame to allow sensor to fall
+//     if (sm_step == 0) {
+//       // keep all probe LEDs dark this frame
+//       // (background + saved markers already drawn)
+//       if (effect_start_time - sm_tLast >= blinkStepMs) {
+//         sm_tLast = effect_start_time;
+//         sm_step = 1; // advance to first probe (-1)
+//       }
+//       return FRAMETIME;
+//     }
+
+//     // Which probe are we on?
+//     const uint16_t k       = sm_step - 1;                           // 0..(2*MAX_SPREAD-1)
+//     const uint16_t kMax    = (uint16_t)(2 * MAX_SPREAD);
+//     const int      offset  = offsetFromK(k);
+//     const uint16_t testPx  = wrapIdx((int)sm_px + offset);
+
+//     // Draw the single probe pixel bright, keep original candidate dark this frame
+//     SEGMENT.setPixelColor(testPx, RGBW32(255,255,255,0));
+
+//     // Sample sensor: first bright pixel wins
+//     const uint16_t meas = GetMeasuredBrightness();
+//     if (isHigh(meas)) {
+//       sm_px    = testPx;               // choose the hit
+//       sm_state = S_CONFIRM;            // go confirm immediately
+//       sm_step  = 0;
+//       sm_tLast = effect_start_time;
+//       if (cd) cd[0] = 0;               // clear saw_hi/saw_lo
+//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm target @%u (offset %+d)"), sm_px, offset);
+//       return FRAMETIME;
+//     }
+
+//     // Move to next probe after blinkStepMs
+//     if (effect_start_time - sm_tLast >= blinkStepMs) {
+//       sm_tLast = effect_start_time;
+//       sm_step++;
+//       if (sm_step > kMax) {
+//         // none of the ±N probes produced a high — abort and resume scan
+//         AddLog(loglevel, PSTR("[PIX-INDEX] disambig none near @%u, resume scan"), sm_px);
+//         sm_state = S_COOLDOWN;
+//         sm_tLast = effect_start_time;
+//       }
+//     }
+
+//   // ====================== STATE: CONFIRM =======================
+//   } else if (sm_state == S_CONFIRM) {
+//     // Blink the chosen pixel; require both hi & low during sequence
+//     const bool onPhase = (sm_step % 2) == 0;
+//     SEGMENT.setPixelColor(sm_px, onPhase ? RGBW32(255,255,255,0)
+//                                          : RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
+
+//     const uint16_t meas = GetMeasuredBrightness();
+//     if (cd) {
+//       if (isHigh(meas)) cd[0] |= 0x01; // saw_hi
+//       if (isLow(meas))  cd[0] |= 0x02; // saw_lo
+//     }
+
+//     // guard timeout
+//     if (effect_start_time - sm_tLast > guardTimeout) {
+//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm timeout @%u (hi=%u lo=%u)"),
+//              sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
+//       sm_state = S_COOLDOWN;
+//       sm_tLast = effect_start_time;
+//     }
+
+//     // toggle timing
+//     if (effect_start_time - sm_tLast >= blinkStepMs) {
+//       sm_tLast = effect_start_time;
+//       sm_step++;
+
+//       if (sm_step >= (uint16_t)BLINKS_TOTAL * 2) {
+//         const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
+//         if (ok) {
+//           bool dup = false;
+//           for (uint16_t i=0; i<count; i++) if (list[i] == sm_px) { dup = true; break; }
+//           if (!dup && count < cap) {
+//             list[count++] = sm_px;
+//             AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), sm_px, count);
+//             SEGMENT.step = effect_start_time; // schedule delayed print
+//           } else if (dup) {
+//             AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), sm_px);
+//           }
+//         } else {
+//           AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
+//                  sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
+//         }
+//         sm_state = S_COOLDOWN;
+//         sm_tLast = effect_start_time;
+//       }
+//     }
+
+//   // ===================== STATE: COOLDOWN =======================
+//   } else { // S_COOLDOWN
+//     SEGMENT.setPixelColor(sm_px, RGBW32(255,255,255,0));
+//     if (effect_start_time - sm_tLast >= COOLDOWN_MS) {
+//       sm_state = S_SCAN;
+//       if (cd) cd[0] = 0; // clear flags; must re-arm with darkness
+//     } else {
+//       if (cd) {
+//         const uint16_t meas = GetMeasuredBrightness();
+//         if (isLow(meas)) cd[0] |= 0x04; // re-arm early if we already see dark
+//       }
+//     }
+//   }
+
+//   return FRAMETIME;
+// }
+
+  // Control snapshot (useful for post-analysis)
+  // Intensity => blink rate mapping happens at runtime; we store raw too.
+  // file.print(F(",\"Controls\":{"));
+  // file.print(F("\"acquire\":"));        file.print(SEGMENT.check1 ? 1 : 0);
+  // file.print(F(",\"saveToFile\":"));    file.print(SEGMENT.check3 ? 1 : 0);
+  // file.print(F(",\"verbosity\":"));     file.print(SEGMENT.custom3);
+  // file.print(F(",\"speed\":"));         file.print(SEGMENT.speed);
+  // file.print(F(",\"intensity\":"));     file.print(SEGMENT.intensity);
+  // file.print(F(",\"aux0_state\":"));    file.print(SEGMENT.aux0); // state
+  // file.print(F(",\"aux1_px\":"));       file.print(SEGMENT.aux1); // px
+  // file.print(F(",\"aux2_confirm\":"));  file.print(SEGMENT.aux2); // confirmStep
+  // file.print(F(",\"aux3_lastms\":"));   file.print(SEGMENT.aux3); // tLast
+  // file.print('}');
+
+  
+
+  // Optionally include a brief note about thresholds used in this session
+  // file.print(F(",\"Notes\":{"));
+  // file.print(F("\"desc\":\"Pixel indexing capture\""));
+  // file.print('}');
+
+// ============================================================================
+// Placeholder for file persistence (hooked to CB3 behavior)
+// ============================================================================
+#ifndef PIX_INDEXING_MAX_CAP
+  #define PIX_INDEXING_MAX_CAP 200   // default; you can override at build time
+#endif
+
+void mAnimatorLight::LightSensorIndexing__SaveResults_To_File()
+{
+  ALOG_INF(PSTR("LightSensorIndexing__SaveResults_To_File"));
+
+  // ----- Gather current buffers -----
+  uint16_t dataCount = 0;
+  const uint16_t *dataList = nullptr;
+  if (SEGMENT.data) {
+    const uint16_t *base = reinterpret_cast<const uint16_t*>(SEGMENT.data);
+    dataCount = base[0];
+    dataList  = (dataCount > 0) ? (base + 1) : nullptr;
+  }
+
+  const uint8_t *cdBase = SEGMENT.ColourData();
+  const uint16_t cdLen  = SEGMENT.ColourDataLength(); // safe if nullptr (0)
+
+    // ----- Open file (backup old, then recreate) -----
+  const char* file_path     = "/pixel_indexing.json";
+  const char* backup_path   = "/pixel_indexing_previous.json";
+
+  if (FILE_SYSTEM.exists(file_path)) {
+    // Try to back up the old file
+    File src = FILE_SYSTEM.open(file_path, "r");
+    if (src) {
+      FILE_SYSTEM.remove(backup_path);             // remove any old backup
+      File dst = FILE_SYSTEM.open(backup_path, "w");
+      if (dst) {
+        while (src.available()) dst.write(src.read());
+        dst.close();
+        ALOG_INF(PSTR("Backed up old file to \"%s\""), backup_path);
+      } else {
+        ALOG_ERR(PSTR("Failed to create backup file \"%s\""), backup_path);
+      }
+      src.close();
+    }
+    FILE_SYSTEM.remove(file_path); // remove original after backup
+  }
+
+  File file = FILE_SYSTEM.open(file_path, "w+");
+  if (!file) {
+    ALOG_ERR(PSTR("Failed to open \"%s\" for write"), file_path);
+    return;
+  }
+
+
+  // ----- Lock JSON builder (only needed while composing JSON text) -----
+  bool gotLock = JBI->RequestLock(GetModuleUniqueID());
+  if (!gotLock) {
+    ALOG_ERR(PSTR("JSON builder lock failed"));
+    file.close();
+    return;
+  }
+
+  // ----- Manually compose compact JSON -----
+  file.print('{');
+
+  // Data object
+  file.print(F("\"Data\":{"));
+  file.print(F("\"indices\":["));
+  if (dataList && dataCount) {
+    for (uint16_t i = 0; i < dataCount; i++) {
+      if (i) file.print(',');
+      file.print(dataList[i]);          // uint16_t index value
     }
   }
-  
-  return FRAMETIME;
-  
+  file.print(F("],\"count\":"));
+  file.print(dataCount);
+  file.print('}');
+
+  // ColourData raw bytes
+  file.print(F(",\"ColourData\":["));
+  if (cdBase && cdLen) {
+    for (uint16_t i = 0; i < cdLen; i++) {
+      if (i) file.print(',');
+      file.print(cdBase[i]);            // decimal byte
+    }
+  }
+  file.print(']');
+
+  // Segment info
+  file.print(F(",\"Segment\":{"));
+  file.print(F("\"index\":"));   file.print(SEGIDX);
+  file.print(F(",\"length\":")); file.print(SEGLEN);
+  file.print('}');
+
+  // Timestamps
+  file.print(F(",\"UTCTime\":\""));
+  file.print(tkr_time->GetDateAndTime(DT_UTC).c_str());
+  file.print(F("\",\"millis\":"));
+  file.print(millis());
+
+  file.print('}'); // end root
+
+  file.close();
+  JBI->ReleaseLock();
+
+  ALOG_INF(PSTR("Saved pixel indexing to \"%s\" (count=%u, cdLen=%u)"),
+           file_path, dataCount, cdLen);
 }
+
+
+void mAnimatorLight::LightSensorIndexing__LoadResults_To_File()
+{
+  ALOG_INF(PSTR("LightSensorIndexing__LoadResults_To_File"));
+
+  const char* file_path = "/pixel_indexing.json";
+  File file = FILE_SYSTEM.open(file_path, "r");
+  if (!file) {
+    ALOG_ERR(PSTR("Failed to open \"%s\" for read"), file_path);
+    return;
+  }
+
+  const size_t len = file.size();
+  if (len == 0) {
+    file.close();
+    ALOG_ERR(PSTR("File \"%s\" is empty"), file_path);
+    return;
+  }
+
+  std::unique_ptr<char[]> buf(new (std::nothrow) char[len + 1]);
+  if (!buf) {
+    file.close();
+    ALOG_ERR(PSTR("OOM loading \"%s\" (%u bytes)"), file_path, (unsigned)len);
+    return;
+  }
+
+  file.readBytes(buf.get(), len);
+  buf[len] = '\0';
+  file.close();
+
+  JsonParser parser(buf.get());
+  JsonParserObject rootObj = parser.getRootObject();
+  if (!rootObj) {
+    ALOG_ERR(PSTR("DeserializationError with \"%s\""), file_path);
+    return;
+  }
+
+  // Navigate JSON: { "Data": { "indices":[ ... ], "count": N }, ... }
+  JsonParserObject dataObj = 0;
+  JsonParserToken  jtok    = 0;
+
+  if (!(dataObj = rootObj["Data"])) {
+    ALOG_ERR(PSTR("\"Data\" not found in %s"), file_path);
+    return;
+  }
+  if (!(jtok = dataObj["indices"])) {
+    ALOG_ERR(PSTR("\"Data.indices\" not found in %s"), file_path);
+    return;
+  }
+
+  // Collect indices as uint16_t, validate against SEGLEN, cap length
+  const uint16_t cap = (SEGLEN < PIX_INDEXING_MAX_CAP) ? SEGLEN : PIX_INDEXING_MAX_CAP;
+  uint16_t temp[PIX_INDEXING_MAX_CAP];
+  uint16_t cnt = 0;
+
+  for (auto v : jtok.getArray()) {
+    long vi = v.getInt();                    // saved as integers
+    if (vi < 0 || vi >= (long)SEGLEN) continue;
+    if (cnt < cap) temp[cnt++] = (uint16_t)vi;
+    else break;
+  }
+
+  if (cnt == 0) {
+    ALOG_INF(PSTR("No valid indices in %s"), file_path);
+    return;
+  }
+
+  // Allocate segment data buffer to hold: [count(uint16)] + cnt * uint16
+  const uint16_t needBytes = (uint16_t)(2U + cnt * 2U);
+  if (!SEGMENT.allocateData(needBytes)) {
+    ALOG_ERR(PSTR("allocateData(%u) failed"), (unsigned)needBytes);
+    return;
+  }
+
+  uint16_t* base = reinterpret_cast<uint16_t*>(SEGMENT.data);
+  base[0] = cnt;
+  for (uint16_t i = 0; i < cnt; i++) base[1 + i] = temp[i];
+
+  ALOG_INF(PSTR("Loaded %u indices from \"%s\""), cnt, file_path);
+}
+
+
+
+uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+{
+  if (SEGLEN == 0) return FRAMETIME;
+
+  // -------- logging controls --------
+  const uint8_t loglevel  = LOG_LEVEL_INFO;     // tune globally as you like
+  const uint8_t verbosity = SEGMENT.custom3;    // 0 silent, 1..200 info, 255 trace
+  const bool info  = (verbosity >= 1 && verbosity <= 200);
+  const bool trace = (verbosity == 255);
+
+  // -------- one-time pin setup --------
+  if (SEGMENT.call == 0) {
+  #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+    pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
+  #endif
+  #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+    pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
+  #endif
+  }
+
+  // -------- thresholds & timings --------
+  const uint16_t THRESH_HIGH     = 1000;            // ≥ => “light”
+  const uint16_t THRESH_LOW      = 100;             // ≤ => “dark”
+  const uint8_t  BLINKS_TOTAL    = 5;               // ON phases during confirm
+  const uint16_t blinkStepMs     = map(SEGMENT.intensity, 0, 255, 250, 40);  // IX
+  const uint16_t dwellMs         = map(SEGMENT.speed,     0, 255, 60, 5);    // SX
+  const uint16_t PRINT_DELAY_MS  = 3000;
+  const uint16_t COOLDOWN_MS     = 300;
+  const uint8_t  BG_DIM          = 1;
+  const uint8_t  SAVED_MARK_BRI  = 255;
+
+  // -------- UI controls --------
+  const bool acquire   = SEGMENT.check1;      // CB1: acquisition
+  bool saveToFileFlag  = SEGMENT.check3;      // CB3: SaveToFile (edge + continuous)
+
+  // Custom1 = 255 → load from file then reset to 0
+  if (SEGMENT.custom1 == 255) {
+    SEGMENT.custom1 = 0;
+    AddLog(loglevel, PSTR("[PIX-INDEX] Load requested (c1=255)"));
+    LightSensorIndexing__LoadResults_To_File();
+  }
+
+  // -------- storage buffer (uint16_t): [count] + indices... --------
+#ifndef PIX_INDEXING_MAX_CAP
+  #define PIX_INDEXING_MAX_CAP 512
+#endif
+  const uint16_t cap  = (SEGLEN < PIX_INDEXING_MAX_CAP) ? SEGLEN : PIX_INDEXING_MAX_CAP;
+  const uint16_t need = 2U + cap * 2U;                 // bytes: 2 for count + 2 per uint16 index
+  if (!SEGMENT.allocateData(need)) return FRAMETIME;
+  uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
+  uint16_t &count = buf[0];
+  uint16_t *list  = &buf[1];
+
+  // Custom2 = 255 → clear current RAM results then reset to 0
+  if (SEGMENT.custom2 == 255) {
+    SEGMENT.custom2 = 0;
+    count = 0;
+    AddLog(loglevel, PSTR("[PIX-INDEX] Cleared in-RAM results (c2=255)"));
+  }
+
+  // Pop-last (CB2)
+  if (SEGMENT.check2) {
+    SEGMENT.check2 = 0;
+    if (count > 0) {
+      count--;
+      if (info) AddLog(loglevel, PSTR("[PIX-INDEX] popped last, new count=%u"), count);
+    }
+  }
+
+  // -------- tiny flags in ColourData --------
+  // cd[0] bits: 0=saw_high, 1=saw_low, 2=armed
+  // cd[1] bit0: last SaveToFile state (for rising-edge)
+  if (!SEGMENT.allocateColourData(2)) { /* continue without if fails */ }
+  uint8_t *cd = SEGMENT.ColourData();
+  if (cd && SEGMENT.call == 0) { cd[0] = 0; cd[1] = 0; }
+
+  // SaveToFile rising-edge (immediate save once when toggled on)
+  const bool lastSave = cd ? (cd[1] & 0x01) : false;
+  if (saveToFileFlag && !lastSave) {
+    AddLog(loglevel, PSTR("[PIX-INDEX] (SaveToFile) immediate save requested"));
+    LightSensorIndexing__SaveResults_To_File(); // persist
+  }
+  if (cd) {
+    if (saveToFileFlag) cd[1] |= 0x01; else cd[1] &= ~0x01;
+  }
+
+  // -------- state in aux --------
+  enum : uint16_t { S_SCAN=0, S_CONFIRM=1, S_COOLDOWN=2 };
+  uint16_t &state       = SEGMENT.aux0;
+  uint16_t &px          = SEGMENT.aux1;
+  uint16_t &confirmStep = SEGMENT.aux2;   // 0..(2*BLINKS_TOTAL-1)
+  uint32_t &tLast       = SEGMENT.aux3;   // must be 32-bit for millis
+
+  // -------- delayed print of results --------
+  if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
+    if (info) {
+      AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
+      for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
+    }
+    SEGMENT.step = 0;
+  }
+
+  // -------- non-acquire: clear + draw saved markers only --------
+  if (!acquire) {
+    SEGMENT.fill(RGBW32(0,0,0,0));
+    for (uint16_t i=0; i<count; i++) {
+      const uint16_t idx = list[i];
+      if (idx < SEGLEN) {
+        uint32_t mark = SEGMENT.GetPaletteColour_ModeWrap(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
+        if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
+        SEGMENT.setPixelColor(idx, mark);
+      }
+    }
+    return FRAMETIME;
+  }
+
+  // -------- base layer: background + saved markers --------
+  SEGMENT.fill(RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
+  for (uint16_t i=0; i<count; i++) {
+    const uint16_t idx = list[i];
+    if (idx < SEGLEN) {
+      uint32_t mark = SEGCOLOR_U32(0);
+      if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
+      SEGMENT.setPixelColor(idx, mark);
+    }
+  }
+
+  // -------- SCAN / CONFIRM / COOLDOWN --------
+  if (state == S_SCAN) {
+    if (px >= SEGLEN) px = 0;
+
+    // Light current px and read
+    SEGMENT.setPixelColor(px, RGBW32(255,255,255,255));
+    uint16_t meas = GetMeasuredBrightness();
+    if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] scan idx=%u meas=%u"), px, meas);
+
+    // Arm on darkness while scanning
+    if (cd && (meas <= THRESH_LOW)) cd[0] |= 0x04;
+
+    // Bright AND armed -> disambiguate within ±5 (0,+1,-1,+2,-2...+5,-5)
+    if (cd && (cd[0] & 0x04) && meas >= THRESH_HIGH) {
+      uint16_t best = px;
+      bool got = false;
+
+      for (uint8_t d=0; d<=5 && !got; d++) {
+        // +d
+        uint16_t cand = (px + d) % SEGLEN;
+        SEGMENT.setPixelColor(cand, RGBW32(255,255,255,0));
+        uint16_t mv = GetMeasuredBrightness();
+        if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] probe idx=%u meas=%u"), cand, mv);
+        if (mv >= THRESH_HIGH) { best = cand; got = true; break; }
+
+        if (d == 0) continue; // no -0
+        // -d
+        cand = (px + SEGLEN - d) % SEGLEN;
+        SEGMENT.setPixelColor(cand, RGBW32(255,255,255,0));
+        mv = GetMeasuredBrightness();
+        if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] probe idx=%u meas=%u"), cand, mv);
+        if (mv >= THRESH_HIGH) { best = cand; got = true; break; }
+      }
+
+      if (info) AddLog(loglevel, PSTR("[PIX-INDEX] confirm target @%u"), best);
+
+      px = best;                 // commit index we’ll confirm
+      state = S_CONFIRM;
+      confirmStep = 0;
+      tLast = effect_start_time;
+      if (cd) cd[0] = 0;         // clear saw_high/low/armed
+      SEGMENT.setPixelColor(px, RGBW32(255,255,255,0)); // first confirm frame ON
+    } else {
+      // advance scan cursor based on dwell
+      if (effect_start_time - tLast >= dwellMs) {
+        tLast = effect_start_time;
+        px = (px + 1) % SEGLEN;  // wrap
+      }
+    }
+
+  } else if (state == S_CONFIRM) {
+    // Blink ON/OFF, record highs and lows
+    const bool onPhase = ((confirmStep % 2) == 0);
+    SEGMENT.setPixelColor(px, onPhase ? RGBW32(255,255,255,0)
+                                      : RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
+    uint16_t meas = GetMeasuredBrightness();
+    if (cd) {
+      if (meas >= THRESH_HIGH) cd[0] |= 0x01; // saw_high
+      if (meas <= THRESH_LOW)  cd[0] |= 0x02; // saw_low
+    }
+    if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] confirm idx=%u step=%u meas=%u"),
+                      px, confirmStep, meas);
+
+    if (effect_start_time - tLast >= blinkStepMs) {
+      tLast = effect_start_time;
+      confirmStep++;
+
+      if (confirmStep >= (BLINKS_TOTAL * 2)) {
+        const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
+        if (ok) {
+          bool dup = false;
+          for (uint16_t i=0; i<count; i++) if (list[i] == px) { dup = true; break; }
+          if (!dup && count < cap) {
+            list[count++] = px;  // store as uint16_t
+            if (info) AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), px, count);
+            SEGMENT.step = effect_start_time; // schedule delayed print
+            if (saveToFileFlag) {
+              AddLog(loglevel, PSTR("[PIX-INDEX] (SaveToFile) autosave after new hit"));
+              LightSensorIndexing__SaveResults_To_File();
+            }
+          } else if (dup && info) {
+            AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), px);
+          }
+        } else if (info) {
+          AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
+                 px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
+        }
+        state = S_COOLDOWN;
+        tLast = effect_start_time;
+      }
+    }
+
+  } else { // S_COOLDOWN
+    if (effect_start_time - tLast >= COOLDOWN_MS) {
+      state = S_SCAN;
+      if (cd) cd[0] = 0; // require fresh arm
+    }
+    SEGMENT.setPixelColor(px, RGBW32(255,255,255,0));
+    if (cd) {
+      uint16_t meas = GetMeasuredBrightness();
+      if (meas <= THRESH_LOW) cd[0] |= 0x04; // armed again when dark
+    }
+  }
+
+  return FRAMETIME;
+}
+// CONFIG: 10 fields after '@' are strictly in this order:
+// 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
-"Debug: Sensor Indexing@Lit run,Unlit run;Unlit,!"  // two sliders, name the secondary color
-";"                                                // (no palette row labels)
-"!"                                                // allow palette selection for the lit gradient
+"Light Sensor Indexing@"                     // name
+"Scan dwell,Blink speed,Load file (255),Reset current (255),Log/Print level,Acquire,Pop last,Save to file,!,!"  // fields 1..10
 ";"
-"1"                                                // 1D icon flag
+""                                           // segment color names (blank = none/all)
+";"
+""                                           // palette picker (none)
+";"
+"0"                                          // icon flags (0 = strip/1D)
+";"
+"sx=128,"                                    // default Speed (mid dwell)
+"ix=160,"                                    // default Intensity (blink speed mid-fast)
+"c1=0,"                                      // Custom1 default (no load trigger)
+"c2=0,"                                      // Custom2 default (no reset trigger)
+"c3=0,"                                      // Custom3 verbosity (silent)
+"o1=1,"                                      // CB1 Acquire default ON (set to 0 if you prefer paused by default)
+"o2=0,"                                      // CB2 Pop last default OFF
+"o3=0,"                                      // CB3 SaveToFile default OFF
+"ep=0"                                       // extra param (unused)
 ;
 
 static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
-"Alternates lit (palette) and unlit (C2) runs for camera/light-sensor mapping.\n\r"
-"SX: Lit run length   IX: Unlit run length";
+"Map LEDs with a light sensor.\n\r"
+"SCAN a white probe (dwell = SX). On light (armed), sweep ±5 to lock target, then CONFIRM by blinking (rate = IX).\n\r"
+"Accept when sensor sees both ON and OFF during confirm; append index (uint16) to results (duplicates ignored).\n\r"
+"CB1 Acquire: on/off scanner • CB2 Pop last • CB3 SaveToFile: save now and on each new find when left on.\n\r"
+"C1=255 Load saved file; C2=255 Reset current (RAM only); C3 verbosity: 0 silent, 1..200 info, 255 trace.\n\r"
+"Non-acquire view: clear strip and draw saved markers only."
+;
+
+
+
+// ============================================================================
+// Pixel Indexing via Light Sensor (with ±N disambiguation, verbose prints,
+// file-save hook, and updated UI mapping per spec)
+// UI:
+//   CB1 (check1): Acquire ON/OFF
+//   CB2 (check2): Pop last saved index
+//   CB3 (check3): SaveToFile mode
+//       - Rising edge (0->1): immediate save
+//       - While ON (1): auto-save after each new pixel found
+//   SX  (speed)     : scan dwell (faster with higher SX)
+//   IX  (intensity) : blink step time (50..200 ms)
+//   C3  (custom3)   : print verbosity
+//        0     -> no prints
+//        1..200-> normal INFO summaries
+//        255   -> per-step verbose (probe/scan/confirm state traces)
+// Notes:
+//   - When acquire is OFF, the effect redraws only saved markers on a dim bg
+//     and clears everything else (no highlight/scan).
+//   - Buffer layout: [count(uint16_t)] + indices(uint16_t[count])
+//   - ColourData[0] flags: 0=saw_hi,1=saw_lo,2=armed
+//     ColourData[1] flags: 0=prevSaveFlag (tracks last CB3 state)
+// ============================================================================
+// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+// {
+//   if (SEGLEN == 0) return FRAMETIME;
+
+//   // -------- logging controls --------
+//   const uint8_t loglevel  = LOG_LEVEL_INFO;   // tune globally as you like
+//   const uint8_t verbosity = SEGMENT.custom3;  // 0 silent, 1..200 info, 255 trace
+//   const bool info  = (verbosity >= 1 && verbosity <= 200);
+//   const bool trace = (verbosity == 255);
+
+//   // -------- one-time pin setup --------
+//   if (SEGMENT.call == 0) {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
+//   #endif
+//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
+//   #endif
+//   }
+
+//   // -------- thresholds & timings --------
+//   const uint16_t THRESH_HIGH     = 1000;            // ≥ => “light”
+//   const uint16_t THRESH_LOW      = 100;             // ≤ => “dark”
+//   const uint8_t  BLINKS_TOTAL    = 5;               // ON phases during confirm
+//   const uint16_t blinkStepMs     = map(SEGMENT.intensity, 0, 255, 250, 40);
+//   const uint16_t dwellMs         = map(SEGMENT.speed,     0, 255, 60, 5);
+//   const uint16_t PRINT_DELAY_MS  = 3000;
+//   const uint16_t COOLDOWN_MS     = 300;
+//   const uint8_t  BG_DIM          = 1;
+//   const uint8_t  SAVED_MARK_BRI  = 255;
+
+//   // -------- UI controls --------
+//   const bool acquire   = SEGMENT.check1;  // CB1: acquisition
+//   bool saveToFileFlag  = SEGMENT.check3;  // CB3: SaveToFile (edge + continuous)
+
+//   // -------- storage buffer (uint16_t): [count] + indices... --------
+// #ifndef PIX_INDEXING_MAX_CAP
+//   #define PIX_INDEXING_MAX_CAP 512
+// #endif
+//   const uint16_t cap  = (SEGLEN < PIX_INDEXING_MAX_CAP) ? SEGLEN : PIX_INDEXING_MAX_CAP;
+//   const uint16_t need = 2U + cap * 2U;                 // bytes: 2 for count + 2 per uint16 index
+//   if (!SEGMENT.allocateData(need)) return FRAMETIME;
+//   uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
+//   uint16_t &count = buf[0];
+//   uint16_t *list  = &buf[1];
+
+//   // Pop-last (CB2)
+//   if (SEGMENT.check2) {
+//     SEGMENT.check2 = 0;
+//     if (count > 0) {
+//       count--;
+//       if (info) AddLog(loglevel, PSTR("[PIX-INDEX] popped last, new count=%u"), count);
+//     }
+//   }
+
+//   // -------- tiny flags in ColourData --------
+//   // cd[0] bits: 0=saw_high, 1=saw_low, 2=armed
+//   // cd[1] bit0: last SaveToFile state (for rising-edge)
+//   if (!SEGMENT.allocateColourData(2)) { /* continue without if fails */ }
+//   uint8_t *cd = SEGMENT.ColourData();
+//   if (cd && SEGMENT.call == 0) { cd[0] = 0; cd[1] = 0; }
+
+//   // SaveToFile rising-edge (immediate save once when toggled on)
+//   const bool lastSave = cd ? (cd[1] & 0x01) : false;
+//   if (saveToFileFlag && !lastSave) {
+//     AddLog(loglevel, PSTR("[PIX-INDEX] (SaveToFile) immediate save requested"));
+//     LightSensorIndexing__SaveResults_To_File(); // user will implement actual persistence
+//   }
+//   if (cd) {
+//     if (saveToFileFlag) cd[1] |= 0x01; else cd[1] &= ~0x01;
+//   }
+
+//   // -------- state in aux --------
+//   enum : uint16_t { S_SCAN=0, S_CONFIRM=1, S_COOLDOWN=2 };
+//   uint16_t &state       = SEGMENT.aux0;
+//   uint16_t &px          = SEGMENT.aux1;
+//   uint16_t &confirmStep = SEGMENT.aux2;   // 0..(2*BLINKS_TOTAL-1)
+//   uint32_t &tLast       = SEGMENT.aux3;   // must be 32-bit for millis
+
+//   // -------- delayed print of results --------
+//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
+//     if (info) {
+//       AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
+//       for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
+//     }
+//     SEGMENT.step = 0;
+//   }
+
+//   // -------- non-acquire: draw saved markers only --------
+//   if (!acquire) {
+//     SEGMENT.fill(RGBW32(0,0,0,0));
+//     for (uint16_t i=0; i<count; i++) {
+//       const uint16_t idx = list[i];
+//       if (idx < SEGLEN) {
+//         uint32_t mark = SEGMENT.GetPaletteColour_ModeWrap(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
+//         if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
+//         SEGMENT.setPixelColor(idx, mark);
+//       }
+//     }
+//     return FRAMETIME;
+//   }
+
+//   // -------- base layer: background + saved markers --------
+//   SEGMENT.fill(RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
+//   for (uint16_t i=0; i<count; i++) {
+//     const uint16_t idx = list[i];
+//     if (idx < SEGLEN) {
+//       uint32_t mark = SEGCOLOR_U32(0);
+//       if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
+//       SEGMENT.setPixelColor(idx, mark);
+//     }
+//   }
+
+//   // -------- SCAN / CONFIRM / COOLDOWN (uses uint16 indices everywhere) --------
+//   if (state == S_SCAN) {
+//     if (px >= SEGLEN) px = 0;
+
+//     // Light current px and read
+//     SEGMENT.setPixelColor(px, RGBW32(255,255,255,255));
+//     uint16_t meas = GetMeasuredBrightness();
+//     if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] scan idx=%u meas=%u"), px, meas);
+
+//     // Arm on darkness while scanning
+//     if (cd && (meas <= THRESH_LOW)) cd[0] |= 0x04;
+
+//     // Bright AND armed -> disambiguate within ±5 (uint16-safe wrap)
+//     if (cd && (cd[0] & 0x04) && meas >= THRESH_HIGH) {
+//       uint16_t best = px;
+//       bool got = false;
+
+//       for (uint8_t d=0; d<=5 && !got; d++) {
+//         // +d
+//         uint16_t cand = (px + d) % SEGLEN;
+//         SEGMENT.setPixelColor(cand, RGBW32(255,255,255,0));
+//         uint16_t mv = GetMeasuredBrightness();
+//         if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] probe idx=%u meas=%u"), cand, mv);
+//         if (mv >= THRESH_HIGH) { best = cand; got = true; break; }
+
+//         if (d == 0) continue; // no -0
+//         // -d
+//         cand = (px + SEGLEN - d) % SEGLEN;
+//         SEGMENT.setPixelColor(cand, RGBW32(255,255,255,0));
+//         mv = GetMeasuredBrightness();
+//         if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] probe idx=%u meas=%u"), cand, mv);
+//         if (mv >= THRESH_HIGH) { best = cand; got = true; break; }
+//       }
+
+//       if (info) AddLog(loglevel, PSTR("[PIX-INDEX] confirm target @%u"), best);
+
+//       px = best;                 // commit the (uint16) index we’ll confirm
+//       state = S_CONFIRM;
+//       confirmStep = 0;
+//       tLast = effect_start_time;
+//       if (cd) cd[0] = 0;         // clear saw_high/low/armed
+//       SEGMENT.setPixelColor(px, RGBW32(255,255,255,0)); // first confirm frame ON
+//     } else {
+//       // advance scan cursor based on dwell
+//       if (effect_start_time - tLast >= dwellMs) {
+//         tLast = effect_start_time;
+//         px = (px + 1) % SEGLEN;  // uint16-safe wrap
+//       }
+//     }
+
+//   } else if (state == S_CONFIRM) {
+//     // Blink ON/OFF, record highs and lows
+//     const bool onPhase = ((confirmStep % 2) == 0);
+//     SEGMENT.setPixelColor(px, onPhase ? RGBW32(255,255,255,0)
+//                                       : RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
+//     uint16_t meas = GetMeasuredBrightness();
+//     if (cd) {
+//       if (meas >= THRESH_HIGH) cd[0] |= 0x01; // saw_high
+//       if (meas <= THRESH_LOW)  cd[0] |= 0x02; // saw_low
+//     }
+//     if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] confirm idx=%u step=%u meas=%u"),
+//                       px, confirmStep, meas);
+
+//     if (effect_start_time - tLast >= blinkStepMs) {
+//       tLast = effect_start_time;
+//       confirmStep++;
+
+//       if (confirmStep >= (BLINKS_TOTAL * 2)) {
+//         const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
+//         if (ok) {
+//           bool dup = false;
+//           for (uint16_t i=0; i<count; i++) if (list[i] == px) { dup = true; break; }
+//           if (!dup && count < cap) {
+//             list[count++] = px;  // store as uint16_t
+//             if (info) AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), px, count);
+//             SEGMENT.step = effect_start_time; // schedule delayed print
+//             if (saveToFileFlag) {
+//               AddLog(loglevel, PSTR("[PIX-INDEX] (SaveToFile) autosave after new hit"));
+//               LightSensorIndexing__SaveResults_To_File();
+//             }
+//           } else if (dup && info) {
+//             AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), px);
+//           }
+//         } else if (info) {
+//           AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
+//                  px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
+//         }
+//         state = S_COOLDOWN;
+//         tLast = effect_start_time;
+//       }
+//     }
+
+//   } else { // S_COOLDOWN
+//     if (effect_start_time - tLast >= COOLDOWN_MS) {
+//       state = S_SCAN;
+//       if (cd) cd[0] = 0; // require fresh arm
+//     }
+//     SEGMENT.setPixelColor(px, RGBW32(255,255,255,0));
+//     if (cd) {
+//       uint16_t meas = GetMeasuredBrightness();
+//       if (meas <= THRESH_LOW) cd[0] |= 0x04; // armed again when dark
+//     }
+//   }
+
+//   return FRAMETIME;
+// }
+
+
+
+
+/***************************************************************************************************************************************
+ * @function    : EffectAnim__Hardware__Light_Sensor_Pixel_Indexing
+ * @purpose     : Walk through the strip one pixel at a time, illuminating exactly one LED. If the light sensor
+ *                sees a “bright” reading at the current pixel, we enter a 5-blink confirm phase (ON/OFF/ON/OFF/ON).
+ *                Only if we observe BOTH high and low readings during the confirm sequence do we accept the index
+ *                as FOUND and store it in a buffer. We can undo the last saved index (CB2) and print the list (CB3).
+ *
+ * Visuals      : - Background dim gray
+ *                - Current scan pixel: white (or blinking during confirm)
+ *                - Saved pixels: palette Color 0 (or any you prefer)
+ *
+ * Controls     :
+ *   • SX (Speed)     : dwell per pixel (ms). Lower = slower scan. (mapped 5..60ms)
+ *   • IX (Intensity) : unused here (reserved).
+ *   • CB1            : Acquire mode ON/OFF (when OFF, holds visuals but stops scanning & confirming)
+ *   • CB2            : Pop last saved index (auto-clears to 0)
+ *   • CB3            : Print saved indices now (auto-clears to 0)
+ *
+ * Data buffer layout in SEGMENT.data (allocated once):
+ *   [0..1]   : uint16_t count (number of saved indices)
+ *   [2..N]   : uint16_t saved indices (capacity derived from allocation)
+ *
+ * State machine (private per-segment via aux fields):
+ *   SEGMENT.aux0 : scanner state
+ *        0 = SCAN        (advance through pixels, show white at current)
+ *        1 = CONFIRM     (blink current pixel 5 times ON/OFF)
+ *   SEGMENT.aux1 : current pixel index (0..SEGLEN-1)
+ *   SEGMENT.aux2 : timestamp ms for pace/blink timing
+ *   SEGMENT.aux3 : confirm-step counter (0..9) => 5 on/off toggles * 2 steps (on and off frames)
+ *   SEGMENT.step : last time we printed the whole buffer after a hit (to apply “print after 3s” rule)
+ *
+ * Accept rule : During CONFIRM we record whether the sensor observed “bright” at least once
+ *               and “dark” at least once. If both seen, we accept and save the index.
+ *
+ * Notes       : This is deliberately conservative (needs both high and low). You can tighten/loosen thresholds later.
+ ***************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+// {
+//   if (SEGLEN == 0) return FRAMETIME;  
+  
+//   // One-time hardware init on first run
+//   if (SEGMENT.call == 0) {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);      // module with onboard comparator
+//   #endif
+//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);       // bare LDR divider
+//     // (Optional) ESP32: configure ADC attenuation/width here if you use them globally.
+//     // analogSetWidth(12); analogSetAttenuation(ADC_11db);
+//   #endif
+//   }
+
+//   Serial.printf("eff\n\r");
+
+
+//   // ---------- constants / thresholds ----------
+//   const uint16_t THRESH_HIGH      = 1000;     // mock “bright”
+//   const uint16_t THRESH_LOW       = 100;      // mock “dark”
+//   const uint16_t BLINKS_TOTAL     = 5;        // 5 on-phases
+//   const uint16_t BLINK_STEP_MS    = 100;      // 100ms between toggles in confirm
+//   const uint16_t PRINT_DELAY_MS   = 3000;     // print full list 3s after a hit
+//   const uint16_t BG_DIM           = 5;        // background gray (5/255)
+//   const uint8_t  SAVED_MARK_BRI   = 255;      // brightness for saved markers
+
+//   // ---------- UI controls ----------
+//   const bool acquire = SEGMENT.check1;        // CB1: acquisition on/off
+//   if (SEGMENT.check2) {                       // CB2: pop last saved index
+//     SEGMENT.check2 = 0;                       // auto-clear
+//     if (SEGMENT.data) {
+//       uint16_t *hdr = reinterpret_cast<uint16_t*>(SEGMENT.data);
+//       if (hdr[0] > 0) hdr[0] -= 1;            // decrement count
+//     }
+//   }
+//   if (SEGMENT.check3) {                       // CB3: print now
+//     SEGMENT.check3 = 0;                       // auto-clear
+//     if (SEGMENT.data) {
+//       uint16_t *hdr = reinterpret_cast<uint16_t*>(SEGMENT.data);
+//       const uint16_t cnt = hdr[0];
+//       Serial.printf("[PIX-INDEX] count=%u  [", cnt);
+//       for (uint16_t i=0; i<cnt; i++) {
+//         if (i) Serial.print(',');
+//         Serial.print(hdr[1+i]);
+//       }
+//       Serial.println("]");
+//     }
+//   }
+
+//   // ---------- allocate / ensure buffer ----------
+//   // We’ll store up to min(SEGLEN, 256) indices (uint16_t each) + 2 bytes for count.
+//   const uint16_t cap = (SEGLEN < 256) ? SEGLEN : 256;
+//   const uint16_t need = 2U + (cap * 2U);
+//   if (!SEGMENT.allocateData(need)) {
+//     return FRAMETIME; // allocation failed
+//   }
+//   uint16_t *buf = reinterpret_cast<uint16_t*>(SEGMENT.data);
+//   uint16_t &count = buf[0];
+//   uint16_t *list  = &buf[1];
+
+//   // ---------- state fetch ----------
+//   enum : uint8_t { S_SCAN=0, S_CONFIRM=1 };  
+//   uint16_t &state       = SEGMENT.aux0;   // effect state machine (0 = idle, 1 = scanning, …)
+//   uint16_t &px          = SEGMENT.aux1;   // current pixel under test
+//   uint16_t &confirmStep = SEGMENT.aux2;   // 0..(BLINKS_TOTAL*2-1) toggles (on/off pairs)
+//   uint32_t &tLast       = SEGMENT.aux3;   // last tick for timing (needs 32-bit millis safe)
+
+//   // We’ll piggyback two flags via colour data (or reuse aux slots if you prefer):
+//   //   cd[0] bit0 => saw_high, cd[0] bit1 => saw_low
+//   if (!SEGMENT.allocateColourData(1)) {
+//     // colour buffer is just a single byte for two flags; fall back to aux1 bits if you prefer
+//   }
+//   uint8_t *cd = SEGMENT.ColourData();
+
+//   // ---------- timing tuning ----------
+//   const uint16_t dwellMs = map(SEGMENT.speed, 0, 255, 60, 5); // per-pixel scan dwell
+
+//   // ---------- background ----------
+//   SEGMENT.fill(RGBW32(BG_DIM, BG_DIM, BG_DIM, 0));
+
+//   // ---------- draw saved markers ----------
+//   for (uint16_t i = 0; i < count; i++) {
+//     uint16_t idx = list[i];
+//     if (idx < SEGLEN) {
+//       // mark saved positions in primary segment color (or full white if you prefer)
+//       uint32_t mark = SEGCOLOR_U32(0);
+//       // ensure brightness (could also do color_blend)
+//       if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0); // fallback green
+//       SEGMENT.setPixelColor(idx, mark);
+//     }
+//   }
+
+//   // ---------- handle printing-after-delay logic ----------
+//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
+//     // print full list once, then clear the print-schedule (step=0)
+//     Serial.printf("[PIX-INDEX][DELAYED PRINT] count=%u  [", count);
+//     for (uint16_t i=0; i<count; i++) {
+//       if (i) Serial.print(',');
+//       Serial.print(list[i]);
+//     }
+//     Serial.println("]");
+//     SEGMENT.step = 0;
+//   }
+
+//   // If not acquiring, just show markers and current pixel position “frozen”
+//   if (!acquire) {
+//     // paint current pixel as a dim highlight (but do not advance)
+//     if (px >= SEGLEN) px = 0;
+//     SEGMENT.setPixelColor(px, RGBW32(255, 255, 255, 0));
+//     return FRAMETIME;
+//   }
+
+//   // ---------- state machine ----------
+//   if (state == S_SCAN) {
+//     // advance to next pixel based on dwell time
+//     if (effect_start_time - tLast >= dwellMs) {
+//       tLast = effect_start_time;
+
+//       // move the highlight
+//       px = (px + 1) % SEGLEN;
+//     }
+
+//     // show current test pixel (steady white)
+//     SEGMENT.setPixelColor(px, RGBW32(255, 255, 255, 0));
+
+//     // read sensor
+//     uint16_t meas = GetMeasuredBrightness();
+//     if (meas >= THRESH_HIGH) {
+//       // Enter confirm phase
+//       state = S_CONFIRM;
+//       confirmStep = 0;
+//       if (cd) cd[0] = 0; // clear flags
+//       tLast = effect_start_time;
+//     }
+
+//   } else {
+//     // S_CONFIRM: blink the current pixel 5 times, 100ms per toggle,
+//     //            record whether we saw HIGH and LOW during the sequence.
+//     bool onPhase = (confirmStep % 2) == 0;
+
+//     // draw blink
+//     SEGMENT.setPixelColor(px, onPhase ? RGBW32(255, 255, 255, 0)
+//                                       : RGBW32(BG_DIM, BG_DIM, BG_DIM, 0));
+
+//     // sample sensor & set flags
+//     uint16_t meas = GetMeasuredBrightness();
+//     if (cd) {
+//       if (meas >= THRESH_HIGH) cd[0] |= 0x01; // saw_high
+//       if (meas <= THRESH_LOW)  cd[0] |= 0x02; // saw_low
+//     }
+
+//     // timing for next toggle
+//     if (effect_start_time - tLast >= BLINK_STEP_MS) {
+//       tLast = effect_start_time;
+//       confirmStep++;
+
+//       if (confirmStep >= (BLINKS_TOTAL * 2)) {
+//         // evaluate accept rule
+//         bool ok = true;
+//         if (cd) {
+//           ok = ((cd[0] & 0x01) && (cd[0] & 0x02)); // both seen
+//         }
+//         if (ok) {
+//           // save if not duplicate and capacity available
+//           bool dup = false;
+//           for (uint16_t i=0; i<count; i++) if (list[i] == px) { dup = true; break; }
+//           if (!dup && count < cap) {
+//             list[count++] = px;
+//             Serial.printf("[PIX-INDEX] found=%u  (count=%u)\n", px, count);
+//             // schedule a delayed print in 3s
+//             SEGMENT.step = effect_start_time;
+//           }
+//         } else {
+//           Serial.printf("[PIX-INDEX] confirm failed at %u (hi=%u, lo=%u)\n",
+//                         px,
+//                         cd ? !!(cd[0] & 0x01) : 0,
+//                         cd ? !!(cd[0] & 0x02) : 0);
+//         }
+
+//         // back to scanning
+//         state = S_SCAN;
+//         // advance to the next pixel next frame (scan pace keeps it moving)
+//       }
+//     }
+//   }
+
+//   return FRAMETIME;
+// }
+
+
+
+// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+// {
+//   if (SEGLEN == 0) return FRAMETIME;
+
+//   // ---------- logging level (can be made runtime-configurable later) ----------
+//   const uint8_t loglevel = LOG_LEVEL_INFO; // 0=off .. 5=trace
+
+//   // ---------- one-time pin init ----------
+//   if (SEGMENT.call == 0) {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
+//   #endif
+//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
+//     // If you use global ADC config on ESP32, do it elsewhere (e.g. setup):
+//     // analogSetWidth(12); analogSetAttenuation(ADC_11db);
+//   #endif
+//   }
+
+//   // ---------- constants ----------
+//   const uint8_t  BLINKS_TOTAL       = 5;      // on phases (10 toggles total)
+//   const uint16_t COOLDOWN_MS        = 300;    // after success/fail
+//   const uint16_t PRINT_DELAY_MS     = 3000;   // print full list after hit (once)
+
+//   // Analog thresholds (used only if analog pin present)
+//   const uint16_t THRESH_HIGH = 1000;
+//   const uint16_t THRESH_LOW  = 100;
+
+//   // ---------- UI values (bitfields cannot be referenced; copy and write back explicitly) ----------
+//   const uint8_t ui_speed      = SEGMENT.speed;       // SX
+//   const uint8_t ui_intensity  = SEGMENT.intensity;   // IX
+//   const uint8_t ui_c1         = SEGMENT.custom1;     // C1 (reserved/future)
+//   const uint8_t ui_c2         = SEGMENT.custom2;     // C2 → blink step adjust
+//   const uint8_t ui_c3         = SEGMENT.custom3;     // C3 → saved marker brightness (0..31)
+//   const bool    ui_acquire    = SEGMENT.check1;      // CB1: acquisition on/off
+//   const bool    ui_popLast    = SEGMENT.check2;      // CB2: pop last saved index (one-shot)
+//   const bool    ui_printNow   = SEGMENT.check3;      // CB3: print saved list now (one-shot)
+
+//   // ---------- state machine fields ----------
+//   enum : uint16_t { S_SCAN = 0, S_CONFIRM = 1, S_COOLDOWN = 2 };
+//   uint16_t &sm_state   = SEGMENT.aux0;        // S_*
+//   uint16_t &sm_px      = SEGMENT.aux1;        // current pixel under test
+//   uint16_t &sm_confirm = SEGMENT.aux2;        // 0..(2*BLINKS_TOTAL-1)
+//   uint32_t &sm_tLast   = SEGMENT.aux3;        // last tick (ms)
+
+//   // ---------- derived timings / levels ----------
+//   const uint16_t dwellMs      = map(ui_speed, 0, 255, 60, 5);                 // per-pixel dwell
+//   const uint16_t blinkStepMs  = 50 + ((uint16_t)ui_c2 * 150) / 255;           // ~50..200ms
+//   const uint16_t guardTimeout = (uint16_t)BLINKS_TOTAL * 2 * blinkStepMs + 200;
+//   const uint8_t  bgDim        = max<uint8_t>(1, ui_intensity >> 6);           // ~0..3; never 0
+//   const uint8_t  savedBri     = (ui_c3 ? (ui_c3 * 8) : 255);                   // map 0..31 → ~0..248 (use 255 if 0)
+
+//   // ---------- helpers: sensor read → high/low booleans ----------
+//   auto sensorHigh = [&]() -> bool {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
+//     #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+//       return (v == LOW);   // light => LOW
+//     #else
+//       return (v == HIGH);  // light => HIGH
+//     #endif
+//   #elif defined(PIXEL_LIGHT_SENSOR__ANALOG_PIN)
+//     return analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN) >= THRESH_HIGH;
+//   #else
+//     // fallback tester: rare highs to simulate detection
+//     return (hw_random8() > 230);
+//   #endif
+//   };
+
+//   auto sensorLow = [&]() -> bool {
+//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+//     const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
+//     #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+//       return (v == HIGH);  // dark => HIGH
+//     #else
+//       return (v == LOW);   // dark => LOW
+//     #endif
+//   #elif defined(PIXEL_LIGHT_SENSOR__ANALOG_PIN)
+//     return analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN) <= THRESH_LOW;
+//   #else
+//     // fallback tester: frequent lows
+//     return (hw_random8() < 20);
+//   #endif
+//   };
+
+//   // ---------- storage: [count(uint16_t)] + indices (uint16_t) ----------
+//   const uint16_t cap  = (SEGLEN < 512) ? SEGLEN : 512;
+//   const uint16_t need = 2U + cap * 2U;
+//   if (!SEGMENT.allocateData(need)) return FRAMETIME;
+//   uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
+//   uint16_t &count = buf[0];
+//   uint16_t *list  = &buf[1];
+
+//   // ---------- tiny flags buffer: cd[0] bits: 0=saw_hi, 1=saw_lo, 2=armed ----------
+//   if (!SEGMENT.allocateColourData(1)) { /* optional; ignore if fails */ }
+//   uint8_t *cd = SEGMENT.ColourData();
+
+//   // ---------- one-shot UI actions (write back clears for bitfields) ----------
+//   if (ui_popLast) {
+//     if (count > 0) count--;
+//     SEGMENT.check2 = 0; // clear CB2
+//   }
+//   if (ui_printNow) {
+//     AddLog(loglevel, PSTR("[PIX-INDEX][MANUAL PRINT] count=%u"), count);
+//     for (uint16_t i = 0; i < count; i++) {
+//       AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
+//     }
+//     SEGMENT.check3 = 0; // clear CB3
+//   }
+
+//   // ---------- background + show saved markers ----------
+//   SEGMENT.fill(RGBW32(bgDim, bgDim, bgDim, 0));
+
+//   for (uint16_t i = 0; i < count; i++) {
+//     uint16_t idx = list[i];
+//     if (idx < SEGLEN) {
+//       uint32_t mark = SEGCOLOR_U32(0);
+//       if (mark == 0) mark = RGBW32(0, savedBri, 0, 0); // fallback bright green
+//       SEGMENT.setPixelColor(idx, mark);
+//     }
+//   }
+
+//   // ---------- delayed print after last hit ----------
+//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
+//     AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
+//     for (uint16_t i = 0; i < count; i++) {
+//       AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
+//     }
+//     SEGMENT.step = 0;
+//   }
+
+//   // ---------- idle view when not acquiring ----------
+//   if (!ui_acquire) {
+//     if (sm_px >= SEGLEN) sm_px = 0;
+//     SEGMENT.setPixelColor(sm_px, RGBW32(255, 255, 255, 0)); // show where scan last was
+//     return FRAMETIME;
+//   }
+
+//   // ---------- state machine ----------
+//   if (sm_state == S_SCAN) {
+//     // highlight current candidate pixel
+//     SEGMENT.setPixelColor(sm_px, RGBW32(255, 255, 255, 0));
+
+//     // arm when we've seen darkness
+//     if (cd && sensorLow()) cd[0] |= 0x04;
+
+//     // edge detection: need "armed" & then high => start confirm on THIS pixel
+//     if (sensorHigh() && cd && (cd[0] & 0x04)) {
+//       sm_state   = S_CONFIRM;
+//       sm_confirm = 0;
+//       sm_tLast   = effect_start_time;
+//       cd[0]      = 0; // clear flags
+//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm start @%u"), sm_px);
+//     } else {
+//       // advance only on dwell expiry and only if we didn't just edge-trigger
+//       if (effect_start_time - sm_tLast >= dwellMs) {
+//         sm_tLast = effect_start_time;
+//         sm_px = (sm_px + 1) % SEGLEN;
+//       }
+//     }
+
+//   } else if (sm_state == S_CONFIRM) {
+//     // blink the pixel: even steps on, odd steps off
+//     const bool onPhase = (sm_confirm % 2) == 0;
+//     SEGMENT.setPixelColor(
+//       sm_px,
+//       onPhase ? RGBW32(255, 255, 255, 0) : RGBW32(bgDim, bgDim, bgDim, 0)
+//     );
+
+//     // sample sensor
+//     if (cd) {
+//       if (sensorHigh()) cd[0] |= 0x01; // saw hi
+//       if (sensorLow())  cd[0] |= 0x02; // saw lo
+//     }
+
+//     // guard timeout (e.g., sensor too far / stuck)
+//     if (effect_start_time - sm_tLast > guardTimeout) {
+//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm timeout @%u (hi=%u lo=%u)"),
+//              sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
+//       sm_state = S_COOLDOWN;
+//       sm_tLast = effect_start_time;
+//     }
+
+//     // toggle timing
+//     if (effect_start_time - sm_tLast >= blinkStepMs) {
+//       sm_tLast = effect_start_time;
+//       sm_confirm++;
+
+//       if (sm_confirm >= (uint16_t)BLINKS_TOTAL * 2) {
+//         const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
+//         if (ok) {
+//           bool dup = false;
+//           for (uint16_t i = 0; i < count; i++) if (list[i] == sm_px) { dup = true; break; }
+//           if (!dup && count < cap) {
+//             list[count++] = sm_px;
+//             AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), sm_px, count);
+//             SEGMENT.step = effect_start_time; // schedule delayed print
+//           } else if (dup) {
+//             AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), sm_px);
+//           }
+//         } else {
+//           AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
+//                  sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
+//         }
+//         sm_state = S_COOLDOWN;
+//         sm_tLast = effect_start_time;
+//       }
+//     }
+
+//   } else { // S_COOLDOWN
+//     // keep pixel lit during cooldown; re-arm as soon as we detect low
+//     SEGMENT.setPixelColor(sm_px, RGBW32(255, 255, 255, 0));
+//     if (effect_start_time - sm_tLast >= COOLDOWN_MS) {
+//       sm_state = S_SCAN;
+//       if (cd) cd[0] = 0; // clear flags; need fresh arm
+//     } else {
+//       if (cd && sensorLow()) cd[0] |= 0x04;
+//     }
+//   }
+
+//   return FRAMETIME;
+// }
+
+
+
+
+
+
+
+
+// static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
+// "Debug: Light Sensor Indexing@"                // Name
+// "Scan Dwell,Blink Rate,,,,"                    // 1s,2i,3c1,4c2,5c3
+// "Acquire,Pop Last,SaveToFile,,"                // 6cb1,7cb2,8cb3,9ep,10grp
+// ";"                                            // ----------------------------------------- Sliders/SegCols
+// ""                                             // Segment Colour Names (blank = show all)
+// ";"                                            // ----------------------------------------- SegCols/PalPicker
+// ""                                             // Palette picker (none)
+// ";"                                            // ----------------------------------------- PalPicker/is1D2D
+// "0"                                            // Icon flags (0 = generic/strip)
+// ";"                                            // ----------------------------------------- is1D2D/Defaults
+// "sx=120,"                                      // default Scan Dwell (Speed)
+// "ix=100,"                                      // default Blink Rate (Intensity)
+// "o1=0,"                                        // CB1 Acquire OFF by default
+// "o2=0,"                                        // CB2 Pop Last OFF
+// "o3=0"                                         // CB3 SaveToFile OFF (edge=save once; hold=autosave)
+// ;                                              // end
+
+// static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
+// "Pixel index acquisition using a light sensor (LDR or digital-threshold module).\n\r"
+// "Scans LEDs sequentially; on detection runs a blink confirm and ±5 disambiguation.\n\r"
+// "Saves confirmed indices; shows saved pixels in green when acquire is OFF.\n\r"
+// "Controls:\n\r"
+// "  SX: Scan dwell per pixel (fast↔slow)\n\r"
+// "  IX: Blink rate for confirm\n\r"
+// "  CB1: Acquire (start/stop scanning)\n\r"
+// "  CB2: Pop last saved index\n\r"
+// "  CB3: SaveToFile (edge=save now, hold=autosave on each find)\n\r"
+// "Notes: Print verbosity is via Custom3 slider (0=off, 1..200=INFO, 255=trace).\n\r"
+// "Ignores palette/segcol; safe for 1D layouts."
+// ;
+
+
+
+
+// static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
+// "Debug: Sensor Indexing@!,!,!,!,!,!,!,!,!,!"  // two sliders, name the secondary color
+// ";"                                                // (no palette row labels)
+// "!"                                                // allow palette selection for the lit gradient
+// ";"
+// "1"                                                // 1D icon flag
+// ;
+// static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
+// "Alternates lit (palette) and unlit (C2) runs for camera/light-sensor mapping.\n\r"
+// "SX: Lit run length   IX: Unlit run length";
+
+
+
+// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
+// {
+  
+//   uint16_t lit = 1 + SEGMENT.speed;
+//   uint16_t unlit = 1 + SEGMENT.intensity;
+//   bool drawingLit = true;
+//   uint16_t cnt = 0;
+
+//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//     SEGMENT.setPixelColor(i, 
+//       (drawingLit) ? SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE) : SEGCOLOR_U32(1)
+//     );
+//     cnt++;
+//     if (cnt >= ((drawingLit) ? lit : unlit)) {
+//       cnt = 0;
+//       drawingLit = !drawingLit;
+//     }
+//   }
+  
+//   return FRAMETIME;
+  
+// }
+// static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Debug Light Sensor Indexing@Fg size,Bg size;Fg,!;!;;pal=19";
+// static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+
+
+
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
 
@@ -14166,7 +15218,6 @@ static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROG
 }
 static const char PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM =
 "Module Controlled@!;;";
-
 static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM =
 "Does not render; reserved for external/realtime control.";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
@@ -18918,42 +19969,42 @@ void mAnimatorLight::LoadEffects()
   
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
-  // /**
-  //  * Hardware Installation Helpers
-  //  **/
-  // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-  // addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
-  //           &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
-  //           PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  /**
+   * Hardware Installation Helpers
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
+            PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
-  //           &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,
-  //           PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,
+            PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
-  //           &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,
-  //           PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
+            &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,
+            PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
-  //           &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
-  //           PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
-  //           #endif
-  //           Effect_DevStage::Dev);
-  // #endif
+  addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
+            PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
+            #endif
+            Effect_DevStage::Dev);
+  #endif
 
   /**
    * Sun Position
