@@ -31,8 +31,10 @@
 // #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
 // #define DEVICE_MEADOWS__OFFICE__BLACK_STAND
 // #define DEVICE_OFFICE__DESK_LIGHTING
-#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
+
+// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

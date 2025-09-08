@@ -854,7 +854,7 @@ void mAnimatorLight::handleSettingsSet(AsyncWebServerRequest *request, byte subP
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_UM
   }
 
-  #ifndef WLED_DISABLE_2D
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   //2D panels
   if (subPage == SUBPAGE_2D)
   {

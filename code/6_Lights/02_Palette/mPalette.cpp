@@ -862,7 +862,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   //     }
   //   }
 
-  //   CRGB fastled_col = ColorFromPaletteWLED(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
+  //   CRGB fastled_col = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
   //   colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
   //   #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
   //   colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
@@ -910,7 +910,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       }
     }
 
-    CRGB fastled_col = ColorFromPaletteWLED(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
+    CRGB fastled_col = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
     colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
@@ -1388,7 +1388,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
 
 // 1:1 replacement of fastled function optimized for ESP, slightly faster, more accurate and uses less flash (~ -200bytes)
-uint32_t mPalette::ColorFromPaletteWLED(const CRGBPalette16& pal, unsigned index, uint8_t brightness, TBlendType blendType)
+uint32_t mPalette::ColorFromPaletteU32(const CRGBPalette16& pal, unsigned index, uint8_t brightness, TBlendType blendType)
 {
   if (blendType == LINEARBLEND_NOWRAP) {
     index = (index*240) >> 8; // Blend range is affected by lo4 blend of values, remap to avoid wrapping

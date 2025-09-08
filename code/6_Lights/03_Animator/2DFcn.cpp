@@ -176,21 +176,13 @@ void mAnimatorLight::setUpMatrix() {
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
-// XY(x,y) - gets pixel index within current segment (often used to reference leds[] array element)
-uint16_t IRAM_ATTR mAnimatorLight::Segment::XY(int x, int y)
-{
-  uint16_t width  = virtualWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
-  uint16_t height = virtualHeight();  // segment height in logical pixels (is always >= 1)
-  return isActive() ? (x%width) + (y%height) * width : 0;
-}
-
-
 
 void 
 // IRAM_ATTR 
 mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 {
 
+      // Serial.println(__LINE__);
   #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
   ALOG_INF(PSTR("Segment::setPixelColorXY(%d,%d|%d,%d,%d)"), x, y, R(col), G(col), B(col));
   #endif
@@ -200,11 +192,13 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   // DEBUG_LINE_HERE;
   if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
   {    
-  //  ALOG_INF(PSTR("out of segment")); 
+   ALOG_INF(PSTR("out of segment")); 
     return;  // if pixel would fall out of virtual segment just exit
   }
 
-
+  // col = RGBW32(250,10,10,0);
+  // if(x==6 && y==6)
+  // col = RGBW32(50,255,0,0);
 
   // DEBUG_LINE_HERE;
   /**
@@ -267,6 +261,9 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   // // This function bypassing the 1D to 2D set function that applies brightness, so we need to apply here before calling the busmanager
 
   //   col = RgbwwColorU32(c);
+  // ALOG_INF(PSTR("xy %d,%d"),x,y);
+  // if(x==2 && y==2)
+  // col = RGBW32(0,255,255,0);
 
   // DEBUG_LINE_HERE;
   if (reverse  ) x = virtualWidth()  - x - 1;
@@ -308,7 +305,7 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
 //       if (_modeBlend) tmpCol = color_blend(getPixelColorXY(start + xX, startY + yY), col, 0xFFFFU - progress(), true);
 // #endif
       #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
-      // ALOG_INF(PSTR("--------setPixelColorXY %d, %d, %d, %d, %d -- w%d h%d"), start + xX, startY + yY, R(tmpCol), G(tmpCol), B(tmpCol), width(), height());
+      ALOG_INF(PSTR("--------setPixelColorXY %d, %d, %d, %d, %d -- w%d h%d"), start + xX, startY + yY, R(tmpCol), G(tmpCol), B(tmpCol), width(), height());
       #endif
 
       // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
@@ -532,10 +529,10 @@ void mAnimatorLight::Segment::blurRow(uint16_t row, fract8 blur_amount) {
     cur += carryover;
     if (x>0) {
       CRGB prev = CRGB(getPixelColorXY(x-1, row)) + part;
-      setPixelColorXY_CRGB(x-1, row, prev);
+      setPixelColorXY(x-1, row, prev);
     }
     if (before != cur)         // optimization: only set pixel if color has changed
-      setPixelColorXY_CRGB(x, row, cur);
+      setPixelColorXY(x, row, cur);
     carryover = part;
   }
 }
@@ -560,10 +557,10 @@ void mAnimatorLight::Segment::blurCol(uint16_t col, fract8 blur_amount) {
     cur += carryover;
     if (y>0) {
       CRGB prev = CRGB(getPixelColorXY(col, y-1)) + part;
-      setPixelColorXY_CRGB(col, y-1, prev);
+      setPixelColorXY(col, y-1, prev);
     }
     if (before != cur)         // optimization: only set pixel if color has changed
-      setPixelColorXY_CRGB(col, y, cur);
+      setPixelColorXY(col, y, cur);
     carryover = part;
   }
 }
@@ -599,7 +596,7 @@ void mAnimatorLight::Segment::box_blur(uint16_t i, bool vertical, fract8 blur_am
   for (int j = 0; j < dim1; j++) {
     uint16_t x = vertical ? i : j;
     uint16_t y = vertical ? j : i;
-    setPixelColorXY_CRGB(x, y, tmp[j]);
+    setPixelColorXY(x, y, tmp[j]);
   }
 }
 
@@ -895,7 +892,7 @@ void mAnimatorLight::Segment::drawCharacter(unsigned char chr, int16_t x, int16_
 //       if (x0 < 0 || x0 >= cols || y0 < 0 || y0 >= rows) continue; // drawing off-screen
 //       if (((bits>>(j+(8-w))) & 0x01)) { // bit set
 //         // DEBUG_LINE_HERE_MARKER;
-//         setPixelColorXY_CRGB(x0, y0, col);
+//         setPixelColorXY(x0, y0, col);
 //       }
 //     }
 //   }
@@ -1027,7 +1024,7 @@ void mAnimatorLight::Segment::wu_pixel(uint32_t x, uint32_t y, CRGB c) {      //
     led.r = qadd8(led.r, c.r * wu[i] >> 8);
     led.g = qadd8(led.g, c.g * wu[i] >> 8);
     led.b = qadd8(led.b, c.b * wu[i] >> 8);
-    setPixelColorXY_CRGB(int((x >> 8) + (i & 1)), int((y >> 8) + ((i >> 1) & 1)), led);
+    setPixelColorXY(int((x >> 8) + (i & 1)), int((y >> 8) + ((i >> 1) & 1)), led);
   }
 }
 #undef WU_WEIGHT

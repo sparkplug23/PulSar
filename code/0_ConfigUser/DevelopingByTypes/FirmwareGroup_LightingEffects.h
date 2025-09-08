@@ -46,7 +46,7 @@
 
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;  -- 2D Devices
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H                  // ESP32 testing 16x16 matrix
+#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H                  // ESP32 testing 16x16 matrix
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32X8_VERTICAL                   // ESP32 testing 32x8 matrix // make this the new one
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_8W32H_TALL
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_32W8H_WIDE_WEIGHT_DISPLAY
@@ -1451,6 +1451,16 @@
 
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H
 
+// REmove these, should be in defaults
+#define ENABLE_EFFECT_DESCRIPTIONS
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+#define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+// #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+#define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+
 #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1499,7 +1509,7 @@
         "BrightnessRGB":1
       },
       "Effects": {
-          "Function":"Black Hole",
+          "Function":"Waving Cell",
           "Speed":100,
           "Intensity":128,
           "Custom1":128,
@@ -1516,6 +1526,7 @@
     "BrightnessCCT": 0
   }
   )=====";
+          // "Function":"Black Hole",
 
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H
 

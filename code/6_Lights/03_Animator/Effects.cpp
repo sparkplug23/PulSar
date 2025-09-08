@@ -11286,7 +11286,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Ripple(uint8_t blurAmount)
       unsigned propF = propagation & 0xFF;
       unsigned amp = (ripplestate < 17) ? triwave8((ripplestate-1)*8) : map(ripplestate,17,255,255,2);
 
-      #ifndef WLED_DISABLE_2D
+      #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
       if (SEGMENT.is2D()) {
         propI /= 2;
         unsigned cx = rippleorigin >> 8;
@@ -13536,75 +13536,6 @@ static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
-/***
- * Idea: Make functions that "dumps" the buffer (allocateData/allocateColourData) into filesystem as csv file or json file. 
- * Hence, I can trigger a "save".
- * Another effect should be added that can take this, and display those pixels on (ie replay capture)
- * Also need to use one of the check buttons to do "show captured". OR, if aquire is not active, then it should show those in buffer!! better idea.
- * 
- * 
- * 
- */
-
-/***************************************************************************************************************************************
- * @function    : GetMeasuredBrightness (TEMP STUB)
- * @brief       : Test harness for the light sensor. For ~1 second, returns low values (<100),
- *                then for ~one frame every ~5 seconds returns a high value (>1000), to simulate a “detected” moment.
- *                Replace with your real sensor (e.g., BH1750/LDR sampling) later.
- ***************************************************************************************************************************************/
-// static inline uint16_t GetMeasuredBrightness()
-// {
-//   // crude pseudo-periodic spike: ~every 5s, emit a brief "bright" window
-//   // (effect_start_time is assumed to be available like in your other effects)
-//   uint32_t t = effect_start_time % 5000UL; // 5-second cycle
-//   if (t < 120) {
-//     // short "bright" window (simulate LED shoved into the jig)
-//     return 1200 + (hw_random16() & 0x1FF); // >1000
-//   }
-//   // otherwise "dark"
-//   return (hw_random16() & 0x3F); // < 100
-// }
-/*******************************************************************************************
- * Sensor-backed light measurement for the pixel-indexing jig.
- * If PIXEL_LIGHT_SENSOR__DIGITAL_PIN is defined, we use digitalRead() (module’s onboard
- * comparator). Otherwise, if PIXEL_LIGHT_SENSOR__ANALOG_PIN is defined, we use analogRead().
- * Returns a "brightness-like" uint16_t so your confirm thresholds still work:
- *   - bright  ≈ 1200
- *   - dark    ≈   50
- *******************************************************************************************/
-// uint16_t GetMeasuredBrightness()
-// {
-// #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//   // Digital "wins" if both are defined. HIGH = bright hit, LOW = dark.
-//   int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
-//   return !v ? 1200 : 50;
-
-// #elif defined(PIXEL_LIGHT_SENSOR__ANALOG_PIN)
-//   // Small oversample to smooth jitter without slowing the loop.
-//   // Keep it fast so your scan pace stays snappy.
-//   uint32_t acc = 0;
-//   constexpr uint8_t kSamples = 4;
-//   for (uint8_t i = 0; i < kSamples; i++) acc += analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN);
-//   acc /= kSamples;
-
-//   // Map to a ~0..1500-ish domain so your existing THRESH_HIGH/LOW (1000/100) work well.
-//   // Use full ADC scale per platform.
-//   #ifdef ARDUINO_ARCH_ESP32
-//     constexpr uint16_t ADC_MAX = 4095;
-//   #else
-//     constexpr uint16_t ADC_MAX = 1023;
-//   #endif
-
-//   // Scale dark≈0 → ~50, bright≈ADC_MAX → ~1400–1500
-//   uint32_t scaled = (acc * 1400UL) / ADC_MAX;
-//   return (uint16_t)(scaled + 50);
-
-// #else
-//   // Nothing defined -> stay dark. (Keeps effect functional without a sensor.)
-//   return 0;
-// #endif
-// }
-
 // ============================================================================
 // Hardware light sensor reading (single place to maintain)
 // Returns a 0..4095-ish "brightness" level regardless of sensor type.
@@ -13614,21 +13545,21 @@ static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
 static uint16_t GetMeasuredBrightness()
 {
   // --- Digital module takes precedence if present ---
-#ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-  const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
-  #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-    // Bright => LOW
-    return (v == LOW) ? 4095 : 0;
-  #else
-    // Bright => HIGH
-    return (v == HIGH) ? 4095 : 0;
+  #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
+    const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
+    #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+      // Bright => LOW
+      return (v == LOW) ? 4095 : 0;
+    #else
+      // Bright => HIGH
+      return (v == HIGH) ? 4095 : 0;
+    #endif
   #endif
-#endif
 
-  // --- Otherwise analog LDR divider (ESP32 ADC typically 0..4095) ---
-#ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
-  return (uint16_t)analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN);
-#endif
+    // --- Otherwise analog LDR divider (ESP32 ADC typically 0..4095) ---
+  #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
+    return (uint16_t)analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN);
+  #endif
 
   // --- Fallback simulator (no pins defined) ---
   // Rare spikes (bright) with mostly dark background
@@ -13637,338 +13568,10 @@ static uint16_t GetMeasuredBrightness()
 }
 
 
-/**
- * @brief 
- * 
- * We will do these in stages next, but here are more ideas: 
- * * I will be adding a function that when called, will dump the data buffers into filesystem for later download. 
- * Another effect later will also be made that can read this and show the save indexes 
- * 
- * * when aquire is not active, you should be showing those previously recorded as turned on using 
- * palette descrete. 
- * 
- * * An optional pair of physical buttons will be added, so I can press "save this" and "remove this". 
- * In both cases, you will rrepeform the detection to find those and add or remove as directed 
- * 
- * * using the last index saved, you should blink that LED so I know you have found what I thought. 
- * 
- * 
- * dont giv e mme the code yet, I just want to point out I expect us to integrate this, with the buttons 
- * ifdef so its optional. We will also need to use the custom sliders 1-3 as additonal off/on states for more options. 
- * Which when it makes sense may want to move current options our of the checkboxes, we will address this later for 
- * example, we probably want to place the filesystem save into the checkbox, so we can have it active, and hence every 
- * new pixel found is immediately saved into memory by default
- * 
- */
-// // ============================================================================
-// // Pixel Indexing via Light Sensor (with ±N disambiguation sweep)
-// // Scans LEDs one-by-one; when a bright edge is seen after darkness (armed),
-// // performs a widening search around the candidate: -1,+1,-2,+2,..., -N,+N.
-// // The first probe that reads bright becomes the target pixel, then a confirm
-// // blink sequence runs (requiring both HIGH and LOW). Indices are stored in a
-// // compact buffer: [count(uint16_t)] + indices(uint16_t[]).
-// //
-// // UI:
-// //   CB1 (check1): acquire on/off
-// //   CB2 (check2): pop last saved index
-// //   CB3 (check3): print now
-// //   SX  (speed) : scan dwell (faster with higher SX)
-// //   C2  (custom2): blink step (50..200 ms)
-// //   C3  (custom3): saved marker brightness (0..31 -> ~0..248; 0 uses 255)
-// //
-// // Internal:
-// //   SEGMENT.aux0 : state (S_*)
-// //   SEGMENT.aux1 : current pixel (and target after disambiguation)
-// //   SEGMENT.aux2 : step (disambiguation or confirm toggles)
-// //   SEGMENT.aux3 : last ms tick
-// //   ColourData[0] bits: 0=saw_hi, 1=saw_lo, 2=armed (saw dark)
-// // ============================================================================
-// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
-// {
-//   if (SEGLEN == 0) return FRAMETIME;
-
-//   // -------- logging level --------
-//   const uint8_t loglevel = LOG_LEVEL_INFO;
-
-//   // -------- one-time pin init --------
-//   if (SEGMENT.call == 0) {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
-//   #endif
-//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
-//   #endif
-//   }
-
-//   // -------- thresholds / constants --------
-//   const uint16_t THRESH_HIGH    = 1000;  // analog high (ignored for digital)
-//   const uint16_t THRESH_LOW     = 100;   // analog low  (ignored for digital)
-//   const uint8_t  BLINKS_TOTAL   = 5;     // 5 on phases (10 toggles)
-//   const uint8_t  MAX_SPREAD     = 5;     // widen search ±1..±MAX_SPREAD
-//   const uint16_t COOLDOWN_MS    = 300;
-//   const uint16_t PRINT_DELAY_MS = 3000;
-//   const uint8_t  BG_DIM         = 2;
-
-//   // -------- UI snapshot --------
-//   const uint8_t ui_speed    = SEGMENT.speed;    // SX: dwell
-//   const uint8_t ui_c2       = SEGMENT.custom2;  // C2: blink rate
-//   const uint8_t ui_c3       = SEGMENT.custom3;  // C3: marker brightness
-//   const bool    ui_acquire  = SEGMENT.check1;   // CB1
-//   const bool    ui_popLast  = SEGMENT.check2;   // CB2
-//   const bool    ui_printNow = SEGMENT.check3;   // CB3
-
-//   // -------- state machine fields --------
-//   enum : uint16_t { S_SCAN=0, S_DISAMBIG=1, S_CONFIRM=2, S_COOLDOWN=3 };
-
-//   uint16_t &sm_state = SEGMENT.aux0;
-//   uint16_t &sm_px    = SEGMENT.aux1;
-//   uint16_t &sm_step  = SEGMENT.aux2;   // disambig step or confirm toggle
-//   uint32_t &sm_tLast = SEGMENT.aux3;
-
-//   // -------- timings / derived --------
-//   const uint16_t dwellMs     = map(ui_speed, 0, 255, 60, 5);
-//   const uint16_t blinkStepMs = 50 + ((uint16_t)ui_c2 * 150) / 255;  // 50..200
-//   const uint16_t guardTimeout= (uint16_t)BLINKS_TOTAL * 2 * blinkStepMs + 200;
-//   const uint8_t  savedBri    = (ui_c3 ? (ui_c3 * 8) : 255);
-
-//   // -------- storage: [count] + list[] --------
-//   const uint16_t cap  = (SEGLEN < 512) ? SEGLEN : 512;
-//   const uint16_t need = 2U + cap * 2U;
-//   if (!SEGMENT.allocateData(need)) return FRAMETIME;
-//   uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
-//   uint16_t &count = buf[0];
-//   uint16_t *list  = &buf[1];
-
-//   // -------- flags byte --------
-//   if (!SEGMENT.allocateColourData(1)) { /* optional */ }
-//   uint8_t *cd = SEGMENT.ColourData(); // bits: 0=saw_hi,1=saw_lo,2=armed
-
-//   // -------- helpers --------
-//   auto isHigh = [&](uint16_t meas)->bool {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     return meas >= 2048; // digital bright maps to ~4095 in GetMeasuredBrightness()
-//   #else
-//     return meas >= THRESH_HIGH;
-//   #endif
-//   };
-//   auto isLow = [&](uint16_t meas)->bool {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     return meas <  2048; // digital dark maps to 0
-//   #else
-//     return meas <= THRESH_LOW;
-//   #endif
-//   };
-//   auto wrapIdx = [&](int idx)->uint16_t {
-//     int m = idx % (int)SEGLEN;
-//     if (m < 0) m += SEGLEN;
-//     return (uint16_t)m;
-//   };
-//   // map disambiguation step (k=0..2*MAX_SPREAD-1) to offsets: -1,+1,-2,+2,...
-//   auto offsetFromK = [&](uint16_t k)->int {
-//     int mag  = (k / 2) + 1;
-//     int sign = (k % 2 == 0) ? -1 : +1;
-//     return sign * mag;
-//   };
-
-//   // -------- one-shot UI actions --------
-//   if (ui_popLast) {
-//     if (count > 0) count--;
-//     SEGMENT.check2 = 0;
-//   }
-//   if (ui_printNow) {
-//     AddLog(loglevel, PSTR("[PIX-INDEX][MANUAL PRINT] count=%u"), count);
-//     for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
-//     SEGMENT.check3 = 0;
-//   }
-
-//   // -------- background + markers --------
-//   SEGMENT.fill(RGBW32(BG_DIM, BG_DIM, BG_DIM, 0));
-//   for (uint16_t i=0; i<count; i++) {
-//     const uint16_t idx = list[i];
-//     if (idx < SEGLEN) {
-//       uint32_t mark = SEGCOLOR_U32(0);
-//       if (mark == 0) mark = RGBW32(0, savedBri, 0, 0); // bright green fallback
-//       SEGMENT.setPixelColor(idx, mark);
-//     }
-//   }
-
-//   // delayed print of full list
-//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
-//     AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
-//     for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
-//     SEGMENT.step = 0;
-//   }
-
-//   // idle view when not acquiring
-//   if (!ui_acquire) {
-//     if (sm_px >= SEGLEN) sm_px = 0;
-//     SEGMENT.setPixelColor(sm_px, RGBW32(255,255,255,0));
-//     return FRAMETIME;
-//   }
-
-//   // clamp px
-//   if (sm_px >= SEGLEN) sm_px = 0;
-
-//   // ======================== STATE: SCAN ========================
-//   if (sm_state == S_SCAN) {
-//     // highlight current candidate
-//     SEGMENT.setPixelColor(sm_px, RGBW32(255,255,255,0));
-
-//     const uint16_t meas = GetMeasuredBrightness();
-//     if (cd && isLow(meas)) cd[0] |= 0x04; // armed when we first see darkness
-
-//     if (isHigh(meas) && cd && (cd[0] & 0x04)) {
-//       // move to disambiguate with an initial settle frame
-//       sm_state = S_DISAMBIG;
-//       sm_step  = 0;                 // 0 = settle, then 1..(2*MAX_SPREAD) = tests
-//       sm_tLast = effect_start_time;
-//       if (cd) cd[0] = 0;           // clear flags
-//       AddLog(loglevel, PSTR("[PIX-INDEX] disambiguate around @%u"), sm_px);
-//     } else {
-//       // normal advance by dwell
-//       if (effect_start_time - sm_tLast >= dwellMs) {
-//         sm_tLast = effect_start_time;
-//         sm_px = (sm_px + 1) % SEGLEN;
-//       }
-//     }
-
-//   // ===================== STATE: DISAMBIG =======================
-//   } else if (sm_state == S_DISAMBIG) {
-//     // Step 0: settle-dark frame to allow sensor to fall
-//     if (sm_step == 0) {
-//       // keep all probe LEDs dark this frame
-//       // (background + saved markers already drawn)
-//       if (effect_start_time - sm_tLast >= blinkStepMs) {
-//         sm_tLast = effect_start_time;
-//         sm_step = 1; // advance to first probe (-1)
-//       }
-//       return FRAMETIME;
-//     }
-
-//     // Which probe are we on?
-//     const uint16_t k       = sm_step - 1;                           // 0..(2*MAX_SPREAD-1)
-//     const uint16_t kMax    = (uint16_t)(2 * MAX_SPREAD);
-//     const int      offset  = offsetFromK(k);
-//     const uint16_t testPx  = wrapIdx((int)sm_px + offset);
-
-//     // Draw the single probe pixel bright, keep original candidate dark this frame
-//     SEGMENT.setPixelColor(testPx, RGBW32(255,255,255,0));
-
-//     // Sample sensor: first bright pixel wins
-//     const uint16_t meas = GetMeasuredBrightness();
-//     if (isHigh(meas)) {
-//       sm_px    = testPx;               // choose the hit
-//       sm_state = S_CONFIRM;            // go confirm immediately
-//       sm_step  = 0;
-//       sm_tLast = effect_start_time;
-//       if (cd) cd[0] = 0;               // clear saw_hi/saw_lo
-//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm target @%u (offset %+d)"), sm_px, offset);
-//       return FRAMETIME;
-//     }
-
-//     // Move to next probe after blinkStepMs
-//     if (effect_start_time - sm_tLast >= blinkStepMs) {
-//       sm_tLast = effect_start_time;
-//       sm_step++;
-//       if (sm_step > kMax) {
-//         // none of the ±N probes produced a high — abort and resume scan
-//         AddLog(loglevel, PSTR("[PIX-INDEX] disambig none near @%u, resume scan"), sm_px);
-//         sm_state = S_COOLDOWN;
-//         sm_tLast = effect_start_time;
-//       }
-//     }
-
-//   // ====================== STATE: CONFIRM =======================
-//   } else if (sm_state == S_CONFIRM) {
-//     // Blink the chosen pixel; require both hi & low during sequence
-//     const bool onPhase = (sm_step % 2) == 0;
-//     SEGMENT.setPixelColor(sm_px, onPhase ? RGBW32(255,255,255,0)
-//                                          : RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
-
-//     const uint16_t meas = GetMeasuredBrightness();
-//     if (cd) {
-//       if (isHigh(meas)) cd[0] |= 0x01; // saw_hi
-//       if (isLow(meas))  cd[0] |= 0x02; // saw_lo
-//     }
-
-//     // guard timeout
-//     if (effect_start_time - sm_tLast > guardTimeout) {
-//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm timeout @%u (hi=%u lo=%u)"),
-//              sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
-//       sm_state = S_COOLDOWN;
-//       sm_tLast = effect_start_time;
-//     }
-
-//     // toggle timing
-//     if (effect_start_time - sm_tLast >= blinkStepMs) {
-//       sm_tLast = effect_start_time;
-//       sm_step++;
-
-//       if (sm_step >= (uint16_t)BLINKS_TOTAL * 2) {
-//         const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
-//         if (ok) {
-//           bool dup = false;
-//           for (uint16_t i=0; i<count; i++) if (list[i] == sm_px) { dup = true; break; }
-//           if (!dup && count < cap) {
-//             list[count++] = sm_px;
-//             AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), sm_px, count);
-//             SEGMENT.step = effect_start_time; // schedule delayed print
-//           } else if (dup) {
-//             AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), sm_px);
-//           }
-//         } else {
-//           AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
-//                  sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
-//         }
-//         sm_state = S_COOLDOWN;
-//         sm_tLast = effect_start_time;
-//       }
-//     }
-
-//   // ===================== STATE: COOLDOWN =======================
-//   } else { // S_COOLDOWN
-//     SEGMENT.setPixelColor(sm_px, RGBW32(255,255,255,0));
-//     if (effect_start_time - sm_tLast >= COOLDOWN_MS) {
-//       sm_state = S_SCAN;
-//       if (cd) cd[0] = 0; // clear flags; must re-arm with darkness
-//     } else {
-//       if (cd) {
-//         const uint16_t meas = GetMeasuredBrightness();
-//         if (isLow(meas)) cd[0] |= 0x04; // re-arm early if we already see dark
-//       }
-//     }
-//   }
-
-//   return FRAMETIME;
-// }
-
-  // Control snapshot (useful for post-analysis)
-  // Intensity => blink rate mapping happens at runtime; we store raw too.
-  // file.print(F(",\"Controls\":{"));
-  // file.print(F("\"acquire\":"));        file.print(SEGMENT.check1 ? 1 : 0);
-  // file.print(F(",\"saveToFile\":"));    file.print(SEGMENT.check3 ? 1 : 0);
-  // file.print(F(",\"verbosity\":"));     file.print(SEGMENT.custom3);
-  // file.print(F(",\"speed\":"));         file.print(SEGMENT.speed);
-  // file.print(F(",\"intensity\":"));     file.print(SEGMENT.intensity);
-  // file.print(F(",\"aux0_state\":"));    file.print(SEGMENT.aux0); // state
-  // file.print(F(",\"aux1_px\":"));       file.print(SEGMENT.aux1); // px
-  // file.print(F(",\"aux2_confirm\":"));  file.print(SEGMENT.aux2); // confirmStep
-  // file.print(F(",\"aux3_lastms\":"));   file.print(SEGMENT.aux3); // tLast
-  // file.print('}');
-
-  
-
-  // Optionally include a brief note about thresholds used in this session
-  // file.print(F(",\"Notes\":{"));
-  // file.print(F("\"desc\":\"Pixel indexing capture\""));
-  // file.print('}');
-
-// ============================================================================
-// Placeholder for file persistence (hooked to CB3 behavior)
-// ============================================================================
 #ifndef PIX_INDEXING_MAX_CAP
   #define PIX_INDEXING_MAX_CAP 200   // default; you can override at build time
 #endif
+
 
 void mAnimatorLight::LightSensorIndexing__SaveResults_To_File()
 {
@@ -14152,7 +13755,76 @@ void mAnimatorLight::LightSensorIndexing__LoadResults_To_File()
 }
 
 
-
+/************************************************************************************************************************************
+ * @function    : EffectAnim__Hardware__Light_Sensor_Pixel_Indexing
+ * @purpose     : Semi-automatic mapping of physical LEDs → pixel indices using a light sensor jig.
+ *
+ * HOW IT WORKS
+ *  1) SCAN: Steps a single white “probe” pixel across the segment (dwell = Speed). While scanning it “arms” on darkness.
+ *     When the sensor reports “light” while armed, it disambiguates within ±5 pixels (0,+1,−1,+2,−2…+5,−5) to land on the
+ *     true hit index.
+ *  2) CONFIRM: Blinks that candidate LED ON/OFF for BLINKS_TOTAL*2 toggles (blink rate = Intensity). During confirm it
+ *     must observe at least one HIGH and one LOW sensor reading (saw_high & saw_low). If both observed → accept.
+ *  3) WRITE: On acceptance, the current index is appended (uint16_t) into a simple buffer:
+ *         [count:uint16][index0:uint16][index1:uint16]…  (cap = min(SEGLEN, PIX_INDEXING_MAX_CAP))
+ *     Duplicates are ignored. When “SaveToFile” is enabled it writes to /pixel_indexing.json immediately after each add.
+ *  4) IDLE: SHOW: If acquisition is OFF, the effect clears the strip and just paints all previously found indexes using the
+ *     current palette (or green fallback), so you can review your map without scanning.
+ *
+ * SENSOR INPUT
+ *  - DIGITAL mode (recommended for speed/noise immunity):
+ *       #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN [GPIO]
+ *     Optional polarity:
+ *       #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+ *     “Light” = pin level after polarity. “Dark” = opposite.
+ *  - ANALOG mode:
+ *       #define PIXEL_LIGHT_SENSOR__ANALOG_PIN  [ADC]
+ *     Thresholds: THRESH_HIGH (≥ = light), THRESH_LOW (≤ = dark). (Stubbed here with constants.)
+ *
+ * STATE/LAYOUT
+ *  - SEGMENT.data           : uint16_t buffer → [count][indices…]
+ *  - SEGMENT.ColourData(2)  : cd[0] flags: bit0=saw_high, bit1=saw_low, bit2=armed; cd[1] bit0=SaveToFile last state (edge detect)
+ *  - aux0..aux3             : state machine and timing
+ *      aux0: state (S_SCAN, S_CONFIRM, S_COOLDOWN)
+ *      aux1: px (current index under test)  (uint16_t)
+ *      aux2: confirmStep (0..(2*BLINKS_TOTAL-1))  (uint16_t)
+ *      aux3: tLast (millis)  (uint32_t)
+ *
+ * CONTROLS (UI → internal mapping)
+ *  - Speed (s)      : scan dwell time (ms)    → dwellMs = map(s,0..255, 60..5)
+ *  - Intensity (i)  : confirm blink step (ms) → blinkStepMs = map(i,0..255, 250..40)
+ *  - Custom1 (c1)   : “Load file (255)” → when set to 255, auto-reset to 0 and call LightSensorIndexing__LoadResults_From_File()
+ *  - Custom2 (c2)   : “Reset current (255)” → when set to 255, clear in-RAM results (SEGMENT.data), auto-reset to 0
+ *  - Custom3 (c3)   : verbosity: 0 silent; 1..200 info; 255 trace
+ *  - CB1  (check1)  : Acquire ON/OFF (enable scanner)
+ *  - CB2  (check2)  : Pop last (remove most-recent hit; auto-clears itself)
+ *  - CB3  (check3)  : SaveToFile ON/OFF (rising-edge immediate save; if left ON, autosave after each new hit)
+ *
+ * FILE I/O
+ *  - Save:  LightSensorIndexing__SaveResults_To_File()
+ *           JSON schema:
+ *             {
+ *               "Data":{"indices":[u16,...],"count":u16},
+ *               "ColourData":[u8,...],
+ *               "Segment":{"index":SEGIDX,"length":SEGLEN},
+ *               "UTCTime":"YYYY-MM-DD hh:mm:ssZ","millis":N
+ *             }
+ *           On save: backs up existing file to /pixel_indexing_previous.json, then overwrites /pixel_indexing.json.
+ *  - Load:  LightSensorIndexing__LoadResults_From_File()
+ *           Reads Data.indices[] as uint16_t into SEGMENT.data (cap = min(SEGLEN, PIX_INDEXING_MAX_CAP)).
+ *
+ * LOGGING
+ *  - Verbosity from Custom3:
+ *      0    : silent
+ *      1..200: info (hits, pops, delayed print, target announcements)
+ *      255  : trace (per-step scan/probe/confirm prints)
+ *
+ * SAFETY/NOTES
+ *  - Uses uint16_t throughout for indices (supports SEGLEN > 255).
+ *  - Disambiguation sweep is ±5 in widening order: 0, +1, −1, +2, −2 … +5, −5.
+ *  - PRINT_DELAY_MS (3s) after last acceptance prints the full list once (info mode).
+ *  - In non-acquire mode the strip is cleared each frame and only the saved markers are drawn.
+ ************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
 {
   if (SEGLEN == 0) return FRAMETIME;
@@ -14390,22 +14062,22 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
 // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
 "Light Sensor Indexing@"                     // name
-"Scan dwell,Blink speed,Load file (255),Reset current (255),Log/Print level,Acquire,Pop last,Save to file,!,!"  // fields 1..10
+"Scan dwell,Blink speed,Load file (255),Reset current (255),Log/Print level,Acquire,Pop last,Save to file,,"  // fields 1..10
 ";"
 ""                                           // segment color names (blank = none/all)
 ";"
-""                                           // palette picker (none)
+"Preview Captured"                                           // palette picker (none)
 ";"
-"0"                                          // icon flags (0 = strip/1D)
+"1"                                          // icon flags (0 = strip/1D)
 ";"
 "sx=128,"                                    // default Speed (mid dwell)
 "ix=160,"                                    // default Intensity (blink speed mid-fast)
 "c1=0,"                                      // Custom1 default (no load trigger)
 "c2=0,"                                      // Custom2 default (no reset trigger)
 "c3=0,"                                      // Custom3 verbosity (silent)
-"o1=1,"                                      // CB1 Acquire default ON (set to 0 if you prefer paused by default)
+"o1=0,"                                      // CB1 Acquire default ON (set to 0 if you prefer paused by default)
 "o2=0,"                                      // CB2 Pop last default OFF
-"o3=0,"                                      // CB3 SaveToFile default OFF
+"o3=1,"                                      // CB3 SaveToFile default OFF
 "ep=0"                                       // extra param (unused)
 ;
 
@@ -14417,787 +14089,6 @@ static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROG
 "C1=255 Load saved file; C2=255 Reset current (RAM only); C3 verbosity: 0 silent, 1..200 info, 255 trace.\n\r"
 "Non-acquire view: clear strip and draw saved markers only."
 ;
-
-
-
-// ============================================================================
-// Pixel Indexing via Light Sensor (with ±N disambiguation, verbose prints,
-// file-save hook, and updated UI mapping per spec)
-// UI:
-//   CB1 (check1): Acquire ON/OFF
-//   CB2 (check2): Pop last saved index
-//   CB3 (check3): SaveToFile mode
-//       - Rising edge (0->1): immediate save
-//       - While ON (1): auto-save after each new pixel found
-//   SX  (speed)     : scan dwell (faster with higher SX)
-//   IX  (intensity) : blink step time (50..200 ms)
-//   C3  (custom3)   : print verbosity
-//        0     -> no prints
-//        1..200-> normal INFO summaries
-//        255   -> per-step verbose (probe/scan/confirm state traces)
-// Notes:
-//   - When acquire is OFF, the effect redraws only saved markers on a dim bg
-//     and clears everything else (no highlight/scan).
-//   - Buffer layout: [count(uint16_t)] + indices(uint16_t[count])
-//   - ColourData[0] flags: 0=saw_hi,1=saw_lo,2=armed
-//     ColourData[1] flags: 0=prevSaveFlag (tracks last CB3 state)
-// ============================================================================
-// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
-// {
-//   if (SEGLEN == 0) return FRAMETIME;
-
-//   // -------- logging controls --------
-//   const uint8_t loglevel  = LOG_LEVEL_INFO;   // tune globally as you like
-//   const uint8_t verbosity = SEGMENT.custom3;  // 0 silent, 1..200 info, 255 trace
-//   const bool info  = (verbosity >= 1 && verbosity <= 200);
-//   const bool trace = (verbosity == 255);
-
-//   // -------- one-time pin setup --------
-//   if (SEGMENT.call == 0) {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
-//   #endif
-//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
-//   #endif
-//   }
-
-//   // -------- thresholds & timings --------
-//   const uint16_t THRESH_HIGH     = 1000;            // ≥ => “light”
-//   const uint16_t THRESH_LOW      = 100;             // ≤ => “dark”
-//   const uint8_t  BLINKS_TOTAL    = 5;               // ON phases during confirm
-//   const uint16_t blinkStepMs     = map(SEGMENT.intensity, 0, 255, 250, 40);
-//   const uint16_t dwellMs         = map(SEGMENT.speed,     0, 255, 60, 5);
-//   const uint16_t PRINT_DELAY_MS  = 3000;
-//   const uint16_t COOLDOWN_MS     = 300;
-//   const uint8_t  BG_DIM          = 1;
-//   const uint8_t  SAVED_MARK_BRI  = 255;
-
-//   // -------- UI controls --------
-//   const bool acquire   = SEGMENT.check1;  // CB1: acquisition
-//   bool saveToFileFlag  = SEGMENT.check3;  // CB3: SaveToFile (edge + continuous)
-
-//   // -------- storage buffer (uint16_t): [count] + indices... --------
-// #ifndef PIX_INDEXING_MAX_CAP
-//   #define PIX_INDEXING_MAX_CAP 512
-// #endif
-//   const uint16_t cap  = (SEGLEN < PIX_INDEXING_MAX_CAP) ? SEGLEN : PIX_INDEXING_MAX_CAP;
-//   const uint16_t need = 2U + cap * 2U;                 // bytes: 2 for count + 2 per uint16 index
-//   if (!SEGMENT.allocateData(need)) return FRAMETIME;
-//   uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
-//   uint16_t &count = buf[0];
-//   uint16_t *list  = &buf[1];
-
-//   // Pop-last (CB2)
-//   if (SEGMENT.check2) {
-//     SEGMENT.check2 = 0;
-//     if (count > 0) {
-//       count--;
-//       if (info) AddLog(loglevel, PSTR("[PIX-INDEX] popped last, new count=%u"), count);
-//     }
-//   }
-
-//   // -------- tiny flags in ColourData --------
-//   // cd[0] bits: 0=saw_high, 1=saw_low, 2=armed
-//   // cd[1] bit0: last SaveToFile state (for rising-edge)
-//   if (!SEGMENT.allocateColourData(2)) { /* continue without if fails */ }
-//   uint8_t *cd = SEGMENT.ColourData();
-//   if (cd && SEGMENT.call == 0) { cd[0] = 0; cd[1] = 0; }
-
-//   // SaveToFile rising-edge (immediate save once when toggled on)
-//   const bool lastSave = cd ? (cd[1] & 0x01) : false;
-//   if (saveToFileFlag && !lastSave) {
-//     AddLog(loglevel, PSTR("[PIX-INDEX] (SaveToFile) immediate save requested"));
-//     LightSensorIndexing__SaveResults_To_File(); // user will implement actual persistence
-//   }
-//   if (cd) {
-//     if (saveToFileFlag) cd[1] |= 0x01; else cd[1] &= ~0x01;
-//   }
-
-//   // -------- state in aux --------
-//   enum : uint16_t { S_SCAN=0, S_CONFIRM=1, S_COOLDOWN=2 };
-//   uint16_t &state       = SEGMENT.aux0;
-//   uint16_t &px          = SEGMENT.aux1;
-//   uint16_t &confirmStep = SEGMENT.aux2;   // 0..(2*BLINKS_TOTAL-1)
-//   uint32_t &tLast       = SEGMENT.aux3;   // must be 32-bit for millis
-
-//   // -------- delayed print of results --------
-//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
-//     if (info) {
-//       AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
-//       for (uint16_t i=0; i<count; i++) AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
-//     }
-//     SEGMENT.step = 0;
-//   }
-
-//   // -------- non-acquire: draw saved markers only --------
-//   if (!acquire) {
-//     SEGMENT.fill(RGBW32(0,0,0,0));
-//     for (uint16_t i=0; i<count; i++) {
-//       const uint16_t idx = list[i];
-//       if (idx < SEGLEN) {
-//         uint32_t mark = SEGMENT.GetPaletteColour_ModeWrap(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
-//         if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
-//         SEGMENT.setPixelColor(idx, mark);
-//       }
-//     }
-//     return FRAMETIME;
-//   }
-
-//   // -------- base layer: background + saved markers --------
-//   SEGMENT.fill(RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
-//   for (uint16_t i=0; i<count; i++) {
-//     const uint16_t idx = list[i];
-//     if (idx < SEGLEN) {
-//       uint32_t mark = SEGCOLOR_U32(0);
-//       if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
-//       SEGMENT.setPixelColor(idx, mark);
-//     }
-//   }
-
-//   // -------- SCAN / CONFIRM / COOLDOWN (uses uint16 indices everywhere) --------
-//   if (state == S_SCAN) {
-//     if (px >= SEGLEN) px = 0;
-
-//     // Light current px and read
-//     SEGMENT.setPixelColor(px, RGBW32(255,255,255,255));
-//     uint16_t meas = GetMeasuredBrightness();
-//     if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] scan idx=%u meas=%u"), px, meas);
-
-//     // Arm on darkness while scanning
-//     if (cd && (meas <= THRESH_LOW)) cd[0] |= 0x04;
-
-//     // Bright AND armed -> disambiguate within ±5 (uint16-safe wrap)
-//     if (cd && (cd[0] & 0x04) && meas >= THRESH_HIGH) {
-//       uint16_t best = px;
-//       bool got = false;
-
-//       for (uint8_t d=0; d<=5 && !got; d++) {
-//         // +d
-//         uint16_t cand = (px + d) % SEGLEN;
-//         SEGMENT.setPixelColor(cand, RGBW32(255,255,255,0));
-//         uint16_t mv = GetMeasuredBrightness();
-//         if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] probe idx=%u meas=%u"), cand, mv);
-//         if (mv >= THRESH_HIGH) { best = cand; got = true; break; }
-
-//         if (d == 0) continue; // no -0
-//         // -d
-//         cand = (px + SEGLEN - d) % SEGLEN;
-//         SEGMENT.setPixelColor(cand, RGBW32(255,255,255,0));
-//         mv = GetMeasuredBrightness();
-//         if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] probe idx=%u meas=%u"), cand, mv);
-//         if (mv >= THRESH_HIGH) { best = cand; got = true; break; }
-//       }
-
-//       if (info) AddLog(loglevel, PSTR("[PIX-INDEX] confirm target @%u"), best);
-
-//       px = best;                 // commit the (uint16) index we’ll confirm
-//       state = S_CONFIRM;
-//       confirmStep = 0;
-//       tLast = effect_start_time;
-//       if (cd) cd[0] = 0;         // clear saw_high/low/armed
-//       SEGMENT.setPixelColor(px, RGBW32(255,255,255,0)); // first confirm frame ON
-//     } else {
-//       // advance scan cursor based on dwell
-//       if (effect_start_time - tLast >= dwellMs) {
-//         tLast = effect_start_time;
-//         px = (px + 1) % SEGLEN;  // uint16-safe wrap
-//       }
-//     }
-
-//   } else if (state == S_CONFIRM) {
-//     // Blink ON/OFF, record highs and lows
-//     const bool onPhase = ((confirmStep % 2) == 0);
-//     SEGMENT.setPixelColor(px, onPhase ? RGBW32(255,255,255,0)
-//                                       : RGBW32(BG_DIM,BG_DIM,BG_DIM,0));
-//     uint16_t meas = GetMeasuredBrightness();
-//     if (cd) {
-//       if (meas >= THRESH_HIGH) cd[0] |= 0x01; // saw_high
-//       if (meas <= THRESH_LOW)  cd[0] |= 0x02; // saw_low
-//     }
-//     if (trace) AddLog(loglevel, PSTR("[PIX-INDEX][TRACE] confirm idx=%u step=%u meas=%u"),
-//                       px, confirmStep, meas);
-
-//     if (effect_start_time - tLast >= blinkStepMs) {
-//       tLast = effect_start_time;
-//       confirmStep++;
-
-//       if (confirmStep >= (BLINKS_TOTAL * 2)) {
-//         const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
-//         if (ok) {
-//           bool dup = false;
-//           for (uint16_t i=0; i<count; i++) if (list[i] == px) { dup = true; break; }
-//           if (!dup && count < cap) {
-//             list[count++] = px;  // store as uint16_t
-//             if (info) AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), px, count);
-//             SEGMENT.step = effect_start_time; // schedule delayed print
-//             if (saveToFileFlag) {
-//               AddLog(loglevel, PSTR("[PIX-INDEX] (SaveToFile) autosave after new hit"));
-//               LightSensorIndexing__SaveResults_To_File();
-//             }
-//           } else if (dup && info) {
-//             AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), px);
-//           }
-//         } else if (info) {
-//           AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
-//                  px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
-//         }
-//         state = S_COOLDOWN;
-//         tLast = effect_start_time;
-//       }
-//     }
-
-//   } else { // S_COOLDOWN
-//     if (effect_start_time - tLast >= COOLDOWN_MS) {
-//       state = S_SCAN;
-//       if (cd) cd[0] = 0; // require fresh arm
-//     }
-//     SEGMENT.setPixelColor(px, RGBW32(255,255,255,0));
-//     if (cd) {
-//       uint16_t meas = GetMeasuredBrightness();
-//       if (meas <= THRESH_LOW) cd[0] |= 0x04; // armed again when dark
-//     }
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-
-
-/***************************************************************************************************************************************
- * @function    : EffectAnim__Hardware__Light_Sensor_Pixel_Indexing
- * @purpose     : Walk through the strip one pixel at a time, illuminating exactly one LED. If the light sensor
- *                sees a “bright” reading at the current pixel, we enter a 5-blink confirm phase (ON/OFF/ON/OFF/ON).
- *                Only if we observe BOTH high and low readings during the confirm sequence do we accept the index
- *                as FOUND and store it in a buffer. We can undo the last saved index (CB2) and print the list (CB3).
- *
- * Visuals      : - Background dim gray
- *                - Current scan pixel: white (or blinking during confirm)
- *                - Saved pixels: palette Color 0 (or any you prefer)
- *
- * Controls     :
- *   • SX (Speed)     : dwell per pixel (ms). Lower = slower scan. (mapped 5..60ms)
- *   • IX (Intensity) : unused here (reserved).
- *   • CB1            : Acquire mode ON/OFF (when OFF, holds visuals but stops scanning & confirming)
- *   • CB2            : Pop last saved index (auto-clears to 0)
- *   • CB3            : Print saved indices now (auto-clears to 0)
- *
- * Data buffer layout in SEGMENT.data (allocated once):
- *   [0..1]   : uint16_t count (number of saved indices)
- *   [2..N]   : uint16_t saved indices (capacity derived from allocation)
- *
- * State machine (private per-segment via aux fields):
- *   SEGMENT.aux0 : scanner state
- *        0 = SCAN        (advance through pixels, show white at current)
- *        1 = CONFIRM     (blink current pixel 5 times ON/OFF)
- *   SEGMENT.aux1 : current pixel index (0..SEGLEN-1)
- *   SEGMENT.aux2 : timestamp ms for pace/blink timing
- *   SEGMENT.aux3 : confirm-step counter (0..9) => 5 on/off toggles * 2 steps (on and off frames)
- *   SEGMENT.step : last time we printed the whole buffer after a hit (to apply “print after 3s” rule)
- *
- * Accept rule : During CONFIRM we record whether the sensor observed “bright” at least once
- *               and “dark” at least once. If both seen, we accept and save the index.
- *
- * Notes       : This is deliberately conservative (needs both high and low). You can tighten/loosen thresholds later.
- ***************************************************************************************************************************************/
-// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
-// {
-//   if (SEGLEN == 0) return FRAMETIME;  
-  
-//   // One-time hardware init on first run
-//   if (SEGMENT.call == 0) {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);      // module with onboard comparator
-//   #endif
-//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);       // bare LDR divider
-//     // (Optional) ESP32: configure ADC attenuation/width here if you use them globally.
-//     // analogSetWidth(12); analogSetAttenuation(ADC_11db);
-//   #endif
-//   }
-
-//   Serial.printf("eff\n\r");
-
-
-//   // ---------- constants / thresholds ----------
-//   const uint16_t THRESH_HIGH      = 1000;     // mock “bright”
-//   const uint16_t THRESH_LOW       = 100;      // mock “dark”
-//   const uint16_t BLINKS_TOTAL     = 5;        // 5 on-phases
-//   const uint16_t BLINK_STEP_MS    = 100;      // 100ms between toggles in confirm
-//   const uint16_t PRINT_DELAY_MS   = 3000;     // print full list 3s after a hit
-//   const uint16_t BG_DIM           = 5;        // background gray (5/255)
-//   const uint8_t  SAVED_MARK_BRI   = 255;      // brightness for saved markers
-
-//   // ---------- UI controls ----------
-//   const bool acquire = SEGMENT.check1;        // CB1: acquisition on/off
-//   if (SEGMENT.check2) {                       // CB2: pop last saved index
-//     SEGMENT.check2 = 0;                       // auto-clear
-//     if (SEGMENT.data) {
-//       uint16_t *hdr = reinterpret_cast<uint16_t*>(SEGMENT.data);
-//       if (hdr[0] > 0) hdr[0] -= 1;            // decrement count
-//     }
-//   }
-//   if (SEGMENT.check3) {                       // CB3: print now
-//     SEGMENT.check3 = 0;                       // auto-clear
-//     if (SEGMENT.data) {
-//       uint16_t *hdr = reinterpret_cast<uint16_t*>(SEGMENT.data);
-//       const uint16_t cnt = hdr[0];
-//       Serial.printf("[PIX-INDEX] count=%u  [", cnt);
-//       for (uint16_t i=0; i<cnt; i++) {
-//         if (i) Serial.print(',');
-//         Serial.print(hdr[1+i]);
-//       }
-//       Serial.println("]");
-//     }
-//   }
-
-//   // ---------- allocate / ensure buffer ----------
-//   // We’ll store up to min(SEGLEN, 256) indices (uint16_t each) + 2 bytes for count.
-//   const uint16_t cap = (SEGLEN < 256) ? SEGLEN : 256;
-//   const uint16_t need = 2U + (cap * 2U);
-//   if (!SEGMENT.allocateData(need)) {
-//     return FRAMETIME; // allocation failed
-//   }
-//   uint16_t *buf = reinterpret_cast<uint16_t*>(SEGMENT.data);
-//   uint16_t &count = buf[0];
-//   uint16_t *list  = &buf[1];
-
-//   // ---------- state fetch ----------
-//   enum : uint8_t { S_SCAN=0, S_CONFIRM=1 };  
-//   uint16_t &state       = SEGMENT.aux0;   // effect state machine (0 = idle, 1 = scanning, …)
-//   uint16_t &px          = SEGMENT.aux1;   // current pixel under test
-//   uint16_t &confirmStep = SEGMENT.aux2;   // 0..(BLINKS_TOTAL*2-1) toggles (on/off pairs)
-//   uint32_t &tLast       = SEGMENT.aux3;   // last tick for timing (needs 32-bit millis safe)
-
-//   // We’ll piggyback two flags via colour data (or reuse aux slots if you prefer):
-//   //   cd[0] bit0 => saw_high, cd[0] bit1 => saw_low
-//   if (!SEGMENT.allocateColourData(1)) {
-//     // colour buffer is just a single byte for two flags; fall back to aux1 bits if you prefer
-//   }
-//   uint8_t *cd = SEGMENT.ColourData();
-
-//   // ---------- timing tuning ----------
-//   const uint16_t dwellMs = map(SEGMENT.speed, 0, 255, 60, 5); // per-pixel scan dwell
-
-//   // ---------- background ----------
-//   SEGMENT.fill(RGBW32(BG_DIM, BG_DIM, BG_DIM, 0));
-
-//   // ---------- draw saved markers ----------
-//   for (uint16_t i = 0; i < count; i++) {
-//     uint16_t idx = list[i];
-//     if (idx < SEGLEN) {
-//       // mark saved positions in primary segment color (or full white if you prefer)
-//       uint32_t mark = SEGCOLOR_U32(0);
-//       // ensure brightness (could also do color_blend)
-//       if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0); // fallback green
-//       SEGMENT.setPixelColor(idx, mark);
-//     }
-//   }
-
-//   // ---------- handle printing-after-delay logic ----------
-//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
-//     // print full list once, then clear the print-schedule (step=0)
-//     Serial.printf("[PIX-INDEX][DELAYED PRINT] count=%u  [", count);
-//     for (uint16_t i=0; i<count; i++) {
-//       if (i) Serial.print(',');
-//       Serial.print(list[i]);
-//     }
-//     Serial.println("]");
-//     SEGMENT.step = 0;
-//   }
-
-//   // If not acquiring, just show markers and current pixel position “frozen”
-//   if (!acquire) {
-//     // paint current pixel as a dim highlight (but do not advance)
-//     if (px >= SEGLEN) px = 0;
-//     SEGMENT.setPixelColor(px, RGBW32(255, 255, 255, 0));
-//     return FRAMETIME;
-//   }
-
-//   // ---------- state machine ----------
-//   if (state == S_SCAN) {
-//     // advance to next pixel based on dwell time
-//     if (effect_start_time - tLast >= dwellMs) {
-//       tLast = effect_start_time;
-
-//       // move the highlight
-//       px = (px + 1) % SEGLEN;
-//     }
-
-//     // show current test pixel (steady white)
-//     SEGMENT.setPixelColor(px, RGBW32(255, 255, 255, 0));
-
-//     // read sensor
-//     uint16_t meas = GetMeasuredBrightness();
-//     if (meas >= THRESH_HIGH) {
-//       // Enter confirm phase
-//       state = S_CONFIRM;
-//       confirmStep = 0;
-//       if (cd) cd[0] = 0; // clear flags
-//       tLast = effect_start_time;
-//     }
-
-//   } else {
-//     // S_CONFIRM: blink the current pixel 5 times, 100ms per toggle,
-//     //            record whether we saw HIGH and LOW during the sequence.
-//     bool onPhase = (confirmStep % 2) == 0;
-
-//     // draw blink
-//     SEGMENT.setPixelColor(px, onPhase ? RGBW32(255, 255, 255, 0)
-//                                       : RGBW32(BG_DIM, BG_DIM, BG_DIM, 0));
-
-//     // sample sensor & set flags
-//     uint16_t meas = GetMeasuredBrightness();
-//     if (cd) {
-//       if (meas >= THRESH_HIGH) cd[0] |= 0x01; // saw_high
-//       if (meas <= THRESH_LOW)  cd[0] |= 0x02; // saw_low
-//     }
-
-//     // timing for next toggle
-//     if (effect_start_time - tLast >= BLINK_STEP_MS) {
-//       tLast = effect_start_time;
-//       confirmStep++;
-
-//       if (confirmStep >= (BLINKS_TOTAL * 2)) {
-//         // evaluate accept rule
-//         bool ok = true;
-//         if (cd) {
-//           ok = ((cd[0] & 0x01) && (cd[0] & 0x02)); // both seen
-//         }
-//         if (ok) {
-//           // save if not duplicate and capacity available
-//           bool dup = false;
-//           for (uint16_t i=0; i<count; i++) if (list[i] == px) { dup = true; break; }
-//           if (!dup && count < cap) {
-//             list[count++] = px;
-//             Serial.printf("[PIX-INDEX] found=%u  (count=%u)\n", px, count);
-//             // schedule a delayed print in 3s
-//             SEGMENT.step = effect_start_time;
-//           }
-//         } else {
-//           Serial.printf("[PIX-INDEX] confirm failed at %u (hi=%u, lo=%u)\n",
-//                         px,
-//                         cd ? !!(cd[0] & 0x01) : 0,
-//                         cd ? !!(cd[0] & 0x02) : 0);
-//         }
-
-//         // back to scanning
-//         state = S_SCAN;
-//         // advance to the next pixel next frame (scan pace keeps it moving)
-//       }
-//     }
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-
-// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
-// {
-//   if (SEGLEN == 0) return FRAMETIME;
-
-//   // ---------- logging level (can be made runtime-configurable later) ----------
-//   const uint8_t loglevel = LOG_LEVEL_INFO; // 0=off .. 5=trace
-
-//   // ---------- one-time pin init ----------
-//   if (SEGMENT.call == 0) {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__DIGITAL_PIN, INPUT);
-//   #endif
-//   #ifdef PIXEL_LIGHT_SENSOR__ANALOG_PIN
-//     pinMode(PIXEL_LIGHT_SENSOR__ANALOG_PIN, INPUT);
-//     // If you use global ADC config on ESP32, do it elsewhere (e.g. setup):
-//     // analogSetWidth(12); analogSetAttenuation(ADC_11db);
-//   #endif
-//   }
-
-//   // ---------- constants ----------
-//   const uint8_t  BLINKS_TOTAL       = 5;      // on phases (10 toggles total)
-//   const uint16_t COOLDOWN_MS        = 300;    // after success/fail
-//   const uint16_t PRINT_DELAY_MS     = 3000;   // print full list after hit (once)
-
-//   // Analog thresholds (used only if analog pin present)
-//   const uint16_t THRESH_HIGH = 1000;
-//   const uint16_t THRESH_LOW  = 100;
-
-//   // ---------- UI values (bitfields cannot be referenced; copy and write back explicitly) ----------
-//   const uint8_t ui_speed      = SEGMENT.speed;       // SX
-//   const uint8_t ui_intensity  = SEGMENT.intensity;   // IX
-//   const uint8_t ui_c1         = SEGMENT.custom1;     // C1 (reserved/future)
-//   const uint8_t ui_c2         = SEGMENT.custom2;     // C2 → blink step adjust
-//   const uint8_t ui_c3         = SEGMENT.custom3;     // C3 → saved marker brightness (0..31)
-//   const bool    ui_acquire    = SEGMENT.check1;      // CB1: acquisition on/off
-//   const bool    ui_popLast    = SEGMENT.check2;      // CB2: pop last saved index (one-shot)
-//   const bool    ui_printNow   = SEGMENT.check3;      // CB3: print saved list now (one-shot)
-
-//   // ---------- state machine fields ----------
-//   enum : uint16_t { S_SCAN = 0, S_CONFIRM = 1, S_COOLDOWN = 2 };
-//   uint16_t &sm_state   = SEGMENT.aux0;        // S_*
-//   uint16_t &sm_px      = SEGMENT.aux1;        // current pixel under test
-//   uint16_t &sm_confirm = SEGMENT.aux2;        // 0..(2*BLINKS_TOTAL-1)
-//   uint32_t &sm_tLast   = SEGMENT.aux3;        // last tick (ms)
-
-//   // ---------- derived timings / levels ----------
-//   const uint16_t dwellMs      = map(ui_speed, 0, 255, 60, 5);                 // per-pixel dwell
-//   const uint16_t blinkStepMs  = 50 + ((uint16_t)ui_c2 * 150) / 255;           // ~50..200ms
-//   const uint16_t guardTimeout = (uint16_t)BLINKS_TOTAL * 2 * blinkStepMs + 200;
-//   const uint8_t  bgDim        = max<uint8_t>(1, ui_intensity >> 6);           // ~0..3; never 0
-//   const uint8_t  savedBri     = (ui_c3 ? (ui_c3 * 8) : 255);                   // map 0..31 → ~0..248 (use 255 if 0)
-
-//   // ---------- helpers: sensor read → high/low booleans ----------
-//   auto sensorHigh = [&]() -> bool {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
-//     #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-//       return (v == LOW);   // light => LOW
-//     #else
-//       return (v == HIGH);  // light => HIGH
-//     #endif
-//   #elif defined(PIXEL_LIGHT_SENSOR__ANALOG_PIN)
-//     return analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN) >= THRESH_HIGH;
-//   #else
-//     // fallback tester: rare highs to simulate detection
-//     return (hw_random8() > 230);
-//   #endif
-//   };
-
-//   auto sensorLow = [&]() -> bool {
-//   #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_PIN
-//     const int v = digitalRead(PIXEL_LIGHT_SENSOR__DIGITAL_PIN);
-//     #ifdef PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-//       return (v == HIGH);  // dark => HIGH
-//     #else
-//       return (v == LOW);   // dark => LOW
-//     #endif
-//   #elif defined(PIXEL_LIGHT_SENSOR__ANALOG_PIN)
-//     return analogRead(PIXEL_LIGHT_SENSOR__ANALOG_PIN) <= THRESH_LOW;
-//   #else
-//     // fallback tester: frequent lows
-//     return (hw_random8() < 20);
-//   #endif
-//   };
-
-//   // ---------- storage: [count(uint16_t)] + indices (uint16_t) ----------
-//   const uint16_t cap  = (SEGLEN < 512) ? SEGLEN : 512;
-//   const uint16_t need = 2U + cap * 2U;
-//   if (!SEGMENT.allocateData(need)) return FRAMETIME;
-//   uint16_t *buf   = reinterpret_cast<uint16_t*>(SEGMENT.data);
-//   uint16_t &count = buf[0];
-//   uint16_t *list  = &buf[1];
-
-//   // ---------- tiny flags buffer: cd[0] bits: 0=saw_hi, 1=saw_lo, 2=armed ----------
-//   if (!SEGMENT.allocateColourData(1)) { /* optional; ignore if fails */ }
-//   uint8_t *cd = SEGMENT.ColourData();
-
-//   // ---------- one-shot UI actions (write back clears for bitfields) ----------
-//   if (ui_popLast) {
-//     if (count > 0) count--;
-//     SEGMENT.check2 = 0; // clear CB2
-//   }
-//   if (ui_printNow) {
-//     AddLog(loglevel, PSTR("[PIX-INDEX][MANUAL PRINT] count=%u"), count);
-//     for (uint16_t i = 0; i < count; i++) {
-//       AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
-//     }
-//     SEGMENT.check3 = 0; // clear CB3
-//   }
-
-//   // ---------- background + show saved markers ----------
-//   SEGMENT.fill(RGBW32(bgDim, bgDim, bgDim, 0));
-
-//   for (uint16_t i = 0; i < count; i++) {
-//     uint16_t idx = list[i];
-//     if (idx < SEGLEN) {
-//       uint32_t mark = SEGCOLOR_U32(0);
-//       if (mark == 0) mark = RGBW32(0, savedBri, 0, 0); // fallback bright green
-//       SEGMENT.setPixelColor(idx, mark);
-//     }
-//   }
-
-//   // ---------- delayed print after last hit ----------
-//   if (SEGMENT.step != 0 && (effect_start_time - SEGMENT.step >= PRINT_DELAY_MS)) {
-//     AddLog(loglevel, PSTR("[PIX-INDEX][DELAYED PRINT] count=%u"), count);
-//     for (uint16_t i = 0; i < count; i++) {
-//       AddLog(loglevel, PSTR("  [%u] %u"), i, list[i]);
-//     }
-//     SEGMENT.step = 0;
-//   }
-
-//   // ---------- idle view when not acquiring ----------
-//   if (!ui_acquire) {
-//     if (sm_px >= SEGLEN) sm_px = 0;
-//     SEGMENT.setPixelColor(sm_px, RGBW32(255, 255, 255, 0)); // show where scan last was
-//     return FRAMETIME;
-//   }
-
-//   // ---------- state machine ----------
-//   if (sm_state == S_SCAN) {
-//     // highlight current candidate pixel
-//     SEGMENT.setPixelColor(sm_px, RGBW32(255, 255, 255, 0));
-
-//     // arm when we've seen darkness
-//     if (cd && sensorLow()) cd[0] |= 0x04;
-
-//     // edge detection: need "armed" & then high => start confirm on THIS pixel
-//     if (sensorHigh() && cd && (cd[0] & 0x04)) {
-//       sm_state   = S_CONFIRM;
-//       sm_confirm = 0;
-//       sm_tLast   = effect_start_time;
-//       cd[0]      = 0; // clear flags
-//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm start @%u"), sm_px);
-//     } else {
-//       // advance only on dwell expiry and only if we didn't just edge-trigger
-//       if (effect_start_time - sm_tLast >= dwellMs) {
-//         sm_tLast = effect_start_time;
-//         sm_px = (sm_px + 1) % SEGLEN;
-//       }
-//     }
-
-//   } else if (sm_state == S_CONFIRM) {
-//     // blink the pixel: even steps on, odd steps off
-//     const bool onPhase = (sm_confirm % 2) == 0;
-//     SEGMENT.setPixelColor(
-//       sm_px,
-//       onPhase ? RGBW32(255, 255, 255, 0) : RGBW32(bgDim, bgDim, bgDim, 0)
-//     );
-
-//     // sample sensor
-//     if (cd) {
-//       if (sensorHigh()) cd[0] |= 0x01; // saw hi
-//       if (sensorLow())  cd[0] |= 0x02; // saw lo
-//     }
-
-//     // guard timeout (e.g., sensor too far / stuck)
-//     if (effect_start_time - sm_tLast > guardTimeout) {
-//       AddLog(loglevel, PSTR("[PIX-INDEX] confirm timeout @%u (hi=%u lo=%u)"),
-//              sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
-//       sm_state = S_COOLDOWN;
-//       sm_tLast = effect_start_time;
-//     }
-
-//     // toggle timing
-//     if (effect_start_time - sm_tLast >= blinkStepMs) {
-//       sm_tLast = effect_start_time;
-//       sm_confirm++;
-
-//       if (sm_confirm >= (uint16_t)BLINKS_TOTAL * 2) {
-//         const bool ok = cd ? ((cd[0] & 0x01) && (cd[0] & 0x02)) : true;
-//         if (ok) {
-//           bool dup = false;
-//           for (uint16_t i = 0; i < count; i++) if (list[i] == sm_px) { dup = true; break; }
-//           if (!dup && count < cap) {
-//             list[count++] = sm_px;
-//             AddLog(loglevel, PSTR("[PIX-INDEX] found=%u  (count=%u)"), sm_px, count);
-//             SEGMENT.step = effect_start_time; // schedule delayed print
-//           } else if (dup) {
-//             AddLog(loglevel, PSTR("[PIX-INDEX] duplicate ignored @%u"), sm_px);
-//           }
-//         } else {
-//           AddLog(loglevel, PSTR("[PIX-INDEX] confirm failed @%u (hi=%u lo=%u)"),
-//                  sm_px, cd ? !!(cd[0] & 0x01) : 0, cd ? !!(cd[0] & 0x02) : 0);
-//         }
-//         sm_state = S_COOLDOWN;
-//         sm_tLast = effect_start_time;
-//       }
-//     }
-
-//   } else { // S_COOLDOWN
-//     // keep pixel lit during cooldown; re-arm as soon as we detect low
-//     SEGMENT.setPixelColor(sm_px, RGBW32(255, 255, 255, 0));
-//     if (effect_start_time - sm_tLast >= COOLDOWN_MS) {
-//       sm_state = S_SCAN;
-//       if (cd) cd[0] = 0; // clear flags; need fresh arm
-//     } else {
-//       if (cd && sensorLow()) cd[0] |= 0x04;
-//     }
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-
-
-
-
-
-
-// static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
-// "Debug: Light Sensor Indexing@"                // Name
-// "Scan Dwell,Blink Rate,,,,"                    // 1s,2i,3c1,4c2,5c3
-// "Acquire,Pop Last,SaveToFile,,"                // 6cb1,7cb2,8cb3,9ep,10grp
-// ";"                                            // ----------------------------------------- Sliders/SegCols
-// ""                                             // Segment Colour Names (blank = show all)
-// ";"                                            // ----------------------------------------- SegCols/PalPicker
-// ""                                             // Palette picker (none)
-// ";"                                            // ----------------------------------------- PalPicker/is1D2D
-// "0"                                            // Icon flags (0 = generic/strip)
-// ";"                                            // ----------------------------------------- is1D2D/Defaults
-// "sx=120,"                                      // default Scan Dwell (Speed)
-// "ix=100,"                                      // default Blink Rate (Intensity)
-// "o1=0,"                                        // CB1 Acquire OFF by default
-// "o2=0,"                                        // CB2 Pop Last OFF
-// "o3=0"                                         // CB3 SaveToFile OFF (edge=save once; hold=autosave)
-// ;                                              // end
-
-// static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
-// "Pixel index acquisition using a light sensor (LDR or digital-threshold module).\n\r"
-// "Scans LEDs sequentially; on detection runs a blink confirm and ±5 disambiguation.\n\r"
-// "Saves confirmed indices; shows saved pixels in green when acquire is OFF.\n\r"
-// "Controls:\n\r"
-// "  SX: Scan dwell per pixel (fast↔slow)\n\r"
-// "  IX: Blink rate for confirm\n\r"
-// "  CB1: Acquire (start/stop scanning)\n\r"
-// "  CB2: Pop last saved index\n\r"
-// "  CB3: SaveToFile (edge=save now, hold=autosave on each find)\n\r"
-// "Notes: Print verbosity is via Custom3 slider (0=off, 1..200=INFO, 255=trace).\n\r"
-// "Ignores palette/segcol; safe for 1D layouts."
-// ;
-
-
-
-
-// static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
-// "Debug: Sensor Indexing@!,!,!,!,!,!,!,!,!,!"  // two sliders, name the secondary color
-// ";"                                                // (no palette row labels)
-// "!"                                                // allow palette selection for the lit gradient
-// ";"
-// "1"                                                // 1D icon flag
-// ;
-// static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM =
-// "Alternates lit (palette) and unlit (C2) runs for camera/light-sensor mapping.\n\r"
-// "SX: Lit run length   IX: Unlit run length";
-
-
-
-// uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
-// {
-  
-//   uint16_t lit = 1 + SEGMENT.speed;
-//   uint16_t unlit = 1 + SEGMENT.intensity;
-//   bool drawingLit = true;
-//   uint16_t cnt = 0;
-
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     SEGMENT.setPixelColor(i, 
-//       (drawingLit) ? SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE) : SEGCOLOR_U32(1)
-//     );
-//     cnt++;
-//     if (cnt >= ((drawingLit) ? lit : unlit)) {
-//       cnt = 0;
-//       drawingLit = !drawingLit;
-//     }
-//   }
-  
-//   return FRAMETIME;
-  
-// }
-// static const char PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Debug Light Sensor Indexing@Fg size,Bg size;Fg,!;!;;pal=19";
-// static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
-
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
@@ -15227,7 +14118,7 @@ static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 //***************************  2D routines  ***********************************
 #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define XY(x,y) SEGMENT.XY(x,y)
+// #define XY(x,y) SEGMENT.XY(x,y)
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : By: Stepko https://editor.soulmatelights.com/gallery/1012 , Modified by: Andrew Tuline
@@ -15523,7 +14414,7 @@ if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
         SEGMENT.setPixelColorXY(x,y, SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
     }
 
-    for (int y = 0; y < rows; y++) for (int x = 0; x < cols; x++) prevLeds[XY(x,y)] = CRGB::Black;
+    for (int y = 0; y < rows; y++) for (int x = 0; x < cols; x++) prevLeds[SEGMENT.XY(x,y)] = CRGB::Black;
     memset(crcBuffer, 0, sizeof(uint16_t)*crcBufferLen);
   } else if (effect_start_time - SEGMENT.step < FRAMETIME * (uint32_t)map(SEGMENT.speed,0,255,64,4)) {
     // update only when appropriate time passes (in 42 FPS slots)
@@ -15532,7 +14423,7 @@ if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
 
   //copy previous leds (save previous generation)
   //NOTE: using lossy getPixelColor() is a benefit as endlessly repeating patterns will eventually fade out causing a reset
-  for (int x = 0; x < cols; x++) for (int y = 0; y < rows; y++) prevLeds[XY(x,y)] = SEGMENT.getPixelColorXY(x,y);
+  for (int x = 0; x < cols; x++) for (int y = 0; y < rows; y++) prevLeds[SEGMENT.XY(x,y)] = SEGMENT.getPixelColorXY(x,y);
 
   //calculate new leds
   for (int x = 0; x < cols; x++) for (int y = 0; y < rows; y++) {
@@ -15549,7 +14440,7 @@ if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
       if (x+i < 0) xx = cols-1; else if (x+i >= cols) xx = 0;
       if (y+j < 0) yy = rows-1; else if (y+j >= rows) yy = 0;
 
-      unsigned xy = XY(xx, yy); // previous cell xy to check
+      unsigned xy = SEGMENT.XY(xx, yy); // previous cell xy to check
       // count different neighbours and colors
       if (prevLeds[xy] != backgroundColor) {
         neighbors++;
@@ -15565,7 +14456,7 @@ if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
     } // i,j
 
     // Rules of Life
-    uint32_t col = uint32_t(prevLeds[XY(x,y)]) & 0x00FFFFFF;  // uint32_t operator returns RGBA, we want RGBW -> cut off "alpha" byte
+    uint32_t col = uint32_t(prevLeds[SEGMENT.XY(x,y)]) & 0x00FFFFFF;  // uint32_t operator returns RGBA, we want RGBW -> cut off "alpha" byte
     uint32_t bgc = RGBW32(backgroundColor.r, backgroundColor.g, backgroundColor.b, 0);
     if      ((col != bgc) && (neighbors <  2)) SEGMENT.setPixelColorXY(x,y, bgc); // Loneliness
     else if ((col != bgc) && (neighbors >  3)) SEGMENT.setPixelColorXY(x,y, bgc); // Overpopulation
@@ -15815,15 +14706,15 @@ uint16_t mAnimatorLight::EffectAnim__2D__Matrix()
     SEGMENT.fadeToBlackBy(fade);
     for (int row = rows-1; row >= 0; row--) {
       for (int col = 0; col < cols; col++) {
-        unsigned index = XY(col, row) >> 3;
-        unsigned bitNum = XY(col, row) & 0x07;
+        unsigned index = SEGMENT.XY(col, row) >> 3;
+        unsigned bitNum = SEGMENT.XY(col, row) & 0x07;
         if (bitRead(SEGMENT.data[index], bitNum)) {
           SEGMENT.setPixelColorXY(col, row, trailColor);  // create trail
           bitClear(SEGMENT.data[index], bitNum);
           if (row < rows-1) {
             SEGMENT.setPixelColorXY(col, row+1, spawnColor);
-            index = XY(col, row+1) >> 3;
-            bitNum = XY(col, row+1) & 0x07;
+            index = SEGMENT.XY(col, row+1) >> 3;
+            bitNum = SEGMENT.XY(col, row+1) & 0x07;
             bitSet(SEGMENT.data[index], bitNum);
             emptyScreen = false;
           }
@@ -15836,8 +14727,8 @@ uint16_t mAnimatorLight::EffectAnim__2D__Matrix()
       uint8_t spawnX = hw_random8(cols);
       SEGMENT.setPixelColorXY(spawnX, 0, spawnColor);
       // update hint for next run
-      unsigned index = XY(spawnX, 0) >> 3;
-      unsigned bitNum = XY(spawnX, 0) & 0x07;
+      unsigned index = SEGMENT.XY(spawnX, 0) >> 3;
+      unsigned bitNum = SEGMENT.XY(spawnX, 0) & 0x07;
       bitSet(SEGMENT.data[index], bitNum);
     }
   }
@@ -17170,44 +16061,163 @@ static const char PM_EFFECT_DESCRI__2D__DISTORTION_WAVES[] PROGMEM = "Cycle Betw
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : @Stepko Idea from https://www.youtube.com/watch?v=DiHBgITrZck&ab_channel=StefanPetrick adapted for WLED by @blazoncek
+ * @function    : EffectAnim__2D__Soap_Base
+ * @brief       : One-axis “soap-film” warp pass (row-wise or column-wise).
+ *
+ * @details     :
+ *   This helper performs a single 1D displacement pass across the matrix, controlled by a
+ *   precomputed noise field. It blends between two source pixels (zD, zF) per destination cell
+ *   using an ease-in/out factor, which yields a smooth elastic ‘soap’ look. When sampling would
+ *   go out of bounds, it falls back to palette color based on the local noise index.
+ *
+ *   - Direction:
+ *       • isRow = true  → process horizontal rows (displace along X for each Y)
+ *       • isRow = false → process vertical columns (displace along Y for each X)
+ *
+ *   - Displacement:
+ *       • The per-line scalar ‘amount’ is derived from the first noise value of that line
+ *         (scaled around 128) and multiplied by ‘amplitude’.
+ *       • amplitude ≈ max(1, ((axisLength - 8) / 8)) * (1 + (SEGMENT.custom1 >> 5))
+ *         (i.e., scales with matrix size and adds a small user bias via C1).
+ *       • ‘shift’ is currently 0, but can be tied to C2 if desired.
+ *
+ *   - Sampling & blend:
+ *       • Integer “delta” = |amount| >> 8, fractional “fraction” = |amount| & 255.
+ *       • Two neighbor samples are chosen (zD, zF) in the displacement direction.
+ *       • Source pixels are taken from the ping-pong buffer “pixels”; if out of range,
+ *         a palette fallback color is produced from ~noise3d[x,y]*3.
+ *       • The two samples are mixed with ease8InOutApprox(fraction) for clean interpolation.
+ *
+ *   - I/O:
+ *       • Input  : noise3d (uint8_t per pixel), pixels (CRGB per pixel snapshot)
+ *       • Output : pixels (updated) and SEGMENT framebuffer (setPixelColorXY)
+ *
+ * @param isRow   Process pass along rows (true) or along columns (false).
+ * @param noise3d Pointer to the smoothed 3D-noise index buffer (size: SEG_W*SEG_H).
+ * @param pixels  Pointer to a working CRGB buffer (size: SEG_W*SEG_H) used for sampling/writing.
+ *
+ * @pre         : SEGMENT.is2D() must be true. Buffers must be allocated by the caller.
+ * @complexity  : O(SEG_W*SEG_H) per pass.
+ * @returns     : void (writes into ‘pixels’ and the segment’s output)
+ *
+ * @Stepko Idea from https://www.youtube.com/watch?v=DiHBgITrZck&ab_channel=StefanPetrick adapted for WLED by @blazoncek
  * @note : Converted from WLED Effects "mode_2Dsoap"
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__2D__Soap()
+void mAnimatorLight::EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRGB *pixels) 
 {
+  const int  cols = SEG_W;
+  const int  rows = SEG_H;
+  const auto XY   = [&](int x, int y) { return x + y * cols; };
+  const auto abs  = [](int x) { return x<0 ? -x : x; };
+  const int  tRC  = isRow ? rows : cols; // transpose if isRow
+  const int  tCR  = isRow ? cols : rows; // transpose if isRow
+  const int  amplitude = max(1, (tCR - 8) >> 3) * (1 + (SEGMENT.custom1 >> 5));
+  const int  shift = 0; //(128 - SEGMENT.custom2)*2;
+
+  CRGB ledsbuff[tCR];
+
+  for (int i = 0; i < tRC; i++) {
+    int amount   = ((int)noise3d[isRow ? i*cols : i] - 128) * amplitude + shift; // use first row/column: XY(0,i)/XY(i,0)
+    int delta    = abs(amount) >> 8;
+    int fraction = abs(amount) & 255;
+    for (int j = 0; j < tCR; j++) {
+      int zD, zF;
+      if (amount < 0) {
+        zD = j - delta;
+        zF = zD - 1;
+      } else {
+        zD = j + delta;
+        zF = zD + 1;
+      }
+      int yA = abs(zD)%tCR;
+      int yB = abs(zF)%tCR;
+      int xA = i;
+      int xB = i;
+      if (isRow) {
+        std::swap(xA,yA);
+        std::swap(xB,yB);
+      }
+      const int indxA = XY(xA,yA);
+      const int indxB = XY(xB,yB);
+      CRGB PixelA;
+      CRGB PixelB;
+      if ((zD >= 0) && (zD < tCR)) PixelA = pixels[indxA];
+      else                         PixelA = mPalette::ColorFromPaletteU32(SEGPALETTE, ~noise3d[indxA]*3);
+      if ((zF >= 0) && (zF < tCR)) PixelB = pixels[indxB];
+      else                         PixelB = mPalette::ColorFromPaletteU32(SEGPALETTE, ~noise3d[indxB]*3);
+      ledsbuff[j] = (PixelA.nscale8(ease8InOutApprox(255 - fraction))) + (PixelB.nscale8(ease8InOutApprox(fraction)));
+    }
+    for (int j = 0; j < tCR; j++) {
+      CRGB c = ledsbuff[j];
+      if (isRow) std::swap(j,i);
+      SEGMENT.setPixelColorXY(i, j, pixels[XY(i,j)] = c);
+      if (isRow) std::swap(j,i);
+    }
+  }
+}
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__Soap
+ * @brief       : Full 2D “soap-film” effect using evolving 3D Perlin noise and a dual-pass warp.
+ *
+ * @details     :
+ *   Builds a time-varying 3D noise field (x,y,z), then:
+ *     1) Smooths the noise per pixel with a temporal low-pass (Intensity = ‘Smoothness’).
+ *     2) Prepaints the matrix from the active CRGB16 palette using the noise index.
+ *     3) Runs two warp passes via EffectAnim__2D__Soap_Base(): first along rows, then along columns.
+ *
+ *   Memory layout (single allocation):
+ *     ┌───────────────────────────┬───────────────────────────────┬──────────────────────────────┐
+ *     │ noise3d (uint8_t * seg)   │ pixels (CRGB * seg)          │ noisecoord[3] (uint32_t xyz) │
+ *     └───────────────────────────┴───────────────────────────────┴──────────────────────────────┘
+ *     where seg = SEG_W * SEG_H
+ *
+ *   Controls:
+ *     • SX (Speed)      : Advances the 3D noise coordinates (temporal evolution).
+ *     • IX (Smoothness) : Temporal smoothing of noise (higher = steadier, slower change).
+ *     • C1 (Offset/amp) : Adds a small amplitude bias in the base pass (row/col warp).
+ *     • C2, C3          : Reserved/unused in this implementation.
+ *
+ *   Colors:
+ *     • Uses CRGB16 palette via mPalette::ColorFromPaletteU32(SEGPALETTE, index).
+ *     • The index is ~noise3d[x,y] * 3 (simple mapping with inversion & gain).
+ *
+ *   Notes:
+ *     • Requires a 2D matrix segment; early-out otherwise.
+ *     • Reinitializes seeds at first run; re-prepaints if dimensions change.
+ *     • Smoothness > 250 intentionally yields very slow visual change.
+ *
+ * @pre         : SEGMENT.is2D() must be true; SEG_W/SEG_H valid and non-zero.
+ * @complexity  : O(SEG_W*SEG_H) for noise + O(SEG_W*SEG_H) per warp pass ≈ O(N).
+ * @returns     : FRAMETIME
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__2D__Soap() {
   if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
 
   const int cols = SEG_W;
   const int rows = SEG_H;
+  const auto XY = [&](int x, int y) { return x + y * cols; };
 
-  const size_t dataSize = SEGMENT.width() * SEGMENT.height() * sizeof(uint8_t); // prevent reallocation if mirrored or grouped
+  const size_t segSize = SEGMENT.width() * SEGMENT.height(); // prevent reallocation if mirrored or grouped
+  const size_t dataSize = segSize * (sizeof(uint8_t) + sizeof(CRGB)); // pixels and noise
   if (!SEGMENT.allocateData(dataSize + sizeof(uint32_t)*3)) return EFFECT_DEFAULT(); //allocation failed
 
-  uint8_t  *noise3d   = reinterpret_cast<uint8_t*>(SEGMENT.data);
-  uint32_t *noise32_x = reinterpret_cast<uint32_t*>(SEGMENT.data + dataSize);
-  uint32_t *noise32_y = reinterpret_cast<uint32_t*>(SEGMENT.data + dataSize + sizeof(uint32_t));
-  uint32_t *noise32_z = reinterpret_cast<uint32_t*>(SEGMENT.data + dataSize + sizeof(uint32_t)*2);
+  uint8_t  *noise3d    = reinterpret_cast<uint8_t*>(SEGMENT.data);
+  CRGB     *pixels     = reinterpret_cast<CRGB*>(SEGMENT.data + segSize * sizeof(uint8_t));
+  uint32_t *noisecoord = reinterpret_cast<uint32_t*>(SEGMENT.data + dataSize); // x, y, z coordinates
   const uint32_t scale32_x = 160000U/cols;
   const uint32_t scale32_y = 160000U/rows;
   const uint32_t mov = MIN(cols,rows)*(SEGMENT.speed+2)/2;
   const uint8_t  smoothness = MIN(250,SEGMENT.intensity); // limit as >250 produces very little changes
 
-  // init
-  if (SEGMENT.call == 0) {
-    *noise32_x = hw_random();
-    *noise32_y = hw_random();
-    *noise32_z = hw_random();
-  } else {
-    *noise32_x += mov;
-    *noise32_y += mov;
-    *noise32_z += mov;
-  }
+  if (SEGMENT.call == 0) for (int i = 0; i < 3; i++) noisecoord[i] = hw_random(); // init
+  else                  for (int i = 0; i < 3; i++) noisecoord[i] += mov;
 
   for (int i = 0; i < cols; i++) {
     int32_t ioffset = scale32_x * (i - cols / 2);
     for (int j = 0; j < rows; j++) {
       int32_t joffset = scale32_y * (j - rows / 2);
-      uint8_t data = inoise16(*noise32_x + ioffset, *noise32_y + joffset, *noise32_z) >> 8;
+      uint8_t data = perlin16(noisecoord[0] + ioffset, noisecoord[1] + joffset, noisecoord[2]) >> 8;
       noise3d[XY(i,j)] = scale8(noise3d[XY(i,j)], smoothness) + scale8(data, 255 - smoothness);
     }
   }
@@ -17217,74 +16227,55 @@ uint16_t mAnimatorLight::EffectAnim__2D__Soap()
     SEGMENT.aux1 = rows;
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
-        SEGMENT.setPixelColorXY(i, j, ColorFromPalette(SEGPALETTE,~noise3d[XY(i,j)]*3));
+        SEGMENT.setPixelColorXY(i, j, mPalette::ColorFromPaletteU32(SEGPALETTE,~noise3d[XY(i,j)]*3));
       }
     }
   }
 
-  int zD;
-  int zF;
-  int amplitude;
-  int shiftX = 0; //(SEGMENT.custom1 - 128) / 4;
-  int shiftY = 0; //(SEGMENT.custom2 - 128) / 4;
-  CRGB ledsbuff[MAX(cols,rows)];
-
-  amplitude = (cols >= 16) ? (cols-8)/8 : 1;
-  for (int y = 0; y < rows; y++) {
-    int amount   = ((int)noise3d[XY(0,y)] - 128) * 2 * amplitude + 256*shiftX;
-    int delta    = abs(amount) >> 8;
-    int fraction = abs(amount) & 255;
-    for (int x = 0; x < cols; x++) {
-      if (amount < 0) {
-        zD = x - delta;
-        zF = zD - 1;
-      } else {
-        zD = x + delta;
-        zF = zD + 1;
-      }
-      CRGB PixelA = CRGB::Black;
-      if ((zD >= 0) && (zD < cols)) PixelA = SEGMENT.getPixelColorXY(zD, y);
-      else                          PixelA = ColorFromPalette(SEGPALETTE, ~noise3d[XY(abs(zD),y)]*3);
-      CRGB PixelB = CRGB::Black;
-      if ((zF >= 0) && (zF < cols)) PixelB = SEGMENT.getPixelColorXY(zF, y);
-      else                          PixelB = ColorFromPalette(SEGPALETTE, ~noise3d[XY(abs(zF),y)]*3);
-      ledsbuff[x] = (PixelA.nscale8(ease8InOutApprox(255 - fraction))) + (PixelB.nscale8(ease8InOutApprox(fraction)));
-    }
-    for (int x = 0; x < cols; x++) SEGMENT.setPixelColorXY(x, y, ledsbuff[x]);
-  }
-
-  amplitude = (rows >= 16) ? (rows-8)/8 : 1;
-  for (int x = 0; x < cols; x++) {
-    int amount   = ((int)noise3d[XY(x,0)] - 128) * 2 * amplitude + 256*shiftY;
-    int delta    = abs(amount) >> 8;
-    int fraction = abs(amount) & 255;
-    for (int y = 0; y < rows; y++) {
-      if (amount < 0) {
-        zD = y - delta;
-        zF = zD - 1;
-      } else {
-        zD = y + delta;
-        zF = zD + 1;
-      }
-      CRGB PixelA = CRGB::Black;
-      if ((zD >= 0) && (zD < rows)) PixelA = SEGMENT.getPixelColorXY(x, zD);
-      else                          PixelA = ColorFromPalette(SEGPALETTE, ~noise3d[XY(x,abs(zD))]*3); 
-      CRGB PixelB = CRGB::Black;
-      if ((zF >= 0) && (zF < rows)) PixelB = SEGMENT.getPixelColorXY(x, zF);
-      else                          PixelB = ColorFromPalette(SEGPALETTE, ~noise3d[XY(x,abs(zF))]*3);
-      ledsbuff[y] = (PixelA.nscale8(ease8InOutApprox(255 - fraction))) + (PixelB.nscale8(ease8InOutApprox(fraction)));
-    }
-    for (int y = 0; y < rows; y++) SEGMENT.setPixelColorXY(x, y, ledsbuff[y]);
-  }
+  EffectAnim__2D__Soap_Base(true,  noise3d, pixels); // rows
+  EffectAnim__2D__Soap_Base(false, noise3d, pixels); // cols
 
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__2D__SOAP[] PROGMEM = "Soap@!,Smoothness;;!;2;pal=11";
-static const char PM_EFFECT_DESCRI__2D__SOAP[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-
+static const char PM_EFFECT_CONFIG__2D__SOAP[] PROGMEM =
+"Soap@!,Smoothness,,,,,,,,;"
+";"
+";"
+"!;"
+"2;"
+"paln=Rainbow 16";
+static const char PM_EFFECT_DESCRI__2D__SOAP[] PROGMEM =
+"2D soap-film warp using evolving 3D noise and palette shading.\n\r"
+"SX: Speed\n\r"
+"IX: Smoothness (temporal)\n\r"
+"C1: Warp amplitude bias\n\r"
+"C2: —\n\r"
+"C3: —\n\r"
+"EP: !\n\r"
+"GP: !";
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Idea from https://www.youtube.com/watch?v=HsA-6KIbgto&ab_channel=GreatScott%21 Octopus (https://editor.soulmatelights.com/gallery/671-octopus) Stepko and Sutaburosu adapted for WLED by @blazoncek
+ * @function    : EffectAnim__2D__Octopus
+ * @description : “Octopus” effect (GreatScott! / Stepko / Sutaburosu ➜ WLED ➜ port).
+ *                Creates radial “arms” radiating from a configurable center point. Each pixel
+ *                is pre-mapped to an (angle, radius) pair relative to the chosen center. During
+ *                runtime the map is animated with sin8_t oscillations and palette indexing,
+ *                producing a rotating tentacle-like pattern.
+ *
+ * Controls
+ *   • SX (Speed)        : Global animation speed (step increment).
+ *   • IX (Intensity)    : Nonlinear brightness shaping strength (higher = more contrast).
+ *   • C1 (Custom 1)     : Center X offset (–128..+127).
+ *   • C2 (Custom 2)     : Center Y offset (–128..+127).
+ *   • C3 (Custom 3)     : “Legs” multiplier (number of arms).
+ *
+ * Notes
+ *   • Requires a 2D matrix; effect aborts on non-2D segments.
+ *   • Precomputes angle & radius map for each pixel once (on first call or dimension/offset change).
+ *   • Uses SEGPALETTE + ColorFromPaletteU32 for fast color lookups.
+ *   • Non-linear brightness mapping improves contrast and visual clarity.
+ *
+ * Idea from https://www.youtube.com/watch?v=HsA-6KIbgto&ab_channel=GreatScott%21 Octopus (https://editor.soulmatelights.com/gallery/671-octopus) Stepko and Sutaburosu adapted for WLED by @blazoncek
  * @note : Converted from WLED Effects "mode_2Doctopus"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__2D__Octopus()
@@ -17320,8 +16311,8 @@ uint16_t mAnimatorLight::EffectAnim__2D__Octopus()
       for (int y = 0; y < rows; y++) {
         int dx = (x - C_X);
         int dy = (y - C_Y);
-        rMap[XY(x, y)].angle  = int(40.7436f * atan2_t(dy, dx));  // avoid 128*atan2()/PI
-        rMap[XY(x, y)].radius = sqrtf(dx * dx + dy * dy) * mapp; //thanks Sutaburosu
+        rMap[SEGMENT.XY(x, y)].angle  = int(40.7436f * atan2_t(dy, dx));  // avoid 128*atan2()/PI
+        rMap[SEGMENT.XY(x, y)].radius = sqrtf(dx * dx + dy * dy) * mapp; //thanks Sutaburosu
       }
     }
   }
@@ -17329,22 +16320,65 @@ uint16_t mAnimatorLight::EffectAnim__2D__Octopus()
   SEGMENT.step += SEGMENT.speed / 32 + 1;  // 1-4 range
   for (int x = 0; x < cols; x++) {
     for (int y = 0; y < rows; y++) {
-      byte angle = rMap[XY(x,y)].angle;
-      byte radius = rMap[XY(x,y)].radius;
-      //CRGB c = CHSV(SEGMENT.step / 2 - radius, 255, sin8_t(sin8_t((angle * 4 - radius) / 4 + SEGMENT.step) + radius - SEGMENT.step * 2 + angle * (SEGMENT.custom3/3+1)));
+      byte angle = rMap[SEGMENT.XY(x,y)].angle;
+      byte radius = rMap[SEGMENT.XY(x,y)].radius;
       unsigned intensity = sin8_t(sin8_t((angle * 4 - radius) / 4 + SEGMENT.step/2) + radius - SEGMENT.step + angle * (SEGMENT.custom3/4+1));
       intensity = map((intensity*intensity) & 0xFFFF, 0, 65535, 0, 255); // add a bit of non-linearity for cleaner display
-      SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, SEGMENT.step / 2 - radius, intensity));
+      SEGMENT.setPixelColorXY(x, y, mPalette::ColorFromPaletteU32(SEGPALETTE, SEGMENT.step / 2 - radius, intensity));
     }
   }
   return FRAMETIME;
 }
-static const char PM_EFFECT_CONFIG__2D__OCTOPUS[] PROGMEM = "Octopus@!,,Offset X,Offset Y,Legs,fasttan;;!;2;";
-static const char PM_EFFECT_DESCRI__2D__OCTOPUS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
+static const char PM_EFFECT_CONFIG__2D__OCTOPUS[] PROGMEM =
+"Octopus@"                       // Name
+"Speed,Contrast,Offset X,Offset Y,Legs,,,,," // 10 fields: 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                              // ----------------------------------------- Sliders/SegCols
+""                               // Segment Colour Names (blank = show all)
+";"                              // ----------------------------------------- SegCols/PalPicker
+"!"                              // Palette picker (primary)
+";"                              // ----------------------------------------- PalPicker/is1D2D
+"2"                              // Icon flags: '2' => 2D/matrix
+";"                              // ----------------------------------------- is1D2D/Defaults
+"ix=128"                         // Example default: mid contrast
+;
+static const char PM_EFFECT_DESCRI__2D__OCTOPUS[] PROGMEM =
+"2D radial octopus arms animated from a palette.\n\r"
+"SX: Speed\n\r"
+"IX: Contrast\n\r"
+"C1: Center X offset\n\r"
+"C2: Center Y offset\n\r"
+"C3: Arms (legs)\n\r"
+"EP: !\n\r"
+"GP: !";
+// static const char PM_EFFECT_CONFIG__2D__OCTOPUS[] PROGMEM = "Octopus@!,,Offset X,Offset Y,Legs,fasttan;;!;2;";
+// static const char PM_EFFECT_DESCRI__2D__OCTOPUS[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Waving Cell @Stepko (https://editor.soulmatelights.com/gallery/1704-wavingcells) adapted for WLED by @blazoncek, improvements by @dedehai
+ * @function    : EffectAnim__2D__WavingCell
+ * @description : 2D “waving cells” interference pattern (Stepko ➜ WLED ➜ port).
+ *                 For each (x,y), we combine a sin() of x with a sin() that’s phase-modulated by y
+ *                 and add a cos() of y. The result indexes a 16-entry CRGB palette (SEGPALETTE),
+ *                 then we apply a post blur for soft cellular boundaries.
+ *
+ *                 Palette sampling uses the fast uint32_t helper:
+ *                   mPalette::ColorFromPaletteU32(SEGPALETTE, index[, brightness, blend])
+ *                 which directly returns WRGB-packed colors.
+ *
+ * Controls
+ *   • SX (Speed)        : Time advance multiplier (overall motion speed).
+ *   • IX (Intensity)    : Post blur strength (higher = softer).
+ *   • C1 (Custom 1)     : X amplitude / spatial frequency.
+ *   • C2 (Custom 2)     : Y amplitude / spatial frequency (in wave modulator).
+ *   • C3 (Custom 3)     : Y cosine amplitude (secondary component).
+ *   • CB2 (Check 2)     : “Flow” toggle (adds extra temporal shift in the palette index).
+ *
+ * Notes
+ *   • Requires a 2D segment (matrix); returns EFFECT_DEFAULT() if not 2D.
+ *   • Ignores segment solid colors; fully palette-driven.
+ *   • Uses SEGPALETTE = SEGMENT.palette->CRGB16Palette16_Palette.data
+ *     and ColorFromPaletteU32 for fast blended lookups.
+ * Waving Cell @Stepko (https://editor.soulmatelights.com/gallery/1704-wavingcells) adapted for WLED by @blazoncek, improvements by @dedehai
  * @note : Converted from WLED Effects "mode_2Dwavingcell"
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__2D__WavingCell()
@@ -17362,18 +16396,31 @@ uint16_t mAnimatorLight::EffectAnim__2D__WavingCell()
     for (int y = 0; y < rows; y++) {
       uint32_t wave = sin8_t((x * aX) + sin8_t((((y<<8) + t) * aY)>>8)) + cos8_t(y * aZ); // bit shifts to increase temporal resolution
       uint8_t colorIndex = wave + (t>>(8-(SEGMENT.check2*3)));
-      SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, colorIndex));
+      uint32_t col = mPalette::ColorFromPaletteU32(SEGPALETTE, colorIndex);
+      SEGMENT.setPixelColorXY(x, y, col);
     }
   }
-  SEGMENT.blur(SEGMENT.intensity);
+  SEGMENT.blur(SEGMENT.intensity); 
   return FRAMETIME;
+  
 }
-static const char PM_EFFECT_CONFIG__2D__WAVING_CELL[] PROGMEM = "Waving Cell@!,Blur,Amplitude 1,Amplitude 2,Amplitude 3,,Flow;;!;2;ix=0";
-static const char PM_EFFECT_DESCRI__2D__WAVING_CELL[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__MATRIX_2D_TODO   END OF SECTION //////////////////////////////////////////////////////////////
-
-
-
+static const char PM_EFFECT_CONFIG__2D__WAVING_CELL[] PROGMEM =
+"Waving Cell@"                 // Name
+"!,Blur,Amplitude X,Amplitude Y,Amplitude Z,,Flow,,,"  // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                            // ----------------------------------------- Sliders/SegCols
+""                             // Segment Colour Names (blank = show all)
+";"                            // ----------------------------------------- SegCols/PalPicker
+"!"                            // Palette picker (primary)
+";"                            // ----------------------------------------- PalPicker/is1D2D
+"2"                            // Icon flags: '2' => 2D/matrix
+";"                            // ----------------------------------------- is1D2D/Defaults
+"ix=0,"                         // Example default: blur=0 (no extra blur)
+"sx=14"
+;
+static const char PM_EFFECT_DESCRI__2D__WAVING_CELL[] PROGMEM =
+"2D interference waving cells\n\r"
+"SX: speed  |  IX: blur  |  C1: X amp  |  C2: Y amp  |  C3: Y cos amp  |  CB2: flow toggle";
+#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -17563,7 +16610,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Aurora()
       }
     }
 
-    SEGMENT.setPixelColor(i, mixedRgb[0], mixedRgb[1], mixedRgb[2]);
+    SEGMENT.setPixelColor((int)i, mixedRgb[0], mixedRgb[1], mixedRgb[2]);
   }
 
   return FRAMETIME;
@@ -17921,7 +16968,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseFire()
     index = (255 - i*256/SEGLEN) * index/(256-SEGMENT.intensity);                       // Now we need to scale index so that it gets blacker as we get close to one of the ends.
                                                                                         // This is a simple y=mx+b equation that's been scaled. index/128 is another scaling.
 
-    SEGMENT.setPixelColor(i, ColorFromPalette(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
+    SEGMENT.setPixelColor((int)i, ColorFromPalette(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
   }
 
   return FRAMETIME;;
@@ -18686,7 +17733,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_FunkyPlank()
       int v = map(fftResult[band % 16], 0, 255, 10, 255);
       for (int w = 0; w < barWidth; w++) {
          int xpos = (barWidth * b) + w;
-         SEGMENT.setPixelColorXY_CRGB(xpos, 0, CHSV(hue, 255, v));
+         SEGMENT.setPixelColorXY(xpos, 0, CHSV(hue, 255, v));
       }
     }
 
@@ -18767,6 +17814,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_Akemi()
     CRGB faceColor  = CRGB(SEGMENT.color_wheel(counter));
     CRGB armsAndLegsColor = CRGB(SEGCOLOR(1) > 0 ? SEGCOLOR(1) : 0xFFE0A0); //default warmish white 0xABA8FF; //0xFF52e5;//
     uint8_t ak = pgm_read_byte_near(akemi + ((y * 32)/rows) * 32 + (x * 32)/cols); // akemi[(y * 32)/rows][(x * 32)/cols]
+    // if(ak) { ALOG_INF(PSTR("%d %d %d"),y,x,ak); }
     switch (ak) {
       case 3: armsAndLegsColor.r *= lightFactor;  armsAndLegsColor.g *= lightFactor;  armsAndLegsColor.b *= lightFactor;  color = armsAndLegsColor; break; //light arms and legs 0x9B9B9B
       case 2: armsAndLegsColor.r *= normalFactor; armsAndLegsColor.g *= normalFactor; armsAndLegsColor.b *= normalFactor; color = armsAndLegsColor; break; //normal arms and legs 0x888888
@@ -18779,12 +17827,24 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_Akemi()
       default: color = BLACK; break;
     }
 
+    // color = CRGB(255,0,0);
+
+    // if(ak==5) { ALOG_INF(PSTR("5col %d,%d,%d"),color.r, color.g, color.b); } 
+
     if (SEGMENT.intensity > 128 && fftResult && fftResult[0] > 128) { //dance if base is high
       SEGMENT.setPixelColorXY(x, 0, BLACK);
       SEGMENT.setPixelColorXY(x, y+1, color);
-    } else
-      SEGMENT.setPixelColorXY(x, y, color);
+    } else {
+      SEGMENT.setPixelColorXY(x, y, (CRGB)color);
+    }
+
+
   }
+    // CRGB color = CRGB(255,0,0);
+    // int y = 5;
+    // int x = 5;
+    // SEGMENT.setPixelColorXY(x, y, (CRGB)color);
+    // SEGMENT.setPixelColorXY(x++, y++, (uint32_t)RGBW32(100,200,254,4));
 
   //add geq left and right
   if (um_data && fftResult) {
@@ -18978,37 +18038,37 @@ void mAnimatorLight::LoadEffects()
 
   // General Level 4 Flashing Complete Effects
   
-  // addEffect(EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID,
-  //           &mAnimatorLight::EffectAnim__Palette_Lit_Pattern,
-  //           PM_EFFECT_CONFIG__PALETTE_LIT_PATTERN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PALETTE_LIT_PATTERN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID,
+            &mAnimatorLight::EffectAnim__Palette_Lit_Pattern,
+            PM_EFFECT_CONFIG__PALETTE_LIT_PATTERN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PALETTE_LIT_PATTERN,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__TRISEGCOL_LIT_PATTERN__ID,
-  //           &mAnimatorLight::EffectAnim__TriSegCol_Lit_Pattern,
-  //           PM_EFFECT_CONFIG__TRISEGCOL_LIT_PATTERN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__TRISEGCOL_LIT_PATTERN__ID,
+            &mAnimatorLight::EffectAnim__TriSegCol_Lit_Pattern,
+            PM_EFFECT_CONFIG__TRISEGCOL_LIT_PATTERN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED_LIT_PATTERN__ID,
-  //           &mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern,
-  //           PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED_LIT_PATTERN__ID,
+            &mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern,
+            PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED__ID,
-  //           &mAnimatorLight::EffectAnim__Palettes_Interleaved,
-  //           PM_EFFECT_CONFIG__PALETTES_INTERLEAVED,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PALETTES_INTERLEAVED,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PALETTES_INTERLEAVED__ID,
+            &mAnimatorLight::EffectAnim__Palettes_Interleaved,
+            PM_EFFECT_CONFIG__PALETTES_INTERLEAVED,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PALETTES_INTERLEAVED,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__SPOTS__ID,
             &mAnimatorLight::EffectAnim__Spots,
@@ -19026,13 +18086,13 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         
-  //           &mAnimatorLight::EffectAnim__Random_Colour,                         
-  //           PM_EFFECT_CONFIG__RANDOM_COLOR,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RANDOM_COLOR,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         
+            &mAnimatorLight::EffectAnim__Random_Colour,                         
+            PM_EFFECT_CONFIG__RANDOM_COLOR,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RANDOM_COLOR,
+            #endif
+            Effect_DevStage::Release);
 
   addEffect(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,
             &mAnimatorLight::EffectAnim__TriColour_Wipe,
@@ -19044,77 +18104,77 @@ void mAnimatorLight::LoadEffects()
   /**
    * Wipe/Sweep/Runners 
    **/
-  // addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,
-  //           &mAnimatorLight::EffectAnim__Colour_Wipe,
-  //           PM_EFFECT_CONFIG__COLOR_WIPE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLOR_WIPE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COLOR_WIPE__ID,
+            &mAnimatorLight::EffectAnim__Colour_Wipe,
+            PM_EFFECT_CONFIG__COLOR_WIPE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLOR_WIPE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,
-  //           &mAnimatorLight::EffectAnim__Colour_Wipe_Random,
-  //           PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLOR_WIPE_RANDOM,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,
+            &mAnimatorLight::EffectAnim__Colour_Wipe_Random,
+            PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLOR_WIPE_RANDOM,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,
-  //           &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,
-  //           PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLOR_WIPE_PALETTE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,
+            &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,
+            PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLOR_WIPE_PALETTE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COLOR_SWEEP__ID,
-  //           &mAnimatorLight::EffectAnim__Colour_Sweep,
-  //           PM_EFFECT_CONFIG__COLOR_SWEEP,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLOR_SWEEP,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP__ID,
+            &mAnimatorLight::EffectAnim__Colour_Sweep,
+            PM_EFFECT_CONFIG__COLOR_SWEEP,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLOR_SWEEP,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,
-  //           &mAnimatorLight::EffectAnim__Colour_Sweep_Random,
-  //           PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLOR_SWEEP_RANDOM,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,
+            &mAnimatorLight::EffectAnim__Colour_Sweep_Random,
+            PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLOR_SWEEP_RANDOM,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,
-  //           &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,
-  //           PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__COLOR_SWEEP_PALETTE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,
+            &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,
+            PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__COLOR_SWEEP_PALETTE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DYNAMIC__ID,
-  //           &mAnimatorLight::EffectAnim__Dynamic,
-  //           PM_EFFECT_CONFIG__DYNAMIC,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DYNAMIC,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DYNAMIC__ID,
+            &mAnimatorLight::EffectAnim__Dynamic,
+            PM_EFFECT_CONFIG__DYNAMIC,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DYNAMIC,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DYNAMIC_SMOOTH__ID,
-  //           &mAnimatorLight::EffectAnim__Dynamic_Smooth,
-  //           PM_EFFECT_CONFIG__DYNAMIC_SMOOTH,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DYNAMIC_SMOOTH,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DYNAMIC_SMOOTH__ID,
+            &mAnimatorLight::EffectAnim__Dynamic_Smooth,
+            PM_EFFECT_CONFIG__DYNAMIC_SMOOTH,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DYNAMIC_SMOOTH,
+            #endif
+            Effect_DevStage::Dev);
             
-  // addEffect(EFFECTS_FUNCTION__RUNNING_COLOR__ID,
-  //           &mAnimatorLight::EffectAnim__Running_Colour,
-  //           PM_EFFECT_CONFIG__RUNNING_COLOR,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RUNNING_COLOR,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__RUNNING_COLOR__ID,
+            &mAnimatorLight::EffectAnim__Running_Colour,
+            PM_EFFECT_CONFIG__RUNNING_COLOR,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RUNNING_COLOR,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__RUNNING_RANDOM__ID,
             &mAnimatorLight::EffectAnim__Running_Random,
@@ -19300,24 +18360,24 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,
-  //           &mAnimatorLight::EffectAnim__Rainbow_Cycle,
-  //           PM_EFFECT_CONFIG__RAINBOW_CYCLE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RAINBOW_CYCLE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,
+            &mAnimatorLight::EffectAnim__Rainbow_Cycle,
+            PM_EFFECT_CONFIG__RAINBOW_CYCLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RAINBOW_CYCLE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // /**
-  //  * Chase
-  //  **/
-  // addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Colour,
-  //           PM_EFFECT_CONFIG__CHASE_COLOR,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__CHASE_COLOR,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  /**
+   * Chase
+   **/
+  addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,
+            &mAnimatorLight::EffectAnim__Chase_Colour,
+            PM_EFFECT_CONFIG__CHASE_COLOR,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHASE_COLOR,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__CHASE_RANDOM__ID,
             &mAnimatorLight::EffectAnim__Chase_Random,
@@ -19327,53 +18387,53 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Rainbow,
-  //           PM_EFFECT_CONFIG__CHASE_RAINBOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__CHASE_RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,
+            &mAnimatorLight::EffectAnim__Chase_Rainbow,
+            PM_EFFECT_CONFIG__CHASE_RAINBOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHASE_RAINBOW,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__CHASE_FLASH__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Flash,
-  //           PM_EFFECT_CONFIG__CHASE_FLASH,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__CHASE_FLASH,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__CHASE_FLASH__ID,
+            &mAnimatorLight::EffectAnim__Chase_Flash,
+            PM_EFFECT_CONFIG__CHASE_FLASH,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHASE_FLASH,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Flash_Random,
-  //           PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__CHASE_FLASH_RANDOM,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,
+            &mAnimatorLight::EffectAnim__Chase_Flash_Random,
+            PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHASE_FLASH_RANDOM,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Rainbow_White,
-  //           PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,
+            &mAnimatorLight::EffectAnim__Chase_Rainbow_White,
+            PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHASE_RAINBOW_WHITE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__CHASE_THEATER__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Theater,
-  //           PM_EFFECT_CONFIG__THEATER_CHASE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__THEATER_CHASE,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__CHASE_THEATER__ID,
+            &mAnimatorLight::EffectAnim__Chase_Theater,
+            PM_EFFECT_CONFIG__THEATER_CHASE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__THEATER_CHASE,
+            #endif
+            Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID,
-  //           &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow,
-  //           PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__THEATER_CHASE_RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID,
+            &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow,
+            PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__THEATER_CHASE_RAINBOW,
+            #endif
+            Effect_DevStage::Release);
 
   addEffect(EFFECTS_FUNCTION__CHASE_TRICOLOR__ID,
             &mAnimatorLight::EffectAnim__Chase_TriColour,
@@ -19531,29 +18591,29 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Alpha);
 
-  // addEffect(EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
-  //           &mAnimatorLight::EffectAnim__Twinkle_Smooth,
-  //           PM_EFFECT_CONFIG__TWINKLE_SMOOTH,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWINKLE_SMOOTH,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Smooth,
+            PM_EFFECT_CONFIG__TWINKLE_SMOOTH,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWINKLE_SMOOTH,
+            #endif
+            Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__TWINKLE_SPARK__ID,
-  //           &mAnimatorLight::EffectAnim__Twinkle_Spark,
-  //           PM_EFFECT_CONFIG__TWINKLE_SPARK,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWINKLE_SPARK,
-  //           #endif
-  //           Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_SPARK__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Spark,
+            PM_EFFECT_CONFIG__TWINKLE_SPARK,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWINKLE_SPARK,
+            #endif
+            Effect_DevStage::Alpha);
 
-  // addEffect(EFFECTS_FUNCTION__TWINKLE_RISE__ID,
-  //           &mAnimatorLight::EffectAnim__Twinkle_Rise,
-  //           PM_EFFECT_CONFIG__TWINKLE_RISE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__TWINKLE_RISE,
-  //           #endif
-  //           Effect_DevStage::Alpha);
+  addEffect(EFFECTS_FUNCTION__TWINKLE_RISE__ID,
+            &mAnimatorLight::EffectAnim__Twinkle_Rise,
+            PM_EFFECT_CONFIG__TWINKLE_RISE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__TWINKLE_RISE,
+            #endif
+            Effect_DevStage::Alpha);
 
   addEffect(EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
             &mAnimatorLight::EffectAnim__Halloween_Eyes,
@@ -19654,254 +18714,254 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  // /**
-  //  * Blink/Strobe
-  //  **/
-  // addEffect(EFFECTS_FUNCTION__BLINK__ID,
-  //           &mAnimatorLight::EffectAnim__Blink,
-  //           PM_EFFECT_CONFIG__BLINK,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__BLINK,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  /**
+   * Blink/Strobe
+   **/
+  addEffect(EFFECTS_FUNCTION__BLINK__ID,
+            &mAnimatorLight::EffectAnim__Blink,
+            PM_EFFECT_CONFIG__BLINK,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__BLINK,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,
-  //           &mAnimatorLight::EffectAnim__Blink_Rainbow,
-  //           PM_EFFECT_CONFIG__BLINK_RAINBOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__BLINK_RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,
+            &mAnimatorLight::EffectAnim__Blink_Rainbow,
+            PM_EFFECT_CONFIG__BLINK_RAINBOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__BLINK_RAINBOW,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__STROBE__ID,
-  //           &mAnimatorLight::EffectAnim__Strobe,
-  //           PM_EFFECT_CONFIG__STROBE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__STROBE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__STROBE__ID,
+            &mAnimatorLight::EffectAnim__Strobe,
+            PM_EFFECT_CONFIG__STROBE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__STROBE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__MULTI_STROBE__ID,
-  //           &mAnimatorLight::EffectAnim__Strobe_Multi,
-  //           PM_EFFECT_CONFIG__MULTI_STROBE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__MULTI_STROBE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__MULTI_STROBE__ID,
+            &mAnimatorLight::EffectAnim__Strobe_Multi,
+            PM_EFFECT_CONFIG__MULTI_STROBE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__MULTI_STROBE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,
-  //           &mAnimatorLight::EffectAnim__Strobe_Rainbow,
-  //           PM_EFFECT_CONFIG__STROBE_RAINBOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__STROBE_RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,
+            &mAnimatorLight::EffectAnim__Strobe_Rainbow,
+            PM_EFFECT_CONFIG__STROBE_RAINBOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__STROBE_RAINBOW,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__RAINBOW__ID,
-  //           &mAnimatorLight::EffectAnim__Rainbow,
-  //           PM_EFFECT_CONFIG__RAINBOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__RAINBOW__ID,
+            &mAnimatorLight::EffectAnim__Rainbow,
+            PM_EFFECT_CONFIG__RAINBOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RAINBOW,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__LIGHTNING__ID,
-  //           &mAnimatorLight::EffectAnim__Lightning,
-  //           PM_EFFECT_CONFIG__LIGHTNING,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__LIGHTNING,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__LIGHTNING__ID,
+            &mAnimatorLight::EffectAnim__Lightning,
+            PM_EFFECT_CONFIG__LIGHTNING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__LIGHTNING,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__FIRE_2012__ID,
-  //           &mAnimatorLight::EffectAnim__Fire_2012,
-  //           PM_EFFECT_CONFIG__FIRE_2012,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__FIRE_2012,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__FIRE_2012__ID,
+            &mAnimatorLight::EffectAnim__Fire_2012,
+            PM_EFFECT_CONFIG__FIRE_2012,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__FIRE_2012,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__RAILWAY__ID,
-  //           &mAnimatorLight::EffectAnim__Railway,
-  //           PM_EFFECT_CONFIG__RAILWAY,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RAILWAY,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__RAILWAY__ID,
+            &mAnimatorLight::EffectAnim__Railway,
+            PM_EFFECT_CONFIG__RAILWAY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RAILWAY,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__HEARTBEAT__ID,
-  //           &mAnimatorLight::EffectAnim__Heartbeat,
-  //           PM_EFFECT_CONFIG__HEARTBEAT,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__HEARTBEAT,
-  //           #endif
-  //           Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__HEARTBEAT__ID,
+            &mAnimatorLight::EffectAnim__Heartbeat,
+            PM_EFFECT_CONFIG__HEARTBEAT,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HEARTBEAT,
+            #endif
+            Effect_DevStage::Release);
 
-  // /**
-  //  * Noise
-  //  **/
-  // addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,
-  //           &mAnimatorLight::EffectAnim__FillNoise8,
-  //           PM_EFFECT_CONFIG__FILLNOISE8,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__FILLNOISE8,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  /**
+   * Noise
+   **/
+  addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,
+            &mAnimatorLight::EffectAnim__FillNoise8,
+            PM_EFFECT_CONFIG__FILLNOISE8,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__FILLNOISE8,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__NOISE16_1__ID,
-  //           &mAnimatorLight::EffectAnim__Noise16_1,
-  //           PM_EFFECT_CONFIG__NOISE16_1,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__NOISE16_1,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__NOISE16_1__ID,
+            &mAnimatorLight::EffectAnim__Noise16_1,
+            PM_EFFECT_CONFIG__NOISE16_1,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__NOISE16_1,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__NOISE16_2__ID,
-  //           &mAnimatorLight::EffectAnim__Noise16_2,
-  //           PM_EFFECT_CONFIG__NOISE16_2,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__NOISE16_2,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__NOISE16_2__ID,
+            &mAnimatorLight::EffectAnim__Noise16_2,
+            PM_EFFECT_CONFIG__NOISE16_2,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__NOISE16_2,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__NOISE16_3__ID,
-  //           &mAnimatorLight::EffectAnim__Noise16_3,
-  //           PM_EFFECT_CONFIG__NOISE16_3,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__NOISE16_3,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__NOISE16_3__ID,
+            &mAnimatorLight::EffectAnim__Noise16_3,
+            PM_EFFECT_CONFIG__NOISE16_3,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__NOISE16_3,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__NOISE16_4__ID,
-  //           &mAnimatorLight::EffectAnim__Noise16_4,
-  //           PM_EFFECT_CONFIG__NOISE16_4,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__NOISE16_4,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__NOISE16_4__ID,
+            &mAnimatorLight::EffectAnim__Noise16_4,
+            PM_EFFECT_CONFIG__NOISE16_4,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__NOISE16_4,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__NOISEPAL__ID,
-  //           &mAnimatorLight::EffectAnim__Noise_Pal,
-  //           PM_EFFECT_CONFIG__NOISEPAL,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__NOISEPAL,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__NOISEPAL__ID,
+            &mAnimatorLight::EffectAnim__Noise_Pal,
+            PM_EFFECT_CONFIG__NOISEPAL,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__NOISEPAL,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PHASEDNOISE__ID,
-  //           &mAnimatorLight::EffectAnim__PhasedNoise,
-  //           PM_EFFECT_CONFIG__PHASEDNOISE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PHASEDNOISE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PHASEDNOISE__ID,
+            &mAnimatorLight::EffectAnim__PhasedNoise,
+            PM_EFFECT_CONFIG__PHASEDNOISE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PHASEDNOISE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__PHASED__ID,
-  //           &mAnimatorLight::EffectAnim__Phased,
-  //           PM_EFFECT_CONFIG__PHASED,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__PHASED,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__PHASED__ID,
+            &mAnimatorLight::EffectAnim__Phased,
+            PM_EFFECT_CONFIG__PHASED,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PHASED,
+            #endif
+            Effect_DevStage::Dev);
 
-  // /**
-  //  * Scan
-  //  **/
-  // addEffect(EFFECTS_FUNCTION__SCAN__ID,
-  //           &mAnimatorLight::EffectAnim__Scan,
-  //           PM_EFFECT_CONFIG__SCAN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__SCAN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  /**
+   * Scan
+   **/
+  addEffect(EFFECTS_FUNCTION__SCAN__ID,
+            &mAnimatorLight::EffectAnim__Scan,
+            PM_EFFECT_CONFIG__SCAN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SCAN,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DUAL_SCAN__ID,
-  //           &mAnimatorLight::EffectAnim__Scan_Dual,
-  //           PM_EFFECT_CONFIG__DUAL_SCAN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DUAL_SCAN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DUAL_SCAN__ID,
+            &mAnimatorLight::EffectAnim__Scan_Dual,
+            PM_EFFECT_CONFIG__DUAL_SCAN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DUAL_SCAN,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__LARSON_SCANNER__ID,
-  //           &mAnimatorLight::EffectAnim__Larson_Scanner,
-  //           PM_EFFECT_CONFIG__LARSON_SCANNER,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__LARSON_SCANNER,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__LARSON_SCANNER__ID,
+            &mAnimatorLight::EffectAnim__Larson_Scanner,
+            PM_EFFECT_CONFIG__LARSON_SCANNER,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__LARSON_SCANNER,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID,
-  //           &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,
-  //           PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DUAL_LARSON_SCANNER,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID,
+            &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,
+            PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DUAL_LARSON_SCANNER,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__ICU__ID,
-  //           &mAnimatorLight::EffectAnim__ICU,
-  //           PM_EFFECT_CONFIG__ICU,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__ICU,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__ICU__ID,
+            &mAnimatorLight::EffectAnim__ICU,
+            PM_EFFECT_CONFIG__ICU,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__ICU,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__RIPPLE__ID,
-  //           &mAnimatorLight::EffectAnim__Ripple,
-  //           PM_EFFECT_CONFIG__RIPPLE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RIPPLE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__RIPPLE__ID,
+            &mAnimatorLight::EffectAnim__Ripple,
+            PM_EFFECT_CONFIG__RIPPLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RIPPLE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,
-  //           &mAnimatorLight::EffectAnim__Ripple_Rainbow,
-  //           PM_EFFECT_CONFIG__RIPPLE_RAINBOW,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,
+            &mAnimatorLight::EffectAnim__Ripple_Rainbow,
+            PM_EFFECT_CONFIG__RIPPLE_RAINBOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__COMET__ID,
-  //           &mAnimatorLight::EffectAnim__Comet,
-  //           PM_EFFECT_CONFIG__COMET,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__COMET__ID,
+            &mAnimatorLight::EffectAnim__Comet,
+            PM_EFFECT_CONFIG__COMET,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__RIPPLE_RAINBOW,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__CHUNCHUN__ID,
-  //           &mAnimatorLight::EffectAnim__Chunchun,
-  //           PM_EFFECT_CONFIG__CHUNCHUN,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__CHUNCHUN,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__CHUNCHUN__ID,
+            &mAnimatorLight::EffectAnim__Chunchun,
+            PM_EFFECT_CONFIG__CHUNCHUN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHUNCHUN,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__DANCING_SHADOWS__ID,
-  //           &mAnimatorLight::EffectAnim__Dancing_Shadows,
-  //           PM_EFFECT_CONFIG__DANCING_SHADOWS,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DANCING_SHADOWS,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DANCING_SHADOWS__ID,
+            &mAnimatorLight::EffectAnim__Dancing_Shadows,
+            PM_EFFECT_CONFIG__DANCING_SHADOWS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DANCING_SHADOWS,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__WASHING_MACHINE__ID,
-  //           &mAnimatorLight::EffectAnim__Washing_Machine,
-  //           PM_EFFECT_CONFIG__WASHING_MACHINE,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__WASHING_MACHINE,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__WASHING_MACHINE__ID,
+            &mAnimatorLight::EffectAnim__Washing_Machine,
+            PM_EFFECT_CONFIG__WASHING_MACHINE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__WASHING_MACHINE,
+            #endif
+            Effect_DevStage::Dev);
 
-  // addEffect(EFFECTS_FUNCTION__BLENDS__ID,
-  //           &mAnimatorLight::EffectAnim__Blends,
-  //           PM_EFFECT_CONFIG__BLENDS,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__BLENDS,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__BLENDS__ID,
+            &mAnimatorLight::EffectAnim__Blends,
+            PM_EFFECT_CONFIG__BLENDS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__BLENDS,
+            #endif
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__TV_SIMULATOR__ID,
             &mAnimatorLight::EffectAnim__TV_Simulator,
@@ -19943,13 +19003,13 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
-  // addEffect(EFFECTS_FUNCTION__DRIP__ID,
-  //           &mAnimatorLight::EffectAnim__Drip,
-  //           PM_EFFECT_CONFIG__DRIP,
-  //           #ifdef ENABLE_EFFECT_DESCRIPTIONS
-  //           PM_EFFECT_DESCRI__DRIP,
-  //           #endif
-  //           Effect_DevStage::Dev);
+  addEffect(EFFECTS_FUNCTION__DRIP__ID,
+            &mAnimatorLight::EffectAnim__Drip,
+            PM_EFFECT_CONFIG__DRIP,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__DRIP,
+            #endif
+            Effect_DevStage::Dev);
             
   addEffect(EFFECTS_FUNCTION__FLOWSTRIPE__ID,  
             &mAnimatorLight::EffectAnim__FlowStripe, 

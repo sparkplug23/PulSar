@@ -2675,7 +2675,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 
   unsigned used = getLengthTotal();
   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (isMatrix) {
     // ignore anything behid matrix (i.e. extra strip)
     used = Segment::maxWidth*Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
@@ -2692,7 +2692,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 
   for (size_t i = 0; i < used; i += n)
   {
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
 #endif
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
@@ -2712,7 +2712,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   }
   buf--;  // remove last comma
   buf += sprintf_P(buf, PSTR("],\"n\":%d"), n);
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (isMatrix) {
     buf += sprintf_P(buf, PSTR(",\"w\":%d"), Segment::maxWidth/n);
     buf += sprintf_P(buf, PSTR(",\"h\":%d"), Segment::maxHeight/n);

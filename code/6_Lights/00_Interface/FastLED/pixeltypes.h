@@ -87,7 +87,7 @@ typedef enum {
 } HSVHue;
 
 //colors.cpp
-#define ColorFromPalette ColorFromPaletteWLED // override fastled version
+// #define ColorFromPalette ColorFromPaletteU32 // override fastled version
 
 /// Representation of an RGB pixel (Red, Green, Blue)
 struct CRGB {

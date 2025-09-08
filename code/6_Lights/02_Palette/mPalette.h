@@ -439,13 +439,13 @@ class mPalette
     uint8_t GetColoursInPalette(uint16_t palette_id);
     PALETTE_ENCODING_DATA findPaletteEncoding(uint16_t id);
 
-// --- sequence tracking state for discrete + 0..255 input ---
-uint16_t tracked_previous_palette_index = 0; // current slot cursor 0..(N-1)
-uint8_t  tracked_prev_v                = 0; // last 0..255 input
-uint8_t  tracked_frac                  = 0; // fractional accumulator (Bresenham-style)
+    // --- sequence tracking state for discrete + 0..255 input ---
+    uint16_t tracked_previous_palette_index = 0; // current slot cursor 0..(N-1)
+    uint8_t  tracked_prev_v                = 0; // last 0..255 input
+    uint8_t  tracked_frac                  = 0; // fractional accumulator (Bresenham-style)
 
 
-    [[gnu::hot]] uint32_t ColorFromPaletteWLED(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
+     [[gnu::hot]] static uint32_t ColorFromPaletteU32(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
 
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     

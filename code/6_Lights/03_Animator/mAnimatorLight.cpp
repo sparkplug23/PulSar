@@ -435,7 +435,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
 #endif
   size_t n = ((used -1)/MAX_LIVE_LEDS_WS) +1; //only serve every n'th LED if count over MAX_LIVE_LEDS_WS
   size_t pos = 2;  // start of data
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (tkr_anim->isMatrix) {
     // ignore anything behid matrix (i.e. extra strip)
     used = mAnimatorLight::Segment::maxWidth*mAnimatorLight::Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
@@ -454,7 +454,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
   buffer[0] = 'L';
   buffer[1] = 1; //version
 
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (tkr_anim->isMatrix) {
     buffer[1] = 2; //version
     buffer[2] = mAnimatorLight::Segment::maxWidth/n;
@@ -465,7 +465,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
   // Serial.println("Sending live data to WS client");
   for (size_t i = 0; pos < bufSize -2; i += n)
   {
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     if (tkr_anim->isMatrix && n>1 && (i/mAnimatorLight::Segment::maxWidth)%n) i += mAnimatorLight::Segment::maxWidth * (n-1);
 #endif
 
@@ -982,6 +982,142 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
 }
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+// // ---- Inline helpers to build a CRGBPalette16 snapshot from your packed palette ----
+
+// // Decode a single packed color at `p` with `encWidth` bytes into CRGB.
+// // Assumptions (adjust if your channel order differs):
+// //   encWidth==3: [R,G,B]
+// //   encWidth==4: [R,G,B,W]   -> add W into RGB (clamped)
+// //   encWidth==5: [R,G,B,WW,CW] -> add max(WW,CW) into RGB (clamped)
+// static inline CRGB decodePackedToCRGB(const uint8_t* p, uint8_t encWidth)
+// {
+//   uint8_t r = 0, g = 0, b = 0, w = 0;
+//   switch (encWidth) {
+//     default:
+//     case 3: // RGB
+//       r = p[0]; g = p[1]; b = p[2];
+//       break;
+//     case 4: // RGBW (assumed)
+//       r = p[0]; g = p[1]; b = p[2]; w = p[3];
+//       r = qadd8(r, w); g = qadd8(g, w); b = qadd8(b, w);
+//       break;
+//     case 5: // RGBWW / RGBCCT (assumed WW, CW at end)
+//     {
+//       r = p[0]; g = p[1]; b = p[2];
+//       uint8_t ww = p[3], cw = p[4];
+//       w = (ww > cw) ? ww : cw;
+//       r = qadd8(r, w); g = qadd8(g, w); b = qadd8(b, w);
+//       break;
+//     }
+//   }
+//   return CRGB(r,g,b);
+// }
+
+// // Fill a CRGBPalette16 by sampling up to 16 colors evenly from packed palette data.
+// static inline void buildCRGB16FromPacked(const std::vector<uint8_t>& packed,
+//                                          uint8_t encWidth,
+//                                          uint16_t colorsInPalette,
+//                                          CRGBPalette16& out)
+// {
+//   // Defensive checks
+//   if (encWidth == 0 || colorsInPalette == 0) {
+//     // fallback to black palette
+//     for (uint8_t i = 0; i < 16; i++) out.entries[i] = CRGB(0,0,0);
+//     return;
+//   }
+
+//   // Sample 16 positions (or fewer if source has < 16 colors; we still fill 16)
+//   // Map i=0..15 to srcIdx=round( i*(N-1)/15 )
+//   for (uint8_t i = 0; i < 16; i++) {
+//     uint16_t srcIdx = (colorsInPalette > 1)
+//                       ? (uint16_t)((uint32_t)i * (colorsInPalette - 1) / 15)
+//                       : 0;
+//     uint32_t byteOff = (uint32_t)srcIdx * encWidth;
+//     if (byteOff + encWidth <= packed.size()) {
+//       out.entries[i] = decodePackedToCRGB(&packed[byteOff], encWidth);
+//     } else {
+//       // out-of-range safety
+//       out.entries[i] = CRGB(0,0,0);
+//     }
+//   }
+// }
+// You provide this to match your packed encoding (RGB, WRGB, etc.)
+static inline CRGB decodePackedToCRGB(const uint8_t* p, uint8_t encWidth) {
+  // Example for simple RGB packed data (R,G,B):
+  if (encWidth >= 3) return CRGB(p[0], p[1], p[2]);
+  return CRGB(0,0,0);
+}
+
+// Build a 16-entry CRGBPalette16 from an arbitrary packed palette of N colors,
+// using at most 15 distinct source colors so the last color spans >= 2 entries.
+//
+// Rules:
+//  - If N == 0: all black.
+//  - If N == 1: fill all 16 with that one color.
+//  - Else:
+//     * M = min(N, 15) distinct picks from the source palette, sampled evenly.
+//     * Partition 16 slots into M blocks:
+//         - For k=0..M-2: blockLen = floor(16 / M)
+//         - For k= M-1   : blockLen = 16 - sum(previous blockLens)  (absorbs remainder)
+//       This guarantees the last block has length >= 2 for all M <= 15.
+//     * Color of block k uses source index:
+//         srcIdx = round( k * (N-1) / (M-1) )  (with k in [0..M-1])
+static inline void buildCRGB16FromPacked(const std::vector<uint8_t>& packed,
+                                         uint8_t encWidth,
+                                         uint16_t colorsInPalette,
+                                         CRGBPalette16& out)
+{
+  // Initialize to black
+  for (uint8_t i = 0; i < 16; i++) out.entries[i] = CRGB(0,0,0);
+
+  // Trivial cases
+  if (encWidth == 0 || colorsInPalette == 0) return;
+
+  auto decodeAt = [&](uint16_t idx) -> CRGB {
+    const uint32_t off = (uint32_t)idx * encWidth;
+    if (off + encWidth > packed.size()) return CRGB(0,0,0);
+    return decodePackedToCRGB(&packed[off], encWidth);
+  };
+
+  if (colorsInPalette == 1) {
+    const CRGB c = decodeAt(0);
+    for (uint8_t i = 0; i < 16; i++) out.entries[i] = c;
+    return;
+  }
+
+  // Use at most 15 distinct source colors to ensure last block >= 2 entries
+  const uint8_t M = (colorsInPalette < 15) ? (uint8_t)colorsInPalette : (uint8_t)15;
+
+  // Base block length for first M-1 blocks
+  const uint8_t baseLen = (uint8_t)(16 / M);                 // floor
+  uint8_t used = 0;
+
+  // Helper to compute a rounded source index spanning [0..colorsInPalette-1]
+  auto srcIndexForK = [&](uint8_t k) -> uint16_t {
+    if (M <= 1) return 0; // shouldn't happen because colorsInPalette >= 2
+    const uint32_t num = (uint32_t)k * (uint32_t)(colorsInPalette - 1) + (uint32_t)((M - 1) / 2);
+    // "+ (M-1)/2" is a small rounding term. For M arbitrary, you can use +((M-1)>>1).
+    return (uint16_t)(num / (uint32_t)(M - 1));
+  };
+
+  // Fill first M-1 blocks, each 'baseLen' entries
+  for (uint8_t k = 0; k < (M - 1); k++) {
+    const CRGB c = decodeAt(srcIndexForK(k));
+    for (uint8_t j = 0; j < baseLen; j++) {
+      if (used < 16) out.entries[used++] = c;
+    }
+  }
+
+  // Last block: fill the rest (ensures >= 2 entries for M <= 15)
+  {
+    const CRGB cLast = decodeAt(colorsInPalette - 1);
+    while (used < 16) out.entries[used++] = cLast;
+  }
+}
+
+#endif
+
 
 /**
  * @brief Loads a palette into RAM for the segment, handling multiple palette types.
@@ -1137,50 +1273,65 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container->pData = ptr->data;
     _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
     _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
-    
-    #ifdef ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
-// Gradient palettes are loaded into CRGB16Palettes in such a way
-    // that, if possible, every color represented in the gradient palette
-    // is also represented in the CRGBPalette16.
-    // For example, consider a gradient palette that is all black except
-    // for a single, one-element-wide (1/256th!) spike of red in the middle:
-    //     0,   0,0,0
-    //   124,   0,0,0
-    //   125, 255,0,0  // one 1/256th-palette-wide red stripe
-    //   126,   0,0,0
-    //   255,   0,0,0
-    // A naive conversion of this 256-element palette to a 16-element palette
-    // might accidentally completely eliminate the red spike, rendering the
-    // palette completely black.
-    // However, the conversions provided here would attempt to include a
-    // the red stripe in the output, more-or-less as faithfully as possible.
-    // So in this case, the resulting CRGBPalette16 palette would have a red
-    // stripe in the middle which was 1/16th of a palette wide -- the
-    // narrowest possible in a CRGBPalette16.
-    // This means that the relative width of stripes in a CRGBPalette16
-    // will be, by definition, different from the widths in the gradient
-    // palette.  This code attempts to preserve "all the colors", rather than
-    // the exact stripe widths at the expense of dropping some colors.
 
-
-    // Lets to show its possible with a default RGBP
-
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    // Mirror into CRGBPalette16 for 2D/WLED effects
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for(uint8_t i=0;i<16;i++){
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
+    for (uint8_t i = 0; i < 16; i++) {
+      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0, 15, 0, 255));
     }
+    buildCRGB16FromPacked(_palette_container->pData,
+                          _palette_container->encoded_colour_width,
+                          _palette_container->colours_in_palette,
+                      _palette_container->CRGB16Palette16_Palette.data);
 
-    _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
-                      CRGB(255,0,0),
-                      CRGB(0,255,0),
-                      CRGB(0,0,255),
-                      CRGB(255,0,255)
-      );
-      // loadDynamicGradientPalette should enable with one (of 255) width to define edges of my palettes, and hence give them as non gradients when not a gradient, or as gradient when they are.
+    #endif
 
 
+    
+//     #ifdef ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
+// // Gradient palettes are loaded into CRGB16Palettes in such a way
+//     // that, if possible, every color represented in the gradient palette
+//     // is also represented in the CRGBPalette16.
+//     // For example, consider a gradient palette that is all black except
+//     // for a single, one-element-wide (1/256th!) spike of red in the middle:
+//     //     0,   0,0,0
+//     //   124,   0,0,0
+//     //   125, 255,0,0  // one 1/256th-palette-wide red stripe
+//     //   126,   0,0,0
+//     //   255,   0,0,0
+//     // A naive conversion of this 256-element palette to a 16-element palette
+//     // might accidentally completely eliminate the red spike, rendering the
+//     // palette completely black.
+//     // However, the conversions provided here would attempt to include a
+//     // the red stripe in the output, more-or-less as faithfully as possible.
+//     // So in this case, the resulting CRGBPalette16 palette would have a red
+//     // stripe in the middle which was 1/16th of a palette wide -- the
+//     // narrowest possible in a CRGBPalette16.
+//     // This means that the relative width of stripes in a CRGBPalette16
+//     // will be, by definition, different from the widths in the gradient
+//     // palette.  This code attempts to preserve "all the colors", rather than
+//     // the exact stripe widths at the expense of dropping some colors.
 
-    #endif // ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
+
+//     // Lets to show its possible with a default RGBP
+
+//     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+//     for(uint8_t i=0;i<16;i++){
+//       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
+//     }
+
+//     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
+//                       CRGB(255,0,0),
+//                       CRGB(0,255,0),
+//                       CRGB(0,0,255),
+//                       CRGB(255,0,255)
+//       );
+//       // loadDynamicGradientPalette should enable with one (of 255) width to define edges of my palettes, and hence give them as non gradients when not a gradient, or as gradient when they are.
+
+
+
+    // #endif // ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
 
   }else
   // Only some dynamic needs loading
@@ -1202,6 +1353,19 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
     _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
     DEBUG_LINE_HERE_TRACE
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    // Mirror into CRGBPalette16 for 2D/WLED effects
+    // Mirror into CRGBPalette16
+    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+    for (uint8_t i = 0; i < 16; i++) {
+      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0, 15, 0, 255));
+    }
+    buildCRGB16FromPacked(_palette_container->pData,
+                          _palette_container->encoded_colour_width,
+                          _palette_container->colours_in_palette,
+                          _palette_container->CRGB16Palette16_Palette.data);
+    #endif
     
   }else
   if(
@@ -1213,6 +1377,20 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container->pData = ptr->data;
     _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
     _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    // Mirror into CRGBPalette16 for 2D/WLED effects
+    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+    for (uint8_t i = 0; i < 16; i++) {
+      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0, 15, 0, 255));
+    }
+    buildCRGB16FromPacked(_palette_container->pData,
+                          _palette_container->encoded_colour_width,
+                          _palette_container->colours_in_palette,
+                          _palette_container->CRGB16Palette16_Palette.data);
+
+    #endif
+
   }else
   if(
     (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
@@ -3342,10 +3520,10 @@ void mAnimatorLight::Segment::setPalette(uint8_t pal)
   palette_id = pal;  
   ALOG_INF(PSTR("setPalette(%d)"), palette_id);
   
-  #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
+  // #ifdef ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
   // Need to add this, since CRGBPalettes will not reload internally, so must load now
-  tkr_anim->LoadPalette(palette_id, tkr_anim->getCurrSegmentId());  
-  #endif 
+  LoadPalette(palette_id);//, getCurrSegmentId());  
+  // #endif 
 }
 
 
@@ -4451,7 +4629,7 @@ void mAnimatorLight::Segment::fadeToBlackBy(uint8_t fadeBy) {
  */
 void mAnimatorLight::Segment::blur(uint8_t blur_amount, bool smear) {
   if (!isActive() || blur_amount == 0) return; // optimization: 0 means "don't blur"
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (is2D()) {
     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     // compatibility with 2D
@@ -4908,6 +5086,12 @@ void mAnimatorLight::Segment::UpdateBrightness()
 
 void IRAM_ATTR mAnimatorLight::setPixelColor(uint32_t i, ColourBaseType col) {
   // Serial.printf(" mAnimatorLight::setPixelColor[%d] = %d,%d,%d,%d)\n\r", i, col.R, col.G, col.B, col.WW);
+
+
+  // if(col)
+  // Serial.printf(" mAnimatorLight::setPixelColor[%d] = %d,%d,%d,%d)\n\r", i, R(col), G(col), B(col), W(col) );
+
+
   i = getMappedPixelIndex(i);
   if (i >= _length) {
     // Serial.printf("BBBBBBBBBBBvoid IRAM_ATTR mAnimatorLight::%d,%dsetPixelColor(uint32_t i, %d,%d,%d)\n\r", i ,_length,col.R, col.G, col.B);
@@ -6050,7 +6234,17 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW_2025(
 
 }
 
-
+/**
+ * @brief 
+ * Need to make options here on how 2D calls different palettes
+ * ColorFromPalette via FastLED
+ * ColorFromPaletteU32 via mPalette WLED fast custom ColorFromPalette
+ * ColorFromPalette_WithLoad to make sure we load, though it should be forced to reload anyway
+ * GetPaletteColour_ModeWrap
+ * 
+ * Should be able to use define to switch.
+ * 
+ */
 
 
 CRGB mAnimatorLight::ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness, TBlendType blendType)
@@ -6243,8 +6437,10 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
 #endif
 ){
 
+  #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows) REQUIRED for bouncing balls effect. Assumes this means int is 32 bit here?
   i &= 0xFFFF;
+  #endif
 
   // #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
   // if(i<10)
@@ -6252,7 +6448,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
   // #endif
 
   if (!isActive() || i < 0) return; // not active or invalid index
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   int vStrip = 0;
 #endif
   int vL = vLength();
@@ -6260,10 +6456,14 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
   // in such case "i" will be > virtualLength()
   if (i >= vL) {
     // check if this is a virtual strip
-    #ifndef WLED_DISABLE_2D
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
     i &= 0xFFFF;    //truncate vstrip index
-    if (i >= vL) return;  // if pixel would still fall out of segment just exit
+    if (i >= vL) 
+    {
+      ALOG_ERR(PSTR("return %d"),__LINE__);
+      return;  // if pixel would still fall out of segment just exit
+    }
     #else
     return;
     #endif
@@ -6293,6 +6493,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
     // pre-scale color for all pixels
     col = color_fade(col, _segBri);
     _colorScaled = true;
+    ALOG_INF(PSTR("map %d"),map1D2D);
     switch (map1D2D) {
       case M12_Pixels:
         // use all available pixels as a long strip
@@ -6458,7 +6659,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col
 
   DEBUG_LINE_HERE;
   if (!isActive() || i < 0) return; // not active or invalid index
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   int vStrip = 0;
 #endif
   int vL = vLength();
@@ -6466,7 +6667,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col
   // in such case "i" will be > virtualLength()
   if (i >= vL) {
     // check if this is a virtual strip
-    #ifndef WLED_DISABLE_2D
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
     i &= 0xFFFF;    //truncate vstrip index
     if (i >= vL) return;  // if pixel would still fall out of segment just exit

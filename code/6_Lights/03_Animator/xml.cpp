@@ -670,7 +670,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage == SUBPAGE_2D) // 2D matrices
   {
     printSetFormValue(settingsScript,PSTR("SOMP"),isMatrix);
-    #ifndef WLED_DISABLE_2D
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     settingsScript.printf_P(PSTR("maxPanels=%d;resetPanels();"),WLED_MAX_PANELS);
     if (isMatrix) {
       if(panels>0){
