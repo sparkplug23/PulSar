@@ -32,6 +32,7 @@
 #define W(c) (byte((c) >> 24))
 
 #define RGBW32fromCRGB(c) RGBW32(c.r,c.g,c.b,0)
+#define CRGBfromRGBW32(c) CRGB(R(c),G(c),B(c))
 
 #define ALOG_COL32(level, s, c) AddLog(level, PSTR("%s:%d,%d,%d,%d"), s, R(c), G(c), B(c), W(c))
 #define SERIAL_DEBUG_COL32(s, c) Serial.printf("%s:%d,%d,%d,%d\n\r", s, R(c), G(c), B(c), W(c))

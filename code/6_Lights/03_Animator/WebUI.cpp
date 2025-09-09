@@ -111,7 +111,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   char colstr[100]; colstr[0] = '['; colstr[1] = '\0';
   for (size_t i = 0; i < 5; i++)
   {
-    byte segcol[4]; 
+    byte segcol[5]; 
     segcol[0] = seg.segcol[i].colour.R;
     segcol[1] = seg.segcol[i].colour.G;
     segcol[2] = seg.segcol[i].colour.B;

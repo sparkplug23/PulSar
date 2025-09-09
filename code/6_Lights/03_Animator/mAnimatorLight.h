@@ -273,7 +273,8 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 
 #define SEGCOLOR_U32(x)       segments[getCurrSegmentId()].segcol[x].getU32()
 #define SEGCOLOR_RGBCCT(x)    segments[getCurrSegmentId()].segcol[x].WithBrightness()
-#define SEGCOLOR(x)           SEGCOLOR_U32(x) // default
+// #define SEGCOLOR(x)           segments[getCurrSegmentId()].segcol[x].getU32Raw()
+#define SEGCOLOR(x)           segments[getCurrSegmentId()].segcol[x].getU32()
 #define SEGMENT               segments[getCurrSegmentId()]
 #define pSEGMENT              tkr_anim->segments[tkr_anim->getCurrSegmentId()]
 #define pSEGCOLOR(x)          pSEGMENT.segcol[x].getU32()
@@ -1087,6 +1088,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Hardware__Light_Sensor_Pixel_Indexing();
     void LightSensorIndexing__SaveResults_To_File();
     void LightSensorIndexing__LoadResults_To_File();
+    uint16_t EffectAnim__Hardware__Light_Sensor_Pixel_Indexing_Button_Triggered();
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
     uint16_t EffectAnim__SunPositions__Sunrise_Alarm_01();
@@ -1538,7 +1540,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
       EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
       EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
+      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
       EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
+      EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN__ID,
+      #endif
       #endif
 
       /**
@@ -2588,10 +2593,18 @@ uint8_t getBrightnessCCT() const {
     // Convert the current color with brightness applied to a 32-bit integer
     uint32_t getU32() const {
         RgbwwColor adjusted = WithBrightness();
-        return (static_cast<uint32_t>(adjusted.WW) << 24) | 
-            (static_cast<uint32_t>(adjusted.R) << 16) | 
-            (static_cast<uint32_t>(adjusted.G) << 8) | 
-            static_cast<uint32_t>(adjusted.B);
+        return (uint32_t((byte(adjusted.WW) << 24) | (byte(adjusted.R) << 16) | (byte(adjusted.G) << 8) | (byte(adjusted.B))));
+        // return (static_cast<uint32_t>(adjusted.WW) << 24) | 
+        //     (static_cast<uint32_t>(adjusted.R) << 16) | 
+        //     (static_cast<uint32_t>(adjusted.G) << 8) | 
+        //     static_cast<uint32_t>(adjusted.B);
+    }
+
+    uint32_t getU32Raw() const {
+        return (static_cast<uint32_t>(colour.WW) << 24) | 
+            (static_cast<uint32_t>(colour.R) << 16) | 
+            (static_cast<uint32_t>(colour.G) << 8) | 
+            static_cast<uint32_t>(colour.B);
     }
 
     // Set CCT in Kelvin
@@ -2998,6 +3011,10 @@ typedef struct Segment
       };
     };
 
+    #ifdef ENABLE_DEVFEATURE_LIGHT__PIXELS_BUFFER_RAW    
+    uint32_t *pixels;                 // pixel data
+    #endif
+
     /***
      * Effect datastorage
      ***/
@@ -3236,6 +3253,16 @@ typedef struct Segment
 
     bool allocateColourData(uint16_t len);
     void deallocateColourData(void);
+    
+    #ifdef ENABLE_DEVFEATURE_LIGHT__PIXELS_BUFFER_RAW    
+    inline uint32_t *getPixels() const                              { return pixels; }
+    inline void     setPixelColorRaw(unsigned i, uint32_t c) const  { pixels[i] = c; }
+    inline uint32_t getPixelColorRaw(unsigned i) const              { return pixels[i]; };
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    inline void     setPixelColorXYRaw(unsigned x, unsigned y, uint32_t c) const  { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; pixels[XY(x,y)] = c; }
+    inline uint32_t getPixelColorXYRaw(unsigned x, unsigned y) const              { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; return pixels[XY(x,y)]; };
+    #endif
+    #endif
 
 
     void resetIfRequired(void);
@@ -3696,13 +3723,17 @@ typedef struct Segment
     // [[gnu::hot]] uint16_t XY(int x, int y);      // support function to get relative index within segment
 
     // XY(x,y) - gets pixel index within current segment (often used to reference leds[] array element)
-    uint16_t [[gnu::hot]] XY(int x, int y)
+    uint16_t [[gnu::hot]] XY(int x, int y) const 
     {
       uint16_t width  = virtualWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
       uint16_t height = virtualHeight();  // segment height in logical pixels (is always >= 1)
       return isActive() ? (x%width) + (y%height) * width : 0;
     }
 
+    // void     Segment::setPixelColorXY(int x, int y, uint32_t col) const;
+    // uint32_t Segment::getPixelColorXY(int x, int y) const;
+    // inline void     setPixelColorXYRaw(unsigned x, unsigned y, uint32_t c) const  { auto XY = [](unsigned X, unsigned Y){ return X + Y*vWidth(); }; pixels[XY(x,y)] = c; }
+    // inline uint32_t getPixelColorXYRaw(unsigned x, unsigned y) const              { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; return pixels[XY(x,y)]; };
 
 
     void setPixelColorXY(float x, float y, uint32_t c, bool aa = true);

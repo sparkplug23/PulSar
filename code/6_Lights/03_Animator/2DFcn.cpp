@@ -176,6 +176,17 @@ void mAnimatorLight::setUpMatrix() {
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
+// void mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col) const
+// {
+//   if (!isActive()) return; // not active
+//   if (x >= (int)vWidth() || y >= (int)vHeight() || x < 0 || y < 0) return;  // if pixel would fall out of virtual segment just exit
+//   setPixelColorXYRaw(x, y, col);
+// }
+// uint32_t mAnimatorLight::Segment::getPixelColorXY(int x, int y) const {
+//   if (!isActive()) return 0; // not active
+//   if (x >= (int)vWidth() || y >= (int)vHeight() || x<0 || y<0) return 0;  // if pixel would fall out of virtual segment just exit
+//   return getPixelColorXYRaw(x,y);
+// }
 
 void 
 // IRAM_ATTR 
@@ -192,7 +203,7 @@ mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t col)
   // DEBUG_LINE_HERE;
   if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
   {    
-   ALOG_INF(PSTR("out of segment")); 
+  //  ALOG_INF(PSTR("out of segment")); 
     return;  // if pixel would fall out of virtual segment just exit
   }
 
@@ -391,43 +402,113 @@ DEBUG_LINE_HERE;
 // returns RGBW values of pixel
 uint32_t mAnimatorLight::Segment::getPixelColorXY(uint16_t x, uint16_t y) const
 {
-  
-  // Serial.println(__LINE__);
-  // DEBUG_LINE_HERE;
-  if (!isActive()) return 0; // not active
-  // DEBUG_LINE_HERE;
-  if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
-  {
-
-    ALOG_ERR(PSTR("OUT OF RANGE getPixelColorXY: x=%d, y=%d, virtualWidth=%d, virtualHeight=%d"), x, y, virtualWidth(), virtualHeight());
-
-    return 0;  // if pixel would fall out of virtual segment just exit
-
-  }
-  // DEBUG_LINE_HERE3
-
+  int i = XY(x,y);
+  // if (leds) return RGBW32(leds[i].r, leds[i].g, leds[i].b, 0);
   if (reverse  ) x = virtualWidth()  - x - 1;
-  // DEBUG_LINE_HERE;
   if (reverse_y) y = virtualHeight() - y - 1;
-  // DEBUG_LINE_HERE;
   if (transpose) { uint16_t t = x; x = y; y = t; } // swap X & Y if segment transposed
-  // DEBUG_LINE_HERE;
   x *= groupLength(); // expand to physical pixels
-  // DEBUG_LINE_HERE;
   y *= groupLength(); // expand to physical pixels
-  // DEBUG_LINE_HERE;
   if (x >= width() || y >= height()) return 0;
-  
-  // DEBUG_LINE_HERE3
-  // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
   return tkr_anim->getPixelColorXY(start + x, startY + y);
-  // DEBUG_LINE_HERE;
+
+
+  // // Serial.println(__LINE__);
+  // // DEBUG_LINE_HERE;
+  // if (!isActive()) return 0; // not active
+  // // DEBUG_LINE_HERE;
+  // if (x >= virtualWidth() || y >= virtualHeight() || x<0 || y<0) 
+  // {
+
+  //   ALOG_ERR(PSTR("OUT OF RANGE getPixelColorXY: x=%d, y=%d, virtualWidth=%d, virtualHeight=%d"), x, y, virtualWidth(), virtualHeight());
+
+  //   return 0;  // if pixel would fall out of virtual segment just exit
+
+  // }
+  // // DEBUG_LINE_HERE3
+
+  // if (reverse  ) x = virtualWidth()  - x - 1;
+  // // DEBUG_LINE_HERE;
+  // if (reverse_y) y = virtualHeight() - y - 1;
+  // // DEBUG_LINE_HERE;
+  // if (transpose) { uint16_t t = x; x = y; y = t; } // swap X & Y if segment transposed
+  // // DEBUG_LINE_HERE;
+  // x *= groupLength(); // expand to physical pixels
+  // // DEBUG_LINE_HERE;
+  // y *= groupLength(); // expand to physical pixels
+  // // DEBUG_LINE_HERE;
+  // if (x >= width() || y >= height()) return 0;
+  
+  // // DEBUG_LINE_HERE3
+  // // Caution, should now call the stirp one (not the segment, needs renamed to be clear!!!)
+  // return tkr_anim->getPixelColorXY(start + x, startY + y);
+  // // DEBUG_LINE_HERE;
 }
 
 
+#ifdef ENABLE_DEVFEATURE_LIGHT__PIXELS_BUFFER_RAW    
 
 // 2D blurring, can be asymmetrical
 void mAnimatorLight::Segment::blur2D(uint8_t blur_x, uint8_t blur_y, bool smear) {
+  if (!isActive()) return; // not active
+  const unsigned cols = vWidth();
+  const unsigned rows = vHeight();
+  const auto XY = [&](unsigned x, unsigned y){ return x + y*cols; };
+  uint32_t lastnew; // not necessary to initialize lastnew and last, as both will be initialized by the first loop iteration
+  uint32_t last;
+  if (blur_x) {
+    const uint8_t keepx = smear ? 255 : 255 - blur_x;
+    const uint8_t seepx = blur_x >> 1;
+    for (unsigned row = 0; row < rows; row++) { // blur rows (x direction)
+      uint32_t carryover = BLACK;
+      uint32_t curnew = BLACK;
+      for (unsigned x = 0; x < cols; x++) {
+        uint32_t cur = getPixelColorRaw(XY(x, row));
+        uint32_t part = color_fade(cur, seepx);
+        curnew = color_fade(cur, keepx);
+        if (x > 0) {
+          if (carryover) curnew = color_add(curnew, carryover);
+          uint32_t prev = color_add(lastnew, part);
+          // optimization: only set pixel if color has changed
+          if (last != prev) setPixelColorRaw(XY(x - 1, row), prev);
+        } else setPixelColorRaw(XY(x, row), curnew); // first pixel
+        lastnew = curnew;
+        last = cur; // save original value for comparison on next iteration
+        carryover = part;
+      }
+      setPixelColorRaw(XY(cols-1, row), curnew); // set last pixel
+    }
+  }
+  if (blur_y) {
+    const uint8_t keepy = smear ? 255 : 255 - blur_y;
+    const uint8_t seepy = blur_y >> 1;
+    for (unsigned col = 0; col < cols; col++) {
+      uint32_t carryover = BLACK;
+      uint32_t curnew = BLACK;
+      for (unsigned y = 0; y < rows; y++) {
+        uint32_t cur = getPixelColorRaw(XY(col, y));
+        uint32_t part = color_fade(cur, seepy);
+        curnew = color_fade(cur, keepy);
+        if (y > 0) {
+          if (carryover) curnew = color_add(curnew, carryover);
+          uint32_t prev = color_add(lastnew, part);
+          // optimization: only set pixel if color has changed
+          if (last != prev) setPixelColorRaw(XY(col, y - 1), prev);
+        } else setPixelColorRaw(XY(col, y), curnew); // first pixel
+        lastnew = curnew;
+        last = cur; //save original value for comparison on next iteration
+        carryover = part;
+      }
+      setPixelColorRaw(XY(col, rows - 1), curnew);
+    }
+  }
+}
+
+#else
+
+// 2D blurring, can be asymmetrical
+void mAnimatorLight::Segment::blur2D(uint8_t blur_x, uint8_t blur_y, bool smear) {
+  
   if (!isActive()) return; // not active
   const unsigned cols = vWidth();
   const unsigned rows = vHeight();
@@ -481,7 +562,7 @@ void mAnimatorLight::Segment::blur2D(uint8_t blur_x, uint8_t blur_y, bool smear)
   }
 }
 
-
+#endif
 
 
 
@@ -1009,7 +1090,47 @@ void mAnimatorLight::Segment::drawCharacter_UsingGradientPalletes(
 
 
 
-
+/*******************************************************************************************************************************************************************************************************************
+ * @description :
+ *  Draws an anti-aliased pixel at fractional coordinates `(x,y)` onto the current segment using **Wu’s algorithm**.
+ *  Instead of lighting only a single LED, this method blends color `c` into the four nearest integer pixel locations,
+ *  weighted by the fractional parts of `x` and `y`. This gives smooth sub-pixel rendering and reduces jagged motion
+ *  when moving points or shapes across a low-resolution LED matrix.
+ *
+ * @method :
+ *  - Input `(x,y)` are in 24.8 fixed-point format (upper 8 bits = integer coordinate, lower 8 bits = fractional).
+ *  - Extract fractional parts `xx = x & 0xff`, `yy = y & 0xff` and their inverses.
+ *  - Compute four bilinear weights using `WU_WEIGHT(a,b)`, corresponding to the contributions to the 4 neighbors:
+ *      (floor(x), floor(y)), (ceil(x), floor(y)),
+ *      (floor(x), ceil(y)), (ceil(x), ceil(y)).
+ *  - For each of the 4 neighbors, read its current CRGB value via `getPixelColorXY()`,
+ *    blend in the contribution of `c` scaled by the weight (with saturation via `qadd8`),
+ *    then write it back using `setPixelColorXY()`.
+ *
+ * @arguments :
+ *  - x (uint32_t): X coordinate in 24.8 fixed-point format.
+ *  - y (uint32_t): Y coordinate in 24.8 fixed-point format.
+ *  - c (CRGB)    : The RGB color to draw with.
+ *
+ * @returns :
+ *  - void (draws in place).
+ *
+ * @dependencies :
+ *  - Requires a valid 2D segment with `getPixelColorXY()` and `setPixelColorXY()` implemented.
+ *  - Uses FastLED helpers `qadd8()` for saturating addition.
+ *
+ * @examples :
+ *  - `wu_pixel( (5 << 8) + 128, (10 << 8) + 64, CRGB(255,0,0) );`
+ *    → Draws a red dot centered at (5.5, 10.25) blended into 4 surrounding pixels.
+ *
+ * @changed :
+ *  - Initial implementation based on Reddit u/sutaburosu, integrated here 08Sep25.
+ *
+ * @notes :
+ *  - This is a **read-modify-write** operation: it blends into the existing buffer rather than overwriting.
+ *  - Use when you need smooth sub-pixel drawing, e.g. moving points, plasma effects, or lines.
+ *  - Inputs outside the active segment are ignored (`isActive()` guard at start).
+ *******************************************************************************************************************************************************************************************************************/
 #define WU_WEIGHT(a,b) ((uint8_t) (((a)*(b)+(a)+(b))>>8))
 void mAnimatorLight::Segment::wu_pixel(uint32_t x, uint32_t y, CRGB c) {      //awesome wu_pixel procedure by reddit u/sutaburosu
   if (!isActive()) return; // not active

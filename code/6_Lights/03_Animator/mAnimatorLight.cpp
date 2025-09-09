@@ -6491,9 +6491,12 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
     const int vW = vWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
     const int vH = vHeight();  // segment height in logical pixels (is always >= 1)
     // pre-scale color for all pixels
-    col = color_fade(col, _segBri);
-    _colorScaled = true;
-    ALOG_INF(PSTR("map %d"),map1D2D);
+    if(flag_brightness_already_applied)
+    {
+      col = color_fade(col, _segBri);
+      _colorScaled = true;
+    }
+    // ALOG_INF(PSTR("map %d"),map1D2D);
     switch (map1D2D) {
       case M12_Pixels:
         // use all available pixels as a long strip
@@ -7600,22 +7603,48 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
           JBI->Add("Rate",         SEGMENT_I(seg_i).cycle_time__rate_ms);
           JBI->Add("Time",         SEGMENT_I(seg_i).animator_blend_time_ms() );
         JBI->Object_End();
-        JBI->Object_Start("RgbcctColours");
-        for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
+        // JBI->Object_Start("RgbcctColours");
+        // for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
+        // {
+        //   JBI->Array_Start_P("Colour%d", rgb_i);
+        //   for(uint8_t c_i=0;c_i<5;c_i++)
+        //   {
+        //     // JBI->Add(SEGMENT_I(seg_i).segcol[rgb_i].raw[c_i]);
+        //   }
+           
+
+
+        //   JBI->Array_End();
+        //   JBI->Object_Start("ColourTemp");
+        //     // JBI->Add("Min",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMin());
+        //     // JBI->Add("Max",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMax());
+        //     // JBI->Add("Set",      SEGMENT_I(seg_i).segcol[rgb_i].getCCT());
+        //   JBI->Object_End();
+        // }
+        // JBI->Object_End();
+
+        // for(uint8_t seg_col = 0; seg_col < 5; seg_col++)
+        //   {
+        //     JBI->Array_Start_P(PSTR("SegColour%d"), seg_col);
+        //       // for(uint8_t p=0;p<5;p++)
+        //       // { 
+        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.R); 
+        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.G); 
+        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.B); 
+        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.WW); 
+        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.CW); 
+        //       // }
+        //     JBI->Array_End();
+        //   }
+        for(uint8_t seg_col = 0; seg_col < 5; seg_col++)
         {
-          JBI->Array_Start_P("Colour%d", rgb_i);
-          for(uint8_t c_i=0;c_i<5;c_i++)
-          {
-            // JBI->Add(SEGMENT_I(seg_i).segcol[rgb_i].raw[c_i]);
-          }
+          JBI->Array_Start_P(PSTR("SegBrtRGB%d"), seg_col);
+            for(uint8_t p=0;p<5;p++)
+            { 
+              JBI->Add(segments[seg_i].segcol[seg_col].bri_rgb); 
+            }
           JBI->Array_End();
-          JBI->Object_Start("ColourTemp");
-            // JBI->Add("Min",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMin());
-            // JBI->Add("Max",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMax());
-            // JBI->Add("Set",      SEGMENT_I(seg_i).segcol[rgb_i].getCCT());
-          JBI->Object_End();
         }
-        JBI->Object_End();
           
       JBI->Object_End();
 

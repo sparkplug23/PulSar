@@ -1495,24 +1495,24 @@
       "PaletteMappingValues":[10,15,20],
       "SegColour0": {
         "Hue": 0,
-        "Sat":100,
-        "BrightnessRGB":1
+        "Sat":0,
+        "BrightnessRGB":100
       },
       "SegColour1": {
         "Hue": 120,
-        "Sat":20,
-        "BrightnessRGB":1
+        "Sat":0,
+        "BrightnessRGB":100
       },
       "SegColour2": {
         "Hue": 240,
         "Sat":100,
-        "BrightnessRGB":1
+        "BrightnessRGB":100
       },
       "Effects": {
-          "Function":"Waving Cell",
-          "Speed":100,
-          "Intensity":128,
-          "Custom1":128,
+          "Function":"GEQ",
+          "Speed":141,
+          "Intensity":203,
+          "Custom1":255,
           "Custom2":128,
           "Custom3":128,
           "Grouping":1,
