@@ -3792,6 +3792,80 @@ void mAnimatorLight::Segment::setPixelColor(float i, uint32_t col, bool aa)
 }
 
 
+#if defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_DEV) || defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA)
+
+// Reorder effects by development stage, promoting a chosen stage to the front.
+// - promote_first: the Effect_DevStage to bring to the front (e.g., Effect_DevStage::Dev).
+//   All entries with this stage keep their relative order (stable).
+// - The remaining entries are ordered by their stage value (Release=0 … Unstable=4), stable within ties.
+void mAnimatorLight::sortEffects(Effect_DevStage promote_first)
+{
+  const size_t n = effects.id.size();
+  if (!n) { effects.count = 0; return; }
+
+  // Sanity: all parallel vectors must match length
+  if (effects.function.size() != n ||
+      effects.config.size()   != n ||
+      effects.development_stage.size() != n
+  #ifdef ENABLE_EFFECT_DESCRIPTIONS
+      || effects.description.size() != n
+  #endif
+  ) {
+    effects.count = (uint16_t)effects.id.size();
+    return;
+  }
+
+  // Indirection index [0..n-1]
+  std::vector<size_t> idx;
+  idx.reserve(n);
+  for (size_t i = 0; i < n; ++i) idx.push_back(i);
+
+  // Priority: promoted stage gets -1, others keep their enum value (0..4).
+  // Using stable_sort => preserves insertion order within same priority.
+  std::stable_sort(idx.begin(), idx.end(),
+    [&](size_t a, size_t b)
+    {
+      const uint8_t sa = effects.development_stage[a];
+      const uint8_t sb = effects.development_stage[b];
+      const int pa = (sa == (uint8_t)promote_first) ? -1 : (int)sa;
+      const int pb = (sb == (uint8_t)promote_first) ? -1 : (int)sb;
+      if (pa != pb) return pa < pb;
+      return false; // keep original order when priorities are equal
+    });
+
+  // Reorder all parallel arrays explicitly
+  std::vector<uint8_t>        id_new;        id_new.reserve(n);
+  std::vector<EffectFunction> fn_new;        fn_new.reserve(n);
+  std::vector<const char*>    cfg_new;       cfg_new.reserve(n);
+  std::vector<uint8_t>        stage_new;     stage_new.reserve(n);
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+  std::vector<const char*>    desc_new;      desc_new.reserve(n);
+#endif
+
+  for (size_t k = 0; k < n; ++k) {
+    const size_t i = idx[k];
+    id_new.push_back(effects.id[i]);
+    fn_new.push_back(effects.function[i]);
+    cfg_new.push_back(effects.config[i]);
+    stage_new.push_back(effects.development_stage[i]);
+  #ifdef ENABLE_EFFECT_DESCRIPTIONS
+    desc_new.push_back(effects.description[i]);
+  #endif
+  }
+
+  effects.id.swap(id_new);
+  effects.function.swap(fn_new);
+  effects.config.swap(cfg_new);
+  effects.development_stage.swap(stage_new);
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+  effects.description.swap(desc_new);
+#endif
+
+  effects.count = (uint16_t)effects.id.size();
+}
+#endif
+
+
 /**
  * @brief Since we cant do overloading via the return, we need a special case for RGBWW
  * 

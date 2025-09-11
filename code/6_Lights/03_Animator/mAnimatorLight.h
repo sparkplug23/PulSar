@@ -1108,6 +1108,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
     uint16_t EffectAnim__Christmas_Slo_Glo__01();
+    
+    uint16_t EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base(bool is_slo_glo);
+    uint16_t EffectAnim__Christmas_Slo_Glo_Plus__01();
+    uint16_t EffectAnim__Christmas_Sequential_Plus__01();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
     void SubTask_Flasher_Animate_Function_Tester_01();
@@ -1626,6 +1630,13 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       #endif
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_ID,
+
+
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_PLUS__ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_PLUS__ID,
+
+
+
       #endif
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_AND_FLASHING__ID,
@@ -4525,6 +4536,21 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     }effects;
 
     void setupEffectData(void); // add default effects to the list; defined in FX.cpp
+
+    // Optional compile-time knobs:
+// #define EFFECTS_SORT_PROMOTE_DEV    1   // put Dev effects first
+// #define EFFECTS_SORT_PROMOTE_ALPHA  1   // put Alpha effects before others (Dev may still come first if both are defined)
+
+#if defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_DEV) || defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA)
+
+// Reorder effects by development stage, promoting a chosen stage to the front.
+// - promote_first: the Effect_DevStage to bring to the front (e.g., Effect_DevStage::Dev).
+//   All entries with this stage keep their relative order (stable).
+// - The remaining entries are ordered by their stage value (Release=0 … Unstable=4), stable within ties.
+void sortEffects(Effect_DevStage promote_first);
+
+#endif
+
 
     inline void setShowCallback(show_callback cb) { _callback = cb; }
     inline void appendSegment(const Segment &seg = Segment()) {

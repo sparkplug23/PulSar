@@ -14818,53 +14818,572 @@ static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
+uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
+{
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Classic “Slo-Glo” — filament-faithful
+  // - Pixels are wired like real 2/4-output strings: ch = i % nOut (…1,2,3,4,1,2…)
+  // - Each logical output has a fixed COLOUR from the PALETTE (exact indices).
+  // - We only modulate BRIGHTNESS over time with an incandescent-like envelope:
+  //     off → rise → hold → fall → idle(+afterglow), never a snap-off.
+  //
+  // UI mapping you asked for (no code outside this function):
+  //   speed (SX)    : overall cycle speed (we use a wide, nicer curve by default)
+  //   intensity (IX): “softness” (affects rise/fall proportions)
+  //   custom1 (C1)  : SPEED “breathing” enable + period
+  //                   - C1 == 0 → disable speed change (constant cycle time)
+  //                   - C1 > 0  → enable ±depth sinusoidal tempo modulation,
+  //                               period mapped 5..15 s from C1 (1..255)
+  //   custom2 (C2)  : RANDOM REVERSE probability when reverse is enabled
+  //                   - If check3==true and C2 > 0 → on each full cycle wrap,
+  //                     flip direction with probability ~ C2/255
+  //                   - If check3==true and C2 == 0 → ALWAYS reverse (static)
+  //                   - If check3==false → always forward
+  //   custom3 (C3)  : COLOUR LIMIT (number of palette entries to use)
+  //                   - C3 == 0 → use 4 colours
+  //                   - C3  > 0 → scale 1..255 to 1..(palette_exact_size)
+  //                               (255 selects all available discrete colours)
+  //                   NOTE: We STILL ANIMATE only 2 or 4 outputs (see check1).
+  //
+  //   check1        : OUTPUT MODE → true: 2 outputs, false: 4 outputs
+  //   check2        : PAIR FLIP (palette order only) → swap (1↔2), (3↔4), …
+  //                   (This replicates real sets where colour pairing sometimes differs)
+  //   check3        : REVERSE enable (see C2 notes above for behavior)
+  //
+  // Compile-time “knobs” live below as ordinary constants (no #ifdefs):
+  //   - envelope proportions, gamma, floor, afterglow, idle gate
+  //   - speed curve endpoints and “breathing” depth
+  //   - fallback palette size when the exact count isn’t known
+  // ─────────────────────────────────────────────────────────────────────────────
 
-/************************************************************************************************************************************
- * @name          : EffectAnim__Christmas_Slo_Glo__01
- * @summary       : OUFD per-output (Off → Up → Full → Down) rotating across N outputs (2/4/5). Incandescent-like rise/fall.
- * @controls      : Speed     -> base cycle time (faster = shorter)
- *                  Intensity -> softness/overlap (affects Up/Down proportions)
- *                  C1 (bitfield):
- *                       bit0 = fixed_palette_positions (1=on)
- *                       bit1 = allow_palette_pair_flip  (1=on)
- *                    bits2-4 = outputs_mode (0=auto, 1=2, 2=4, 3=5)
- *                  C2 -> ramp period (seconds) for speed “breathe” (0=default 20s)
- *                  C3 -> incandescent profile id (reserved; 0=default)
- * @behaviour     : Never instant-off; gamma + floor; optional afterglow tail; slow speed ramp (±25%).
- * @date modified : 10-Sep-2025
- ***********************************************************************************************************************************/
-/************************************************************************************************************************************
- * @name          : EffectAnim__Christmas_Slo_Glo__01
- * @summary       : OUFD per-output (Off→Up→Full→Down) rotating across N outputs (2/4/5). Incandescent-like rise/fall.
- * @controls      : SX  -> base cycle time (faster = shorter)
- *                  IX  -> softness/overlap (affects Up/Down proportions)
- *                  C1  -> outputs_mode (0=auto, 1=2, 2=4, 3=5) + flags packed: bit0=fixed_pos, bit1=pair_flip (see defaults)
- *                  C2  -> ramp period (seconds) for speed “breathe” (0=20s)
- *                  C3  -> incandescent profile id (reserved; 0)
- * @behaviour     : Never instant-off; gamma + floor; afterglow tail; slow speed ramp (±25%).
- * @date modified : 10-Sep-2025
- ***********************************************************************************************************************************/
+  const uint16_t len = SEGMENT.length();
+  if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  // ── Controls from segment (as per your mapping) ─────────────────────────────
+  const uint8_t SX = SEGMENT.speed;       // 0..255  → speed curve below
+  const uint8_t IX = SEGMENT.intensity;   // 0..255  → “softness” of rise/fall
+  const uint8_t C1 = SEGMENT.custom1;     // 0 = no tempo breathing; >0 = period (5..15 s)
+  const uint8_t C2 = SEGMENT.custom2;     // reverse flip probability per base cycle (if check3)
+  const uint8_t C3 = SEGMENT.custom3;     // colour limit selector (see below)
+
+  const bool output_is_2   = SEGMENT.check1; // true → 2 outputs, false → 4 outputs
+  const bool pair_flip     = SEGMENT.check2; // swap palette order within pairs (no physical swap)
+  const bool reverse_enable= SEGMENT.check3; // allow reverse direction
+
+  // ── Compile-time style “constants” (edit to taste) ──────────────────────────
+  // Incandescent envelope shaping
+  const float ENVL_GAMMA        = 2.20f;   // perceptual brightness shaping
+  const float ENVL_FLOOR        = 0.00f;   // lift this slightly (0.01..0.03) to hide bottom quantization
+  const float ENVL_AFTER_GAIN   = 0.10f;   // tail strength during idle
+  const float ENVL_AFTER_MS     = 160.0f;  // tail decay time constant (ms)
+  const float ENVL_IDLE_GATE_FR = 0.06f;   // suppress first ~6% of idle to avoid a 1-frame “blink”
+
+  // Baseline envelope proportions for Slo-Glo (sum=1.0)
+  float pRise = 0.28f, pHold = 0.22f, pFall = 0.28f, pIdle = 0.22f;
+  // “Softness”: ±10% spread between rise/fall (kept symmetrical)
+  {
+    const float soft = (int(IX) - 128) / 128.0f * 0.10f; // −0.10..+0.10
+    pRise = fmaxf(0.05f, pRise + soft);
+    pFall = fmaxf(0.05f, pFall + soft);
+    const float remain = 1.0f - (pRise + pFall);
+    pHold = remain * 0.5f;
+    pIdle = remain * 0.5f;
+  }
+
+  // Speed curve (wide; “tails emphasis” so ends have more control)
+  const float SPEED_T_FAST_S    = 0.60f;   // classic Slo-Glo fastest end (seconds per cycle)
+  const float SPEED_T_SLOW_S    = 18.0f;   // classic Slo-Glo slowest end (seconds per cycle)
+  const float SPEED_CURVE_POWER = 1.70f;   // 1.0=parabolic; >1 flattens middle, more control at ends
+
+  // Optional speed “breathing” (tempo modulation)
+  const float BREATH_DEPTH_FRAC = 0.20f;   // ±20% depth (edit here)
+  const float BREATH_MIN_S      = 5.0f;    // C1=1
+  const float BREATH_MAX_S      = 15.0f;   // C1=255
+
+  // ── Outputs (2 or 4 only; classic behavior) ─────────────────────────────────
+  const uint8_t nOut = output_is_2 ? 2u : 4u;
+
+  // ── Per-segment state (phase accumulator, timebase, and direction) ──────────
+  // We keep:
+  //   aux1 : phase16 (0..65535) — position within [0,1) for this effect
+  //   aux2 : packed {bit15 = current reverse flag, bits14..0 = prev_phase16}  (per-segment)
+  //   aux3 : last_ms (u32) — for delta time step
+  if (SEGMENT.flags.animator_first_run) {
+    SEGMENT.aux1 = 0;             // phase16
+    SEGMENT.aux2 = 0;             // prev_phase16=0, reverseFlag=0
+    SEGMENT.aux3 = millis();      // last_ms
+  }
+  uint16_t &phase16    = SEGMENT.aux1;
+  uint16_t &state_pack = SEGMENT.aux2;
+  uint32_t &last_ms    = SEGMENT.aux3;
+
+  // Unpack direction + prev phase for wrap detection
+  bool     dir_reverse = (state_pack & 0x8000u) != 0;
+  uint16_t prev_phase  = (uint16_t)(state_pack & 0x7FFFu);
+
+  // ── Build the COLOUR SET for outputs from the palette (exact indices) ───────
+  // “Colour limit” from C3:
+  //   - If C3==0 → use exactly 4 colours (pal indices 0..3).
+  //   - Else map C3 (1..255) → 1..palette_exact_size (255 selects all).
+
+  // Palette info
+  const uint16_t pid         = SEGMENT.palette_id;
+  const bool     pal_is_grad = mPaletteI->IsPaletteGradient(pid);
+  const uint8_t  pal_exact   = mPaletteI->GetColoursInPalette(pid); // 0 or real count for discrete palettes
+  const uint8_t  pal_total   = pal_is_grad ? 255u : (pal_exact ? pal_exact : 8u); // 255-domain for gradients
+
+  uint8_t pal_limit = (C3 == 0) ? 4u
+                                : (uint8_t)max<uint8_t>(1u, (uint8_t)((uint16_t)C3 * pal_total + 254u) / 255u);
+  if (pal_is_grad && pal_limit > 16u) pal_limit = 16u;  // limit sampling granularity for gradients
+
+  // We still animate only nOut (2 or 4). If pal_limit < nOut, colours will repeat by modulo.
+  uint32_t outColor[4] = {0,0,0,0};
+  for (uint8_t k = 0; k < nOut; ++k) {
+    uint8_t palIdx = (uint8_t)(k % max<uint8_t>(1u, pal_limit));
+    // Pair-flip is “palette order only”: swap (1↔2), (3↔4), … within the limited set
+    if (pair_flip && palIdx >= 1 && pal_limit >= 3) {
+      const uint8_t swapIdx = (uint8_t)(1 + ((palIdx - 1) ^ 1)); // 1↔2, 3↔4, …
+      if (swapIdx < pal_limit) palIdx = swapIdx;
+    }
+
+    if (pal_is_grad) {
+      // Scale from 0..(pal_limit-1) → 0..255 for continuous palettes
+      const uint8_t p8 = (pal_limit <= 1u) ? 0u : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit - 1u));
+      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+        /*palette_index*/ p8,
+        /*index_mode*/    PALETTE_INDEX__IS_255_RANGE,  // 0..255 palette domain (use your engine’s 255-range constant)
+        /*mode*/          PALETTE_MODE__DEFAULT,
+        /*wrap*/          PALETTE_WRAP_OFF,
+        /*encoded*/       NO_ENCODED_VALUE);
+    } else {
+      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+        /*palette_index*/ palIdx,
+        /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,  // discrete slot
+        /*mode*/          PALETTE_MODE__DEFAULT,
+        /*wrap*/          PALETTE_WRAP_OFF,
+        /*encoded*/       NO_ENCODED_VALUE);
+    }
+  }
+
+
+  // ── Compute cycle length (ms) from SX (ends have more control) ──────────────
+  uint32_t baseCycle_ms;
+  {
+    const float x = SX * (1.0f / 255.0f);                        // 0..1
+    float y = (x <= 0.5f) ? 0.5f * powf(2.0f * x, SPEED_CURVE_POWER)
+                          : 1.0f - 0.5f * powf(2.0f * (1.0f - x), SPEED_CURVE_POWER);
+    const float ratio = SPEED_T_SLOW_S / SPEED_T_FAST_S;
+    const float t_s   = SPEED_T_FAST_S * powf(ratio, 1.0f - y); // 0→slow, 1→fast
+    baseCycle_ms = (uint32_t)lroundf(t_s * 1000.0f);
+  }
+
+  // Optional tempo breathing (if C1 > 0): ±BREATH_DEPTH_FRAC with period 5..15 s
+  uint32_t cycle_ms = baseCycle_ms;
+  if (C1 > 0) {
+    const float breathPeriod_s = BREATH_MIN_S + (C1 * (BREATH_MAX_S - BREATH_MIN_S) / 255.0f);
+    const uint32_t nowA = millis();
+    const float t_s = nowA * (1.0f / 1000.0f);
+    const float ramp = BREATH_DEPTH_FRAC * sinf(6.28318531f * (t_s / fmaxf(5.0f, breathPeriod_s)));
+    const float factor = fmaxf(0.10f, 1.0f + ramp);            // clamp just in case
+    cycle_ms = (uint32_t)lroundf(baseCycle_ms * factor);
+    if (cycle_ms == 0) cycle_ms = 1;
+  }
+
+  // ── Advance phase with real-time delta (jitter-proof) ───────────────────────
+  const uint32_t now_ms = millis();
+  const uint32_t dt_ms  = now_ms - last_ms;
+  last_ms = now_ms;
+  const uint32_t step16 = (uint32_t)(((uint64_t)dt_ms * 65536u) / (uint64_t)max<uint32_t>(1, cycle_ms));
+  phase16 = (uint16_t)(phase16 + (uint16_t)step16);
+  const float tCycle = (float)phase16 * (1.0f / 65536.0f);      // 0..1
+
+  // ── Direction management (check3 + custom2) ─────────────────────────────────
+  // We detect a phase wrap; on wrap, if reverse is enabled and C2>0, we may flip direction randomly.
+  if (phase16 < prev_phase) { // wrap occurred
+    if (reverse_enable) {
+      if (C2 == 0) {
+        dir_reverse = true;                 // always reverse (static)
+      } else {
+        // Randomly toggle direction with probability ~C2/255 per wrap
+        if ((uint8_t)random8() < C2) dir_reverse = !dir_reverse;
+      }
+    } else {
+      dir_reverse = false;                  // force forward if reverse disabled
+    }
+  }
+  // Update packed state for next frame
+  state_pack = (uint16_t)((dir_reverse ? 0x8000u : 0u) | (phase16 & 0x7FFFu));
+  prev_phase = phase16;
+
+  // ── Incandescent envelope helper (with idle gate) ───────────────────────────
+  auto envelope = [&](float ph)->float {
+    const float a = pRise, b = pRise + pHold, c = pRise + pHold + pFall;
+    float e;
+    if      (ph < a) { float u = ph / fmaxf(0.001f, a); e = u*u*(3.0f - 2.0f*u); }         // rise (cubic smooth)
+    else if (ph < b) { e = 1.0f; }                                                          // hold
+    else if (ph < c) { float d = (ph - b) / fmaxf(0.001f, pFall);
+                       float s = d*d*(3.0f - 2.0f*d); e = 1.0f - s; }                       // fall
+    else             { e = 0.0f; }                                                          // idle
+    if (ph >= c) {
+      const float offp = (ph - c) / fmaxf(0.001f, pIdle);        // 0..1 within idle
+      const float gate = (offp <= ENVL_IDLE_GATE_FR) ? 0.0f : 1.0f; // suppress initial flicker
+      const float tail = ENVL_AFTER_GAIN * expf(-offp * (1000.0f / ENVL_AFTER_MS)) * gate;
+      if (tail > e) e = tail;
+    }
+    e = fminf(fmaxf(e, 0.0f), 1.0f);
+    return ENVL_FLOOR + (1.0f - ENVL_FLOOR) * powf(e, ENVL_GAMMA); // incandescent “feel”
+  };
+
+  // ── Render (true interleaved slots; slot-bound colours; forward/reverse) ────
+  for (uint16_t i = 0; i < len; ++i) {
+    const uint8_t ch = (uint8_t)(i % nOut);               // physical interleave: …0,1,2,3,0,1,2,3…
+
+    // Phase pairing: if pair_flip is enabled and we are in 4-output mode,
+    // lock phases as (0 & 2) and (1 & 3). Colours remain per-channel (0..3).
+    const uint8_t nPhase  = (pair_flip && nOut == 4u) ? 2u : nOut;
+    const uint8_t chPhase = (pair_flip && nOut == 4u) ? (uint8_t)(ch & 1u) : ch;
+
+
+    // Phase offset across outputs; sign based on direction
+    float phaseOffset = (float)chPhase / (float)nPhase;
+    float ph = dir_reverse ? (tCycle + phaseOffset) : (tCycle - phaseOffset);  // forward vs reverse
+    if (ph < 0.0f) ph += 1.0f;                            // cheap wrap
+    else if (ph >= 1.0f) ph -= 1.0f;
+
+    const float   briF = envelope(ph);
+    const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
+
+    uint32_t col = AdjustColourWithBrightness(outColor[ch], bri);
+    SEGMENT.setPixelColor(i, col);
+  }
+
+  return FRAMETIME;
+}
+
+// =================================================================================================
+// Christmas: Slo-Glo — PROGMEM Config
+// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+// Date Modified: 11Sep2025
+// =================================================================================================
+static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
+"Christmas: Slo-Glo@"
+"!,Softness,Speed Change,Reverses,Palette Range,Paired,Pair flip,Reverse enable,,"
+";"
+""                  // no segment colour names; colours come from palette
+";"
+"!"                 // primary palette picker
+";"
+"1"                 // 1D effect icon
+";"
+"sx=96,ix=128,c1=0,c2=0,c3=0,paln=RGBO"
+;
+
+static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01[] PROGMEM =
+"Filament-style Slo-Glo with 2/4 interleaved outputs; colours are slot-bound (palette exact indices).\n\r"
+"SX: cycle speed (wider control near ends).\n\r"
+"IX: rise/fall softness.\n\r"
+"C1: speed change — 0=off; >0 enables ±tempo breathe with a 5–15 s period mapped from C1.\n\r"
+"C2: reverse randomness — used only when Reverse is enabled; 0=always reverse, >0 = probability per cycle.\n\r"
+"C3: colour limit — 0=use 4 colours; 1–255 scales to the discrete palette size (gradients capped to 16 samples).\n\r"
+"CB1: 2 outputs (on) / 4 outputs (off).\n\r"
+"CB2: pair flip (palette order only: 1↔2, 3↔4, …).\n\r"
+"CB3: enable reverse (see C2 behavior).\n\r"
+"Palette: uses first N entries for discrete palettes; for gradients, indices are scaled over 0..255 with up to 16 samples.";
+
+
+
+
+
+// /************************************************************************************************************************************
+//  * @name          : EffectAnim__Christmas_Slo_Glo__01
+//  * @summary       : OUFD per-output (Off → Up → Full → Down) rotating across N outputs (2/4/5). Incandescent-like rise/fall.
+//  * @controls      : Speed     -> base cycle time (faster = shorter)
+//  *                  Intensity -> softness/overlap (affects Up/Down proportions)
+//  *                  C1 (bitfield):
+//  *                       bit0 = fixed_palette_positions (1=on)
+//  *                       bit1 = allow_palette_pair_flip  (1=on)
+//  *                    bits2-4 = outputs_mode (0=auto, 1=2, 2=4, 3=5)
+//  *                  C2 -> ramp period (seconds) for speed “breathe” (0=default 20s)
+//  *                  C3 -> incandescent profile id (reserved; 0=default)
+//  * @behaviour     : Never instant-off; gamma + floor; optional afterglow tail; slow speed ramp (±25%).
+//  * @date modified : 10-Sep-2025
+//  ***********************************************************************************************************************************/
+// /************************************************************************************************************************************
+//  * @name          : EffectAnim__Christmas_Slo_Glo__01
+//  * @summary       : OUFD per-output (Off→Up→Full→Down) rotating across N outputs (2/4/5). Incandescent-like rise/fall.
+//  * @controls      : SX  -> base cycle time (faster = shorter)
+//  *                  IX  -> softness/overlap (affects Up/Down proportions)
+//  *                  C1  -> outputs_mode (0=auto, 1=2, 2=4, 3=5) + flags packed: bit0=fixed_pos, bit1=pair_flip (see defaults)
+//  *                  C2  -> ramp period (seconds) for speed “breathe” (0=20s)
+//  *                  C3  -> incandescent profile id (reserved; 0)
+//  * @behaviour     : Never instant-off; gamma + floor; afterglow tail; slow speed ramp (±25%).
+//  * @date modified : 10-Sep-2025
+//  ***********************************************************************************************************************************/
+// // uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
+// // {
+// //   // Date Modified: 10Sep2025
+// //   // Christmas Slo-Glo: four-phase brightness per logical output (off→rise→hold→fall)
+// //   // Rotates across 2/4/5 outputs. Incandescent feel: asymmetric rise/fall, gamma, floor, afterglow. Never instant-off.
+
+// //   const uint16_t len = SEGMENT.length();
+// //   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+// //   // --- Controls ---
+// //   const uint8_t SX = SEGMENT.speed;       // cycle speed → 2..14 s
+// //   const uint8_t IX = SEGMENT.intensity;   // softness/overlap for rise/fall proportions
+// //   const uint8_t C1 = SEGMENT.custom1;     // [0]=fixedPos, [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
+// //   const uint8_t C2 = SEGMENT.custom2;     // ramp period (s), 0→20
+// //   (void)SEGMENT.custom3;                  // reserved
+
+// //   const bool fixedPos      = (C1 & 0x01u);
+// //   const bool allowPairFlip = (C1 & 0x02u);
+// //   const uint8_t outModeEnc = (C1 >> 2) & 0x07u;
+
+// //   // --- Logical outputs ---
+// //   uint8_t nOut;
+// //   switch (outModeEnc) {
+// //     case 1: nOut = 2; break;
+// //     case 2: nOut = 4; break;
+// //     case 3: nOut = 5; break;
+// //     default: nOut = (len >= 4) ? 4 : 2; break;
+// //   }
+// //   if (nOut < 2) nOut = 2;
+
+// //   // --- Per-effect start time (store in aux2/aux3) ---
+// //   uint16_t &t0_lo = SEGMENT.aux2;
+// //   uint32_t &t0_hi = SEGMENT.aux3;
+// //   if (SEGMENT.flags.animator_first_run) {
+// //     const uint32_t t0 = millis();
+// //     t0_lo = (uint16_t)(t0 & 0xFFFFu);
+// //     t0_hi = (uint16_t)(t0 >> 16);
+// //   }
+// //   const uint32_t t0_ms = (uint32_t(t0_hi) << 16) | uint32_t(t0_lo);
+
+// //   // --- Incandescent shaping params ---
+// //   const float gamma_    = 2.2f;
+// //   const float floor_    = 0.00f;   // never fully dark
+// //   const float afterGain = 0.10f;   // small afterglow during “off”
+// //   const float afterMs   = 160.0f;
+
+// //   // Phase proportions (sum=1), softened by IX
+// //   float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
+// //   const float soft = (int(IX) - 128) / 128.0f * 0.10f; // −0.10..+0.10
+// //   pRise = fmaxf(0.05f, pRise + soft);
+// //   pFall = fmaxf(0.05f, pFall + soft);
+// //   {
+// //     const float remain = 1.0f - (pRise + pFall);
+// //     pHold = remain * 0.5f;
+// //     pIdle = remain * 0.5f;
+// //   }
+
+// //   // --- Timebase with slow “breathe” ramp (±25%) ---
+// //   const float baseCycle_s  = 14.0f - (SX * (12.0f / 255.0f));                 // 2..14 s
+// //   const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
+// //   const float t_now_s      = (millis() - t0_ms) / 1000.0f;
+// //   const float ramp         = 0.25f * sinf(6.28318531f * (t_now_s / fmaxf(5.0f, rampPeriod_s)));
+// //   const float cycle_s      = baseCycle_s * (1.0f + ramp);
+// //   const float tCycle       = fmodf(t_now_s, cycle_s) / fmaxf(0.001f, cycle_s);
+// //   const uint32_t cycleCount = (uint32_t)((millis() - t0_ms) / (uint32_t)(baseCycle_s * 1000.0f));
+// //   const bool doPairFlip    = allowPairFlip && ((cycleCount & 1u) != 0);
+
+// //   // --- Brightness envelope (keep as a small helper) ---
+// //   auto envelope = [&](float ph)->float {
+// //     const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+// //     float e;
+// //     if      (ph < a) { float u = ph / fmaxf(0.001f, a); e = u*u*(3.0f-2.0f*u); }               // rise (ease-in-out)
+// //     else if (ph < b) { e = 1.0f; }                                                              // hold
+// //     else if (ph < c) { float d = (ph - b) / fmaxf(0.001f, pFall); float s = d*d*(3.0f-2.0f*d); e = 1.0f - s; } // fall
+// //     else             { e = 0.0f; }                                                              // idle
+// //     if (ph >= c) { // afterglow during idle
+// //       const float offp = (ph - c) / fmaxf(0.001f, pIdle);
+// //       const float tail = afterGain * expf(-offp * (1000.0f / afterMs));
+// //       if (tail > e) e = tail;
+// //     }
+// //     e = fminf(fmaxf(e, 0.0f), 1.0f);
+// //     return floor_ + (1.0f - floor_) * powf(e, gamma_); // incandescent curve
+// //   };
+
+// //   // --- Precompute one colour per logical output from the ACTIVE PALETTE ---
+// //   // Use the centre of each output's block as the palette index anchor (spans across segment).
+// //   uint32_t outColor[5] = {0,0,0,0,0};
+// //   const uint16_t blockLen = (uint16_t)max<uint16_t>(1, len / nOut);
+// //   for (uint8_t k = 0; k < nOut; ++k) {
+// //     const uint16_t anchor = (uint16_t)min<uint32_t>(len-1, (uint32_t)k * blockLen + (blockLen >> 1));
+// //     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+// //         /*palette_index*/ anchor,
+// //         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+// //         /*mode*/          PALETTE_MODE__DEFAULT,
+// //         /*wrap*/          PALETTE_WRAP_OFF,
+// //         /*encoded*/       NO_ENCODED_VALUE);
+// //   }
+
+// //   // --- Render ---
+// //   for (uint16_t i = 0; i < len; ++i) {
+// //     // Map pixel → logical output
+// //     uint8_t outIdx = fixedPos
+// //       ? (uint8_t)(i % nOut)                                  // scattered mapping
+// //       : (uint8_t)min<uint16_t>(nOut - 1, i / blockLen);      // contiguous mapping
+
+// //     // Optional pair flip (only when nOut even)
+// //     uint8_t idx = outIdx;
+// //     if (doPairFlip && (nOut % 2 == 0)) {
+// //       idx = (idx & 1u) ? (uint8_t)(idx - 1u) : (uint8_t)(idx + 1u);
+// //       if (idx >= nOut) idx = nOut - 1;
+// //     }
+
+// //     // Per-output phase shift across the cycle
+// //     float ph = tCycle + ((float)idx / (float)nOut);
+// //     ph -= floorf(ph); // wrap 0..1
+
+// //     // Incandescent brightness
+// //     const float   briF = envelope(ph);
+// //     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
+
+// //     // Colour from palette (precomputed per output), then apply brightness
+// //     uint32_t col = AdjustColourWithBrightness(outColor[idx], bri);
+// //     SEGMENT.setPixelColor(i, col);
+// //   }
+
+// //   SEGMENT.cycle_time__rate_ms = FRAMETIME;
+// //   return FRAMETIME;
+// // }
+
+// // uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
+// // {
+// //   // Date Modified: 11Sep2025
+// //   // Slo-Glo: four-phase brightness (off→rise→hold→fall) rotating across 2/4/5 logical outputs.
+// //   // Wiring assumption: bulbs are interleaved 1,2,3,4,1,2,3,4,... along the entire string.
+
+// //   const uint16_t len = SEGMENT.length();
+// //   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+// //   // --- Controls (kept simple while developing) ---
+// //   const uint8_t SX = SEGMENT.speed;       // base cycle time (~2..14 s)
+// //   const uint8_t IX = SEGMENT.intensity;   // softens rise/fall proportions
+// //   const uint8_t C1 = SEGMENT.custom1;     // [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
+// //   // custom2: ramp period if you later enable speed-change; custom3 reserved
+
+// //   // Dev toggles (hardcoded now; wire to UI later if wanted)
+// //   bool enable_speed_change = false;   // keep false to avoid any time drift/jumps
+// //   bool enable_reverse      = false;   // true = reverse rotation direction
+
+// //   const bool allowPairFlip = (C1 & 0x02u) != 0;
+// //   const uint8_t outModeEnc = (C1 >> 2) & 0x07u;
+
+// //   // --- Logical outputs count ---
+// //   uint8_t nOut;
+// //   switch (outModeEnc) { case 1: nOut=2; break; case 2: nOut=4; break; case 3: nOut=5; break; default: nOut=(len>=4)?4:2; break; }
+// //   if (nOut < 2) nOut = 2;
+
+// //   // --- Start time (u32) ---
+// //   if (SEGMENT.flags.animator_first_run) SEGMENT.aux3 = millis();
+// //   const uint32_t t0_ms = SEGMENT.aux3;
+
+// //   // --- Incandescent shaping ---
+// //   const float gamma_    = 2.2f;
+// //   const float floor_    = 0.00f;  // raise if you want a minimum glow
+// //   const float afterGain = 0.10f;
+// //   const float afterMs   = 160.0f;
+
+// //   // Phase proportions (sum=1), softened by IX
+// //   float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
+// //   const float soft = (int(IX)-128) / 128.0f * 0.10f;
+// //   pRise = fmaxf(0.05f, pRise + soft);
+// //   pFall = fmaxf(0.05f, pFall + soft);
+// //   { const float remain = 1.0f - (pRise + pFall); pHold = remain*0.5f; pIdle = remain*0.5f; }
+
+// //   // --- Timebase ---
+// //   const float baseCycle_s = 14.0f - (SX * (12.0f/255.0f)); // 2..14 s
+// //   const float t_now_s     = (millis() - t0_ms) / 1000.0f;
+
+// //   float cycle_s = baseCycle_s;
+// //   if (enable_speed_change) {
+// //     const uint8_t C2 = SEGMENT.custom2;                        // ramp period (s)
+// //     const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
+// //     const float ramp = 0.25f * sinf(6.28318531f * (t_now_s / fmaxf(5.0f, rampPeriod_s)));
+// //     cycle_s = baseCycle_s * (1.0f + ramp);                     // ±25%
+// //   }
+
+// //   const float tCycle = fmodf(t_now_s, cycle_s) / fmaxf(0.001f, cycle_s);
+
+// //   // Pair-flip decision aligned to base cycle (independent of optional breathe)
+// //   const uint32_t cycleCount = (uint32_t)((millis() - t0_ms) / (uint32_t)(baseCycle_s * 1000.0f));
+// //   const bool doPairFlip     = allowPairFlip && ((cycleCount & 1u) != 0);
+
+// //   // --- Brightness envelope helper ---
+// //   auto envelope = [&](float ph)->float {
+// //     const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+// //     float e;
+// //     if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                     // rise
+// //     else if (ph < b) { e = 1.0f; }                                                                   // hold
+// //     else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; }   // fall
+// //     else             { e = 0.0f; }                                                                   // idle
+// //     if (ph >= c) { float offp=(ph-c)/fmaxf(0.001f,pIdle); float tail=afterGain*expf(-offp*(1000.0f/afterMs)); if (tail>e) e=tail; }
+// //     e = fminf(fmaxf(e,0.0f),1.0f);
+// //     return floor_ + (1.0f - floor_) * powf(e, gamma_);
+// //   };
+
+// //   // --- Per-output colours from palette: exact indices 0..nOut-1 ---
+// //   uint32_t outColor[5] = {0,0,0,0,0};
+// //   for (uint8_t k=0; k<nOut; ++k) {
+// //     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+// //       /*palette_index*/ k,
+// //       /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+// //       /*mode*/          PALETTE_MODE__DEFAULT,
+// //       /*wrap*/          PALETTE_WRAP_OFF,
+// //       /*encoded*/       NO_ENCODED_VALUE);
+// //   }
+
+// //   // --- Render (no blocks) ---
+// //   for (uint16_t i=0; i<len; ++i) {
+// //     // Interleaved wiring: 1,2,3,4 repeated along the whole string
+// //     uint8_t ch = (uint8_t)(i % nOut);
+
+// //     // Optional pair swap on the physical channel (even nOut)
+// //     if (doPairFlip && (nOut % 2 == 0)) {
+// //       ch = (ch & 1u) ? (uint8_t)(ch - 1u) : (uint8_t)(ch + 1u);
+// //       if (ch >= nOut) ch = nOut - 1;
+// //     }
+
+// //     // Rotation direction: advance phase offset forward or backward across channels
+// //     float phaseOffset = (float)ch / (float)nOut;
+// //     if (enable_reverse) phaseOffset = 1.0f - phaseOffset;  // flip around the cycle
+
+// //     float ph = tCycle - phaseOffset; // forward
+// //     ph -= floorf(ph); // 0..1
+
+// //     const float   briF = envelope(ph);
+// //     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
+
+// //     uint32_t col = AdjustColourWithBrightness(outColor[ch], bri);
+// //     SEGMENT.setPixelColor(i, col);
+// //   }
+
+// //   SEGMENT.cycle_time__rate_ms = FRAMETIME;
+// //   return FRAMETIME;
+// // }
 // uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
 // {
-//   // Date Modified: 10Sep2025
-//   // Christmas Slo-Glo: four-phase brightness per logical output (off→rise→hold→fall)
-//   // Rotates across 2/4/5 outputs. Incandescent feel: asymmetric rise/fall, gamma, floor, afterglow. Never instant-off.
+//   // Date Modified: 11Sep2025
+//   // Slo-Glo: four-phase brightness (off→rise→hold→fall) rotating across 2/4/5 logical outputs.
+//   // Wiring: bulbs interleaved 1,2,3,4,1,2,3,4,...
 
 //   const uint16_t len = SEGMENT.length();
 //   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
 
-//   // --- Controls ---
-//   const uint8_t SX = SEGMENT.speed;       // cycle speed → 2..14 s
-//   const uint8_t IX = SEGMENT.intensity;   // softness/overlap for rise/fall proportions
-//   const uint8_t C1 = SEGMENT.custom1;     // [0]=fixedPos, [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
-//   const uint8_t C2 = SEGMENT.custom2;     // ramp period (s), 0→20
-//   (void)SEGMENT.custom3;                  // reserved
+//   // --- Controls (dev) ---
+//   const uint8_t SX = SEGMENT.speed;       // base cycle time (~2..14 s)
+//   const uint8_t IX = SEGMENT.intensity;   // softens rise/fall proportions
+//   const uint8_t C1 = SEGMENT.custom1;     // [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
 
-//   const bool fixedPos      = (C1 & 0x01u);
-//   const bool allowPairFlip = (C1 & 0x02u);
-//   const uint8_t outModeEnc = (C1 >> 2) & 0x07u;
+//   // Dev toggles (hardcoded; wire to UI later if desired)
+//   bool enable_speed_change = false;   // keep false to avoid drift/jumps
+//   bool enable_reverse      = false;   // true = reverse rotation direction
 
-//   // --- Logical outputs ---
+//   const bool allowPairFlip = SEGMENT.check3;//(C1 & 0x02u) != 0;
+//   const uint8_t outModeEnc = 2;//(C1 >> 2) & 0x07u;
+
+//   // --- Logical outputs count ---
 //   uint8_t nOut;
 //   switch (outModeEnc) {
 //     case 1: nOut = 2; break;
@@ -14874,208 +15393,158 @@ static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 //   }
 //   if (nOut < 2) nOut = 2;
 
-//   // --- Per-effect start time (store in aux2/aux3) ---
-//   uint16_t &t0_lo = SEGMENT.aux2;
-//   uint32_t &t0_hi = SEGMENT.aux3;
+//   // --- Per-segment state (phase accumulator & last time) ---
+//   // aux1: phase16 (0..65535), aux3: last_ms (u32)
 //   if (SEGMENT.flags.animator_first_run) {
-//     const uint32_t t0 = millis();
-//     t0_lo = (uint16_t)(t0 & 0xFFFFu);
-//     t0_hi = (uint16_t)(t0 >> 16);
+//     SEGMENT.aux1 = 0;            // phase16
+//     SEGMENT.aux3 = millis();     // last_ms
 //   }
-//   const uint32_t t0_ms = (uint32_t(t0_hi) << 16) | uint32_t(t0_lo);
-
-//   // --- Incandescent shaping params ---
-//   const float gamma_    = 2.2f;
-//   const float floor_    = 0.00f;   // never fully dark
-//   const float afterGain = 0.10f;   // small afterglow during “off”
-//   const float afterMs   = 160.0f;
-
-//   // Phase proportions (sum=1), softened by IX
-//   float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
-//   const float soft = (int(IX) - 128) / 128.0f * 0.10f; // −0.10..+0.10
-//   pRise = fmaxf(0.05f, pRise + soft);
-//   pFall = fmaxf(0.05f, pFall + soft);
-//   {
-//     const float remain = 1.0f - (pRise + pFall);
-//     pHold = remain * 0.5f;
-//     pIdle = remain * 0.5f;
-//   }
-
-//   // --- Timebase with slow “breathe” ramp (±25%) ---
-//   const float baseCycle_s  = 14.0f - (SX * (12.0f / 255.0f));                 // 2..14 s
-//   const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
-//   const float t_now_s      = (millis() - t0_ms) / 1000.0f;
-//   const float ramp         = 0.25f * sinf(6.28318531f * (t_now_s / fmaxf(5.0f, rampPeriod_s)));
-//   const float cycle_s      = baseCycle_s * (1.0f + ramp);
-//   const float tCycle       = fmodf(t_now_s, cycle_s) / fmaxf(0.001f, cycle_s);
-//   const uint32_t cycleCount = (uint32_t)((millis() - t0_ms) / (uint32_t)(baseCycle_s * 1000.0f));
-//   const bool doPairFlip    = allowPairFlip && ((cycleCount & 1u) != 0);
-
-//   // --- Brightness envelope (keep as a small helper) ---
-//   auto envelope = [&](float ph)->float {
-//     const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
-//     float e;
-//     if      (ph < a) { float u = ph / fmaxf(0.001f, a); e = u*u*(3.0f-2.0f*u); }               // rise (ease-in-out)
-//     else if (ph < b) { e = 1.0f; }                                                              // hold
-//     else if (ph < c) { float d = (ph - b) / fmaxf(0.001f, pFall); float s = d*d*(3.0f-2.0f*d); e = 1.0f - s; } // fall
-//     else             { e = 0.0f; }                                                              // idle
-//     if (ph >= c) { // afterglow during idle
-//       const float offp = (ph - c) / fmaxf(0.001f, pIdle);
-//       const float tail = afterGain * expf(-offp * (1000.0f / afterMs));
-//       if (tail > e) e = tail;
-//     }
-//     e = fminf(fmaxf(e, 0.0f), 1.0f);
-//     return floor_ + (1.0f - floor_) * powf(e, gamma_); // incandescent curve
-//   };
-
-//   // --- Precompute one colour per logical output from the ACTIVE PALETTE ---
-//   // Use the centre of each output's block as the palette index anchor (spans across segment).
-//   uint32_t outColor[5] = {0,0,0,0,0};
-//   const uint16_t blockLen = (uint16_t)max<uint16_t>(1, len / nOut);
-//   for (uint8_t k = 0; k < nOut; ++k) {
-//     const uint16_t anchor = (uint16_t)min<uint32_t>(len-1, (uint32_t)k * blockLen + (blockLen >> 1));
-//     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-//         /*palette_index*/ anchor,
-//         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
-//         /*mode*/          PALETTE_MODE__DEFAULT,
-//         /*wrap*/          PALETTE_WRAP_OFF,
-//         /*encoded*/       NO_ENCODED_VALUE);
-//   }
-
-//   // --- Render ---
-//   for (uint16_t i = 0; i < len; ++i) {
-//     // Map pixel → logical output
-//     uint8_t outIdx = fixedPos
-//       ? (uint8_t)(i % nOut)                                  // scattered mapping
-//       : (uint8_t)min<uint16_t>(nOut - 1, i / blockLen);      // contiguous mapping
-
-//     // Optional pair flip (only when nOut even)
-//     uint8_t idx = outIdx;
-//     if (doPairFlip && (nOut % 2 == 0)) {
-//       idx = (idx & 1u) ? (uint8_t)(idx - 1u) : (uint8_t)(idx + 1u);
-//       if (idx >= nOut) idx = nOut - 1;
-//     }
-
-//     // Per-output phase shift across the cycle
-//     float ph = tCycle + ((float)idx / (float)nOut);
-//     ph -= floorf(ph); // wrap 0..1
-
-//     // Incandescent brightness
-//     const float   briF = envelope(ph);
-//     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
-
-//     // Colour from palette (precomputed per output), then apply brightness
-//     uint32_t col = AdjustColourWithBrightness(outColor[idx], bri);
-//     SEGMENT.setPixelColor(i, col);
-//   }
-
-//   SEGMENT.cycle_time__rate_ms = FRAMETIME;
-//   return FRAMETIME;
-// }
-
-// uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
-// {
-//   // Date Modified: 11Sep2025
-//   // Slo-Glo: four-phase brightness (off→rise→hold→fall) rotating across 2/4/5 logical outputs.
-//   // Wiring assumption: bulbs are interleaved 1,2,3,4,1,2,3,4,... along the entire string.
-
-//   const uint16_t len = SEGMENT.length();
-//   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
-
-//   // --- Controls (kept simple while developing) ---
-//   const uint8_t SX = SEGMENT.speed;       // base cycle time (~2..14 s)
-//   const uint8_t IX = SEGMENT.intensity;   // softens rise/fall proportions
-//   const uint8_t C1 = SEGMENT.custom1;     // [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
-//   // custom2: ramp period if you later enable speed-change; custom3 reserved
-
-//   // Dev toggles (hardcoded now; wire to UI later if wanted)
-//   bool enable_speed_change = false;   // keep false to avoid any time drift/jumps
-//   bool enable_reverse      = false;   // true = reverse rotation direction
-
-//   const bool allowPairFlip = (C1 & 0x02u) != 0;
-//   const uint8_t outModeEnc = (C1 >> 2) & 0x07u;
-
-//   // --- Logical outputs count ---
-//   uint8_t nOut;
-//   switch (outModeEnc) { case 1: nOut=2; break; case 2: nOut=4; break; case 3: nOut=5; break; default: nOut=(len>=4)?4:2; break; }
-//   if (nOut < 2) nOut = 2;
-
-//   // --- Start time (u32) ---
-//   if (SEGMENT.flags.animator_first_run) SEGMENT.aux3 = millis();
-//   const uint32_t t0_ms = SEGMENT.aux3;
+//   uint16_t &phase16 = SEGMENT.aux1;
+//   uint32_t &last_ms = SEGMENT.aux3;
 
 //   // --- Incandescent shaping ---
 //   const float gamma_    = 2.2f;
-//   const float floor_    = 0.00f;  // raise if you want a minimum glow
+//   const float floor_    = 0.00f;   // raise if you want minimum glow
 //   const float afterGain = 0.10f;
 //   const float afterMs   = 160.0f;
 
-//   // Phase proportions (sum=1), softened by IX
 //   float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
 //   const float soft = (int(IX)-128) / 128.0f * 0.10f;
 //   pRise = fmaxf(0.05f, pRise + soft);
 //   pFall = fmaxf(0.05f, pFall + soft);
 //   { const float remain = 1.0f - (pRise + pFall); pHold = remain*0.5f; pIdle = remain*0.5f; }
 
-//   // --- Timebase ---
-//   const float baseCycle_s = 14.0f - (SX * (12.0f/255.0f)); // 2..14 s
-//   const float t_now_s     = (millis() - t0_ms) / 1000.0f;
+//   // --- Cycle length (ms) ---
+//   uint32_t baseCycle_ms = (uint32_t)lroundf((14.0f - (SX * (12.0f/255.0f))) * 1000.0f); // 2000..14000 ms
+//   uint32_t cycle_ms = baseCycle_ms;
 
-//   float cycle_s = baseCycle_s;
+//   // --- Cycle length (ms) from SX (0..255) ---
+//   // ─────────────────────────────────────────────────────────────────────────────
+//   // Variant A — Tails-emphasis (more control near very slow & very fast)
+//   // Uses a piecewise power curve to flatten near 0 and 1, plus log interpolation
+//   // for a wide, perceptually nicer range.
+//   // ─────────────────────────────────────────────────────────────────────────────
+//   {
+//     const float T_FAST_S = 0.30f;   // fastest end (seconds)
+//     const float T_SLOW_S = 25.00f;  // slowest end (seconds)
+//     const float P        = 2.2f;    // >1.0 flattens near ends (more resolution at tails)
+
+//     const float x = (float)SX * (1.0f / 255.0f); // 0..1
+
+//     // piecewise-power remap: y in [0..1], flattened near 0 and 1
+//     float y = (x <= 0.5f)
+//                 ? 0.5f * powf(2.0f * x, P)
+//                 : 1.0f - 0.5f * powf(2.0f * (1.0f - x), P);
+
+//     // wide range via log interpolation (perceptual)
+//     const float ratio = T_SLOW_S / T_FAST_S;                 // >1
+//     const float t_s   = T_FAST_S * powf(ratio, 1.0f - y);    // y=0→slowest, y=1→fastest
+
+//     baseCycle_ms = (uint32_t)lroundf(t_s * 1000.0f);
+//     cycle_ms     = baseCycle_ms;
+//   }
+
 //   if (enable_speed_change) {
-//     const uint8_t C2 = SEGMENT.custom2;                        // ramp period (s)
+//     const uint8_t C2 = SEGMENT.custom2;              // ramp period (s)
 //     const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
-//     const float ramp = 0.25f * sinf(6.28318531f * (t_now_s / fmaxf(5.0f, rampPeriod_s)));
-//     cycle_s = baseCycle_s * (1.0f + ramp);                     // ±25%
+//     const uint32_t now_ms = millis();
+//     const float t_s = (now_ms / 1000.0f);
+//     const float ramp = 0.25f * sinf(6.28318531f * (t_s / fmaxf(5.0f, rampPeriod_s))); // ±25%
+//     cycle_ms = (uint32_t)lroundf(baseCycle_ms * (1.0f + ramp));
+//     if (cycle_ms == 0) cycle_ms = 1;
 //   }
 
-//   const float tCycle = fmodf(t_now_s, cycle_s) / fmaxf(0.001f, cycle_s);
+//   // --- Advance phase by real time delta (robust to frame jitter) ---
+//   const uint32_t now_ms = millis();
+//   const uint32_t dt_ms  = now_ms - last_ms;
+//   last_ms = now_ms;
 
-//   // Pair-flip decision aligned to base cycle (independent of optional breathe)
-//   const uint32_t cycleCount = (uint32_t)((millis() - t0_ms) / (uint32_t)(baseCycle_s * 1000.0f));
-//   const bool doPairFlip     = allowPairFlip && ((cycleCount & 1u) != 0);
+//   // step16 = dt_ms / cycle_ms mapped to 0..65535
+//   const uint32_t step16 = (uint32_t)(((uint64_t)dt_ms * 65536u) / (uint64_t)max<uint32_t>(1, cycle_ms));
+//   phase16 = (uint16_t)(phase16 + (uint16_t)step16);
+//   const float tCycle = (float)phase16 * (1.0f / 65536.0f);   // 0..1
 
-//   // --- Brightness envelope helper ---
-//   auto envelope = [&](float ph)->float {
-//     const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
-//     float e;
-//     if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                     // rise
-//     else if (ph < b) { e = 1.0f; }                                                                   // hold
-//     else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; }   // fall
-//     else             { e = 0.0f; }                                                                   // idle
-//     if (ph >= c) { float offp=(ph-c)/fmaxf(0.001f,pIdle); float tail=afterGain*expf(-offp*(1000.0f/afterMs)); if (tail>e) e=tail; }
-//     e = fminf(fmaxf(e,0.0f),1.0f);
-//     return floor_ + (1.0f - floor_) * powf(e, gamma_);
-//   };
+//   // Pair-flip decision aligned to base cycles (optional). Cheap approximate count:
+//   // we toggle every time phase wraps AND only when base speed is used (good enough for visuals).
+//   static uint16_t prev_phase16 = 0;
+//   static uint8_t  flipParity   = 0;
+//   if (phase16 < prev_phase16) { flipParity ^= 1; }  // detect wrap
+//   prev_phase16 = phase16;
+//   const bool doPairFlip = allowPairFlip;// && (flipParity != 0);
 
-//   // --- Per-output colours from palette: exact indices 0..nOut-1 ---
+//   // --- Envelope helper ---
+//   // auto envelope = [&](float ph)->float {
+//   //   const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+//   //   float e;
+//   //   if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                   // rise
+//   //   else if (ph < b) { e = 1.0f; }                                                                 // hold
+//   //   else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
+//   //   else             { e = 0.0f; }                                                                 // idle
+//   //   if (ph >= c) { float offp=(ph-c)/fmaxf(0.001f,pIdle); float tail=afterGain*expf(-offp*(1000.0f/afterMs)); if (tail>e) e=tail; }
+//   //   e = fminf(fmaxf(e,0.0f),1.0f);
+//   //   return floor_ + (1.0f - floor_) * powf(e, gamma_);
+//   // };
+//   // --- Envelope helper ---
+// auto envelope = [&](float ph)->float {
+//   const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+//   float e;
+//   if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                   // rise
+//   else if (ph < b) { e = 1.0f; }                                                                 // hold
+//   else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
+//   else             { e = 0.0f; }                                                                 // idle
+//   if (ph >= c) {
+//     const float offp = (ph - c) / fmaxf(0.001f, pIdle);      // 0..1 within idle
+//     const float gate = (offp <= 0.06f) ? 0.0f : 1.0f;         // suppress first ~6% of idle to avoid blip
+//     const float tail = afterGain * expf(-offp * (1000.0f / afterMs)) * gate;
+//     if (tail > e) e = tail;
+//   }
+//   e = fminf(fmaxf(e,0.0f),1.0f);
+//   return floor_ + (1.0f - floor_) * powf(e, gamma_);
+// };
+
+
+//   // // --- Per-output colours from palette: exact indices 0..nOut-1 ---
+//   // uint32_t outColor[5] = {0,0,0,0,0};
+//   // for (uint8_t k=0; k<nOut; ++k) {
+//   //   outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//   //     /*palette_index*/ k,
+//   //     /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+//   //     /*mode*/          PALETTE_MODE__DEFAULT,
+//   //     /*wrap*/          PALETTE_WRAP_OFF,
+//   //     /*encoded*/       NO_ENCODED_VALUE);
+//   // }// --- Per-output colours from palette: exact indices 0..nOut-1 (with optional reorder on check3) ---
+
 //   uint32_t outColor[5] = {0,0,0,0,0};
-//   for (uint8_t k=0; k<nOut; ++k) {
-//     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-//       /*palette_index*/ k,
-//       /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
-//       /*mode*/          PALETTE_MODE__DEFAULT,
-//       /*wrap*/          PALETTE_WRAP_OFF,
-//       /*encoded*/       NO_ENCODED_VALUE);
+// for (uint8_t k=0; k<nOut; ++k) {
+//   uint8_t palIdx = k;
+//   if (allowPairFlip && k >= 1) {
+//     // swap within pairs starting at index 1: (1↔2), (3↔4), ...
+//     const uint8_t swapIdx = (uint8_t)(1 + ((k - 1) ^ 1));  // 1->2, 2->1, 3->4, 4->3, ...
+//     if (swapIdx < nOut) palIdx = swapIdx;                  // safe for 5 outputs; no change if out of range
 //   }
+//   outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//     /*palette_index*/ palIdx,
+//     /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+//     /*mode*/          PALETTE_MODE__DEFAULT,
+//     /*wrap*/          PALETTE_WRAP_OFF,
+//     /*encoded*/       NO_ENCODED_VALUE);
+// }
 
-//   // --- Render (no blocks) ---
+//   // --- Render (true 1-2-3-4 wiring; no blocks) ---
 //   for (uint16_t i=0; i<len; ++i) {
-//     // Interleaved wiring: 1,2,3,4 repeated along the whole string
 //     uint8_t ch = (uint8_t)(i % nOut);
 
-//     // Optional pair swap on the physical channel (even nOut)
-//     if (doPairFlip && (nOut % 2 == 0)) {
-//       ch = (ch & 1u) ? (uint8_t)(ch - 1u) : (uint8_t)(ch + 1u);
-//       if (ch >= nOut) ch = nOut - 1;
-//     }
+//     // if (doPairFlip && (nOut % 2 == 0)) {
+//     //   ch = (ch & 1u) ? (uint8_t)(ch - 1u) : (uint8_t)(ch + 1u);
+//     //   if (ch >= nOut) ch = nOut - 1;
+//     // }
 
-//     // Rotation direction: advance phase offset forward or backward across channels
 //     float phaseOffset = (float)ch / (float)nOut;
-//     if (enable_reverse) phaseOffset = 1.0f - phaseOffset;  // flip around the cycle
+//     if (enable_reverse) phaseOffset = 1.0f - phaseOffset;
 
-//     float ph = tCycle - phaseOffset; // forward
-//     ph -= floorf(ph); // 0..1
+//     float ph = tCycle - phaseOffset;   // forward
+//     if (ph < 0.0f) ph += 1.0f;         // fast wrap
+//     // ph -= floorf(ph);               // (not needed after fast wrap)
 
 //     const float   briF = envelope(ph);
 //     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
@@ -15087,93 +15556,132 @@ static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 //   SEGMENT.cycle_time__rate_ms = FRAMETIME;
 //   return FRAMETIME;
 // }
-uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
-{
-  // Date Modified: 11Sep2025
-  // Slo-Glo: four-phase brightness (off→rise→hold→fall) rotating across 2/4/5 logical outputs.
-  // Wiring: bulbs interleaved 1,2,3,4,1,2,3,4,...
 
+
+
+// // =================================================================================================
+// // Christmas: Slo-Glo — PROGMEM Config
+// // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+// // Date Modified: 10Sep2025
+// // =================================================================================================
+// static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
+// "Christmas: Slo-Glo@"
+// "Cycle speed,Softness,Outputs/Flags,Ramp period (s),Profile,Fixed positions,Allow pair flip,8,9,10" // labels
+// ";"
+// ""                                         // no segment colour names; palette drives colours
+// ";"
+// "!"                                        // palette picker
+// ";"
+// "1"                                        // 1D effect icon
+// ";"
+// "sx=81,paln=RGBO"
+// // "sx=128,ix=128,c1=11,c2=20,c3=0"           // defaults: fixed+flip + 4 outputs (bits2..=2 → 11)
+// ;
+
+
+// static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01[] PROGMEM = "todo";
+
+
+
+
+/************************************************************************************************************************************
+ * @name          : EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base
+ * @summary       : Shared engine for Sequential+ and Slo-Glo+.
+ *                  Colours come from a static palette field laid across the segment;
+ *                  the effect is a rotating brightness mask with N interleaved slots.
+ * @behaviour     : Never snap-off; incandescent shaping (gamma, floor, afterglow) with idle gate.
+ * @controls      : SX  -> cycle time (wide range; tails-emphasis mapping)
+ *                  IX  -> envelope “softness” (affects rise/fall proportions)
+ *                  C1  -> [bit1]=pair-flip (swap adjacent slots), [bits4:2]=outputs N (0=auto,1:2,2:4,3:5,4:8,5:10)
+ *                  C2  -> ramp period (seconds) if speed-change is enabled (dev toggle, off by default)
+ *                  C3  -> reserved
+ * @notes         : - Wiring assumption: pixels are interleaved by slot: ch = i % N.
+ *                  - Colour source: primary palette, indexed by pixel position (segment-length range).
+ * @date modified : 11-Sep-2025
+ ***********************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base(bool is_slo_glo)
+{
   const uint16_t len = SEGMENT.length();
   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
 
   // --- Controls (dev) ---
-  const uint8_t SX = SEGMENT.speed;       // base cycle time (~2..14 s)
-  const uint8_t IX = SEGMENT.intensity;   // softens rise/fall proportions
-  const uint8_t C1 = SEGMENT.custom1;     // [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
+  const uint8_t SX = SEGMENT.speed;       // user speed
+  const uint8_t IX = SEGMENT.intensity;   // softness
+  const uint8_t C1 = SEGMENT.custom1;     // flags + outputs
+  // C2: ramp period (s) if speed-change enabled; C3 reserved
 
-  // Dev toggles (hardcoded; wire to UI later if desired)
+  // Dev toggles (hardcoded now; wire later if desired)
   bool enable_speed_change = false;   // keep false to avoid drift/jumps
-  bool enable_reverse      = false;   // true = reverse rotation direction
+  bool enable_reverse      = false;   // reverse direction if true
 
-  const bool allowPairFlip = 0;//(C1 & 0x02u) != 0;
-  const uint8_t outModeEnc = 2;//(C1 >> 2) & 0x07u;
+  const bool   allowPairFlip = SEGMENT.check3;//0(C1 & 0x02u) != 0;
+  const uint8_t outModeEnc   = SEGMENT.custom3;//(C1 >> 2) & 0x07u;
 
-  // --- Logical outputs count ---
+  // --- Slot count (outputs) ---
   uint8_t nOut;
   switch (outModeEnc) {
     case 1: nOut = 2; break;
     case 2: nOut = 4; break;
     case 3: nOut = 5; break;
-    default: nOut = (len >= 4) ? 4 : 2; break;
+    case 4: nOut = 8; break;
+    case 5: nOut = 10; break;
+    default: nOut = (len >= 8) ? 8 : ((len >= 4) ? 4 : 2); break; // auto
   }
   if (nOut < 2) nOut = 2;
 
-  // --- Per-segment state (phase accumulator & last time) ---
+  // --- Per-segment timing state (phase accumulator & last time) ---
   // aux1: phase16 (0..65535), aux3: last_ms (u32)
-  if (SEGMENT.flags.animator_first_run) {
-    SEGMENT.aux1 = 0;            // phase16
-    SEGMENT.aux3 = millis();     // last_ms
-  }
+  if (SEGMENT.flags.animator_first_run) { SEGMENT.aux1 = 0; SEGMENT.aux3 = millis(); }
   uint16_t &phase16 = SEGMENT.aux1;
   uint32_t &last_ms = SEGMENT.aux3;
 
-  // --- Incandescent shaping ---
-  const float gamma_    = 2.2f;
-  const float floor_    = 0.00f;   // raise if you want minimum glow
-  const float afterGain = 0.10f;
-  const float afterMs   = 160.0f;
+  // --- Incandescent envelope presets (Sequential+ vs Slo-Glo+) ---
+  float gamma_    = is_slo_glo ? 2.25f : 1.60f;
+  float floor_    = is_slo_glo ? 0.00f : 0.00f;
+  float afterGain = is_slo_glo ? 0.10f : 0.02f;
+  float afterMs   = is_slo_glo ? 160.0f : 120.0f;
 
-  float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
-  const float soft = (int(IX)-128) / 128.0f * 0.10f;
-  pRise = fmaxf(0.05f, pRise + soft);
-  pFall = fmaxf(0.05f, pFall + soft);
-  { const float remain = 1.0f - (pRise + pFall); pHold = remain*0.5f; pIdle = remain*0.5f; }
+  // Envelope proportions (sum=1)
+  float pRise = is_slo_glo ? 0.28f : 0.05f;
+  float pHold = is_slo_glo ? 0.22f : 0.10f;
+  float pFall = is_slo_glo ? 0.28f : 0.05f;
+  float pIdle = 1.0f - (pRise + pHold + pFall);
+  // Softness adjusts rise/fall symmetrically
+  const float soft = (int(IX) - 128) / 128.0f * (is_slo_glo ? 0.10f : 0.05f);
+  pRise = fmaxf(0.02f, pRise + soft);
+  pFall = fmaxf(0.02f, pFall + soft);
+  { const float rem = 1.0f - (pRise + pFall); pHold = rem * (is_slo_glo ? 0.44f : 0.66f); pIdle = rem - pHold; }
 
-  // --- Cycle length (ms) ---
-  uint32_t baseCycle_ms = (uint32_t)lroundf((14.0f - (SX * (12.0f/255.0f))) * 1000.0f); // 2000..14000 ms
+  // Optional: keep ~3 concurrently-active slots regardless of N (comment in if desired)
+  // {
+  //   const float F_target = 3.0f / (float)nOut; // desired active coverage
+  //   const float F_now = pRise + pHold + pFall;
+  //   if (F_now > 0.001f) {
+  //     const float k = F_target / F_now;
+  //     pRise *= k; pHold *= k; pFall *= k; pIdle = fmaxf(0.0f, 1.0f - (pRise + pHold + pFall));
+  //   }
+  // }
+
+  // --- Cycle length (ms) — wide range with tails-emphasis mapping ---
+  uint32_t baseCycle_ms;
+  {
+    const float T_FAST_S = is_slo_glo ? 0.45f : 0.30f; // Slo-Glo+ slightly slower minimum
+    const float T_SLOW_S = 25.00f;
+    const float P        = 2.2f;                       // tails emphasis
+    const float x = (float)SX * (1.0f / 255.0f);
+    float y = (x <= 0.5f) ? 0.5f * powf(2.0f * x, P)
+                          : 1.0f - 0.5f * powf(2.0f * (1.0f - x), P);
+    const float ratio = T_SLOW_S / T_FAST_S;
+    const float t_s   = T_FAST_S * powf(ratio, 1.0f - y);  // 0→slow, 1→fast
+    baseCycle_ms = (uint32_t)lroundf(t_s * 1000.0f);
+  }
   uint32_t cycle_ms = baseCycle_ms;
 
-  // --- Cycle length (ms) from SX (0..255) ---
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Variant A — Tails-emphasis (more control near very slow & very fast)
-  // Uses a piecewise power curve to flatten near 0 and 1, plus log interpolation
-  // for a wide, perceptually nicer range.
-  // ─────────────────────────────────────────────────────────────────────────────
-  {
-    const float T_FAST_S = 0.30f;   // fastest end (seconds)
-    const float T_SLOW_S = 25.00f;  // slowest end (seconds)
-    const float P        = 2.2f;    // >1.0 flattens near ends (more resolution at tails)
-
-    const float x = (float)SX * (1.0f / 255.0f); // 0..1
-
-    // piecewise-power remap: y in [0..1], flattened near 0 and 1
-    float y = (x <= 0.5f)
-                ? 0.5f * powf(2.0f * x, P)
-                : 1.0f - 0.5f * powf(2.0f * (1.0f - x), P);
-
-    // wide range via log interpolation (perceptual)
-    const float ratio = T_SLOW_S / T_FAST_S;                 // >1
-    const float t_s   = T_FAST_S * powf(ratio, 1.0f - y);    // y=0→slowest, y=1→fastest
-
-    baseCycle_ms = (uint32_t)lroundf(t_s * 1000.0f);
-    cycle_ms     = baseCycle_ms;
-  }
-
   if (enable_speed_change) {
-    const uint8_t C2 = SEGMENT.custom2;              // ramp period (s)
+    const uint8_t C2 = SEGMENT.custom2; // ramp period (s)
     const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
-    const uint32_t now_ms = millis();
-    const float t_s = (now_ms / 1000.0f);
+    const uint32_t nowA = millis();
+    const float t_s = nowA * (1.0f / 1000.0f);
     const float ramp = 0.25f * sinf(6.28318531f * (t_s / fmaxf(5.0f, rampPeriod_s))); // ±25%
     cycle_ms = (uint32_t)lroundf(baseCycle_ms * (1.0f + ramp));
     if (cycle_ms == 0) cycle_ms = 1;
@@ -15183,82 +15691,56 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
   const uint32_t now_ms = millis();
   const uint32_t dt_ms  = now_ms - last_ms;
   last_ms = now_ms;
-
-  // step16 = dt_ms / cycle_ms mapped to 0..65535
   const uint32_t step16 = (uint32_t)(((uint64_t)dt_ms * 65536u) / (uint64_t)max<uint32_t>(1, cycle_ms));
   phase16 = (uint16_t)(phase16 + (uint16_t)step16);
   const float tCycle = (float)phase16 * (1.0f / 65536.0f);   // 0..1
 
-  // Pair-flip decision aligned to base cycles (optional). Cheap approximate count:
-  // we toggle every time phase wraps AND only when base speed is used (good enough for visuals).
-  static uint16_t prev_phase16 = 0;
-  static uint8_t  flipParity   = 0;
-  if (phase16 < prev_phase16) { flipParity ^= 1; }  // detect wrap
-  prev_phase16 = phase16;
-  const bool doPairFlip = allowPairFlip && (flipParity != 0);
+  // --- Envelope helper (with idle gate to suppress first-frame blip) ---
+  auto envelope = [&](float ph)->float {
+    const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+    float e;
+    if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                 // rise
+    else if (ph < b) { e = 1.0f; }                                                               // hold
+    else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
+    else             { e = 0.0f; }                                                               // idle
+    if (ph >= c) {
+      const float offp = (ph - c) / fmaxf(0.001f, pIdle);     // 0..1 within idle
+      const float gate = (offp <= 0.06f) ? 0.0f : 1.0f;       // suppress first ~6% of idle
+      const float tail = afterGain * expf(-offp * (1000.0f / afterMs)) * gate;
+      if (tail > e) e = tail;
+    }
+    e = fminf(fmaxf(e,0.0f),1.0f);
+    return floor_ + (1.0f - floor_) * powf(e, gamma_);
+  };
 
-  // --- Envelope helper ---
-  // auto envelope = [&](float ph)->float {
-  //   const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
-  //   float e;
-  //   if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                   // rise
-  //   else if (ph < b) { e = 1.0f; }                                                                 // hold
-  //   else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
-  //   else             { e = 0.0f; }                                                                 // idle
-  //   if (ph >= c) { float offp=(ph-c)/fmaxf(0.001f,pIdle); float tail=afterGain*expf(-offp*(1000.0f/afterMs)); if (tail>e) e=tail; }
-  //   e = fminf(fmaxf(e,0.0f),1.0f);
-  //   return floor_ + (1.0f - floor_) * powf(e, gamma_);
-  // };
-  // --- Envelope helper ---
-auto envelope = [&](float ph)->float {
-  const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
-  float e;
-  if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                   // rise
-  else if (ph < b) { e = 1.0f; }                                                                 // hold
-  else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
-  else             { e = 0.0f; }                                                                 // idle
-  if (ph >= c) {
-    const float offp = (ph - c) / fmaxf(0.001f, pIdle);      // 0..1 within idle
-    const float gate = (offp <= 0.06f) ? 0.0f : 1.0f;         // suppress first ~6% of idle to avoid blip
-    const float tail = afterGain * expf(-offp * (1000.0f / afterMs)) * gate;
-    if (tail > e) e = tail;
-  }
-  e = fminf(fmaxf(e,0.0f),1.0f);
-  return floor_ + (1.0f - floor_) * powf(e, gamma_);
-};
-
-
-  // --- Per-output colours from palette: exact indices 0..nOut-1 ---
-  uint32_t outColor[5] = {0,0,0,0,0};
-  for (uint8_t k=0; k<nOut; ++k) {
-    outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-      /*palette_index*/ k,
-      /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
-      /*mode*/          PALETTE_MODE__DEFAULT,
-      /*wrap*/          PALETTE_WRAP_OFF,
-      /*encoded*/       NO_ENCODED_VALUE);
-  }
-
-  // --- Render (true 1-2-3-4 wiring; no blocks) ---
-  for (uint16_t i=0; i<len; ++i) {
+  // --- Render (true interleaved slots; colour from static palette field) ---
+  for (uint16_t i = 0; i < len; ++i) {
     uint8_t ch = (uint8_t)(i % nOut);
 
-    if (doPairFlip && (nOut % 2 == 0)) {
+    // Optional pair swap on slot id (even nOut)
+    if (allowPairFlip && (nOut % 2 == 0)) {
       ch = (ch & 1u) ? (uint8_t)(ch - 1u) : (uint8_t)(ch + 1u);
-      if (ch >= nOut) ch = nOut - 1;
+      if (ch >= nOut) ch = (uint8_t)(nOut - 1);
     }
 
     float phaseOffset = (float)ch / (float)nOut;
     if (enable_reverse) phaseOffset = 1.0f - phaseOffset;
 
-    float ph = tCycle - phaseOffset;   // forward
-    if (ph < 0.0f) ph += 1.0f;         // fast wrap
-    // ph -= floorf(ph);               // (not needed after fast wrap)
+    float ph = tCycle - phaseOffset;     // forward
+    if (ph < 0.0f) ph += 1.0f;           // fast wrap
 
     const float   briF = envelope(ph);
     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
 
-    uint32_t col = AdjustColourWithBrightness(outColor[ch], bri);
+    // Static palette field across the segment (primary palette)
+    uint32_t baseCol = SEGMENT.GetPaletteColour_ModeWrap(
+      /*palette_index*/ i,
+      /*index_mode*/    PALETTE_INDEX__IS_SEGLEN_RANGE,
+      /*mode*/          PALETTE_MODE__DEFAULT,
+      /*wrap*/          PALETTE_WRAP_OFF,
+      /*encoded*/       NO_ENCODED_VALUE);
+
+    uint32_t col = AdjustColourWithBrightness(baseCol, bri);
     SEGMENT.setPixelColor(i, col);
   }
 
@@ -15266,38 +15748,77 @@ auto envelope = [&](float ph)->float {
   return FRAMETIME;
 }
 
+/************************************************************************************************************************************
+ * @name     : EffectAnim__Christmas_Slo_Glo_Plus__01
+ * @summary  : “Slo-Glo+” — incandescent swell over a static palette field; N interleaved slots.
+ ************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo_Plus__01()
+{
+  return EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base(/*is_slo_glo=*/true);
+}
 
+/************************************************************************************************************************************
+ * @name     : EffectAnim__Christmas_Sequential_Plus__01
+ * @summary  : “Sequential+” — step-chase feel (short rise/fall) over a static palette field; N interleaved slots.
+ ************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential_Plus__01()
+{
+  return EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base(/*is_slo_glo=*/false);
+}
 
 // =================================================================================================
-// Christmas: Slo-Glo — PROGMEM Config
-// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-// Date Modified: 10Sep2025
+// Christmas: Slo-Glo+ — PROGMEM Config
+// Fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 // =================================================================================================
-static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
-"Christmas: Slo-Glo@"
-"Cycle speed,Softness,Outputs/Flags,Ramp period (s),Profile,Fixed positions,Allow pair flip,,," // labels
+static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_PLUS_01[] PROGMEM =
+"Christmas: Slo-Glo+@"
+"Speed,Softness,Outputs/Flags,Ramp period (s),Profile,Reverse,Pair flip,8,9,10"  // labels; cb1..cb3 are placeholders
 ";"
-""                                         // no segment colour names; palette drives colours
+""                                // no segment colour names; colour from palette field
 ";"
-"!"                                        // palette picker
+"!"                               // primary palette picker
 ";"
-"1"                                        // 1D effect icon
+"1"                               // 1D effect icon
 ";"
-// "sx=128,ix=128,c1=11,c2=20,c3=0"           // defaults: fixed+flip + 4 outputs (bits2..=2 → 11)
+"sx=128,ix=128,c1=16,c2=20,c3=2"  // defaults: c1=16 ⇒ (4<<2)=N=8, pair-flip off
 ;
 
+static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_PLUS_01[] PROGMEM =
+"Incandescent slow-glow over a static palette field; N interleaved slots.\n\r"
+"Colours come from the palette across the segment; the brightness mask rotates.\n\r"
+"SX: wide range (fast at ends, slow in middle)\n\r"
+"IX: rise/fall softness\n\r"
+"C1: bits2..4 = outputs (0=auto,1:2,2:4,3:5,4:8,5:10); bit1=pair flip\n\r"
+"C2: ramp period (only if speed-change is enabled)\n\r"
+"EP/GP: !"
+;
 
-static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01[] PROGMEM = "todo";
+// =================================================================================================
+// Christmas: Sequential+ — PROGMEM Config
+// Fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+// =================================================================================================
+static const char PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_PLUS_01[] PROGMEM =
+"Christmas: Sequential+@"
+"Speed,Softness,Outputs/Flags,Ramp period (s),Profile,Reverse,Pair flip,8,9,10"  // labels; cb1..cb3 placeholders
+";"
+""                                // no segment colours; colour from palette field
+";"
+"!"                               // primary palette picker
+";"
+"1"                               // 1D effect icon
+";"
+"sx=160,ix=96,c1=16,c2=20,c3=0"   // slightly faster & crisper defaults; N=8 (c1=16)
+;
 
-
-
-
-
-
-
-
-
-
+static const char PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_PLUS_01[] PROGMEM =
+"Step-chase feel (short rise/fall) over a static palette field; N interleaved slots.\n\r"
+"Colours come from the palette across the segment; the brightness mask rotates.\n\r"
+"SX: wide range (fast at ends, slow in middle)\n\r"
+"IX: rise/fall softness (lower = snappier)\n\r"
+"C1: bits2..4 = outputs (0=auto,1:2,2:4,3:5,4:8,5:10); bit1=pair flip\n\r"
+"C2: ramp period (only if speed-change is enabled)\n\r"
+"EP/GP: !"
+;
 
 
 
@@ -21952,7 +22473,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__TWINKLE_OUT__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Out,
@@ -21960,21 +22481,21 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_OUT,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
   addEffect(EFFECTS_FUNCTION__TWINKLE_DECAY__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Decay,
             PM_EFFECT_CONFIG__TWINKLE_DECAY,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_DECAY,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
   addEffect(EFFECTS_FUNCTION__TWINKLE_GLOW__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Glow,
             PM_EFFECT_CONFIG__TWINKLE_GLOW,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_GLOW,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
             
   addEffect(EFFECTS_FUNCTION__TWINKLE_FAIRY__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Fairy,
@@ -21982,7 +22503,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_FAIRY,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
             
   addEffect(EFFECTS_FUNCTION__TWINKLE__ID,
             &mAnimatorLight::EffectAnim__Twinkle,
@@ -21990,7 +22511,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__TWINKLE_COLOUR__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Colour,
@@ -21998,7 +22519,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_COLOUR,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__TWINKLE_SMOOTH__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Smooth,
@@ -22014,7 +22535,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_SPARK,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__TWINKLE_RISE__ID,
             &mAnimatorLight::EffectAnim__Twinkle_Rise,
@@ -22022,7 +22543,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__TWINKLE_RISE,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Dev);
 
   addEffect(EFFECTS_FUNCTION__HALLOWEEN_EYES__ID,
             &mAnimatorLight::EffectAnim__Halloween_Eyes,
@@ -22709,7 +23230,24 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01,
             #endif
-            Effect_DevStage::Dev);
+            Effect_DevStage::Alpha);
+
+
+  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_PLUS__ID,
+            &mAnimatorLight::EffectAnim__Christmas_Slo_Glo_Plus__01,
+            PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_PLUS_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_PLUS_01,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_PLUS__ID,
+            &mAnimatorLight::EffectAnim__Christmas_Sequential_Plus__01,
+            PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_PLUS_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_PLUS_01,
+            #endif
+            Effect_DevStage::Alpha);
   #endif
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
@@ -23306,6 +23844,15 @@ void mAnimatorLight::LoadEffects()
 
   uint16_t effectCount = effects.function.size();
   uint16_t effects_in_header_length = EFFECTS_FUNCTION__LENGTH__ID;
+
+  #if defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_DEV) || defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA)
+  #ifdef ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_DEV
+  sortEffects(Effect_DevStage::Dev);
+  #endif
+  #ifdef ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+  sortEffects(Effect_DevStage::Alpha);
+  #endif
+  #endif
 
   ALOG_INF(PSTR(D_LOG_NEO "Effects %d/%d"), effectCount, effects_in_header_length);  
 
