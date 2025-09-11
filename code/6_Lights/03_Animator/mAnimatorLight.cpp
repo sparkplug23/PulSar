@@ -2691,111 +2691,9 @@ uint32_t mAnimatorLight::ColourBlend(uint32_t color1, uint32_t color2, uint8_t b
 // Segment class implementation
 ///////////////////////////////////////////////////////////////////////////////
 uint16_t mAnimatorLight::Segment::_usedSegmentData = 0U; // amount of RAM all segments use for their data[]
-// CRGB    *mAnimatorLight::Segment::_globalLeds = nullptr;
 uint16_t mAnimatorLight::Segment::maxWidth = DEFAULT_LED_COUNT;
 uint16_t mAnimatorLight::Segment::maxHeight = 1;
 
-// copy assignment
-// mAnimatorLight::Segment& mAnimatorLight::Segment::operator= (const mAnimatorLight::Segment &orig) {
-  
-  
-//   //DEBUG_PRINTLN(F("-- Copying segment --"));
-//   if (this != &orig) {
-//     // clean destination
-//     if (name) delete[] name;
-//     // if (leds && !mAnimatorLight::Segment::_globalLeds) free(leds);
-//     deallocateData();
-//         deallocateColourData();
-//     // copy source
-//     memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
-//     // erase pointers to allocated data
-//     name = nullptr;
-//     data = nullptr;
-//     _dataLen = 0;
-//     // if (!mAnimatorLight::Segment::_globalLeds) leds = nullptr;
-//     // copy source data
-//     if (orig.name) { name = new char[strlen(orig.name)+1]; if (name) strcpy(name, orig.name); }
-//     if (orig.data) { if (allocateData(orig._dataLen)) memcpy(data, orig.data, orig._dataLen); }
-//     // if (orig.leds && !mAnimatorLight::Segment::_globalLeds) { leds = (CRGB*)malloc(sizeof(CRGB)*length()); if (leds) memcpy(leds, orig.leds, sizeof(CRGB)*length()); }
-//   }
-      
-//   return *this;
-// }
-
-// mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(const mAnimatorLight::Segment& orig) 
-// {
-//   if (this != &orig) 
-//   {
-//     // Clean destination
-//     if (name) {
-//         delete[] name;
-//         name = nullptr;
-//     }
-//     deallocateData();
-//     deallocateColourData();
-
-//     // Copy all members from the source
-//     memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
-
-//     // Reset pointers in destination (they will be reallocated if needed)
-//     name = nullptr;
-//     data = nullptr;
-//     coldata = nullptr;
-//     _dataLen = 0;
-//     _coldataLen = 0;
-
-//     // Copy allocated data
-//     if (orig.name) {
-//         name = new char[strlen(orig.name) + 1];
-//         if (name) {
-//             strcpy(name, orig.name);
-//         }
-//     }
-//     if (orig.data && orig._dataLen > 0) {
-//         if (allocateData(orig._dataLen)) {
-//             memcpy(data, orig.data, orig._dataLen);
-//         }
-//     }
-//     if (orig.coldata && orig._coldataLen > 0) {
-//           DEBUG_LINE_HERE
-//         if (allocateColourData(orig._coldataLen)) {
-//           DEBUG_LINE_HERE
-//             memcpy(coldata, orig.coldata, orig._coldataLen);
-//           DEBUG_LINE_HERE
-//         }
-//     }
-//   }
-//           DEBUG_LINE_HERE
-
-//           delay(3000);
-
-//   return *this;
-// }
-
-// // move assignment
-// mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(mAnimatorLight::Segment&& orig) noexcept {
-//     if (this != &orig) {
-//         // Free any existing resources
-//         if (name) {
-//             delete[] name;
-//             name = nullptr;
-//         }
-//         deallocateData();
-//         deallocateColourData();
-
-//         // Move all members from the source
-//         memcpy(this, &orig, sizeof(mAnimatorLight::Segment));
-
-//         // Nullify pointers in the source object
-//         orig.name = nullptr;
-//         orig.data = nullptr;
-//         orig.coldata = nullptr;
-//         orig._dataLen = 0;
-//         orig._coldataLen = 0;
-//     }
-
-//     return *this;
-// }
 
 mAnimatorLight::Segment& mAnimatorLight::Segment::operator=(const mAnimatorLight::Segment& orig) 
 {
@@ -3092,24 +2990,6 @@ void mAnimatorLight::Segment::resetIfRequired() {
     // Serial.println(DEBUG_INSERT_PAGE_BREAK "mAnimatorLight::Segment::resetIfRequired()"); //delay(5000);
   // }
 }
-
-// void mAnimatorLight::Segment::setUpLeds() {
-//   // deallocation happens in resetIfRequired() as it is called when segment changes or in destructor
-//   if (mAnimatorLight::Segment::_globalLeds)
-//     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-//     leds = &mAnimatorLight::Segment::_globalLeds[start + startY*mAnimatorLight::Segment::maxWidth];
-//     #else
-//     leds = &mAnimatorLight::Segment::_globalLeds[start];
-//     #endif
-//   else if (!leds) {
-//     #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
-//     if (psramFound())
-//       leds = (CRGB*)ps_malloc(sizeof(CRGB)*length());
-//     else
-//     #endif
-//       leds = (CRGB*)malloc(sizeof(CRGB)*length());
-//   }
-// }
 
 
 void mAnimatorLight::Segment::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8_t spc, uint16_t ofs, uint16_t i1Y, uint16_t i2Y) {
@@ -3912,53 +3792,6 @@ void mAnimatorLight::Segment::setPixelColor(float i, uint32_t col, bool aa)
 }
 
 
-
-// #endif
-
-// uint32_t mAnimatorLight::Segment::getPixelColor(int i)
-// {
-
-//   if (!isActive()) return 0; // not active
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-//   int vStrip = i>>16;
-// #endif
-//   i &= 0xFFFF;
-
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-//   if (is2D()) {
-//     uint16_t vH = virtualHeight();  // segment height in logical pixels
-//     uint16_t vW = virtualWidth();
-//     switch (map1D2D) {
-//       case M12_Pixels:
-//         return getPixelColorXY(i % vW, i / vW);
-//         break;
-//       case M12_pBar:
-//         if (vStrip>0) return getPixelColorXY(vStrip - 1, vH - i -1);
-//         else          return getPixelColorXY(0, vH - i -1);
-//         break;
-//       case M12_pArc:
-//       case M12_pCorner:
-//         // use longest dimension
-//         return vW>vH ? getPixelColorXY(i, 0) : getPixelColorXY(0, i);
-//         break;
-//     }
-//     return 0;
-//   }
-// #endif
-
-//   if (reverse) i = virtualLength() - i - 1;
-//   i *= groupLength();
-//   i += start;
-//   /* offset/phase */
-//   i += offset;
-//   if ((i >= stop) && (stop>0)) i -= length(); // avoids negative pixel index (stop = 0 is a possible value)
-//   // return tkr_anim->BUS_getPixelColor(i);
-//   return tkr_anim->getPixelColor(i);
-// }
-
-
-
-
 /**
  * @brief Since we cant do overloading via the return, we need a special case for RGBWW
  * 
@@ -4279,153 +4112,6 @@ void mAnimatorLight::Segment::fadePixelColor(uint16_t n, uint8_t fade) {
 #endif
   setPixelColor(n, pix);
 }
-
-/*
- * fade out function, higher rate = quicker fade
- */
-
-// void mAnimatorLight::Segment::fade_out(uint8_t rate) {
-//   if (!isActive()) return; // not active
-//   const int cols = is2D() ? vWidth() : vLength();
-//   const int rows = vHeight(); // will be 1 for 1D
-
-//   rate = (255-rate) >> 1;
-//   float mappedRate = 1.0f / (float(rate) + 1.1f);
-
-//   uint32_t color = segcol[1].WithBrightness().getU32();//colors[1]; // SEGCOLOR(1); // target color
-//   uint32_t color_check = color;
-//   int w2 = W(color);
-//   int r2 = R(color);
-//   int g2 = G(color);
-//   int b2 = B(color);
-
-//   for (int y = 0; y < rows; y++) for (int x = 0; x < cols; x++) {
-//     color = is2D() ? getPixelColorXY(x, y) : getPixelColor(x);
-//     if (color == color_check) continue; // already at target color
-//     int w1 = W(color);
-//     int r1 = R(color);
-//     int g1 = G(color);
-//     int b1 = B(color);
-
-//     int wdelta = (w2 - w1) * mappedRate;
-//     int rdelta = (r2 - r1) * mappedRate;
-//     int gdelta = (g2 - g1) * mappedRate;
-//     int bdelta = (b2 - b1) * mappedRate;
-
-//     // if fade isn't complete, make sure delta is at least 1 (fixes rounding issues)
-//     wdelta += (w2 == w1) ? 0 : (w2 > w1) ? 1 : -1;
-//     rdelta += (r2 == r1) ? 0 : (r2 > r1) ? 1 : -1;
-//     gdelta += (g2 == g1) ? 0 : (g2 > g1) ? 1 : -1;
-//     bdelta += (b2 == b1) ? 0 : (b2 > b1) ? 1 : -1;
-
-//     if (is2D()) setPixelColorXY(x, y, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
-//     else        setPixelColor(x, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
-//   }
-// }
-// void mAnimatorLight::Segment::fade_out(uint8_t rate) {
-//   DEBUG_LINE_HERE
-//   const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
-//   const uint16_t rows = virtualHeight(); // will be 1 for 1D
-// DEBUG_LINE_HERE
-//   // ALOG_INF(PSTR("Segment::maxHeight3 %d\n\r"), Segment::maxHeight);
-
-//   // ALOG_INF(PSTR("fade_out(%d)"), rate);
-//   // ALOG_INF(PSTR("cols=%d rows=%d"), cols, rows);
-
-//   // 
-//   rate = (255-rate) >> 1;
-//   float mappedRate = float(rate) +1.1;
-
-//   // 
-//   DEBUG_LINE_HERE
-//   uint32_t color = segcol[1].WithBrightness().getU32();
-//   DEBUG_LINE_HERE
-  
-//   // RgbcctColor::GetU32ColourBrightnessApplied(segcol[1]);   //tkr_anim->SEGCOLOR_RGBCCT(1).G; //  tkr_anim->segments[0].segcol[1].getU32(); // getPixelColor(0);
-  
-//   // 
-//   int w2 = W(color);
-//   int r2 = R(color);
-//   int g2 = G(color);
-//   int b2 = B(color);
-
-//   // 
-//   for (int y = 0; y < rows; y++){
-//   // 
-//     for (int x = 0; x < cols; x++) {
-//   // 
-
-//     //  ALOG_INF(PSTR("is2D() %d"), is2D() );
-
-//   // 
-//   DEBUG_LINE_HERE
-//       color = is2D() ? getPixelColorXY(x, y) : getPixelColor(x);
-//       DEBUG_LINE_HERE
-//   // 
-//       int w1 = W(color);
-//       int r1 = R(color);
-//       int g1 = G(color);
-//       int b1 = B(color);
-
-//       int wdelta = (w2 - w1) / mappedRate;
-//       int rdelta = (r2 - r1) / mappedRate;
-//       int gdelta = (g2 - g1) / mappedRate;
-//       int bdelta = (b2 - b1) / mappedRate;
-// DEBUG_LINE_HERE
-//       // if fade isn't complete, make sure delta is at least 1 (fixes rounding issues)
-//       wdelta += (w2 == w1) ? 0 : (w2 > w1) ? 1 : -1;
-//       rdelta += (r2 == r1) ? 0 : (r2 > r1) ? 1 : -1;
-//       gdelta += (g2 == g1) ? 0 : (g2 > g1) ? 1 : -1;
-//       bdelta += (b2 == b1) ? 0 : (b2 > b1) ? 1 : -1;
-
-//   // 
-//   DEBUG_LINE_HERE
-//       if (is2D())
-//       {
-//   // 
-//   DEBUG_LINE_HERE
-//         setPixelColorXY(x, y, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
-//         DEBUG_LINE_HERE
-//   // 
-//       }
-//       else{
-//   // 
-//   DEBUG_LINE_HERE
-//         setPixelColor(x, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
-//         DEBUG_LINE_HERE
-//   // 
-//       }   
-//       DEBUG_LINE_HERE     
-//   // 
-//     }
-//   // 
-//   }
-//   // 
-// }
-
-// // fades all pixels to black using nscale8()
-// void mAnimatorLight::Segment::fadeToBlackBy(uint8_t fadeBy) {
-
-  
-//   if (!isActive() || fadeBy == 0) return;   // optimization - no scaling to apply
-//   const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
-//   const uint16_t rows = virtualHeight(); // will be 1 for 1D
-
-//   for (int y = 0; y < rows; y++) for (int x = 0; x < cols; x++) {
-//     if (is2D()) setPixelColorXY(x, y, color_fade(getPixelColorXY(x,y), 255-fadeBy));
-//     else        setPixelColor(x, color_fade(getPixelColor(x), 255-fadeBy));
-//   }
-
-
-
-//   // const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
-//   // const uint16_t rows = virtualHeight(); // will be 1 for 1D
-
-//   // for (uint16_t y = 0; y < rows; y++) for (uint16_t x = 0; x < cols; x++) {
-//   //   if (is2D()) setPixelColorXY(x, y, CRGB(getPixelColorXY(x,y)).nscale8(255-fadeBy));
-//   //   else        setPixelColor(x, CRGB(getPixelColor(x)).nscale8(255-fadeBy));
-//   // }
-// }
 
 
 
@@ -5050,22 +4736,6 @@ void mAnimatorLight::finalizeInit(void)
   }
 
   #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-
-  //initialize leds array. TBD: realloc if nr of leds change
-  // if (mAnimatorLight::Segment::_globalLeds) {
-  //   purgeSegments(true);
-  //   free(mAnimatorLight::Segment::_globalLeds);
-  //   mAnimatorLight::Segment::_globalLeds = nullptr;
-  // }
-  // if (useLedsArray) {
-  //   #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
-  //   if (psramFound())
-  //     mAnimatorLight::Segment::_globalLeds = (CRGB*) ps_malloc(sizeof(CRGB) * _length);
-  //   else
-  //   #endif
-  //     mAnimatorLight::Segment::_globalLeds = (CRGB*) malloc(sizeof(CRGB) * _length);
-  //   memset(mAnimatorLight::Segment::_globalLeds, 0, sizeof(CRGB) * _length);
-  // }
 
   //segments are created in makeAutoSegments();
   loadCustomPalettes(); // (re)load all custom palettes
@@ -6469,33 +6139,18 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
     #endif
   }
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
-  // // Apply brightness if needed
-  if (flag_brightness_already_applied==false) {
-    // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
-    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
-    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
-    // Extract, scale, and repack in one step
-    col = RGBW32(
-      (R(col) * scale) >> 8,  // Red
-      (G(col) * scale) >> 8,  // Green
-      (B(col) * scale) >> 8,  // Blue
-      (W(col) * scale) >> 8   // White
-    );
-  }
-  #endif
-
+// Moved brightness set from here, as it was also set in setPixelColorXY
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (is2D()) {
     const int vW = vWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
     const int vH = vHeight();  // segment height in logical pixels (is always >= 1)
     // pre-scale color for all pixels
-    if(flag_brightness_already_applied)
-    {
-      col = color_fade(col, _segBri);
-      _colorScaled = true;
-    }
+    // if(flag_brightness_already_applied)
+    // {
+    //   col = color_fade(col, _segBri);
+    //   _colorScaled = true;
+    // }
     // ALOG_INF(PSTR("map %d"),map1D2D);
     switch (map1D2D) {
       case M12_Pixels:
@@ -6602,9 +6257,34 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
   }
 #endif
 
+
+  /**
+   * @brief Sep2025
+   * This cant happen before the setPixelColorXY which needs its own internal brightness setter.
+   * This is needed because that function can either be called via
+   * setPixelColor(this) -> setPixelColorXY ie 1D effects being converted to 2D
+   *                        setPixelColorXY direct ie 2D effects and bypassing setPixelColor
+   * Waiting until after 2D has been handled, with the assumption its brightness is then set by setPixelColorXY
+   */
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
+  // // Apply brightness if needed
+  if (flag_brightness_already_applied==false) {
+    // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+    uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
+    uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+    // Extract, scale, and repack in one step
+    col = RGBW32(
+      (R(col) * scale) >> 8,  // Red
+      (G(col) * scale) >> 8,  // Green
+      (B(col) * scale) >> 8,  // Blue
+      (W(col) * scale) >> 8   // White
+    );
+  }
+  #endif
+
   unsigned len = length();
   // if color is unscaled
-  if (!_colorScaled) col = color_fade(col, _brightness_rgb);
+  // if (!_colorScaled) col = color_fade(col, _brightness_rgb);
 
   // expand pixel (taking into account start, grouping, spacing [and offset])
   i = i * groupLength();

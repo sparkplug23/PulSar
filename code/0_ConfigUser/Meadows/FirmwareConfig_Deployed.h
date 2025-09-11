@@ -33,7 +33,7 @@
 // #define DEVICE_OFFICE__DESK_LIGHTING
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
-// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
+#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1646,6 +1646,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
 
   #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
 
 //   #define ENABLE_ADVANCED_DEBUGGING

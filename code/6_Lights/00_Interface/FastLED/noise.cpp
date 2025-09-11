@@ -505,6 +505,7 @@ int8_t inoise8_raw(uint16_t x, uint16_t y)
 
 
 uint8_t inoise8(uint16_t x, uint16_t y) {
+  Serial.println("inoise8->perlin8");
   //return scale8(69+inoise8_raw(x,y),237)<<1;
     int8_t n = inoise8_raw( x, y);  // -64..+64
     n+= 64;                         //   0..128

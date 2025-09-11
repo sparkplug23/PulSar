@@ -651,7 +651,7 @@ uint16_t mAnimatorLight::EffectAnim__Firefly()
 }
 static const char PM_EFFECT_CONFIG__FIREFLY[] PROGMEM =
 "Firefly@"                           // name
-"Blend Speed,Pixels Changing,DrawOver FirstRun,,,"  // 1sx,2ix,3c1,4c2,5c3
+"Blend Speed,Pixels Changing,,,,DrawOver FirstRun,,!,"  // 1sx,2ix,3c1,4c2,5c3
 ";"
 ""                                     // no segment colour names
 ";"
@@ -5554,7 +5554,7 @@ uint16_t mAnimatorLight::EffectAnim__Fireworks()
 }
 static const char PM_EFFECT_CONFIG__FIREWORKS[] PROGMEM =
 "Fireworks@"
-"Speed,Frequency,,,,,,,!,"
+",Frequency,,,,,,,,"
 ";"
 ""
 ";"
@@ -5562,10 +5562,9 @@ static const char PM_EFFECT_CONFIG__FIREWORKS[] PROGMEM =
 ";"
 "12"
 ";"
-"sx=180,ix=137,paln=Colourful,s1=0";
+"ix=137,paln=Colourful,s1=0";
 static const char PM_EFFECT_DESCRI__FIREWORKS[] PROGMEM =
 "Exploding sparks with blur.\n\r"
-"SX:Rate\n\r"
 "IX:Spawn freq(↑=more)\n\r"
 "EP:!\n\r"
 "GP:!";
@@ -5727,7 +5726,7 @@ uint16_t mAnimatorLight::EffectAnim__Fireworks_Starburst()
 #undef STARBURST_MAX_FRAG
 static const char PM_EFFECT_CONFIG__STARBURST[] PROGMEM =
 "Fireworks Starburst@"
-"Speed,Intensity,,,,Use Palette,,,,"   // sx, ix (others unused)
+"Change,Fragments,,,,Use Palette,Overlay,,,"   // sx, ix (others unused)
 ";"
 "Overlay"                    // label for O2 toggle (overlay/trails)
 ";"
@@ -5740,7 +5739,8 @@ static const char PM_EFFECT_DESCRI__STARBURST[] PROGMEM =
 "Starburst fireworks with mirrored fragments.\n\r"
 "SX:Spawn rate\n\r"
 "IX:Burst size\n\r"
-"O2:Overlay(trails)\n\r"
+"O1:Use Palette\n\r"
+"O2:Overlay (no clear)\n\r"
 "EP:!\n\r"
 "GP:!";
 
@@ -6102,6 +6102,7 @@ static const char PM_EFFECT_DESCRI__EXPLODING_FIREWORKS_NOLAUNCH[] PROGMEM =
  *   2D: scrolls down; 1D: scrolls left. Old frame wraps; new spark indices advance.
  *   Uses Fireworks() rendering each tick for spark color/blur look.
  *   Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
+ *   Firework effect draws specks of lights, this wrapper shifts them downward. 
  *
  * CONTROLS
  *   SX: scroll cadence (higher = faster movement)
@@ -6117,10 +6118,10 @@ uint16_t mAnimatorLight::EffectAnim__Rain()
   if (SEGMENT.call && SEGMENT.step > SPEED_FORMULA_L) {
     SEGMENT.step = 1;
     if (SEGMENT.is2D()) {
-      //uint32_t ctemp[width];
-      //for (int i = 0; i<width; i++) ctemp[i] = SEGMENT.getPixelColorXY(i, height-1);
-      SEGMENT.move(6, 1, true);  // move all pixels down
-      //for (int i = 0; i<width; i++) SEGMENT.setPixelColorXY(i, 0, ctemp[i]); // wrap around
+      // Default direction was 6 for downward
+      uint8_t direction = SEGMENT.custom3 ? SEGMENT.custom3 - 1 : 6; // Use custom3(0-31) when >0, else default downwards
+      if(direction > 7) direction = 7;
+      SEGMENT.move(/*dir*/direction, /*amount*/ 1);  // move all pixels down
       SEGMENT.aux0 = (SEGMENT.aux0 % width) + (SEGMENT.aux0 / width + 1) * width;
       SEGMENT.aux1 = (SEGMENT.aux1 % width) + (SEGMENT.aux1 / width + 1) * width;
     } else {
@@ -6142,7 +6143,7 @@ uint16_t mAnimatorLight::EffectAnim__Rain()
 }
 static const char PM_EFFECT_CONFIG__RAIN[] PROGMEM =
 "Rain@"
-"Speed,Spawning rate,,,,,,,,"   // 1sx,2ix
+"!,Spawning rate,,,Direction,,,,,"   // 1sx,2ix
 ";"
 ""                              // no segment color labels
 ";"
@@ -6150,7 +6151,9 @@ static const char PM_EFFECT_CONFIG__RAIN[] PROGMEM =
 ";"
 "12"                            // 1D/2D icon
 ";"
-"sx=160,ix=128,s1=0,paln=Ocean";
+"sx=160,ix=255,"
+"c3=0," // 6 is downwards
+"paln=Semi Blue";
 static const char PM_EFFECT_DESCRI__RAIN[] PROGMEM =
 "Twinkling rain; frame scroll + new sparks.\n\r"
 "SX:ScrollRate\n\r"
@@ -6277,38 +6280,64 @@ static const char PM_EFFECT_DESCRI__TETRIX[] PROGMEM =
 "EP:!\n\r"
 "GP:!";
 
-
 /************************************************************************************************************************************
  * EFFECT: Fire Flicker
  *
  * SUMMARY
- *   Per-pixel brightness jitter for a fire-like look.
- *   If Palette=OFF (pal=0): flicker darkens SEGCOLOR(0).
- *   If Palette=ON: samples palette per pixel and attenuates by random flicker.
+ *   Simulates the random brightness jitter of a flame. Each pixel is attenuated by a random flicker value
+ *   on every update tick, producing the chaotic shimmer typical of firelight.
+ *
+ * BEHAVIOR
+ *   • If "Use Palette" (CB2) is OFF → flicker is applied to SEGCOLOR(0). Each channel (R,G,B,W) is darkened
+ *     independently using safe subtraction to avoid underflow.
+ *   • If "Use Palette" (CB2) is ON  → pixel colors are drawn from the active palette and attenuated
+ *     by the flicker depth (brighter palette colors fade randomly toward black).
  *
  * CONTROLS
- *   SX: flicker rate (faster with higher SX)
- *   IX: flicker depth (stronger with higher IX)
- *   EP/GP: default (!)
+ *   SX (Speed)      : Flicker update rate (higher = faster jitter).
+ *   IX (Intensity)  : Flicker depth (higher = stronger darkening).
+ *   CB2 (UsePal)    : Palette enable. OFF = SEGCOLOR(0) only, ON = active palette per pixel.
+ *   EP / GP         : reserved, default (!).
+ *
+ * NOTES
+ *   • Cycle limiter: updates only when effect time crosses `cycleTime` (40 + (255-SX)).
+ *   • Flicker depth calculation: derived from SEGCOLOR(0) brightness or full 255 if using palette.
+ *   • Uses qsub8() to clamp subtraction and avoid uint8 underflow artifacts.
+ *
+ * @inspired by WLED FireFlicker, rewritten and decoupled by Michael
  ************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Fire_Flicker(void) 
 {
-  uint32_t cycleTime = 40 + (255 - SEGMENT.speed);
-  uint32_t it = effect_start_time / cycleTime;
+  const bool usePal = SEGMENT.check2;
+
+  // tick limiter
+  const uint32_t cycleTime = 40 + (255 - SEGMENT.speed);
+  const uint32_t it = effect_start_time / cycleTime;
   if (SEGMENT.step == it) return FRAMETIME;
 
-  byte w = (SEGCOLOR(0) >> 24);
-  byte r = (SEGCOLOR(0) >> 16);
-  byte g = (SEGCOLOR(0) >>  8);
-  byte b = (SEGCOLOR(0)      );
-  byte lum = (SEGMENT.palette_id == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
-  lum /= (((256-SEGMENT.intensity)/16)+1);
+  // Base color when palette is OFF
+  const uint8_t w = W(SEGCOLOR(0));
+  const uint8_t r = R(SEGCOLOR(0));
+  const uint8_t g = G(SEGCOLOR(0));
+  const uint8_t b = B(SEGCOLOR(0));
+
+  // Flicker depth from IX (higher IX => deeper flicker)
+  uint8_t depth = MAX(w, MAX(r, MAX(g, b)));
+  if (usePal) depth = 255;
+  depth /= (((256 - SEGMENT.intensity) / 16) + 1);
+
   for (unsigned i = 0; i < SEGLEN; i++) {
-    byte flicker = hw_random8(lum);
-    if (SEGMENT.palette_id == 0) {
-      SEGMENT.setPixelColor((int)i, MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0));
+    const uint8_t flicker = hw_random8(depth);
+
+    if (!usePal) {
+      const uint8_t nr = qsub8(r, flicker);
+      const uint8_t ng = qsub8(g, flicker);
+      const uint8_t nb = qsub8(b, flicker);
+      const uint8_t nw = qsub8(w, flicker);
+      SEGMENT.setPixelColor((int)i, nr, ng, nb, nw);
     } else {
-      SEGMENT.setPixelColor((int)i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
+      SEGMENT.setPixelColor((int)i,
+        SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
     }
   }
 
@@ -6316,20 +6345,22 @@ uint16_t mAnimatorLight::EffectAnim__Fire_Flicker(void)
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__FIRE_FLICKER[] PROGMEM =
-"Fire Flicker@"
-"!,!,,,,,,,,"   // 1sx,2ix
+"Fire Flicker@"                  // Effect name
+"!,!,,,,,Use Palette"             // CB2 toggle for palette enable
 ";"
-""                          // no segment color labels
+""                               // No segment color labels
 ";"
-"!"                         // palette picker enabled
+"!"                              // Palette picker enabled
 ";"
-"01"                         // 1D icon
+"01"                             // 1D icon
 ";"
-"sx=160,ix=180,paln=Gradient Fire 01";
+"sx=188,ix=228,o2=1,paln=Gradient Fire 01" // Defaults: mid SX/IX, palette preloaded, CB2=off
+;
 static const char PM_EFFECT_DESCRI__FIRE_FLICKER[] PROGMEM =
-"Fire-like flicker.\n\r"
-"SX:FlickerRate\n\r"
-"IX:FlickerDepth\n\r"
+"Simulated fire flicker.\n\r"
+"SX:Flicker rate (update speed)\n\r"
+"IX:Flicker depth (darkening strength)\n\r"
+"CB2:Toggle palette use\n\r"
 "EP:!\n\r"
 "GP:!";
 
@@ -10850,7 +10881,7 @@ static const char PM_EFFECT_DESCRI__HEARTBEAT[] PROGMEM =
  * @description : 8-bit Perlin noise (2D slice) mapped to the active palette. The noise field is sampled at (x=i*SEGLEN, y=step+i*SEGLEN);
  *                step jitters forward each frame by a small, beat-scaled amount so the pattern gently morphs.
  *                Mapping
- *                  • Color index = inoise8(x,y) → 0..255 → palette index.
+ *                  • Color index = perlin8(x,y) → 0..255 → palette index.
  *                  • SX controls the frame step (beatsin8) magnitude; higher SX = faster morphing.
  *                State
  *                  • On first call, step is randomized for variation.
@@ -10860,7 +10891,7 @@ uint16_t mAnimatorLight::EffectAnim__FillNoise8()
 {
   if (SEGMENT.call == 0) SEGMENT.step = hw_random();
   for (unsigned i = 0; i < SEGLEN; i++) {
-    unsigned index = inoise8(i * SEGLEN, SEGMENT.step + i * SEGLEN);
+    unsigned index = perlin8(i * SEGLEN, SEGMENT.step + i * SEGLEN);
     SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
   }
   SEGMENT.step += beatsin8_t(SEGMENT.speed, 1, 6); //10,1,4
@@ -11063,7 +11094,7 @@ static const char PM_EFFECT_DESCRI__NOISE16_4[] PROGMEM =
  *                Behavior
  *                  • Two CRGBPalette16 objects: palettes[0] (current) blends toward palettes[1] (target) over time.
  *                  • Every 4–6.5s, a new random target palette is generated (unless an explicit palette is active).
- *                  • Index = inoise8(i*scale, aux0 + i*scale) through the blended palette; aux0 advances by a slow beatsin.
+ *                  • Index = perlin8(i*scale, aux0 + i*scale) through the blended palette; aux0 advances by a slow beatsin.
  *                Controls
  *                  • SX sets the target-palette change interval (faster change at higher SX).
  *                  • IX sets spatial scale (bigger scale = zoomed-out bands).
@@ -11097,7 +11128,7 @@ uint16_t mAnimatorLight::EffectAnim__Noise_Pal()
   if (SEGMENT.palette_id > 0) palettes[0] = SEGPALETTE;
 
   for (unsigned i = 0; i < SEGLEN; i++) {
-    unsigned index = inoise8(i*scale, SEGMENT.aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
+    unsigned index = perlin8(i*scale, SEGMENT.aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
     SEGMENT.setPixelColor((int)i,  ColorFromPalette(palettes[0], index, 255, LINEARBLEND));  // Use my own palette.
   }
 
@@ -11152,7 +11183,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Phased(uint8_t moder)
   *phase += SEGMENT.speed/32.0;                                  // You can change the speed of the wave. AKA SPEED (was .4)
 
   for (unsigned i = 0; i < SEGLEN; i++) {
-    if (moder == 1) modVal = (inoise8(i*10 + i*10) /16);         // Let's randomize our mod length with some Perlin noise.
+    if (moder == 1) modVal = (perlin8(i*10 + i*10) /16);         // Let's randomize our mod length with some Perlin noise.
     unsigned val = (i+1) * allfreq;                              // This sets the frequency of the waves. The +1 makes sure that led 0 is used.
     if (modVal == 0) modVal = 1;
     val += *phase * (i % modVal +1) /2;                          // This sets the varying phase change of the waves. By Andrew Tuline.
@@ -11564,7 +11595,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Ripple(uint8_t blurAmount)
         unsigned cx = rippleorigin >> 8;
         unsigned cy = rippleorigin & 0xFF;
         unsigned mag = scale8(sin8_t((propF>>2)), amp);
-        if (propI > 0) SEGMENT.drawCircle(cx, cy, propI, color_blend(SEGMENT.getPixelColorXY(cx + propI, cy), col, mag), true);
+        if (propI > 0) SEGMENT.drawCircle(cx, cy, propI, color_blend(SEGMENT.getPixelColorXY(cx + propI, cy), col, mag));
       } else
       #endif
       {
@@ -14785,6 +14816,494 @@ static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
 
 
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+
+
+/************************************************************************************************************************************
+ * @name          : EffectAnim__Christmas_Slo_Glo__01
+ * @summary       : OUFD per-output (Off → Up → Full → Down) rotating across N outputs (2/4/5). Incandescent-like rise/fall.
+ * @controls      : Speed     -> base cycle time (faster = shorter)
+ *                  Intensity -> softness/overlap (affects Up/Down proportions)
+ *                  C1 (bitfield):
+ *                       bit0 = fixed_palette_positions (1=on)
+ *                       bit1 = allow_palette_pair_flip  (1=on)
+ *                    bits2-4 = outputs_mode (0=auto, 1=2, 2=4, 3=5)
+ *                  C2 -> ramp period (seconds) for speed “breathe” (0=default 20s)
+ *                  C3 -> incandescent profile id (reserved; 0=default)
+ * @behaviour     : Never instant-off; gamma + floor; optional afterglow tail; slow speed ramp (±25%).
+ * @date modified : 10-Sep-2025
+ ***********************************************************************************************************************************/
+/************************************************************************************************************************************
+ * @name          : EffectAnim__Christmas_Slo_Glo__01
+ * @summary       : OUFD per-output (Off→Up→Full→Down) rotating across N outputs (2/4/5). Incandescent-like rise/fall.
+ * @controls      : SX  -> base cycle time (faster = shorter)
+ *                  IX  -> softness/overlap (affects Up/Down proportions)
+ *                  C1  -> outputs_mode (0=auto, 1=2, 2=4, 3=5) + flags packed: bit0=fixed_pos, bit1=pair_flip (see defaults)
+ *                  C2  -> ramp period (seconds) for speed “breathe” (0=20s)
+ *                  C3  -> incandescent profile id (reserved; 0)
+ * @behaviour     : Never instant-off; gamma + floor; afterglow tail; slow speed ramp (±25%).
+ * @date modified : 10-Sep-2025
+ ***********************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
+// {
+//   // Date Modified: 10Sep2025
+//   // Christmas Slo-Glo: four-phase brightness per logical output (off→rise→hold→fall)
+//   // Rotates across 2/4/5 outputs. Incandescent feel: asymmetric rise/fall, gamma, floor, afterglow. Never instant-off.
+
+//   const uint16_t len = SEGMENT.length();
+//   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+//   // --- Controls ---
+//   const uint8_t SX = SEGMENT.speed;       // cycle speed → 2..14 s
+//   const uint8_t IX = SEGMENT.intensity;   // softness/overlap for rise/fall proportions
+//   const uint8_t C1 = SEGMENT.custom1;     // [0]=fixedPos, [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
+//   const uint8_t C2 = SEGMENT.custom2;     // ramp period (s), 0→20
+//   (void)SEGMENT.custom3;                  // reserved
+
+//   const bool fixedPos      = (C1 & 0x01u);
+//   const bool allowPairFlip = (C1 & 0x02u);
+//   const uint8_t outModeEnc = (C1 >> 2) & 0x07u;
+
+//   // --- Logical outputs ---
+//   uint8_t nOut;
+//   switch (outModeEnc) {
+//     case 1: nOut = 2; break;
+//     case 2: nOut = 4; break;
+//     case 3: nOut = 5; break;
+//     default: nOut = (len >= 4) ? 4 : 2; break;
+//   }
+//   if (nOut < 2) nOut = 2;
+
+//   // --- Per-effect start time (store in aux2/aux3) ---
+//   uint16_t &t0_lo = SEGMENT.aux2;
+//   uint32_t &t0_hi = SEGMENT.aux3;
+//   if (SEGMENT.flags.animator_first_run) {
+//     const uint32_t t0 = millis();
+//     t0_lo = (uint16_t)(t0 & 0xFFFFu);
+//     t0_hi = (uint16_t)(t0 >> 16);
+//   }
+//   const uint32_t t0_ms = (uint32_t(t0_hi) << 16) | uint32_t(t0_lo);
+
+//   // --- Incandescent shaping params ---
+//   const float gamma_    = 2.2f;
+//   const float floor_    = 0.00f;   // never fully dark
+//   const float afterGain = 0.10f;   // small afterglow during “off”
+//   const float afterMs   = 160.0f;
+
+//   // Phase proportions (sum=1), softened by IX
+//   float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
+//   const float soft = (int(IX) - 128) / 128.0f * 0.10f; // −0.10..+0.10
+//   pRise = fmaxf(0.05f, pRise + soft);
+//   pFall = fmaxf(0.05f, pFall + soft);
+//   {
+//     const float remain = 1.0f - (pRise + pFall);
+//     pHold = remain * 0.5f;
+//     pIdle = remain * 0.5f;
+//   }
+
+//   // --- Timebase with slow “breathe” ramp (±25%) ---
+//   const float baseCycle_s  = 14.0f - (SX * (12.0f / 255.0f));                 // 2..14 s
+//   const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
+//   const float t_now_s      = (millis() - t0_ms) / 1000.0f;
+//   const float ramp         = 0.25f * sinf(6.28318531f * (t_now_s / fmaxf(5.0f, rampPeriod_s)));
+//   const float cycle_s      = baseCycle_s * (1.0f + ramp);
+//   const float tCycle       = fmodf(t_now_s, cycle_s) / fmaxf(0.001f, cycle_s);
+//   const uint32_t cycleCount = (uint32_t)((millis() - t0_ms) / (uint32_t)(baseCycle_s * 1000.0f));
+//   const bool doPairFlip    = allowPairFlip && ((cycleCount & 1u) != 0);
+
+//   // --- Brightness envelope (keep as a small helper) ---
+//   auto envelope = [&](float ph)->float {
+//     const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+//     float e;
+//     if      (ph < a) { float u = ph / fmaxf(0.001f, a); e = u*u*(3.0f-2.0f*u); }               // rise (ease-in-out)
+//     else if (ph < b) { e = 1.0f; }                                                              // hold
+//     else if (ph < c) { float d = (ph - b) / fmaxf(0.001f, pFall); float s = d*d*(3.0f-2.0f*d); e = 1.0f - s; } // fall
+//     else             { e = 0.0f; }                                                              // idle
+//     if (ph >= c) { // afterglow during idle
+//       const float offp = (ph - c) / fmaxf(0.001f, pIdle);
+//       const float tail = afterGain * expf(-offp * (1000.0f / afterMs));
+//       if (tail > e) e = tail;
+//     }
+//     e = fminf(fmaxf(e, 0.0f), 1.0f);
+//     return floor_ + (1.0f - floor_) * powf(e, gamma_); // incandescent curve
+//   };
+
+//   // --- Precompute one colour per logical output from the ACTIVE PALETTE ---
+//   // Use the centre of each output's block as the palette index anchor (spans across segment).
+//   uint32_t outColor[5] = {0,0,0,0,0};
+//   const uint16_t blockLen = (uint16_t)max<uint16_t>(1, len / nOut);
+//   for (uint8_t k = 0; k < nOut; ++k) {
+//     const uint16_t anchor = (uint16_t)min<uint32_t>(len-1, (uint32_t)k * blockLen + (blockLen >> 1));
+//     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//         /*palette_index*/ anchor,
+//         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+//         /*mode*/          PALETTE_MODE__DEFAULT,
+//         /*wrap*/          PALETTE_WRAP_OFF,
+//         /*encoded*/       NO_ENCODED_VALUE);
+//   }
+
+//   // --- Render ---
+//   for (uint16_t i = 0; i < len; ++i) {
+//     // Map pixel → logical output
+//     uint8_t outIdx = fixedPos
+//       ? (uint8_t)(i % nOut)                                  // scattered mapping
+//       : (uint8_t)min<uint16_t>(nOut - 1, i / blockLen);      // contiguous mapping
+
+//     // Optional pair flip (only when nOut even)
+//     uint8_t idx = outIdx;
+//     if (doPairFlip && (nOut % 2 == 0)) {
+//       idx = (idx & 1u) ? (uint8_t)(idx - 1u) : (uint8_t)(idx + 1u);
+//       if (idx >= nOut) idx = nOut - 1;
+//     }
+
+//     // Per-output phase shift across the cycle
+//     float ph = tCycle + ((float)idx / (float)nOut);
+//     ph -= floorf(ph); // wrap 0..1
+
+//     // Incandescent brightness
+//     const float   briF = envelope(ph);
+//     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
+
+//     // Colour from palette (precomputed per output), then apply brightness
+//     uint32_t col = AdjustColourWithBrightness(outColor[idx], bri);
+//     SEGMENT.setPixelColor(i, col);
+//   }
+
+//   SEGMENT.cycle_time__rate_ms = FRAMETIME;
+//   return FRAMETIME;
+// }
+
+// uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
+// {
+//   // Date Modified: 11Sep2025
+//   // Slo-Glo: four-phase brightness (off→rise→hold→fall) rotating across 2/4/5 logical outputs.
+//   // Wiring assumption: bulbs are interleaved 1,2,3,4,1,2,3,4,... along the entire string.
+
+//   const uint16_t len = SEGMENT.length();
+//   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+//   // --- Controls (kept simple while developing) ---
+//   const uint8_t SX = SEGMENT.speed;       // base cycle time (~2..14 s)
+//   const uint8_t IX = SEGMENT.intensity;   // softens rise/fall proportions
+//   const uint8_t C1 = SEGMENT.custom1;     // [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
+//   // custom2: ramp period if you later enable speed-change; custom3 reserved
+
+//   // Dev toggles (hardcoded now; wire to UI later if wanted)
+//   bool enable_speed_change = false;   // keep false to avoid any time drift/jumps
+//   bool enable_reverse      = false;   // true = reverse rotation direction
+
+//   const bool allowPairFlip = (C1 & 0x02u) != 0;
+//   const uint8_t outModeEnc = (C1 >> 2) & 0x07u;
+
+//   // --- Logical outputs count ---
+//   uint8_t nOut;
+//   switch (outModeEnc) { case 1: nOut=2; break; case 2: nOut=4; break; case 3: nOut=5; break; default: nOut=(len>=4)?4:2; break; }
+//   if (nOut < 2) nOut = 2;
+
+//   // --- Start time (u32) ---
+//   if (SEGMENT.flags.animator_first_run) SEGMENT.aux3 = millis();
+//   const uint32_t t0_ms = SEGMENT.aux3;
+
+//   // --- Incandescent shaping ---
+//   const float gamma_    = 2.2f;
+//   const float floor_    = 0.00f;  // raise if you want a minimum glow
+//   const float afterGain = 0.10f;
+//   const float afterMs   = 160.0f;
+
+//   // Phase proportions (sum=1), softened by IX
+//   float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
+//   const float soft = (int(IX)-128) / 128.0f * 0.10f;
+//   pRise = fmaxf(0.05f, pRise + soft);
+//   pFall = fmaxf(0.05f, pFall + soft);
+//   { const float remain = 1.0f - (pRise + pFall); pHold = remain*0.5f; pIdle = remain*0.5f; }
+
+//   // --- Timebase ---
+//   const float baseCycle_s = 14.0f - (SX * (12.0f/255.0f)); // 2..14 s
+//   const float t_now_s     = (millis() - t0_ms) / 1000.0f;
+
+//   float cycle_s = baseCycle_s;
+//   if (enable_speed_change) {
+//     const uint8_t C2 = SEGMENT.custom2;                        // ramp period (s)
+//     const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
+//     const float ramp = 0.25f * sinf(6.28318531f * (t_now_s / fmaxf(5.0f, rampPeriod_s)));
+//     cycle_s = baseCycle_s * (1.0f + ramp);                     // ±25%
+//   }
+
+//   const float tCycle = fmodf(t_now_s, cycle_s) / fmaxf(0.001f, cycle_s);
+
+//   // Pair-flip decision aligned to base cycle (independent of optional breathe)
+//   const uint32_t cycleCount = (uint32_t)((millis() - t0_ms) / (uint32_t)(baseCycle_s * 1000.0f));
+//   const bool doPairFlip     = allowPairFlip && ((cycleCount & 1u) != 0);
+
+//   // --- Brightness envelope helper ---
+//   auto envelope = [&](float ph)->float {
+//     const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+//     float e;
+//     if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                     // rise
+//     else if (ph < b) { e = 1.0f; }                                                                   // hold
+//     else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; }   // fall
+//     else             { e = 0.0f; }                                                                   // idle
+//     if (ph >= c) { float offp=(ph-c)/fmaxf(0.001f,pIdle); float tail=afterGain*expf(-offp*(1000.0f/afterMs)); if (tail>e) e=tail; }
+//     e = fminf(fmaxf(e,0.0f),1.0f);
+//     return floor_ + (1.0f - floor_) * powf(e, gamma_);
+//   };
+
+//   // --- Per-output colours from palette: exact indices 0..nOut-1 ---
+//   uint32_t outColor[5] = {0,0,0,0,0};
+//   for (uint8_t k=0; k<nOut; ++k) {
+//     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//       /*palette_index*/ k,
+//       /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+//       /*mode*/          PALETTE_MODE__DEFAULT,
+//       /*wrap*/          PALETTE_WRAP_OFF,
+//       /*encoded*/       NO_ENCODED_VALUE);
+//   }
+
+//   // --- Render (no blocks) ---
+//   for (uint16_t i=0; i<len; ++i) {
+//     // Interleaved wiring: 1,2,3,4 repeated along the whole string
+//     uint8_t ch = (uint8_t)(i % nOut);
+
+//     // Optional pair swap on the physical channel (even nOut)
+//     if (doPairFlip && (nOut % 2 == 0)) {
+//       ch = (ch & 1u) ? (uint8_t)(ch - 1u) : (uint8_t)(ch + 1u);
+//       if (ch >= nOut) ch = nOut - 1;
+//     }
+
+//     // Rotation direction: advance phase offset forward or backward across channels
+//     float phaseOffset = (float)ch / (float)nOut;
+//     if (enable_reverse) phaseOffset = 1.0f - phaseOffset;  // flip around the cycle
+
+//     float ph = tCycle - phaseOffset; // forward
+//     ph -= floorf(ph); // 0..1
+
+//     const float   briF = envelope(ph);
+//     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
+
+//     uint32_t col = AdjustColourWithBrightness(outColor[ch], bri);
+//     SEGMENT.setPixelColor(i, col);
+//   }
+
+//   SEGMENT.cycle_time__rate_ms = FRAMETIME;
+//   return FRAMETIME;
+// }
+uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
+{
+  // Date Modified: 11Sep2025
+  // Slo-Glo: four-phase brightness (off→rise→hold→fall) rotating across 2/4/5 logical outputs.
+  // Wiring: bulbs interleaved 1,2,3,4,1,2,3,4,...
+
+  const uint16_t len = SEGMENT.length();
+  if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  // --- Controls (dev) ---
+  const uint8_t SX = SEGMENT.speed;       // base cycle time (~2..14 s)
+  const uint8_t IX = SEGMENT.intensity;   // softens rise/fall proportions
+  const uint8_t C1 = SEGMENT.custom1;     // [1]=pairFlip, [4:2]=outputs (0:auto,1:2,2:4,3:5)
+
+  // Dev toggles (hardcoded; wire to UI later if desired)
+  bool enable_speed_change = false;   // keep false to avoid drift/jumps
+  bool enable_reverse      = false;   // true = reverse rotation direction
+
+  const bool allowPairFlip = 0;//(C1 & 0x02u) != 0;
+  const uint8_t outModeEnc = 2;//(C1 >> 2) & 0x07u;
+
+  // --- Logical outputs count ---
+  uint8_t nOut;
+  switch (outModeEnc) {
+    case 1: nOut = 2; break;
+    case 2: nOut = 4; break;
+    case 3: nOut = 5; break;
+    default: nOut = (len >= 4) ? 4 : 2; break;
+  }
+  if (nOut < 2) nOut = 2;
+
+  // --- Per-segment state (phase accumulator & last time) ---
+  // aux1: phase16 (0..65535), aux3: last_ms (u32)
+  if (SEGMENT.flags.animator_first_run) {
+    SEGMENT.aux1 = 0;            // phase16
+    SEGMENT.aux3 = millis();     // last_ms
+  }
+  uint16_t &phase16 = SEGMENT.aux1;
+  uint32_t &last_ms = SEGMENT.aux3;
+
+  // --- Incandescent shaping ---
+  const float gamma_    = 2.2f;
+  const float floor_    = 0.00f;   // raise if you want minimum glow
+  const float afterGain = 0.10f;
+  const float afterMs   = 160.0f;
+
+  float pRise=0.28f, pHold=0.22f, pFall=0.28f, pIdle=0.22f;
+  const float soft = (int(IX)-128) / 128.0f * 0.10f;
+  pRise = fmaxf(0.05f, pRise + soft);
+  pFall = fmaxf(0.05f, pFall + soft);
+  { const float remain = 1.0f - (pRise + pFall); pHold = remain*0.5f; pIdle = remain*0.5f; }
+
+  // --- Cycle length (ms) ---
+  uint32_t baseCycle_ms = (uint32_t)lroundf((14.0f - (SX * (12.0f/255.0f))) * 1000.0f); // 2000..14000 ms
+  uint32_t cycle_ms = baseCycle_ms;
+
+  // --- Cycle length (ms) from SX (0..255) ---
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Variant A — Tails-emphasis (more control near very slow & very fast)
+  // Uses a piecewise power curve to flatten near 0 and 1, plus log interpolation
+  // for a wide, perceptually nicer range.
+  // ─────────────────────────────────────────────────────────────────────────────
+  {
+    const float T_FAST_S = 0.30f;   // fastest end (seconds)
+    const float T_SLOW_S = 25.00f;  // slowest end (seconds)
+    const float P        = 2.2f;    // >1.0 flattens near ends (more resolution at tails)
+
+    const float x = (float)SX * (1.0f / 255.0f); // 0..1
+
+    // piecewise-power remap: y in [0..1], flattened near 0 and 1
+    float y = (x <= 0.5f)
+                ? 0.5f * powf(2.0f * x, P)
+                : 1.0f - 0.5f * powf(2.0f * (1.0f - x), P);
+
+    // wide range via log interpolation (perceptual)
+    const float ratio = T_SLOW_S / T_FAST_S;                 // >1
+    const float t_s   = T_FAST_S * powf(ratio, 1.0f - y);    // y=0→slowest, y=1→fastest
+
+    baseCycle_ms = (uint32_t)lroundf(t_s * 1000.0f);
+    cycle_ms     = baseCycle_ms;
+  }
+
+  if (enable_speed_change) {
+    const uint8_t C2 = SEGMENT.custom2;              // ramp period (s)
+    const float rampPeriod_s = (C2 > 0 ? (float)C2 : 20.0f);
+    const uint32_t now_ms = millis();
+    const float t_s = (now_ms / 1000.0f);
+    const float ramp = 0.25f * sinf(6.28318531f * (t_s / fmaxf(5.0f, rampPeriod_s))); // ±25%
+    cycle_ms = (uint32_t)lroundf(baseCycle_ms * (1.0f + ramp));
+    if (cycle_ms == 0) cycle_ms = 1;
+  }
+
+  // --- Advance phase by real time delta (robust to frame jitter) ---
+  const uint32_t now_ms = millis();
+  const uint32_t dt_ms  = now_ms - last_ms;
+  last_ms = now_ms;
+
+  // step16 = dt_ms / cycle_ms mapped to 0..65535
+  const uint32_t step16 = (uint32_t)(((uint64_t)dt_ms * 65536u) / (uint64_t)max<uint32_t>(1, cycle_ms));
+  phase16 = (uint16_t)(phase16 + (uint16_t)step16);
+  const float tCycle = (float)phase16 * (1.0f / 65536.0f);   // 0..1
+
+  // Pair-flip decision aligned to base cycles (optional). Cheap approximate count:
+  // we toggle every time phase wraps AND only when base speed is used (good enough for visuals).
+  static uint16_t prev_phase16 = 0;
+  static uint8_t  flipParity   = 0;
+  if (phase16 < prev_phase16) { flipParity ^= 1; }  // detect wrap
+  prev_phase16 = phase16;
+  const bool doPairFlip = allowPairFlip && (flipParity != 0);
+
+  // --- Envelope helper ---
+  // auto envelope = [&](float ph)->float {
+  //   const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+  //   float e;
+  //   if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                   // rise
+  //   else if (ph < b) { e = 1.0f; }                                                                 // hold
+  //   else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
+  //   else             { e = 0.0f; }                                                                 // idle
+  //   if (ph >= c) { float offp=(ph-c)/fmaxf(0.001f,pIdle); float tail=afterGain*expf(-offp*(1000.0f/afterMs)); if (tail>e) e=tail; }
+  //   e = fminf(fmaxf(e,0.0f),1.0f);
+  //   return floor_ + (1.0f - floor_) * powf(e, gamma_);
+  // };
+  // --- Envelope helper ---
+auto envelope = [&](float ph)->float {
+  const float a=pRise, b=pRise+pHold, c=pRise+pHold+pFall;
+  float e;
+  if      (ph < a) { float u = ph / fmaxf(0.001f,a); e = u*u*(3.0f-2.0f*u); }                   // rise
+  else if (ph < b) { e = 1.0f; }                                                                 // hold
+  else if (ph < c) { float d=(ph-b)/fmaxf(0.001f,pFall); float s=d*d*(3.0f-2.0f*d); e=1.0f-s; } // fall
+  else             { e = 0.0f; }                                                                 // idle
+  if (ph >= c) {
+    const float offp = (ph - c) / fmaxf(0.001f, pIdle);      // 0..1 within idle
+    const float gate = (offp <= 0.06f) ? 0.0f : 1.0f;         // suppress first ~6% of idle to avoid blip
+    const float tail = afterGain * expf(-offp * (1000.0f / afterMs)) * gate;
+    if (tail > e) e = tail;
+  }
+  e = fminf(fmaxf(e,0.0f),1.0f);
+  return floor_ + (1.0f - floor_) * powf(e, gamma_);
+};
+
+
+  // --- Per-output colours from palette: exact indices 0..nOut-1 ---
+  uint32_t outColor[5] = {0,0,0,0,0};
+  for (uint8_t k=0; k<nOut; ++k) {
+    outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      /*palette_index*/ k,
+      /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
+      /*mode*/          PALETTE_MODE__DEFAULT,
+      /*wrap*/          PALETTE_WRAP_OFF,
+      /*encoded*/       NO_ENCODED_VALUE);
+  }
+
+  // --- Render (true 1-2-3-4 wiring; no blocks) ---
+  for (uint16_t i=0; i<len; ++i) {
+    uint8_t ch = (uint8_t)(i % nOut);
+
+    if (doPairFlip && (nOut % 2 == 0)) {
+      ch = (ch & 1u) ? (uint8_t)(ch - 1u) : (uint8_t)(ch + 1u);
+      if (ch >= nOut) ch = nOut - 1;
+    }
+
+    float phaseOffset = (float)ch / (float)nOut;
+    if (enable_reverse) phaseOffset = 1.0f - phaseOffset;
+
+    float ph = tCycle - phaseOffset;   // forward
+    if (ph < 0.0f) ph += 1.0f;         // fast wrap
+    // ph -= floorf(ph);               // (not needed after fast wrap)
+
+    const float   briF = envelope(ph);
+    const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
+
+    uint32_t col = AdjustColourWithBrightness(outColor[ch], bri);
+    SEGMENT.setPixelColor(i, col);
+  }
+
+  SEGMENT.cycle_time__rate_ms = FRAMETIME;
+  return FRAMETIME;
+}
+
+
+
+// =================================================================================================
+// Christmas: Slo-Glo — PROGMEM Config
+// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+// Date Modified: 10Sep2025
+// =================================================================================================
+static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
+"Christmas: Slo-Glo@"
+"Cycle speed,Softness,Outputs/Flags,Ramp period (s),Profile,Fixed positions,Allow pair flip,,," // labels
+";"
+""                                         // no segment colour names; palette drives colours
+";"
+"!"                                        // palette picker
+";"
+"1"                                        // 1D effect icon
+";"
+// "sx=128,ix=128,c1=11,c2=20,c3=0"           // defaults: fixed+flip + 4 outputs (bits2..=2 → 11)
+;
+
+
+static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01[] PROGMEM = "todo";
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
 
 //***************************  2D routines  ***********************************
 #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15021,7 +15540,7 @@ static const char PM_EFFECT_CONFIG__2D__DNA[] PROGMEM =
 ";"                                      // ----------------------------------------- PalPicker/is1D2D
 "2"                                      // Icon flags: 2 = 2D effect
 ";"                                      // ----------------------------------------- is1D2D/Defaults
-"ix=0,sx=1"                              // Defaults
+"ix=127,sx=127"                              // Defaults
 ;
 static const char PM_EFFECT_DESCRI__2D__DNA[] PROGMEM =
 "Two counter-phased palette strands forming a simple DNA helix.\n\r"
@@ -15199,7 +15718,7 @@ static const char PM_EFFECT_DESCRI__2D__DRIFT[] PROGMEM =
  *                and mapped through the active palette to produce vertical flame streaks.
  *
  *   How it works
- *   • For each pixel (x=j, y=i) we sample inoise8(j*yscale*rows/255, i*xscale + t).
+ *   • For each pixel (x=j, y=i) we sample perlin8(j*yscale*rows/255, i*xscale + t).
  *   • The palette index rises roughly with height (i) and noise amplitude, creating a
  *     hotter look near the “top” of each column.
  *   • Result color is fetched from the active CRGBPalette16 (SEGPALETTE).
@@ -15943,7 +16462,7 @@ const char PM_EFFECT_DESCRI__2D__MATRIX[] PROGMEM =
  * @function    : EffectAnim__2D__Metaballs
  * @description :
  *   Classic 2D “metaballs” / blobby plasma. Three moving influence points are generated:
- *     • Two points wander via 3D Perlin noise (inoise8) sampled over time.
+ *     • Two points wander via 3D Perlin noise (perlin8) sampled over time.
  *     • One point follows a Lissajous-style path (beatsin8_t with different frequencies).
  *
  *   For each pixel (x,y), the (approximate) distances to all three points are computed, weighted,
@@ -15976,11 +16495,11 @@ uint16_t mAnimatorLight::EffectAnim__2D__Metaballs()
   float speed = 0.25f * (1+(SEGMENT.speed>>6));
 
   // get some 2 random moving points
-  int x2 = map(inoise8(effect_start_time * speed, 25355, 685), 0, 255, 0, cols-1);
-  int y2 = map(inoise8(effect_start_time * speed, 355, 11685), 0, 255, 0, rows-1);
+  int x2 = map(perlin8(effect_start_time * speed, 25355, 685), 0, 255, 0, cols-1);
+  int y2 = map(perlin8(effect_start_time * speed, 355, 11685), 0, 255, 0, rows-1);
 
-  int x3 = map(inoise8(effect_start_time * speed, 55355, 6685), 0, 255, 0, cols-1);
-  int y3 = map(inoise8(effect_start_time * speed, 25355, 22685), 0, 255, 0, rows-1);
+  int x3 = map(perlin8(effect_start_time * speed, 55355, 6685), 0, 255, 0, cols-1);
+  int y3 = map(perlin8(effect_start_time * speed, 25355, 22685), 0, 255, 0, rows-1);
 
   // and one Lissajou function
   int x1 = beatsin8_t(23 * speed, 0, cols-1);
@@ -16071,7 +16590,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__Noise()
 
   for (int y = 0; y < rows; y++) {
     for (int x = 0; x < cols; x++) {
-      uint8_t pixelHue8 = inoise8(x * scale, y * scale, effect_start_time / (16 - SEGMENT.speed/16));
+      uint8_t pixelHue8 = perlin8(x * scale, y * scale, effect_start_time / (16 - SEGMENT.speed/16));
       SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, pixelHue8));
     }
   }
@@ -16120,7 +16639,7 @@ static const char PM_EFFECT_DESCRI__2D__NOISE[] PROGMEM =
  *
  * @notes :
  *   - Requires a 2D matrix segment.
- *   - Uses Perlin noise (inoise8) and a fixed beat8() accent for subtle palette cycling.
+ *   - Uses Perlin noise (perlin8) and a fixed beat8() accent for subtle palette cycling.
  *   - Returns FRAMETIME to keep the engine’s global timing cadence.
  * @description : By: Stepko https://editor.soulmatelights.com/gallery/659-plasm-ball , Modified by: Andrew Tuline
  * @note : Converted from WLED Effects "mode_2DPlasmaball"
@@ -16135,10 +16654,10 @@ uint16_t mAnimatorLight::EffectAnim__2D__PlasmaBall()
   SEGMENT.fadeToBlackBy(SEGMENT.custom1>>2);
   uint_fast32_t t = (effect_start_time * 8) / (256 - SEGMENT.speed);  // optimized to avoid float
   for (int i = 0; i < cols; i++) {
-    unsigned thisVal = inoise8(i * 30, t, t);
+    unsigned thisVal = perlin8(i * 30, t, t);
     unsigned thisMax = map(thisVal, 0, 255, 0, cols-1);
     for (int j = 0; j < rows; j++) {
-      unsigned thisVal_ = inoise8(t, j * 30, t);
+      unsigned thisVal_ = perlin8(t, j * 30, t);
       unsigned thisMax_ = map(thisVal_, 0, 255, 0, rows-1);
       int x = (i + thisMax_ - cols / 2);
       int y = (j + thisMax - cols / 2);
@@ -16184,7 +16703,7 @@ static const char PM_EFFECT_DESCRI__2D__PLASMA_BALL[] PROGMEM =
  *   vertical distance from the matrix center to create soft bands that arc across the sky.
  *
  *   For each pixel (x,y) per frame:
- *     1) A time-varying noise sample is computed: inoise8(tx, ty, tz), where tz advances
+ *     1) A time-varying noise sample is computed: perlin8(tx, ty, tz), where tz advances
  *        frame-to-frame (via SEGMENT.step) and tx/ty are scaled by column/row.
  *     2) The raw noise is ‘dimmed’ by the vertical distance from the matrix center using
  *        an adjustable height factor so the brightest band sits near mid-height.
@@ -16226,7 +16745,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__PolarLights()
   for (int x = 0; x < cols; x++) {
     for (int y = 0; y < rows; y++) {
       SEGMENT.step++;
-      uint8_t palindex = qsub8(inoise8((SEGMENT.step%2) + x * _scale, y * 16 + SEGMENT.step % 16, SEGMENT.step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
+      uint8_t palindex = qsub8(perlin8((SEGMENT.step%2) + x * _scale, y * 16 + SEGMENT.step % 16, SEGMENT.step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
       uint8_t palbrightness = palindex;
       if(SEGMENT.check1) palindex = 255 - palindex; //flip palette
       SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(palindex, false, false, 255, palbrightness));
@@ -16470,7 +16989,7 @@ static const char PM_EFFECT_DESCRI__2D__SQUARED_SWIRL[] PROGMEM =
  * @description : Heat-map “sunburst” derived from a moving Perlin bump map; rays flicker and bend.
  *
  *   How it works
- *   • A (cols+2)×(rows+2) 8-bit “bump” field is filled from layered inoise8_raw() over time (SX sets noise scale).
+ *   • A (cols+2)×(rows+2) 8-bit “bump” field is filled from layered perlin8_raw() over time (SX sets noise scale).
  *   • Local gradients (nx, ny) are compared to a radial vector from screen center to produce a per-pixel energy value.
  *   • Energy is mapped through FastLED HeatColor(), with overall brightness/contrast influenced by IX.
  *
@@ -16504,7 +17023,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__SunRadiation()
   uint8_t someVal = SEGMENT.speed/4;             // Was 25.
   for (int j = 0; j < (rows + 2); j++) {
     for (int i = 0; i < (cols + 2); i++) {
-      byte col = (inoise8_raw(i * someVal, j * someVal, t)) / 2;
+      byte col = (perlin8(i * someVal, j * someVal, t)) / 2;
       bump[index++] = col;
     }
   }
@@ -17699,7 +18218,7 @@ static const char PM_EFFECT_DESCRI__2D__DIGITAL_CLOCK[] PROGMEM = "Cycle Between
  *
  *   Pipeline
  *     1) Plasma source (per frame):
- *        • If CB1 (Alt) is OFF  → plasma[y,x] = inoise8(x*40, y*40, t)
+ *        • If CB1 (Alt) is OFF  → plasma[y,x] = perlin8(x*40, y*40, t)
  *        • If CB1 (Alt) is ON   → plasma[y,x] = (x*4 ^ y*4) + t/6
  *        where t = effect_start_time / 15.
  *     2) Rotozoom transform:
@@ -17748,7 +18267,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__PlasmaRotoZoom()
     int index = j*cols;
     for (int i = 0; i < cols; i++) {
       if (SEGMENT.check1) plasma[index+i] = (i * 4 ^ j * 4) + ms / 6;
-      else                plasma[index+i] = inoise8(i * 40, j * 40, ms);
+      else                plasma[index+i] = perlin8(i * 40, j * 40, ms);
     }
   }
 
@@ -18805,7 +19324,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Grav__Base(unsigned 
   }
   else if(mode == 2) { //Gravimeter
     for (int i=0; i<tempsamp; i++) {
-      uint8_t index = inoise8(i*segmentSampleAvg+effect_start_time, 5000+i*segmentSampleAvg);
+      uint8_t index = perlin8(i*segmentSampleAvg+effect_start_time, 5000+i*segmentSampleAvg);
       SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
     }
     if (gravcen->topLED > 0) {
@@ -18827,7 +19346,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Grav__Base(unsigned 
   }
   else { //Gravcenter
     for (int i=0; i<tempsamp; i++) {
-      uint8_t index = inoise8(i*segmentSampleAvg+effect_start_time, 5000+i*segmentSampleAvg);
+      uint8_t index = perlin8(i*segmentSampleAvg+effect_start_time, 5000+i*segmentSampleAvg);
       SEGMENT.setPixelColor(i+SEGLEN/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
       SEGMENT.setPixelColor(SEGLEN/2-i-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
     }
@@ -19064,7 +19583,9 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Matripix()
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_MATRIPIX[] PROGMEM =
 "Matripix@"                    // name
 "Speed,Brightness,,,,,,,,"    // 10 fields after '@': SX, IX, then blanks
-"Base;"                        // segment color labels (C1 = Base)
+";"
+""
+";"                        // segment color labels (C1 = Base)
 "!"                            // palette picker enabled
 ";"
 "1v;"                          // 1D + volume-reactive
@@ -19084,7 +19605,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_MATRIPIX[] PROGMEM =
  *     • Each frame, the strip is faded twice (strong decay) and then a noise-colored band is drawn symmetrically
  *       around the center. The half-width of this band scales with the *smoothed volume* (volumeSmth) and with IX.
  *     • For each pixel i inside the band, we sample 2D Perlin noise at:
- *         inoise8( i * volumeSmth + aux0 ,  aux1 + i * volumeSmth )
+ *         perlin8( i * volumeSmth + aux0 ,  aux1 + i * volumeSmth )
  *       producing a soft, evolving texture mapped through the active palette.
  *     • The noise field itself drifts over time by slowly animating aux0/aux1 using low-frequency beats (5Hz/4Hz
  *       in FastLED’s 8-bit beat domain).
@@ -19119,7 +19640,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_MidNoise()
   if (maxLen >SEGLEN/2) maxLen = SEGLEN/2;
 
   for (unsigned i=(SEGLEN/2-maxLen); i<(SEGLEN/2+maxLen); i++) {
-    uint8_t index = inoise8(i*volumeSmth+SEGMENT.aux0, SEGMENT.aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
+    uint8_t index = perlin8(i*volumeSmth+SEGMENT.aux0, SEGMENT.aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
     SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
   }
 
@@ -19179,12 +19700,12 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseFire()
 
   if (SEGMENT.call == 0) SEGMENT.fill(BLACK);
 
-  for (unsigned i = 0; i < SEGLEN; i++) {
-    unsigned index = inoise8(i*SEGMENT.speed/64,effect_start_time*SEGMENT.speed/64*SEGLEN/255);  // X location is constant, but we move along the Y at the rate of millis(). By Andrew Tuline.
+  for (unsigned i = 0; i < SEGLEN; i++) {    
+    unsigned index = perlin8(i*SEGMENT.speed/64,effect_start_time*SEGMENT.speed/64*SEGLEN/255);  // X location is constant, but we move along the Y at the rate of millis(). By Andrew Tuline.
     index = (255 - i*256/SEGLEN) * index/(256-SEGMENT.intensity);                       // Now we need to scale index so that it gets blacker as we get close to one of the ends.
                                                                                         // This is a simple y=mx+b equation that's been scaled. index/128 is another scaling.
 
-    SEGMENT.setPixelColor((int)i, ColorFromPalette(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
+    SEGMENT.setPixelColor((int)i, mPalette::ColorFromPaletteU32(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
   }
 
   return FRAMETIME;
@@ -19228,7 +19749,7 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseMeter()
   if (maxLen > SEGLEN) maxLen = SEGLEN;
 
   for (unsigned i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
-    uint8_t index = inoise8(i*volumeSmth+SEGMENT.aux0, SEGMENT.aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
+    uint8_t index = perlin8(i*volumeSmth+SEGMENT.aux0, SEGMENT.aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
     SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
   }
 
@@ -20328,7 +20849,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__SWIRL[] PROGMEM =
  *
  * @algorithm   :
  *   1) Fade: The entire matrix is dimmed by fadeToBlackBy(SEGMENT.speed); higher SX ⇒ shorter trails.
- *   2) Noise column height: For each column x, compute n = inoise8(x*45, t, t). Wave height is scaled as:
+ *   2) Noise column height: For each column x, compute n = perlin8(x*45, t, t). Wave height is scaled as:
  *        thisVal = (1 + SEGMENT.intensity/64) * n / 2;
  *      If audio volume is available, it further scales as:
  *        thisVal = (thisVal / 32) * volumeSmth;          // smooth amplitude modulation
@@ -22179,15 +22700,19 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__CHRISTMAS_MUSICAL_01,
             #endif
             Effect_DevStage::Dev);
+  #endif
 
-  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_ID,
-            &mAnimatorLight::EffectAnim__Christmas_Musical__01,
-            PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01,
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_ID,
+            &mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01,
+            PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHRISTMAS_MUSICAL_01,
+            PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01,
             #endif
             Effect_DevStage::Dev);
+  #endif
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_ID,
             &mAnimatorLight::EffectAnim__Christmas_Musical__01,
             PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01,
@@ -22230,7 +22755,7 @@ void mAnimatorLight::LoadEffects()
   #endif
 
   /**
-   * 2D (No Audio)
+   * 2D (No Audio) : UNSTABLE MARKED
    **/
   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   addEffect(EFFECTS_FUNCTION__2D__BLACK_HOLE__ID,        
@@ -22509,7 +23034,7 @@ void mAnimatorLight::LoadEffects()
 
 
   /**
-   * Audio Reactive 1D
+   * Audio Reactive 1D: UNSTABLE ASSIGNED
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_RIPPLE_PEAK__ID,
@@ -22526,7 +23051,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_PERLINE_MOVE,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
 
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_AURORA__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Aurora,
@@ -22534,7 +23059,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_AURORA,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
 
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_GRAV_CENTER__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_GravCenter,
@@ -22542,7 +23067,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_GRAV_CENTER,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
 
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_GRAV_CENTRIC__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_GravCentric,
@@ -22582,7 +23107,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_MATRIPIX,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
 
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_MID_NOISE__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_MidNoise,
@@ -22598,7 +23123,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_NOISE_FIRE,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
 
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_NOISE_METER__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseMeter,
@@ -22614,7 +23139,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_PIXEL_WAVE,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
             
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_PLASMOID__ID,  
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Plasmoid, 
@@ -22670,7 +23195,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_DJ_LIGHT,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
   
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_FREQ_MAP__ID,  
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_FreqMap, 
@@ -22702,7 +23227,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_FREQ_WAVE,
             #endif
-            Effect_DevStage::Release);
+            Effect_DevStage::Unstable);
   
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_NOISE_MOVE__ID,  
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseMove, 
@@ -22718,7 +23243,7 @@ void mAnimatorLight::LoadEffects()
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_WATERFALL,
             #endif
-            Effect_DevStage::Release); 
+            Effect_DevStage::Unstable); 
   #endif
 
   /**
