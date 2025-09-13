@@ -1633,6 +1633,20 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 #ifdef DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
 
+// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
+
+// inwaves, seems to be chasing
+// twinkle/flash, is just constant twinkle back and forth
+// flashing, in chasing/flash, appears to be twinkle/flash
+
+// most recent observations with real world lights, lets make sure we are doing this 
+
+// inwaves, never turns off any lights, they just dim
+// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
+// slo glo, I think we have it well now. 
+// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
+// twinkle/flash, how no reversing.
+
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
@@ -1643,13 +1657,16 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
   #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
 
+  #define ENABLE_FEATURE_LIGHTING__CHRISTMAS_EFFECT_PRECOMPUTE_POWF_INTO_COLOURDATA_BUFFER
+
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
 
   #define ENABLE_EFFECT_DESCRIPTIONS
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
-  #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
 
 //   #define ENABLE_ADVANCED_DEBUGGING
 //   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME

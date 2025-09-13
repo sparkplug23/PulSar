@@ -39,6 +39,8 @@
 #error "dont be default yet"
 #endif
 
+#define ALOG_COL32(c,i) ALOG_INF(PSTR("%d c %d,%d,%d,%d"), i, R(c), G(c), B(c), W(c));
+
 
 #define ENABLE_DEVFEATURE_LIGHTING__SLOW_GLOW_LEGACY_FIX
 
@@ -1106,9 +1108,20 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
     uint16_t EffectAnim__Manual__ControlledFromAnotherModule();
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
     uint16_t EffectAnim__Christmas_Slo_Glo__01();
-    
+    uint16_t EffectAnim__Christmas_Sequential__01();
+    uint16_t EffectAnim__Christmas_InWaves__01();
+    uint16_t EffectAnim__Christmas_ChasingFlash__01();
+    uint16_t EffectAnim__Christmas_TwinkleFlash__01();
+    uint16_t EffectAnim__Christmas_Slo_Glo__02();
+    uint16_t EffectAnim__Christmas_Sequential__02();
+    uint16_t EffectAnim__Christmas_InWaves__02();
+    uint16_t EffectAnim__Christmas_ChasingFlash__02();
+    uint16_t EffectAnim__Christmas_TwinkleFlash__02();
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+    uint16_t EffectAnim__Christmas_Slo_Glo__02();    
     uint16_t EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base(bool is_slo_glo);
     uint16_t EffectAnim__Christmas_Slo_Glo_Plus__01();
     uint16_t EffectAnim__Christmas_Sequential_Plus__01();
@@ -1608,41 +1621,24 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Christmas Multifunction Controller: Replication of vintage 8 function controllers
        * Replicate how traditional 2/4 ouput controllers and their effects look
-          - Option1: Make the same LEDs maintain colour, as if they are painted glass bulbs. So a sequence of 4 RGBO would mean every 1 pixel in order would be turned off
-          - Option2: Replicate the same effects, but keep as many LEDs on as possible.
-          - These should be an optional flag
-          - Another optional flag should be "instant" vs "filament" when turning on/off, ie keep the added fade on/off of traditional lights by keeping a 0.75 second blending
-          - Another flag will be to limit palette up to only 5 outputs, like the best controllers out there, otherwise extend effect into full length.
-        Palette is drawn "inorder" and animations are drawn with X outputs (4 or 5 like normal lights) to create the effect like real lights
-          1 - Combination (will use param to call the others internally)
-          2 - In Waves
-          3 - Sequentials
-          4 - Slo-Glo
-          5 - Chasing / Flash
-          6 - Slow Fade
-          7 - Twinkle / Flash
-          8 - Steady on
        **/
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__COMBINATION_ID,
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__IN_WAVES_ID,
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_01_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_01_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_01_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_FLASH_01_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_FLASH_01_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_02_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_02_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_02_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_FLASH_02_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_FLASH_02_ID,
       #endif
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_ID,
-
-
+      // EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__COMBINATION_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_02_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_PLUS__ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_PLUS__ID,
-
-
-
-      #endif
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_AND_FLASHING__ID,
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLOW_FADE__ID,
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_AND_FLASH__ID,
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__STEADY_ON__ID,
       #endif
 
       /**
@@ -3048,6 +3044,8 @@ typedef struct Segment
     uint16_t _coldataLen;
     inline byte* ColourData(){ return coldata; };
     inline uint16_t ColourDataLength(){ return _coldataLen; };
+    inline const byte* ColourData() const { return coldata; }// add these const overloads
+    inline uint16_t ColourDataLength() const { return _coldataLen; }
 
 
 

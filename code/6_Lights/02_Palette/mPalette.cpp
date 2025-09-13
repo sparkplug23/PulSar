@@ -1804,13 +1804,13 @@ bool mPalette::IsPaletteGradient(uint16_t palette_id) {
   else if (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID &&
            palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID) {
     uint16_t index = palette_id - PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
-    encoding = static_palettes[index].encoding;
+    return true;
   }
   // Static CRGB gradient palettes (e.g., sunset gradients)
   else if (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID &&
            palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID) {
     uint16_t index = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    encoding = static_palettes[index].encoding;
+    return true;
   }
   // Other static palettes (like colourful defaults)
   else if (palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID &&
