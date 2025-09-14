@@ -3154,6 +3154,10 @@ void mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults)
     sOpt = tkr_anim->extractModeDefaults(fx, "mi");   if (sOpt >= 0) mirror    = (bool)sOpt; // NOTE: setting this option is a risky business
     sOpt = tkr_anim->extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
     sOpt = tkr_anim->extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y  = (bool)sOpt; // NOTE: setting this option is a risky business
+    sOpt = tkr_anim->extractModeDefaults(fx, "p0");   if (sOpt >= 0) params_user[0]   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p1");   if (sOpt >= 0) params_user[1]   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p2");   if (sOpt >= 0) params_user[2]   = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p3");   if (sOpt >= 0) params_user[3]   = sOpt;
 
     // --- New: s# = segment color defaults (s0..s4), hex in RGBWC (short/long) ---
     // examples: s1=111111 (white RGB), s0=F (R=FF), s2=abcde (a,b,c,d,e => R,G,B,W,C)
@@ -5006,7 +5010,9 @@ void mAnimatorLight::setTargetFps(uint8_t fps) {
 
 void mAnimatorLight::setEffect(uint8_t segid, uint8_t m) {
   
+    #ifdef ENABLE_EFFECT_DESCRIPTIONS  
     ALOG_INF(PSTR("description len=%d"),effects.description.size());
+    #endif
 
   if (segid >= segments.size()) return;
    

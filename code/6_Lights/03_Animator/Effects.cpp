@@ -13794,40 +13794,79 @@ static const char PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM =
 /*******************************************************************************************************************************************************************************************************************
  * @description : Debug: View Pixel Range
  *                Highlights a contiguous pixel range for inspection (e.g., a suspect span).
- *                Controls
- *                  • params_user[0] = start index (inclusive)
- *                  • params_user[1] = end index   (exclusive)
- *                Colors
- *                  • Background = C1 (Primary); highlighted range may be customized in code.
- *                Notes
- *                  • Sliders are intentionally unused; range is fed via params_user[].
- * @note        : Converted from WLED Effects.
+ *
+ * BEHAVIOR
+ *   • Fills the entire segment with background (SegColor 1), then paints the
+ *     requested [start, end) range in foreground (SegColor 0).
+ *   • End index is EXCLUSIVE. Both indices are clamped to [0, SEGLEN].
+ *   • If start > end, they are swapped for convenience.
+ *
+ * INPUT SOURCES
+ *   • Default (CB2 OFF): use params_user[0] = start, params_user[1] = end.
+ *       - These accept large values (set via MQTT/automation).
+ *   • Quick test (CB2 ON): use Custom1 = start, Custom2 = end (0..255).
+ *
+ * COLORS
+ *   • Foreground: SegColor 0 (C0)
+ *   • Background: SegColor 1 (C1)
+ *
+ * NOTES
+ *   • Sliders SX/IX are unused. Only C1/C2 matter when CB2 is ON.
+ *   • Designed for quick bench diagnostics and mapping verification.
+ * @note        : Converted from WLED Effects (debug utility), adapted for dual-source indices.
  *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
 {
   // Fill entire segment with background color (SegColor 1)
   SEGMENT.fill(SEGCOLOR_U32(1));
 
-  // Read params once
-  uint32_t start = SEGMENT.params_user[0];
-  uint32_t end   = SEGMENT.params_user[1];
+  // Decide source of indices:
+  //  - CB2 OFF → params_user[0/1] (wide, MQTT-friendly)
+  //  - CB2 ON  → custom1/custom2   (0..255 quick slider test)
+  uint32_t start = 0, end = 0;
+  if (SEGMENT.check2) {
+    start = (uint32_t)SEGMENT.custom1;
+    end   = (uint32_t)SEGMENT.custom2;
+  } else {
+    start = SEGMENT.params_user[0];
+    end   = SEGMENT.params_user[1];
+  }
 
-  // Safety checks
-  if (end > SEGLEN) end = SEGLEN;
-  if (start >= end) return FRAMETIME;  // nothing to draw if invalid range
+  // Clamp & normalize
+  if (start > end) { uint32_t tmp = start; start = end; end = tmp; } // swap if reversed
+  if (end > SEGLEN)   end   = SEGLEN;
+  if (start > SEGLEN) start = SEGLEN;  // empty range if start beyond
 
-  // Draw range in foreground color (SegColor 0)
-  for (uint32_t i = start; i < end; i++) {
+  // Draw the [start, end) range in foreground color (SegColor 0)
+  for (uint32_t i = start; i < end; ++i) {
     SEGMENT.setPixelColor(i, SEGCOLOR_U32(0));
   }
 
   return FRAMETIME;
 }
+
+// ----------------------------- UI config & description -----------------------------
+
 static const char PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
-"DB Pixel Range@!;Fx,Bg;";  // parameters come from params_user[], not UI
+"DB Pixel Range@"                                  // Name
+",,Start,Stop,,,Use Sliders"   // fields: sx,ix,c1,c2,,,,cb2
+";"
+"Fx,Bg"                                            // Segment color labels
+";"
+""                                                 // Palette picker (none)
+";"
+"01"                                               // 1D icon
+";"
+"c1=0,c2=255,o2=0,p0=0,p1=100"                                  // defaults: start=0,end=10, CB2 off, also setting the param_user values to defaults for stability
+;
+
 static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
-"Shows a supplied [start,end] pixel range for quick diagnostics.\n\r"
-"Supply indices via params_user[0] and params_user[1].";
+"Show a [start,end) pixel range.\n\r"
+"CB2 ON: use C1/C2 sliders (0..255).\n\r"
+"CB2 OFF: use params_user[0/1] (MQTT).\n\r"
+"FG=C0, BG=C1. End index is exclusive.\n\r"
+"Indices are clamped; start/end auto-swap if reversed.";
+
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
 /********************************************************************************************************************************************************************************************************************
@@ -14819,9 +14858,6 @@ static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Christmas: Sequential — stubs
-// ─────────────────────────────────────────────────────────────────────────────
 // ============================================================================
 // XmasBase — tiny shared helpers
 // ============================================================================
@@ -14944,9 +14980,44 @@ namespace XmasBase {
 } // namespace XmasBase
 
 
-// ============================================================================
-// XmasSequential — per-effect style knobs
-// ============================================================================
+/************************************************************************************************************************************
+ * EFFECT: Christmas Sequential (01)
+ *
+ * SUMMARY
+ *   Classic “sequential” step-chase with fading tails:
+ *     • Each slot (palette colour or group) turns on in sequence.
+ *     • Active slot crossfades with the next while the previous slot decays.
+ *     • Supports 2, 4, or 5 logical slots depending on palette and pairing.
+ *     • Optional 4-speed gear schedule (CB3) rotates slot duration automatically.
+ *
+ * CONTROLS
+ *   SX (Speed)     : scales the overall tempo when not using scheduled mode.
+ *   IX (Intensity) : not used here (reserved for palette scaling in C3).
+ *   C2 (Custom2)   : reverse probability at wrap (0 disables, >0 chance per full rotation).
+ *   C3 (Custom3)   : palette limit scaler for 4-slot gradient mode (ignored in exact-colour modes).
+ *   CB1 (Check1)   : Paired ON = two groups (0,2 vs 1,3). Paired OFF = 4 or 5 slots.
+ *   CB2 (Check2)   : Palette order swap (pair flip).
+ *   CB3 (Check3)   : Enable 4-gear schedule. Slot length cycles:
+ *                     – Gear0: 3s × 15s duration
+ *                     – Gear1: 3s × 15s duration
+ *                     – Gear2: 1s × 10s duration
+ *                     – Gear3: 1s × 10s duration
+ *                   Schedule advances after full rotations, never mid-slot.
+ *
+ * BEHAVIOUR
+ *   • Detects 5-slot mode only when palette has exactly 5 discrete colours and Paired=OFF.
+ *   • Otherwise uses 2-slot (paired) or 4-slot (default) mapping.
+ *   • In each frame, computes current slot, next slot, and previous slot brightness.
+ *   • Brightness envelopes:
+ *        – Next slot rises at slot start (smooth cubic ease).
+ *        – Current slot decays near slot end with exponential tail.
+ *        – Previous slot continues trailing with longer exponential decay.
+ *   • Direction flipping is optional (C2 probability) and only checked at full rotation wraps.
+ *   • Scheduled mode uses aux4 to store [gear, rotation count], updated only on cycle wrap.
+ *
+ * RETURNS
+ *   FRAMETIME
+ ************************************************************************************************************************************/
 namespace XmasSequential {
   // Base continuous mapping (used when schedule OFF)
   static constexpr float SPEED_T_FAST_S    = 0.45f;
@@ -14967,13 +15038,7 @@ namespace XmasSequential {
   // Ensure two lights are always visibly on
   static constexpr float CUR_MIN_FLOOR  = 0.04f; // small floor for current slot
   static constexpr float PREV_MIN_FLOOR = 0.08f; // tail never fully off
-
 }
-
-// ============================================================================
-// Christmas: Sequential (01) — 5-step when palette has exactly 5 colours,
-// unless Paired is ON (then use first 4 colours + 2-group pairing).
-// ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
 {
   const uint16_t len = SEGMENT.length();
@@ -15132,18 +15197,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
   SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
-
-
-
-
-
-// =================================================================================================
-// Christmas: Sequential — PROGMEM Config (01)
-// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-// =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_01[] PROGMEM =
 "XMAS Sequential@"
-"!,Softness,,,Colour limit,Paired,Pair flip,4-speed schedule,,"  // labels
+"!,Softness,,,Colour limit,Paired,Pair flip,4-speed schedule,,"  // labels = lets add these to the others too, cb3 for animations default
 ";"
 ""                  // no segment colours
 ";"
@@ -15154,17 +15210,113 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_01[] PROGMEM =
 "sx=104,ix=128,o3=1,paln=RGBO"  // defaults; schedule off (cb3 unchecked in UI)
 // cb1,cb2,cb3 are checkboxes provided by your UI system
 ;
-
-// ≤15 words per line
 static const char PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_01[] PROGMEM =
-"Classic step-chase with filament decay.\n\r"
-"Two groups or four groups selectable.\n\r"
+"Classic chase with overlapping tails.\n\r"
+"Two, four, or five slot variants.\n\r"
 "Pair flip swaps palette order only.\n\r"
-"Schedule (CB3): cycle 4 fixed speeds.\n\r"
-"Speeds switch instantly after rotations.\n\r"
-"SX scales overall tempo.\n\r"
-"C3 limits palette colours/taps.";
+"CB3 schedule: cycles 4 fixed speeds.\n\r"
+"Gear switches only at rotation start.\n\r"
+"SX scales base cycle length.\n\r"
+"C3 scales palette taps or range.";
 
+
+/************************************************************************************************************************************
+ * EFFECT: Christmas — Slo-Glo (01)
+ *
+ * SUMMARY
+ *   Calm “hold → crossfade” rotation of palette colours across fixed logical slots.
+ *   Only two slots are ever illuminated at once: the current slot held fully on,
+ *   then a smooth crossfade into the next slot. Supports 2, 4, or “exact-5” slot
+ *   layouts depending on pairing and palette content. Direction can randomly flip
+ *   at slot boundaries. An optional Default Pattern scheduler alternates slow and
+ *   fast slot durations without visual jumps.
+ *
+ * CONTROLS
+ *   SX (Speed)     : When Default Pattern is OFF, maps to total cycle time.
+ *                    When Default Pattern is ON, SX is ignored (pattern drives rate).
+ *   IX (Intensity) : Crossfade fraction within a slot. Low IX = more “hold” time,
+ *                    high IX = longer crossfade.
+ *   C2 (Custom2)   : Direction flip probability at slot wrap (0..255). 0 = never flip.
+ *   C3 (Custom3)   : Colour limiter for 4-slot/gradient mode (narrows palette taps).
+ *   CB1 (check1)   : “Paired output” ON → 2 logical groups (channels 0&2, 1&3).
+ *                    OFF → 4 logical groups (or 5 when exact-5 palette is active).
+ *   CB2 (check2)   : “Pair flip” swaps order inside palette pairs (1↔2, 3↔4).
+ *   CB3 (check3)   : Enable Default Pattern scheduling: 3 s slots for 15 s, then
+ *                    1 s slots for 10 s, repeating. Slot length changes only at
+ *                    slot boundaries to avoid resets/jumps.
+ *   Palette        : Source for per-slot colours. Special case: an *exactly* 5-colour,
+ *                    non-gradient palette enables 5-slot mode (unless paired).
+ *
+ * MODES (slot topology)
+ *   • 5-slot mode  : Active when palette has exactly 5 discrete (non-gradient) colours
+ *                    AND pairing (CB1) is OFF. Each pixel’s group = (index % 5).
+ *   • 4-slot mode  : Default when not in 5-slot and pairing is OFF. Groups = channels 0..3.
+ *   • 2-slot mode  : When pairing (CB1) is ON. Physical channels (0,2) share group 0,
+ *                    (1,3) share group 1. If the palette is exact-5, we still use the
+ *                    first four exact colours and respect Pair flip (CB2).
+ *
+ * TIMING & SCHEDULING
+ *   Legacy timing (CB3 OFF)
+ *     • SX maps to a continuous cycle period via a curved map. Phase advances each frame.
+ *     • On *slot wrap* (moving from one slot to the next), direction may flip with
+ *       probability C2 (0..255).
+ *
+ *   Default Pattern (CB3 ON)
+ *     • A small scheduler struct (stored in SEGMENT.data) runs fixed sections:
+ *       15 s of 3-second slots, followed by 10 s of 1-second slots, repeating.
+ *     • The effect *never* changes slot length mid-slot. If a section expires mid-slot,
+ *       the new slot length takes effect at the *next* slot boundary.
+ *     • Direction flips only at slot boundaries, controlled by C2 probability.
+ *     • No resets of colour order occur when sections change; progression continues.
+ *
+ * COLOUR SELECTION
+ *   • 5-slot mode: pull exact palette indices 0..4 (with optional pair-flip inside 1..4).
+ *   • 4-slot/2-slot modes: either take the first four exact colours (when an exact-5
+ *     palette is paired), or sample the active palette across four taps. C3 can narrow
+ *     the sampling window to limit hue spread in gradient palettes.
+ *
+ * EASING WITHIN A SLOT
+ *   • Each slot time is divided into “hold” then “crossfade”.
+ *   • IX maps to crossfade fraction (hold = 1 − crossfade). Low IX yields longer hold,
+ *     high IX yields smoother, longer crossfades.
+ *   • Crossfade uses a smoothstep curve (t*t*(3−2*t)) and optional gamma on brightness.
+ *   • Only two groups are non-zero at any instant: the current (fading down) and the
+ *     next (fading up). Others are at floor (typically 0).
+ *
+ * STATE & MEMORY
+ *   • Direction flag and phase are kept in aux (legacy) or in the scheduler (pattern).
+ *   • Default Pattern allocates a small Sched struct in SEGMENT.data:
+ *       { section_start_ms, section_dur_ms, slot_ms, phase, last_slot, dir_rev }
+ *     This avoids consuming aux slots and ensures clean section/slot boundaries.
+ *   • No per-pixel buffers; colours are computed on the fly from palette and group.
+ *
+ * ALGORITHM FLOW (high-level)
+ *   1) Determine slot topology (2/4/5) from CB1 and palette inspection.
+ *   2) Resolve per-slot colours:
+ *        - 5-slot: exact indices 0..4 (apply pair-flip to 1..4).
+ *        - Paired exact-5: first four exact colours (apply 1↔2 pair-flip).
+ *        - Gradient/4-slot: four taps (optionally constrained by C3).
+ *   3) Compute timing:
+ *        - If CB3 ON: read section/slot timing from Sched, update at slot boundary.
+ *        - Else: map SX → cycle time and advance fractional phase.
+ *      On *slot wrap*: optionally flip direction with probability C2.
+ *   4) Compute within-slot sub-phase ‘sub’ (0..1) and split into hold/crossfade using IX.
+ *      Produce two brightness weights (current, next) via smoothstep + gamma.
+ *   5) For each pixel: pick its group (mod 5/mod 4/paired), then apply the group’s
+ *      brightness to the preselected colour. Write to LED buffer.
+ *
+ * EDGE CASES / NOTES
+ *   • Slot length changes (Default Pattern) never occur mid-slot; they take effect at
+ *     the *next* slot boundary to avoid abrupt colour resets.
+ *   • When pairing is ON, 5-slot mode is suppressed by design; channels are grouped 0/1.
+ *   • Pair flip (CB2) swaps only the *order* of paired palette entries; it does not
+ *     change the number of active slots.
+ *   • If the palette is gradient (not discrete), 5-slot mode is disabled.
+ *   • C2 = 0 disables direction flips entirely; values near 255 flip nearly every slot.
+ *
+ * RETURNS
+ *   FRAMETIME
+ ************************************************************************************************************************************/
 namespace XmasSloGlo {
   // Speed mapping (full rotation time)
   static constexpr float SPEED_T_FAST_S    = 0.60f;
@@ -15179,11 +15331,6 @@ namespace XmasSloGlo {
   static constexpr float FADE_GAMMA = 2.0f;
   static constexpr float FLOOR_MIN  = 0.00f;    // strict off for inactive slots
 }
-
-// ============================================================================
-// Christmas: Slo-Glo (01) — supports 5-slot when palette has exactly 5 colours,
-// unless Paired (check1) is ON (paired supersedes → use first 4 colours).
-// ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
 {
   const uint16_t len = SEGMENT.length();
@@ -15191,41 +15338,32 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
 
   // Controls
   const uint8_t SX = SEGMENT.speed;
-  const uint8_t IX = SEGMENT.intensity;   // maps to crossfade fraction
-  const uint8_t C2 = SEGMENT.custom2;     // reverse probability on wrap (0 = disabled)
-  const uint8_t C3 = SEGMENT.custom3;     // colour limit scaler (non-5-mode only)
+  const uint8_t IX = SEGMENT.intensity;   // crossfade fraction
+  const uint8_t C2 = SEGMENT.custom2;     // direction flip probability on slot wrap (0=off)
+  const uint8_t C3 = SEGMENT.custom3;     // colour-limit scaler (non-5-mode only)
 
   const bool two_outputs = SEGMENT.check1; // ON→2 groups (0,2)&(1,3); OFF→4 (or 5 if 5-mode)
-  const bool pair_flip   = SEGMENT.check2; // palette order swap only
+  const bool pair_flip   = SEGMENT.check2; // palette order swap
+  const bool patternDef  = SEGMENT.check3; // Default Pattern scheduler
 
-  // One-time init
-  if (SEGMENT.flags.animator_first_run) {
-    SEGMENT.aux1 = 0;         // phase16
-    SEGMENT.aux2 = 0;         // [15]=dir flag (managed by base helper)
-    SEGMENT.aux3 = millis();  // last_ms
-  }
-
-  // Decide 5-mode: exactly 5 discrete colours AND not paired
+  // ---- palette/slot determination ----
   const uint16_t pid         = SEGMENT.palette_id;
   const bool     pal_is_grad = mPaletteI->IsPaletteGradient(pid);
   const uint8_t  pal_exact   = mPaletteI->GetColoursInPalette(pid);
   const bool     five_base   = (!pal_is_grad && pal_exact == 5u);
   const bool     five_mode   = (five_base && !two_outputs);  // Paired supersedes 5-mode
 
-  // Slot count
   const uint8_t nPhys  = 4u;
   const uint8_t nLogic = five_mode ? 5u : (two_outputs ? 2u : 4u);
 
-  // Colours
-  uint32_t slotColor5[5] = {0,0,0,0,0};  // used in 5-mode
-  uint32_t outColor4[4]  = {0,0,0,0};    // used otherwise
+  uint32_t slotColor5[5] = {0,0,0,0,0};
+  uint32_t outColor4[4]  = {0,0,0,0};
 
   if (five_mode) {
-    // Exact indices 0..4 (apply pair_flip as 1↔2 and 3↔4; 0 unchanged)
     for (uint8_t k = 0; k < 5; ++k) {
       uint8_t palIdx = k;
       if (pair_flip && palIdx >= 1 && palIdx <= 4) {
-        const uint8_t block = (uint8_t)((palIdx - 1u) >> 1); // 0 for {1,2}, 1 for {3,4}
+        const uint8_t block = (uint8_t)((palIdx - 1u) >> 1); // {1,2} / {3,4}
         const uint8_t a = (uint8_t)(1u + (block << 1));
         const uint8_t b = (uint8_t)(a + 1u);
         palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
@@ -15234,26 +15372,134 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
         palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
         PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
     }
-  } else {
-    if (five_base && two_outputs) {
-      // Paired supersedes: force first 4 exact colours (ignore C3), still allow 1↔2 swap.
-      for (uint8_t k = 0; k < 4; ++k) {
-        uint8_t palIdx = k;
-        if (pair_flip && palIdx >= 1 && palIdx <= 3) {
-          const uint8_t a = 1u, b = 2u;
-          palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
-        }
-        outColor4[k] = SEGMENT.GetPaletteColour_ModeWrap(
-          palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+  } else if (five_base && two_outputs) {
+    for (uint8_t k = 0; k < 4; ++k) {
+      uint8_t palIdx = k;
+      if (pair_flip && palIdx >= 1 && palIdx <= 3) {
+        const uint8_t a = 1u, b = 2u;
+        palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
       }
-    } else {
-      // Normal 4-channel sampling (gradient-aware) with C3
-      XmasBase::fillOutColors4(SEGMENT, C3, pair_flip, outColor4);
+      outColor4[k] = SEGMENT.GetPaletteColour_ModeWrap(
+        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
+        PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
     }
+  } else {
+    XmasBase::fillOutColors4(SEGMENT, C3, pair_flip, outColor4);
   }
 
-  // Cycle length from SX
+  // ---- crossfade fraction from IX ----
+  auto clampf = [](float v, float a, float b){ return v < a ? a : (v > b ? b : v); };
+  float xfadeFrac = XmasSloGlo::XFADE_MIN_FR +
+                    (IX * (XmasSloGlo::XFADE_MAX_FR - XmasSloGlo::XFADE_MIN_FR) * (1.0f/255.0f));
+  xfadeFrac = clampf(xfadeFrac, XmasSloGlo::XFADE_MIN_FR, XmasSloGlo::XFADE_MAX_FR);
+  const float holdFrac = 1.0f - xfadeFrac;
+
+  // ---- Default Pattern (slot-driven scheduler) ----
+  struct Sched {
+    uint32_t slot_start_ms;     // when current slot began
+    uint32_t slot_ms;           // 3000 (slow) or 1000 (fast)
+    uint8_t  phase;             // 0=slow(3s slots for 15s), 1=fast(1s slots for 10s)
+    uint8_t  total_slots;       // 15 or 10 (slots per section)
+    uint8_t  slots_done;        // how many completed in current section
+    uint8_t  idx;               // current logical slot index [0..nLogic-1]
+    bool     dir_rev;           // direction flag
+  };
+
+  Sched* S = nullptr;
+
+  if (patternDef) {
+    if (!SEGMENT.allocateData(sizeof(Sched))) return FRAMETIME;
+    S = reinterpret_cast<Sched*>(SEGMENT.data);
+
+    auto setPhase = [&](uint8_t ph){
+      S->phase       = ph;                 // 0 slow, 1 fast
+      S->slot_ms     = (ph == 0) ? 3000u : 1000u;
+      S->total_slots = (ph == 0) ? 15u    : 10u;
+      S->slots_done  = 0u;
+    };
+
+    if (SEGMENT.flags.animator_first_run) {
+      S->idx          = 0u;                // start on slot 0 (e.g., red)
+      S->dir_rev      = false;
+      S->slot_start_ms= millis();
+      setPhase(0u);                         // start with slow 3s section
+    }
+
+    // Advance slots at boundaries (no mid-slot resets)
+    const uint32_t now       = millis();
+    const uint32_t elapsed   = now - S->slot_start_ms;
+
+    // If we crossed one or more slot boundaries, consume them one-by-one
+    while (elapsed >= S->slot_ms + (S->slot_start_ms - (now - elapsed))) {
+      // Move slot_start forward by exactly one slot (avoid drift)
+      S->slot_start_ms += S->slot_ms;
+
+      // Optional direction flip on every slot wrap
+      if (C2 && hw_random8() < C2) S->dir_rev = !S->dir_rev;
+
+      // Advance logical slot by direction
+      if (!S->dir_rev) {
+        S->idx = (uint8_t)((S->idx + 1u) % nLogic);
+      } else {
+        S->idx = (uint8_t)((S->idx + nLogic - 1u) % nLogic);
+      }
+
+      // Count slots in this section; if complete, switch section at this boundary
+      if (++S->slots_done >= S->total_slots) {
+        setPhase(S->phase ^ 1u);           // toggle 0↔1
+        // keep S->slot_start_ms as-is; next slot begins immediately with new slot_ms
+      }
+    }
+
+    // Current slot sub-phase [0..1)
+    const float sub = clampf((float)(now - S->slot_start_ms) / (float)S->slot_ms, 0.0f, 0.999999f);
+
+    // Compute current & next slot IDs (by direction)
+    const uint8_t idx     = S->idx;
+    const uint8_t idxNext = (!S->dir_rev)
+                          ? (uint8_t)((idx + 1u) % nLogic)
+                          : (uint8_t)((idx + nLogic - 1u) % nLogic);
+
+    // ---- easing: hold then crossfade within slot ----
+    auto smooth3 = [](float t)->float { t = t<0?0:(t>1?1:t); return t*t*(3.0f - 2.0f*t); };
+
+    float briG[5] = {0,0,0,0,0};
+    if (sub < holdFrac) {
+      briG[idx] = 1.0f;
+    } else {
+      const float t = (sub - holdFrac) / (1.0f - holdFrac + 1e-6f);
+      const float s = smooth3(t);
+      briG[idx]     = 1.0f - s;
+      briG[idxNext] = s;
+    }
+
+    // Emit pixels
+    if (five_mode) {
+      for (uint16_t i = 0; i < len; ++i) {
+        const uint8_t g   = (uint8_t)(i % 5u);
+        const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
+        SEGMENT.setPixelColor(i, AdjustColourWithBrightness(slotColor5[g], bri));
+      }
+    } else {
+      for (uint16_t i = 0; i < len; ++i) {
+        const uint8_t ch  = (uint8_t)(i % nPhys);
+        const uint8_t g   = two_outputs ? (uint8_t)(ch & 1u) : ch;
+        const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
+        SEGMENT.setPixelColor(i, AdjustColourWithBrightness(outColor4[ch], bri));
+      }
+    }
+
+    SEGMENT.cycle_time__rate_ms = FRAMETIME;
+    return FRAMETIME;
+  }
+
+  // ---- Legacy (no Default Pattern): speed curve from SX ----
+  if (SEGMENT.flags.animator_first_run) {
+    SEGMENT.aux1 = 0;        // phase16
+    SEGMENT.aux2 = 0;        // [15]=dir
+    SEGMENT.aux3 = millis(); // last_ms
+  }
+
   const uint32_t cycle_ms = XmasBase::mapSpeedToCycleMs(
     SX,
     XmasSloGlo::SPEED_T_FAST_S,
@@ -15261,61 +15507,54 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
     XmasSloGlo::SPEED_CURVE_POWER
   );
 
-  // Advance phase and update direction (reverse only on full wrap, per C2)
   const auto step    = XmasBase::advancePhase_16(SEGMENT, cycle_ms);
-  const bool dir_rev = XmasBase::updateDirectionOnWrap(SEGMENT, step.wrapped, C2);
+  const bool wrapped = step.wrapped;
 
-  // Map IX → crossfade fraction
-  float xfadeFrac = XmasSloGlo::XFADE_MIN_FR +
-                    (IX * (XmasSloGlo::XFADE_MAX_FR - XmasSloGlo::XFADE_MIN_FR) * (1.0f/255.0f));
-  if (xfadeFrac < XmasSloGlo::XFADE_MIN_FR) xfadeFrac = XmasSloGlo::XFADE_MIN_FR;
-  if (xfadeFrac > XmasSloGlo::XFADE_MAX_FR) xfadeFrac = XmasSloGlo::XFADE_MAX_FR;
-  const float holdFrac = 1.0f - xfadeFrac;
+  if (wrapped && C2 && hw_random8() < C2) {
+    SEGMENT.aux2 ^= 0x8000u; // toggle MSB as direction flag
+  }
+  const bool dir_rev = (SEGMENT.aux2 & 0x8000u) != 0;
 
-  // Slot index & subphase; render “current→next” or reverse thereof
   const float rotF = step.tCycle * (float)nLogic;
-  int   kF   = (int)floorf(rotF);
+  int kF = (int)floorf(rotF);
   if (kF >= (int)nLogic) kF = (int)nLogic - 1;
-  const float sub = rotF - (float)kF; // 0..1 time within the slot window
+  float sub = rotF - (float)kF;
 
-  int idx, idxNext;
+  uint8_t idx     = 0;
+  uint8_t idxNext = 0;
   if (!dir_rev) {
-    idx     = kF;
-    idxNext = (kF + 1) % nLogic;                 // forward crossfade
+    idx     = (uint8_t)kF;
+    idxNext = (uint8_t)((kF + 1) % nLogic);
   } else {
-    const int kR = (int)nLogic - 1 - kF;         // reverse mapping
-    idx     = kR;
-    idxNext = (kR - 1 + nLogic) % nLogic;        // reverse crossfade
+    const int kR = (int)nLogic - 1 - kF;
+    idx     = (uint8_t)kR;
+    idxNext = (uint8_t)((kR - 1 + nLogic) % nLogic);
   }
 
-  auto smooth3 = [](float t)->float {
-    t = fminf(fmaxf(t,0.0f),1.0f); return t*t*(3.0f - 2.0f*t);
-  };
+  // ---- easing: hold then crossfade within slot ----
+  auto smooth3 = [](float t)->float { t = t<0?0:(t>1?1:t); return t*t*(3.0f - 2.0f*t); };
 
-  // Group brightness (only two groups ever non-zero)
-  float briG[5] = {0,0,0,0,0}; // supports up to 5 groups
+  float briG[5] = {0,0,0,0,0};
   if (sub < holdFrac) {
-    briG[idx] = 1.0f;                            // hold fully on
+    briG[idx] = 1.0f;
   } else {
-    const float t = (sub - holdFrac) / fmaxf(1e-6f, (1.0f - holdFrac));
+    const float t = (sub - holdFrac) / (1.0f - holdFrac + 1e-6f);
     const float s = smooth3(t);
-    briG[idx]     = 1.0f - s;                     // fade down
-    briG[idxNext] = s;                            // fade up
+    briG[idx]     = 1.0f - s;
+    briG[idxNext] = s;
   }
 
   // Emit pixels
   if (five_mode) {
-    // 5-slot mapping: brightness by (i % 5), colour per slot
     for (uint16_t i = 0; i < len; ++i) {
       const uint8_t g   = (uint8_t)(i % 5u);
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(slotColor5[g], bri));
     }
   } else {
-    // 2/4-slot mapping: brightness by logical group; colours bound to physical channels 0..3
     for (uint16_t i = 0; i < len; ++i) {
-      const uint8_t ch  = (uint8_t)(i % nPhys);                 // 0..3
-      const uint8_t g   = two_outputs ? (uint8_t)(ch & 1u) : ch; // (0,2)->0 ; (1,3)->1  OR 0..3
+      const uint8_t ch  = (uint8_t)(i % nPhys);
+      const uint8_t g   = two_outputs ? (uint8_t)(ch & 1u) : ch;
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(outColor4[ch], bri));
     }
@@ -15324,14 +15563,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
   SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
-
-// =================================================================================================
-// Christmas: Slo-Glo — PROGMEM Config (01)
-// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-// =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
 "XMAS Slo-Glo@"
-"!,Softness,,Reverse randomness,Colour limit,Paired,Pair flip,,,"   // labels
+"!,Softness,,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"   // labels
 ";"
 ""                  // no segment colours
 ";"
@@ -15341,102 +15575,139 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
 ";"
 "sx=88,ix=144,c1=0,c2=0,c3=0,paln=RGBO"
 ;
-
-// ≤15 words per line, debug-friendly
 static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01[] PROGMEM =
 "Hold then crossfade; two slots active.\n\r"
-"Two or four logical groups.\n\r"
+"Two, four, or five logical groups.\n\r"
 "Pair flip swaps palette order only.\n\r"
-"SX sets rotation time.\n\r"
-"IX sets crossfade vs hold.\n\r"
-"C2 reverse on full wrap.\n\r"
-"C3 limits palette taps.";
+"SX sets rotation time (legacy mode).\n\r"
+"IX sets crossfade versus hold.\n\r"
+"C2 reverse at slot wrap, probabilistic.\n\r"
+"C3 limits palette taps in 4-mode.\n\r"
+"CB3 enables Default Pattern scheduling.\n\r"
+"Pattern: 3s slots for 15s, then 1s slots for 10s.\n\r"
+"Speed changes occur only at slot boundaries.";
 
-
+// ============================================================================
+// Xmas InWaves — constants & tuning
+// ============================================================================
+// Base speed curve (used when CB3 = OFF)
 namespace XmasInwaves {
-  // Speed mapping (full rotation = one full wave travel across groups)
-  static constexpr float SPEED_T_FAST_S    = 0.50f;
-  static constexpr float SPEED_T_SLOW_S    = 15.0f;
+  // Full-rotation time (seconds) mapped from SX by a power curve.
+  static constexpr float SPEED_T_FAST_S    = 0.50f;   // SX high  → ~0.5 s / rotation
+  static constexpr float SPEED_T_SLOW_S    = 5.00f;   // SX low   → ~5.0 s / rotation
   static constexpr float SPEED_CURVE_POWER = 1.70f;
 
-  // Wave shaping
-  static constexpr float SOFT_SHARP_MIN = 0.70f;   // broad (IX high)
-  static constexpr float SOFT_SHARP_MAX = 3.00f;   // sharp (IX low)
-  static constexpr float FADE_GAMMA     = 1.90f;   // incandescent-ish gamma
-  static constexpr float FLOOR_MIN      = 0.02f;   // minimum glow
+  // Wave shaping (IX → soft/sharp)
+  static constexpr float SOFT_SHARP_MIN = 0.70f;  // IX high  → broader lobes
+  static constexpr float SOFT_SHARP_MAX = 3.00f;  // IX low   → sharper peaks
+  static constexpr float FADE_GAMMA     = 1.90f;  // incandescent-ish gamma
+  static constexpr float FLOOR_MIN      = 0.02f;  // never fully black
 
-  // C1==1 scripted schedule
-  static constexpr float    C1_SLOT_SLOW_S_DEFAULT  = 7.0f;
-  static constexpr uint8_t  C1_PRE_FULL_ROTATIONS   = 4;
-  static constexpr uint32_t C1_RAMP_UP_MS           = 60u * 1000u;
-  static constexpr uint32_t C1_RAMP_DOWN_MS         = 40u * 1000u;
-  static constexpr float    C1_ROT_FAST_TARGET_S    = 0.25f; // fast peak
+  // CB3 “Default Pattern” (rotational schedule; switch only on rotation wrap)
+  // Phases: 0=FWD slow, 1=FWD fast, 2=REV fast, 3=REV slow, then repeat.
+  // Slow/fast chosen so each phase lasts ~8 seconds:
+  static constexpr float   DEF_ROT_T_SLOW_S          = 0.80f;  // 0.80 s per rotation (slow)
+  static constexpr float   DEF_ROT_T_FAST_S          = 0.25f;  // 0.25 s per rotation (fast)
+  static constexpr uint8_t DEF_ROTS_PER_PHASE_SLOW   = 10;     // 10 * 0.80 = 8.0 s
+  static constexpr uint8_t DEF_ROTS_PER_PHASE_FAST   = 32;     // 32 * 0.25 = 8.0 s
+}
 
-  // C1>1 windowed random modulation
-  static constexpr float C1_WIN_MIN_LOW_S  = 15.0f;
-  static constexpr float C1_WIN_MIN_MID_S  = 10.0f;
-  static constexpr float C1_WIN_MIN_HIGH_S =  1.0f;
-  static constexpr float C1_FAST_MIN_FR    = 0.12f;
-  static constexpr float C1_FAST_MIN_FR_LO = 0.95f;
-  static constexpr float C1_SLOW_MAX_FR_LO = 1.10f;
-  static constexpr float C1_SLOW_MAX_FR_HI = 1.25f;
-}// ============================================================================
 // ============================================================================
-// Christmas: In Waves (01) — dt-driven, C2-only reverse, auto 5-slot
+// EFFECT: Christmas — In Waves (01)
+// SUMMARY
+//   Cosine-like wave travels across logical groups (2/4 or auto 5-slot).
+//   • IX controls wave sharpness (low=peaky, high=soft).
+//   • SX sets base rotation speed (when CB3=OFF).
+//   • C2 gives reverse probability on full-rotation wrap (CB3=OFF only).
+//   • CB3 enables a 4-phase schedule (FWD slow → FWD fast → REV fast → REV slow).
+//     Phase changes happen ONLY at full-rotation boundaries.
+//
+// CONTROLS
+//   SX (Speed)      : Base rotation time (CB3=OFF).
+//   IX (Intensity)  : Wave sharpness (soft↔sharp).
+//   C2 (Custom2)    : Reverse probability at wrap (CB3=OFF).
+//   C3 (Custom3)    : Colour-limit scaler for 2/4-slot sampling.
+//   CB1 (check1)    : Paired outputs (2 groups: (0,2) & (1,3)).
+//   CB2 (check2)    : Palette order swap (pair flip).
+//   CB3 (check3)    : Default 4-phase schedule (CB3 ON ignores C2).
+//
+// RETURNS
+//   FRAMETIME
 // ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 {
   const uint16_t len = SEGMENT.length();
   if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
 
-  // Controls
-  const uint8_t SX = SEGMENT.speed;
-  const uint8_t IX = SEGMENT.intensity;   // wave softness
-  const uint8_t C1 = SEGMENT.custom1;     // speed-change: 0 fixed; 1 script; >1 windowed
-  const uint8_t C2 = SEGMENT.custom2;     // reverse probability on wrap (0 = off)
-  const uint8_t C3 = SEGMENT.custom3;     // colour limit (for 2/4-slot path)
+  // --- Controls ---
+  const uint8_t SX = SEGMENT.speed;       // base speed (CB3=OFF only)
+  const uint8_t IX = SEGMENT.intensity;   // wave softness → sharpness
+  const uint8_t C2 = SEGMENT.custom2;     // reverse prob. on wrap (CB3=OFF only)
+  const uint8_t C3 = SEGMENT.custom3;     // colour limit scaler (2/4-slot path)
 
-  const bool two_outputs = SEGMENT.check1; // ON→2 groups (0,2)&(1,3); OFF→4 (or 5 if auto)
-  const bool pair_flip   = SEGMENT.check2; // palette order swap only
+  const bool paired    = SEGMENT.check1;  // ON→2 groups (0,2)&(1,3); OFF→4 (or 5 if auto)
+  const bool pair_flip = SEGMENT.check2;  // palette order swap only
+  const bool schedCB3  = SEGMENT.check3;  // default pattern schedule
 
-  // One-time init
+  // --- One-time init for base accumulators ---
   if (SEGMENT.flags.animator_first_run) {
-    SEGMENT.aux0 = millis();  // start_ms for C1==1 script
-    SEGMENT.aux1 = 0;         // phase16
-    SEGMENT.aux2 = 0;         // [15]=dir_reverse, [14..0]=prev_phase15
-    SEGMENT.aux3 = millis();  // last_ms
-    SEGMENT.aux4 = 0;         // low byte will hold last_nLogic
+    SEGMENT.aux1 = 0;         // phase16 accumulator
+    SEGMENT.aux2 = 0;         // [15]=dir_flag (CB3 OFF path), [14..0]=prev_phase latch
+    SEGMENT.aux3 = millis();  // last_ms for dt integration
+    // aux4 no longer abused for CB3; see CB3 state below
   }
 
-  // Palette & five-slot decision (Paired supersedes)
+  // --- Palette topology → 2/4 or auto 5-slot ---
   const uint16_t pid         = SEGMENT.palette_id;
   const bool     pal_is_grad = mPaletteI->IsPaletteGradient(pid);
   const uint8_t  pal_exact   = mPaletteI->GetColoursInPalette(pid);
+  const bool five_mode = (!paired && !pal_is_grad && pal_exact == 5u);
 
-  const bool five_mode = (!two_outputs && !pal_is_grad && pal_exact == 5u);
-
-  ALOG_INF(PSTR("five %d"),five_mode);
-
-  // Logical groups
   const uint8_t nPhys  = 4u;
-  const uint8_t nLogic = five_mode ? 5u : (two_outputs ? 2u : 4u);
+  const uint8_t nLogic = five_mode ? 5u : (paired ? 2u : 4u);
 
-  // If nLogic changed (e.g., toggling Paired or switching to/from 5-color),
-  // re-seed the phase so there’s no skip/jump.
-  uint8_t &last_nlogic = *reinterpret_cast<uint8_t*>(&SEGMENT.aux4); // use low byte
-  if (last_nlogic != nLogic) {
-    SEGMENT.aux1 = 0;                // reset phase16
-    SEGMENT.aux2 = 0;                // clear reverse/prev_phase latch
-    SEGMENT.aux3 = millis();         // reset clock
-    last_nlogic  = nLogic;           // record current topology
+  // --- CB3 state (struct kept in SEGMENT.data only while CB3 is ON) ---
+  struct Cb3State {
+    uint8_t last_nlogic;  // remembered topology (avoid reinit on toggle)
+    uint8_t phase;        // 0..3: FwdSlow, FwdFast, RevFast, RevSlow
+    uint8_t rot_count;    // completed rotations within current phase
+    uint8_t pad;          // alignment (unused)
+  };
+  Cb3State* S = nullptr;
+  if (schedCB3) {
+    if (!SEGMENT.allocateData(sizeof(Cb3State))) return FRAMETIME;
+    S = reinterpret_cast<Cb3State*>(SEGMENT.data);
+    if (SEGMENT.flags.animator_first_run) {
+      S->last_nlogic = 0;        // force initialization
+      S->phase       = 0;        // start at FWD slow
+      S->rot_count   = 0;
+    }
   }
 
-  // Colours
-  uint32_t outColor4[4]  = {0,0,0,0};     // channel-bound (2/4-slot)
-  uint32_t slotColor5[5] = {0,0,0,0,0};   // slot-bound (5-slot)
+  // --- Handle topology change without resetting CB3 schedule ---
+  if (!schedCB3) {
+    // CB3 OFF: keep direction flag in aux2 MSB, stash last_nlogic in aux2 LSB
+    uint8_t &last_nlogic_base = *reinterpret_cast<uint8_t*>(&SEGMENT.aux2);
+    if (SEGMENT.flags.animator_first_run || last_nlogic_base != nLogic) {
+      SEGMENT.aux1 = 0;                         // reset phase16
+      SEGMENT.aux2 = (SEGMENT.aux2 & 0x80) | nLogic; // preserve dir bit (MSB)
+      SEGMENT.aux3 = millis();
+    }
+  } else {
+    // CB3 ON: store topology in the struct, keep schedule continuity
+    if (S->last_nlogic != nLogic) {
+      SEGMENT.aux1   = 0;        // reset phase16 to avoid visual hop
+      SEGMENT.aux2   = 0;        // clear base dir/prev latch (unused in CB3)
+      SEGMENT.aux3   = millis(); // reset clock base
+      S->last_nlogic = nLogic;   // do NOT reset phase/rot_count
+    }
+  }
+
+  // --- Colours ---
+  uint32_t outColor4[4]  = {0,0,0,0};     // 2/4 path (channel-bound)
+  uint32_t slotColor5[5] = {0,0,0,0,0};   // 5-slot exact indices
 
   if (five_mode) {
-    // Exact indices 0..4 (pair_flip swaps 1↔2, 3↔4)
     for (uint8_t k = 0; k < 5; ++k) {
       uint8_t palIdx = k;
       if (pair_flip && palIdx >= 1 && palIdx <= 4) {
@@ -15450,97 +15721,83 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
         PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
     }
   } else {
-    // 2/4 path: colours bound to channels (gradient/discrete + C3 + pair-flip)
     XmasBase::fillOutColors4(SEGMENT, C3, pair_flip, outColor4);
   }
 
-  // Base cycle from SX
-  uint32_t cycle_ms = XmasBase::mapSpeedToCycleMs(
-    SX,
-    XmasInwaves::SPEED_T_FAST_S,
-    XmasInwaves::SPEED_T_SLOW_S,
-    XmasInwaves::SPEED_CURVE_POWER
-  );
-
-  // C1 speed-change models
-  const uint32_t nowA = millis();
-  if (C1 == 1) {
-    const float    slot_slow_s   = XmasInwaves::C1_SLOT_SLOW_S_DEFAULT;
-    const uint32_t start_ms      = SEGMENT.aux0;
-    const uint32_t elapsed_ms    = nowA - start_ms;
-    const uint32_t full_slow_ms  = (uint32_t)lroundf(slot_slow_s * 1000.0f) * (uint32_t)nLogic;
-    const uint32_t pre_ms        = (uint32_t)XmasInwaves::C1_PRE_FULL_ROTATIONS * full_slow_ms;
-    if (elapsed_ms < pre_ms) {
-      cycle_ms = full_slow_ms;
-    } else if (elapsed_ms < pre_ms + XmasInwaves::C1_RAMP_UP_MS) {
-      const float u = (float)(elapsed_ms - pre_ms) / (float)XmasInwaves::C1_RAMP_UP_MS;
-      const float cur_rot_s = ((slot_slow_s * (float)nLogic) * (1.0f - u))
-                            + (XmasInwaves::C1_ROT_FAST_TARGET_S * u);
-      cycle_ms = (uint32_t)lroundf(cur_rot_s * 1000.0f);
-    } else if (elapsed_ms < pre_ms + XmasInwaves::C1_RAMP_UP_MS + XmasInwaves::C1_RAMP_DOWN_MS) {
-      const float v = (float)(elapsed_ms - (pre_ms + XmasInwaves::C1_RAMP_UP_MS))
-                    / (float)XmasInwaves::C1_RAMP_DOWN_MS;
-      const float target_rot_slow = 5.0f * (float)nLogic;
-      const float cur_rot_s = (1.0f * (1.0f - v)) + (target_rot_slow * v);
-      cycle_ms = (uint32_t)lroundf(cur_rot_s * 1000.0f);
-    } else {
-      cycle_ms = (uint32_t)lroundf(5.0f * (float)nLogic * 1000.0f);
-    }
-  } else if (C1 > 1) {
-    float win_s;
-    if (C1 <= 200) {
-      const float t = (float)(C1 - 1) / 199.0f;
-      win_s = XmasInwaves::C1_WIN_MIN_LOW_S + (XmasInwaves::C1_WIN_MIN_MID_S - XmasInwaves::C1_WIN_MIN_LOW_S) * t;
-    } else {
-      const float t = (float)(C1 - 200) / 55.0f;
-      win_s = XmasInwaves::C1_WIN_MIN_MID_S + (XmasInwaves::C1_WIN_MIN_HIGH_S - XmasInwaves::C1_WIN_MIN_MID_S) * t;
-    }
-    const uint32_t win_ms = (uint32_t)lroundf(win_s * 1000.0f);
-    const uint32_t bucket = (win_ms ? (nowA / win_ms) : nowA);
-    auto h01 = [](uint32_t x)->float {
-      x ^= x >> 17; x *= 0xed5ad4bbu; x ^= x >> 11; x *= 0xac4c1b51u;
-      x ^= x >> 15; x *= 0x31848babu; x ^= x >> 14; return (float)(x & 0xFFFFu) * (1.0f/65535.0f);
-    };
-    const float f      = win_ms ? ((nowA % win_ms) * (1.0f / (float)win_ms)) : 0.0f;
-    const float r0     = h01(bucket ^ (uint32_t)pid ^ 0xA5A5u);
-    const float r1     = h01((bucket+1u) ^ (uint32_t)pid ^ 0x5A5Au);
-    const float r_lerp = r0 + (r1 - r0) * f;
-
-    const float c      = (float)C1 * (1.0f/255.0f);
-    const float fmin   = XmasInwaves::C1_FAST_MIN_FR_LO
-                       - (XmasInwaves::C1_FAST_MIN_FR_LO - XmasInwaves::C1_FAST_MIN_FR) * powf(c, 1.5f);
-    const float fmax   = XmasInwaves::C1_SLOW_MAX_FR_LO
-                       + (XmasInwaves::C1_SLOW_MAX_FR_HI - XmasInwaves::C1_SLOW_MAX_FR_LO) * c;
-    const float factor = fmin + (fmax - fmin) * r_lerp;
-    cycle_ms = (uint32_t)lroundf((float)cycle_ms * fmaxf(0.05f, factor));
-    if (cycle_ms == 0) cycle_ms = 1;
-  }
-
-  // dt-based phase and C2 reverse
-  const auto step    = XmasBase::advancePhase_16(SEGMENT, cycle_ms);
-  const bool dir_rev = XmasBase::updateDirectionOnWrap(SEGMENT, step.wrapped, C2);
-
-  // Wave envelope
+  // --- Wave helper (shared) ---
   const float sharp = XmasInwaves::SOFT_SHARP_MIN
                     + (XmasInwaves::SOFT_SHARP_MAX - XmasInwaves::SOFT_SHARP_MIN)
                       * (1.0f - (IX * (1.0f/255.0f)));
+
   auto wave_val = [&](float phase01)->float {
-    phase01 -= floorf(phase01);
+    phase01 -= floorf(phase01);               // wrap to 0..1
     const float c = cosf(6.28318531f * phase01); // cos(2πx)
-    float v = 0.5f * (1.0f + c);                 // 0..1
-    v = powf(v, sharp);
+    float v = 0.5f * (1.0f + c);              // 0..1
+    v = powf(v, sharp);                       // soften/sharpen
     return v;
   };
 
-  const float base = dir_rev ? (1.0f - step.tCycle) : step.tCycle;
-
+  // --- Two execution paths: CB3 OFF (free-run) vs CB3 ON (scheduled) ---
   float briG[5] = {0,0,0,0,0};
-  for (uint8_t g = 0; g < nLogic; ++g) {
-    const float ofs = (float)g / (float)nLogic;
-    briG[g] = wave_val(base - ofs);
+
+  if (!schedCB3) {
+    // Base cycle from SX; reverse only on rotation wrap per C2
+    uint32_t cycle_ms = XmasBase::mapSpeedToCycleMs(
+      SX,
+      XmasInwaves::SPEED_T_FAST_S,
+      XmasInwaves::SPEED_T_SLOW_S,
+      XmasInwaves::SPEED_CURVE_POWER
+    );
+
+    const auto step     = XmasBase::advancePhase_16(SEGMENT, cycle_ms);
+    const bool dir_rev  = XmasBase::updateDirectionOnWrap(SEGMENT, step.wrapped, C2);
+    const float base    = dir_rev ? (1.0f - step.tCycle) : step.tCycle;
+
+    for (uint8_t g = 0; g < nLogic; ++g) {
+      const float ofs = (float)g / (float)nLogic;
+      briG[g] = wave_val(base - ofs);
+    }
+
+  } else {
+    // CB3 scheduled phases (switch ONLY at full-rotation boundaries)
+    uint8_t phase     = S->phase;       // 0..3
+    uint8_t rot_count = S->rot_count;   // completed rotations this phase
+
+    // Choose dir & rotation time for current phase
+    const bool phase_slow = (phase == 0 || phase == 3); // 0/3 = slow
+    const bool phase_fwd  = (phase == 0 || phase == 1); // 0/1 = forward
+    const bool dir_rev    = !phase_fwd;
+
+    const float rot_s = phase_slow ? XmasInwaves::DEF_ROT_T_SLOW_S
+                                   : XmasInwaves::DEF_ROT_T_FAST_S;
+    const uint32_t cycle_ms = (uint32_t)lroundf(rot_s * 1000.0f);
+
+    const auto step = XmasBase::advancePhase_16(SEGMENT, cycle_ms);
+
+    // On wrap: count rotations; if reached target, advance phase
+    if (step.wrapped) {
+      uint8_t rc = (uint8_t)(rot_count + 1u);
+      const uint8_t target = phase_slow
+        ? XmasInwaves::DEF_ROTS_PER_PHASE_SLOW
+        : XmasInwaves::DEF_ROTS_PER_PHASE_FAST;
+
+      if (rc >= target) {
+        rc    = 0;
+        phase = (uint8_t)((phase + 1u) & 0x03u);   // 0→1→2→3→0
+      }
+      S->rot_count = rc;
+      S->phase     = phase;
+    }
+
+    const float base = dir_rev ? (1.0f - step.tCycle) : step.tCycle;
+
+    for (uint8_t g = 0; g < nLogic; ++g) {
+      const float ofs = (float)g / (float)nLogic;
+      briG[g] = wave_val(base - ofs);
+    }
   }
 
-  // Render
+  // --- Emit ---
   if (five_mode) {
     for (uint16_t i = 0; i < len; ++i) {
       const uint8_t g   = (uint8_t)(i % 5u);
@@ -15549,8 +15806,8 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
     }
   } else {
     for (uint16_t i = 0; i < len; ++i) {
-      const uint8_t ch  = (uint8_t)(i % nPhys);                 // 0..3
-      const uint8_t g   = two_outputs ? (uint8_t)(ch & 1u) : ch;// (0,2)->0 ; (1,3)->1  OR 0..3
+      const uint8_t ch  = (uint8_t)(i % 4u);              // 0..3
+      const uint8_t g   = paired ? (uint8_t)(ch & 1u) : ch; // (0,2)->0 ; (1,3)->1  OR 0..3
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasInwaves::FADE_GAMMA, XmasInwaves::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(outColor4[ch], bri));
     }
@@ -15559,17 +15816,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
   SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
-
-
-
-// =================================================================================================
-// Christmas: In Waves — PROGMEM Config
-// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8(cb3 unused),9ep,10grp
-// Reverse enable checkbox removed; C2 alone controls reverse (0 = disabled).
-// =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
-"XMAS InWaves 1@"
-"Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,,,"
+"XMAS InWaves@"
+"Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"
 ";"
 ""                  // no segment colours
 ";"
@@ -15577,10 +15826,8 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
 ";"
 "1"                 // 1D effect icon
 ";"
-"sx=64,ix=160,c1=0,c2=0,c3=0,paln=RGBO"
+"sx=64,ix=160,c1=0,c2=0,c3=1,paln=RGBO"
 ;
-
-// ≤15 words per line, debug-friendly
 static const char PM_EFFECT_DESCRI__CHRISTMAS_INWAVES_01[] PROGMEM =
 "Sinusoidal wave across outputs; multiple slots lit.\n\r"
 "Two or four logical groups; colours bound to slots.\n\r"
@@ -15590,6 +15837,8 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_INWAVES_01[] PROGMEM =
 "C2: reverse on wrap; 0 disables.\n\r"
 "C3: colour limit; gradients capped.\n\r"
 "CB1: 2-outs; CB2: flip.";
+
+
 // ============================================================================
 // XmasChasingFlash — per-effect style knobs
 // ============================================================================
@@ -15887,6 +16136,10 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_FLASH_01[] PROGMEM =
 "CB1: 2-out; CB2: pair flip.\n\r"
 "C1: pulses per pair.";
 #endif
+
+#endif ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
 
 /************************************************************************************************************************************
@@ -17666,10 +17919,6 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_FLASH_02[] PROGMEM =
 "CB1: 2/4 outputs.\n\r"
 "CB2: pair flip.\n\r"
 "CB3: reverse.";
-
-#endif ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
-
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
 uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__02()
 {
@@ -25822,55 +26071,6 @@ void mAnimatorLight::LoadEffects()
   
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
-  /**
-   * Hardware Installation Helpers
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-  addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
-            PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
-            #endif
-            Effect_DevStage::Release);
-
-  addEffect(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,
-            PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING,
-            #endif
-            Effect_DevStage::Release);
-
-  addEffect(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
-            &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,
-            PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE,
-            #endif
-            Effect_DevStage::Release);
-
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
-
-  addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
-            PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
-            #endif
-            Effect_DevStage::Release);
-            
-  addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN__ID,
-            &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing_Button_Triggered,
-            PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN,
-            #endif
-            Effect_DevStage::Release);
-
-  #endif
-
-  #endif
 
   /**
    * Sun Position
@@ -26053,59 +26253,49 @@ void mAnimatorLight::LoadEffects()
   #endif
 
   /**
-   * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-  addEffect(EFFECTS_FUNCTION__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__ID,
-            &mAnimatorLight::EffectAnim__Manual__ControlledFromAnotherModule,
-            PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE,
-            #endif
-            Effect_DevStage::Release);
-  #endif
-
-  /**
    * Christmas Multifunction Controller: Replication of vintage 8 function controllers
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
   
-  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_01_ID,
-            &mAnimatorLight::EffectAnim__Christmas_Sequential__01,
-            PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_01,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_01,
-            #endif
-            Effect_DevStage::Alpha);
-    addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_01_ID,
-            &mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01,
-            PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01,
-            #endif
-            Effect_DevStage::Alpha);
     addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_01_ID,
             &mAnimatorLight::EffectAnim__Christmas_InWaves__01,
             PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__CHRISTMAS_INWAVES_01,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Release);
+  addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_01_ID,
+            &mAnimatorLight::EffectAnim__Christmas_Sequential__01,
+            PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_01,
+            #endif
+            Effect_DevStage::Release);
+    addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_01_ID,
+            &mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01,
+            PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_01,
+            #endif
+            Effect_DevStage::Release);
     addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_FLASH_01_ID,
             &mAnimatorLight::EffectAnim__Christmas_ChasingFlash__01,
             PM_EFFECT_CONFIG__CHRISTMAS_CHASING_FLASH_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__CHRISTMAS_CHASING_FLASH_01,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Release);
     addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_FLASH_01_ID,
             &mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__01,
             PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_FLASH_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_FLASH_01,
             #endif
-            Effect_DevStage::Alpha);
+            Effect_DevStage::Release);
 
+  #endif
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_02_ID,
             &mAnimatorLight::EffectAnim__Christmas_Sequential__02,
@@ -26142,9 +26332,6 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_FLASH_02,
             #endif
             Effect_DevStage::Alpha);
-  #endif
-
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
   
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_02_ID,
             &mAnimatorLight::EffectAnim__Christmas_Slo_Glo__02,
@@ -26777,6 +26964,69 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);  
   #endif
+
+  /**
+   * Hardware Installation Helpers
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
+            PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
+            #endif
+            Effect_DevStage::Release);
+
+  addEffect(EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting,
+            PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING,
+            #endif
+            Effect_DevStage::Release);
+
+  addEffect(EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
+            &mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range,
+            PM_EFFECT_CONFIG__HARDWARE__VIEW_PIXEL_RANGE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE,
+            #endif
+            Effect_DevStage::Release);
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
+
+  addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
+            PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING,
+            #endif
+            Effect_DevStage::Release);
+            
+  addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing_Button_Triggered,
+            PM_EFFECT_CONFIG__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN,
+            #endif
+            Effect_DevStage::Release);
+
+  #endif
+
+  #endif
+  /**
+   * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+  addEffect(EFFECTS_FUNCTION__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__ID,
+            &mAnimatorLight::EffectAnim__Manual__ControlledFromAnotherModule,
+            PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE,
+            #endif
+            Effect_DevStage::Release);
+  #endif
+
 
   uint16_t effectCount = effects.function.size();
   uint16_t effects_in_header_length = EFFECTS_FUNCTION__LENGTH__ID;
