@@ -22,7 +22,7 @@
  *   depending on the configured colour width.  
  * 
  *   For RGB/WRGB:
- *     - Uses `SEGMENT.GetPaletteColour_ModeWrap()` to retrieve the target palette colour.
+ *     - Uses `SEGMENT.GetPaletteColour()` to retrieve the target palette colour.
  *     - Stores both the starting colour (current pixels) and desired colour into the dynamic buffer.
  * 
  *   For RGBWW:
@@ -68,7 +68,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
   } else {
 
     // Handle RGB/WRGB cases
-    uint32_t desiredColour  = SEGMENT.GetPaletteColour_ModeWrap(0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t desiredColour  = SEGMENT.GetPaletteColour(0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     uint32_t startingColour = SEGMENT.getPixelColor(0);
 
     // SERIAL_DEBUG_COL32i("des", desiredColour, 0);
@@ -148,7 +148,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
     uint32_t colour;
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
-      colour = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE);
+      colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE);
       SEGMENT.setPixelColor(pixel, colour);
     }
     // SERIAL_DEBUG_COL32i("last", colour, 0);
@@ -167,7 +167,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
       DEBUG_LINE_HERE_TRACE
-      colour = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_COLOURS    
       Serial.printf("Static Colour --------------------------------------------------%d,%d,%d,%d\n\r", R(colour), G(colour), B(colour), W(colour));
@@ -257,7 +257,7 @@ uint16_t mAnimatorLight::EffectAnim__Palette_Variation()
     for (uint16_t pixel = 0; pixel < SEGLEN; ++pixel)
     {
       // Base colour from active palette, spanned across segment
-      base = SEGMENT.GetPaletteColour_ModeWrap(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE);
+      base = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE);
 
       // Symmetric jitter per channel in [-variance .. +variance]
       r_off = (int8_t)random8(2 * variance + 1) - variance;
@@ -377,11 +377,11 @@ uint16_t mAnimatorLight::EffectAnim__Bands_Palette_SegWidth()
     {
       uint16_t adjusted_pixel = (pixel + offset_shift) % SEGLEN;
 
-      uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+      uint32_t colour = SEGMENT.GetPaletteColour(
         palette_index,
         PALETTE_INDEX__IS_EXACT_COLOUR,
         PALETTE_MODE__FORCE_DISCRETE,
-        PALETTE_WRAP_OFF,
+        PALETTE_WRAP_HARDEDGE,
         NO_ENCODED_VALUE,
         ANIM_BRIGHTNESS_REQUIRED
       );
@@ -444,7 +444,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     uint32_t colour;
     for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
-      colour = SEGMENT.GetPaletteColour_ModeWrap(
+      colour = SEGMENT.GetPaletteColour(
         pixel,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__FORCE_GRADIENT,
@@ -470,7 +470,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     uint32_t colour;
     for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
-      colour = SEGMENT.GetPaletteColour_ModeWrap(
+      colour = SEGMENT.GetPaletteColour(
         pixel,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__FORCE_GRADIENT,
@@ -629,8 +629,8 @@ uint16_t mAnimatorLight::EffectAnim__Firefly()
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
   for (uint16_t i = 0; i < pixels_to_update; i++) {
-    // uint32_t colour = SEGMENT.GetPaletteColour_Legacy((SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.palette->colours_in_palette), PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
-    uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+    // uint32_t colour = SEGMENT.GetPaletteColour_Legacy((SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.palette->colours_in_palette), PALETTE_SPAN_OFF, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour(
         (SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.palette->colours_in_palette),
         PALETTE_INDEX__IS_EXACT_COLOUR,
         PALETTE_MODE__FORCE_DISCRETE,
@@ -784,9 +784,9 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
     {
       // Get primary color
       #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-      colour_pri = SEGMENT.GetPaletteColour_ModeWrap( i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
+      colour_pri = SEGMENT.GetPaletteColour( i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
       #else
-      colour_pri = SEGMENT.GetPaletteColour_ModeWrap( i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
+      colour_pri = SEGMENT.GetPaletteColour( i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
       #endif
 
       #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
@@ -815,9 +815,9 @@ uint16_t mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flick
       {
         // Get primary color for each pixel
         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-        colour_pri = SEGMENT.GetPaletteColour_ModeWrap( p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
+        colour_pri = SEGMENT.GetPaletteColour( p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
         #else
-        colour_pri = SEGMENT.GetPaletteColour_ModeWrap( p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
+        colour_pri = SEGMENT.GetPaletteColour( p, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE );
         #endif
 
         // If only one color in secondary palette, reuse it, otherwise get a new color for each pixel
@@ -1240,7 +1240,7 @@ uint16_t mAnimatorLight::EffectAnim__Rotating_Palette()
   if (need_repaint) {
     const bool wrap_mode = hard_edge ? PALETTE_WRAP_HARDEDGE : PALETTE_WRAP_SMOOTH;
     for (uint16_t p = 0; p < SEGLEN; ++p) {
-      const uint32_t col = SEGMENT.GetPaletteColour_ModeWrap(
+      const uint32_t col = SEGMENT.GetPaletteColour(
         p,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__DEFAULT,
@@ -1498,7 +1498,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
     for (uint16_t i = 0; i < len; ++i) {
       uint8_t slot   = (uint8_t)(i % vis_nonzero);  // fixed slot id along the strip
       uint8_t palidx = (uint8_t)(slot % n);         // initial palette mapping
-          uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+          uint32_t c = SEGMENT.GetPaletteColour(
             palidx,
             PALETTE_INDEX__IS_EXACT_COLOUR,
             PALETTE_MODE__DEFAULT,
@@ -1517,7 +1517,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
     const uint8_t vis_nonzero = (visible ? visible : 1);
     for (uint16_t i = write_slot; i < len; i += vis_nonzero) {
       uint8_t palidx = (uint8_t)(next_pal % n);
-      uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+      uint32_t c = SEGMENT.GetPaletteColour(
             palidx,
             PALETTE_INDEX__IS_EXACT_COLOUR,
             PALETTE_MODE__DEFAULT,
@@ -1603,7 +1603,7 @@ uint16_t mAnimatorLight::EffectAnim__TimeBased__HourProgress()
 
   // Fill desired colours for current progress
   for (uint16_t pixel = 0; pixel < progress; pixel++) {
-    uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+    uint32_t colour = SEGMENT.GetPaletteColour(
             pixel,
             PALETTE_INDEX__IS_SEGLEN_RANGE,
             PALETTE_MODE__DEFAULT,
@@ -1689,7 +1689,7 @@ static const char PM_EFFECT_DESCRI__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
  *
  * NOTES
  *   • Background uses: GetUnloadedPaletteColour_ModeWrap(…, IS_SEGLEN_RANGE, DEFAULT/Discrete, WRAP_SMOOTH, …).
- *   • Foreground uses: GetPaletteColour_ModeWrap(…, IS_EXACT_COLOUR, DEFAULT, WRAP_HARDEDGE, …) so we address exact entries.
+ *   • Foreground uses: GetPaletteColour(…, IS_EXACT_COLOUR, DEFAULT, WRAP_HARDEDGE, …) so we address exact entries.
  *   • Uses ANIM_BRIGHTNESS_REQUIRED only when painting desired colours; your animator applies the blend.
  *
  * RETURNS
@@ -1791,7 +1791,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
       const uint16_t offset = (uint16_t)(s * stride);
       for (uint16_t j = offset; j < len; j += (period ? period : 1)) {
         const uint8_t palidx = (uint8_t)(s % n);
-        const uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+        const uint32_t c = SEGMENT.GetPaletteColour(
           palidx,
           PALETTE_INDEX__IS_EXACT_COLOUR,
           PALETTE_MODE__DEFAULT,
@@ -1813,7 +1813,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
     const uint16_t offset = (uint16_t)(write_slot * stride);
     for (uint16_t j = offset; j < len; j += (period ? period : 1)) {
       const uint8_t palidx = (uint8_t)(next_pal % n);          
-        const uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+        const uint32_t c = SEGMENT.GetPaletteColour(
           palidx,
           PALETTE_INDEX__IS_EXACT_COLOUR,
           PALETTE_MODE__DEFAULT,
@@ -1884,7 +1884,7 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
  * Tuning tips
  * Make the pulse even more “late-blooming”: bump 4.0f to 6.0f or 8.0f in gamma = 1 + k*alpha.
  * Prefer purely sine-shaped fraction? Set Q = u_ease; (and optionally keep the powf(Q, gamma) for intensity).
- * Want discrete palette steps (no interpolation) on the primary? Flip PALETTE_DISCRETE_OFF to ON.
+ * Want discrete palette steps (no interpolation) on the primary? Flip PALETTE_MODE__DEFAULT to ON.
  **********************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 {
@@ -1967,7 +1967,7 @@ uint16_t mAnimatorLight::EffectAnim__Blend_Two_Palettes()
     uint32_t c;
     if (pid == pid_primary) {
       // Primary via segment helper (with brightness handling)
-      c = SEGMENT.GetPaletteColour_ModeWrap(
+      c = SEGMENT.GetPaletteColour(
         i,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__DEFAULT,
@@ -2043,7 +2043,7 @@ static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM =
  *
  * DETAILS
  * - Base layer:
- *   • Sample primary palette with PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF.
+ *   • Sample primary palette with PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE.
  *   • Scale by base brightness (C2), write directly (no animator).
  * - Twinkle layer:
  *   • A 16-bit per-frame seed (aux1) evolves for spatial variety.
@@ -2109,11 +2109,11 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
   // --- 1) Draw BACKGROUND (primary, PRELOADED palette) ---
   for (uint16_t i = 0; i < len; ++i) {
     uint8_t dummy_enc = 0;
-    uint32_t colour = SEGMENT.GetPaletteColour_ModeWrap(
+    uint32_t colour = SEGMENT.GetPaletteColour(
         i,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__DEFAULT,
-        PALETTE_WRAP_OFF,
+        PALETTE_WRAP_HARDEDGE,
         NO_ENCODED_VALUE);
     // Apply base brightness inside the effect (per NPBLg constraint)
     colour = scale_rgb_u32(colour, bri_base);
@@ -2285,7 +2285,7 @@ static const char PM_EFFECT_DESCRI__TWINKLE_OUT[] PROGMEM =
  *   • C1 (custom1)      : “Twinkle” blanking strength 0..255       →  Higher = slightly more frequent winks (still sparse).
  *   • Palette/Check1    : Colour source:
  *                           - Check1=ON: force segment-spanned gradient sampling from primary palette (smooth across SEGLEN).
- *                           - Check1=OFF: default palette sampling via GetPaletteColour_ModeWrap(...).
+ *                           - Check1=OFF: default palette sampling via GetPaletteColour(...).
  *   • SEGCOLOR(1)       : Background colour each frame (twinkles are blended over this).
  *
  * IMPLEMENTATION NOTES
@@ -2357,11 +2357,11 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Base(bool fade_up, bool show_decay,
         /*full visual*/ true
       );
     }
-    return SEGMENT.GetPaletteColour_ModeWrap(
+    return SEGMENT.GetPaletteColour(
       idx,
       PALETTE_INDEX__IS_SEGLEN_RANGE,
       PALETTE_MODE__DEFAULT,
-      PALETTE_WRAP_OFF,
+      PALETTE_WRAP_HARDEDGE,
       NO_ENCODED_VALUE
     );
   };
@@ -2545,7 +2545,7 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Glow() {
   return EffectAnim__Twinkle_Base(/*fade_up*/true, /*show_decay*/true, /*apply_decay_blanking*/true);
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_GLOW[] PROGMEM =
-"Twinkle Glow@"
+"Xmas Twinkle Glow@"
 "Speed,Intensity,Blanking strength,,,,,,,,"      // sx, ix, c1
 ";"
 ""
@@ -2592,7 +2592,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01()
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -2626,7 +2626,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_P
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -2662,7 +2662,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01()
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -2820,8 +2820,8 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
       uint32_t colour = SEGMENT.GetPaletteColour_Legacy(
         palette_index,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
-        PALETTE_WRAP_ON,
-        PALETTE_DISCRETE_OFF,
+        PALETTE_WRAP_SMOOTH,
+        PALETTE_MODE__DEFAULT,
         NO_ENCODED_VALUE
       );
       SEGMENT.setPixelColor(pixel, colour);
@@ -3118,8 +3118,8 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool 
       uint32_t colour = SEGMENT.GetPaletteColour_Legacy(
         palette_index,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
-        PALETTE_WRAP_ON,
-        PALETTE_DISCRETE_OFF,
+        PALETTE_WRAP_SMOOTH,
+        PALETTE_MODE__DEFAULT,
         NO_ENCODED_VALUE
       );
       SEGMENT.setPixelColor(pixel, colour);
@@ -3223,7 +3223,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azim
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -3258,7 +3258,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_
   uint32_t colour;
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour); 
   }
 
@@ -3836,7 +3836,7 @@ uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, 
     // RgbcctColor colour = RgbcctColor();
     // colour = SEGMENT.GetPaletteColour_Legacy(color_index);      
 
-    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color_index, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color_index, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel_index, colour);
 
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
@@ -3885,13 +3885,13 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
     // colour = SEGMENT.GetPaletteColour_Legacy(color);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
-    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
     SEGMENT.Set_DynamicBuffer_DesiredColour(startPos, colour);
 
     if ( dots == 2 ) 
     {
 
-      uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
       SEGMENT.Set_DynamicBuffer_DesiredColour(startPos+1, colour);
 
 
@@ -4407,7 +4407,7 @@ uint16_t mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRand
   else
   if(useIterateOverPalette)
   {
-    col_wipe = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+    col_wipe = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
   }
   else
   {
@@ -4428,11 +4428,11 @@ uint16_t mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRand
     else
     if(useIterateOverPalette)
     {
-      col_base = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+      col_base = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     }
     else
     {
-      col_base = SEGMENT.GetPaletteColour_Legacy(indexPixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+      col_base = SEGMENT.GetPaletteColour_Legacy(indexPixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
     }
 
     if (i < ledIndex) 
@@ -5161,7 +5161,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_
 
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint32_t col = color2;
-    if (usePalette) color1 = SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    if (usePalette) color1 = SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
     if (theatre) {
       if ((i % width) == SEGMENT.aux0) col = color1;
     } else {
@@ -5421,7 +5421,7 @@ uint16_t mAnimatorLight::EffectAnim__Breath()
   uint8_t lum = 30 + var;
   for(unsigned i = 0; i < SEGLEN; i++) 
   {
-    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR(1), SEGMENT.GetPaletteColour_ModeWrap(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH), lum) );
+    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR(1), SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH), lum) );
   }
 
   return FRAMETIME;
@@ -5470,7 +5470,7 @@ uint16_t mAnimatorLight::EffectAnim__Fade()
   uint8_t lum = triwave16(counter) >> 8;
 
   for(unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR_U32(1), SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON), lum) );
+    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR_U32(1), SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH), lum) );
   }
 
   return FRAMETIME;
@@ -5640,7 +5640,7 @@ uint16_t mAnimatorLight::EffectAnim__Fireworks_Starburst()
       float multiplier = (float)(hw_random8())/255.0f * 1.0f;
 
       if(SEGMENT.check1){
-        stars[j].color = SEGMENT.GetPaletteColour_ModeWrap(hw_random8(), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH); // colour from palette
+        stars[j].color = SEGMENT.GetPaletteColour(hw_random8(), PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH); // colour from palette
       }else{
         stars[j].color = CRGB(SEGMENT.color_wheel(hw_random8())); // default to random colour
       }
@@ -5869,7 +5869,7 @@ uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks()
           
           uint32_t spColor;
           if(SEGMENT.check1){
-            spColor = SEGMENT.GetPaletteColour_ModeWrap(sparks[i].colIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
+            spColor = SEGMENT.GetPaletteColour(sparks[i].colIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
           }else{
             spColor = (SEGMENT.palette_id) ? SEGMENT.color_wheel(sparks[i].colIndex) : SEGCOLOR(0); // Original was random colour wheel
           }
@@ -6045,7 +6045,7 @@ uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
           if (SEGMENT.is2D() && !(sparks[i].posX >= 0 && sparks[i].posX < cols)) continue;
           unsigned prog = sparks[i].col;
           // uint32_t spColor = (SEGMENT.palette_id) ? SEGMENT.color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
-          uint32_t spColor = SEGMENT.GetPaletteColour_ModeWrap(sparks[i].colIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
+          uint32_t spColor = SEGMENT.GetPaletteColour(sparks[i].colIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
           CRGBW c = BLACK; //HeatColor(sparks[i].col);
           if (prog > 300) { //fade from white to spark color
             c = color_blend(spColor, WHITE, uint8_t((prog - 300)*5));
@@ -7918,11 +7918,11 @@ uint16_t mAnimatorLight::EffectAnim__Oscillate()
         // const uint32_t c = SEGCOLOR_U32(j % 5); // s0..s4
         // Use palette colours
         uint16_t adjusted_pixel = j % colours_in_palette;
-        uint32_t c = SEGMENT.GetPaletteColour_ModeWrap(
+        uint32_t c = SEGMENT.GetPaletteColour(
           adjusted_pixel,
           PALETTE_INDEX__IS_EXACT_COLOUR,
           PALETTE_MODE__FORCE_DISCRETE,
-          PALETTE_WRAP_OFF,
+          PALETTE_WRAP_HARDEDGE,
           NO_ENCODED_VALUE,
           ANIM_BRIGHTNESS_REQUIRED
         );
@@ -9288,7 +9288,7 @@ uint16_t mAnimatorLight::EffectAnim__Popcorn()
             {
               popcorn[i].colIndex = tkr_anim->hw_random8();
             } else {
-              byte col = tkr_anim->hw_random8(0, NUM_COLORS);
+              byte col = tkr_anim->hw_random8(0, NUMBER_SEGMENT_COLOURS);
               if (!pSEGCOLOR(2) || !pSEGCOLOR(col)) col = 0;
               popcorn[i].colIndex = col;
             }
@@ -9296,7 +9296,7 @@ uint16_t mAnimatorLight::EffectAnim__Popcorn()
         }
         if (popcorn[i].pos >= 0.0f) { // draw now active popcorn (either active before or just popped)
           uint32_t col = pSEGMENT.color_wheel(popcorn[i].colIndex);
-          if (!pSEGMENT.palette_id && popcorn[i].colIndex < NUM_COLORS) col = pSEGCOLOR(popcorn[i].colIndex);
+          if (!pSEGMENT.palette_id && popcorn[i].colIndex < NUMBER_SEGMENT_COLOURS) col = pSEGCOLOR(popcorn[i].colIndex);
           unsigned ledIndex = popcorn[i].pos;
           if (ledIndex < pSEGLEN) pSEGMENT.setPixelColor(indexToVStrip(ledIndex, stripNr), col);
         }
@@ -9516,11 +9516,11 @@ uint16_t mAnimatorLight::EffectAnim__GlowSpots()
     if (p < 0) break; // fully occupied
 
     // Lock base colour from palette at this position (preloaded access)
-    uint32_t col = SEGMENT.GetPaletteColour_ModeWrap(
+    uint32_t col = SEGMENT.GetPaletteColour(
       (uint16_t)p,
       PALETTE_INDEX__IS_SEGLEN_RANGE,
       PALETTE_MODE__DEFAULT,
-      PALETTE_WRAP_OFF,
+      PALETTE_WRAP_HARDEDGE,
       NO_ENCODED_VALUE
     );
     uint8_t sr = (col >> 16) & 0xFF;
@@ -10140,7 +10140,7 @@ static const char PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN[] PROGMEM =
  * @description : Palettes Interleaved (Lit Pattern) — using *_ModeWrap APIs
  *                C1=0: SX/IX are per-band lengths (px). Alternate pal1/pal2 bands; each band maps that palette’s full 0→255.
  *                C1=1: Both palettes span the full segment (0→255 over SEGLEN); SX/IX only switch which palette shows.
- *                Primary palette via SEGMENT.GetPaletteColour_ModeWrap; secondary via GetUnloadedPaletteColour_ModeWrap.
+ *                Primary palette via SEGMENT.GetPaletteColour; secondary via GetUnloadedPaletteColour_ModeWrap.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
 {
@@ -10166,7 +10166,7 @@ uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
 
       uint32_t col;
       if (use_pal1) {
-        col = SEGMENT.GetPaletteColour_ModeWrap(
+        col = SEGMENT.GetPaletteColour(
           idx8,
           PALETTE_INDEX__IS_255_RANGE,   // we generated a 0–255 index
           PALETTE_MODE__DEFAULT,
@@ -10208,7 +10208,7 @@ uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
 
       uint32_t col;
       if (pos_in_cycle < len1) {
-        col = SEGMENT.GetPaletteColour_ModeWrap(
+        col = SEGMENT.GetPaletteColour(
           gidx,
           PALETTE_INDEX__IS_255_RANGE,   // already scaled to 0–255
           PALETTE_MODE__DEFAULT,
@@ -10292,11 +10292,11 @@ uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved()
     // Alternate between Palette 1 and Palette 2
     if (i % 2 == 0) {
       // Use Palette 1 for even indices
-      colour = SEGMENT.GetPaletteColour_Legacy(index1, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+      colour = SEGMENT.GetPaletteColour_Legacy(index1, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
       index1 = (index1 + 1) % palette1Length; // Wrap Palette 1
     } else {
       // Use Palette 2 for odd indices
-      colour = SEGMENT.GetPaletteColour_Legacy(index2, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+      colour = SEGMENT.GetPaletteColour_Legacy(index2, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
       index2 = (index2 + 1) % palette2Length; // Wrap Palette 2
     }
 
@@ -10361,7 +10361,7 @@ uint16_t mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2
   if (color == color1 && do_palette)
   {
     for (int i = 0; i < SEGLEN; i++) {
-      SEGMENT.setPixelColor(i, SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE));
+      SEGMENT.setPixelColor(i, SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE));
     }
   }
   else
@@ -13294,7 +13294,7 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
   // RgbcctColor colour = RgbcctColor();
   // for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   // {    
-  //   colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+  //   colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
   //   SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour);
   // }
 
@@ -13545,7 +13545,7 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
   uint32_t colour = 0;//RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
   
   
@@ -13583,7 +13583,7 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
   uint32_t colour = 0;//RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
   
   
@@ -13650,12 +13650,12 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS[] PROGMEM =
-"Debug: Visualize Busses (Hue)@"  // Name
+"DB Visualize Busses (Hue)@"  // Name
 ",Saturation,,,,StartPiX,Alternate,,,"    // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                // ----------------------------------------- Sliders/SegCols
 ""                                 // Segment Colour Names (none)
 ";"                                // ----------------------------------------- SegCols/PalPicker
-"!"                                 // palette picker (not used)
+""                                 // palette picker (not used) No palette used.
 ";"                                // ----------------------------------------- PalPicker/is1D2D
 "1"                                 // icon flags: 1D/strip
 ";"                                // ----------------------------------------- is1D2D/Defaults
@@ -13772,7 +13772,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Manual_Pixel_Counting()
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM =
-"Debug: Pixel Counting@"                 // Name
+"DB Pixel Counting@"                 // Name
 ",,,,,,,Blinks,,"                        // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                      // ----------------------------------------- Sliders/SegCols
 ""                                       // Segment Colour Names (none)
@@ -14276,7 +14276,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing()
     for (uint16_t i=0; i<count; i++) {
       const uint16_t idx = list[i];
       if (idx < SEGLEN) {
-        uint32_t mark = SEGMENT.GetPaletteColour_ModeWrap(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
+        uint32_t mark = SEGMENT.GetPaletteColour(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
         if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
         SEGMENT.setPixelColor(idx, mark);
       }
@@ -14604,7 +14604,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing_Butto
     for (uint16_t i=0; i<count; i++) {
       const uint16_t idx = list[i];
       if (idx < SEGLEN) {
-        uint32_t mark = SEGMENT.GetPaletteColour_ModeWrap(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
+        uint32_t mark = SEGMENT.GetPaletteColour(idx, PALETTE_INDEX__IS_EXACT_COLOUR);
         if (mark == 0) mark = RGBW32(0, SAVED_MARK_BRI, 0, 0);
         SEGMENT.setPixelColor(idx, mark);
       }
@@ -14958,11 +14958,11 @@ namespace XmasBase {
       if (pal_is_grad) {
         const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
                            : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-        outColor[k] = seg.GetPaletteColour_ModeWrap(
-          p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+        outColor[k] = seg.GetPaletteColour(
+          p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
       } else {
-        outColor[k] = seg.GetPaletteColour_ModeWrap(
-          palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+        outColor[k] = seg.GetPaletteColour(
+          palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
       }
     }
   }
@@ -15041,8 +15041,8 @@ namespace XmasSequential {
 }
 uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
 {
-  const uint16_t len = SEGMENT.length();
-  if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  if(SEGLEN <= 1) return EFFECT_DEFAULT();
 
   // Controls
   const uint8_t SX = SEGMENT.speed;
@@ -15084,9 +15084,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
         const uint8_t b = (uint8_t)(a + 1u);
         palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
       }
-      slotColor5[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      slotColor5[k] = SEGMENT.GetPaletteColour(
         palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
-        PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+        PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   } else {
     if (five_base && two_outputs) {
@@ -15098,9 +15098,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
           const uint8_t a = 1u, b = 2u;
           palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
         }
-        outColor4[k] = SEGMENT.GetPaletteColour_ModeWrap(
+        outColor4[k] = SEGMENT.GetPaletteColour(
           palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+          PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
       }
     } else {
       // Normal 4-channel sampling with C3 and pair_flip handling.
@@ -15179,14 +15179,14 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
   // --- Emit
   if (five_mode) {
     // 5-slot mapping: group by i % 5, colour per slot
-    for (uint16_t i = 0; i < len; ++i) {
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
       const uint8_t g    = (uint8_t)(i % 5u);
       const uint8_t bri8 = XmasBase::gamma_u8(bri[g], XmasSequential::FADE_GAMMA, XmasSequential::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(slotColor5[g], bri8));
     }
   } else {
     // 2/4-slot mapping: brightness by logical group; colours bound to physical channels 0..3
-    for (uint16_t i = 0; i < len; ++i) {
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
       const uint8_t ch   = (uint8_t)(i % nPhys);                 // 0..3
       const uint8_t g    = two_outputs ? (uint8_t)(ch & 1u) : ch; // (0,2)->0 ; (1,3)->1  OR 0..3
       const uint8_t bri8 = XmasBase::gamma_u8(bri[g], XmasSequential::FADE_GAMMA, XmasSequential::FLOOR_MIN);
@@ -15194,11 +15194,10 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__01()
     }
   }
 
-  SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_01[] PROGMEM =
-"XMAS Sequential@"
+"Xmas Sequential@"
 "!,Softness,,,Colour limit,Paired,Pair flip,4-speed schedule,,"  // labels = lets add these to the others too, cb3 for animations default
 ";"
 ""                  // no segment colours
@@ -15333,8 +15332,8 @@ namespace XmasSloGlo {
 }
 uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
 {
-  const uint16_t len = SEGMENT.length();
-  if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  if(SEGLEN <= 1) return EFFECT_DEFAULT();
 
   // Controls
   const uint8_t SX = SEGMENT.speed;
@@ -15368,9 +15367,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
         const uint8_t b = (uint8_t)(a + 1u);
         palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
       }
-      slotColor5[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      slotColor5[k] = SEGMENT.GetPaletteColour(
         palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
-        PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+        PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   } else if (five_base && two_outputs) {
     for (uint8_t k = 0; k < 4; ++k) {
@@ -15379,9 +15378,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
         const uint8_t a = 1u, b = 2u;
         palIdx = (palIdx == a) ? b : (palIdx == b ? a : palIdx);
       }
-      outColor4[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor4[k] = SEGMENT.GetPaletteColour(
         palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
-        PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+        PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   } else {
     XmasBase::fillOutColors4(SEGMENT, C3, pair_flip, outColor4);
@@ -15475,13 +15474,13 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
 
     // Emit pixels
     if (five_mode) {
-      for (uint16_t i = 0; i < len; ++i) {
+      for (uint16_t i = 0; i < SEGLEN; ++i) {
         const uint8_t g   = (uint8_t)(i % 5u);
         const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
         SEGMENT.setPixelColor(i, AdjustColourWithBrightness(slotColor5[g], bri));
       }
     } else {
-      for (uint16_t i = 0; i < len; ++i) {
+      for (uint16_t i = 0; i < SEGLEN; ++i) {
         const uint8_t ch  = (uint8_t)(i % nPhys);
         const uint8_t g   = two_outputs ? (uint8_t)(ch & 1u) : ch;
         const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
@@ -15546,13 +15545,13 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
 
   // Emit pixels
   if (five_mode) {
-    for (uint16_t i = 0; i < len; ++i) {
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
       const uint8_t g   = (uint8_t)(i % 5u);
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(slotColor5[g], bri));
     }
   } else {
-    for (uint16_t i = 0; i < len; ++i) {
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
       const uint8_t ch  = (uint8_t)(i % nPhys);
       const uint8_t g   = two_outputs ? (uint8_t)(ch & 1u) : ch;
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasSloGlo::FADE_GAMMA, XmasSloGlo::FLOOR_MIN);
@@ -15560,11 +15559,10 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__01()
     }
   }
 
-  SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_01[] PROGMEM =
-"XMAS Slo-Glo@"
+"Xmas Slo-Glo@"
 "!,Softness,,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"   // labels
 ";"
 ""                  // no segment colours
@@ -15636,9 +15634,8 @@ namespace XmasInwaves {
 // ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 {
-  const uint16_t len = SEGMENT.length();
-  if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
-
+  if(SEGLEN <= 1) return EFFECT_DEFAULT();
+  
   // --- Controls ---
   const uint8_t SX = SEGMENT.speed;       // base speed (CB3=OFF only)
   const uint8_t IX = SEGMENT.intensity;   // wave softness → sharpness
@@ -15716,9 +15713,9 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
         else if (palIdx == 3) palIdx = 4;
         else if (palIdx == 4) palIdx = 3;
       }
-      slotColor5[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      slotColor5[k] = SEGMENT.GetPaletteColour(
         palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT,
-        PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+        PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   } else {
     XmasBase::fillOutColors4(SEGMENT, C3, pair_flip, outColor4);
@@ -15799,13 +15796,13 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 
   // --- Emit ---
   if (five_mode) {
-    for (uint16_t i = 0; i < len; ++i) {
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
       const uint8_t g   = (uint8_t)(i % 5u);
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasInwaves::FADE_GAMMA, XmasInwaves::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(slotColor5[g], bri));
     }
   } else {
-    for (uint16_t i = 0; i < len; ++i) {
+    for (uint16_t i = 0; i < SEGLEN; ++i) {
       const uint8_t ch  = (uint8_t)(i % 4u);              // 0..3
       const uint8_t g   = paired ? (uint8_t)(ch & 1u) : ch; // (0,2)->0 ; (1,3)->1  OR 0..3
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasInwaves::FADE_GAMMA, XmasInwaves::FLOOR_MIN);
@@ -15813,11 +15810,10 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
     }
   }
 
-  SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
-"XMAS InWaves@"
+"Xmas InWaves@"
 "Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"
 ";"
 ""                  // no segment colours
@@ -15875,8 +15871,8 @@ namespace XmasChasingFlash {
 // ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_ChasingFlash__01()
 {
-  const uint16_t len = SEGMENT.length();
-  if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  if(SEGLEN <= 1) return EFFECT_DEFAULT();
 
   // Controls
   const uint8_t SX  = SEGMENT.speed;       // scales both phase durations
@@ -15989,14 +15985,13 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_ChasingFlash__01()
   }
 
   // Emit pixels
-  for (uint16_t i = 0; i < len; ++i) {
+  for (uint16_t i = 0; i < SEGLEN; ++i) {
     const uint8_t ch  = (uint8_t)(i % nPhys);
     const uint8_t grp = two_outputs ? (uint8_t)(ch & 1u) : ch; // 2-out grouping
     const uint8_t bri = gamma_b(gB[grp]);
     SEGMENT.setPixelColor(i, AdjustColourWithBrightness(outColor[ch], bri));
   }
 
-  SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
 
@@ -16004,7 +15999,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_ChasingFlash__01()
 // Christmas: Chasing/Flash — PROGMEM
 // ─────────────────────────────────────────────────────────────────────────────
 static const char PM_EFFECT_CONFIG__CHRISTMAS_CHASING_FLASH_01[] PROGMEM =
-"XMAS Chasing/Flash@"
+"Xmas Chasing/Flash@"
 "!,Pulse feel,Flashes,,,Paired,Pair flip,,,"  // s,i,c1,c2,c3,cb1,cb2,cb3,ep,grp
 ";"
 ""      // no segment colours
@@ -16044,8 +16039,8 @@ namespace XmasTwinkleFlash {
 // ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__01()
 {
-  const uint16_t len = SEGMENT.length();
-  if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  if(SEGLEN <= 1) return EFFECT_DEFAULT();
 
   // Controls
   const uint8_t SX  = SEGMENT.speed;       // scales loop duration
@@ -16103,7 +16098,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__01()
     return XmasBase::gamma_u8(b, XmasTwinkleFlash::PULSE_GAMMA, XmasTwinkleFlash::PULSE_FLOOR);
   };
 
-  for (uint16_t i = 0; i < len; ++i) {
+  for (uint16_t i = 0; i < SEGLEN; ++i) {
     const uint8_t ch  = (uint8_t)(i % nPhys);
     const uint8_t grp = two_outputs ? (uint8_t)(ch & 1u) : ch;
     const uint8_t bri = gamma_b(gB[grp]);
@@ -16118,7 +16113,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__01()
 // Christmas: Twinkle/Flash — PROGMEM
 // ─────────────────────────────────────────────────────────────────────────────
 static const char PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_FLASH_01[] PROGMEM =
-"XMAS Twinkle/Flash@"
+"Xmas Twinkle/Flash@"
 "!,Pulse feel,Flashes,,,Paired,Pair flip,,,"  // s,i,c1,c2,c3,cb1,cb2,cb3,ep,grp
 ";"
 ""      // no segment colours
@@ -16136,6 +16131,292 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_FLASH_01[] PROGMEM =
 "CB1: 2-out; CB2: pair flip.\n\r"
 "C1: pulses per pair.";
 #endif
+
+
+/************************************************************************************************************************************
+ * EFFECT: Christmas – Twinkle Glow
+ *
+ * SUMMARY
+ *   Emulates classic 24 V filament strings with thermal “flasher” bulbs.
+ *   Groups or individual lamps randomly blink OFF for noticeable pauses
+ *   (≈0.2–5 seconds). Lamps still ON glow slightly brighter, while other
+ *   blocks can dim a little to mimic transformer/load behavior.
+ *   Two modes:
+ *     • CB3 OFF (Grouped mode): simulate 40-lamp blocks, divided into
+ *       4 interleaved 10-lamp sub-groups (A=0:4:40, B=1:4:40, C=2:4:40,
+ *       D=3:4:40). Any lamp in a subgroup going OFF drops the whole 10.
+ *     • CB3 ON  (Free-twinkle): ignore groups; individual lamps randomly
+ *       blink OFF based on IX; ON lamps brighten slightly with off-fraction.
+ *
+ * RENDER PIPELINE (per frame)
+ *   1) BASE COLOURING:
+ *      First pass paints the whole segment from the active palette (like Static).
+ *      This keeps hues decoupled from brightness math.
+ *   2) STATE UPDATE:
+ *      Each pixel has a small cooldown counter (uint8_t). When >0 the pixel is OFF;
+ *      the counter decays each tick. New OFF events spawn probabilistically from IX
+ *      and SX. In grouped mode, OFF spawns per 10-lamp subgroup (“flasher bulb”),
+ *      dropping all 10 lamps together.
+ *   3) BRIGHTNESS ADJUST:
+ *      Compute OFF fraction in each 40-block (and optionally across blocks).
+ *      For ON lamps:
+ *        • Normally capped at ~85% brightness (hard limit).
+ *        • Only at max brighten (C1=255, local block ~fully OFF) may ON lamps
+ *          reach 100% brightness.
+ *      For other blocks:
+ *        • Optional cross-block dimming applies (C2).
+ *        • Dim factor has a hardcoded minimum floor (e.g. ≥30%, optionally stronger).
+ *      For OFF lamps:
+ *        • Forced black (can be tweaked to faint glow if desired).
+ *
+ * CONTROLS
+ *   SX (Speed)     : update cadence (faster → more frequent twinkle checks).
+ *   IX (Intensity) : OFF density / probability (higher → more bulbs blink).
+ *   C1 (Custom1)   : Brighten factor for ON bulbs when others are OFF
+ *                    (0..255 → ~0..40% per “full-off” block; scales smoothly).
+ *   C2 (Custom2)   : Cross-block dimming factor (0..255 → ~0..20% max dim).
+ *   C3 (Custom3)   : OFF hold time scaler, stored as 5-bit (0..31) but expanded
+ *                    to 0..255 internally. Higher → longer OFF duration (~0.2–5 s).
+ *   CB3 (Check3)   : Twinkle mode:
+ *                      OFF → grouped (40-lamp blocks, interleaved sub-groups)
+ *                      ON  → free-twinkle (per-pixel random OFF)
+ *
+ * IMPLEMENTATION NOTES
+ *   • Uses SEGMENT.data as a SEGLEN-sized byte array of cooldown timers.
+ *   • Update tick is quantized from SX; state mutates only once per tick.
+ *   • Group math:
+ *       - Block size = 40 lamps. Leftovers (<40) still follow the same logic.
+ *       - Sub-groups are interleaved: indices (i % 40) % 4 select A/B/C/D.
+ *       - Each subgroup is 10 lamps spaced 4 apart (e.g. 0,4,8,…,36).
+ *   • Base colouring calls GetPaletteColour() once per pixel,
+ *     then brightness scaling applies separately.
+ *
+ * RETURNS
+ *   FRAMETIME
+ ************************************************************************************************************************************/
+
+uint16_t mAnimatorLight::EffectAnim__Christmas_Twinkle_Thermal()
+{
+  const uint16_t len = SEGMENT.length();
+  if (!len) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+  // ── Hardcoded user options (visible/scannable) ───────────────────────────────────────────────
+  static constexpr bool  ENABLE_BRIGHTNESS_CAP   = true;    // cap ON-lamp brightness unless max-bright condition
+  static constexpr float MAX_ON_CAP              = 0.85f;   // 85% ceiling in normal operation
+  static constexpr bool  FULL_BRIGHT_ONLY_AT_MAX = true;    // allow 100% only when C1==255 and local off-fraction≈1
+
+  static constexpr bool  ENABLE_MIN_DIM          = true;    // enforce minimum dim on other blocks if dimming applies
+  static constexpr float MIN_DIM_RATIO           = 0.30f;   // e.g. 0.30 → at least 30% dim (scale ≤ 0.70)
+  // To make it very noticeable, set: static constexpr float MIN_DIM_RATIO = 0.65f; // 65% dim (scale ≤ 0.35)
+
+  // ---- controls ----
+  const uint8_t SX = SEGMENT.speed;       // tick cadence
+  const uint8_t IX = SEGMENT.intensity;   // off density
+  const uint8_t C1 = SEGMENT.custom1;     // brighten factor (others ON)
+  const uint8_t C2 = SEGMENT.custom2;     // cross-block dim factor
+  // C3 is stored with 32 levels (5-bit). Expand to 0..255 for smoother math.
+  const uint8_t C3_5  = (SEGMENT.custom3 & 0x1F);           // 0..31
+  const uint8_t C3  = map(C3_5, 0, 31, 0, 255);           // 0..255 (expanded)
+  
+  const bool    free_twinkle = SEGMENT.check3; // ON → per-pixel mode
+
+  // ---- one-time state ----
+  if (SEGMENT.call == 0) {
+    if (!SEGMENT.allocateData(len)) return EFFECT_DEFAULT(); // off-cooldown buffer (uint8_t per pixel). 0 = ON.
+    memset(SEGMENT.data, 0, len);
+    SEGMENT.aux0 = 0;  // tick latch (millis of last update)
+  }
+  uint8_t *cool = reinterpret_cast<uint8_t*>(SEGMENT.data);
+
+  // ---- palette base pass (decoupled hue) ----
+  for (uint16_t i = 0; i < len; ++i) {
+    uint32_t colour = SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT);
+    SEGMENT.setPixelColor(i, colour);
+  }
+
+  // ---- tick limiter from SX ----
+  // Map SX 0..255 → ~120..2 ms per check; slower SX = fewer updates
+  const uint16_t tick_ms = (uint16_t)map(SX, 0, 255, 120, 2);
+  const uint32_t now_ms  = millis();
+  if (now_ms - SEGMENT.aux0 >= tick_ms) {
+    SEGMENT.aux0 = now_ms;
+
+    // Probability base (spawn OFF events). IX drives density.
+    // Gentler rate to avoid flicker; target “pauses”, not fast twinkle.
+    const float p_base = powf(IX * (1.0f/255.0f), 1.2f) * 0.08f;  // up to ~8% per tick
+
+    // OFF duration from C3 in milliseconds (≈0.2–5.0 s), then convert to ticks
+    const uint16_t off_ms_min =  200 + (uint16_t)lroundf((C3 * (1.0f/255.0f)) * 1300.0f); // 0.2–1.5 s
+    const uint16_t off_ms_max = 1500 + (uint16_t)lroundf((C3 * (1.0f/255.0f)) * 3500.0f); // 1.5–5.0 s
+
+    const uint8_t off_ticks_min = (uint8_t)MIN(255, (off_ms_min + tick_ms - 1) / tick_ms); // ceil(ms / tick)
+    const uint8_t off_ticks_max = (uint8_t)MAX(off_ticks_min,
+                                               MIN(255, (off_ms_max + tick_ms - 1) / tick_ms));
+
+    if (free_twinkle) {
+      // --- free twinkle: per-pixel OFF spawn ---
+      for (uint16_t i = 0; i < len; ++i) {
+        if (cool[i]) { cool[i]--; continue; } // still OFF, decay
+        if (hw_random8() < (uint8_t)(p_base * 255.0f)) {
+          cool[i] = hw_random8(off_ticks_min, off_ticks_max);
+        }
+      }
+    } else {
+      // --- grouped mode: 40-lamp blocks, interleaved subgroups A/B/C/D (0..3 : step 4) ---
+      const uint16_t blockSize = 40;
+
+      for (uint16_t base = 0; base < len; base += blockSize) {
+        const uint16_t thisBlock = (uint16_t)MIN(blockSize, (int)len - (int)base);
+        const uint16_t blockEnd  = base + thisBlock;
+
+        // Spawn OFF per interleaved subgroup
+        for (uint8_t g = 0; g < 4; ++g) {
+          // Check if any lamp in this subgroup is currently ON
+          bool anyOn = false;
+          for (uint8_t k = 0; k < 10; ++k) {
+            const uint16_t idx = base + g + 4 * k;
+            if (idx >= blockEnd) break;
+            if (cool[idx] == 0) { anyOn = true; break; }
+          }
+
+          // If subgroup has at least one ON lamp, maybe drop the whole 10
+          if (anyOn && hw_random8() < (uint8_t)(p_base * 255.0f)) {
+            const uint8_t hold = hw_random8(off_ticks_min, off_ticks_max);
+            for (uint8_t k = 0; k < 10; ++k) {
+              const uint16_t idx = base + g + 4 * k;
+              if (idx >= blockEnd) break;
+              cool[idx] = hold;
+            }
+          }
+        }
+
+        // Decay existing OFF timers within this 40-block
+        for (uint16_t i = base; i < blockEnd; ++i) {
+          if (cool[i]) cool[i]--;
+        }
+      }
+    }
+  }
+
+  // Map C1 (0..255) → brighten per full off-block (~0..+40%)
+  const float k_bright = 0.40f * (C1 * (1.0f/255.0f));
+  // Map C2 (0..255) → cross-block dim (~0..20%)
+  const float k_dim    = 0.20f * (C2 * (1.0f/255.0f));
+
+  if (free_twinkle) {
+    // Compute global off fraction
+    uint16_t offCount = 0;
+    for (uint16_t i = 0; i < len; ++i) if (cool[i]) offCount++;
+    const float offFrac = len ? ((float)offCount / (float)len) : 0.0f;
+
+    // Base brighten
+    float scale_on = 1.0f + k_bright * offFrac;
+
+    // Cap logic: allow full 1.0 only at max-bright condition
+    const bool allow_full_now = (FULL_BRIGHT_ONLY_AT_MAX && C1 == 255 && offFrac > 0.99f);
+    if (ENABLE_BRIGHTNESS_CAP && !allow_full_now) {
+      if (scale_on > MAX_ON_CAP) scale_on = MAX_ON_CAP;   // cap ≈ 85%
+    } else {
+      if (scale_on > 1.0f) scale_on = 1.0f;               // never exceed 100%
+    }
+
+    const uint8_t bri_on = (uint8_t)MAX(1, MIN(255, (uint32_t)lroundf(scale_on * 255.0f)));
+
+    for (uint16_t i = 0; i < len; ++i) {
+      const uint32_t c = SEGMENT.getPixelColor(i);
+      if (cool[i]) SEGMENT.setPixelColor(i, 0);           // OFF = black
+      else         SEGMENT.setPixelColor(i, AdjustColourWithBrightness(c, bri_on));
+    }
+
+  } else {
+    // Grouped: per 40-block brighten ON lamps; optional min-dim on other blocks
+    const uint16_t blockSize = 40;
+    const uint16_t nBlocks = (len + blockSize - 1) / blockSize; // ceil
+    float offFracBlock[16]; // safe for up to 640px; larger will still render, but without this array (rare)
+
+    for (uint16_t b = 0; b < nBlocks; ++b) {
+      const uint16_t base = b * blockSize;
+      const uint16_t thisBlock = (uint16_t)MIN(blockSize, (int)len - (int)base);
+      uint16_t offCount = 0;
+      for (uint16_t i = base; i < base + thisBlock; ++i) if (cool[i]) offCount++;
+      offFracBlock[b] = thisBlock ? ((float)offCount / (float)thisBlock) : 0.0f;
+    }
+
+    for (uint16_t b = 0; b < nBlocks; ++b) {
+      const uint16_t base = b * blockSize;
+      const uint16_t thisBlock = (uint16_t)MIN(blockSize, (int)len - (int)base);
+
+      // Brighten for ON lamps in this block by its own off fraction
+      float scale_on = 1.0f + k_bright * offFracBlock[b];
+
+      // Cap: only allow 1.0 at max condition
+      const bool allow_full_now = (FULL_BRIGHT_ONLY_AT_MAX && C1 == 255 && offFracBlock[b] > 0.99f);
+      if (ENABLE_BRIGHTNESS_CAP && !allow_full_now) {
+        if (scale_on > MAX_ON_CAP) scale_on = MAX_ON_CAP;
+      } else {
+        if (scale_on > 1.0f) scale_on = 1.0f;
+      }
+
+      // Cross-block dim based on others’ off fraction
+      float dim_other = 1.0f;
+      if (nBlocks > 1 && k_dim > 0.0f) {
+        float sum = 0.0f;
+        for (uint16_t o = 0; o < nBlocks; ++o) if (o != b) sum += offFracBlock[o];
+        const float avg = sum / (float)(nBlocks - 1);
+        dim_other = 1.0f - k_dim * avg;
+
+        // Enforce minimum dim amount if any dim is applied
+        if (ENABLE_MIN_DIM && avg > 0.0f) {
+          const float max_allowed_scale = 1.0f - MIN_DIM_RATIO; // e.g., 0.70 for 30% dim
+          if (dim_other > max_allowed_scale) dim_other = max_allowed_scale;
+        }
+        if (dim_other < 0.0f) dim_other = 0.0f; // safety
+      }
+
+      // Combine
+      float scale_combined = scale_on * dim_other;
+
+      // Respect cap unless full allowed
+      if (ENABLE_BRIGHTNESS_CAP && !allow_full_now && scale_combined > MAX_ON_CAP) {
+        scale_combined = MAX_ON_CAP;
+      }
+      if (scale_combined > 1.0f) scale_combined = 1.0f;
+
+      const uint8_t bri_on = (uint8_t)MAX(1, MIN(255, (uint32_t)lroundf(scale_combined * 255.0f)));
+
+      // Apply
+      for (uint16_t i = base; i < base + thisBlock; ++i) {
+        const uint32_t c = SEGMENT.getPixelColor(i);
+        if (cool[i]) SEGMENT.setPixelColor(i, 0); // OFF
+        else         SEGMENT.setPixelColor(i, AdjustColourWithBrightness(c, bri_on));
+      }
+    }
+  }
+
+  return FRAMETIME;
+}
+
+// -------------------------------- UI config & description --------------------------------
+
+static const char PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_THERMAL[] PROGMEM =
+"Xmas Twinkle Glow@"                   // Name
+"Update rate,Off density,Brighten factor,Dim other blocks,Hold time,,,Free-twinkle,,"
+";"
+""                                     // Segment color labels (none; palette drives hue)
+";"
+"!"                                    // Palette picker enabled
+";"
+"01"                                   // 1D icon
+";"
+"sx=128,ix=96,c1=128,c2=32,c3=19,o3=0" // defaults: mid speed, modest density, modest brighten, mild cross-dim, medium holds
+;
+
+static const char PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_THERMAL[] PROGMEM =
+"Thermal-flasher style twinkle with long OFF holds and load glow.\n\r"
+"A/B/C/D are interleaved (0:4:40,1:4:40,2:4:40,3:4:40). Any lamp OFF drops its 10.\n\r"
+"ON lamps cap at ~85%% unless C1=255 and local off-fraction≈1 ⇒ can reach 100%%.\n\r"
+"C2 dims other blocks with a minimum dim floor (e.g. ≥30%%). Global brightness applies later.";
+
 
 #endif ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
 
@@ -16336,18 +16617,18 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__02()
       // Scale 0..(pal_limit_eff-1) → 0..255 for continuous palette sampling
       const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
                           : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor[k] = SEGMENT.GetPaletteColour(
         /*palette_index*/ p8,
         /*index_mode*/    PALETTE_INDEX__IS_255_RANGE,
         /*mode*/          PALETTE_MODE__DEFAULT,
-        /*wrap*/          PALETTE_WRAP_OFF,
+        /*wrap*/          PALETTE_WRAP_HARDEDGE,
         /*encoded*/       NO_ENCODED_VALUE);
     } else {
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor[k] = SEGMENT.GetPaletteColour(
         /*palette_index*/ palIdx,
         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
         /*mode*/          PALETTE_MODE__DEFAULT,
-        /*wrap*/          PALETTE_WRAP_OFF,
+        /*wrap*/          PALETTE_WRAP_HARDEDGE,
         /*encoded*/       NO_ENCODED_VALUE);
     }
   }
@@ -16541,7 +16822,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__02()
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_02[] PROGMEM =
-"XMAS Slo-Glo@"
+"Xmas Slo-Glo@"
 "!,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Reverse enable,,"
 ";"
 ""                  // no segment colours; slot colours come from palette
@@ -16673,18 +16954,18 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__02()
     if (pal_is_grad) {
       const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
                          : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor[k] = SEGMENT.GetPaletteColour(
         /*palette_index*/ p8,
         /*index_mode*/    PALETTE_INDEX__IS_255_RANGE,
         /*mode*/          PALETTE_MODE__DEFAULT,
-        /*wrap*/          PALETTE_WRAP_OFF,
+        /*wrap*/          PALETTE_WRAP_HARDEDGE,
         /*encoded*/       NO_ENCODED_VALUE);
     } else {
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor[k] = SEGMENT.GetPaletteColour(
         /*palette_index*/ palIdx,
         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
         /*mode*/          PALETTE_MODE__DEFAULT,
-        /*wrap*/          PALETTE_WRAP_OFF,
+        /*wrap*/          PALETTE_WRAP_HARDEDGE,
         /*encoded*/       NO_ENCODED_VALUE);
     }
   }
@@ -16853,7 +17134,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential__02()
 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_02[] PROGMEM =
-"XMAS Sequential@"
+"Xmas Sequential@"
 "!,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Reverse enable,,"
 ";"
 ""                  // no segment colours; palette supplies slot colours
@@ -16995,18 +17276,18 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_02[] PROGMEM =
 //     if (pal_is_grad) {
 //       const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
 //                          : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-//       outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//       outColor[k] = SEGMENT.GetPaletteColour(
 //         /*palette_index*/ p8,
 //         /*index_mode*/    PALETTE_INDEX__IS_255_RANGE,
 //         /*mode*/          PALETTE_MODE__DEFAULT,
-//         /*wrap*/          PALETTE_WRAP_OFF,
+//         /*wrap*/          PALETTE_WRAP_HARDEDGE,
 //         /*encoded*/       NO_ENCODED_VALUE);
 //     } else {
-//       outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//       outColor[k] = SEGMENT.GetPaletteColour(
 //         /*palette_index*/ palIdx,
 //         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
 //         /*mode*/          PALETTE_MODE__DEFAULT,
-//         /*wrap*/          PALETTE_WRAP_OFF,
+//         /*wrap*/          PALETTE_WRAP_HARDEDGE,
 //         /*encoded*/       NO_ENCODED_VALUE);
 //     }
 //   }
@@ -17309,11 +17590,11 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__02()
     if (pal_is_grad) {
       const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
                          : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-        p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+      outColor[k] = SEGMENT.GetPaletteColour(
+        p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     } else {
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+      outColor[k] = SEGMENT.GetPaletteColour(
+        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   }
 
@@ -17479,7 +17760,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__02()
 // Reverse enable checkbox removed; C2 alone controls reverse (0 = disabled).
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_02[] PROGMEM =
-"XMAS InWaves@"
+"Xmas InWaves@"
 "Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,,,"
 ";"
 ""                  // no segment colours
@@ -17604,11 +17885,11 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_ChasingFlash__02()
     if (pal_is_grad) {
       const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
                          : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-        p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+      outColor[k] = SEGMENT.GetPaletteColour(
+        p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     } else {
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+      outColor[k] = SEGMENT.GetPaletteColour(
+        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   }
 
@@ -17716,7 +17997,7 @@ int        i1         = (i0 + 1) % (int)nLogic;
 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_CHASING_FLASH_02[] PROGMEM =
-"XMAS Chasing/Flash@"
+"Xmas Chasing/Flash@"
 "Speed,Softness,Flash count,,Colour limit,2 outputs,Pair flip,Reverse,,"
 ";"
 ""
@@ -17822,11 +18103,11 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__02()
     if (pal_is_grad) {
       const uint8_t p8 = (pal_limit_eff <= 1u) ? 0u
                          : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit_eff - 1u));
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-        p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+      outColor[k] = SEGMENT.GetPaletteColour(
+        p8, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     } else {
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
-        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_OFF, NO_ENCODED_VALUE);
+      outColor[k] = SEGMENT.GetPaletteColour(
+        palIdx, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
   }
 
@@ -17898,7 +18179,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__02()
 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_FLASH_02[] PROGMEM =
-"XMAS Twinkle/Flash@"
+"Xmas Twinkle/Flash@"
 "Speed,Pulse feel,Flashes,,Colour limit,Paired,Pair flip,Reverse,,"
 ";"
 ""                  // no segment colours; palette drives colours
@@ -18060,18 +18341,18 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Slo_Glo__02()
       // Scale from 0..(pal_limit-1) → 0..255 for continuous palettes
       const uint8_t p8 = (pal_limit <= 1u) ? 0u : (uint8_t)((uint16_t)palIdx * 255u / (uint16_t)(pal_limit - 1u));
       // ALOG_INF(PSTR("k%d %d->%d"),k,palIdx,p8);
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor[k] = SEGMENT.GetPaletteColour(
         /*palette_index*/ p8,
         /*index_mode*/    PALETTE_INDEX__IS_255_RANGE,  // 0..255 palette domain (use your engine’s 255-range constant)
         /*mode*/          PALETTE_MODE__DEFAULT,
-        /*wrap*/          PALETTE_WRAP_OFF,
+        /*wrap*/          PALETTE_WRAP_HARDEDGE,
         /*encoded*/       NO_ENCODED_VALUE);
     } else {
-      outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+      outColor[k] = SEGMENT.GetPaletteColour(
         /*palette_index*/ palIdx,
         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,  // discrete slot
         /*mode*/          PALETTE_MODE__DEFAULT,
-        /*wrap*/          PALETTE_WRAP_OFF,
+        /*wrap*/          PALETTE_WRAP_HARDEDGE,
         /*encoded*/       NO_ENCODED_VALUE);    
     }
     // ALOG_INF(PSTR("palI%d %d"),k,palIdx);
@@ -18323,11 +18604,11 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_02[] PROGMEM =
 // //   const uint16_t blockLen = (uint16_t)max<uint16_t>(1, len / nOut);
 // //   for (uint8_t k = 0; k < nOut; ++k) {
 // //     const uint16_t anchor = (uint16_t)min<uint32_t>(len-1, (uint32_t)k * blockLen + (blockLen >> 1));
-// //     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+// //     outColor[k] = SEGMENT.GetPaletteColour(
 // //         /*palette_index*/ anchor,
 // //         /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
 // //         /*mode*/          PALETTE_MODE__DEFAULT,
-// //         /*wrap*/          PALETTE_WRAP_OFF,
+// //         /*wrap*/          PALETTE_WRAP_HARDEDGE,
 // //         /*encoded*/       NO_ENCODED_VALUE);
 // //   }
 
@@ -18440,11 +18721,11 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_02[] PROGMEM =
 // //   // --- Per-output colours from palette: exact indices 0..nOut-1 ---
 // //   uint32_t outColor[5] = {0,0,0,0,0};
 // //   for (uint8_t k=0; k<nOut; ++k) {
-// //     outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+// //     outColor[k] = SEGMENT.GetPaletteColour(
 // //       /*palette_index*/ k,
 // //       /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
 // //       /*mode*/          PALETTE_MODE__DEFAULT,
-// //       /*wrap*/          PALETTE_WRAP_OFF,
+// //       /*wrap*/          PALETTE_WRAP_HARDEDGE,
 // //       /*encoded*/       NO_ENCODED_VALUE);
 // //   }
 
@@ -18620,11 +18901,11 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_02[] PROGMEM =
 //   // // --- Per-output colours from palette: exact indices 0..nOut-1 ---
 //   // uint32_t outColor[5] = {0,0,0,0,0};
 //   // for (uint8_t k=0; k<nOut; ++k) {
-//   //   outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//   //   outColor[k] = SEGMENT.GetPaletteColour(
 //   //     /*palette_index*/ k,
 //   //     /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
 //   //     /*mode*/          PALETTE_MODE__DEFAULT,
-//   //     /*wrap*/          PALETTE_WRAP_OFF,
+//   //     /*wrap*/          PALETTE_WRAP_HARDEDGE,
 //   //     /*encoded*/       NO_ENCODED_VALUE);
 //   // }// --- Per-output colours from palette: exact indices 0..nOut-1 (with optional reorder on check3) ---
 
@@ -18636,11 +18917,11 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_02[] PROGMEM =
 //     const uint8_t swapIdx = (uint8_t)(1 + ((k - 1) ^ 1));  // 1->2, 2->1, 3->4, 4->3, ...
 //     if (swapIdx < nOut) palIdx = swapIdx;                  // safe for 5 outputs; no change if out of range
 //   }
-//   outColor[k] = SEGMENT.GetPaletteColour_ModeWrap(
+//   outColor[k] = SEGMENT.GetPaletteColour(
 //     /*palette_index*/ palIdx,
 //     /*index_mode*/    PALETTE_INDEX__IS_EXACT_COLOUR,
 //     /*mode*/          PALETTE_MODE__DEFAULT,
-//     /*wrap*/          PALETTE_WRAP_OFF,
+//     /*wrap*/          PALETTE_WRAP_HARDEDGE,
 //     /*encoded*/       NO_ENCODED_VALUE);
 // }
 
@@ -18847,11 +19128,11 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base
     const uint8_t bri  = (uint8_t)lroundf(briF * 255.0f);
 
     // Static palette field across the segment (primary palette)
-    uint32_t baseCol = SEGMENT.GetPaletteColour_ModeWrap(
+    uint32_t baseCol = SEGMENT.GetPaletteColour(
       /*palette_index*/ i,
       /*index_mode*/    PALETTE_INDEX__IS_SEGLEN_RANGE,
       /*mode*/          PALETTE_MODE__DEFAULT,
-      /*wrap*/          PALETTE_WRAP_OFF,
+      /*wrap*/          PALETTE_WRAP_HARDEDGE,
       /*encoded*/       NO_ENCODED_VALUE);
 
     uint32_t col = AdjustColourWithBrightness(baseCol, bri);
@@ -21498,7 +21779,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__ScrollingText()
   for (int i = 0; i < numberOfLetters; i++) {
     int xoffset = int(cols) - int(SEGMENT.aux0) + rotLW*i;
     if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-    uint32_t col1 = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t col1 = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
     uint32_t col2 = BLACK;
     if (SEGMENT.check1 && SEGMENT.palette_id == 0) {
       col1 = SEGCOLOR_U32(0); //SEGCOLOR_U32(0);
@@ -26290,6 +26571,13 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_FLASH_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_FLASH_01,
+            #endif
+            Effect_DevStage::Release);
+    addEffect(EFFECTS_FUNCTION__CHRISTMAS_TWINKLE_THERMAL__ID,
+            &mAnimatorLight::EffectAnim__Christmas_Twinkle_Thermal,
+            PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_THERMAL,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_THERMAL,
             #endif
             Effect_DevStage::Release);
 

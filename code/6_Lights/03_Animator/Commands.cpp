@@ -946,7 +946,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
                     ALOG_INF(PSTR("OnPixel %d (processed %d)"), pixelIndex, count);
 
                     // Get the color from the palette
-                    colour = SEGMENT.GetPaletteColour_Legacy(pixel++, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+                    colour = SEGMENT.GetPaletteColour_Legacy(pixel++, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
 
 brightness = 255;
 // colour = RgbcctColor(255,255,255,255,255);
@@ -1093,7 +1093,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
                             colour = RgbcctColor(255, 255, 255, 255, 255);
                         } else {
                             // Get color from the palette using the current palette index
-                            colour = SEGMENT.GetPaletteColour_Legacy(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
+                            colour = SEGMENT.GetPaletteColour_Legacy(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
                         }
 
                         // Apply brightness and set the pixel
@@ -1267,7 +1267,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
     snprintf(buffer, sizeof(buffer), "SegColour%d", colour_index);
 
-    // ALOG_HGL(PSTR("SEGMENT_I(segment_index).segcol[colour_index] length %d"), RGBCCTCOLOURS_SIZE);    
+    // ALOG_HGL(PSTR("SEGMENT_I(segment_index).segcol[colour_index] length %d"), NUMBER_SEGMENT_COLOURS);    
 
     if(seg_obj = obj[buffer].getObject())
     {
@@ -1700,35 +1700,35 @@ void mAnimatorLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uin
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
+  if(colour_index >= NUMBER_SEGMENT_COLOURS){ return; }
   SEGMENT_I(segment_index).segcol[colour_index].setHue(hue_new);      
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
+  if(colour_index >= NUMBER_SEGMENT_COLOURS){ return; }
   SEGMENT_I(segment_index).segcol[colour_index].setSaturation(sat_new);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
+  if(colour_index >= NUMBER_SEGMENT_COLOURS){ return; }
   SEGMENT_I(segment_index).segcol[colour_index].setCCT_Kelvin(ct);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
+  if(colour_index >= NUMBER_SEGMENT_COLOURS){ return; }
   SEGMENT_I(segment_index).segcol[colour_index].setBrightnessRGB(brightness);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
+  if(colour_index >= NUMBER_SEGMENT_COLOURS){ return; }
   SEGMENT_I(segment_index).segcol[colour_index].setBrightnessCCT(brightness);    
 }
 

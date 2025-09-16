@@ -887,7 +887,7 @@ void mAnimatorLight::Init(void)
   _virtualSegmentLength = 0;
   _length = DEFAULT_LED_COUNT;
   _brightness = DEFAULT_BRIGHTNESS;
-  _targetFps = WLED_FPS;
+  _targetFps = 40;
   _frametime = FRAMETIME;
   _cumulativeFps = 2;
   _isServicing = false;
@@ -2550,11 +2550,7 @@ int16_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
     if (dataPtr) *dataPtr = '\0'; // replace name divider with null termination. Escape "name@data"
 
     // Check for a match with the provided name
-    if (strcmp(f, lineBuffer) == 0
-#ifdef ENABLE_DEVFEATURE_LIGHTING__SLOW_GLOW_LEGACY_FIX
-        || (strcmp(lineBuffer, "Firefly") == 0 && strcmp(f, "Slow Glow") == 0)
-#endif
-    ) {
+    if (strcmp(f, lineBuffer) == 0) {
       ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s i within effects vector %d"), f, i);
       // return effects.id[i]; 
       return i; // maybe this is wrong, it should not be returning the index of the loop, but the ID of the effect?
@@ -3038,7 +3034,7 @@ bool mAnimatorLight::Segment::setColor(uint8_t slot, uint32_t c) { //returns tru
   
   // RgbcctColor(c); 
 
-  // if (slot >= NUM_COLORS || c == colors[slot]) return false;
+  // if (slot >= NUMBER_SEGMENT_COLOURS || c == colors[slot]) return false;
   // if (fadeTransition) startTransition(tkr_anim->getTransition()); // start transition prior to change
   // colors[slot] = c;
   // stateChanged = true; // send UDP/WS broadcast
@@ -3050,7 +3046,7 @@ bool mAnimatorLight::Segment::setColor(uint8_t slot, RgbwwColor c) { //returns t
 
   segcol[slot].colour = c;
 
-  // if (slot >= NUM_COLORS || c == colors[slot]) return false;
+  // if (slot >= NUMBER_SEGMENT_COLOURS || c == colors[slot]) return false;
   // if (fadeTransition) startTransition(tkr_anim->getTransition()); // start transition prior to change
   // colors[slot] = c;
   // stateChanged = true; // send UDP/WS broadcast
@@ -4116,7 +4112,7 @@ uint32_t IRAM_ATTR mAnimatorLight::Segment::getPixelColor(int i) const
 //   // //bit pattern: (msb first) sound:3, mapping:3, transposed, mirrorY, reverseY, [transitional, reset,] paused, mirrored, on, reverse, [selected]
 //   // if ((options & 0b1111111110011110U) != (b.options & 0b1111111110011110U)) d |= SEG_DIFFERS_OPT;
 //   // if ((options & 0x0001U) != (b.options & 0x0001U))                         d |= SEG_DIFFERS_SEL;
-//   // for (uint8_t i = 0; i < NUM_COLORS; i++) if (colors[i] != b.colors[i])    d |= SEG_DIFFERS_COL;
+//   // for (uint8_t i = 0; i < NUMBER_SEGMENT_COLOURS; i++) if (colors[i] != b.colors[i])    d |= SEG_DIFFERS_COL;
 
 //   // return d;
 // }
@@ -4216,7 +4212,7 @@ uint8_t mAnimatorLight::Segment::differs(const Segment& b) const {
   // set:2, sound:2, mapping:3, transposed, mirrorY, reverseY, [reset,] paused, mirrored, on, reverse, [selected]
   if ((options & 0b1111111111011110U) != (b.options & 0b1111111111011110U)) d |= SEG_DIFFERS_OPT;
   if ((options & 0x0001U) != (b.options & 0x0001U))                         d |= SEG_DIFFERS_SEL;
-  // for (unsigned i = 0; i < NUM_COLORS; i++) if (colors[i] != b.colors[i])   d |= SEG_DIFFERS_COL;
+  // for (unsigned i = 0; i < NUMBER_SEGMENT_COLOURS; i++) if (colors[i] != b.colors[i])   d |= SEG_DIFFERS_COL;
 
   return d;
 }
@@ -5034,7 +5030,7 @@ void mAnimatorLight::setEffect(uint8_t segid, uint8_t m) {
 
 //applies to all active and selected segments
 void mAnimatorLight::setColor(uint8_t slot, uint32_t c) {
-  if (slot >= RGBCCTCOLOURS_SIZE) return;
+  if (slot >= NUMBER_SEGMENT_COLOURS) return;
 
   for (segment &seg : segments) {
     if (seg.isActive() && seg.isSelected()) {
@@ -5602,9 +5598,9 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour_Legacy(
     Serial.println("PO: GetPaletteColour_Legacy");
 
 
-  // uint32_t color = SEGCOLOR(mcol < NUM_COLORS ? mcol : 0);
+  // uint32_t color = SEGCOLOR(mcol < NUMBER_SEGMENT_COLOURS ? mcol : 0);
   // // default palette or no RGB support on segment
-  // if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) {
+  // if ((palette == 0 && mcol < NUMBER_SEGMENT_COLOURS) || !_isRGB) {
   //   return color_fade(color, pbri, true);
   // }
   
@@ -5769,7 +5765,7 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
 
 
 /*WrapEdge and Discrete should be flipped, will rename into original when full conversion is done*/
-uint32_t mAnimatorLight::Segment::GetPaletteColour_ModeWrap(
+uint32_t mAnimatorLight::Segment::GetPaletteColour(
   /**
    * @brief _pixel_position
    * ** [0-SEGLEN]
@@ -5820,9 +5816,9 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour_ModeWrap(
   }
 
 
-  // uint32_t color = SEGCOLOR(mcol < NUM_COLORS ? mcol : 0);
+  // uint32_t color = SEGCOLOR(mcol < NUMBER_SEGMENT_COLOURS ? mcol : 0);
   // // default palette or no RGB support on segment
-  // if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) {
+  // if ((palette == 0 && mcol < NUMBER_SEGMENT_COLOURS) || !_isRGB) {
   //   return color_fade(color, pbri, true);
   // }
   
@@ -5990,7 +5986,7 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW_2025(
  * ColorFromPalette via FastLED
  * ColorFromPaletteU32 via mPalette WLED fast custom ColorFromPalette
  * ColorFromPalette_WithLoad to make sure we load, though it should be forced to reload anyway
- * GetPaletteColour_ModeWrap
+ * GetPaletteColour
  * 
  * Should be able to use define to switch.
  * 
@@ -6111,7 +6107,7 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetUnloadedPaletteColour(
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : SUCCESSOR API — GetUnloadedPaletteColour_ModeWrap
- *                Reordered args to match GetPaletteColour_ModeWrap so calls can rely on header defaults.
+ *                Reordered args to match GetPaletteColour so calls can rely on header defaults.
  *                Internally maps (index_mode, palette_mode, wrap) to legacy boolean flags.
  ********************************************************************************************************************************************************************************************************************/
 RgbwwColor IRAM_ATTR mAnimatorLight::GetUnloadedPaletteColour_ModeWrap(
@@ -6119,13 +6115,13 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetUnloadedPaletteColour_ModeWrap(
   uint16_t index_or_pos,
   uint8_t  palette_index_mode,           // e.g. PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_INDEX__IS_SEGLEN_RANGE
   uint8_t  palette_mode,                 // e.g. PALETTE_MODE__DEFAULT / __EXACT / __DISCRETE, etc.
-  uint8_t  palette_wrap,                 // e.g. PALETTE_WRAP_OFF / __ON
+  uint8_t  palette_wrap,                 // e.g. PALETTE_WRAP_HARDEDGE / __ON
   uint8_t* encoded_value,                // pass NO_ENCODED_VALUE if unused
   bool     flag_request_is_for_full_visual_output
 ){
   // --- translate Mode/Wrap to legacy flags used by palette backends ---
   const bool flag_spanned_segment  = (palette_index_mode == PALETTE_INDEX__IS_SEGLEN_RANGE);
-  const bool flag_wrap_hard_edge   = (palette_wrap       == PALETTE_WRAP_ON);
+  const bool flag_wrap_hard_edge   = (palette_wrap       == PALETTE_WRAP_SMOOTH);
   const bool flag_crgb_exact_color = (palette_mode       == PALETTE_INDEX__IS_EXACT_COLOUR);
 
   // --- direct, no-load paths (static / generated palettes) ---

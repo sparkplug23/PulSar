@@ -2465,7 +2465,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           color = GetUnloadedPaletteColour(
               palette_id,
               j,
-              PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, // "PALETTE_DISCRETE_ON" should be the only thing to get the basic colors, without gradients
+              PALETTE_SPAN_OFF, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, // "PALETTE_MODE__FORCE_DISCRETE" should be the only thing to get the basic colors, without gradients
               &encoded_gradient,
               flag_request_is_for_full_visual_output
           );

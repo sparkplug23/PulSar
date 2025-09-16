@@ -41,10 +41,6 @@
 
 #define ALOG_COL32(c,i) ALOG_INF(PSTR("%d c %d,%d,%d,%d"), i, R(c), G(c), B(c), W(c));
 
-
-#define ENABLE_DEVFEATURE_LIGHTING__SLOW_GLOW_LEGACY_FIX
-
-
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
   #ifndef PIXEL_COUNTS
     #define PIXEL_COUNTS DEFAULT_LED_COUNT
@@ -61,42 +57,104 @@
   #endif
 #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-/**
- * @brief GetColourPalette defines to make it visually easy to read
- **/
-#define PALETTE_WRAP_ON                 true //confusing to be replaced with below
-#define PALETTE_WRAP_OFF                false //confusing to be replaced with below
-// Palette wrap behaviour flag (used by *_ModeWrap APIs):
-//  - SMOOTH: allow circular blend between last and first entries (255 wraps to 0)
-//  - HARD_EDGE: clamp at the end; no blend back to start
-#define PALETTE_WRAP_SMOOTH    true   // circular wrap: 255→0 blends (use full 0..255 range)
-#define PALETTE_WRAP_HARDEDGE false  // no wrap: clamp at end (optionally pre-scale indices to 0..240 upstream)
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Palette wrap behaviour flag (used by *_ModeWrap APIs)
+//
+// Concept:
+//   A palette lookup takes an 8-bit index (0..255). Some effects want the
+//   gradient to be *circular* (255 blends back into 0), others want a *hard*
+//   stop at the end (255 is the end, no blend back to 0).
+//
+// Legacy (WLED):
+//   WLED’s color_from_palette(..., wrap=true/false) used a boolean “wrap”.
+//     - wrap=true  → indices wrap around; the gradient is circular
+//     - wrap=false → indices clamp at ends; no circular blend
+//
+// Legacy (our code, older names):
+//   PALETTE_WRAP_ON  == circular/smooth wrap
+//   PALETTE_WRAP_OFF == hard edge / no wrap
+//
+// Current names:
+//   PALETTE_WRAP_SMOOTH   → circular wrap (255→0 blends)
+//   PALETTE_WRAP_HARDEDGE → no wrap (clamp at the ends)
+// ─────────────────────────────────────────────────────────────────────────────
+#define PALETTE_WRAP_SMOOTH     true   // circular wrap: 255 blends to 0 (full 0..255)
+                                       // - Best for continuous/looping gradients
+                                       // - Equivalent to WLED wrap=true (legacy PALETTE_WRAP_ON)
+                                       // - Visual: no “seam” where the gradient restarts
 
+#define PALETTE_WRAP_HARDEDGE   false  // hard edge: clamp at 0 and 255, no blend back to start
+                                       // - Best for one-way ramps or when you *don’t* want 255→0 mixing
+                                       // - Equivalent to WLED wrap=false (legacy PALETTE_WRAP_OFF)
+                                       // - Tip: If you want to avoid touching the 255→0 seam entirely,
+                                       //        pre-scale indices to 0..240 upstream (keeps a margin)
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PALETTE_INDEX ENCODING TYPES
+//
+// What does your per-pixel “index” represent before the palette lookup?
+//   - 0: The index is already in the palette’s native 0..255 range (WLED default).
+//   - 1: The index was derived from SEGLEN (e.g., i in 0..SEGLEN-1) and needs
+//        scaling to 0..255 inside the palette function (WLED compatible path).
+//   - 2: Request a *precise* palette tap at a specific index without any mapping
+//        (useful for fixed swatches/markers).
+//
+// Legacy (our code):
+//   PALETTE_INDEX__IS_SEGLEN_RANGE used to be PALETTE_INDEX_SPANS_SEGLEN_ON
+//   PALETTE_INDEX__IS_EXACT_COLOUR used to be PALETTE_INDEX_IS_INDEX_IN_PALETTE
+//
+// Legacy (WLED):
+//   WLED generally treats the palette index as 0..255. Many effects compute
+//   i→(i*256/SEGLEN) themselves; this enum lets us centralize that behavior.
+// ─────────────────────────────────────────────────────────────────────────────
+#define PALETTE_INDEX__IS_255_RANGE       0  // “Raw 0..255” (WLED default semantics).
+                                             // - Use when you already computed an 8-bit palette index.
+                                             // - No internal scaling is applied.
 
-#define PALETTE_INDEX__IS_255_RANGE      0 // ie false for WLED compatibility
+#define PALETTE_INDEX__IS_SEGLEN_RANGE    1  // “Index spans SEGLEN; please scale to 0..255”.
+                                             // - Input i in [0..SEGLEN-1] will be mapped to [0..255].
+                                             // - WLED-compatible for effects that used segment length
+                                             //   as their domain (saves you from manual scaling).
 
+#define PALETTE_INDEX__IS_EXACT_COLOUR    2  // “Exact tap” into the palette (no scaling or wrapping).
+                                             // - Use for fixed palette slot access (e.g., swatches).
+                                             // - Caller guarantees the index semantics; no automatic
+                                             //   remap or safety applied.
 
-// #define PALETTE_INDEX_SPANS_SEGLEN_ON   true       // PHASE OUT
-#define PALETTE_INDEX__IS_SEGLEN_RANGE   1 // ie true for WLED compatibility ie mapping happened so palette needs to scale seglen to 255 range
+// ─────────────────────────────────────────────────────────────────────────────
+// PALETTE_MODE — how to interpret the palette when sampling
+//
+// Palettes can be treated as continuous *gradients* (interpolated) or as
+// *discrete* steps (nearest entries only). WLED historically exposed this via
+// palette blending settings (e.g., “linear” vs “none/discrete”). Here we make
+// it explicit per lookup when needed.
+//
+//   DEFAULT         → Use the palette’s native style (respect its definition)
+//   FORCE_DISCRETE  → Stepwise; no interpolation between entries
+//   FORCE_GRADIENT  → Force interpolation even if the palette is discrete
+//
+// Legacy (our code):
+//   DEFAULT used to be PALETTE_DISCRETE_OFF
+//   FORCE_DISCRETE used to be PALETTE_DISCRETE_ON
+// ─────────────────────────────────────────────────────────────────────────────
+#define PALETTE_MODE__DEFAULT          0  // Use palette as defined (gradient or discrete).
+                                          // - Honors the palette’s own interpolation metadata.
+                                          // - Closest to WLED’s normal behavior given palette & blend mode.
 
-// #define PALETTE_INDEX_IS_INDEX_IN_PALETTE   false  // PHASE OUT
-#define PALETTE_INDEX__IS_EXACT_COLOUR   2 // special method when I desire the precise colour at that index, without any scaling or mapping
+#define PALETTE_MODE__FORCE_DISCRETE   1  // Force discrete steps; no in-between blending.
+                                          // - Good for “pixelated”/posterized looks, or when you want
+                                          //   exact banding without soft transitions.
+                                          // - In WLED terms, similar to “no palette blending”.
 
+#define PALETTE_MODE__FORCE_GRADIENT   2  // Force gradient interpolation between entries.
+                                          // - Smooths out discrete palettes.
+                                          // - In WLED terms, akin to “linear palette blending”.
 
-
-#define PALETTE_DISCRETE_OFF            0
-#define PALETTE_DISCRETE_ON             1
-#define PALETTE_DISCRETE_DEFAULT        2 // Use the prefered method depending on the palette. Gradients will be shown across the segment, discrete will be shown as a single colours sequenced
-
-#define PALETTE_MODE__DEFAULT         0  // Use palette as defined (gradient or discrete)
-#define PALETTE_MODE__FORCE_DISCRETE  1  // Force discrete interpretation
-#define PALETTE_MODE__FORCE_GRADIENT  2  // Force gradient interpretation
 
 /**
  * @brief 1D and 2D level of development
- * Show the max level of error only when 2D is active, otherwise, ignore the 2D level
+ * Show the max level of devstage only when 2D is active, otherwise, ignore the 2D level
  */
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 #define EFFECT_DEVSTAGE_12D_CHECK(X,Y) max(X,Y) // Take the highest devstage
@@ -104,92 +162,91 @@
 #define EFFECT_DEVSTAGE_12D_CHECK(X,Y) X // Take only the 1D devstage, ignore the 2D devstage.
 #endif
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Legacy-to-new compatibility shims
+// Keep old flags compiling while everything migrates to the new enums.
+// ─────────────────────────────────────────────────────────────────────────────
 
-#define PALETTE_SPAN_OFF                false // PALETTE_INDEX_IS_INDEX_IN_PALETTE
-#define WLED_PALETTE_MAPPING_ARG_FALSE  false
+// OLD: PALETTE_SPAN_OFF  (commented as PALETTE_INDEX_IS_INDEX_IN_PALETTE)
+// Meaning used in your codebase: “use the palette index *as-is*, don’t remap
+// by SEGLEN; I want the exact palette tap I specified.”
+// → Map to our explicit “exact tap” encoding.
+#define PALETTE_SPAN_OFF                PALETTE_INDEX__IS_EXACT_COLOUR
+// (If any callsites actually meant “0..255 raw” instead of a literal slot,
+//  change those sites to PALETTE_INDEX__IS_255_RANGE; this alias assumes the
+//  stricter ‘exact colour’ semantics you documented.)
+
+// OLD: WLED_PALETTE_MAPPING_ARG_FALSE
+// WLED’s color_from_palette(i, mapping=bool, ...) used `mapping=false` to say:
+// “index is already 0..255; don’t scale i by SEGLEN.”
+// → That’s our 0..255 raw path.
+#define WLED_PALETTE_MAPPING_ARG_FALSE  PALETTE_INDEX__IS_255_RANGE
+// (If you still have a TRUE case somewhere, use PALETTE_INDEX__IS_SEGLEN_RANGE.)
+
+// OLD: PALETTE_SOLID_WRAP (was `(paletteBlend == 1 || paletteBlend == 3)`)
+// Historically: if palette blending mode implied continuous gradients, allow
+// circular wrap (255→0). In the new API, wrap is explicit.
+// → Default this legacy macro to SMOOTH wrap; callers that need hard edges
+//   should pass PALETTE_WRAP_HARDEDGE directly.
+#define PALETTE_SOLID_WRAP              PALETTE_WRAP_SMOOTH
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sentinel / state flags
+// These are used as *self-documenting booleans* or *sentinel values* in APIs,
+// instead of passing raw true/false or nullptr.
+// ─────────────────────────────────────────────────────────────────────────────
+
 #define NO_ENCODED_VALUE                nullptr
-#define PALETTE_SOLID_WRAP              true//(paletteBlend == 1 || paletteBlend == 3)
+// Meaning: No encoded colour/index/value provided.
+// Use when an API normally takes a pointer to encoded data but you want to
+// signal “none” (i.e. default handling). Equivalent to NULL in older code.
+// WLED: not explicit — this is a project-specific helper.
+
 #define SET_BRIGHTNESS                  true
+// Meaning: Apply brightness scaling inside this API call.
+// Used to avoid passing a “magic true” — name makes intent explicit.
+
 #define BRIGHTNESS_ALREADY_SET          true
 #define BRIGHTNESS_NOT_YET_SET          false
+// Distinguishes code paths that *already applied brightness* from those
+// that have not yet. Lets helpers skip a redundant scale.
+// Legacy: WLED often scaled brightness at the final stage; you’re
+// separating “did we apply it yet?” into explicit flags.
+
 #define WITH_BRIGHTNESS_APPLIED         true
-
-#define EFFECT_CONFIG_DEFAULT_OPTION__PALETTE_INDEX_CTR "pal=95" // The default forced palette
-
-/**
- * WLED conversions
- * These are basic defines that remap temporarily from WLED in PulSar. 
- * For optimisation, these will be removed and replaced with the correct values.
- * 
- * Since these are different maps, I should use this name to enable conversion from my method to WLED method, and hence, enable the "d" which is mcol work as expected
- * 
- * Gets a single color from the currently selected palette.
- * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
- * @param mapping if true, LED position in segment is considered for color
- * @param wrap FastLED palettes will usually wrap back to the start smoothly. Set false to get a hard edge
- * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
- * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
- * @returns Single color from palette
- * 
- * 
- **/
-// #define color_from_palette(i,mapping,wrap,mcol)    GetPaletteColour_Legacy(i,mapping,wrap,mcol)inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
-//   return GetPaletteColour_Legacy(i, mapping, wrap, mcol, pbri);
-// }
+// Used in signatures where you pass an “apply brightness?” argument.
+// Semantically overlaps with SET_BRIGHTNESS; keep whichever form
+// makes the callsite most readable (e.g., `DrawPixel(...,WITH_BRIGHTNESS_APPLIED)`).
 
 
 #define RgbwwColorU32(c)  RGBW32(c.R,c.G,c.B,c.WW) 
 
-
-/***
- * 
- * 
- * Conversion mapping for WLED to mine
- * 
- * 
- * 
- * 
- WLED                                  ------->                              PulSar
-
-
-SEGENV                                                                       SEGMENT
-isMatrix                                                               isMatrix
-color_from_palette                                                           c
-SEGMENT.params_internal.aux1                                                                 SEGMENT.params_internal.aux1
-SEGCOLOR                                    SEGCOLOR_U32                                  
-SEGMENT.color_from_palette((band * 35), false, PALETTE_SOLID_WRAP, 0);                       SEGMENT.GetPaletteColour_Legacy((band * 35), WLED_PALETTE_MAPPING_ARG_FALSE, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE).getU32()      
-
-#define color_from_palette(a,b,c,d)    GetPaletteColour_Legacy(a,b,c,d).getU32()
-
- * 
- * 
- * 
-*/
-
-#define STRINGIFY(X) #X
-#define TOSTRING(X) STRINGIFY(X)
-
-
-// #define WLED_VERSION 0.12.0
-#ifndef WLED_RELEASE_NAME
-  #define WLED_RELEASE_NAME "Custom"
-#endif
 
 
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
-/* Not used in all effects yet */
-#define WLED_FPS         42
-// #define FRAMETIME_FIXED  (1000/WLED_FPS)
-// #define FRAMETIME_FIXED  25//(1000/WLED_FPS)
-// #define FRAMETIME_MS     24
-#define FRAMETIME        25
-#define FRAMETIME_STATIC        1000 // Static effects with minimal update time
+
+// Primary frame time (ms) for most animated effects.
+// In practice this sets a ~40 FPS update rate (1000/25 = 40).
+#define FRAMETIME             25
+
+// Static effects (no animation) — update once per second.
+#define FRAMETIME_STATIC      1000
+
+// Special marker for "no FPS limit" (effect runs as fast as possible).
+#define FPS_UNLIMITED         0
+
+//       /**
+//        * @brief Temporary fix to enable phasing out of animator
+// I believe this is to be phased out
+//        **/
 #define USE_ANIMATOR 0 // tmp fix to return as zero, to enable the effect call to keep the animator running
 
-#define FPS_UNLIMITED    0
+
+
+
 
 extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 
@@ -235,20 +292,22 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 // bit    2: segment is on
 // bit    1: reverse segment
 // bit    0: segment is selected
-#define NO_OPTIONS   (uint8_t)0x00
-#define TRANSITIONAL (uint8_t)0x80
-#define MIRROR       (uint8_t)0x08
+// #define NO_OPTIONS   (uint8_t)0x00
+// #define TRANSITIONAL (uint8_t)0x80
+// #define MIRROR       (uint8_t)0x08
 #define SEGMENT_ON   (uint8_t)0x04
-#define REVERSE      (uint8_t)0x02
+// #define REVERSE      (uint8_t)0x02
 #define SELECTED     (uint8_t)0x01
-#define IS_TRANSITIONAL ((SEGMENT_I(segment_current_index).options & TRANSITIONAL) == TRANSITIONAL)
-#define IS_MIRROR       ((SEGMENT_I(segment_current_index).options & MIRROR      ) == MIRROR      )
-#define IS_SEGMENT_ON   ((SEGMENT_I(segment_current_index).options & SEGMENT_ON  ) == SEGMENT_ON  )
-#define IS_REVERSE      ((SEGMENT_I(segment_current_index).options & REVERSE     ) == REVERSE     )
-#define IS_SELECTED     ((SEGMENT_I(segment_current_index).options & SELECTED    ) == SELECTED    )
+// #define IS_TRANSITIONAL ((SEGMENT_I(segment_current_index).options & TRANSITIONAL) == TRANSITIONAL)
+// #define IS_MIRROR       ((SEGMENT_I(segment_current_index).options & MIRROR      ) == MIRROR      )
+// #define IS_SEGMENT_ON   ((SEGMENT_I(segment_current_index).options & SEGMENT_ON  ) == SEGMENT_ON  )
+// #define IS_REVERSE      ((SEGMENT_I(segment_current_index).options & REVERSE     ) == REVERSE     )
+// #define IS_SELECTED     ((SEGMENT_I(segment_current_index).options & SELECTED    ) == SELECTED    )
 
-// #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
-#define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
+/**
+ * SECTION: Set defaults for segments
+ * 
+ */
 
 #define FLASH_COUNT 4 
 #define LED_SKIP_AMOUNT  0
@@ -264,6 +323,79 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 #define DEFAULT_C2         (uint8_t)128
 #define DEFAULT_C3         (uint8_t)16
 
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Segment colour accessors
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Return color (as u32) from the current segment’s colour slot [x].
+#define SEGCOLOR_U32(x)        segments[getCurrSegmentId()].segcol[x].getU32()
+
+// Return color (with brightness scaling applied) from the current segment’s colour slot [x].
+#define SEGCOLOR_RGBCCT(x)     segments[getCurrSegmentId()].segcol[x].WithBrightness()
+
+// Unified SEGCOLOR macro — returns u32 (matches old SEGCOLOR_U32).
+// Legacy note: previously there was also .getU32Raw().
+#define SEGCOLOR(x)            segments[getCurrSegmentId()].segcol[x].getU32()
+
+// Pointer-context version (used with tkr_anim).
+#define pSEGCOLOR(x)           pSEGMENT.segcol[x].getU32()
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Segment object accessors
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Current segment (main handle).
+#define SEGMENT                segments[getCurrSegmentId()]
+
+// Current segment in pointer-context (via tkr_anim).
+#define pSEGMENT               tkr_anim->segments[tkr_anim->getCurrSegmentId()]
+
+// Indexed segment by ID (raw array access).
+// NOTE: Consider refactoring to a getSegment(X) helper for bounds safety.
+#define SEGMENT_I(X)           segments[X]
+
+// Indexed segment by ID in pointer-context.
+#define pSEGMENT_I(X)          tkr_anim->segments[X]
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Segment length / geometry
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Virtual segment length (set externally before effect execution).
+#define SEGLEN                 _virtualSegmentLength
+
+// Pointer-context virtual segment length.
+#define pSEGLEN                tkr_anim->_virtualSegmentLength
+
+// Segment width/height helpers.
+#define SEG_W                  segments[getCurrSegmentId()].vWidth()
+#define SEG_H                  segments[getCurrSegmentId()].vHeight()
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Palette accessors
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Current segment’s palette data (CRGB16Palette16).
+#define SEGPALETTE             SEGMENT.palette->CRGB16Palette16_Palette.data
+
+// Pointer-context palette data.
+#define pSEGPALETTE            pSEGMENT.palette->CRGB16Palette16_Palette.data
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Index helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Current segment index.
+#define SEGIDX                 getCurrSegmentId()
+
+
+
 //Segment option byte bits
 #define SEG_OPTION_SELECTED       0
 #define SEG_OPTION_REVERSED       1
@@ -271,33 +403,6 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 #define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
 #define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
 #define SEG_OPTION_TRANSITIONAL   7
-
-
-#define SEGCOLOR_U32(x)       segments[getCurrSegmentId()].segcol[x].getU32()
-#define SEGCOLOR_RGBCCT(x)    segments[getCurrSegmentId()].segcol[x].WithBrightness()
-// #define SEGCOLOR(x)           segments[getCurrSegmentId()].segcol[x].getU32Raw()
-#define SEGCOLOR(x)           segments[getCurrSegmentId()].segcol[x].getU32()
-#define SEGMENT               segments[getCurrSegmentId()]
-#define pSEGMENT              tkr_anim->segments[tkr_anim->getCurrSegmentId()]
-#define pSEGCOLOR(x)          pSEGMENT.segcol[x].getU32()
-#define SEGMENT_I(X)          segments[X] // can this be changed later to "getSegment(X)" and hence protect against out of bounds
-#define pSEGMENT_I(X)         tkr_anim->segments[X]
-#define SEGLEN                _virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
-#define pSEGLEN               tkr_anim->_virtualSegmentLength // This is still using the function, it just relies on calling the function prior to the effect to set this
-#define SEG_W            segments[getCurrSegmentId()].vWidth()
-#define SEG_H            segments[getCurrSegmentId()].vHeight()
-#define SEGPALETTE            SEGMENT.palette->CRGB16Palette16_Palette.data
-#define pSEGPALETTE            pSEGMENT.palette->CRGB16Palette16_Palette.data
-#define SEGIDX                getCurrSegmentId()
-
-// WLED Conversions
-#define NUM_COLORS RGBCCTCOLOURS_SIZE
-
-#ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  #define WLED_DISABLE_2D // fix for WLED
-#endif
-
-
 
 
 #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed))/SEGLEN
@@ -519,8 +624,16 @@ class mAnimatorLight :
      * SECTION: Internal Functions
      ************************************************************************************************/
 
-char versionString[16] = TOSTRING(PROJECT_VERSION);
-char releaseString[7] = WLED_RELEASE_NAME; // must include the quotes when defining, e.g -D WLED_RELEASE_NAME=\"ESP32_MULTI_USREMODS\"
+    #define STRINGIFY(X) #X
+    #define TOSTRING(X) STRINGIFY(X)
+
+    // #define WLED_VERSION 0.12.0
+    #ifndef WLED_RELEASE_NAME
+      #define WLED_RELEASE_NAME "Custom"
+    #endif
+
+    char versionString[16] = TOSTRING(PROJECT_VERSION);
+    char releaseString[7] = WLED_RELEASE_NAME; // must include the quotes when defining, e.g -D WLED_RELEASE_NAME=\"ESP32_MULTI_USREMODS\"
 
 
 
@@ -1114,6 +1227,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Christmas_InWaves__01();
     uint16_t EffectAnim__Christmas_ChasingFlash__01();
     uint16_t EffectAnim__Christmas_TwinkleFlash__01();
+    uint16_t EffectAnim__Christmas_Twinkle_Thermal();
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
     uint16_t EffectAnim__Christmas_Slo_Glo__02();
@@ -1628,6 +1742,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_FLASH_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_FLASH_01_ID,
+      EFFECTS_FUNCTION__CHRISTMAS_TWINKLE_THERMAL__ID,
       #endif
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
       // EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__COMBINATION_ID,
@@ -1640,6 +1755,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_PLUS__ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_PLUS__ID,
       #endif
+        
 
       /**
        * 2D (No Audio)
@@ -1680,8 +1796,10 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID,         
       EFFECTS_FUNCTION__2D__SCROLLING_TEXT_WITH_BASELINE__ID,
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
-      #endif
+      // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
 
+      #endif
+      
 
       /**
        * Audio Reactive 1D
@@ -1741,47 +1859,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
 
     
 
-    /**
-     * @brief Turn random Lights off, but when they are off (and hence shunted from in series) the rest of the LEDs in that region should get brighter
-     * Note: Part of why these look good is the inherent initial brightness from a cold incandenct bulb turning on, then stabilising. 
-     * This will also be the case for the other traditional christmas effects... not sure how to programmatically replicate this
-     * Option1: Randomly turn LEDs off, entire string gets marginally brighter
-     * Option2: Divide all LED string into sections of 8 (ie. 24V filament sets) and randomly turn 1 led off in each section, and that section brightness changes
-     * 
-     */
-
-
-    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    // /**
-    //  * @brief  linear palette group colour, changing by triggered and over a period of time (eg an alarm -30 minutes)
-    //  **/
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,
-    // /**
-    //  * @brief  Azimuth min/max selects 0-255 for index to get from palette (so map(az, az_min, az_max, 0, 255) which is 0-colours_in_palette)
-    //  **/
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,
-    // /**
-    //  * @brief Daytime: Palette 1
-    //  *       Nightime: Palette 2
-    //  *        Option1: 0 means it considers the full daily movement as transition, otherwise it means 0.1-degree of movement is considered transition around horizon (ie. +- 5.5 degrees would be 55)
-    //  **/
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,
-    // /**
-    //  * @brief  Draw Sun will either draw single pixel, or bloom gradient (ie 1 pixel to 5 pixels blended) on a 1D LED strip
-    //  * Option1: for background to be drawn (ie. sky)
-    //  * Option2: background sky colour may be time of day reactive and change colour (ie. blue during day, black at night)
-    //  **/
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_01__ID,
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,    
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID, // 2D LED matrix, elevation and azimuth
-    // /**
-    //  * @brief  As the traditional solid white light, but reactive to the time of day (lightness outside)
-    //  *        I will also want a way to pick what these max/min are (ie setting dusk/dawn as limits for transition for CCT colours etc)
-    //  **/
-    // OLD_EFFECTS_FUNCTION__SUNPOSITIONS_WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__ID, // Daywhite in daylight, and warm white at night
     // #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
-  // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
 
   
   #define WLED_GROUP_IDS_FIRST  EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID
@@ -1855,40 +1934,6 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
 
 
 
-
-
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-  // IRAM_ATTR 
-  // #endif 
-  // void AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
-
-
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-  // IRAM_ATTR 
-  // #endif 
-  // void AnimationProcess_LinearBlend_Dynamic_Buffer_BrtNotSet(const AnimationParam& param);
-
-
-
-  // void AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSegColours(const AnimationParam& param);
-
-  // void 
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-  // IRAM_ATTR 
-  // #endif 
-  // SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, ColourType pixel_type, const RgbwwColor& starting_colour);
-  
-  // void 
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-  // IRAM_ATTR 
-  // #endif 
-  // SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  ColourType pixel_type, const RgbwwColor& desired_colour);
-
-  // void 
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-  // IRAM_ATTR 
-  // #endif 
-  // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
 inline RgbwwColor AdjustColourWithBrightness(const RgbwwColor& colour, uint8_t brightnessRGB) {
     // Pre-calculate the scale factor (bit-shift scaling for division by 255)
@@ -2791,10 +2836,10 @@ typedef struct Segment
     #endif
 
     // Define the size of the color array
-    #define RGBCCTCOLOURS_SIZE 5
+    #define NUMBER_SEGMENT_COLOURS 5
 
     // Initialize the array with default values
-    SegmentColour segcol[RGBCCTCOLOURS_SIZE] = 
+    SegmentColour segcol[NUMBER_SEGMENT_COLOURS] = 
     {
       SegmentColour(255, 0, 0, 0, 0), // Red
       SegmentColour(0, 255, 0, 0, 0), // Green
@@ -2803,19 +2848,8 @@ typedef struct Segment
       SegmentColour(255, 255, 0, 0, 0)  // Yellow
     };
 
-
-    // #define RGBCCTCOLOURS_SIZE 5
-    // RgbwwColor segcol[5] = {RgbwwColor(255,0,0,0,0), RgbwwColor(0,255,0,0,0), RgbwwColor(0,0,255,0,0), RgbwwColor(255,0,255,0,0), RgbwwColor(255,255,0,0,0)};
-
-    // void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w )
-    // {
-    //   uint8_t index_t = index<RGBCCTCOLOURS_SIZE?index:0;
-    //   if(index>RGBCCTCOLOURS_SIZE){ Serial.println("ERROR"); }
-    //   segcol[index_t] = RgbwwColor(r,g,b,w,w);
-    // }
-
     void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t ww, uint8_t cw, uint8_t br_rgb = 255, uint8_t br_ww = 255) {
-        if (index >= RGBCCTCOLOURS_SIZE) {
+        if (index >= NUMBER_SEGMENT_COLOURS) {
             Serial.println("ERROR: Index out of bounds");
             return;
         }
@@ -2965,6 +2999,8 @@ typedef struct Segment
     void setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1);
     
     uint8_t  cct_slider;                 //0==1900K, 255==10091K
+
+
     uint8_t  custom1, custom2;    // custom FX parameters/sliders
     struct {
       uint8_t custom3 : 5;        // reduced range slider (0-31)
@@ -3009,6 +3045,9 @@ typedef struct Segment
      */
     uint16_t params_user[4] = {0};
 
+    #ifdef ENABLE_DEVFEATURE_LIGHT__PIXELS_BUFFER_RAW    
+    uint32_t *pixels;                 // pixel data
+    #endif
     // CRGB* leds;     // local leds[] array (may be a pointer to global)
     // static CRGB *_globalLeds;             // global leds[] array
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
@@ -3025,9 +3064,6 @@ typedef struct Segment
       };
     };
 
-    #ifdef ENABLE_DEVFEATURE_LIGHT__PIXELS_BUFFER_RAW    
-    uint32_t *pixels;                 // pixel data
-    #endif
 
     /***
      * Effect datastorage
@@ -3038,7 +3074,7 @@ typedef struct Segment
     inline byte* Data(){ return data; };
     inline uint16_t DataLength(){ return _dataLen; };
     /***
-     * dynamic colour byte buffer
+     * Effect dynamic colour byte buffer
      ***/
     byte* coldata;     // buffer to be used when leds needed stored in out dynamic colour methods
     uint16_t _coldataLen;
@@ -3046,8 +3082,6 @@ typedef struct Segment
     inline uint16_t ColourDataLength(){ return _coldataLen; };
     inline const byte* ColourData() const { return coldata; }// add these const overloads
     inline uint16_t ColourDataLength() const { return _coldataLen; }
-
-
 
 
 
@@ -3246,12 +3280,12 @@ typedef struct Segment
     uint8_t differs(const Segment& b) const;
     void    refreshLightCapabilities(void);
 
-    static uint32_t color_blend(uint32_t,uint32_t,uint16_t,bool b16=false);
+    static uint32_t   color_blend(uint32_t,uint32_t,uint16_t,bool b16=false);
     static RgbwwColor color_blend(RgbwwColor,RgbwwColor,uint16_t,bool b16=false);
-    static uint32_t color_add(uint32_t,uint32_t, bool fast=false);
-    static uint32_t color_add(RgbwwColor,RgbwwColor, bool fast=false);
+    static uint32_t   color_add(uint32_t,uint32_t, bool fast=false);
+    static uint32_t   color_add(RgbwwColor,RgbwwColor, bool fast=false);
     static RgbwwColor color_fade(RgbwwColor c1, uint8_t amount, bool video=false);
-    static uint32_t color_fade(uint32_t c1, uint8_t amount, bool video=false);
+    static uint32_t   color_fade(uint32_t c1, uint8_t amount, bool video=false);
 
     void setRandomColor(byte* rgb);
     void colorHStoRGB(uint16_t hue, byte sat, byte* rgb);
@@ -3496,7 +3530,7 @@ typedef struct Segment
      * #endif
      **/
     // uint8_t white_warm_GetPaletteColour = 0;
-    [[gnu::hot]] uint32_t GetPaletteColour_ModeWrap(
+    [[gnu::hot]] uint32_t GetPaletteColour( // GetPaletteColour_ModeWrap was temporary as this, should be converted.
       /**
        * @brief _pixel_position
        * ** [0-SEGLEN]
@@ -3610,7 +3644,7 @@ typedef struct Segment
 
       // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
       const uint8_t idxMode   = mapping ? PALETTE_INDEX__IS_SEGLEN_RANGE : PALETTE_INDEX__IS_EXACT_COLOUR;
-      const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_ON               : PALETTE_WRAP_OFF;
+      const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_SMOOTH           : PALETTE_WRAP_HARDEDGE;
       const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
 
       uint8_t encoded = 0; // non-null pointer expected by some impls
@@ -3625,7 +3659,7 @@ typedef struct Segment
       //     mcol
       // );
 
-      uint32_t c = GetPaletteColour_ModeWrap(
+      uint32_t c = GetPaletteColour(
           i,
           idxMode,
           discrete,
@@ -5587,3 +5621,59 @@ extern mAnimatorLight* tkr_extern_lAni;  // global instance of the mAnimatorLigh
 
 #endif
 
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WLED → PulSar Conversion Notes
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Purpose:
+ *   These defines and notes are temporary shims that allow PulSar code to
+ *   interoperate with legacy WLED patterns until all callsites are ported.
+ *   They should be removed once everything consistently uses the new
+ *   GetPaletteColour_* APIs.
+ *
+ * Context:
+ *   WLED and PulSar differ in how palette indices, wrapping, and modes are
+ *   handled. WLED had booleans for "mapping" and "wrap"; PulSar has explicit
+ *   enums for index encoding, wrap mode, and palette mode.
+ *
+ * Original WLED function:
+ *     CRGB color_from_palette(i, mapping, wrap, mcol, pbri=255)
+ *
+ * Parameters:
+ *   i       → Palette index (0..255, or scaled by segment length if mapping=true)
+ *   mapping → if true, i spans SEGLEN and is mapped to 0..255
+ *   wrap    → if true, circular blend at 255→0; if false, clamp (hard edge)
+ *   mcol    → if palette 0 selected, returns SEGCOLOR[0..2]; >2 → Party palette
+ *   pbri    → brightness scale (255=no scale)
+ *
+ * PulSar equivalent:
+ *     GetPaletteColour_Legacy(i, indexEncoding, wrapMode, paletteMode, encodedVal)
+ *
+ * Example mapping:
+ *   WLED:
+ *     SEGMENT.color_from_palette(band*35, false, PALETTE_SOLID_WRAP, 0);
+ *
+ *   PulSar:
+ *     SEGMENT.GetPaletteColour_Legacy(
+ *         band*35,
+ *         WLED_PALETTE_MAPPING_ARG_FALSE,  // index already 0..255
+ *         PALETTE_WRAP_SMOOTH,             // wrap=on
+ *         PALETTE_MODE__DEFAULT,           // palette mode
+ *         NO_ENCODED_VALUE                 // no encoded override
+ *     ).getU32();
+ *
+ * Conversion reference:
+ *   WLED                 →   PulSar
+ *   --------------------     ------------------------------
+ *   SEGENV                   SEGMENT
+ *   isMatrix                 SEGMENT.isMatrix
+ *   SEGCOLOR                 SEGCOLOR_U32
+ *   color_from_palette()     GetPaletteColour_Legacy().getU32()
+ *   aux1                     SEGMENT.params_internal.aux1
+ *
+ * Legacy aliases (for compatibility only):
+ *
+ * #define color_from_palette(i,mapping,wrap,mcol) \
+ *  GetPaletteColour_Legacy(i, mapping, wrap, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE).getU32()
+ */

@@ -33,7 +33,7 @@
 // #define DEVICE_OFFICE__DESK_LIGHTING
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
-// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
+#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

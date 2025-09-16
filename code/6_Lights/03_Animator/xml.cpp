@@ -169,7 +169,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 
   if (subPage == SUBPAGE_MENU)
   {
-  #ifdef WLED_DISABLE_2D // include only if 2D is not compiled in
+  #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is not compiled in
     settingsScript.print(F("gId('2dbtn').style.display='none';"));
   #endif
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
