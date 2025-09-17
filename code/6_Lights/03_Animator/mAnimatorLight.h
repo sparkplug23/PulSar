@@ -1209,6 +1209,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__SunPositions__Sunrise_Alarm_01();
     uint16_t EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01();
     uint16_t EffectAnim__SunPositions__Sunset_Blended_Palettes_01();
+    uint16_t EffectAnim__SunPositions__NoonBurst_Base(uint8_t speed, uint16_t center);
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(bool include_duskdawn);
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_01();
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Elevation_02();
@@ -1908,22 +1909,18 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       COLOUR_TYPE__RGB__ID=3, //3   
       COLOUR_TYPE__RGBW__ID=4, //4
       COLOUR_TYPE__RGBWW__ID=5 // 5 
-      
-      // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
-      // COLOUR_TYPE__RGBWC__ID, //remove
-      // COLOUR_TYPE__RGBCW__ID //remove
   };
 
-  inline uint8_t GetSizeOfPixel(ColourType colour_type)
-  {
-    switch(colour_type)
-    {
-      default:
-      case ColourType::COLOUR_TYPE__RGB__ID:     return 3;
-      case ColourType::COLOUR_TYPE__RGBW__ID:    return 4;
-      case ColourType::COLOUR_TYPE__RGBWW__ID:  return 5;
-    }
-  }
+  // inline uint8_t GetSizeOfPixel(ColourType colour_type)
+  // {
+  //   switch(colour_type)
+  //   {
+  //     default:
+  //     case ColourType::COLOUR_TYPE__RGB__ID:     return 3;
+  //     case ColourType::COLOUR_TYPE__RGBW__ID:    return 4;
+  //     case ColourType::COLOUR_TYPE__RGBWW__ID:  return 5;
+  //   }
+  // }
 
 
   mAnimatorLight& SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
@@ -3083,8 +3080,6 @@ typedef struct Segment
     inline const byte* ColourData() const { return coldata; }// add these const overloads
     inline uint16_t ColourDataLength() const { return _coldataLen; }
 
-
-
     mPaletteLoaded* palette = new mPaletteLoaded();
     /**
      * Each segment will have its own animator
@@ -3094,7 +3089,6 @@ typedef struct Segment
 
     uint8_t GetNumberOfColoursInPalette(){ return palette->colours_in_palette; };
   
-
     bool LoadPalette_AsyncLock = false;
     void LoadPalette(uint8_t palette_id, mPaletteLoaded* palette = nullptr);
 
@@ -3142,7 +3136,6 @@ typedef struct Segment
       #endif
       
       refreshLightCapabilities();
-
       
       if (segment_name) {
         name = new char[strlen(segment_name) + 1];
@@ -3163,6 +3156,7 @@ typedef struct Segment
       startY = sStartY;
       stopY  = sStopY;
     }
+
 
     Segment(const Segment &orig) // copy constructor
     {
@@ -3331,65 +3325,65 @@ typedef struct Segment
     [[gnu::hot]] uint16_t virtualLength(void) const;
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    [[gnu::hot]] void setPixelColor(int n, RgbwwColor c
+      [[gnu::hot]] void setPixelColor(int n, RgbwwColor c
+        #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+        ,bool brightness_already_set = false /*temporary fix*/
+        #endif
+      );                  // Main function others below call
+      void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) 
+      { 
+        #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
+        Serial.println("setPixelColor(int n, byte r, byte g, byte b, byte w = 0");
+        #endif    
+        setPixelColor(n, RgbwwColor(r,g,b,w));    
+      }
+      void setPixelColor(uint16_t n, RgbwwColor c)
+      {      
+        #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
+        Serial.println("setPixelColor(uint16_t n, RgbwwColor c)");
+        #endif    
+        setPixelColor((int)n, c); 
+      } // explicit conversion
+      void setPixelColor(int n, CRGB c) 
+      {
+        #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
+        Serial.println("setPixelColor(int n, CRGB c)");
+        #endif    
+        setPixelColor(n, RgbwwColor(c.r, c.g, c.b));
+      }
+      void setPixelColor(int n, uint32_t c) 
+      {
+        #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
+        Serial.println("setPixelColor(int n, uint32_t c)");
+        #endif    
+        setPixelColor(n, RgbwwColor(R(c), G(c), B(c), W(c), W(c)));
+      }  // explicit conversion
+      void setPixelColor(unsigned n, uint32_t c)
+      {
+        #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
+        Serial.println("setPixelColor(unsigned n, uint32_t c)");
+        #endif    
+        setPixelColor((int)n, RgbwwColor(R(c), G(c), B(c), W(c), W(c)));
+      }  // explicit conversion
+      // Anti-aliasing functions
+      void setPixelColor(float i, uint32_t c, bool aa = true);
+      void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
+      void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }    
+    #else    
+      [[gnu::hot]] void setPixelColor(int n, uint32_t c
       #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
       ,bool brightness_already_set = false /*temporary fix*/
       #endif
-    );                  // Main function others below call
-    void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) 
-    { 
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
-      Serial.println("setPixelColor(int n, byte r, byte g, byte b, byte w = 0");
-      #endif    
-      setPixelColor(n, RgbwwColor(r,g,b,w));    
-    }
-    void setPixelColor(uint16_t n, RgbwwColor c)
-    {      
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
-      Serial.println("setPixelColor(uint16_t n, RgbwwColor c)");
-      #endif    
-      setPixelColor((int)n, c); 
-    } // explicit conversion
-    void setPixelColor(int n, CRGB c) 
-    {
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
-      Serial.println("setPixelColor(int n, CRGB c)");
-      #endif    
-      setPixelColor(n, RgbwwColor(c.r, c.g, c.b));
-    }
-    void setPixelColor(int n, uint32_t c) 
-    {
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
-      Serial.println("setPixelColor(int n, uint32_t c)");
-      #endif    
-      setPixelColor(n, RgbwwColor(R(c), G(c), B(c), W(c), W(c)));
-    }  // explicit conversion
-    void setPixelColor(unsigned n, uint32_t c)
-    {
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
-      Serial.println("setPixelColor(unsigned n, uint32_t c)");
-      #endif    
-      setPixelColor((int)n, RgbwwColor(R(c), G(c), B(c), W(c), W(c)));
-    }  // explicit conversion
-    // Anti-aliasing functions
-    void setPixelColor(float i, uint32_t c, bool aa = true);
-    void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
-    void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }    
-    #else    
-    [[gnu::hot]] void setPixelColor(int n, uint32_t c
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
-    ,bool brightness_already_set = false /*temporary fix*/
-    #endif
-    );
-    void setPixelColor(int n, RgbwwColor c){ setPixelColor(n, RGBW32(c.R, c.G, c.B, c.WW)); } 
-    void setPixelColor(unsigned n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
-    void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
-    void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) {      setPixelColor(n, RGBW32(r,g,b,w));    }
-    void setPixelColor(int n, CRGB c) {            setPixelColor(n, RGBW32(c.r, c.g, c.b,0));    }
-    // Anti-aliasing functions
-    void setPixelColor(float i, uint32_t c, bool aa = true);
-    void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
-    void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
+      );
+      void setPixelColor(int n, RgbwwColor c){ setPixelColor(n, RGBW32(c.R, c.G, c.B, c.WW)); } 
+      void setPixelColor(unsigned n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
+      void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
+      void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) {      setPixelColor(n, RGBW32(r,g,b,w));    }
+      void setPixelColor(int n, CRGB c) {            setPixelColor(n, RGBW32(c.r, c.g, c.b,0));    }
+      // Anti-aliasing functions
+      void setPixelColor(float i, uint32_t c, bool aa = true);
+      void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
+      void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
     #endif
     
       
@@ -3423,7 +3417,6 @@ typedef struct Segment
      *  * RGBWW can be used directly, but U32 methods are used for performance
      * 
      ******************************************************************************************************************************************************/
-
 
 
     /**
@@ -3478,6 +3471,7 @@ typedef struct Segment
 
       uint8_t mcol = 0
     );
+
 
     /*****
      * Some effects allow for RGBWW to be generated, but this has performance implications
@@ -3572,6 +3566,7 @@ typedef struct Segment
       uint8_t mcol = 0
     );
 
+
     /*****
      * Some effects allow for RGBWW to be generated, but this has performance implications
      *****/
@@ -3606,8 +3601,6 @@ typedef struct Segment
        */
       uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
 
-      
-
       bool apply_brightness = false
     );
 
@@ -3624,47 +3617,24 @@ typedef struct Segment
      * @returns Single color from palette
      * Since inline functions are expanded at compile time and do not incur runtime overhead, you can use an inline function in a header file
      * alternatively could seak DEFINE remaps
-     * 
+     * return GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg* false, /*encoded value skip arg* nullptr, /*apply brightness skip arg* true, pbri, mcol); August2025, pbri not applied correctly this way, needs fixed later
+     * uint32_t c = GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg* false, /*encoded value skip arg* nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function* false, pbri, mcol);
      * color_from_palette_forced_gradient is really teh default, all WLED acts on CRGBPalette16 and assumes never discrete/exact colour sampling so we should default mine to that too.
     */
     inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
-      // // return GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg*/true, pbri, mcol); August2025, pbri not applied correctly this way, needs fixed later
-      // uint32_t c = GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg*/false, /*encoded value skip arg*/nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function*/false, pbri, mcol);
-      // if(pbri != 255) { // apply brightness if not already done
-      //   byte r = R(c), g = G(c), b = B(c), w = W(c);
-      //   r = (uint16_t(r) * pbri) >> 8;
-      //   g = (uint16_t(g) * pbri) >> 8;
-      //   b = (uint16_t(b) * pbri) >> 8;
-      //   w = (uint16_t(w) * pbri) >> 8;
-      //   c = RGBW32(r, g, b, w);
-      // }
-      // return c;
-
-      // Map booleans to your enum constants
+      
 
       // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
       const uint8_t idxMode   = mapping ? PALETTE_INDEX__IS_SEGLEN_RANGE : PALETTE_INDEX__IS_EXACT_COLOUR;
       const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_SMOOTH           : PALETTE_WRAP_HARDEDGE;
       const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
 
-      uint8_t encoded = 0; // non-null pointer expected by some impls
-      // uint32_t c = GetPaletteColour_Legacy(
-      //     i,
-      //     idxMode,
-      //     wrapMode,
-      //     discrete,
-      //     &encoded,
-      //     /*apply brightness*/ false,
-      //     255, // to be removed, handled below
-      //     mcol
-      // );
-
       uint32_t c = GetPaletteColour(
           i,
           idxMode,
           discrete,
           wrapMode,
-          &encoded,
+          nullptr,
           /*apply brightness*/ false,
           255, // to be removed, handled below
           mcol
@@ -3682,65 +3652,6 @@ typedef struct Segment
 
       return c;
     }
-
-    /**
-     * Forced-gradient palette lookup.
-     *
-     * Always disables discrete/CRGB “exact color” sampling and requests interpolated
-     * gradient output, regardless of the palette’s native type.
-     *
-     * @param i      Palette index (or pixel index if mapping==true).
-     * @param mapping true: i spans seglen, false: i spans 0..255 space.
-     * @param wrap   If true, wrap smoothly end→start; else hard edge at ends.
-     * @param mcol   PHASEOUT: If default palette 0 is active, choose SEGCOLOR(mcol) instead (0..2); >2 uses a fallback (e.g., Party).
-     * @param pbri   Brightness scale (0..255) applied to the sampled color.
-     * 
-     * 
-     * color_from_palette(i, mapping, wrap, mcol, pbri)
-     * If mapping == false → i is always interpreted as 0–255.
-     * That’s the raw FastLED palette space.
-     * Good if you want “absolute positions” within a palette, independent of segment length.
-     * If mapping == true → i is treated as a pixel index in 0–SEGLEN-1, which gets rescaled internally to 0–255.
-     * So pixel #0 = palette index 0, pixel #SEGLEN-1 = palette index 255.
-     * This matches your assumption: default = false means “always 0–255, don’t rescale by SEGLEN”.
-
-
-     */
-    // inline uint32_t color_from_palette_forced_gradient(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255)
-    // {
-    //   // Map booleans to your enum constants
-
-    //   // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
-    //   const uint8_t idxMode   = mapping ? PALETTE_INDEX__IS_SEGLEN_RANGE : PALETTE_INDEX__IS_EXACT_COLOUR;
-
-
-    //   const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_ON               : PALETTE_WRAP_OFF;
-    //   const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
-
-    //   uint8_t encoded = 0; // non-null pointer expected by some impls
-    //   uint32_t c = GetPaletteColour_Legacy(
-    //       i,
-    //       idxMode,
-    //       wrapMode,
-    //       discrete,
-    //       &encoded,
-    //       /*apply brightness*/ false,
-    //       255, // to be removed, handled below
-    //       mcol
-    //   );
-
-    //   if(pbri != 255) { // apply brightness if not already done
-    //     byte r = R(c), g = G(c), b = B(c), w = W(c);
-    //     r = (uint16_t(r) * pbri) >> 8;
-    //     g = (uint16_t(g) * pbri) >> 8;
-    //     b = (uint16_t(b) * pbri) >> 8;
-    //     w = (uint16_t(w) * pbri) >> 8;
-    //     c = RGBW32(r, g, b, w);
-    //   }
-
-    //   return c;
-
-    // }
 
 
     // 2D Blur: shortcuts for bluring columns or rows only (50% faster than full 2D blur)
@@ -3764,7 +3675,7 @@ typedef struct Segment
     // uint16_t nrOfVStrips(void) const;
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
     // [[gnu::hot]] uint16_t XY(int x, int y);      // support function to get relative index within segment
 
@@ -3976,6 +3887,7 @@ inline uint32_t Get_DynamicBuffer_DesiredColour(uint16_t pixelIndex) {
     return 0; // Return black if colour width is invalid
 }
 
+
 inline uint32_t Get_DynamicBuffer_StartingColour(uint16_t pixelIndex) {
     size_t offset = (pixelIndex * colour_width__used_in_effect_generate * 2) + colour_width__used_in_effect_generate; // Starting is after desired
 
@@ -4038,7 +3950,6 @@ inline void Update_DynamicBuffer_DesiredColour_Brightness(uint8_t bri_rgb, uint8
 }
 
 
-
 /************************************************************************************
  ****** Higher Level Ops ********************************************************************* 
  ************************************************************************************/
@@ -4068,6 +3979,7 @@ inline void DynamicBuffer_StartingColour_GetAllSegment() {
     performance.bus_read_total_us = micros() - performance.bus_read_total_us;
     #endif
 }
+
 
 inline void DynamicBuffer_StartingColour_GetAllSegment_WithFade(uint8_t fade) {
     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
@@ -4142,6 +4054,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32(const AnimationParam&
     }
 }
 
+
 // Temporary function until I decide what to do with brightness
 inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(const AnimationParam& param) {
   
@@ -4185,7 +4098,6 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(
         }
     }
 }
-
 
 
 /**
@@ -4236,8 +4148,8 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
             #endif
         }
     }
-    #else
-float progress = param.progress;
+  #else
+    float progress = param.progress;
     uint8_t blendFactor = static_cast<uint8_t>(progress * 255);
 
     for (int i = 0; i < virtualLength(); i++) {
@@ -4277,8 +4189,6 @@ float progress = param.progress;
 
     #endif
 }
-
-
 
 
 inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const AnimationParam& param) {
@@ -4337,7 +4247,6 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const Ani
         }
     }
 }
-
 
 
 inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_BrightnessAlreadySet(const AnimationParam& param) {

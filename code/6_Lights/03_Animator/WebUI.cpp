@@ -391,11 +391,11 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root[F("product")] = F("FOSS");
   // root["mac"] = escapedMac;
   char s[16] = "";
-  // if (Network.isConnected())
-  // {
-  //   IPAddress localIP = Network.localIP();
-  //   sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
-  // }
+  if (Network.isConnected())
+  {
+    IPAddress localIP = Network.localIP();
+    sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
+  }
   root["ip"] = s;
 }
 

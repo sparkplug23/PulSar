@@ -46,18 +46,25 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
   if (SEGMENT.colour_width__used_in_effect_generate == ColourType::COLOUR_TYPE__RGBWW__ID) {
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    RgbwwColor desiredColour = SEGMENT.GetPaletteColour_RGBWW();
-    RgbwwColor startingColour = SEGMENT.getPixelColorRgbww(0);
+      RgbwwColor desiredColour = SEGMENT.GetPaletteColour_RGBWW();
+      RgbwwColor startingColour = SEGMENT.getPixelColorRgbww(0);
 
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-    // desiredColour = RgbwwColor(1,2,3,4,5);
-    // startingColour = RgbwwColor(6,7,8,9,10);
-    Serial.printf("Solid Colour --------------------------------------------------%d\n\r", desiredColour);
-    #endif
-    
-    // Set the desired and starting colors in the transition buffer
-    SEGMENT.Set_DynamicBuffer_DesiredColour_RgbwwColor(0, desiredColour);
-    SEGMENT.Set_DynamicBuffer_StartingColour_RgbwwColor(0, startingColour);
+      #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
+      // desiredColour = RgbwwColor(1,2,3,4,5);
+      // startingColour = RgbwwColor(6,7,8,9,10);
+      Serial.printf("Solid Colour --------------------------------------------------%d\n\r", desiredColour);
+      #endif
+      
+      // Set the desired and starting colors in the transition buffer
+      SEGMENT.Set_DynamicBuffer_DesiredColour_RgbwwColor(0, desiredColour);
+      SEGMENT.Set_DynamicBuffer_StartingColour_RgbwwColor(0, startingColour);
+    #else    
+      // Handle RGB/WRGB cases
+      uint32_t desiredColour  = SEGMENT.GetPaletteColour(0);
+      uint32_t startingColour = SEGMENT.getPixelColor(0);
+      // Set the desired and starting colors in the transition buffer
+      SEGMENT.Set_DynamicBuffer_DesiredColour(0, desiredColour);
+      SEGMENT.Set_DynamicBuffer_StartingColour(0, startingColour);
     #endif
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
@@ -2677,58 +2684,154 @@ static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] P
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
+// *********************************************************************************************
+// @function   : EffectAnim__SunPositions__NoonBurst_Base
+// @summary    : Full-segment "celebration" at solar noon when elevation flips rising->falling.
+// @controls   : speed selects style + intensity
+//               1..50   -> A: Full-strip smooth white pulse
+//               51..100 -> B: Shockwave from 'center' to edges (bright ring with soft tail)
+//               101..180-> C: Crisp strobes (faster with speed)
+//               181..255-> D: Palette sweep across strip
+// @args       : speed    - SEGMENT.speed (0..255)
+//               center   - pixel index for origin-based modes (e.g., sun_center)
+// @returns    : FRAMETIME
+// @Date Modified : 16Sep2025
+// *********************************************************************************************
+uint16_t mAnimatorLight::EffectAnim__SunPositions__NoonBurst_Base(uint8_t speed, uint16_t center)
+{
+  // Clamp/basic
+  if (SEGLEN == 0) return FRAMETIME;
+  center = (center < SEGLEN) ? center : (SEGLEN/2);
 
-/********************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************
- * @function              : EffectAnim__SunPositions__DrawSun_1D_Elevation_Base
- * @description           : 
- *   Renders a vertical 1D visual of the sun’s **elevation angle** using a glowing orb and a surrounding sky gradient.
- *   The LED segment is treated as a vertical axis:
- *     - Bottom pixel represents low elevation (horizon or twilight)
- *     - Top pixel represents the sun’s highest point (solar noon)
- * 
- *   The sun's **elevation angle** is mapped to a pixel position and colored with a smooth RGB transition depending on height.
- *   Surrounding sky glow fades outward from the sun using a configurable falloff. Optionally, sunrise/noon markers can be drawn.
- * 
- *   Behavior is modified depending on the `include_duskdawn` flag:
- * 
- *   ● `include_duskdawn == false` (Standard Mode):
- *     - Segment range maps from 0° (sunrise) to maximum elevation (solar noon)
- *     - Used when only visible sun (above horizon) is of interest
- *     - Pixel 0 → elevation 0°, Top pixel → max elevation (e.g., 56.5°)
- *     - Sunrise and noon markers drawn at extremes
- * 
- *   ● `include_duskdawn == true` (Twilight Mode):
- *     - Segment range maps from -6° (civil dawn) to maximum elevation
- *     - Used when twilight periods are visually important
- *     - Pixel 0 → elevation -6°, Top pixel → max elevation
- *     - Additional marker drawn for 0° elevation (sunrise)
- *     - Allows sun to appear **before** actual sunrise
- * 
- * @param include_duskdawn     : When true, includes twilight zone (−6° to 0° elevation) in the scale mapping
- * 
- * @param SEGMENT.intensity    : Controls sun's width (0–255), squared mapping for fine control
- * @param SEGMENT.custom1      : Controls sky glow width (0–255), squared
- * @param SEGMENT.custom2      : Controls falloff sharpness of sky glow (0–255); higher = tighter fade
- * @param SEGMENT.custom3      : Marker brightness (0–31 mapped to 0–100). Affects sunrise/noon markers.
- * @param SEGMENT.check1       : Use palette for sun coloring if true; otherwise use calculated RGB gradient
- * @param SEGMENT.check2       : Mirror palette from sun center if true (ignored in RGB mode)
- * @param SEGMENT.check3       : Enable rendering of reference markers (sunrise, noon)
- * 
- * @param Intensity            : [unused] Included for compatibility with effect manager
- * @param Speed                : [unused]
- * @param rate                 : [unused]
- * @param time                 : Used for blending control (if applicable in caller)
- * 
- * @return uint16_t
- *   Returns `FRAMETIME` constant for standard refresh timing
- * 
- * @notes
- *   - When `tkr_solar` is invalid, or sun elevation is below range, the effect renders nothing
- *   - All positioning and color mapping uses floating-point precision for smooth animation
- *   - Intended for use with real-time sun tracking updates
- ********************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
+  const uint32_t now = millis();
+  // Normalize time phase 0..1 at roughly 1.2s base; caller limits overall duration
+  const float baseT   = 1200.0f;                             // ms
+  const float spdGain = 0.4f + (speed/255.0f)*1.6f;          // 0.4..2.0
+  const float t       = fmodf((float)(now % (uint32_t)baseT) / baseT * spdGain, 1.0f);
+
+  // Common helpers
+  auto sat01 = [](float x){ return x<0?0:(x>1?1:x); };
+  auto easeS = [&](float x){ x=sat01(x); return x*x*(3-2*x); };      // smoothstep
+  auto sin2  = [&](float x){ float s=sinf(3.1415926f*x); return s*s; };
+
+  SEGMENT.fill(BLACK);
+
+  if (speed <= 50) {
+    // --- A: Smooth white pulse (global)
+    // Brightness envelope: sin^2 with mild overshoot via ease
+    float env = 0.7f*sin2(t) + 0.3f*easeS(t);
+    uint8_t v = (uint8_t)(sat01(env)*255.0f);
+    for (uint16_t i=0;i<SEGLEN;i++) SEGMENT.setPixelColor(i, RGBW32(v,v,v,0));
+  }
+  else if (speed <= 100) {
+    // --- B: Shockwave from center
+    // Radius grows to edges; ring has Gaussian-ish profile and trailing fill
+    float maxR = (float)max(center, (uint16_t)(SEGLEN-1-center));
+    float R    = (t * (maxR+4.0f));           // +4 for a little overshoot
+    float sigma= 1.2f + (speed-50)*0.02f;     // 1.2..2.2
+    for (uint16_t i=0;i<SEGLEN;i++) {
+      float d = fabsf((float)i - (float)center);
+      // ring peak near |d-R|≈0
+      float ring = expf(-(d-R)*(d-R)/(2.0f*sigma*sigma));
+      // subtle fill inside the wave
+      float fill = sat01(1.0f - d/(R+1.0f))*0.25f;
+      float v    = sat01(ring*0.9f + fill);
+      uint8_t u  = (uint8_t)(v*255.0f);
+      SEGMENT.setPixelColor(i, RGBW32(u,u,u,0));
+    }
+  }
+  else if (speed <= 180) {
+    // --- C: Strobes (speed controls rate)
+    // Rate: ~6..20 Hz
+    float hz = 6.0f + (speed-101)*(14.0f/79.0f);
+    // square wave on fractional part of (time * rate)
+    float phase = fmodf((now/1000.0f)*hz, 1.0f);
+    bool on = (phase < 0.2f); // 20% duty
+    uint8_t v = on ? 255 : 0;
+    for (uint16_t i=0;i<SEGLEN;i++) SEGMENT.setPixelColor(i, RGBW32(v,v,v,0));
+  }
+  else {
+    // --- D: Palette sweep (wraps along strip)
+    // Move index with time; faster with speed
+    uint16_t sweep = (uint16_t)(t * (SEGLEN-1));
+    for (uint16_t i=0;i<SEGLEN;i++) {
+      uint16_t idx = (i + sweep) % (SEGLEN);
+      uint32_t c = SEGMENT.GetPaletteColour_Legacy(
+        idx,
+        PALETTE_INDEX__IS_SEGLEN_RANGE,
+        PALETTE_WRAP_SMOOTH,
+        PALETTE_MODE__DEFAULT,
+        NO_ENCODED_VALUE
+      );
+      SEGMENT.setPixelColor(i, c);
+    }
+  }
+
+  return FRAMETIME;
+}
+
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT BASE: SunPositions_DrawSun_1D_Elevation_Base(include_duskdawn)
+ *
+ * PURPOSE
+ *   Render a vertical 1-D “sky column” where pixel index encodes the sun’s **elevation angle**. A soft “sun” disc is drawn at the
+ *   mapped elevation with a surrounding sky glow and optional reference markers (dawn/sunrise/noon). Supports a **solar-noon burst**
+ *   micro-effect when the elevation trend flips from rising→falling (i.e., immediately after local solar noon).
+ *
+ * MODES (controlled by include_duskdawn)
+ *   • Standard (include_duskdawn=false) : map [0°,  Emax] → [bottom, top]; draw sunrise(0°) + noon(Emax) markers.
+ *   • Twilight (include_duskdawn=true)  : map [−6°, Emax] → [bottom, top]; draw dawn(−6°), sunrise(0°), noon(Emax). Lets sun appear pre-sunrise.
+ *
+ * CONTROLS (read from SEGMENT)
+ *   • SX (intensity)   : Sun core width (0..255; squared shaping). → wider disc at higher values.
+ *   • IX (custom1)     : Sky glow half-width (0..255; squared).     → larger halo reach.
+ *   • C2 (custom2)     : Glow roll-off sharpness (0..255; +1).      → higher = tighter fade.
+ *   • C3 (custom3)     : Marker brightness (0..31 mapped to 0..100).→ small 5-bit control as agreed.
+ *   • Check1           : Use palette for sun core (ON = palette sampled; OFF = analytic warm RGB ramp).
+ *   • Check2           : Mirror palette about sun center (palette path only).
+ *   • Check3           : Show reference markers (dawn/sunrise/noon as applicable).
+ *   • Speed            : Triggers/controls **solar-noon burst** when elevation flips rising→falling at the top:
+ *                        - Speed=0  → no burst.
+ *                        - Speed>0  → burst enabled, duration/intensity/style scale with Speed (see NoonBurst_Base).
+ *
+ * SOLAR-NOON BURST (behavior)
+ *   • Detection  : Track elevation trend; when wasRising && nowFalling && |elev−Emax|≤~1°, fire once.
+ *   • Duration   : ~0.8..4.0 s mapped from Speed (1..255).
+ *   • Style set  : Selected by Speed bands inside NoonBurst_Base:
+ *                  1–50   → A) global soft white pulse,
+ *                  51–100 → B) center-origin shockwave,
+ *                  101–180→ C) crisp strobes,
+ *                  181–255→ D) palette sweep.
+ *   • Isolation  : Burst rendering wholly replaces normal frame while active (clean handoff; no extra buffers).
+ *
+ * COLOUR / BRIGHTNESS MAPPING
+ *   • Sun core (non-palette): warm analytic ramp vs elevation (sunrise red → midday yellow).
+ *   • Sky base: deep blue → lighter blue with elevation; brightness scales with normalized elevation.
+ *   • Brightness scale uses **0..255** (Option B) for sky_brightness; all blends normalized by /255.
+ *
+ * IMPLEMENTATION NOTES
+ *   • Elevation clamp: elev ∈ [emin, emax], where emin = (include_duskdawn ? −6° : 0°), emax = daily max elevation.
+ *   • Position map: norm = (elev−emin)/(emax−emin), sun_center = round(norm*(SEGLEN−1)).
+ *   • Widths: sun_width from SX² (min 1, max ≈ SEGLEN/4). sky_width from IX² (clamped 0..SEGLEN−1).
+ *   • Glow roll-off: power-shaped halo with (custom2+1) controlling steepness; avoids seams around the core.
+ *   • Markers: rendered last and only if they don’t overlap the sun disc (prevent flicker / aliasing).
+ *   • Palette path: per-pixel palette sampling across the sun disc; optional mirror about the center.
+ *
+ * MEMORY / PERF
+ *   • No dynamic allocator pressure beyond standard segment ops; no additional per-pixel state.
+ *   • Solar-noon burst uses a few static locals (prevElev, prevTrend, timer) → O(1) state.
+ *   • Returns FRAMETIME; caller cadence defines animation rate.
+ *
+ * RETURN
+ *   • FRAMETIME
+ *
+ * QUICK HOOKS
+ *   • To drive sun/sky from user colours: replace analytic RGB with SEGCOLOR(1/2) or decode palette indices.
+ *   • To always show mirror palette by default, set o2=1 in the PM_EFFECT_CONFIG strings.
+ *   • To alter burst styles by project: swap NoonBurst_Base with custom variants; interface is speed, center.
+ **********************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(bool include_duskdawn)
 {
@@ -2738,6 +2841,12 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
   bool use_palette   = SEGMENT.check1;
   bool is_mirrored   = SEGMENT.check2;
   bool draw_markers  = SEGMENT.check3;
+
+  // Δ1: add static burst state near top (after SEGMENT.fill(BLACK))
+  static uint32_t s_noonBurstUntil = 0;
+  static bool     s_burstActive    = false;
+  static bool     s_prevRising     = true;
+  static float    s_prevElev       = -999.0f;
 
   // Elevation range
   const double elev_min = include_duskdawn ? -6.0 : 0.0;
@@ -2752,6 +2861,36 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
   uint16_t min_width = 1;
   uint16_t max_width = SEGLEN / 4;
   uint16_t sun_width = (uint16_t)(min_width + f_sun * (max_width - min_width) + 0.5f);
+
+  // SECTION: Burst at noon
+
+  // Δ3: determine rising/flip at max, start burst if Speed>0
+  // after computing elev, elev_max and before rendering:
+  bool risingNow = (elev > s_prevElev + 0.01f);
+  bool flippedAtTop = (s_prevRising && !risingNow && fabsf(elev - elev_max) <= 1.0f);
+
+  if (flippedAtTop && SEGMENT.speed > 0) {
+    // map speed to burst length 0.8..4.0s
+    uint16_t durMs = (uint16_t)map(constrain(SEGMENT.speed,1,255), 1,255, 800,4000);
+    s_noonBurstUntil = millis() + durMs;
+    s_burstActive = true;
+  }
+
+  // Δ4: if burst active, call the burst renderer and short-circuit
+  if (s_burstActive) {
+    if ((int32_t)(s_noonBurstUntil - millis()) > 0) {
+      // optional: pass center so some modes can originate from "sun"
+      EffectAnim__SunPositions__NoonBurst_Base(SEGMENT.speed, /*center*/ sun_center);
+      // update prev state, then return
+      s_prevRising = risingNow;
+      s_prevElev   = elev;
+      return FRAMETIME;
+    } else {
+      s_burstActive = false;
+    }
+  }
+
+  // SECTION: Normal effect
 
   float f_sky = SEGMENT.custom1 / 255.0f;
   f_sky *= f_sky;
@@ -2802,9 +2941,8 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
     sky_b = (1.0f - f) * 80 + f * 255;
   }
 
-  float sky_brightness = 100.0f * norm;
-  sky_brightness = constrain(sky_brightness, 0.0f, 100.0f);
-
+  float sky_brightness = constrain(255.0f * norm, 0.0f, 255.0f);
+  
   // Sun core
   if (use_palette) {
     for (int16_t offset = -((int16_t)sun_width); offset <= (int16_t)sun_width; offset++) {
@@ -2876,24 +3014,28 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
       SEGMENT.setPixelColor(px_noon, col_noon);
   }
 
+  s_prevRising = risingNow;
+  s_prevElev   = elev;
+
   return FRAMETIME;
 }
+
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Sun Elevation (Day)
  *                Draws a centered “sun” disc across a 1D strip, with surrounding sky gradient.
  *                Controls
- *                  • SX (Sun Width) : diameter of the sun core
- *                  • IX (Sky Width) : span of the surrounding sky
- *                  • Sky Fade       : gradient falloff into background
- *                  • Use Palette    : enable palette-based coloring instead of fixed colors
- *                  • Mirror         : mirror sky colors around the center
- *                  • Markers        : toggle sun/sky boundary markers
- *                Colors
- *                  • C1 = Sun core color
- *                  • C2 = Sky base color
+ *                  • SX (Speed)     : If >0, enables **solar-noon burst** when elevation flips rising→falling; style/duration scale with SX.
+ *                  • IX (Intensity) : Sun core diameter (maps to SEGMENT.intensity, squared shaping).
+ *                  • Sky Width      : Span of surrounding sky glow (SEGMENT.custom1, squared).
+ *                  • Sky Fade       : Glow roll-off sharpness (SEGMENT.custom2; higher = tighter fade).
+ *                  • Use Palette    : Palette-based sun core (Check1). OFF = analytic warm RGB ramp.
+ *                  • Mirror         : Mirror palette about sun center (Check2; palette path only).
+ *                  • Markers        : Toggle sunrise/noon markers (Check3). Brightness via SEGMENT.custom3 (0..31 → 0..100).
  *                Notes
- *                  • Default = no palette, mirror on.
+ *                  • Sky brightness scale uses 0..255.
+ *                  • C1/C2 pickers present; analytic (non-palette) path ignores them.
+ *                  • Default = palette off, mirror on (see config below).
  * @note        : Converted from WLED Effects (customized for elevation/day).
  *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
@@ -2902,7 +3044,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_01()
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM =
 "Sun Elevation Day@"
-",Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,"
+"Noon Burst,Sun Width,Sky Width,Sky Fade,Marker Brightness,Use Palette,Mirror,Markers,,"
 ";"
 ""                                  // Segment Colour Names (none)
 ";"
@@ -2915,42 +3057,43 @@ static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROG
 "ix=0,"
 "c1=186,"
 "c2=50,"
-"o1=0,"
+"o1=0,"                             // palette OFF
+"o2=1,"                             // mirror ON
 "o3=1"
 ;
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM =
 "Sun elevation daytime renderer\n\r"
-"SX: Sun width\n\r"
-"IX: Sky width\n\r"
-"Extra: Sky fade, palette toggle, mirror/markers\n\r"
-"C1: Sun color\n\r"
-"C2: Sky color";
+"SX (speed): solar-noon burst trigger/intensity\n\r"
+"IX (intensity): sun width\n\r"
+"Extra: Sky width (c1), Sky fade (c2), palette, mirror, markers (c3=0..31)\n\r"
+"C1/C2 present; analytic path ignores them";
 
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Sun Elevation (Dusk/Dawn)
- *                Variant of the Day effect, with extended blending for dusk and dawn transitions.
+ *                Variant of the Day effect with extended blending for dusk/dawn (range −6°..Emax).
  *                Controls
- *                  • SX (Sun Width) : diameter of the sun disc
- *                  • IX (Sky Width) : span of blended dusk/dawn sky
- *                  • Sky Fade       : transition smoothness into night background
- *                  • Use Palette    : palette-based color blending
- *                  • Mirror         : mirror sky gradient around center
- *                  • Markers        : show/hide markers at sun/sky boundaries
- *                Colors
- *                  • C1 = Sun glow color
- *                  • C2 = Sky horizon color
+ *                  • SX (Speed)     : If >0, enables **solar-noon burst** when elevation flips rising→falling; style/duration scale with SX.
+ *                  • IX (Intensity) : Sun core diameter (SEGMENT.intensity, squared).
+ *                  • Sky Width      : Dusk/dawn sky span (SEGMENT.custom1, squared).
+ *                  • Sky Fade       : Transition smoothness into night (SEGMENT.custom2).
+ *                  • Use Palette    : Palette-based sun core (Check1). OFF = analytic warm RGB ramp.
+ *                  • Mirror         : Mirror palette about sun center (Check2; palette path only).
+ *                  • Markers        : Dawn(−6°)/Sunrise(0°)/Noon markers (Check3), brightness via SEGMENT.custom3 (0..31 → 0..100).
  *                Notes
- *                  • Defaults favor smoother transitions with mirrored colors.
+ *                  • Sky brightness scale uses 0..255.
+ *                  • C1/C2 pickers present; analytic (non-palette) path ignores them.
+ *                  • Default = palette off, mirror on (see config below).
  * @note        : Converted from WLED Effects (customized for elevation/dusk-dawn).
  *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_02()
 {
   return EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(true);
-}// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
+}
+// static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_01[] PROGMEM = "Name@1-s1,2-s2,3-s3,4-s4,5-s5,6-c1,7-c2,8-c3,9-s6,10-s7;;name of palette;1;sx=255,ix=0,ep=1000,paln=Yellow";
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM =
 "Sun Elevation DuskDawn@"
-",Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,"
+"Noon Burst,Sun Width,Sky Width,Sky Fade,Marker Brightness,Use Palette,Mirror,Markers,,"
 ";"
 ""                                  // Segment Colour Names (none)
 ";"
@@ -2963,16 +3106,18 @@ static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROG
 "ix=0,"
 "c1=186,"
 "c2=50,"
-"o1=0,"
+"o1=0,"                             // palette OFF
+"o2=1,"                             // mirror ON
 "o3=1"
 ;
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROGMEM =
-"Sun elevation dusk/dawn renderer with extended blending\n\r"
-"SX: Sun width\n\r"
-"IX: Sky width\n\r"
-"Extra: Fade, palette, mirror/markers\n\r"
-"C1: Sun glow\n\r"
-"C2: Horizon color";
+"Sun elevation dusk/dawn (−6°..Emax)\n\r"
+"SX (speed): solar-noon burst trigger/intensity\n\r"
+"IX (intensity): sun width\n\r"
+"Extra: Sky width (c1), Sky fade (c2), palette, mirror, markers (c3=0..31)\n\r"
+"C1/C2 present; analytic path ignores them";
+
+
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
 
@@ -3272,501 +3417,6 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01[] PROGMEM = "Sun White Corrected El 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend
- * @note : Randomly changes colours of pixels, and blends to the new one
- *  
- * Best to develop this with 12 pixel ring, esp32
- * Start with RGPBO palette
- * 
- * Add test command cpp file, that lets me set anything in struct for development with mqtt. Only include in development build
- * 
- * Step 1: Scale palette progress with elevation (manual) 
- * Step 2: Use user defined max/min elevations, or, enable suns max/min of the day (is this directly in the math, or does it need to be calculated? perhaps at midnight for the next day)
- *         Save as uint16_t as it uses less memory than float, ie 12.34 will be 1234, what about minus, signed int16_t gives 32k +-, for only 2 decimel places, this is enough is +/-32768 can store 327.68 
- * 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2 
-uint16_t mAnimatorLight::EffectAnim__SunPositions_Elevation_Palette_Progress_Step()
-{
-
-// for sun thing
-// I will still use this function to get the raw colour, I just need another intermediate function that does the conversion with sun elevation
-// also add sun elevation and azimuth into settings struct, that way I can update it locally or via command 
-
-  uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-
-  //ALOG_TST(PSTR("dataSize = %d"), dataSize);
-
-  if (!SEGMENT.allocateColourData(dataSize))
-  {
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    ALOG_TST(PSTR("Not Enough Memory"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-    SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION; // Default
-  }
-  
-  // this should probably force order as random, then introduce static "inorder" option
-  SEGMENT.transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
-  // So colour region does not need to change each loop to prevent colour crushing
-  SEGMENT.flags.brightness_applied_during_colour_generation = true;
-  
-  // Pick new colours
-  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette_id, SEGIDX);
-  // Get starting positions already on show
-  SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  SEGIDX, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-    }
-  );
-
-}
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend
- * @note : Randomly changes colours of pixels, and blends to the new one
- *  
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-uint16_t mAnimatorLight::EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend()
-{
-
-  uint16_t dataSize = SEGMENT.colour_width__used_in_effect_generate * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-
-  //ALOG_TST(PSTR("dataSize = %d"), dataSize);
-
-  if (!SEGMENT.allocateColourData(dataSize))
-  {
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    ALOG_TST(PSTR("Not Enough Memory"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-    SEGMENT.effect_id = DEFAULT_EFFECTS_FUNCTION; // Default
-  }
-  
-  // this should probably force order as random, then introduce static "inorder" option
-  SEGMENT.transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
-  // So colour region does not need to change each loop to prevent colour crushing
-  SEGMENT.flags.brightness_applied_during_colour_generation = true;
-  
-  // Pick new colours
-  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette_id, SEGIDX);
-  // Get starting positions already on show
-  SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
-
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  SEGIDX, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
-    }
-  );
-
-}
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-
-// /**************************************************************************************************************************************************************
-//  * @brief  Solid_Colour_Based_On_Sun_Elevation_02
-//  * @note   From -10 to noon, CCT will range from yellow to daywhite
-//  * @note   From -5 to dusk, blue will go from 0 to max_brightness 
-//  * 
-//  * @note   Gloabl brightness will be manual, or controlled indirectly eg via mqtt
-//  * 
-//  * @note   Using RgbcctColour palette that is designed for each point in elevation
-//  * *************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01()
-{
- 
-//  #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-//   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
-
-//   // tkr_iLight->animation.palette_id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
-
-//   uint8_t segment_index = SEGIDX;
-//   uint16_t start_pixel = SEGMENT.start;
-//   uint16_t end_pixel = SEGMENT.stop;
-
-
-//   // Set palette pointer
-//   mPaletteI->SetPaletteListPtrFromID(SEGMENT.palette_id);
-//   // Brightness is generated internally, and rgbcct solid palettes are output values
-//   SEGMENT.flags.brightness_applied_during_colour_generation = false;
-
-//   /**
-//    * Solar data to use, defined here for testing or simulations
-//    * */
-// float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-//   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
-//   #else
-//   sun_elevation = (float)tkr_solar->solar_position.elevation;
-//   #endif
-// #endif
-//   bool sun_is_ascending = true;//tkr_solar->solar_position_testing.direction.is_ascending;
-//   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
-
-//   // delay(1000);
-
-//   /**
-//    * Sun elevation indexing is stored in palettes index location.
-//    * The current sun elevation shall be searched against for nearest match, then depending on accesending or decending sun the nearest match and nearest next match will be linearblended as current show colour
-//    * */
-
-//   /**
-//    * Get total pixels in palette
-//    * */
-//   mPalette::PALETTE* ptr = &mPaletteI->static_palettes[SEGMENT.palette_id];
-//   uint8_t pixels_max = GetNumberOfColoursInUNLOADEDPalette(palette_p);
-//   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
-
-//   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
-//   uint8_t zero_crossing_index = 0;
-
-//   struct INDEXES_MATCHES{
-//     uint8_t previous = 0; //ie colour moving away from
-//     uint8_t next = 0; //colour moving towards
-//   }index;
-
-//   /**
-//    * Steps to finding index
-//    * 1) Find the zero-crossing index from the palette (ie the colour where its index is 0)
-//    * 2) Decide if elevation is pos or neg, begin searching that part of the array
-//    * 3) Find index of closest in array
-//    * 4) Next and previous index will depend on direction of sun, and will be equal to current index if error is exactly 0
-//    * */
-
-//   /**
-//    * Step X: Find zero crossing point
-//    * Step X: Find all differences
-//    * */
-//   int16_t indexing = 0;  
-//   uint8_t lower_boundary_index = 13;
-//   float lower_boundary_value = 45;
-//   uint8_t upper_boundary_index = 14;  
-//   float upper_boundary_value = 90;
-//   float sun_positions_from_palette_index[pixels_max];  
-//   uint8_t searching_matched_index = 0;
-
-//   /**
-//    * Ascending method for finding right region between points
-//    * Check all, but once sun_elev is greater, then thats the current region
-//    * */
-//   for(int i=0;i<pixels_max;i++)
-//   {
-//     mPaletteI->GetColourFromPalette(palette_p, i, &indexing);
-//     sun_positions_from_palette_index[i] = indexing - 90;
-//     // Serial.printf("sun_pos=[%02d]=\t%f\n\r", i, sun_positions_from_palette_index[i]);
-//   }
-
-
-//   for(int i=0;i<pixels_max;i++)
-//   {
-//     // Serial.printf("sun=%f > index[%d]=%f\n\r", sun_elevation, i, sun_positions_from_palette_index[i]);
-//     if(sun_elevation >= sun_positions_from_palette_index[i])
-//     {
-      
-//       // searching_matched_index = i;
-//       // Serial.printf("sun=%f > index[%d]=%f   MATCH=%d\n\r", 
-//       //   sun_elevation, i, sun_positions_from_palette_index[i], searching_matched_index
-//       // );
-//       //Serial.printf("Still less\n\r");
-
-//     }else{
-      
-//       searching_matched_index = i-1;
-//       // Serial.printf("sun=%f > index[%d]=%f   MATCH=%d\n\r", 
-//       //   sun_elevation, i, sun_positions_from_palette_index[i], searching_matched_index
-//       // );
-//       // Serial.printf("searching_matched_index = %d\n\r", searching_matched_index);
-//       break;
-
-//     }
-
-//     // Directly, manually, check the last memory space
-
-//     if(sun_elevation == sun_positions_from_palette_index[pixels_max-1])
-//     {
-//       searching_matched_index = i-1;
-//       // Serial.printf("sun=%f > index[%d]=%f   MATCH=%d\n\r", 
-//       //   sun_elevation, i, sun_positions_from_palette_index[i], searching_matched_index
-//       // );
-//       break;
-
-//     }
-
-
-
-
-//   }
-
-//   lower_boundary_index = searching_matched_index;
-//   upper_boundary_index = searching_matched_index+1;
-
-//   /**
-//    * Check ranges are valid, if not, reset to 0 and 1
-//    * */
-//   if(lower_boundary_index>=pixels_max)
-//   {
-//     lower_boundary_index = 0;
-//     // Serial.printf("lower_boundary_index>=pixels_max\n\r");
-//   }
-//   if(upper_boundary_index>=pixels_max)
-//   {
-//     upper_boundary_index = pixels_max;
-//     // Serial.printf("upper_boundary_index>=pixels_max\n\r");
-//   }
-
-//   lower_boundary_value = sun_positions_from_palette_index[lower_boundary_index];
-//   upper_boundary_value = sun_positions_from_palette_index[upper_boundary_index];
-
-
-//   float numer = sun_elevation        - lower_boundary_value;
-//   float denum = upper_boundary_value - lower_boundary_value;
-//   float progress_between_colours = numer/denum;
-
-//   // Serial.printf("\n\r\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
-//   // Serial.printf("lower_boundary_value[%02d]=%f\n\r", lower_boundary_index, lower_boundary_value);
-//   // Serial.printf("upper_boundary_value[%02d]=%f\n\r", upper_boundary_index, upper_boundary_value);
-//   // Serial.printf("numer=\t%f\n\r",numer);
-//   // Serial.printf("denum=\t%f\n\r",denum);
-//   // Serial.printf("progress_between_colours=\t%f\n\r",progress_between_colours);
-
-//   /**
-//    * Showing the colours
-//    * 1) previous
-//    * 2) next
-//    * 3) linearblend of the exact new colour
-//    * */
-
-//   RgbcctColor c_lower = mPaletteI->GetColourFromPalette(palette_p, lower_boundary_index);
-//   RgbcctColor c_upper = mPaletteI->GetColourFromPalette(palette_p, upper_boundary_index);
-
-//   // Serial.printf("progress_between_colours\t %f(%d)/%f(%d) => %f\n\r", 
-//   //   lower_boundary_value, lower_boundary_index, 
-//   //   upper_boundary_value, upper_boundary_index, progress_between_colours);
-
-//   RgbcctColor c_blended = RgbcctColor::LinearBlend(c_lower, c_upper, progress_between_colours);
-
-//   RgbcctColor c = c_lower; 
-//   // ALOG_INF(PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
-//   c = c_blended; 
-//   // ALOG_INF(PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
-//   c = c_upper; 
-//   // ALOG_INF(PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
-
-//   /**
-//    * Load new colour into animation
-//    * */
-
-//   tkr_anim->force_update();
-
-// //set desired colour
-//   // SEGMENT.active_rgbcct_colour_p->  = c_blended;
-
-//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
-    
-//   if(!SEGMENT.rgbcct_controller->getApplyBrightnessToOutput())
-//   { // If not already applied, do it using global values
-//     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
-//       animation_colours_rgbcct.DesiredColour, 
-//       SEGMENT.rgbcct_controller->getBrightnessRGB_WithGlobalApplied(),
-//       SEGMENT.rgbcct_controller->getBrightnessCCT255()
-//     );
-//   }
-
-//   animation_colours_rgbcct.StartingColor = SEGMENT.GetPixelColor();
-
-//   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
-//   // this->setAnimFunctionCallback([this](const AnimationParam& param){
-//   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
-
-//         // Call the animator to blend from previous to new
-//   SetSegment_AnimFunctionCallback(  SEGIDX, 
-//     [this](const AnimationParam& param){
-//       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
-//     }
-//   );
-
-//   #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-   
-}
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @description : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "cycle_time__rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "cycle_time__rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-// /**************************************************************************************************************************************************************
-//  * @brief  Solid_Colour_Based_On_Sun_Elevation_05
-//  * 
-//  * CCT_Mapped, day white to warm white around +-20, then >20 is max cct
-//  * 
-// This needs fixing, so multiple scene (rgbcct controllers) can be used together
-//  * *************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01()
-{
- 
-  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05"));
-
-// #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-
-
-//   SEGMENT.palette_id = mPaletteI->PALETTELIST_VARIABLE_SEGMENT_COLOUR_01_ID;
-
-//   mPaletteI->SetPaletteListPtrFromID(SEGMENT.palette_id);
-//   // Set up colours
-//   // Brightness is generated internally, and rgbcct solid palettes are output values
-
-// float sun_elevation = 0;
-// #ifdef USE_MODULE_SENSORS_SUN_TRACKING
-//   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-//   sun_elevation = (float)tkr_solar->solar_position_testing.elevation;
-//   #else
-//   sun_elevation = (float)tkr_solar->solar_position.elevation;
-//   #endif
-// #endif
-
-//   if(sun_elevation < -20)
-//   {
-//     SEGMENT.rgbcct_controller->setCCT(tkr_iLight->get_CTRangeMax());      
-//   }else
-//   if(sun_elevation > 20)
-//   {
-//     SEGMENT.rgbcct_controller->setCCT(tkr_iLight->get_CTRangeMin());      
-//   }else{
-//     // Convert elevation into percentage
-//     uint8_t elev_perc = map(sun_elevation,-20,20,0,100);
-//     // Convert percentage into cct
-//     uint16_t cct_val = mapvalue(elev_perc, 0,100, tkr_iLight->get_CTRangeMax(),tkr_iLight->get_CTRangeMin());
- 
-//     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "cct_val=%d"),cct_val);
-//     // Set the colour temp
-//     SEGMENT.rgbcct_controller->setCCT(cct_val);    
-//   }
-
-//   SEGMENT.flags.brightness_applied_during_colour_generation = false;
-//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
-//   SEGMENT.flags.fForceUpdate = true;
-
-//   // ALOG_TST(PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
-    
-//   if(!SEGMENT.rgbcct_controller->getApplyBrightnessToOutput())
-//   { // If not already applied, do it using global values
-//     animation_colours_rgbcct.DesiredColour = RgbcctColor::ApplyBrightnesstoRgbcctColour(
-//       animation_colours_rgbcct.DesiredColour, 
-//       SEGMENT.rgbcct_controller->getBrightnessRGB_WithGlobalApplied(),
-//       SEGMENT.rgbcct_controller->getBrightnessCCT255()
-//     );
-//   }
-
-//   animation_colours_rgbcct.StartingColor = SEGMENT.GetPixelColor();
-
-//   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
-//   // this->setAnimFunctionCallback([this](const AnimationParam& param){
-//   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
-
-//         // Call the animator to blend from previous to new
-//   SetSegment_AnimFunctionCallback(  SEGIDX, 
-//     [this](const AnimationParam& param){
-//       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
-//     }
-//   );
-   
-// #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-
-}
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS 
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -4941,6 +4591,7 @@ static const char PM_EFFECT_DESCRI__CHASE_COLOR[] PROGMEM =
 "IX: Band width\n\r"
 "Color 0 = primary head, Color 2 = secondary head; background from palette.";
 
+
 /*******************************************************************************************************************************************************************************************************************
  * @description : Chase Rainbow — primary/secondary heads run on a dynamic rainbow background (not palette).
  *                Controls
@@ -5399,6 +5050,7 @@ static const char PM_EFFECT_DESCRI__CHASE_RANDOM[] PROGMEM =
 "SX:StepRate\n\r"
 "IX:!";
 
+
 /********************************************************************************************************************************************************************************************************************
  * @description : Breath
  * @note        : Soft “breathing” brightness pulse that blends the current palette over a background segment color.
@@ -5568,6 +5220,7 @@ static const char PM_EFFECT_DESCRI__FIREWORKS[] PROGMEM =
 "IX:Spawn freq(↑=more)\n\r"
 "EP:!\n\r"
 "GP:!";
+
 
 /************************************************************************************************************************************
  * EFFECT: Fireworks – Starburst
@@ -6279,6 +5932,7 @@ static const char PM_EFFECT_DESCRI__TETRIX[] PROGMEM =
 "O1:OneColor\n\r"
 "EP:!\n\r"
 "GP:!";
+
 
 /************************************************************************************************************************************
  * EFFECT: Fire Flicker
@@ -15822,7 +15476,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
 ";"
 "1"                 // 1D effect icon
 ";"
-"sx=64,ix=160,c1=0,c2=0,c3=1,paln=RGBO"
+"sx=64,ix=160,c1=0,c2=0,c3=1,paln=RGBO,ep=1"
 ;
 static const char PM_EFFECT_DESCRI__CHRISTMAS_INWAVES_01[] PROGMEM =
 "Sinusoidal wave across outputs; multiple slots lit.\n\r"
