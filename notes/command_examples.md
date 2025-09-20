@@ -1,7 +1,25 @@
 
 
 # Example Json Commands
-
+{
+  "FanSpeed":0,
+  "BrightnessRGB":50,
+  "PowerName":0,
+  "Relay":{"TimeOnMins":1},
+  "Cam": {
+    "Mirror":1,
+    "Flip":1,
+    "AWB":0,
+    "Resolution":12
+  },
+  "sun_track":{
+    "Enabled":1,
+    "Elevation":10,
+    "ElevationMin":-20,
+    "ElevationMax":60,
+    "Azimuth":180
+  }
+}
 
 ## Lighting
 

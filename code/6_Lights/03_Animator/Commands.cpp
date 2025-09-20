@@ -1501,6 +1501,280 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
   #endif // ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS options above to be moved into debug methods
 
+  
+  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  // if(jtok = obj["Debug"].getObject()["SaveSegment"])
+  // {
+  //   ALOG_DBG(PSTR("Debug:SaveSegment"));
+  //   FileSave__Segment();
+  // }
+  // if(jtok = obj["Debug"].getObject()["LoadSegment"])
+  // {
+  //   ALOG_DBG(PSTR("Debug:LoadSegment"));
+  //   FileLoad__Segment();
+  // }
+
+  // if(jtok = obj["Debug"])
+  // {
+
+  //   JsonParserObject jObj = jtok.getObject();
+
+  //   if (jObj["SaveState"]) {
+  //     bool includeBounds = jObj["SaveState"]["includeBounds"] | true;
+  //     bool includeBri    = jObj["SaveState"]["includeBri"]    | true;
+  //     bool selectedOnly  = jObj["SaveState"]["selectedOnly"]  | false;
+  //     bool fullGlobals   = jObj["SaveState"]["fullGlobals"]   | false;
+  //     ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
+  //             includeBounds, includeBri, selectedOnly, fullGlobals);
+  //     FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
+  //   }
+
+  //   if (jObj["LoadState"]) {
+  //     uint8_t callMode = jObj["LoadState"]["callMode"] | CALL_MODE_NO_NOTIFY;
+  //     ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
+  //     FileLoad__State(callMode);
+  //   }
+  // }
+  // Debug command handler — lightweight parser style (no `| default`)
+// #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+if (jtok = obj["Debug"])
+{
+  JsonParserObject jDbg = jtok.getObject();
+  JsonParserToken jtok2 = 0; 
+// ---------------- Save/Load full STATE snapshot (debug only) ----------------
+  // if (jtok2 = jDbg["SaveState"]) {
+  //   bool includeBounds = true;
+  //   bool includeBri    = true;
+  //   bool selectedOnly  = false;
+  //   bool fullGlobals   = false;
+
+  //   auto t = jDbg["SaveState"]; JsonParserObject o = t.getObject();
+  //   if (o) {
+  //     if (o["includeBounds"]) includeBounds = (bool)o["includeBounds"].getInt();
+  //     if (o["includeBri"])    includeBri    = (bool)o["includeBri"].getInt();
+  //     if (o["selectedOnly"])  selectedOnly  = (bool)o["selectedOnly"].getInt();
+  //     if (o["fullGlobals"])   fullGlobals   = (bool)o["fullGlobals"].getInt();
+  //   }
+  //   ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
+  //            includeBounds, includeBri, selectedOnly, fullGlobals);
+  //   if(jtok2.getInt())
+  //   FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
+  // }
+
+  // if (jtok2 = jDbg["LoadState"]) {
+  //   uint8_t callMode = CALL_MODE_NO_NOTIFY;
+  //   auto t = jDbg["LoadState"]; JsonParserObject o = t.getObject();
+  //   if (o && o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+  //   ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
+  //   if(jtok2.getInt())
+  //   FileLoad__State(callMode);
+  // }
+
+  // // ---------------- Standby control (uses virtual preset profile) -------------
+  if (jtok2 = jDbg["StandbyStart"]) {
+    uint16_t fadeMs  = 0;
+    uint8_t  callMode= CALL_MODE_NO_NOTIFY;
+  //   auto t = jDbg["StandbyStart"]; JsonParserObject o = t.getObject();
+  //   if (o) {
+  //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+  //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+  //   }
+  //   ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), fadeMs, callMode);
+    if(jtok2.getInt())
+    Standby_Start(fadeMs, callMode);
+  }
+
+  if (jtok2 = jDbg["StandbyStop"]) {
+    uint16_t fadeMs  = 0;
+    uint8_t  callMode= CALL_MODE_NO_NOTIFY;
+  //   auto t = jDbg["StandbyStop"]; JsonParserObject o = t.getObject();
+  //   if (o) {
+  //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+  //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+  //   }
+  //   ALOG_INF(PSTR("Debug:StandbyStop fade=%u callMode=%u"), fadeMs, callMode);
+    if(jtok2.getInt())
+    Standby_Stop(fadeMs, callMode);
+  }
+
+  // // Force reload the PROGMEM template → RAM (and FS if persist=true)
+  // if (jDbg["StandbyReloadTemplate"]) {
+  //   bool persist = true;
+  //   auto t = jDbg["StandbyReloadTemplate"]; JsonParserObject o = t.getObject();
+  //   if (o && o["persist"]) persist = (bool)o["persist"].getInt();
+  //   ALOG_INF(PSTR("Debug:StandbyReloadTemplate persist=%d"), persist);
+  //   Standby_ReloadTemplate(persist);   // <-- single explicit function; do NOT call Standby_Init() here
+  // }
+
+  // Replace profile from raw JSON string (validated; saved to FS)
+  if (jtok2 = jDbg["StandbyInit"]) {
+    if(jtok2.getInt())
+    Standby_Init();
+  }
+
+
+  // // Replace profile from raw JSON string (validated; saved to FS)
+  // if (jDbg["StandbySetProfile"]) {
+  //   const char* s = nullptr;
+  //   auto t = jDbg["StandbySetProfile"]; JsonParserObject o = t.getObject();
+  //   if (o && o["json"]) s = o["json"].getStr();
+  //   if (s) {
+  //     ALOG_INF(PSTR("Debug:StandbySetProfile len=%u"), (unsigned)strlen(s));
+  //     Standby_SetProfileFromJson(s);
+  //   }
+  // }
+
+  // // Convenience: snapshot current scene and store as standby profile
+  // if (jDbg["StandbySaveCurrentAsProfile"]) {
+  //   // Serialize a *compact* state and store as standby.profileRAM (+ FS)
+  //   DynamicJsonDocument d(12*1024);
+  //   JsonObject root = d.to<JsonObject>();
+  //   serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
+  //   String tmp; serializeJson(d, tmp);
+  //   Standby_SetProfileFromJson(tmp.c_str());
+  //   ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
+  // }
+//   // ---------- SaveState ----------
+//   if (jDbg["SaveState"])
+//   {
+//     // defaults first
+//     bool includeBounds = true;
+//     bool includeBri    = true;
+//     bool selectedOnly  = false;
+//     bool fullGlobals   = false;
+
+//     // if SaveState is an object, read optional fields
+//     {
+//       auto tSave = jDbg["SaveState"];
+//       JsonParserObject oSave = tSave.getObject(); // if not an object, this will be "invalid"
+//       if (oSave) {
+//         if (oSave["includeBounds"]) includeBounds = (bool)oSave["includeBounds"].getInt();
+//         if (oSave["includeBri"])    includeBri    = (bool)oSave["includeBri"].getInt();
+//         if (oSave["selectedOnly"])  selectedOnly  = (bool)oSave["selectedOnly"].getInt();
+//         if (oSave["fullGlobals"])   fullGlobals   = (bool)oSave["fullGlobals"].getInt();
+//       }
+//       // if SaveState is just `true`, we keep defaults; if `false`, this block won't run
+//     }
+
+//     ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
+//              includeBounds, includeBri, selectedOnly, fullGlobals);
+//     FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
+//   }
+// // StandbyStart
+//   if (jDbg["StandbyStart"])
+//   {
+//     uint16_t fadeMs = 0; uint8_t callMode = CALL_MODE_NO_NOTIFY;
+//     auto t = jDbg["StandbyStart"]; JsonParserObject o = t.getObject();
+//     if (o) {
+//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+//     }
+//     Standby_Start(fadeMs, callMode);
+//   }
+
+//   // StandbyStop
+//   if (jDbg["StandbyStop"])
+//   {
+//     uint16_t fadeMs = 0; uint8_t callMode = CALL_MODE_NO_NOTIFY;
+//     auto t = jDbg["StandbyStop"]; JsonParserObject o = t.getObject();
+//     if (o) {
+//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+//     }
+//     Standby_Stop(fadeMs, callMode);
+//   }
+
+//   // (optional) force reload template/holder gate
+//   if (jDbg["StandbyReloadTemplate"]) {
+//     Standby_Init(); // runs holder/version gate and loads to RAM (and FS if needed)
+//   }
+
+//   if (jDbg["StandbyReloadTemplate"]) {
+//   bool persist = true;
+//   auto t = jDbg["StandbyReloadTemplate"]; JsonParserObject o = t.getObject();
+//   if (o && o["persist"]) persist = (bool)o["persist"].getInt();
+//   Standby_ReloadTemplate(persist);
+// }
+
+//   // (optional) set profile from raw JSON string
+//   if (jDbg["StandbySetProfile"]) {
+//     auto t = jDbg["StandbySetProfile"]; JsonParserObject o = t.getObject();
+//     const char* s = nullptr; if (o && o["json"]) s = o["json"].getStr();
+//     if (s) Standby_SetProfileFromJson(s);
+//   }
+//   // ---------- LoadState ----------
+//   if (jDbg["LoadState"])
+//   {
+//     uint8_t callMode = CALL_MODE_NO_NOTIFY;  // default
+
+//     {
+//       auto tLoad = jDbg["LoadState"];
+//       JsonParserObject oLoad = tLoad.getObject();
+//       if (oLoad) {
+//         if (oLoad["callMode"]) callMode = oLoad["callMode"].getInt();
+//       }
+//       // if LoadState is just `true`, we keep default callMode
+//     }
+
+//     ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
+//     FileLoad__State(callMode);
+//   }
+  
+  
+
+//   // StandbyStart
+//   if (jDbg["StandbyStart"])
+//   {
+//     uint16_t fadeMs  = 0;
+//     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
+
+//     auto t = jDbg["StandbyStart"];
+//     JsonParserObject o = t.getObject();
+//     if (o) {
+//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+//     }
+
+//     ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), fadeMs, callMode);
+//     Standby_Start(fadeMs, callMode);
+//   }
+
+//   // StandbyStop
+//   if (jDbg["StandbyStop"])
+//   {
+//     uint16_t fadeMs  = 0;
+//     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
+
+//     auto t = jDbg["StandbyStop"];
+//     JsonParserObject o = t.getObject();
+//     if (o) {
+//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+//     }
+
+//     ALOG_INF(PSTR("Debug:StandbyStop fade=%u callMode=%u"), fadeMs, callMode);
+//     Standby_Stop(fadeMs, callMode);
+//   }
+
+//   // StandbySetProfile (optional): push a new JSON profile string
+//   if (jDbg["StandbySetProfile"])
+//   {
+//     // Expect raw JSON string in field "json"
+//     const char* profile = nullptr;
+//     auto t = jDbg["StandbySetProfile"];
+//     JsonParserObject o = t.getObject();
+//     if (o && o["json"]) profile = o["json"].getStr();
+
+//     if (profile) {
+//       ALOG_INF(PSTR("Debug:StandbySetProfile len=%u"), (unsigned)strlen(profile));
+//       Standby_SetProfileFromJson(profile);
+//     }
+//   }
+}
+
+  #endif
+
+
   /**
    * @brief 
    * # Issue : Caused effects to reset when non lighting commands happened

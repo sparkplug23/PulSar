@@ -39,6 +39,8 @@ JsonBuilder* JsonBuilder::GetInstance(){
   return instance;
 }
 
+
+
 char* JsonBuilder::GetBufferPtr(){
   return writer.buffer;
 }

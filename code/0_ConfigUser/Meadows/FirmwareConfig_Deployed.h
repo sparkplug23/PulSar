@@ -33,7 +33,7 @@
 // #define DEVICE_OFFICE__DESK_LIGHTING
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
-// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
+#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1657,10 +1657,29 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
   #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
 
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
 
   #define ENABLE_EFFECT_DESCRIPTIONS
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION  6
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+{
+  "BrightnessRGB": 1,
+  "bri":1
+}
+)=====";
 
 
   // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA

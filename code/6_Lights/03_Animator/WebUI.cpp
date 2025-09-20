@@ -118,7 +118,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
     segcol[3] = seg.segcol[i].colour.WW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
     segcol[4] = seg.segcol[i].colour.CW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
     char tmpcol[40];
-    snprintf_P(tmpcol, sizeof(tmpcol), PSTR("[%u,%u,%u,%u,%u]"), segcol[0], segcol[1], segcol[2], segcol[3], segcol[3]);
+    snprintf_P(tmpcol, sizeof(tmpcol), PSTR("[%u,%u,%u,%u,%u]"), segcol[0], segcol[1], segcol[2], segcol[3], segcol[4]);
     strcat(colstr, i<4 ? strcat(tmpcol, ",") : tmpcol);
   }
   strcat(colstr, "]");
@@ -165,6 +165,11 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
   if (includeBri) {
     root["on"] = tkr_iLight->_briRGB_Global > 0;
     root["bri"] = tkr_iLight->_briRGB_Global;
+
+    // NEW: write the separate channels your deserializer expects
+    root["cBri"] = tkr_iLight->getBriRGB_Global(); // or _briRGB_Global if that's the accessor
+    root["wBri"] = tkr_iLight->_briCT_Global;  // your CCT/white global brightness
+  
   }
 
   if (!forPreset) {
@@ -193,6 +198,10 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
 
     root[F("lor")] = realtimeOverride;
   }
+  
+  // in serializeState(...), after other globals
+  root["tb"] = (int32_t)(millis() + timebase);  // matches: timebase = tb - millis();
+
 
   root[F("mainseg")] = getMainSegmentId();
 
