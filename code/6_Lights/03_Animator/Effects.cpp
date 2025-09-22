@@ -112,16 +112,12 @@ static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM =
 "0"                                            // Icon flags
 ";"                                            // ----------------------------------------- is1D2D/Defaults
 "pal=0,"                                       // default palette id
-"sx=255,"                                      // Speed (unused here)
-"ix=200,"                                      // Intensity (unused here)
 "ep=100"                                       // Extra param (e.g., 1s refresh in your system)
 ;                                              // end
 static const char PM_EFFECT_DESCRI__SOLID_COLOUR[] PROGMEM =
 "Solid colour fill for RGB/WRGB/RGBWW.\n\r"
 "Uses the active palette (segcol \"Colour 01\" by default); lower layer handles RGBCCT conversion.\n\r"
 "Instant colour changes (no blend), low memory.\n\r"
-"SX: —\n\r"
-"IX: —"
 ;
 
 
@@ -10410,8 +10406,8 @@ static const char PM_EFFECT_CONFIG__FIRE_2012[] PROGMEM =
 "ix=160,"                         // frequent sparks
 "c2=128,"                         // mid blur/spread on 2D
 "c3=0,"                           // no extra boost
-"m12=1"                           // layout/meta flag as used in your project
-;
+"m12=1,"                           // layout/meta flag as used in your project
+"paln=Lava Fire";
 static const char PM_EFFECT_DESCRI__FIRE_2012[] PROGMEM =
 "Per-pixel heat sim with rising, diffusing embers and bottom ignitions.\n\r"
 "SX: cooling speed  |  IX: spark rate  |  C2: 2D blur/spread  |  C3: spark boost\n\r"
@@ -15288,8 +15284,8 @@ namespace XmasInwaves {
 // ============================================================================
 uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 {
-  if(SEGLEN <= 1) return EFFECT_DEFAULT();
-  
+  if (SEGLEN <= 1) return EFFECT_DEFAULT();
+
   // --- Controls ---
   const uint8_t SX = SEGMENT.speed;       // base speed (CB3=OFF only)
   const uint8_t IX = SEGMENT.intensity;   // wave softness → sharpness
@@ -15305,14 +15301,14 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
     SEGMENT.aux1 = 0;         // phase16 accumulator
     SEGMENT.aux2 = 0;         // [15]=dir_flag (CB3 OFF path), [14..0]=prev_phase latch
     SEGMENT.aux3 = millis();  // last_ms for dt integration
-    // aux4 no longer abused for CB3; see CB3 state below
+    // aux4 reserved (low byte used below for last_nlogic in CB3-OFF path)
   }
 
   // --- Palette topology → 2/4 or auto 5-slot ---
   const uint16_t pid         = SEGMENT.palette_id;
   const bool     pal_is_grad = mPaletteI->IsPaletteGradient(pid);
   const uint8_t  pal_exact   = mPaletteI->GetColoursInPalette(pid);
-  const bool five_mode = (!paired && !pal_is_grad && pal_exact == 5u);
+  const bool     five_mode   = (!paired && !pal_is_grad && pal_exact == 5u);
 
   const uint8_t nPhys  = 4u;
   const uint8_t nLogic = five_mode ? 5u : (paired ? 2u : 4u);
@@ -15337,12 +15333,21 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 
   // --- Handle topology change without resetting CB3 schedule ---
   if (!schedCB3) {
-    // CB3 OFF: keep direction flag in aux2 MSB, stash last_nlogic in aux2 LSB
-    uint8_t &last_nlogic_base = *reinterpret_cast<uint8_t*>(&SEGMENT.aux2);
-    if (SEGMENT.flags.animator_first_run || last_nlogic_base != nLogic) {
-      SEGMENT.aux1 = 0;                         // reset phase16
-      SEGMENT.aux2 = (SEGMENT.aux2 & 0x80) | nLogic; // preserve dir bit (MSB)
-      SEGMENT.aux3 = millis();
+    // CB3 OFF: DO NOT touch aux2 (owned by dir/phase latch logic).
+    // Use aux4.low to store last_nlogic so free-run integration isn't clobbered.
+    uint8_t &last_nlogic = *reinterpret_cast<uint8_t*>(&SEGMENT.aux4); // using aux4 because Cb3State is not allocated in this mode
+
+    if (SEGMENT.flags.animator_first_run) {
+      last_nlogic  = 0;          // force init
+      SEGMENT.aux1 = 0;          // reset phase16
+      SEGMENT.aux3 = millis();   // reset clock base
+    }
+
+    if (last_nlogic != nLogic) {
+      SEGMENT.aux1 = 0;          // reset phase so we don't "jump"
+      SEGMENT.aux3 = millis();   // reset timebase
+      last_nlogic  = (uint8_t)nLogic;
+      ALOG_INF(PSTR("InWaves(CB3 OFF): topology -> %u groups"), (unsigned)nLogic);
     }
   } else {
     // CB3 ON: store topology in the struct, keep schedule continuity
@@ -15404,6 +15409,11 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
     const bool dir_rev  = XmasBase::updateDirectionOnWrap(SEGMENT, step.wrapped, C2);
     const float base    = dir_rev ? (1.0f - step.tCycle) : step.tCycle;
 
+    // ALOG_INF(PSTR("InWaves step: tCycle=%.4f wrapped=%d aux1=%u aux3=%u now=%lu"),
+    //          step.tCycle, (int)step.wrapped,
+    //          (unsigned)SEGMENT.aux1, (unsigned)SEGMENT.aux3,
+    //          (unsigned long)millis());
+
     for (uint8_t g = 0; g < nLogic; ++g) {
       const float ofs = (float)g / (float)nLogic;
       briG[g] = wave_val(base - ofs);
@@ -15457,7 +15467,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
     }
   } else {
     for (uint16_t i = 0; i < SEGLEN; ++i) {
-      const uint8_t ch  = (uint8_t)(i % 4u);              // 0..3
+      const uint8_t ch  = (uint8_t)(i % 4u);               // 0..3
       const uint8_t g   = paired ? (uint8_t)(ch & 1u) : ch; // (0,2)->0 ; (1,3)->1  OR 0..3
       const uint8_t bri = XmasBase::gamma_u8(briG[g], XmasInwaves::FADE_GAMMA, XmasInwaves::FLOOR_MIN);
       SEGMENT.setPixelColor(i, AdjustColourWithBrightness(outColor4[ch], bri));
@@ -15466,6 +15476,7 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 
   return FRAMETIME;
 }
+
 static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
 "Xmas InWaves@"
 "Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"
@@ -15476,8 +15487,7 @@ static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
 ";"
 "1"                 // 1D effect icon
 ";"
-"sx=64,ix=160,c1=0,c2=0,c3=1,paln=RGBO,ep=1"
-;
+"sx=255,ix=160,c1=0,c2=0,c3=1,paln=RGBO,ep=20";
 static const char PM_EFFECT_DESCRI__CHRISTMAS_INWAVES_01[] PROGMEM =
 "Sinusoidal wave across outputs; multiple slots lit.\n\r"
 "Two or four logical groups; colours bound to slots.\n\r"

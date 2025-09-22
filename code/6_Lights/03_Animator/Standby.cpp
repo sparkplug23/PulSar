@@ -1,6 +1,7 @@
 #include "mAnimatorLight.h"
 
 #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+
 // =============================================================
 // Standby.cpp — virtual preset (standby) + state snapshot utils
 // =============================================================
@@ -35,7 +36,7 @@ static int Standby_ReadTemplateId(const char* json, size_t len)
 }
 
 
-bool mAnimatorLight::Standby_WriteProfileToFS(const char* json, size_t len /*ignored safely*/)
+bool mAnimatorLight::Standby_WriteProfileToFS(const char* json)
 {
   if (!json) return false;
 
@@ -59,23 +60,6 @@ bool mAnimatorLight::Standby_WriteProfileToFS(const char* json, size_t len /*ign
 }
 
 
-int8_t mAnimatorLight::Standby_GetTemplateIDFromBuffer(char* buffer)
-{
-  int8_t res = -1;
-  char tmp[strlen(buffer)+1];
-  strcpy(tmp, buffer);
-  DynamicJsonDocument d(strlen(buffer) + 128);
-  DeserializationError err = deserializeJson(d, tmp);
-  if (!err) {
-    JsonVariant v = d["template_id"];
-    if (!v.isNull()) res = (int8_t)v.as<int>();
-  } else {
-    ALOG_ERR(PSTR("Standby_GetTemplateIDFromBuffer: parse err=%s"), err.c_str());
-  }
-  return res;
-}
-
-
 bool mAnimatorLight::Standby_Init()
 {
   ALOG_INF(PSTR("Standby_Init: init----------------------------"));
@@ -91,7 +75,7 @@ bool mAnimatorLight::Standby_Init()
   // 2) Read template_id from FS (if present)
   int8_t fsId = -1;
   if (haveFile && standby.profileRAM) {
-    fsId = Standby_GetTemplateIDFromBuffer(standby.profileRAM);
+    fsId = Standby_ReadTemplateId(standby.profileRAM, standby.profileLen - 1);
   }
 
 #ifdef USE_STANDBY_TEMPLATE
@@ -102,7 +86,7 @@ bool mAnimatorLight::Standby_Init()
   // 4) If no FS or mismatch, overwrite FS from template + injected template_id
   if (!haveFile || fsId < 0 || fsId != tplId) {
     if (!Load_StandbyTemplate_Into_ProfileRAM(/*injectTemplateId=*/true)) return false;
-    Standby_WriteProfileToFS(standby.profileRAM, 0);   // persist from RAM
+    Standby_WriteProfileToFS(standby.profileRAM);   // persist from RAM
     Standby_LoadProfileFromFS();                       // single source of truth in RAM
     return true;
   }
@@ -134,24 +118,35 @@ bool mAnimatorLight::Standby_Init()
 bool mAnimatorLight::Standby_SetProfileFromJson(const char* json, STBY_SRC src)
 {
   if (!json) return false;
-  size_t len = strlen(json);
 
+  // Validate the incoming payload first (so we don't poison RAM/FS on failure)
+  if (!ValidateJSON(json)) {
+    ALOG_ERR(PSTR("Standby_SetProfileFromJson: invalid JSON"));
+    return false;
+  }
+
+  const size_t len = strlen(json);
   char* buf = (char*)malloc(len + 1);
   if (!buf) return false;
+
   memcpy(buf, json, len);
   buf[len] = '\0';
 
-  // adopt to RAM
+  // Adopt to RAM
   free(standby.profileRAM);
   standby.profileRAM = buf;
   standby.profileLen = len + 1;
   standby.last_src   = src;
   standby.last_ver   = Standby_ReadTemplateId(buf, len); // may be -1 (user JSON)
 
-  // mirror to FS
-  Standby_WriteProfileToFS(standby.profileRAM, len);
+  // Mirror to FS (use the overload you actually have)
+  // If your impl is Standby_WriteProfileToFS(const char*):
+  Standby_WriteProfileToFS(standby.profileRAM);
+  // If it's the two-arg version that ignores len when 0:
+  // Standby_WriteProfileToFS(standby.profileRAM, 0);
 
-  ALOG_INF(PSTR("Standby profile saved (source=%s template_id=%d)"), StbySrcName(src), standby.last_ver);
+  ALOG_INF(PSTR("Standby profile saved (source=%s template_id=%d)"),
+           StbySrcName(src), standby.last_ver);
   return true;
 }
 
@@ -191,7 +186,7 @@ bool mAnimatorLight::Standby_Start(uint16_t /*fadeMs*/, uint8_t callMode)
     return false;
   }
 
-  const bool ok = Standby_ApplyJsonBlob(srcJson, lenToApply, callMode);
+  const bool ok = Standby_JsonCommand_Run(srcJson, lenToApply, callMode);
   standby.active       = ok;
   standby.callModeLast = callMode;
 
@@ -217,7 +212,7 @@ bool mAnimatorLight::Standby_Stop(uint16_t /*fadeMs*/, uint8_t callMode)
     return false;
   }
 
-  const bool ok = Standby_ApplyJsonBlob(src, len, callMode);
+  const bool ok = Standby_JsonCommand_Run(src, len, callMode);
   if (ok) {
     standby.active = false;
     ALOG_INF(PSTR("Standby_Stop: restored previous state (OK)"));
@@ -257,13 +252,6 @@ bool mAnimatorLight::ValidateJSON(const char* json_str)
 
 
 
-void mAnimatorLight::Standby_AnnotateMeta(DynamicJsonDocument& d, STBY_SRC src, int version)
-{
-  JsonObject meta = d["meta"].isNull() ? d.createNestedObject("meta") : d["meta"];
-  meta["source"] = StbySrcName(src);
-  meta["ts"]     = (uint32_t)millis();
-  if (version >= 0) meta["version"] = version;
-}
 
 
 // ---------- standby profile FS I/O ----------
@@ -304,7 +292,7 @@ ALOG_INF(PSTR("SaveProfileToFS: Saving RAM into FS as debug"));
     ALOG_WRN(PSTR("SaveProfileToFS: no profile in RAM"));
     return false;
   }
-  return Standby_WriteProfileToFS(standby.profileRAM, strlen(standby.profileRAM));
+  return Standby_WriteProfileToFS(standby.profileRAM);
 }
 bool mAnimatorLight::Load_StandbyTemplate_Into_ProfileRAM(bool injectTemplateId)
 {
@@ -433,37 +421,104 @@ bool mAnimatorLight::Standby_CaptureResumeToRAM()
   return true;
 }
 
-// ---------- apply any state JSON (dup-parse) ----------
-bool mAnimatorLight::Standby_ApplyJsonBlob(const char* json, size_t len, uint8_t callMode)
+/********************************************************************************************************************************************************************************************************************
+ * @function              : Standby_JsonCommand_Run
+ * @description           :
+ *   Executes a standby JSON scene/command in two coordinated passes so BOTH the platform-wide
+ *   command system and the lighting stack are applied:
+ *
+ *     1) Global Tasker pass
+ *        - Routes the EXACT same payload through the system-wide JSON command handler (Tasker),
+ *          so non-lighting keys (MQTT, device, system toggles, etc.) are honored.
+ *        - Uses the shared data buffer with lock, then dispatches Tasker_Interface().
+ *
+ *     2) Lighting (WLED) pass
+ *        - Parses again with ArduinoJson and applies lighting state via deserializeState()
+ *          (segments, palettes, brightness, etc.), then calls notify(callMode).
+ *
+ *   The incoming bytes are duplicated into a private, NUL-terminated buffer for safe logging and to
+ *   ensure we never mutate the caller’s memory. Tasker runs FIRST (when lock available) so global
+ *   state updates precede the lighting scene application.
+ *
+ * @flow
+ *   - Validate input → duplicate (len+1, NUL-terminated) → log payload
+ *   - Try requestDataBufferLock() → copy into shared buffer → Tasker_Interface(TASK_JSON_COMMAND_ID) → release
+ *   - Parse duplicate with ArduinoJson → deserializeState(root, callMode, 0) → notify(callMode)
+ *
+ * @params
+ *   @param json     Pointer to JSON bytes (not required to be NUL-terminated).
+ *   @param len      Number of valid bytes at @json.
+ *   @param callMode Notify behavior for deserializeState()/notify() (e.g., CALL_MODE_NO_NOTIFY).
+ *
+ * @returns
+ *   true  = Successfully ran Tasker (if lock available) and applied lighting state.
+ *   false = OOM (OutOfMemory), parse failure, or invalid input (reason is logged).
+ *
+ * @notes
+ *   - Dual pipeline is intentional: Tasker covers platform-level commands; WLED path covers segments/state.
+ *   - If the Tasker lock is busy, we WARN and still run the lighting pass (to avoid stalling standby).
+ *   - We log the full JSON we’re about to apply for traceability.
+ *
+ * @errors & logging
+ *   - Logs OOM, parse errors, missing root object, and lock failures with payload length and content.
+ *
+ * @threading / locking
+ *   - Uses requestDataBufferLock() ONLY for the Tasker pass; releases immediately after dispatch.
+ *   - ArduinoJson pass does not use the shared buffer lock.
+ *
+ * @performance
+ *   - One malloc for the duplicate buffer (len+1), freed before return.
+ *   - ArduinoJson document capacity is len + 1024 for headroom.
+ ********************************************************************************************************************************************************************************************************************/
+bool mAnimatorLight::Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode)
 {
+  LoggingLevels level = LOG_LEVEL_INFO;
+
   if (!json || !len) {
-    ALOG_ERR(PSTR("Standby_ApplyJsonBlob: empty (len=%u)"), (unsigned)len);
+    ALOG_ERR(PSTR("Standby_JsonCommand_Run: empty (len=%u)"), (unsigned)len);
     return false;
   }
 
-  // duplicate into a mutable, null-terminated buffer (so we can log safely)
+  // Duplicate into a mutable, NUL-terminated buffer (safe for logging & parsing)
   char* buf = (char*)malloc(len + 1);
   if (!buf) {
-    ALOG_ERR(PSTR("Standby_ApplyJsonBlob: OOM (%u)"), (unsigned)len);
+    ALOG_ERR(PSTR("Standby_JsonCommand_Run: OOM (%u)"), (unsigned)len);
     return false;
   }
   memcpy(buf, json, len);
   buf[len] = '\0';
 
-  // log EXACTLY what we are about to parse
-  ALOG_INF(PSTR("Standby_ApplyJsonBlob: len=%u json='%s'"), (unsigned)len, buf);
+  // Exact payload log (what we are about to apply)
+  AddLog(level, PSTR("Standby_JsonCommand_Run: len=%u json='%s'"), (unsigned)len, buf);
 
+  // -------- Pass 1: Global Tasker (platform-wide commands) --------
+  if (requestDataBufferLock(GetModuleUniqueID())) {
+    D_DATA_BUFFER_SOFT_CLEAR();
+    data_buffer.payload.length_used = len;
+    memcpy(data_buffer.payload.ctr, buf, data_buffer.payload.length_used);
+    data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // NUL-terminate
+
+    AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"),
+           data_buffer.payload.length_used, data_buffer.payload.ctr);
+
+    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    releaseDataBufferLock();
+  } else {
+    ALOG_WRN(PSTR("Standby_JsonCommand_Run: Tasker buffer busy; skipping Tasker pass"));
+  }
+
+  // -------- Pass 2: Lighting (WLED) state apply --------
   DynamicJsonDocument d(len + 1024);
   DeserializationError err = deserializeJson(d, buf);
   if (err) {
-    ALOG_ERR(PSTR("Standby_ApplyJsonBlob: parse failed: %s; json='%s'"), err.c_str(), buf);
+    ALOG_ERR(PSTR("Standby_JsonCommand_Run: parse failed: %s; json='%s'"), err.c_str(), buf);
     free(buf);
     return false;
   }
 
   JsonObject root = d.as<JsonObject>();
   if (root.isNull()) {
-    ALOG_ERR(PSTR("Standby_ApplyJsonBlob: root null; json='%s'"), buf);
+    ALOG_ERR(PSTR("Standby_JsonCommand_Run: root null; json='%s'"), buf);
     free(buf);
     return false;
   }
@@ -475,24 +530,6 @@ bool mAnimatorLight::Standby_ApplyJsonBlob(const char* json, size_t len, uint8_t
   return true;
 }
 
-// Duplicate-then-parse helper. Never mutates the original `src`.
-static bool ParseJsonFromCopy(const char* src, size_t len, DynamicJsonDocument& dstDoc)
-{
-  if (!src || !len) return false;
-  char* tmp = (char*)malloc(len + 1);
-  if (!tmp) return false;
-  memcpy(tmp, src, len);
-  tmp[len] = '\0';
-  auto err = deserializeJson(dstDoc, tmp);
-  free(tmp);
-  if (err) {
-    // optional: short peek for logs
-    // char peek[97]; size_t n = len < 96 ? len : 96; memcpy(peek, src, n); peek[n]=0;
-    // ALOG_ERR(PSTR("ParseJsonFromCopy: %s, peek='%s'"), err.c_str(), peek);
-    return false;
-  }
-  return true;
-}
 
 // ---------- Debug: save/load full state to FS (/edit inspection) ----------
 bool mAnimatorLight::FileSave__State(bool includeBounds, bool includeBri, bool selectedOnly, bool fullGlobals)
@@ -538,9 +575,12 @@ bool mAnimatorLight::FileLoad__State(uint8_t callMode)
   buf[rd] = '\0';
 
   DynamicJsonDocument doc(rd + 1024);
-  bool ok = ParseJsonFromCopy(buf, rd, doc);
+  DeserializationError err = deserializeJson(doc, buf);
   free(buf);
-  if (!ok) { ALOG_ERR(PSTR("FileLoad__State: parse failed")); return false; }
+  if (err) {
+    ALOG_ERR(PSTR("FileLoad__State: parse failed: %s"), err.c_str());
+    return false;
+  }
 
   JsonObject root = doc.as<JsonObject>();
   if (root.isNull() || root["seg"].isNull()) { ALOG_ERR(PSTR("FileLoad__State: missing 'seg' array")); return false; }

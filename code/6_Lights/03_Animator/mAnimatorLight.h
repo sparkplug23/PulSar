@@ -2931,6 +2931,7 @@ typedef struct Segment
        * Can't be zero, as that means not active
        * */
       uint16_t time_ms = 1000; //on boot
+      uint16_t cycle_time__rate_ms__save_state = 0;
       // uint16_t cycle_time__rate_ms = 1000;
     }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
 
@@ -5453,7 +5454,7 @@ bool useMainSegmentOnly _INIT(false);
     // private:
     //   // Helpers
     //   bool Standby_CaptureResumeToRAM();                   // serialize current state → standby.resumeRAM
-    //   bool Standby_ApplyJsonBlob(const char* json, size_t len, uint8_t callMode);
+    //   bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
 
     //   // Paths
     //   static const char kStateSnapshotPath[]   PROGMEM;    // "/lgt_state.json"   (already added)
@@ -5517,7 +5518,7 @@ bool useMainSegmentOnly _INIT(false);
 // private:
 //   // Internal helpers
 //   bool Standby_CaptureResumeToRAM();               // serialize current state → RAM
-//   bool Standby_ApplyJsonBlob(const char* json, size_t len, uint8_t callMode);
+//   bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
 
 //   // FS paths
 //   static const char kStandbyProfilePath[]  PROGMEM; // "/lgt_standby.json"
@@ -5588,18 +5589,10 @@ public:
   bool FileLoad__State(uint8_t callMode = CALL_MODE_NO_NOTIFY);
   bool ValidateJSON(const char* json_str);
 
-  int8_t Standby_GetTemplateIDFromBuffer(char* buffer);
-
-
 private:
   // helpers
   bool Standby_CaptureResumeToRAM();
-  bool Standby_ApplyJsonBlob(const char* json, size_t len, uint8_t callMode);
-
-  // meta helpers
-  // bool Standby_ValidateJson(const char* json, size_t len, int* out_version = nullptr);
-  void Standby_AnnotateMeta(DynamicJsonDocument& d, STBY_SRC src, int version);
-  STBY_SRC Standby_ExtractSource(const DynamicJsonDocument& d, int* out_version);
+  bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
 
   // FS paths
   static const char kStandbyProfilePath[]  PROGMEM; // "/lgt_standby.json"
@@ -5610,7 +5603,7 @@ private:
 
   // FS I/O
   bool Standby_LoadProfileFromFS();
-  bool Standby_WriteProfileToFS(const char* json, size_t len);
+  bool Standby_WriteProfileToFS(const char* json);
 
   static const char* StbySrcName(STBY_SRC s); // for logs
 #endif

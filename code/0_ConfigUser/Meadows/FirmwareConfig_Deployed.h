@@ -33,7 +33,7 @@
 // #define DEVICE_OFFICE__DESK_LIGHTING
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
-#define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
+// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -774,6 +774,46 @@
   // )=====";
 
 
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -781,17 +821,17 @@
   {
     "BusConfig":[
       {
-        "Pin":4,
+        "Pin":18,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":42
+        "Length":50
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        42
+        50
       ],
       "ColourPalette":"Snowy 02",
       "Effects": {
@@ -1669,17 +1709,52 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // ======================= Example PROGMEM template =======================
 // Put this in your config header (mirrors your DEFINE_PGM_CTR style)
 #define USE_STANDBY_TEMPLATE
-#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION  6
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
-{
-  "BrightnessRGB": 1,
-  "bri":1
-}
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
 )=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
 
 
   // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA

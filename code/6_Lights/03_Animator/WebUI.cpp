@@ -598,6 +598,8 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     }
   }
 
+  ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
+
   // stateUpdated(callMode);
   if (presetToRestore) currentPreset = presetToRestore;
   
@@ -2830,55 +2832,99 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     return;
   }
   #endif
-  else if (url.indexOf("pal") > 0) { // "/json/palettes"
+  // else if (url.indexOf("pal") > 0) { // "/json/palettes"
 
-    JBI->Start();
-      JBI->Array_Start();
+  //   JBI->Start();
+  //     JBI->Array_Start();
 
-      char lineBuffer[100] = {0};
-      bool flag_get_first_name_only = true;
+  //     char lineBuffer[100] = {0};
+  //     bool flag_get_first_name_only = true;
         
-      for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
-      {
+  //     for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
+  //     {
 
-        GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
-        if(flag_get_first_name_only)
-        {    
-          char* dataPtr = strchr(lineBuffer, PALETTE_MULTIPLE_NAME_DELIMETER);
-          if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
-        }
-        ALOG_DBM(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
-        JBI->Add(lineBuffer);
-      }
+  //       GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
+  //       if(flag_get_first_name_only)
+  //       {    
+  //         char* dataPtr = strchr(lineBuffer, PALETTE_MULTIPLE_NAME_DELIMETER);
+  //         if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+  //       }
+  //       ALOG_DBM(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
+  //       JBI->Add(lineBuffer);
+  //     }
 
-      JBI->Array_End();
-    JBI->End();
+  //     JBI->Array_End();
+  //   JBI->End();
 
-    // remove leading and trailing json parts as temp measure
-    char* data = JBI->GetBufferPtr();
-    uint16_t data_len = strlen(data);
-    if(data) data[data_len-1] = '\0';
-    Serial.println();
+  //   // remove leading and trailing json parts as temp measure
+  //   char* data = JBI->GetBufferPtr();
+  //   uint16_t data_len = strlen(data);
+  //   if(data) data[data_len-1] = '\0';
+  //   Serial.println();
 
-    #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE    
-    /**
-     * @brief It actually makes perfect sense to embedded the ETag into the names of palettes, 
-     * since its this that forces the reload of the palette colours if needed too.
-     * 
-     */
-    // Generate the ETag
+  //   #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE    
+  //   /**
+  //    * @brief It actually makes perfect sense to embedded the ETag into the names of palettes, 
+  //    * since its this that forces the reload of the palette colours if needed too.
+  //    * 
+  //    */
+  //   // Generate the ETag
+  //   char etag[32];
+  //   tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
+  //   // Send the response with the ETag header
+  //   AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", &data[1]);   [1] possible cause of toast#1] SyntaxError: Unexpected token '}', "}
+  //   response->addHeader(F("ETag"), etag); // Add the ETag header to the response
+  //   request->send(response);
+  //   #else
+  //   request->send_P(200, "application/json", &data[1]);
+  //   #endif
+
+  //   return;
+  // }
+  else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
+  // Build JSON into a local String to avoid races with the global JBI buffer
+  String out;
+  out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
+
+  out += '[';
+
+  char nameBuf[96];
+  bool first = true;
+  const bool firstNameOnly = true; // keep your current behavior
+
+  for (uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++) {
+    GetPaletteNameByID(i, nameBuf, sizeof(nameBuf));
+    if (firstNameOnly) {
+      if (char* p = strchr(nameBuf, PALETTE_MULTIPLE_NAME_DELIMETER)) *p = '\0';
+    }
+
+    // minimal JSON string escape (quotes + backslashes); names are simple, but be safe
+    String nm; nm.reserve(strlen(nameBuf) + 8);
+    for (const char* s = nameBuf; *s; ++s) {
+      char c = *s;
+      if (c == '\"' || c == '\\') { nm += '\\'; nm += c; }
+      else                         { nm += c; }
+    }
+
+    if (!first) out += ',';
+    first = false;
+    out += '\"'; out += nm; out += '\"';
+  }
+
+  out += ']';
+
+  #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
     char etag[32];
     tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
-    // Send the response with the ETag header
-    AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", &data[1]);
-    response->addHeader(F("ETag"), etag); // Add the ETag header to the response
-    request->send(response);
-    #else
-    request->send_P(200, "application/json", &data[1]);
-    #endif
+    AsyncWebServerResponse* resp = request->beginResponse(200, "application/json", out);
+    resp->addHeader(F("ETag"), etag);
+    request->send(resp);
+  #else
+    request->send(200, "application/json", out);
+  #endif
 
-    return;
-  }
+  return;
+}
   else if (url.indexOf("cfg") > 0 && tkr_mfile->handleFileRead(request, "/cfg.json")) {
     return;
   }
@@ -3226,7 +3272,8 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     this->serveJson(request);
   });
 
-  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/json", [this](AsyncWebServerRequest *request) {
+  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/json", [this](AsyncWebServerRequest *request) 
+  {
     bool verboseResponse = false;
     bool isConfig = false;
 
@@ -3249,31 +3296,17 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
       //   Serial.println((char)jsonBuffer[i]);
       // }
 
+      /***
+       * Enable parsing through normal JSON commands
+       * This must happen first, as it is later consumed by the arduinojson deserializer which tokenizes the buffer
+       * and then it is no longer possible to parse the buffer again.
+       * It works here because we copy the buffer out before it is deserialized into the global large buffer with thread lock.
+       */
+
       uint16_t jsonBufferLength = request->contentLength();
-      if(jsonBufferLength < 2000)
+      if(jsonBufferLength < DATA_BUFFER_PAYLOAD_MAX_LENGTH)
       {
-        /**
-         * @brief DEBUG LOAD
-         * 
-         */
-        // char buffer[jsonBufferLength+1];
-        // // Copy the contents of jsonBuffer into buffer
-        // memcpy(buffer, jsonBuffer, jsonBufferLength);
-        // // Null-terminate the buffer
-        // buffer[jsonBufferLength] = '\0';
-        
-        // ALOG_INF(PSTR("webui ui buffer \n\r%s\n\r"), buffer);
-        // JsonParser parser(buffer);
-        // JsonParserObject rootObj = parser.getRootObject();   
-        // if (!rootObj) 
-        // {
-        //   ALOG_ERR(PSTR("DeserializationError with \"%s\""), buffer);
-        //   return;
-        // } 
-        // else
-        // {
-        //   ALOG_INF(PSTR("Deserialization Success with \"%s\""), buffer);
-        // }
+        ALOG_INF(PSTR("AsyncCallbackJsonWebHandler jsonBufferLength %d"),jsonBufferLength);
 
         /**
          * @brief LOAD TO PARSE
@@ -3339,6 +3372,33 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
 
     this->releaseJSONBufferLock();
+
+    // #ifdef ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+    // if(requestDataBufferLock(GetModuleUniqueID()))
+    //     {
+    //       D_DATA_BUFFER_SOFT_CLEAR();
+
+    //       char* jsonBuffer = (char*)request->_tempObject;
+
+    //       data_buffer.payload.length_used = jsonBufferLength;
+    //       memcpy(data_buffer.payload.ctr, jsonBuffer, data_buffer.payload.length_used);
+    //       data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
+        
+    //       LoggingLevels level = LOG_LEVEL_INFO;
+    //       #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+    //       level = LOG_LEVEL_DEV_TEST;
+    //       #endif
+    //       #ifdef ENABLE_LOG_LEVEL_INFO
+    //       AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+    //       #endif// ENABLE_LOG_LEVEL_INFO
+
+    //       pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+    //       releaseDataBufferLock();
+
+    //     }
+    //     #endif
 
     if (verboseResponse) {
       if (!isConfig) {

@@ -1650,3 +1650,46 @@ dialog {
 		overflow-x: clip;
 	}
 }
+
+/* standby mode */
+/* Standby card collapse */
+#stbyInner .h { display:flex; justify-content:space-between; align-items:center; }
+
+#stbyCaret { transition: transform .2s ease; }
+#stbyInner.expanded #stbyCaret { transform: rotate(180deg); }
+
+/* Collapsed: same narrow width as preset rows */
+#pcont #stbyCard {
+  /* match the preset row’s max width; fall back if the var isn't present */
+  max-width: 280px;
+  margin: 12px auto 0;
+}
+
+/* Expanded: stretch to the full column width, not beyond the column */
+#pcont #stbyCard.full { max-width: 100%; }
+#stbyCard.full .presin { width: 100%; }
+
+/* Make tabs render narrower in the Standby JSON editor (scoped to Standby card) */
+#stbyCard #stbyJson,
+#stbyCard .apitxt {
+  tab-size: 2;        /* Chrome/Edge/Safari */
+  -moz-tab-size: 2;   /* Firefox */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Ensure only the header shows when collapsed */
+#stbyInner:not(.expanded) > :not(.h) { display: none; }
+
+
+/* Standby: collapsed matches preset row width */
+#pcont > #stbyCard.pres {
+  max-width: var(--c2w, 480px);
+  margin: 12px auto 0;
+}
+
+/* Standby: expanded may use wider column width (like playlist cards) */
+#pcont > #stbyCard.full {
+  max-width: var(--c3w, 720px);
+}
+
+

@@ -321,35 +321,58 @@ void sendDataWs(AsyncWebSocketClient * client)
 
 void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len)
 {
-
   uint8_t log = LOG_LEVEL_INFO;
 
-  // ALOG_INF(PSTR("wsEvent_________________________________________________________%d"),type);
-
-  if(type == WS_EVT_CONNECT){
-    //client connected
+  if (type == WS_EVT_CONNECT) {
     DEBUG_PRINTLN(F("WS client connected."));
     sendDataWs(client);
-  } else if(type == WS_EVT_DISCONNECT){
-    //client disconnected
+    return;
+  }
+
+  if (type == WS_EVT_DISCONNECT) {
     if (client->id() == wsLiveClientId) wsLiveClientId = 0;
     DEBUG_PRINTLN(F("WS client disconnected."));
-  } else if(type == WS_EVT_DATA){
-    // ALOG(log, PSTR("WS data received."));
-    // data packet
+    return;
+  }
+
+  if (type == WS_EVT_DATA) {
+    ALOG_INF(PSTR("wsEvent::WS_EVT_DATA"));
     AwsFrameInfo * info = (AwsFrameInfo*)arg;
-    if(info->final && info->index == 0 && info->len == len){
-      // the whole message is in a single frame and we got all of its data (max. 1450 bytes)
-      if(info->opcode == WS_TEXT)
-      {
+
+    // Single-frame, full payload
+    if (info->final && info->index == 0 && info->len == len) {
+      if (info->opcode == WS_TEXT) {
+        // Lightweight heartbeat
         if (len > 0 && len < 10 && data[0] == 'p') {
-          // application layer ping/pong heartbeat.
-          // client-side socket layer ping packets are unanswered (investigate)
           client->text(F("pong"));
           return;
         }
 
+        // -------- Pass 1: ALWAYS run Tasker on raw WS payload (pre-parse, no JSON lock) --------
+        if (len < DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
+          ALOG_INF(PSTR("wsEvent:: len < DATA_BUFFER_PAYLOAD_MAX_LENGTH"));
+          if (requestDataBufferLock(tkr_anim->GetModuleUniqueID())) {
+            D_DATA_BUFFER_SOFT_CLEAR();
+            data_buffer.payload.length_used = (uint16_t)len;
+            memcpy(data_buffer.payload.ctr, data, len);
+            data_buffer.payload.ctr[len] = '\0'; // NUL terminate for logging/consumers
+
+            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "WS State Payload [len:%d] %s"),
+                   data_buffer.payload.length_used, data_buffer.payload.ctr);
+
+            pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+            releaseDataBufferLock();
+          } else {
+            ALOG_WRN(PSTR("WS Tasker: buffer lock busy; skipping Tasker pass"));
+          }
+        } else {
+          ALOG_ERR(PSTR("WS Tasker: payload too large (%u)"), (unsigned)len);
+        }
+        // ----------------------------------------------------------------------------------------
+
+        // -------- Pass 2: ArduinoJson parse + lighting state (with JSON buffer lock) -----------
         bool verboseResponse = false;
+
         if (!tkr_anim->requestJSONBufferLock(11)) {
           client->text(F("{\"error\":3}")); // ERR_NOBUF
           return;
@@ -362,65 +385,202 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
           ALOG(log, PSTR("{\"error\":2}")); // ERR_JSON
           return;
         }
+
         if (root["v"] && root.size() == 1) {
-          //if the received value is just "{"v":true}", send only to this client
+          // client asked only for a verbose state reply
           verboseResponse = true;
         } else if (root.containsKey("lv")) {
           wsLiveClientId = root["lv"] ? client->id() : 0;
         } else {
-          // ALOG(log, PSTR("we are here"));
           verboseResponse = tkr_anim->deserializeState(root);
         }
-        tkr_anim->releaseJSONBufferLock();
-        // ALOG(log, PSTR("we are here 2"));
 
-        if (!tkr_anim->interfaceUpdateCallMode) { // individual client response only needed if no WS broadcast soon
+        tkr_anim->releaseJSONBufferLock();
+
+        // Per-client response if no broadcast queued
+        if (!tkr_anim->interfaceUpdateCallMode) {
           if (verboseResponse) {
             ALOG(log, PSTR("{\"success\":true} verboseResponse"));
             sendDataWs(client);
           } else {
             ALOG(log, PSTR("{\"success\":true}"));
-            // we have to send something back otherwise WS connection closes
             client->text(F("{\"success\":true}"));
           }
-          // force broadcast in 500ms after updating client
-          //lastInterfaceUpdate = millis() - (INTERFACE_UPDATE_COOLDOWN -500); // ESP8266 does not like this
         }
+        // ----------------------------------------------------------------------------------------
       }
-        // ALOG(log, PSTR("we are here 3"));
-    } else {
-      //message is comprised of multiple frames or the frame is split into multiple packets
-      //if(info->index == 0){
-        //if (!wsFrameBuffer && len < 4096) wsFrameBuffer = new uint8_t[4096];
-      //}
-
-      //if (wsFrameBuffer && len < 4096 && info->index + info->)
-      //{
-
-      //}
-        // ALOG(log, PSTR("we are here 4"));
-
-      if((info->index + len) == info->len){
-        if(info->final){
-          if(info->message_opcode == WS_TEXT) {
-            client->text(F("{\"error\":9}")); // ERR_JSON we do not handle split packets right now
-          }
-        }
-      }
-      DEBUG_PRINTLN(F("WS multipart message."));
+      return;
     }
-  } else if(type == WS_EVT_ERROR){
-    //error was received from the other end
-    DEBUG_PRINTLN(F("WS error."));
 
-  } else if(type == WS_EVT_PONG){
-    //pong message was received (in response to a ping request maybe)
-    DEBUG_PRINTLN(F("WS pong."));
-
-  } else {
-    DEBUG_PRINTLN(F("WS unknown event."));
+    // Multi-frame / split packets not handled yet
+    if ((info->index + len) == info->len) {
+      if (info->final && info->message_opcode == WS_TEXT) {
+        client->text(F("{\"error\":9}")); // ERR_JSON (we do not handle split packets right now)
+      }
+    }
+    DEBUG_PRINTLN(F("WS multipart message."));
+    return;
   }
+
+  if (type == WS_EVT_ERROR) {
+    DEBUG_PRINTLN(F("WS error."));
+    return;
+  }
+
+  if (type == WS_EVT_PONG) {
+    DEBUG_PRINTLN(F("WS pong."));
+    return;
+  }
+
+  DEBUG_PRINTLN(F("WS unknown event."));
 }
+
+// void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len)
+// {
+
+//   uint8_t log = LOG_LEVEL_INFO;
+
+//   // ALOG_INF(PSTR("wsEvent_________________________________________________________%d"),type);
+
+//   if(type == WS_EVT_CONNECT){
+//     //client connected
+//     DEBUG_PRINTLN(F("WS client connected."));
+//     sendDataWs(client);
+//   } else if(type == WS_EVT_DISCONNECT){
+//     //client disconnected
+//     if (client->id() == wsLiveClientId) wsLiveClientId = 0;
+//     DEBUG_PRINTLN(F("WS client disconnected."));
+//   } else if(type == WS_EVT_DATA){
+//     // ALOG(log, PSTR("WS data received."));
+//     // data packet
+//     AwsFrameInfo * info = (AwsFrameInfo*)arg;
+//     if(info->final && info->index == 0 && info->len == len){
+//       // the whole message is in a single frame and we got all of its data (max. 1450 bytes)
+//       if(info->opcode == WS_TEXT)
+//       {
+//         if (len > 0 && len < 10 && data[0] == 'p') {
+//           // application layer ping/pong heartbeat.
+//           // client-side socket layer ping packets are unanswered (investigate)
+//           client->text(F("pong"));
+//           return;
+//         }
+
+//         bool verboseResponse = false;
+//         if (!tkr_anim->requestJSONBufferLock(11)) {
+//           client->text(F("{\"error\":3}")); // ERR_NOBUF
+//           return;
+//         }
+
+//       /***
+//        * Enable parsing through normal JSON commands
+//        * This must happen first, as it is later consumed by the arduinojson deserializer which tokenizes the buffer
+//        * and then it is no longer possible to parse the buffer again.
+//        * It works here because we copy the buffer out before it is deserialized into the global large buffer with thread lock.
+//        */
+
+//       uint16_t jsonBufferLength = len;
+//       if(jsonBufferLength < DATA_BUFFER_PAYLOAD_MAX_LENGTH)
+//       {
+//         ALOG_INF(PSTR("AsyncCallbackJsonWebHandler jsonBufferLength %d"),jsonBufferLength);
+
+//         /**
+//          * @brief LOAD TO PARSE
+//          * 
+//          */
+//         if(requestDataBufferLock(tkr_anim->GetModuleUniqueID()))
+//         {
+//           D_DATA_BUFFER_SOFT_CLEAR();
+
+//           // char* jsonBuffer = data;
+
+//           data_buffer.payload.length_used = jsonBufferLength;
+//           memcpy(data_buffer.payload.ctr, data, data_buffer.payload.length_used);
+//           data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
+        
+//           LoggingLevels level = LOG_LEVEL_INFO;
+//           #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+//           level = LOG_LEVEL_DEV_TEST;
+//           #endif
+//           #ifdef ENABLE_LOG_LEVEL_INFO
+//           AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
+//           #endif// ENABLE_LOG_LEVEL_INFO
+
+//           pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+//           releaseDataBufferLock();
+
+//         }
+
+
+//       }
+
+
+//         DeserializationError error = deserializeJson(*tkr_anim->pDoc, data, len);
+//         JsonObject root = tkr_anim->pDoc->as<JsonObject>();
+//         if (error || root.isNull()) {
+//           tkr_anim->releaseJSONBufferLock();
+//           ALOG(log, PSTR("{\"error\":2}")); // ERR_JSON
+//           return;
+//         }
+//         if (root["v"] && root.size() == 1) {
+//           //if the received value is just "{"v":true}", send only to this client
+//           verboseResponse = true;
+//         } else if (root.containsKey("lv")) {
+//           wsLiveClientId = root["lv"] ? client->id() : 0;
+//         } else {
+//           // ALOG(log, PSTR("we are here"));
+//           verboseResponse = tkr_anim->deserializeState(root);
+//         }
+//         tkr_anim->releaseJSONBufferLock();
+//         // ALOG(log, PSTR("we are here 2"));
+
+//         if (!tkr_anim->interfaceUpdateCallMode) { // individual client response only needed if no WS broadcast soon
+//           if (verboseResponse) {
+//             ALOG(log, PSTR("{\"success\":true} verboseResponse"));
+//             sendDataWs(client);
+//           } else {
+//             ALOG(log, PSTR("{\"success\":true}"));
+//             // we have to send something back otherwise WS connection closes
+//             client->text(F("{\"success\":true}"));
+//           }
+//           // force broadcast in 500ms after updating client
+//           //lastInterfaceUpdate = millis() - (INTERFACE_UPDATE_COOLDOWN -500); // ESP8266 does not like this
+//         }
+//       }
+//         // ALOG(log, PSTR("we are here 3"));
+//     } else {
+//       //message is comprised of multiple frames or the frame is split into multiple packets
+//       //if(info->index == 0){
+//         //if (!wsFrameBuffer && len < 4096) wsFrameBuffer = new uint8_t[4096];
+//       //}
+
+//       //if (wsFrameBuffer && len < 4096 && info->index + info->)
+//       //{
+
+//       //}
+//         // ALOG(log, PSTR("we are here 4"));
+
+//       if((info->index + len) == info->len){
+//         if(info->final){
+//           if(info->message_opcode == WS_TEXT) {
+//             client->text(F("{\"error\":9}")); // ERR_JSON we do not handle split packets right now
+//           }
+//         }
+//       }
+//       DEBUG_PRINTLN(F("WS multipart message."));
+//     }
+//   } else if(type == WS_EVT_ERROR){
+//     //error was received from the other end
+//     DEBUG_PRINTLN(F("WS error."));
+
+//   } else if(type == WS_EVT_PONG){
+//     //pong message was received (in response to a ping request maybe)
+//     DEBUG_PRINTLN(F("WS pong."));
+
+//   } else {
+//     DEBUG_PRINTLN(F("WS unknown event."));
+//   }
+// }
 
 bool sendLiveLedsWs(uint32_t wsClient)
 {
@@ -911,6 +1071,10 @@ void mAnimatorLight::Init(void)
 
   DEBUG_LINE_HERE4
   Init_Segments();
+    
+  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  Standby_Init();
+  #endif
 
   DEBUG_LINE_HERE4
   module_state.mode = ModuleStatus::Running;
@@ -1978,9 +2142,6 @@ void mAnimatorLight::SubTask_Effects()
     // reset the segment runtime data if needed
     seg.resetIfRequired();
 
-    // Temporary fix to make sure WLED effects run with my UI, may simply need reset added above
-    // if(seg.flags.animator_first_run) seg.call = 0; // reset call counter if first run
-
     if (!seg.isActive())
     {
       ALOG_WRN(PSTR("LEAVING EARLY %d %d %d"), segment_current_index, seg.start, seg.stop);
@@ -1990,6 +2151,9 @@ void mAnimatorLight::SubTask_Effects()
     ALOG_DBM_IF(seg.name, PSTR("Segment if %s [%d,%d]"), seg.name, seg.start, seg.stop );
 
     // _force_update = true; // temp force it
+    // ALOG_INF(PSTR("FX gate: seg=%u fx=%u now=%lu next=%lu force=%d"),
+    //         (unsigned)segment_current_index, (unsigned)seg.effect_id,
+    //         (unsigned long)nowUp, (unsigned long)seg.next_time, (int)_force_update);
 
     #ifdef ENABLE_DEVFEATURE_LIGHT__EFFECT_SHOW_TIME_NEW
     // last condition ensures all solid segments are updated at the same time
@@ -2041,39 +2205,11 @@ void mAnimatorLight::SubTask_Effects()
       
       seg.next_time = nowUp + frameDelay; 
 
-      #ifndef ENABLE_DEVFEATURE_LIGHT__EFFECT_SHOW_TIME_NEW
-      // Tmp fix
-      if(
-        (seg.animation_has_anim_callback==false)&&   // WLED method
-        (1)
-      ){
+      #ifndef ENABLE_DEVFEATURE_LIGHT__EFFECT_SHOW_TIME_NEW      // Tmp fix
+      if(seg.animation_has_anim_callback==false){
         seg.cycle_time__rate_ms = frameDelay; // use returned timing to ensure next call
       } 
       #endif
-
-//       /**
-//        * @brief Temporary fix to enable phasing out of animator
-//        **/
-//       if(frameDelay != USE_ANIMATOR) //assume we do not want animator
-//       {
-//         seg.anim_function_callback = nullptr;
-//         Serial.println("DISABLE ANIM");
-//       }else{
-//         Serial.println("A---");
-//         // Temp, cycle time needs to be set here? or is assumed set elsewhere
-        
-// // #define DIRECT_MODE(x)  SEGMENT.anim_function_callback = nullptr; SEGMENT.cycle_time__rate_ms = x;
-
-//       }
-
-//       /**
-//        * @brief Only calls Animator if effects are not directly handled
-//        **/
-//       if(seg.anim_function_callback == nullptr) // assumes direct update
-//       {
-//         seg.flags.animator_first_run = false; // Animator not used, so reset first_run here
-//       }
-//       else
 
       if(seg.animation_has_anim_callback)
       { 
@@ -2096,21 +2232,28 @@ void mAnimatorLight::SubTask_Effects()
      * @brief If animator is used, then the animation will be called from the animator
      * TODO: Animator should be totally phased out
      **/    
-    if(seg.animator->IsAnimating())
+    if (seg.animator->IsAnimating())
     {
-      // Serial.println("ISAnimating");
-
       seg.animator->UpdateAnimations();
-      doShow = true; // Animator updated, so trigger SHOW
-      SEGMENT.flags.animator_first_run = RESET_FLAG;     // CHANGE to function: reset here for all my methods
-      
-      if(!seg.animator->IsAnimating()){
-        seg.transitional = false; // Since this is already inside "IsAnimating" then it should only be set if it was animating but is now stopping
+      doShow = true;
+      SEGMENT.flags.animator_first_run = RESET_FLAG;
+
+      // If UpdateAnimations() finished the animation, restore the original cycle time.
+      if (!seg.animator->IsAnimating())
+      {
+        seg.transitional = false;
+
+        /****
+         * AnimationOverride: If a single animation was overridden for a one-shot animation, restore the original cycle time.
+         */
+        if (seg.single_animation_override.cycle_time__rate_ms__save_state)
+        {
+          seg.cycle_time__rate_ms = seg.single_animation_override.cycle_time__rate_ms__save_state;
+          seg.single_animation_override.cycle_time__rate_ms__save_state = 0;
+          ALOG_HGL(PSTR("Override: restored cycle_time__rate_ms=%u after one-shot"), seg.cycle_time__rate_ms);
+        }
       }
-
-    } // IsAnimating
-
-    DEBUG_LINE_HERE
+    }
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
     if(doShow)
@@ -2137,9 +2280,7 @@ void mAnimatorLight::SubTask_Effects()
   #endif  
   if(doShow)
   {
-    // Serial.println("SHOW");
     yield();
-    // Segment::handleRandomPalette(); NOTE THIS IS RANDOMISE, NOW MOVED OUT OF THE PALETTE // slowly transition random palette; move it into for loop when each segment has individual random palette
     show();
     _lastShow = nowUp;
   }   
@@ -2446,43 +2587,82 @@ mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_
 /**
  * Begin at "StartingColor" at 0% then return to "DesiredColor" at 100%
  * */
+// void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index)
+// { 
+
+//   uint16_t time_tmp = 0;    
+//   time_tmp = SEGMENT_I(segment_index).animator_blend_time_ms();//    SEGMENT_I(segment_index).time_ms; 
+
+//   /**
+//    * @brief Testing as a temp solution, if neopixelbus gamma is not being used 
+//    * then to avoid needing complex apply brightness is the effects, the brightness is applied here
+//    * once to the starting position
+//    * 
+//    */
+//   #ifdef ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG_BRIGHTNESS_ON_START_OF_ANIMATION //does nto work for firefly
+//   error
+//   ALOG_INF(PSTR("Adjusting Brightness %d %d"), SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied());
+//   SEGMENT.Update_DynamicBuffer_DesiredColour_Brightness( SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
+//   #endif
+
+//   /**
+//    * @brief Before starting animation, check the override states to see if they are active
+//    **/
+//   // Overwriting single SEGMENT_I(0) methods, set, then clear
+//   if(SEGMENT_I(segment_index).single_animation_override.time_ms>0)
+//   {
+//     time_tmp = SEGMENT_I(segment_index).single_animation_override.time_ms;
+//     SEGMENT_I(segment_index).single_animation_override.time_ms = 0; // reset overwrite
+//     ALOG_HGL(PSTR("Override: TimeMs: %d"), time_tmp);
+//     // Also requires setting the rate, so the next time it is called is not before the animation is finished
+//     SEGMENT_I(segment_index).cycle_time__rate_ms = time_tmp > 1000 ? time_tmp + 500 : time_tmp +10; // add a bit of buffer, make it short if frame time is < 1 second.
+//     ALOG_HGL(PSTR("Override: cycle_time__rate_ms: %d"), time_tmp); // need to add into the code, that returns this when animation ends.
+//   }
+
+//   if(SEGMENT_I(segment_index).animation_has_anim_callback == true)
+//   {
+//     SEGMENT_I(segment_index).animator->StartAnimation(0, time_tmp, SEGMENT_I(segment_index).anim_function_callback);
+//   }
+
+//   SEGMENT_I(segment_index).transitional = true;
+
+// } //end function
+
 void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index)
-{ 
+{
+  uint16_t time_tmp = SEGMENT_I(segment_index).animator_blend_time_ms();
 
-  uint16_t time_tmp = 0;    
-  time_tmp = SEGMENT_I(segment_index).animator_blend_time_ms();//    SEGMENT_I(segment_index).time_ms; 
-
-  /**
-   * @brief Testing as a temp solution, if neopixelbus gamma is not being used 
-   * then to avoid needing complex apply brightness is the effects, the brightness is applied here
-   * once to the starting position
-   * 
-   */
-  #ifdef ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG_BRIGHTNESS_ON_START_OF_ANIMATION //does nto work for firefly
-  error
-  ALOG_INF(PSTR("Adjusting Brightness %d %d"), SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied());
-  SEGMENT.Update_DynamicBuffer_DesiredColour_Brightness( SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
-  #endif
-
-  /**
-   * @brief Before starting animation, check the override states to see if they are active
-   **/
-  // Overwriting single SEGMENT_I(0) methods, set, then clear
-  if(SEGMENT_I(segment_index).single_animation_override.time_ms>0)
+  // --- One-shot animation-time override ---
+  if (SEGMENT_I(segment_index).single_animation_override.time_ms > 0)
   {
+    // Save current cycle time only once so we can restore it after animation completes.
+    if (SEGMENT_I(segment_index).single_animation_override.cycle_time__rate_ms__save_state == 0)
+    {
+      SEGMENT_I(segment_index).single_animation_override.cycle_time__rate_ms__save_state =
+        SEGMENT_I(segment_index).cycle_time__rate_ms;
+    }
+
     time_tmp = SEGMENT_I(segment_index).single_animation_override.time_ms;
-    SEGMENT_I(segment_index).single_animation_override.time_ms = 0; // reset overwrite
-    ALOG_DBM(PSTR("Override: TimeMs: %d"), time_tmp);
+    SEGMENT_I(segment_index).single_animation_override.time_ms = 0; // consume override
+
+    // Ensure the next effect tick cannot preempt the one-shot
+    const uint16_t guard = (time_tmp > 1000) ? 500 : 10;
+    SEGMENT_I(segment_index).cycle_time__rate_ms = time_tmp + guard;
+
+    ALOG_HGL(PSTR("Override: TimeMs=%u  cycle_time__rate_ms=%u  (saved=%u)"),
+             time_tmp,
+             SEGMENT_I(segment_index).cycle_time__rate_ms,
+             SEGMENT_I(segment_index).single_animation_override.cycle_time__rate_ms__save_state);
   }
 
-  if(SEGMENT_I(segment_index).animation_has_anim_callback == true)
+  if (SEGMENT_I(segment_index).animation_has_anim_callback)
   {
-    SEGMENT_I(segment_index).animator->StartAnimation(0, time_tmp, SEGMENT_I(segment_index).anim_function_callback);
+    SEGMENT_I(segment_index).animator->StartAnimation(0, time_tmp,
+                                                      SEGMENT_I(segment_index).anim_function_callback);
   }
 
   SEGMENT_I(segment_index).transitional = true;
-
-} //end function
+}
 
 
 /*
@@ -2519,7 +2699,6 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   #ifdef ENABLE_EFFECT_DESCRIPTIONS   
   if (value < effects.description.size())
   ALOG_INF(PSTR("description=%S"),effects.description[value]);
-
   ALOG_INF(PSTR("description len=%d"),effects.description.size());
   #endif
   
@@ -4184,7 +4363,7 @@ void mAnimatorLight::Segment::fadePixelColor(uint16_t n, uint8_t fade) {
 #else
   CRGB pix = CRGB(getPixelColor(n)).nscale8_video(fade);
 #endif
-  setPixelColor(n, pix);
+  setPixelColor((int)n, pix);
 }
 
 

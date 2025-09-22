@@ -343,18 +343,76 @@ function handleLocationHash() {
 	}
 }
 
+/* START *************************************************************************************************************************************
+ * ************************************************************************************************************************************
+ * *************************************************************************************************************************************/
+/***
+ * Option A: Simple toast with text only, no logging
+ */
+// var timeout;
+// function showToast(text, error = false)
+// {
+// 	console.log(text);
+// 	var x = gId('toast');
+// 	// Line below: add close button if error toast good for debug. Can be commented out to make it auto-disappear only
+// 	if (error) text += '<i class="icons btn-icon" style="transform:rotate(45deg);position:absolute;top:10px;right:0px;" onclick="clearErrorToast(100);">&#xe18a;</i>';
+// 	x.innerHTML = text;
+// 	x.classList.add(error ? 'error':'show');
+// 	clearTimeout(timeout);
+// 	x.style.animation = 'none';
+// 	timeout = setTimeout(()=>{ x.classList.remove('show'); }, 2900);
+// 	if (error) console.log(text);
+// }
+
+/****
+ * Option B: Should show caller info and optional detail object/string in console
+ */
 var timeout;
-function showToast(text, error = false)
+let _toastSeq = 0;
+/**
+ * showToast(text, error=false, detail?)
+ * - Fully backward compatible with your existing calls.
+ * - If you pass a 3rd arg (detail: string/object), it will be logged too.
+ */
+function showToast(text, error = false /*, detail? */)
 {
-	var x = gId('toast');
-	//if (error) text += '<i class="icons btn-icon" style="transform:rotate(45deg);position:absolute;top:10px;right:0px;" onclick="clearErrorToast(100);">&#xe18a;</i>';
-	x.innerHTML = text;
-	x.classList.add(error ? 'error':'show');
-	clearTimeout(timeout);
-	x.style.animation = 'none';
-	timeout = setTimeout(()=>{ x.classList.remove('show'); }, 2900);
-	if (error) console.log(text);
+  const id = ++_toastSeq;
+
+  // Try to identify who called showToast (2nd/3rd line in stack)
+  let caller = "";
+  try {
+    const st = (new Error()).stack || "";
+    const lines = st.split("\n");
+    // Chrome: [0]Error [1]at showToast ... [2]at caller ...
+    // FF:     [0]showToast@... [1]caller@...
+    caller = (lines[2] || lines[1] || "").trim();
+  } catch (_) {}
+
+  // Log header + message (and optional detail if provided)
+  if (arguments.length > 2 && arguments[2] !== undefined) {
+    console.groupCollapsed(`[toast#${id}] ${error ? "ERROR: " : ""}${text}`);
+    console.log("caller:", caller);
+    console.log("detail:", arguments[2]);
+    console.groupEnd();
+  } else {
+    (error ? console.error : console.log)(`[toast#${id}] ${text}  ← ${caller}`);
+  }
+
+  // Render toast
+  var x = gId('toast');
+  x.innerHTML = text;
+  x.classList.remove(error ? 'show' : 'error'); // keep classes tidy
+  x.classList.add(error ? 'error' : 'show');
+  clearTimeout(timeout);
+  x.style.animation = 'none';
+  timeout = setTimeout(()=>{ x.classList.remove('show'); }, 2900);
+
+  if (error) console.error(text);
 }
+/* END *************************************************************************************************************************************
+ * ************************************************************************************************************************************
+ * *************************************************************************************************************************************/
+
 
 function showErrorToast(text)
 {
@@ -528,6 +586,7 @@ function loadPresets(callback = null)
 
 function loadPalettes(callback = null)
 {
+		console.log("DB: loadPalettes");
 	fetch(getURL('/json/palettes'), {
 		method: 'get'
 	})
@@ -535,11 +594,15 @@ function loadPalettes(callback = null)
 		if (!res.ok) showErrorToast("loadPalettes");
 		
 		// Validate the ETag and clear localStorage if stale
-		validatePalettesEtag(res)
+		validatePalettesEtag(res);
+
+		
+		console.log("DB: loadPalettes2",res);
 		
 		return res.json();
 	})
 	.then((json)=>{
+		console.log("DB:json>>", json);
 		lJson = Object.entries(json);
 		populatePalettes();
 		retry = false;
@@ -549,6 +612,8 @@ function loadPalettes(callback = null)
 			retry = true;
 			setTimeout(loadPalettes, 500); // retry
 		}
+		console.log("DB: WE ARE HERE");
+		console.log(e);
 		showToast(e, true);
 	})
 	.finally(()=>{
@@ -611,6 +676,7 @@ function loadFX(callback = null)
 
 function loadFXData(callback = null)
 {
+	console.log("DB:loadFXData");
 	fetch(getURL('/json/fxdata'), {
 		method: 'get'
 	})
@@ -2027,6 +2093,16 @@ function readState(s,command=false)
 	return true;
 }
 
+//STANDBY MODE  keep a fresh copy of last state JSON for "Use current as Standby"
+(function(){
+  const _readState = window.readState;
+  window.readState = function(s, command=false){
+    try { if (s && !s.success) window._lastStateJSON = JSON.stringify(s); } catch(e){}
+    return _readState(s, command);
+  };
+})();
+
+
 // control HTML elements for Slider and Color Control (original ported form WLED-SR)
 // Technical notes
 // ===============
@@ -2645,7 +2721,161 @@ function makePUtil()
 		block: 'center'
 	});
 	gId('psFind').classList.remove('staytop');
+
+	ensureStandbyCard();   // <— add me here
 }
+
+/****
+ * SECTION START: Standby utility
+ */
+
+// ---------- Standby card (after "+ Preset") ----------
+function standbyCardHTML(collapsed=true) {
+  return `
+  <div class="pres" id="stbyCard">
+    <div class="presin ${collapsed ? "" : "expanded"}" id="stbyInner">
+      <div class="h" style="display:flex;align-items:center;gap:.5rem;">
+        <button class="btn btn-s" onclick="toggleStandbyCard()" style="display:flex;align-items:center;gap:.5rem;">
+          <i class="icons btn-icon">&#xe18a;</i>
+          <span>Standby</span>
+          <i id="stbyCaret" class="icons sel" style="margin-left:.25rem;">&#xe5cf;</i>
+        </button>
+        <span id="stbyMeta" class="lbl-l" style="opacity:.8;"></span>
+      </div>
+
+      <div class="c">
+        Transition override (ms)
+        <input id="stbyFadeMs" class="segn" type="number" min="0" value="0" style="width:120px;">
+      </div>
+
+      <div class="c">
+        <button class="btn btn-p" onclick="stbyStart()"><i class="icons btn-icon">&#xe038;</i>Start</button>
+        <button class="btn btn-p" onclick="stbyStop()"><i class="icons btn-icon">&#xe03b;</i>Stop</button>
+      </div>
+
+      <div class="c">
+        <button class="btn btn-p" onclick="stbySnapshot()"><i class="icons btn-icon">&#xe41a;</i>Snapshot state</button>
+        <button class="btn btn-p" onclick="stbyRestore()"><i class="icons btn-icon">&#xe41b;</i>Restore state</button>
+      </div>
+
+      <div class="hrz"></div>
+
+      <div class="c">
+        <button class="btn btn-p" onclick="stbyCaptureCurrent()"><i class="icons btn-icon">&#xe39f;</i>Use current as Standby</button>
+        <span class="lbl-l">or from preset:</span>
+        <div class="sel-p">
+          <select id="stbyFromPresetSel">${makePlSel(0,true)}</select>
+        </div>
+        <button class="btn btn-p" onclick="stbyCopyFromPreset()"><i class="icons btn-icon">&#xe8d1;</i>Copy</button>
+      </div>
+
+      <div class="hrz"></div>
+
+      <div class="c">Standby JSON</div>
+      <textarea id="stbyJson" class="apitxt" style="min-height:140px"></textarea>
+      <div class="c">
+        <button class="btn btn-p" onclick="stbyLoadJson()"><i class="icons btn-icon">&#xe2c4;</i>Load</button>
+        <button class="btn btn-p" onclick="stbyApplyJson()"><i class="icons btn-icon">&#xe161;</i>Apply & Save</button>
+        <button class="btn btn-s" onclick="stbyReloadTemplate()"><i class="icons btn-icon">&#xe86a;</i>Reload compiled template</button>
+      </div>
+
+      <div class="idn">Standby</div>
+    </div>
+  </div>`;
+}
+
+function ensureStandbyCard() {
+  if (gId('stbyCard')) return;
+  const util = gId('putil');
+  const host = util ? util : gId('pcont');     // fallback
+  if (!host) return;
+
+  const html = standbyCardHTML(true);
+  if (util) util.insertAdjacentHTML('afterend', html);
+  else host.insertAdjacentHTML('beforeend', html);
+}
+
+
+function toggleStandbyCard() {
+  const inner = gId('stbyInner');
+  const card  = gId('stbyCard');
+  if (!inner || !card) return;
+
+  inner.classList.toggle('expanded');
+  const open = inner.classList.contains('expanded');
+  card.classList.toggle('full', open);   // <— add this line
+
+  if (open) stbyLoadJson();
+}
+
+
+// ---------- Standby actions ----------
+function stbyStart() {
+  const fade = parseInt(gId('stbyFadeMs').value)||0;
+  const obj  = fade>0
+    ? {"Debug":{"StandbyStart":{"fadeMs":fade,"callMode":5}}}
+    : {"Debug":{"StandbyStart":true}};
+  requestJson(obj);
+}
+
+function stbyStop() {
+  const fade = parseInt(gId('stbyFadeMs').value)||0;
+  const obj  = fade>0
+    ? {"Debug":{"StandbyStop":{"fadeMs":fade,"callMode":5}}}
+    : {"Debug":{"StandbyStop":true}};
+  requestJson(obj);
+}
+
+function stbySnapshot() { requestJson({"Debug":{"SaveState":true}}); }
+function stbyRestore()  { requestJson({"Debug":{"LoadState":true}}); }
+
+function stbyCaptureCurrent() {
+  if (!window._lastStateJSON) { showToast("No live state captured yet.", true); return; }
+  requestJson({"Debug":{"StandbySetProfile":{"json": window._lastStateJSON}}});
+  showToast("Standby profile set from current state");
+}
+
+function stbyCopyFromPreset() {
+  const sel = gId('stbyFromPresetSel'); if (!sel) return;
+  const pid = parseInt(sel.value)||0;
+  const raw = papiVal(pid);
+  if (!raw) { showToast("Preset has no JSON payload.", true); return; }
+  requestJson({"Debug":{"StandbySetProfile":{"json": raw}}});
+  showToast(`Standby profile copied from preset ${pid}`);
+}
+
+function stbyLoadJson() {
+  fetch(getURL('/lgt_standby.json'))
+    .then(r=>r.text())
+    .then(txt=>{
+      const ta = gId('stbyJson'); if (ta) ta.value = txt;
+      // lite meta
+      try { const j = JSON.parse(txt);
+        gId('stbyMeta').textContent = `template_id: ${('template_id' in j)? j.template_id : '—'} • ${txt.length} bytes`;
+      } catch { gId('stbyMeta').textContent = `Invalid JSON • ${txt.length} bytes`; }
+    })
+    .catch(e=>showToast(e,true));
+}
+
+function stbyApplyJson() {
+  const ta = gId('stbyJson'); if (!ta) return;
+  try {
+    const v = JSON.parse(ta.value);
+    requestJson({"Debug":{"StandbySetProfile":{"json": JSON.stringify(v)}}});
+    showToast("Standby profile saved.");
+  } catch {
+    showToast("JSON invalid. Fix it and try again.", true);
+  }
+}
+
+function stbyReloadTemplate() {
+  requestJson({"Debug":{"StandbyReloadTemplate":{"persist":true}}});
+}
+
+
+/////// SECTION END: Standby utility
+
+
 
 function makePlEntry(p,i)
 {
@@ -2692,15 +2922,40 @@ function makePlUtil()
 	gId('psFind').classList.remove('staytop');
 }
 
-function resetPUtil()
-{
-	gId('psFind').classList.add('staytop');
-	let p = gId('putil');
-	p.classList.add('staybot');
-	p.classList.remove('pres');
-	p.innerHTML = `<button class="btn btn-s" onclick="makePUtil()" style="float:left;"><i class="icons btn-icon">&#xe18a;</i>Preset</button>`
-	+ `<button class="btn btn-s" onclick="makePlUtil()" style="float:right;"><i class="icons btn-icon">&#xe18a;</i>Playlist</button>`;
+/**
+ * Adding Standby utility
+ */
+// function resetPUtil()
+// {
+// 	gId('psFind').classList.add('staytop');
+// 	let p = gId('putil');
+// 	p.classList.add('staybot');
+// 	p.classList.remove('pres');
+// 	p.innerHTML = `<button class="btn btn-s" onclick="makePUtil()" style="float:left;"><i class="icons btn-icon">&#xe18a;</i>Preset</button>`
+// 	+ `<button class="btn btn-s" onclick="makePlUtil()" style="float:right;"><i class="icons btn-icon">&#xe18a;</i>Playlist</button>`;
+// }
+function resetPUtil() {
+  gId('psFind').classList.add('staytop');
+  const p = gId('putil');
+  p.classList.add('staybot');
+  p.classList.remove('pres');
+  p.innerHTML =
+    `<button class="btn btn-s" onclick="makePUtil()" style="float:left;"><i class="icons btn-icon">&#xe18a;</i>Preset</button>` +
+    `<button class="btn btn-s" onclick="makePlUtil()" style="float:right;"><i class="icons btn-icon">&#xe18a;</i>Playlist</button>`;
+  ensureStandbyCard(); // renders the full-width Standby panel right below
 }
+
+
+// STANDBY utility
+function makeStbyUtil() {
+  ensureStandbyCard();
+  const inner = gId('stbyInner');
+  if (!inner) return;
+  const open = !inner.classList.contains('expanded');
+  if (open) { inner.classList.add('expanded'); stbyLoadJson(); }
+  gId('stbyCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
 
 function tglCs(i)
 {
@@ -3516,31 +3771,91 @@ function loadPalettesData(callback = null)
 
 }
 
+// --- Palettes fetch status (under the "Color palette" label) ---
+let _palFetchMax = 0;
 
+function ensurePalFetchBar() {
+  const hdr = gId('pall');                 // <p class="labels hd" id="pal1">Color palette</p>
+  if (!hdr) return null;
+  let bar = gId('palFetchBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'palFetchBar';
+    bar.className = 'lbl-l palfetch';
+    bar.style.cssText = 'margin:6px 8px -2px; opacity:.8;';
+    hdr.insertAdjacentElement('afterend', bar);
+  }
+  return bar;
+}
+
+function palFetchStatus(text) {
+  const bar = ensurePalFetchBar();
+  if (!bar) return;
+  bar.textContent = text || '';
+  bar.style.display = text ? '' : 'none';
+}
+
+
+// function getPalettesData(page, callback)
+// {
+// 	console.log("DB:Loading palettes data, page " + page);
+// 	fetch(getURL(`/json/palx?page=${page}`), {
+// 		method: 'get'
+// 	})
+// 	.then(res => {
+// 		if (!res.ok) showErrorToast("getPalettesData")
+// 		return res.json();
+// 	})
+// 	.then(json => {
+// 		retry = false;
+// 		palettesData = Object.assign({}, palettesData, json.p);
+// 		palettesStyle = Object.assign({}, palettesStyle, json.s);
+// 		if (page < json.m) setTimeout(()=>{ getPalettesData(page + 1, callback); }, 75);
+// 		else callback();
+// 	})
+// 	.catch((error)=>{
+// 		if (!retry) {
+// 			retry = true;
+// 			setTimeout(()=>{getPalettesData(page,callback);}, 500); // retry
+// 		}
+// 		showToast(error, true);
+// 	});
+// }
 function getPalettesData(page, callback)
 {
-	fetch(getURL(`/json/palx?page=${page}`), {
-		method: 'get'
-	})
-	.then(res => {
-		if (!res.ok) showErrorToast("getPalettesData")
-		return res.json();
-	})
-	.then(json => {
-		retry = false;
-		palettesData = Object.assign({}, palettesData, json.p);
-		palettesStyle = Object.assign({}, palettesStyle, json.s);
-		if (page < json.m) setTimeout(()=>{ getPalettesData(page + 1, callback); }, 75);
-		else callback();
-	})
-	.catch((error)=>{
-		if (!retry) {
-			retry = true;
-			setTimeout(()=>{getPalettesData(page,callback);}, 500); // retry
-		}
-		showToast(error, true);
-	});
+  console.log("DB:Loading palettes data, page " + page);
+  if (page === 0) { _palFetchMax = 0; palFetchStatus('Fetching palettes…'); }
+
+  fetch(getURL(`/json/palx?page=${page}`), { method: 'get' })
+  .then(res => {
+    if (!res.ok) showErrorToast("getPalettesData");
+    return res.json();
+  })
+  .then(json => {
+    if (!_palFetchMax) _palFetchMax = json.m || page; // total pages (server sends "m")
+    palFetchStatus(`Fetching palettes ${Math.min(page+1,_palFetchMax)}/${_palFetchMax}`);
+
+    retry = false;
+    palettesData  = Object.assign({}, palettesData,  json.p);
+    palettesStyle = Object.assign({}, palettesStyle, json.s);
+
+    if (page < json.m) {
+      setTimeout(()=>{ getPalettesData(page + 1, callback); }, 75);
+    } else {
+      palFetchStatus(''); // done
+      callback();
+    }
+  })
+  .catch((error)=>{
+    if (!retry) {
+      retry = true;
+      palFetchStatus('Fetching palettes… retrying');
+      setTimeout(()=>{ getPalettesData(page, callback); }, 500);
+    }
+    showToast(error, true);
+  });
 }
+
 
 
 /*
