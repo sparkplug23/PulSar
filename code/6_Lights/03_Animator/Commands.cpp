@@ -1,4 +1,4 @@
-#include "mAnimatorLight.h"
+#include "_AnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -430,8 +430,6 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
-
-      
     if (jtok = jobj["Params"]) { 
       if (jtok.isArray()) {
         JsonParserArray arrobj = jtok;
@@ -460,6 +458,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       }
     }    
 
+
     if (jtok = jobj["Custom1"]) 
     {
       SEGMENT_I(segment_index).custom1 = jtok.getInt();
@@ -485,6 +484,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       data_buffer.isserviced++;
     }
 
+    
     if (jtok = jobj["Check1"]) 
     {
       SEGMENT_I(segment_index).check1 = jtok.getInt();

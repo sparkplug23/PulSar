@@ -1,0 +1,9 @@
+{
+  "ColourPalette":0,
+  "SegColour0":{"RGBWC":[255,0,0,0,0]},
+  "Effects": {
+    "Function":"DB Pixel Range",
+    "Param0": 0,
+    "Param1": 20
+  }
+}

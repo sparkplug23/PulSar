@@ -12,6 +12,9 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case TASK_PRE_INIT:
       Pre_Init();
+      #ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+      Calib_Init();
+      #endif
     break;
     case TASK_INIT:
       Init();
@@ -29,6 +32,9 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       
       #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
         Update_UnifiedFilteredReadings();
+      #endif
+      #ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+      Calib_EveryLoop();
       #endif
     break;  
     case TASK_EVERY_SECOND:{
@@ -48,6 +54,9 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       }
       
   
+      #ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+      Calib_OnSecond();
+      #endif
 
 
       // for(auto& pmod:pCONT->pModule)
@@ -198,6 +207,222 @@ void mSensorsInterface::Broadcast_Event_UserInput()
 }
 
 
+// Date Modified: 03 Oct 2025
+#ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+
+void mSensorsInterface::Calib_Init() {
+  calib_cfg.enabled = true;                // opt-in
+  calib_cfg.min_sample_period_ms = 1000;    // default 1 Hz collection
+  calib_cfg.dump_period_ms = 60000;         // flush every minute
+  calib_cfg.t_last_sample_ms = 0;
+  calib_cfg.t_last_dump_ms = 0;
+  calib_buffer.clear();
+}
+
+void mSensorsInterface::Calib_SetCaptureName(const char* s) {
+  if (calib_cfg.capture_name) { free(calib_cfg.capture_name); calib_cfg.capture_name = nullptr; calib_cfg.capture_name_len = 0; }
+  if (!s) return;
+  size_t n = strnlen(s, 63);
+  calib_cfg.capture_name = (char*)malloc(n+1);
+  if (calib_cfg.capture_name) {
+    memcpy(calib_cfg.capture_name, s, n); calib_cfg.capture_name[n] = '\0';
+    calib_cfg.capture_name_len = (uint8_t)n;
+  }
+}
+
+void mSensorsInterface::Calib_ClearBuffer() {
+  calib_buffer.clear();
+}
+
+void mSensorsInterface::Calib_EveryLoop() {
+  if (!calib_cfg.enabled) return;
+  uint32_t now = millis();
+  if (now - calib_cfg.t_last_sample_ms >= calib_cfg.min_sample_period_ms) {
+    calib_cfg.t_last_sample_ms = now;
+    Calib_AppendCurrentReadings();
+  }
+  if (now - calib_cfg.t_last_dump_ms >= calib_cfg.dump_period_ms) {
+    calib_cfg.t_last_dump_ms = now;
+    Calib_FlushToFile();
+  }
+}
+
+void mSensorsInterface::Calib_OnSecond() {
+  // reserved if later you want a per-second “truth” injector; currently not needed
+}
+
+/**
+ * Traverse all sensor modules (same pattern as ConstructJSON_Sensor),
+ * collect float readings with valid timestamp, push into calib_buffer.
+ */// Date Modified: 04 Oct 2025
+void mSensorsInterface::Calib_AppendCurrentReadings() {
+#ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+  if (!tkr_time->RtcTime.valid) {
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+    ALOG_INF(PSTR("Calib: skip — RTC invalid"));
+#endif
+    return;
+  }
+
+  const uint32_t utc_now = tkr_time->UtcTime();
+
+  uint32_t modules = 0, modules_used = 0;
+  uint32_t skipped_nosensors = 0, skipped_invalid = 0, skipped_filter = 0, skipped_stale = 0;
+  uint32_t pushed = 0;
+
+  char name_buf[100] = {0};
+
+  for (auto& pmod : pCONT->pModule) {
+    ++modules;
+    const uint32_t mid = pmod->GetModuleUniqueID();
+    const bool is_sensor = IS_MODULE_SENSOR_SUBMODULE(mid);
+    if (!is_sensor) {
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+      ALOG_DBM(PSTR("Calib: module 0x%08X not a sensor-submodule, skipping"), mid);
+#endif
+      continue;
+    }
+
+    ++modules_used;
+
+    const uint8_t sensors_available = pmod->GetSensorCount();
+    if (!sensors_available) {
+      ++skipped_nosensors;
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+      ALOG_INF(PSTR("Calib: module 0x%08X has no sensors"), mid);
+#endif
+      continue;
+    }
+
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+    ALOG_INF(PSTR("Calib: module 0x%08X sensors=%u"), mid, sensors_available);
+#endif
+
+    for (int sensor_id = 0; sensor_id < sensors_available; ++sensor_id) {
+      sensors_reading_t val{};
+      pmod->GetSensorReading(&val, sensor_id);
+      if (!val.Valid()) {
+        ++skipped_invalid;
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+        ALOG_INF(PSTR("Calib: mid=0x%08X sid=%d invalid reading"), mid, sensor_id);
+#endif
+        continue;
+      }
+
+      // Resolve unified name once for this reading
+      DLI->GetDeviceName_WithModuleUniqueID(mid, val.sensor_id, name_buf, sizeof(name_buf));
+
+      // --- Filter (NameList or Name) — decide once per reading
+      bool keep = true;
+      if (calib_cfg.use_name_list) {
+        keep = false;
+        for (auto &s : calib_cfg.capture_names) { if (s.equals(name_buf)) { keep = true; break; } }
+      } else if (calib_cfg.capture_name && calib_cfg.capture_name_len) {
+        keep = (strncmp(name_buf, calib_cfg.capture_name, calib_cfg.capture_name_len) == 0);
+      }
+      if (!keep) {
+        ++skipped_filter;
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+        ALOG_INF(PSTR("Calib: filter drop name=\"%s\""), name_buf);
+#endif
+        continue;
+      }
+
+      // --- Staleness check
+      const uint32_t stale_s = tkr_set->Settings.unified_interface_reporting_invalid_reading_timeout_seconds;
+      if (stale_s != 0 && val.timestamp) {
+        const uint32_t age = utc_now - val.timestamp;
+        if (age > stale_s) {
+          ++skipped_stale;
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+          ALOG_INF(PSTR("Calib: stale drop name=\"%s\" age=%u > %u s"), name_buf, age, stale_s);
+#endif
+          continue;
+        }
+      }
+
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+      ALOG_INF(PSTR("Calib: keep name=\"%s\" types=%u floats=%u ts=%u"),
+               name_buf, (unsigned)val.sensor_type.size(), (unsigned)val.data_f.size(), val.timestamp);
+#endif
+
+      // --- Push floats
+      const size_t n = min(val.sensor_type.size(), val.data_f.size());
+      for (size_t i = 0; i < n; ++i) {
+        const uint16_t type_id = val.sensor_type[i];
+        const float fv = val.data_f[i];
+
+        calib_point_t cp;
+        cp.name    = String(name_buf);
+        cp.type_id = type_id;
+        cp.value   = fv;
+        cp.utc     = utc_now;
+
+        calib_buffer.push_back(std::move(cp));
+        ++pushed;
+
+#ifdef ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+        ALOG_INF(PSTR("Calib: push name=\"%s\" type_id=%u v=%0.6f t=%u"),
+                 name_buf, type_id, fv, utc_now);
+#endif
+      }
+    }
+  }
+
+  ALOG_INF(PSTR("Calib: modules=%u used=%u pushed=%u skip{nosensor=%u invalid=%u filter=%u stale=%u}"),
+           modules, modules_used, pushed, skipped_nosensors, skipped_invalid, skipped_filter, skipped_stale);
+#endif // feature
+}
+
+
+/**
+ * Append buffered points as NDJSON lines to a single file.
+ * Each line: {"t":<utc>,"name":"<dev>","type_id":N,"v":<float>}
+ * Safe on power loss; MATLAB can read line-by-line easily.
+ */
+void mSensorsInterface::Calib_FlushToFile() {
+  ALOG_INF(PSTR("Calib: Flush %u points"), (unsigned)calib_buffer.size());
+  if (calib_buffer.empty()) return;
+
+#if defined(USE_MODULE_CORE_FILESYSTEM)
+  // Ensure FS mounted (assume already by your platform init)
+  File f = FILE_SYSTEM.open(CALIB_CAPTURE_FILENAME, FILE_APPEND);
+  if (!f) {
+    // Try create
+    f = FILE_SYSTEM.open(CALIB_CAPTURE_FILENAME, FILE_WRITE);
+  }
+  if (!f) {
+    ALOG_ERR(PSTR("Calib: open fail \"%s\""), CALIB_CAPTURE_FILENAME);
+    return;
+  }
+
+  // Minimal JSON per line
+  for (const auto& cp : calib_buffer) {
+    // NOTE: If you later want human-readable type, map type_id→name here.
+    // Keeping compact for MATLAB regression.
+    // {"t":1696355401,"name":"DB_04","type_id":1,"v":28.937}
+    f.print('{');
+      f.print(F("\"t\":"));       f.print(cp.utc); f.print(',');
+      f.print(F("\"n\":\""));  f.print(cp.name); f.print(F("\","));
+      f.print(F("\"i\":")); f.print(cp.type_id); f.print(F(","));
+      f.print(F("\"v\":"));       f.print(cp.value, 2);
+    f.println('}');
+  }
+  f.flush();
+  f.close();
+#else
+  // No FS available on this build; you can redirect to MQTT or serial if needed.
+  for (const auto& cp : calib_buffer) {
+    ALOG_INF(PSTR("Calib NDJSON: {\"t\":%u,\"name\":\"%s\",\"type_id\":%u,\"v\":%f}"),
+             cp.utc, cp.name.c_str(), cp.type_id, cp.value);
+  }
+#endif
+
+  calib_buffer.clear();
+}
+#endif // ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+
+
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
@@ -233,6 +458,40 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 		}
 
 	}
+
+  // Date Modified: 03 Oct 2025
+  #ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+  if (JsonParserObject calib = obj["Calib"].getObject()) {
+    if (auto j = calib["Enable"]) { calib_cfg.enabled = (bool)j.getInt(); }
+    if (auto j = calib["Name"])   { Calib_SetCaptureName(j.getStr()); }
+    if (auto j = calib["SampleMs"]) { calib_cfg.min_sample_period_ms = (uint32_t)j.getInt(); }
+    if (auto j = calib["DumpSecs"]) { calib_cfg.dump_period_ms = (uint32_t)j.getInt() * 1000UL; }
+    if (auto j = calib["Flush"])    { if ((bool)j.getInt()) Calib_FlushToFile(); }
+    if (auto j = calib["ClearBuf"]) { if ((bool)j.getInt()) Calib_ClearBuffer(); }
+    // Optional: ClearFile
+    if (auto j = calib["ClearFile"]) {
+      if ((bool)j.getInt()) {
+        #if defined(CALIB_FS)
+        FILE_SYSTEM.remove(CALIB_CAPTURE_FILENAME);
+        #endif
+      }
+    }
+    ALOG_INF(PSTR("Calib: en=%d name=%s sample=%ums dump=%ums"),
+            calib_cfg.enabled,
+            calib_cfg.capture_name ? calib_cfg.capture_name : "(all)",
+            calib_cfg.min_sample_period_ms,
+            calib_cfg.dump_period_ms);
+            if (auto arr = calib["NameList"].getArray()) {
+    calib_cfg.capture_names.clear();
+    for (uint16_t i = 0; i < arr.size(); ++i) {
+      const char* s = arr[i].getStr();
+      if (s && *s) calib_cfg.capture_names.emplace_back(s);
+    }
+    calib_cfg.use_name_list = !calib_cfg.capture_names.empty();
+  }
+  }
+#endif
+
     
 }
 

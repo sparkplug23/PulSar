@@ -178,7 +178,53 @@ class mSensorsInterface :
     // AddFilteredSensor(5027, 0, 60, 120);
 
     #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-        
+
+    
+    #ifdef ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+
+    // Default data file (single file, append-only)
+    #ifndef CALIB_CAPTURE_FILENAME
+      #define CALIB_CAPTURE_FILENAME  "/sensor_calib_captures.json"
+    #endif
+
+    struct calib_point_t {
+      String   name;        // unified device name (e.g. "DB_04")
+      uint16_t type_id;     // SENSOR_TYPE_*
+      float    value;       // reading
+      uint32_t utc;         // unix time (seconds)
+    };
+
+    struct calib_capture_cfg_t {
+      bool     enabled = false;
+      uint32_t min_sample_period_ms = 1000;   // sensor sample throttle (per loop collector)
+      uint32_t dump_period_ms        = 60000; // flush-to-file cadence
+      uint32_t t_last_sample_ms      = 0;
+      uint32_t t_last_dump_ms        = 0;
+
+      // Optional filter (capture only this device name)
+      char* capture_name = nullptr;     // malloc'ed (or set via template)
+      uint8_t capture_name_len = 0;
+  bool use_name_list = false;
+  std::vector<String> capture_names; // exact-include list
+
+      // Optional “truth” channel injection later (leave placeholder)
+      // char* truth_key = nullptr; float truth_value = NAN;
+    };
+
+    calib_capture_cfg_t calib_cfg;
+    std::vector<calib_point_t> calib_buffer;
+
+    // API
+    void Calib_Init();
+    void Calib_EveryLoop();
+    void Calib_OnSecond();
+    void Calib_AppendCurrentReadings();   // collect into RAM buffer
+    void Calib_FlushToFile();             // append NDJSON lines
+    void Calib_ClearBuffer();
+    void Calib_SetCaptureName(const char* s); // alloc + set
+
+    #endif // ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
@@ -233,27 +279,6 @@ class mSensorsInterface :
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     struct handler<mSensorsInterface> mqtthandler_event_input; // events triggered by user input
     #endif // USE_MODULE_NETWORK_MQTT
-
-
-    /******************************************************************************************************************
-     * WEBSERVER
-    *******************************************************************************************************************/
-
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
-
-    These would be good just on the interface files, to enable HTTP requests for data overview
-
-      /**
-       * @brief MQTTHandler_AddWebURL_PayloadRequests
-       * */
-      void MQTTHandler_AddWebURL_PayloadRequests();
-
-    #endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
-    #endif // USE_MODULE_NETWORK_WEBSERVER
-
-
-
 
 };
 

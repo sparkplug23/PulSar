@@ -34,7 +34,12 @@
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
 // #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
-
+// #define DEVICE_MEADOWS__ROAMING__REDBOARD_TESTER02
+// #define DEVICE_MEADOWS__OFFICE__SANTA_HAT
+// #define DEVICE_MEADOWS__OUTSIDE__SIDE_TREE
+// #define DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
+// #define DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
+#define DEVICE_MEADOWS__XMAS25__RED_TREE
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1713,6 +1718,1275 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":2400
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          2400
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+#endif
+
+
+
+#ifdef DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
+/**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+{
+  "ColourPalette":0,
+  "SegColour0":{"RGBWC":[255,255,0,0,0]},
+  "Effects": {
+    "Function":"DB Pixel Range",
+    "Param0": 0,
+    "Param1": 199
+  }
+}
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":200,
+        "Length":200
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":400,
+        "Length":200
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":200
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          800
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+#endif
+
+
+
+
+#ifdef DEVICE_MEADOWS__XMAS25__RED_TREE
+/**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":16,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      },
+      {
+        "Pin":17,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":200,
+        "Length":200
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":400,
+        "Length":200
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":200
+      },
+      {
+        "Pin":5,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":800,
+        "Length":200
+      },
+      {
+        "Pin":12,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":250
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1250,
+        "Length":250
+      },
+      {
+        "Pin":15,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1500,
+        "Length":250
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          1750
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+#endif
+
+
+
+
+#ifdef DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
+
+// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
+
+// inwaves, seems to be chasing
+// twinkle/flash, is just constant twinkle back and forth
+// flashing, in chasing/flash, appears to be twinkle/flash
+
+// most recent observations with real world lights, lets make sure we are doing this 
+
+// inwaves, never turns off any lights, they just dim
+// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
+// slo glo, I think we have it well now. 
+// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
+// twinkle/flash, how no reversing.
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Sweep Random",
+          "Speed":70,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+#endif
+
+
+
+
+
+#ifdef DEVICE_MEADOWS__OUTSIDE__SIDE_TREE
+
+// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
+
+// inwaves, seems to be chasing
+// twinkle/flash, is just constant twinkle back and forth
+// flashing, in chasing/flash, appears to be twinkle/flash
+
+// most recent observations with real world lights, lets make sure we are doing this 
+
+// inwaves, never turns off any lights, they just dim
+// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
+// slo glo, I think we have it well now. 
+// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
+// twinkle/flash, how no reversing.
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+
+  // ======================= Example PROGMEM template =======================
+  // Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  // compile-time gate
+  // #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+  #define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+  #define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
+      },
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          500
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":20,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+
+#endif
+
+
+
+
+
+
+
+#ifdef DEVICE_MEADOWS__OFFICE__SANTA_HAT
+
+// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
+
+// inwaves, seems to be chasing
+// twinkle/flash, is just constant twinkle back and forth
+// flashing, in chasing/flash, appears to be twinkle/flash
+
+// most recent observations with real world lights, lets make sure we are doing this 
+
+// inwaves, never turns off any lights, they just dim
+// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
+// slo glo, I think we have it well now. 
+// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
+// twinkle/flash, how no reversing.
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+  
+/*
+{
+  "BrightnessRGB": 100,
+  "SegColour0": {
+    "RGBWC": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "MQTTPixel": {
+    "OnPixels": [
+      25,65,105,143,180,223,258,291,324,354,383,412,438,463,487,510,532,554,575,594,613,630,646,661,676,691,705,719,732,744,755,765,774,783,791,797,803,
+      26,66,106,144,181,224,256,292,325,355,384,413,439,464,488,511,533,555,576,595,614,631,647,662,677,692,706,720,733,745,756,766,775,784,792,798,804,
+      3,45,85,124,162,206,241,275,308,340,370,399,426,452,476,500,522,544,565,585,605,623,639,655,670,685,699,713,726,738,749,760,770,779,787,794,800    ]
+  }
+}
+
+   * 
+   * 
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":201
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":201,
+        "Length":201
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":402,
+        "Length":201
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":603,
+        "Length":201
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        804
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Sweep Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+#endif
+
+
+
+
+// 01 is at whitehall, with all the connectors
+#ifdef DEVICE_MEADOWS__ROAMING__REDBOARD_TESTER02
+
+// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
+
+// inwaves, seems to be chasing
+// twinkle/flash, is just constant twinkle back and forth
+// flashing, in chasing/flash, appears to be twinkle/flash
+
+// most recent observations with real world lights, lets make sure we are doing this 
+
+// inwaves, never turns off any lights, they just dim
+// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
+// slo glo, I think we have it well now. 
+// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
+// twinkle/flash, how no reversing.
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
 #define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
@@ -1779,7 +3053,14 @@ R"=====(
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":201
+        "Length":250
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
       }
     ],
     "Segments":[
@@ -1787,21 +3068,21 @@ R"=====(
         "Name":"Bus 1",
         "PixelRange": [
           0,
-          201
+          500
         ],
         "ColourPalette":"RGPBY",
         "ColourType":3,
         "Effects": {
-          "Function":"Solid",
+          "Function":"Sweep Random",
           "Speed":255,
           "Intensity":127,
-          "Grouping":1,
+          "Grouping":20,
           "RateMs": 20
         },
         "BrightnessRGB": 100
       }
     ],
-    "BrightnessRGB": 25
+    "BrightnessRGB": 100
   }
   )=====";
 
@@ -3705,6 +4986,51 @@ May need to add two power connections too, so its not just the cat5e wire to let
  "}";
 
   
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":200,
+  //       "Reversed":1
+  //     },
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":200
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       400
+  //     ],
+  //     "ColourPalette":"Warm White",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Candles",
+  //       "Speed":180,
+  //       "Intensity":85,
+  //       "Grouping":1,
+  //       "RateMs": 20
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+
+  //   },
+  //   "BrightnessRGB": 1,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -3737,18 +5063,17 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "Function":"Candles",
         "Speed":180,
         "Intensity":85,
-        "Grouping":1,
+        "Grouping":10,
         "RateMs": 20
       },
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
 
     },
-    "BrightnessRGB": 100,
+    "BrightnessRGB": 5,
     "BrightnessCCT": 0
   }
   )=====";
-
   
  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
 
@@ -3854,7 +5179,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/  
   
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
@@ -3930,6 +5255,15 @@ May need to add two power connections too, so its not just the cat5e wire to let
     // Shower Temp /     Bath Temp
   #endif
   
+
+  // #define ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
+
+  // #define USE_MODULE_CORE_FILESYSTEM
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // #define CALIB_FS
+  // #define ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
+
 
   // #define USE_MODULE_DRIVERS_INTERFACE
   // #define USE_MODULE_DRIVERS_RELAY
@@ -4111,6 +5445,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" "PRINTER" "\""
+      "],"  
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_01_NAME "\""
       "],"
@@ -4174,8 +5511,39 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "}"
       "]"
     "}"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
-  "}";
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  
+  //  "\"Calib\": {"
+  //     "\"Enable\": 1,"            // start capturing at boot
+  //     "\"Name\": \"\","             // empty → no filter (capture all)
+  //     "\"SampleMs\": 1000,"       // collect once per second
+  //     "\"DumpSecs\": 60"          // flush to /sensor_calib_captures.json every 60s
+  //   "}"
+    "\"Calib\": {"
+        "\"Enable\": 1,"
+        "\"Name\": \"\","                // ignored if NameList present
+        "\"SampleMs\": 1000,"
+        "\"DumpSecs\": 60,"
+        "\"NameList\": ["
+          "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\","
+          "\"" D_DEVICE_SENSOR_DB18S20_15_NAME "\""
+        "]"
+      "}"
+
+    "}";
 
   // #ifdef USE_RGB_OUT_LANDING_PANEL
   // #ifdef USE_MODULE_LIGHTS_INTERFACE

@@ -1,8 +1,74 @@
-#include "mAnimatorLight.h"
+#include "_AnimatorLight.h"
+
+// to add later, hence any development code for all type of drivers/sensors etc should be callable at the end of their own tasker. 
+// This will make it easier to split release/development code.
+#if defined(ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR) && defined(ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS)
+
+int8_t mAnimatorLight::Tasker_DevCode(uint8_t function, JsonParserObject obj)
+{
+
+  int8_t function_result = FUNCTION_RESULT_SUCCESS_ID;
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case TASK_EVERY_SECOND:{
+
+      // ALOG_INF(PSTR("mAnimatorLight::Tasker_DevCode: TASK_EVERY_SECOND"));
+
+      #ifdef USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
+      DEBUG_PRINT(F("Matrix ledmap:"));
+      for (unsigned i=0; i<customMappingSize; i++) {
+        if (!(i%mAnimatorLight::Segment::maxWidth)) DEBUG_PRINTLN();
+        DEBUG_PRINTF("%4d,", customMappingTable[i]);
+      }
+      DEBUG_PRINTLN();
+      #endif // USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
+
+
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+      uint8_t log_level = tkr_time->UpTime() < 3600 ? LOG_LEVEL_DEV_TEST : LOG_LEVEL_DEBUG_MORE;
+      AddLog(log_level, PSTR("getFPS %d"), getFps());
+      AddLog(log_level, PSTR("starting %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__starting_colour / 1000 : lighting_time_critical_logging.dynamic_buffer__starting_colour, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("part1  ---------> %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__starting_colour_part1 / 1000 : lighting_time_critical_logging.dynamic_buffer__starting_colour_part1, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("part2  ---------> %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__starting_colour_part2 / 1000 : lighting_time_critical_logging.dynamic_buffer__starting_colour_part2, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("desired  %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.dynamic_buffer__desired_colour / 1000 : lighting_time_critical_logging.dynamic_buffer__desired_colour, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("effect_call  %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.effect_call / 1000 : lighting_time_critical_logging.effect_call, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      AddLog(log_level, PSTR("segment_effects  ---------> %d%s"), lighting_time_critical_logging.time_unit_output_ms ? lighting_time_critical_logging.segment_effects / 1000 : lighting_time_critical_logging.segment_effects, lighting_time_critical_logging.time_unit_output_ms ? "ms" : "us");
+      ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, tkr_sup->activity.cycles_per_sec);    
+      #endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+    }break;
+    case TASK_UPTIME_1_MINUTES:
+      ALOG_INF(PSTR("mAnimatorLight::Tasker_DevCode: TASK_UPTIME_1_MINUTES   ====== WIFI_OFF"));
+      WiFi.mode(WIFI_OFF);
+    break;
+  } // switch(command)
+
+  return function_result;
+
+} // END FUNCTION
+
+#endif // ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
+
+
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING__DEVELOPING_CODE
 
 
+//   if(panels)
+//   {    
+    
+//   Panel p = panel[0];
+//   ALOG_INF(PSTR(
+//     "MatrixConfig[%d]: %dx%d, StartX:%d, StartY:%d, BottomStart:%d, RightStart:%d, Vertical:%d, Serpentine:%d"),
+//     panels, p.width, p.height, p.xOffset, p.yOffset, p.bottomStart, p.rightStart, p.vertical, p.serpentine
+//   );
+// }
+
+// ALOG_INF(PSTR("maxWidth  %d\n\r"), Segment::maxWidth);
+// ALOG_INF(PSTR("maxHeight %d\n\r"), Segment::maxHeight);
 
 void mAnimatorLight::TestCode_AddBus1()
 {

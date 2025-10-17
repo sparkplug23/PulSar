@@ -74,31 +74,11 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
       tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEB SECTION * 
-    *******************/   
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case TASK_WEB_ADD_HANDLER:    
-      WebPage_Root_AddHandlers();
-    break;
-    #endif // USE_MODULE_NETWORK_WEBSERVER
   }
 
   return FUNCTION_RESULT_UNKNOWN_ID;
 
 }
-
-
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-void mTelemetry::WebPage_Root_AddHandlers()
-{
-  #ifdef ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
-  #ifdef USE_MODULE_NETWORK_MQTT
-  CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests();
-  #endif
-  #endif
-}
-#endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 #ifdef USE_MODULE_NETWORK_MQTT

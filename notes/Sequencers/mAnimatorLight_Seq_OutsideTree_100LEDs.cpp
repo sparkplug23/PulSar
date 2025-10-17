@@ -27,7 +27,7 @@
  * 
  */
 
-#include "6_Lights/03_Animator/mAnimatorLight.h"
+#include "6_Lights/03_Animator/_AnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -3164,7 +3164,7 @@ void mAnimatorLight::SubLoad_Sequencer_Device(uint8_t id)
 //  * 
 //  */
 
-// #include "mAnimatorLight.h"
+// #include "_AnimatorLight.h"
 
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR
 

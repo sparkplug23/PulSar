@@ -658,6 +658,7 @@ void mPalette::addStaticPalette(uint16_t id, const uint8_t* data, const uint8_t 
 }
 
 
+
 void mPalette::addDynamicPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding)
 {
 

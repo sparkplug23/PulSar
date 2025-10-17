@@ -161,6 +161,7 @@ class Bus {
 
     virtual ~Bus(){}
 
+    virtual void     begin()                                    {};
     virtual void     show() = 0;
     virtual bool     canShow() const                          { return true; }
     virtual void     setStatusPixel(uint32_t c)                {}

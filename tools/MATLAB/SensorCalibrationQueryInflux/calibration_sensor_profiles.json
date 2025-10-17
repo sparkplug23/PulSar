@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "created_utc": "2025-10-04T15:28:31Z",
+    "reference": "SENSOR_3DPrinterFrontRight25_Temperature",
+    "units": "degC",
+    "created_by": "SensorCalibrationQueryInflux",
+    "notes": "Hot-water cool-down test"
+  },
+  "model": "poly1",
+  "profiles": [
+    {
+      "name": "SENSOR_3DPrinterFrontRight00_Temperature",
+      "alias": "FrontRight00",
+      "coeffs": {
+        "a": 0.98780833749170183,
+        "b": 0.37483362509273987
+      },
+      "rmse": 1.7121744661185223,
+      "n": 247,
+      "input_range": [
+        16.924799999999998,
+        78.385333333333335
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontRight50_Temperature",
+      "alias": "FrontRight50",
+      "coeffs": {
+        "a": 0.973323236827076,
+        "b": 0.69632054491429729
+      },
+      "rmse": 1.0439270342588025,
+      "n": 247,
+      "input_range": [
+        18.10925,
+        79.938
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontRight75_Temperature",
+      "alias": "FrontRight75",
+      "coeffs": {
+        "a": 0.99683388337136924,
+        "b": 0.80360966218768815
+      },
+      "rmse": 1.5033889527549142,
+      "n": 247,
+      "input_range": [
+        17.0996,
+        78.083
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontRight100_Temperature",
+      "alias": "FrontRight100",
+      "coeffs": {
+        "a": 0.9915004466168984,
+        "b": 0.75284605490888012
+      },
+      "rmse": 1.7658750594163093,
+      "n": 247,
+      "input_range": [
+        17.9874,
+        78.041666666666671
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontTopLeft_Temperature",
+      "alias": "FrontTopLeft",
+      "coeffs": {
+        "a": 1.005007904427482,
+        "b": 0.49925869498701891
+      },
+      "rmse": 2.2200772691547819,
+      "n": 247,
+      "input_range": [
+        17.6498,
+        76.937666666666658
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontTopCentre_Temperature",
+      "alias": "FrontTopCentre",
+      "coeffs": {
+        "a": 0.96153789871067741,
+        "b": 1.4527935827308294
+      },
+      "rmse": 2.4815014459738141,
+      "n": 247,
+      "input_range": [
+        16.6874,
+        79.4065
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontTopRight_Temperature",
+      "alias": "FrontTopRight",
+      "coeffs": {
+        "a": 1.0071875280227554,
+        "b": 0.62082902359309033
+      },
+      "rmse": 2.2320840692004831,
+      "n": 247,
+      "input_range": [
+        17.8748,
+        76.166666666666671
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontLeft00_Temperature",
+      "alias": "FrontLeft00",
+      "coeffs": {
+        "a": 0.99457077920389314,
+        "b": 1.0017935246227012
+      },
+      "rmse": 2.2170897442167572,
+      "n": 247,
+      "input_range": [
+        17.162200000000002,
+        76.354666666666674
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontLeft25_Temperature",
+      "alias": "FrontLeft25",
+      "coeffs": {
+        "a": 0.97235486731662979,
+        "b": 1.4320399422236785
+      },
+      "rmse": 2.2159629571328416,
+      "n": 247,
+      "input_range": [
+        16.9622,
+        78.541666666666671
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontLeft50_Temperature",
+      "alias": "FrontLeft50",
+      "coeffs": {
+        "a": 0.99480880129201454,
+        "b": 0.87107121055341485
+      },
+      "rmse": 2.12631227350719,
+      "n": 247,
+      "input_range": [
+        19.062,
+        76.875
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontLeft75_Temperature",
+      "alias": "FrontLeft75",
+      "coeffs": {
+        "a": 0.95889499886001706,
+        "b": 1.8913827887750057
+      },
+      "rmse": 2.4159732876745883,
+      "n": 247,
+      "input_range": [
+        18.828,
+        79.375
+      ]
+    },
+    {
+      "name": "SENSOR_3DPrinterFrontLeft100_Temperature",
+      "alias": "FrontLeft100",
+      "coeffs": {
+        "a": 1.0047209736367597,
+        "b": 0.541656569631729
+      },
+      "rmse": 2.75175745868429,
+      "n": 247,
+      "input_range": [
+        18.75,
+        75.291666666666671
+      ]
+    }
+  ]
+}

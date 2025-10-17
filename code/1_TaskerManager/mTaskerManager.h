@@ -216,6 +216,13 @@ enum ModuleStatus{
 #include "2_CoreSystem/02_RtcMemory/mRtcSettings.h"
 
 
+    
+  template <size_t N>
+  static inline bool in_list(uint16_t id, const uint16_t (&lst)[N]) {
+    for (size_t i = 0; i < N; ++i) if (lst[i] == id) return true;
+    return false;
+  }
+
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
   MODULE_SUBTYPE_NETWORK_ID,
@@ -542,7 +549,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_iLight                          static_cast<mInterfaceLight*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  #include "6_Lights/03_Animator/mAnimatorLight.h"
+  #include "6_Lights/03_Animator/_AnimatorLight.h"
   #define tkr_lAni                            static_cast<mAnimatorLight*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID))
   #ifdef ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
   #define tkr_anim tkr_extern_lAni // using a more direct access method, with a local pointer in the class header
@@ -854,9 +861,7 @@ class mTaskerManager{
   
       return 0;
   }
-  
-  
-
+    
 
     uint8_t Instance_Init();
     

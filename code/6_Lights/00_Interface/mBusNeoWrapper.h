@@ -199,16 +199,89 @@ enum EM_BUS_TYPE
 #endif
 #endif
 
-
 /*** ESP32 Neopixel methods ***/
-#ifdef ESP32
+#ifdef ARDUINO_ARCH_ESP32
+// C3: I2S0 and I2S1 methods not supported (has one I2S bus)
+// S2: I2S0 methods supported (single & parallel), I2S1 methods not supported (has one I2S bus)
+// S3: I2S0 methods not supported, I2S1 supports LCD parallel methods (has two I2S buses)
+// https://github.com/Makuna/NeoPixelBus/blob/b32f719e95ef3c35c46da5c99538017ef925c026/src/internal/Esp32_i2s.h#L4
+// https://github.com/Makuna/NeoPixelBus/blob/b32f719e95ef3c35c46da5c99538017ef925c026/src/internal/NeoEsp32RmtMethod.h#L857
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+  // S3 will always use LCD parallel output
+  typedef X8Ws2812xMethod X1Ws2812xMethod;
+  typedef X8Sk6812Method X1Sk6812Method;
+  typedef X8400KbpsMethod X1400KbpsMethod;
+  typedef X8800KbpsMethod X1800KbpsMethod;
+  typedef X8Tm1814Method X1Tm1814Method;
+  typedef X8Tm1829Method X1Tm1829Method;
+  typedef X8Apa106Method X1Apa106Method;
+  typedef X8Ws2805Method X1Ws2805Method;
+  typedef X8Tm1914Method X1Tm1914Method;
+#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+  // S2 will use I2S0
+  typedef NeoEsp32I2s0Ws2812xMethod X1Ws2812xMethod;
+  typedef NeoEsp32I2s0Sk6812Method X1Sk6812Method;
+  typedef NeoEsp32I2s0400KbpsMethod X1400KbpsMethod;
+  typedef NeoEsp32I2s0800KbpsMethod X1800KbpsMethod;
+  typedef NeoEsp32I2s0Tm1814Method X1Tm1814Method;
+  typedef NeoEsp32I2s0Tm1829Method X1Tm1829Method;
+  typedef NeoEsp32I2s0Apa106Method X1Apa106Method;
+  typedef NeoEsp32I2s0Ws2805Method X1Ws2805Method;
+  typedef NeoEsp32I2s0Tm1914Method X1Tm1914Method;
+#elif !defined(CONFIG_IDF_TARGET_ESP32C3)
+  // regular ESP32 will use I2S1
+  typedef NeoEsp32I2s1Ws2812xMethod X1Ws2812xMethod;
+  typedef NeoEsp32I2s1Sk6812Method X1Sk6812Method;
+  typedef NeoEsp32I2s1400KbpsMethod X1400KbpsMethod;
+  typedef NeoEsp32I2s1800KbpsMethod X1800KbpsMethod;
+  typedef NeoEsp32I2s1Tm1814Method X1Tm1814Method;
+  typedef NeoEsp32I2s1Tm1829Method X1Tm1829Method;
+  typedef NeoEsp32I2s1Apa106Method X1Apa106Method;
+  typedef NeoEsp32I2s1Ws2805Method X1Ws2805Method;
+  typedef NeoEsp32I2s1Tm1914Method X1Tm1914Method;
+#endif
+
+
+#ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+// RMT driver selection
+// #if !defined(WLED_USE_SHARED_RMT)  && !defined(__riscv)
+#include <NeoEsp32RmtHIMethod.h>
+#define NeoEsp32RmtMethod(x) NeoEsp32RmtHIN ## x ## Method
+// error
+// #else
+// #define NeoEsp32RmtMethod(x) NeoEsp32RmtN ## x ## Method
+// #endif
+#endif
+
+
+// #endif
+
+
+// /*** ESP32 Neopixel methods ***/
+// #ifdef ESP32
 
   #ifdef CONFIG_IDF_TARGET_ESP32C3
     // No I2S, only RMT methods available
     #define NEOPIXEL_DISABLE_400_PIXELBUS
 
     //RGB
+    // 
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+    // #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32Rmt0Ws2812xMethod>//NeoEsp32RmtMethod(Ws2812x)> // ESP32, S2, S3, C3
+    // #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtHINWs2812xMethod>//NeoEsp32RmtMethod(Ws2812x)> // ESP32, S2, S3, C3
+    
+    // using StripMethod = NeoEsp32Rmt0Ws2812xHiMethod;  // WS2812/WS2812B (prefer HI)
+    //// using StripMethod = NeoEsp32Rmt0Ws2812xMethod;   // classic
+    //// using StripMethod = NeoEsp32Rmt0Sk6812Method;    // SK6812 (RGBW)
+    // #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32Rmt0Ws2812xHiMethod>//NeoEsp32RmtMethod(Ws2812x)> // ESP32, S2, S3, C3
+    
+    // static_assert(RMT_CHANNEL_MAX >= 4, "Unexpected RMT channel count on this target");
+    // static_assert(0 < RMT_CHANNEL_MAX,  "Chosen RMT channel out of range");
     #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
+
+  #else
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
+    #endif
     #define PIXELBUS_32_I0_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
     #define PIXELBUS_32_I1_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
     #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
@@ -410,7 +483,10 @@ class PolyBus
     #endif
     }
       
+
+    #ifndef ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
     begin(busPtr, busType, pins);
+    #endif
     
     return busPtr;
   };
@@ -1123,6 +1199,10 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
             #elif defined(CONFIG_IDF_TARGET_ESP32C3)
                 // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
                 if (num > 1) return BUSTYPE__NONE__ID;
+
+                // need to force RMT on C3, as I2S is not supported for WS2812
+                offset_method_inside_group = 0; // force RMT method
+
                 //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
 
             #elif defined(CONFIG_IDF_TARGET_ESP32S3)

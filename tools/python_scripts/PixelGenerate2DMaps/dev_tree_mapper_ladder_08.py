@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     # Define file names
     input_file = os.path.join(input_file_dir, "mapping_range_rows__tree_01.json")
-    output_file = os.path.join(output_file_dir, "ledmap__reversed_or_normalized.json")
+    output_file = os.path.join(output_file_dir, "ledmap__reversed_or_normalized_sep25.json")
 
     # Load input data
     input_data = load_input_data(input_file)

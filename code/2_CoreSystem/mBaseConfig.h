@@ -760,6 +760,16 @@ With latest version, all longer term shared debug features should be added here 
     #define IR_RCV_WHILE_SENDING    0            // Turns on receiver while sending messages, i.e. receive your own. This is unreliable and can cause IR timing issues
     #define IR_RCV_TOLERANCE        25           // Base tolerance percentage for matching incoming IR messages (default 25, max 100)
 
+// Size of buffer for API JSON object (increase for more segments)
+#ifdef ESP8266
+  #define JSON_BUFFER_SIZE 10240
+#else
+  #if defined(ARDUINO_ARCH_ESP32S2)
+    #define JSON_BUFFER_SIZE 24576
+  #else
+    #define JSON_BUFFER_SIZE 32767
+  #endif
+#endif
 
 // #ifndef WLED_MAX_BUSSES
 //   #ifdef ESP8266

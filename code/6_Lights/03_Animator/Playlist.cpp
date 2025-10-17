@@ -1,4 +1,4 @@
-#include "mAnimatorLight.h"
+#include "_AnimatorLight.h"
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
 
@@ -149,8 +149,8 @@ void mAnimatorLight::SubTask_Playlist()
 
   static unsigned long presetCycledTime = 0;
 
-  // if fileDoc is not null JSON buffer is in use so just quit
-  if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_mfile->fileDoc != nullptr) 
+  // if gDoc is not null JSON buffer is in use so just quit
+  if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_mfile->pDoc != nullptr) 
   {
     // ALOG_INF(PSTR("SubTask_Playlist return early"));    
     return;

@@ -38,6 +38,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     { 
       DEBUG_LINE_HERE_MILLIS
       mod->Tasker(task, obj);
+      #ifdef ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
+      mod->Tasker_DevCode(task, obj);
+      #endif
     }
     
     return FUNCTION_RESULT_SUCCESS_ID;
@@ -104,6 +107,37 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       // ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
       DEBUG_LINE_HERE_MILLIS
     }
+
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+    if(tkr_time->uptime_seconds_nonreset > 120)
+    {
+      // 1030 = mAnimatorLight, 1031 = mPalette, 1032 = mPlaylist, etc.
+      static constexpr uint16_t kAllowList[] = {
+        // Put light-related modules here to allow only these after warmup
+        D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID /*mAnimatorLight*/, /*1031, 1032, ...*/
+      };
+
+      static constexpr uint16_t kBlockList[] = {
+        // Or, leave ALLOW empty and put non-light modules here to skip them
+        // 2001, 2002, ...
+      };
+      WiFi.mode(WIFI_OFF); // Disable WiFi to prevent flicker
+      uint16_t id = mod->GetModuleUniqueID();
+      // If ALLOW has entries, enforce allow-list.
+      if (sizeof(kAllowList) / sizeof(kAllowList[0]) > 0) {
+        if (!in_list(id, kAllowList)) {
+          continue; // skip all non-allowed modules
+        }
+      } 
+      // else
+      // Otherwise, if BLOCK has entries, enforce block-list.
+      // if (sizeof(kBlockList) / sizeof(kBlockList[0]) > 0) {
+      //   if (in_list(id, kBlockList)) {
+      //     continue; // skip blocked modules
+      //   }
+      // }
+    }
+    #endif
     
     #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
     // Record start time in microseconds
@@ -186,6 +220,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
        * In the future if we get stuck, remember missing return from task required with platest platform/board
        */
       DEBUG_LINE_HERE4;
+      #ifdef ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
+      result = mod->Tasker_DevCode(task, obj);
+      #endif
   #endif
 
     

@@ -1,4 +1,4 @@
-#include "mAnimatorLight.h"
+#include "_AnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -1070,7 +1070,7 @@ void mAnimatorLight::Segment::wu_pixel(uint32_t x, uint32_t y, CRGB c) {      //
 
 
 
-// #include "mAnimatorLight.h"
+// #include "_AnimatorLight.h"
 
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR
 

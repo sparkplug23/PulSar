@@ -341,6 +341,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   /************************************************************************
    * WEBPAGE:
    ************************************************************************/
+  #ifndef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
@@ -355,6 +356,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define WLED_ENABLE_WEBSOCKETS2
   #define ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
   #define WLED_ENABLE_JSONLIVE
+  #endif
 
   /************************************************************************
   * LIGHTING:

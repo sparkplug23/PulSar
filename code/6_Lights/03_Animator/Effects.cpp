@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#include "mAnimatorLight.h"
+#include "_AnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -102,7 +102,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
 
 }
 static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM =
-"Solid Colour@"                                // Name
+"Solid@"                                // Name
 "Speed,Intensity,,,,,,,!,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names (blank = show all)
@@ -13291,7 +13291,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
     const uint32_t col = HueSatBrt(hue, sat, 255);
     const uint32_t end = start + length;
     for (uint32_t i = start; i < end; ++i) {
-      SEGMENT.setPixelColor(i, col);
+      SEGMENT.setPixelColor((int)i, col);
     }
 
     if(SEGMENT.check1) SEGMENT.setPixelColor(start, 0xFFFFFF);
@@ -13489,7 +13489,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__View_Pixel_Range()
 
   // Draw the [start, end) range in foreground color (SegColor 0)
   for (uint32_t i = start; i < end; ++i) {
-    SEGMENT.setPixelColor(i, SEGCOLOR_U32(0));
+    SEGMENT.setPixelColor((int)i, SEGCOLOR_U32(0));
   }
 
   return FRAMETIME;

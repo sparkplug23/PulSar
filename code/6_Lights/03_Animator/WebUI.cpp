@@ -1,4 +1,4 @@
-#include "6_Lights/03_Animator/mAnimatorLight.h"
+#include "6_Lights/03_Animator/_AnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -34,40 +34,87 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 
 
 //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-bool mAnimatorLight::requestJSONBufferLock(uint16_t module)
+// bool mAnimatorLight::requestJSONBufferLock(uint16_t module)
+// {
+//   unsigned long now = millis();
+
+//   // This assumption here is another http thread must release itself to permit this function to proceed
+//   while (jsonBufferLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+//   if (millis()-now >= 1000) {
+//     // DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
+//     // DEBUG_PRINT(jsonBufferLock);
+//     // DEBUG_PRINTLN(")");
+//     return false; // waiting time-outed
+//   }
+
+//   jsonBufferLock = module ? module : 255;
+//   // DEBUG_PRINT(F("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOCKED    JSON buffer locked. ("));
+//   // DEBUG_PRINT(jsonBufferLock);
+//   // DEBUG_PRINTLN(")");
+//   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   // tkr_mfile->gDoc = &doc;  // used for applying presets (presets.cpp)
+//   tkr_mfile->pDoc->clear();
+//   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   return true;
+// }
+//threading/network callback details: https://github.com/wled-dev/WLED/pull/2336#discussion_r762276994
+bool mAnimatorLight::requestJSONBufferLock(uint16_t moduleID)
 {
-  unsigned long now = millis();
-
-  // This assumption here is another http thread must release itself to permit this function to proceed
-  while (jsonBufferLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
-
-  if (millis()-now >= 1000) {
-    // DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
-    // DEBUG_PRINT(jsonBufferLock);
-    // DEBUG_PRINTLN(")");
-    return false; // waiting time-outed
+  if (tkr_mfile->pDoc == nullptr) {
+    DEBUG_PRINTLN(F("ERROR: JSON buffer not allocated!"));
+    return false;
   }
 
-  jsonBufferLock = module ? module : 255;
-  // DEBUG_PRINT(F("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOCKED    JSON buffer locked. ("));
-  // DEBUG_PRINT(jsonBufferLock);
-  // DEBUG_PRINTLN(")");
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  tkr_mfile->fileDoc = &doc;  // used for applying presets (presets.cpp)
-  doc.clear();
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+#if defined(ARDUINO_ARCH_ESP32)
+  // Use a recursive mutex type in case our task is the one holding the JSON buffer.
+  // This can happen during large JSON web transactions.  In this case, we continue immediately
+  // and then will return out below if the lock is still held.
+  if (xSemaphoreTakeRecursive(tkr_mfile->jsonBufferLockMutex, 250) == pdFALSE) return false;  // timed out waiting
+#elif defined(ARDUINO_ARCH_ESP8266)
+  // If we're in system context, delay() won't return control to the user context, so there's
+  // no point in waiting.
+  if (can_yield()) {
+    unsigned long now = millis();
+    while (jsonBufferLock && (millis()-now < 250)) delay(1); // wait for fraction for buffer lock
+  }
+#else
+  #error Unsupported task framework - fix requestJSONBufferLock
+#endif  
+  // If the lock is still held - by us, or by another task
+  if (jsonBufferLock) {
+    DEBUG_PRINTF_P(PSTR("ERROR: Locking JSON buffer (%d) failed! (still locked by %d)\n"), moduleID, jsonBufferLock);
+#ifdef ARDUINO_ARCH_ESP32
+    xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
+#endif
+    return false;
+  }
+
+  jsonBufferLock = moduleID ? moduleID : 255;
+  DEBUG_PRINTF_P(PSTR("JSON buffer locked. (%d)\n"), jsonBufferLock);
+  tkr_mfile->pDoc->clear();
   return true;
 }
 
-void mAnimatorLight::releaseJSONBufferLock()
+
+// void mAnimatorLight::releaseJSONBufferLock()
+// {
+//   // DEBUG_PRINT(F("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNLOCKED JSON buffer released. ("));
+//   // DEBUG_PRINT(jsonBufferLock);
+//   // DEBUG_PRINTLN(")");
+//   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   tkr_mfile->gDoc = nullptr;
+//   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   jsonBufferLock = 0;
+// }
+
+void  mAnimatorLight::releaseJSONBufferLock()
 {
-  // DEBUG_PRINT(F("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNLOCKED JSON buffer released. ("));
-  // DEBUG_PRINT(jsonBufferLock);
-  // DEBUG_PRINTLN(")");
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  tkr_mfile->fileDoc = nullptr;
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  DEBUG_PRINTF_P(PSTR("JSON buffer released. (%d)\n"), jsonBufferLock);
   jsonBufferLock = 0;
+#ifdef ARDUINO_ARCH_ESP32
+  xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
+#endif  
 }
 
 
@@ -408,7 +455,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root["ip"] = s;
 }
 
-// deserializes WLED state (fileDoc points to doc object if called from web server)
+// deserializes WLED state (gDoc points to doc object if called from web server)
 // presetId is non-0 if called from handlePreset()
 bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte presetId)
 {
@@ -2812,6 +2859,30 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 
 #endif
 
+// Global buffer locking response helper class (to make sure lock is released when AsyncJsonResponse is destroyed)
+class LockedJsonResponse: public AsyncJsonResponse {
+  bool _holding_lock;
+  public:
+  // WARNING: constructor assumes requestJSONBufferLock() was successfully acquired externally/prior to constructing the instance
+  // Not a good practice with C++. Unfortunately AsyncJsonResponse only has 2 constructors - for dynamic buffer or existing buffer,
+  // with existing buffer it clears its content during construction
+  // if the lock was not acquired (using JSONBufferGuard class) previous implementation still cleared existing buffer
+  inline LockedJsonResponse(JsonDocument* doc, bool isArray) : AsyncJsonResponse(doc, isArray), _holding_lock(true) {};
+
+  virtual size_t _fillBuffer(uint8_t *buf, size_t maxLen) { 
+    size_t result = AsyncJsonResponse::_fillBuffer(buf, maxLen);
+    // Release lock as soon as we're done filling content
+    if (((result + _sentLength) >= (_contentLength)) && _holding_lock) {
+      tkr_anim->releaseJSONBufferLock();
+      _holding_lock = false;
+    }
+    return result;
+  }
+
+  // destructor will remove JSON buffer lock when response is destroyed in AsyncWebServer
+  virtual ~LockedJsonResponse() { if (_holding_lock) tkr_anim->releaseJSONBufferLock(); };
+};
+
 
 void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
 {
@@ -2938,7 +3009,13 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     return;
   }
 
-  AsyncJsonResponse *response = new AsyncJsonResponse(&doc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+
+  // releaseJSONBufferLock() will be called when "response" is destroyed (from AsyncWebServer)
+  // make sure you delete "response" if no "request->send(response);" is made
+  LockedJsonResponse *response = new LockedJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+
+
 
   JsonVariant lDoc = response->getRoot();
 
@@ -3341,8 +3418,8 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
       #endif
 
-    DeserializationError error = deserializeJson(doc, (uint8_t*)(request->_tempObject));
-    JsonObject root = doc.as<JsonObject>();
+    DeserializationError error = deserializeJson(*tkr_mfile->pDoc, (uint8_t*)(request->_tempObject));
+    JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
     if (error || root.isNull()) {
       this->releaseJSONBufferLock();
       request->send(400, "application/json", F("{\"error\":9}")); // ERR_JSON

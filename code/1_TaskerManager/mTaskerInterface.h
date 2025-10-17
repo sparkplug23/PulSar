@@ -19,6 +19,7 @@ class mTaskerInterface
 
     mTaskerInterface(){};
     virtual int8_t Tasker(uint8_t function, JsonParserObject obj);
+    virtual int8_t Tasker_DevCode(uint8_t function, JsonParserObject obj) { return 0; } // optional per module place to test development code. It will be in its own file "DevCode.cpp"
     virtual PGM_P GetModuleName();
     virtual uint16_t GetModuleUniqueID();
     

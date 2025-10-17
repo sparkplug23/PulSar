@@ -78,14 +78,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEB SECTION * 
-    *******************/   
-    case TASK_WEB_ADD_HANDLER:    
-      #ifdef USE_MODULE_NETWORK_WEBSERVER
-      // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
-      #endif
-    break;
 
   } // end switch
 
@@ -1504,6 +1496,89 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
 #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
 
 
+#ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+uint8_t mInterfaceLight::ConstructJSON_Debug__PowerProfiles(uint8_t json_level, bool json_appending)
+{
+  
+  JBI->Start();
+
+  // --- Active profile ---
+  char name_buf[64];
+  uint8_t active_idx = (g_led_profile_active_index < kLEDProfileCount) ? g_led_profile_active_index : 0;
+  tkr_sup->GetTextIndexed_P(name_buf, sizeof(name_buf), active_idx, kLEDProfileNames);
+
+  JBI->Object_Start("Active");
+    JBI->Add("Index", active_idx);
+    JBI->Add("Name",  name_buf);
+  JBI->Object_End();
+
+  // --- List of names ---
+  JBI->Array_Start("List");
+  for (uint8_t i = 0; i < kLEDProfileCount; i++) {
+    tkr_sup->GetTextIndexed_P(name_buf, sizeof(name_buf), i, kLEDProfileNames);
+    JBI->Add(name_buf);
+  }
+  JBI->Array_End();
+
+  // kLEDProfileCount= 2;
+
+  // --- Full Profiles ---
+  JBI->Array_Start("Profiles");
+  for (uint8_t i = 0; i < kLEDProfileCount; i++) {
+    const LEDCurrentRequirements* p_prog =
+      reinterpret_cast<const LEDCurrentRequirements*>(pgm_read_ptr(&g_led_profile_table[i]));
+
+    LEDCurrentRequirements prof{};
+    memcpy_P(&prof, p_prog, sizeof(prof));
+
+    tkr_sup->GetTextIndexed_P(name_buf, sizeof(name_buf), i, kLEDProfileNames);
+
+    JBI->Object_Start();
+      JBI->Add("Index", i);
+      JBI->Add("Name",  name_buf);
+
+      JBI->Add("supply_v",             prof.supply_v);
+      JBI->Add("rated_len_px",         (uint32_t)prof.rated_len_px);
+      JBI->Add("I_idle_mA",            (uint32_t)prof.I_idle_mA);
+      JBI->Add("I_standby", (uint32_t)prof.I_standby_mA_per_led);
+
+      // k_mA_per100 (5)
+      // JBI->Array_Start("k_mA_per100");
+      //   JBI->Add((uint32_t)prof.k_mA_per100[0]);
+      //   JBI->Add((uint32_t)prof.k_mA_per100[1]);
+      //   JBI->Add((uint32_t)prof.k_mA_per100[2]);
+      //   JBI->Add((uint32_t)prof.k_mA_per100[3]);
+      //   JBI->Add((uint32_t)prof.k_mA_per100[4]);
+      // JBI->Array_End();
+
+      JBI->Add("k_full_mA_per100", (uint32_t)prof.k_full_mA_per100);
+
+      // I_1ch_mA (4)
+      // JBI->Array_Start("I_1ch_mA");
+      //   JBI->Add((uint32_t)prof.I_1ch_mA[0]);
+      //   JBI->Add((uint32_t)prof.I_1ch_mA[1]);
+      //   JBI->Add((uint32_t)prof.I_1ch_mA[2]);
+      //   JBI->Add((uint32_t)prof.I_1ch_mA[3]);
+      // JBI->Array_End();
+
+      // I_full_mA (4)
+      JBI->Array_Start("I_full_mA");
+        JBI->Add((uint32_t)prof.I_full_mA[0]);
+        JBI->Add((uint32_t)prof.I_full_mA[1]);
+        JBI->Add((uint32_t)prof.I_full_mA[2]);
+        JBI->Add((uint32_t)prof.I_full_mA[3]);
+      JBI->Array_End();
+
+      JBI->Add("alpha_permille", (uint32_t)prof.alpha_permille);
+    JBI->Object_End();
+  }
+  JBI->Array_End(); // Profiles
+
+  return JBI->End();
+}
+#endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
 /******************************************************************************************************************
  * mInterfaceLight_MQTT.cpp
 *******************************************************************************************************************/
@@ -1565,6 +1640,20 @@ void mInterfaceLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
+  
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+  ptr = &mqtthandler__debug_power_profiles__teleperiod;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_POWER_PROFILES__CTR;
+  ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug__PowerProfiles;
+  mqtthandler_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
 
 } 
 
@@ -1600,15 +1689,6 @@ void mInterfaceLight::MQTTHandler_Sender()
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
-  
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-#ifdef ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
-void mInterfaceLight::MQTTHandler_AddWebURL_PayloadRequests()
-{    
-  CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests();
-}
-#endif // ENABLE_FEATURE_MQTT__ADD_WEBURL_FOR_PAYLOAD_REQUESTS
-#endif // USE_MODULE_NETWORK_WEBSERVER
 
 #endif// USE_MODULE_NETWORK_MQTT
 

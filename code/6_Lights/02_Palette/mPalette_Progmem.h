@@ -25,6 +25,8 @@
 
 #include "internal/mPalette_Encoding_Options.h"
 
+// #include "6_Lights\00_Interface\FastLED\colorpalettes.h"
+
 
 #define ELEVATION_DAY_THRESHOLD 10
 #define ELEVATION_NIGHT_THRESHOLD -10
@@ -593,7 +595,7 @@ DEF_PGM_UINT8(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_10__DATA)
 
 
 #ifndef D_PALETTE_OCEAN_01_NAME_CTR
-#define D_PALETTE_OCEAN_01_NAME_CTR        "Ocean"   
+#define D_PALETTE_OCEAN_01_NAME_CTR        "Ocean Green"   
 #endif
 #define D_PALETTE_OCEAN_01_ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
 DEF_PGM_UINT8(PM_PALETTE_OCEAN_01__DATA)
@@ -605,7 +607,7 @@ DEF_PGM_UINT8(PM_PALETTE_OCEAN_01__DATA)
 };
 
 #ifndef D_PALETTE_RAINBOW_NAME_CTR
-#define D_PALETTE_RAINBOW_NAME_CTR        "Rainbow"   
+#define D_PALETTE_RAINBOW_NAME_CTR        "Rainbow 2"   
 #endif          
 #define D_PALETTE_RAINBOW_ENCODING                (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
 DEF_PGM_UINT8(PM_PALETTE_RAINBOW__DATA)
@@ -1378,14 +1380,39 @@ DEF_PGM_UINT8(PM_PALETTE_PASTEL_05__DATA)
 DEF_PGM_UINT8(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE__DATA)
 { // grad range 0-255, R,G,B
     0,   224, 187, 228,   // Soft lavender
-   16,   224, 140, 228,   // Slightly deeper
-   32,   224,  40, 228,   // Pinkish violet
-   64,   160,  30, 160,   // Muted plum
-   96,   100,  20, 100,   // Dusty purple
-  127,   200,  20, 180,   // Pastel magenta
-  160,   230,  25, 190,   // Lightened again
-  200,   250,  25, 194,   // Near-white purple
-  255,   255, 210, 230    // Softest fade to pastel lilac-pink
+  //  16,   224, 140, 228,   // Slightly deeper
+  //  32,   224,  40, 228,   // Pinkish violet
+  //  64,   160,  30, 160,   // Muted plum
+  //  96,   100,  20, 100,   // Dusty purple
+  // 127,   200,  20, 180,   // Pastel magenta
+  // 160,   230,  25, 190,   // Lightened again
+  200,   D_RGB_PURPLE_DARKER   // Near-white purple
+  255,   D_RGB_PURPLE_DARKER    // Softest fade to pastel lilac-pink
+
+  
+  // D_RGB_RED_FULL
+  // D_RGB_GREEN_FADED_3
+  // D_RGB_PINK_ALT_1
+  // D_RGB_BLUE_FADED_3
+  // D_RGB_ORANGE_FULL       
+  // D_RGB_GREEN_PASTEL_FADED_1
+  // D_RGB_CYAN_FADED_4
+  // D_RGB_PINK_ALT_2
+  // D_RGB_RED_PASTEL_1
+  // D_RGB_ORANGE_WARM_1
+  // D_RGB_YELLOW_WARM_2
+  // D_RGB_RED_ALT_1
+  // D_RGB_GREEN_FADED_3
+  // D_RGB_PINK_ALT_1
+  // D_RGB_BLUE_FADED_3
+  // D_RGB_GREEN_PASTEL_FADED_1
+  // D_RGB_PINK_FADED_1
+  // D_RGB_CYAN_FADED_4
+  // D_RGB_RED_PASTEL_1
+  // D_RGB_ORANGE_WARM_1
+  // D_RGB_PURPLE_DARKER
+  // D_RGB_PINK_FADED_2
+  // D_RGB_CYAN_FADED_4
 };
 
 
@@ -2706,6 +2733,7 @@ const byte pink_white_purple_blend[] PROGMEM = {
     255, 255,0,255  // Pink
   };
 
+  
 
 
 // Single array of defined cpt-city color palettes.
@@ -2875,7 +2903,7 @@ DEFINE_PGM_CTR(PM_DYNAMIC_PALETTES_NAMES_CTR)
 
 DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_NAMES_CTR)
 {
-  "Rainbow 16|Cloud 16|Lava 16|Ocean 16|Forest 16|Rainbow Stripe 16|Party 16|Heat 16|Parula 16|Turbo 16|Hot 16|Cool 16|Spring 16|Autumn 16|Jet 16" // Name are not unique here!
+  "Rainbow|Rainbow Stripe|Party|Cloud|Lava|Ocean|Forest|Heat|Parula|Turbo|Hot|Cool|Spring|Autumn|Jet" // Name are not unique here!
 };
 
 
@@ -2883,7 +2911,7 @@ DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR)
 {
   "Sunset|Rivendell|Ocean Breeze|Red & Blue|Yellowout|Analogous|Pink Splash|Sunset Yellow|Sunset 2|Beech|"
   "Vintage|Departure|Landscape|Beach|Sherbet|Hult|Hult 64|Drywet|Jul|Grintage|"
-  "Rewhi|Tertiary|Lava Fire|Icefire|Cyane|Light Pink|Autumn 16|Magenta|Magred|Yelmag|"
+  "Rewhi|Tertiary|Lava Fire|Icefire|Cyane|Light Pink|Autumn Hot|Magenta|Magred|Yelmag|"
   "Yelblu|Orange & Teal|Tiamat|April Night|Orangery|Sakura|Aurora|Atlantica|Temperature|Aurora 2|"
   "Retro Clown|Candy|Toxy Reaf|Fairy Reaf|Semi Blue|Pink Candy|Red Reaf|Aqua Flash|Yelblu Hot|Lite Light|"
   "Red Flash|Blink Red|Red Shift|Candy2|Pink Purple Grad|Pink White Purple Grad"

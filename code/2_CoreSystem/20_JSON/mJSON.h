@@ -115,7 +115,7 @@ class JsonBuilder{
       DEBUG_PRINT(locked_by_module_unique_id);
       DEBUG_PRINTLN(")");
 
-      // fileDoc = &doc;  // used for applying presets (presets.cpp)
+      // gDoc = &doc;  // used for applying presets (presets.cpp)
       // doc.clear();
 
       return true;

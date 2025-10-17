@@ -1,4 +1,4 @@
-#include "6_Lights/03_Animator/mAnimatorLight.h"
+#include "6_Lights/03_Animator/_AnimatorLight.h"
 
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR_OUTSIDE
 

@@ -1,16 +1,11 @@
-#include "mAnimatorLight.h"
-
+#include "_AnimatorLight.h"
 
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
 /*
  * Methods to handle saving and loading presets to/from the filesystem
-
-
-
- I want to serialise the preset file and send over mqtt anytime it changes as debug
-
+ * TODO:I want to serialise the preset file and send over mqtt anytime it changes as debug
  */
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -31,11 +26,6 @@ static const char tmp_json[] PROGMEM = "/tmp.json";
 const char *mAnimatorLight::getPresetsFileName(bool persistent) {
   return persistent ? presets_json : tmp_json;
 }
-const char *mAnimatorLight::getFileName(bool persist) 
-{
-  return persist ? "/presets.json" : "/tmp.json";
-}
-
 
 
 void mAnimatorLight::doSaveState() 
@@ -50,67 +40,32 @@ void mAnimatorLight::doSaveState()
   while (isUpdating() && millis()-start < (2*FRAMETIME)+1) yield(); // wait 2 frames
 
   bool persist = (presetToSave < 251);
-  const char *filename = getFileName(persist);
+  const char *filename = getPresetsFileName(persist);
   
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
-
-  if (!requestJSONBufferLock(10)) return; // will set fileDoc
+  if (!requestJSONBufferLock(10)) return; // will set gDoc
 
   initPresetsFile(); // just in case if someone deleted presets.json using /edit
 
-  JsonObject sObj = doc.to<JsonObject>();
-
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  JsonObject sObj = tkr_mfile->pDoc->to<JsonObject>(); //needs done
 
   DEBUG_PRINTLN(F("Serialize current state"));
-  
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
-  
+    
   if (playlistSave) 
   {
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
     #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
     serializePlaylist(sObj);
     #endif
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
     if (includeBri) sObj["on"] = true;
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
   } 
   else 
   {
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
     serializeState(sObj, true, includeBri, segBounds, selectedOnly);
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
   }
-  
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
 
   sObj["n"] = saveName;
   if (quickLoad[0]) sObj[F("ql")] = quickLoad;
@@ -127,28 +82,12 @@ void mAnimatorLight::doSaveState()
   if (!persist) 
   {
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
     if (tmpRAMbuffer!=nullptr) free(tmpRAMbuffer);
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
-    size_t len = measureJson(*tkr_mfile->fileDoc) + 1;
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
+    size_t len = measureJson(*tkr_mfile->pDoc) + 1;
 
     ALOG_INF(PSTR("JSON Len=%d"),len);
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
     // if possible use SPI RAM on ESP32
     #if defined(BOARD_HAS_PSRAM) && defined(WLED_USE_PSRAM)
     if (psramFound())
@@ -156,77 +95,40 @@ void mAnimatorLight::doSaveState()
     else
     #endif
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
     tmpRAMbuffer = (char*) malloc(len);
- 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-    
+     
     if (tmpRAMbuffer!=nullptr) 
     {
-  
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
+        
+      serializeJson(*tkr_mfile->pDoc, tmpRAMbuffer, len);
       
-      serializeJson(*tkr_mfile->fileDoc, tmpRAMbuffer, len);
-  
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
-    
     }
     else
     {
   
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
-
-      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->fileDoc);
+      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->pDoc);
   
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
     }
   } 
   else
   {
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-
-    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->fileDoc);
-  
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
+    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->pDoc);
   
   }
   #endif
 
   if (persist) tkr_mfile->presetsModifiedTime = toki.second(); //unix time
   
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
   releaseJSONBufferLock();
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
   tkr_mfile->updateFSInfo();
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
   // clean up
   saveLedmap   = -1;
@@ -248,9 +150,9 @@ bool mAnimatorLight::getPresetName(byte index, String& name)
 
   if (!requestJSONBufferLock(9)) return false;
   bool presetExists = false;
-  if (tkr_mfile->readObjectFromFileUsingId(getFileName(), index, &doc))
+  if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), index, tkr_mfile->pDoc))
   {
-    JsonObject fdo = doc.as<JsonObject>();
+    JsonObject fdo = tkr_mfile->pDoc->as<JsonObject>();
     if (fdo["n"]) {
       name = (const char*)(fdo["n"]);
       presetExists = true;
@@ -282,7 +184,7 @@ void mAnimatorLight::initPresetsFile()
   StaticJsonDocument<64> doc;
   JsonObject sObj = doc.to<JsonObject>();
   sObj.createNestedObject("0");
-  File f = FILE_SYSTEM.open(getFileName(), "w");
+  File f = FILE_SYSTEM.open(getPresetsFileName(), "w");
   
   ALOG_INF(PSTR("initPresetsFile() -- creating init file"));
 
@@ -328,70 +230,61 @@ void mAnimatorLight::SubTask_Presets()
     return;
   }
 
-  if (presetToApply == 0 || tkr_mfile->fileDoc)
+  if (presetToApply == 0 || !requestJSONBufferLock(9))
   {
-    // ALOG_INF(PSTR("(presetToApply == 0 || fileDoc)()"));    
+    // ALOG_INF(PSTR("(presetToApply == 0 || gDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
   }
 
   ALOG_INF(PSTR("mAnimatorLight::SubTask_Presets presetToApply %d"), presetToApply);
 
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
   bool changePreset = false;
   uint8_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
   uint8_t tmpMode   = callModeToApply;
  
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
   JsonObject fdo;
-  const char *filename = getFileName(tmpPreset < 255);
+  const char *filename = getPresetsFileName(tmpPreset < 255);
 
   // allocate buffer
-  if (!requestJSONBufferLock(9)) return;  // will also assign fileDoc
+  if (!requestJSONBufferLock(9)) return;  // will also assign gDoc
 
   presetToApply = 0; //clear request for preset
   callModeToApply = 0;
 
   ALOG_INF(PSTR("Applying preset:%d"), tmpPreset);
 
+  #if defined(ARDUINO_ARCH_ESP32S2) || defined(ARDUINO_ARCH_ESP32C3)
+  unsigned long maxWait = millis() + tkr_lAni->getFrameTime();
+  while (tkr_lAni->isUpdating() && millis() < maxWait) delay(1); // wait for strip to finish updating, accessing FS during sendout causes glitches
+  #endif
+
   #ifdef ARDUINO_ARCH_ESP32
   if (tmpPreset==255 && tmpRAMbuffer!=nullptr) 
   { 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
-    deserializeJson(*tkr_mfile->fileDoc,tmpRAMbuffer);
+    deserializeJson(*tkr_mfile->pDoc,tmpRAMbuffer);
     tkr_mfile->errorFlag = ERR_NONE;
   } 
   else
   #endif
   { 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
 
-    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_mfile->fileDoc) ? ERR_NONE : ERR_FS_PLOAD;
+    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_mfile->pDoc) ? ERR_NONE : ERR_FS_PLOAD;
 
   } 
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
-  fdo = tkr_mfile->fileDoc->as<JsonObject>();
+  fdo = tkr_mfile->pDoc->as<JsonObject>();
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
-  // ALOG_HGL(PSTR("mAnimatorLight::SubTask_Presets is now being read as fileDoc and not compatable with my command structure"));
+  // ALOG_HGL(PSTR("mAnimatorLight::SubTask_Presets is now being read as gDoc and not compatable with my command structure"));
 
   // delay(4000);
 
@@ -404,7 +297,7 @@ void mAnimatorLight::SubTask_Presets()
     D_DATA_BUFFER_SOFT_CLEAR();
 
     // Serialise from ArduinoJson into buffer for parser to load
-    serializeJson(*tkr_mfile->fileDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
+    serializeJson(*tkr_mfile->pDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
 
     LoggingLevels level = LOG_LEVEL_INFO;
     #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
@@ -425,9 +318,6 @@ void mAnimatorLight::SubTask_Presets()
   const char* httpwin = fdo["win"];
   if (httpwin) { 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
 
     String apireq = "win"; // reduce flash string usage
     apireq += F("&IN&"); // internal call
@@ -442,9 +332,6 @@ void mAnimatorLight::SubTask_Presets()
   else
   { 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
 
     ALOG_INF(PSTR("Here might be what resets the segments without my commands"));
 
@@ -460,9 +347,7 @@ void mAnimatorLight::SubTask_Presets()
     presetCycCurr = currentPreset = tmpPreset;
   }
  
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
   #if defined(ARDUINO_ARCH_ESP32)
   //Aircoookie recommended not to delete buffer
@@ -472,11 +357,9 @@ void mAnimatorLight::SubTask_Presets()
   }
   #endif
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
-  releaseJSONBufferLock(); // will also clear fileDoc
+  releaseJSONBufferLock(); // will also clear gDoc
 
   if (changePreset) notify(tmpMode); // force UDP notification
 
@@ -495,7 +378,7 @@ void mAnimatorLight::SubTask_Demo()
 #endif
 
 
-//called from handleSet(PS=) [network callback (fileDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
+//called from handleSet(PS=) [network callback (gDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
 void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
 {
 
@@ -517,16 +400,11 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     strlcpy(quickLoad, sObj[F("ql")].as<const char*>(), 9); // client limits QL to 2 chars, buffer for 8 bytes to allow unicode
   } 
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
   
   if (sObj["o"].isNull()) 
   { // no "o" means not a playlist or custom API call, saving of state is async (not immediately)
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
     includeBri   = sObj["ib"].as<bool>() || index==255; // temporary preset needs brightness
     segBounds    = sObj["sb"].as<bool>() || index==255; // temporary preset needs bounds
     selectedOnly = sObj[F("sc")].as<bool>();
@@ -536,44 +414,25 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
   else 
   {
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-    DEBUG_LINE_HERE;
-    #endif
 
     // this is a playlist or API call
     if (sObj[F("playlist")].isNull()) 
     {
       // we will save API call immediately (often causes presets.json corruption)
       presetToSave = 0;
-      if (index > 250 || !tkr_mfile->fileDoc) return; // cannot save API calls to temporary preset (255)
+      if (index > 250 || !tkr_mfile->pDoc) return; // cannot save API calls to temporary preset (255)
       sObj.remove("o");
       sObj.remove("v");
       sObj.remove("time");
       sObj.remove(F("error"));
       sObj.remove(F("psave"));
       if (sObj["n"].isNull()) sObj["n"] = saveName;
-  
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
-
       initPresetsFile(); // just in case if someone deleted presets.json using /edit
-  
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
-
-      tkr_mfile->writeObjectToFileUsingId(getFileName(index<255), index, tkr_mfile->fileDoc);
+      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index<255), index, tkr_mfile->pDoc);
     
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
       
       tkr_mfile->presetsModifiedTime = toki.second(); //unix time
   
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
 
       tkr_mfile->updateFSInfo();
 
@@ -581,9 +440,6 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     else 
     {
   
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-      DEBUG_LINE_HERE;
-      #endif
 
       // store playlist
       // WARNING: playlist will be loaded in json.cpp after this call and will have repeat counter increased by 1
@@ -593,9 +449,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     }
   }
   
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  DEBUG_LINE_HERE;
-  #endif
+  
 
 }
 
@@ -603,7 +457,7 @@ void mAnimatorLight::deletePreset(byte index)
 {
 
   StaticJsonDocument<24> empty;
-  tkr_mfile->writeObjectToFileUsingId(getFileName(), index, &empty);
+  tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(), index, &empty);
   tkr_mfile->presetsModifiedTime = toki.second(); //unix time
   tkr_mfile->updateFSInfo();
 

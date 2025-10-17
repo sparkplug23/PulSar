@@ -1344,12 +1344,25 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
   //   break; 
   case TASK_WIFI_CONNECTED:
 
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
+
 
     #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
     initServer();
 
     tkr_web->server->begin();
+
+    ALOG_INF(PSTR(D_LOG_HTTP "Webserver started on http://%s.local or http://%s"), cmDNS, tkr_set->runtime.my_hostname);
 
     #endif
 // DEBUG_LINE_HERE;

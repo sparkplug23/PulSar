@@ -16,6 +16,10 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
   return 0;
   #endif
 
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+  return 0;
+  #endif
+
   switch(function){
     case TASK_INIT:
       #ifndef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
@@ -308,9 +312,14 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 {
 
 
-  ALOG_INF(PSTR("mWiFi::WifiBegin %d:%d"), flag, channel);
+  ALOG_HGL(PSTR("mWiFi::WifiBegin %d:%d"), flag, channel);
 
+  // delay(2000);
+
+  // DEBUG_LINE_HERE_PAUSE;
   pCONT->Tasker_Interface(TASK_WIFI_STARTING_CONNECTION);
+
+  ALOG_INF(PSTR(D_LOG_WIFI "mWiFi::WifiBegin TASK_WIFI_STARTING_CONNECTION over")); Serial.flush();
 
   const char kWifiPhyMode[] = " BGN";
 
@@ -346,6 +355,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
   if (!strlen(tkr_set->SettingsText(SET_STASSID1 + tkr_set->Settings.sta_active))) {
     tkr_set->Settings.sta_active ^= 1;  // Skip empty SSID
   }
+
 
 
 

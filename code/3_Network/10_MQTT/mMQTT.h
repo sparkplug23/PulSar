@@ -15,7 +15,10 @@
 // Void Arg Functions
 #define CALL_MEMBER_FUNCTION(object,ptrToMember)  ((object).*(ptrToMember))
 
-
+// Removing from per module code, this should be fully handled by iterating over the modules to get their mqtt topics, then payloads.
+// Hence, we can specify either by their name, or simply query all modules and any topics they have.
+// previous method adding url callbacks to each topic, but this can be inserted into a single callback handler. We redo process below.
+// In short, /mqtt_query/ should allow querying of any module/topic combination, and return the payload.
 #ifdef ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
 #define CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests()  \
   char uri_buffer[70] = {0};\

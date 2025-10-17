@@ -94,7 +94,8 @@ def load_input_data(filename):
 # Main execution
 if __name__ == "__main__":
     # Load input data from a JSON file
-    input_file = r"C:\pool_local\Github\PulSar\tools\python_scripts\input_data_santa_hat.json"  # Specify the input JSON file
+    # input_file = r"C:\pool_local\Github\PulSar\tools\python_scripts\input_data_santa_hat.json"  # Specify the input JSON file
+    input_file = r"U:\GitHub\PulSar\tools\python_scripts\PixelGenerate2DMaps\input_data_santa_hat.json"  # Specify the input JSON file
     input_data = load_input_data(input_file)
 
     # Generate the matrix and metadata

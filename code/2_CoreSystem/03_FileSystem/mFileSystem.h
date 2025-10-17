@@ -56,14 +56,22 @@
 // There is a code that will still not use PSRAM though:
 //    AsyncJsonResponse is a derived class that implements DynamicJsonDocument (AsyncJson-v6.h)
 #if defined(ARDUINO_ARCH_ESP32)
-extern bool psramSafe;
+// extern bool psramSafe;
 struct PSRAM_Allocator {
+  // void* allocate(size_t size) {
+  //   if (psramSafe && psramFound()) return ps_malloc(size); // use PSRAM if it exists
+  //   else                           return malloc(size);    // fallback
+  // }
+  // void* reallocate(void* ptr, size_t new_size) {
+  //   if (psramSafe && psramFound()) return ps_realloc(ptr, new_size); // use PSRAM if it exists
+  //   else                           return realloc(ptr, new_size);    // fallback
+  // }
   void* allocate(size_t size) {
-    if (psramSafe && psramFound()) return ps_malloc(size); // use PSRAM if it exists
+    if (1 && psramFound()) return ps_malloc(size); // use PSRAM if it exists
     else                           return malloc(size);    // fallback
   }
   void* reallocate(void* ptr, size_t new_size) {
-    if (psramSafe && psramFound()) return ps_realloc(ptr, new_size); // use PSRAM if it exists
+    if (1 && psramFound()) return ps_realloc(ptr, new_size); // use PSRAM if it exists
     else                           return realloc(ptr, new_size);    // fallback
   }
   void deallocate(void* pointer) {
@@ -108,6 +116,9 @@ class mFileSystem :
 {
 
   public:
+    bool psramSafe = true;         // is it safe to use PSRAM (on ESP32 rev.1; compiler fix used "-mfix-esp32-psram-cache-issue")
+
+
     mFileSystem(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
@@ -135,9 +146,6 @@ class mFileSystem :
     void SystemTask__Execute_Module_Data_Save();
 
     
-    bool psramSafe = true;         // is it safe to use PSRAM (on ESP32 rev.1; compiler fix used "-mfix-esp32-psram-cache-issue")
-
-
     /*********************************************************************************************\
     This driver adds universal file system support for
     - ESP8266 (sd card or littlefs on  > 1 M devices with special linker file e.g. eagle.flash.4m2m.ld)
@@ -234,7 +242,48 @@ class mFileSystem :
     size_t fsBytesUsed =0;
     size_t fsBytesTotal =0;
     unsigned long presetsModifiedTime =0L;
-    JsonDocument* fileDoc;
+
+    // StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
+    
+// #if defined(ARDUINO_ARCH_ESP32)
+//   // Recursive mutex like WLED
+//   SemaphoreHandle_t jsonMutex = xSemaphoreCreateRecursiveMutex();
+// #else
+//   // Non-ESP32: Static buffer + pointer
+//   StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
+// #endif
+
+// global ArduinoJson buffer
+#if defined(ARDUINO_ARCH_ESP32)
+JsonDocument *pDoc = nullptr;
+SemaphoreHandle_t jsonBufferLockMutex = xSemaphoreCreateRecursiveMutex();
+#else
+StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
+JsonDocument *pDoc = &gDoc;
+#endif
+
+
+
+
+
+    // JsonDocument* pDoc = nullptr;//&gDoc;
+
+//     #ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+//     StaticJsonDocument<JSON_BUFFER_SIZE> doc;
+//     JsonDocument *pDoc = &doc;
+//     #endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+    
+//     StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
+// WLED_GLOBAL JsonDocument *pDoc _INIT(&gDoc);
+
+// FileSystem.h (fields)
+// public:
+  // JsonDocument* pDoc = nullptr;
+void InitJsonDoc(size_t baseSize);// /* e.g., JSON_BUFFER_SIZE */)
+
+
+
+
     bool doCloseFile =false;
     byte errorFlag = 0;
 

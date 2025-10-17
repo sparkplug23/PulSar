@@ -84,6 +84,34 @@ void mFileSystem::closeFile() {
   doCloseFile = false;
 }
 
+// FileSystem.cpp
+// FileSystem.cpp
+void mFileSystem::InitJsonDoc(size_t baseSize)
+{
+// #if defined(ARDUINO_ARCH_ESP32)
+//   bool psramSafe = true;
+
+//   // Match WLED's rev1 cache-issue guard when BOARD_HAS_PSRAM isn't defined
+//   #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
+//     if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
+//   #endif
+
+//   const bool usePsram = psramSafe && psramFound();
+//   const size_t allocSize = (usePsram ? 2 : 1) * baseSize;
+
+//   if (usePsram) {
+//     pDoc = new PSRAMDynamicJsonDocument(allocSize);
+//   } else {
+//     pDoc = new DynamicJsonDocument(allocSize);
+//   }
+//   // If this fails, pDoc stays nullptr; requestJSONBufferLock() will return false.
+// #else
+//   // Non-ESP32: static doc is already a member; point to it.
+//   pDoc = &gDoc;
+// #endif
+}
+
+
 
 // find() that reads and buffers data from file stream in 256-byte blocks.
 // Significantly faster, f.find(key) can take SECONDS for multi-kB files
@@ -1055,6 +1083,46 @@ void mFileSystem::Pre_Init(){
     #ifdef USE_SDCARD
     UfsCheckSDCardInit();
     #endif // USE_SDCARD
+
+// #if defined(ARDUINO_ARCH_ESP32)
+//   bool psramSafe = true;
+
+//   // Match WLED's rev1 cache-issue guard when BOARD_HAS_PSRAM isn't defined
+//   #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
+//     if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
+//   #endif
+
+//   const bool usePsram = psramSafe && psramFound();
+//   const size_t allocSize = (usePsram ? 2 : 1) * baseSize;
+
+//   if (usePsram) {
+//     pDoc = new PSRAMDynamicJsonDocument(allocSize);
+//   } else {
+//     pDoc = new DynamicJsonDocument(allocSize);
+//   }
+//   // If this fails, pDoc stays nullptr; requestJSONBufferLock() will return false.
+// #else
+//   // Non-ESP32: static doc is already a member; point to it.
+//   pDoc = &gDoc;
+// #endif
+    // InitJsonDoc((psramSafe && psramFound() ? 2 : 1)*JSON_BUFFER_SIZE);
+
+    
+#if defined(ARDUINO_ARCH_ESP32)
+  // BOARD_HAS_PSRAM also means that a compiler flag "-mfix-esp32-psram-cache-issue" was used and so PSRAM is safe to use on rev.1 ESP32
+  #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
+  if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
+  if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
+  #endif
+  pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1)*JSON_BUFFER_SIZE);
+  DEBUG_PRINTF_P(PSTR("JSON buffer allocated: %u\n"), (psramSafe && psramFound() ? 2 : 1)*JSON_BUFFER_SIZE);
+  // if the above fails requestJsonBufferLock() will always return false preventing crashes
+  if (psramFound()) {
+    DEBUG_PRINTF_P(PSTR("PSRAM: %dkB/%dkB\n"), ESP.getFreePsram()/1024, ESP.getPsramSize()/1024);
+  }
+  // DEBUG_PRINTF_P(PSTR("TX power: %d/%d\n"), WiFi.getTxPower(), txPower);
+#endif
+
 }
 
 
