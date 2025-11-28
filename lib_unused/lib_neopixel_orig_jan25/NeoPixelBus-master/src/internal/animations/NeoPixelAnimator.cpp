@@ -122,6 +122,8 @@ void NeoPixelAnimator::StopAll()
 
 void NeoPixelAnimator::UpdateAnimations()
 {
+    
+                Serial.println("UpdateAnimations"); Serial.flush();
     if (_isRunning)
     {
         uint32_t currentTick = millis();
@@ -136,8 +138,10 @@ void NeoPixelAnimator::UpdateAnimations()
             for (uint16_t iAnim = 0; iAnim < _countAnimations; iAnim++)
             {
                 pAnim = &_animations[iAnim];
+                Serial.println("h1"); Serial.flush();
                 AnimUpdateCallback fnUpdate = pAnim->_fnCallback;
                 AnimationParam param;
+                Serial.println("h2"); Serial.flush();
                 
                 param.index = iAnim;
 

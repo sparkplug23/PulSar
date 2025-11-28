@@ -164,6 +164,7 @@
 #define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR "relay_state_ledstrip"
 #define D_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_CTR "mavlink_flying_leds"
 #define D_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_MOTION_ALERTS__CTR "light_motion_alerts"
+#define D_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE__CTR "light_radar_distance"
 
 
 /**

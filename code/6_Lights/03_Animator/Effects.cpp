@@ -2058,6 +2058,7 @@ static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM =
  * - Optionally prefetch secondary colours into a temp buffer per frame (freed before return).
  * - Brightness scaling is applied inside the effect per pixel.
  *
+ * previously? Twinkle Palette Two on One??
  * STATE
  * - aux1: evolving 16-bit seed for the spatial hash.
  **********************************************************************************************************************************************************************************/
@@ -2184,7 +2185,7 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
   return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM =
-"Twinkle Palettes@"
+"Flicker Palettes@"
 "Speed,Intensity,Twinkle Brightness,Base Brightness,,,,,!"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                                                          // segment colour names (none)
@@ -2243,7 +2244,7 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Out() {
   return EffectAnim__Twinkle_Base(/*fade_up*/false, /*show_decay*/false, /*apply_decay_blanking*/true);
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_OUT[] PROGMEM =
-"Twinkle Out@"
+"Flicker Out@"
 "Speed,Intensity,Blanking strength,,,,,,,,"      // sx, ix, c1
 ";"
 ""                                          // seg color labels (unused)
@@ -2518,7 +2519,7 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Decay() {
   return EffectAnim__Twinkle_Base(/*fade_up*/false, /*show_decay*/true, /*apply_decay_blanking*/true);
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_DECAY[] PROGMEM =
-"Twinkle Decay@"
+"Flicker Decay@"
 "Speed,Intensity,Blanking strength,,,,,,,,"      // sx, ix, c1
 ";"
 ""
@@ -2568,6 +2569,24 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
 "IX: Concurrent twinkles (1..~70% of segment)\n\r"
 "C1: Blanking strength/probability\n\r"
 "SEGCOL(1): Background blend color\n\r";
+
+/**
+ * @brief With the above or by other means
+ * 
+ * P+ Pop ON, then fade off
+ * P+ Fade on, then fade off
+ * P+ Pop Cycle (Amount to pop on, then off should be in sine wave)
+ * 
+ * Twinkle Smooth, is closer to pops
+ * 
+ * Twinkle smooth = fade on, then off
+ * Twinkle Spark = instant on, then fade off
+ * Twinkle rise, unknown, but in same as the above
+ * 
+ * 
+ * Twinkle=flickers, Pops=Graduals
+ */
+
 
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC  SECITON END ////////////////////////////////////////////////////////
@@ -9298,73 +9317,162 @@ static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM =
  *
  * @note        : Converted from WLED Effects "mode_percent".
  *******************************************************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Percent()
+// {
+// 	unsigned percent = SEGMENT.intensity;
+//   percent = constrain(percent, 0, 200);
+//   unsigned active_leds = (percent < 100) ? roundf(SEGLEN * percent / 100.0f)
+//                                          : roundf(SEGLEN * (200 - percent) / 100.0f);
+
+//   unsigned size = (1 + ((SEGMENT.speed * SEGLEN) >> 11));
+//   if (SEGMENT.speed == 255) size = 255;
+
+//   if (percent <= 100) {
+//     for (unsigned i = 0; i < SEGLEN; i++) {
+//     	if (i < SEGMENT.aux1) {
+//         if (SEGMENT.check1)
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(map(percent,0,100,0,255), false, false, 0));
+//         else
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//     	}
+//     	else {
+//         SEGMENT.setPixelColor(i, SEGCOLOR(1));
+//     	}
+//     }
+//   } else {
+//     for (unsigned i = 0; i < SEGLEN; i++) {
+//     	if (i < (SEGLEN - SEGMENT.aux1)) {
+//         SEGMENT.setPixelColor(i, SEGCOLOR(1));
+//     	}
+//     	else {
+//         if (SEGMENT.check1)
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(map(percent,100,200,255,0), false, false, 0));
+//         else
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//     	}
+//     }
+//   }
+
+//   if(active_leds > SEGMENT.aux1) {  // smooth transition to the target value
+//     SEGMENT.aux1 += size;
+//     if (SEGMENT.aux1 > active_leds) SEGMENT.aux1 = active_leds;
+//   } else if (active_leds < SEGMENT.aux1) {
+//     if (SEGMENT.aux1 > size) SEGMENT.aux1 -= size; else SEGMENT.aux1 = 0;
+//     if (SEGMENT.aux1 < active_leds) SEGMENT.aux1 = active_leds;
+//   }
+
+//  	return FRAMETIME;
+// }
+// static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM =
+// "Percent@"                                    // Name
+// "Speed,% of fill,,,,One color,,,,,"           // 10 fields
+// ";"
+// "Bg"                                          // segment colour labels (SEGCOLOR1 = background)
+// ";"
+// "!"                                           // palette picker
+// ";"
+// "1"                                           // 1D icon
+// ";"
+// "paln=Party,"                                 // defaults
+// "sx=64,"                                      // smoothing rate
+// "ix=50,"                                      // 50%
+// "c1=0"                                        // one-color off
+// ;
+// static const char PM_EFFECT_DESCRI__PERCENT[] PROGMEM =
+// "Percentage gauge: fills up to 100%, then empties toward 200%.\n\r"
+// "SX: Smoothing step (higher = faster)\n\r"
+// "IX: Percent (0–100 fill, 100–200 unfill)\n\r"
+// "C1: One color (derive hue from percent)\n\r"
+// "SEGCOLOR(1) is the background.";
+
+/*******************************************************************************************************************************************************************************************************************
+ * Percent — custom3 selects interpretation of intensity:
+ *   - custom3=1 (Percent mode): intensity = 0..100 (%) → target LEDs = round(SEGLEN * intensity/100)
+ *   - custom3=0 (Scale mode)  : intensity = 0..255     → target LEDs = round(SEGLEN * intensity/255)
+ * Overlay (custom2): if ON, do not draw background; only draw lit band.
+ * One color (custom1): lit band uses a single palette index derived from current fill; else per-LED palette indexing.
+ *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Percent()
 {
-	unsigned percent = SEGMENT.intensity;
-  percent = constrain(percent, 0, 200);
-  unsigned active_leds = (percent < 100) ? roundf(SEGLEN * percent / 100.0f)
-                                         : roundf(SEGLEN * (200 - percent) / 100.0f);
+  // Toggles
+  const bool one_color    = SEGMENT.check1; // C1
+  const bool overlay      = SEGMENT.check2; // C2 (overlay)
+  const bool percent_mode = SEGMENT.check3; // C3 (intensity as %)
 
-  unsigned size = (1 + ((SEGMENT.speed * SEGLEN) >> 11));
+  // Map intensity to target lit length
+  uint16_t inten = SEGMENT.intensity;
+  uint16_t target_leds;
+  if (percent_mode) {
+    // 0..100% (clamped)
+    if (inten > 100) inten = 100;
+    target_leds = (uint16_t)roundf(SEGLEN * (inten / 100.0f));
+  } else {
+    // 0..255 scaled to 0..SEGLEN
+    target_leds = (uint16_t)((((uint32_t)inten * (uint32_t)SEGLEN) + 127u) / 255u); // rounded
+  }
+  if (target_leds > SEGLEN) target_leds = SEGLEN;
+
+  // Easing step from SX (speed)
+  unsigned size = (1u + ((SEGMENT.speed * SEGLEN) >> 11));
   if (SEGMENT.speed == 255) size = 255;
 
-  if (percent <= 100) {
-    for (unsigned i = 0; i < SEGLEN; i++) {
-    	if (i < SEGMENT.aux1) {
-        if (SEGMENT.check1)
-          SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(map(percent,0,100,0,255), false, false, 0));
-        else
-          SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-    	}
-    	else {
-        SEGMENT.setPixelColor(i, SEGCOLOR(1));
-    	}
-    }
-  } else {
-    for (unsigned i = 0; i < SEGLEN; i++) {
-    	if (i < (SEGLEN - SEGMENT.aux1)) {
-        SEGMENT.setPixelColor(i, SEGCOLOR(1));
-    	}
-    	else {
-        if (SEGMENT.check1)
-          SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(map(percent,100,200,255,0), false, false, 0));
-        else
-          SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-    	}
+  // Precompute palette index for "one color" mode from current target fill (0..255)
+  uint8_t one_idx = 0;
+  if (one_color) {
+    one_idx = (SEGLEN > 0) ? (uint8_t)((uint32_t)target_leds * 255u / (uint32_t)SEGLEN) : 0u;
+  }
+
+  // Draw: simple left->right fill up to aux1
+  for (uint16_t i = 0; i < SEGLEN; i++) {
+    if (i < SEGMENT.aux1) {
+      if (one_color)
+        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(one_idx, false, false, 0));
+      else
+        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    } else {
+      if (!overlay) SEGMENT.setPixelColor(i, SEGCOLOR(1));
     }
   }
 
-  if(active_leds > SEGMENT.aux1) {  // smooth transition to the target value
-    SEGMENT.aux1 += size;
-    if (SEGMENT.aux1 > active_leds) SEGMENT.aux1 = active_leds;
-  } else if (active_leds < SEGMENT.aux1) {
-    if (SEGMENT.aux1 > size) SEGMENT.aux1 -= size; else SEGMENT.aux1 = 0;
-    if (SEGMENT.aux1 < active_leds) SEGMENT.aux1 = active_leds;
+  // Ease aux1 toward target_leds
+  if (target_leds > SEGMENT.aux1) {
+    uint16_t next = SEGMENT.aux1 + size;
+    SEGMENT.aux1 = (next > target_leds) ? target_leds : next;
+  } else if (target_leds < SEGMENT.aux1) {
+    SEGMENT.aux1 = (SEGMENT.aux1 > size) ? (SEGMENT.aux1 - size) : 0u;
+    if (SEGMENT.aux1 < target_leds) SEGMENT.aux1 = target_leds;
   }
 
- 	return FRAMETIME;
+  return FRAMETIME;
 }
 static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM =
-"Percent@"                                    // Name
-"Speed,% of fill,,,,One color,,,,,"           // 10 fields
+"Percent@"
+"Speed,% of fill,,,,One color,Overlay,Percent mode,"   // labels (C1, C2, C3 at the end)
 ";"
-"Bg"                                          // segment colour labels (SEGCOLOR1 = background)
+",Bg"
 ";"
-"!"                                           // palette picker
+"!"
 ";"
-"1"                                           // 1D icon
+"1"
 ";"
-"paln=Party,"                                 // defaults
-"sx=64,"                                      // smoothing rate
-"ix=50,"                                      // 50%
-"c1=0"                                        // one-color off
+"paln=Party,"
+"sx=64,"
+"ix=50,"         // default knob; in Percent mode this is 50%
+"c1=0,"          // One color OFF
+"c2=0,"          // Overlay OFF
+"c3=0,"           // Percent mode OFF (default = scale mode)
+"s1=0"
 ;
+
 static const char PM_EFFECT_DESCRI__PERCENT[] PROGMEM =
-"Percentage gauge: fills up to 100%, then empties toward 200%.\n\r"
-"SX: Smoothing step (higher = faster)\n\r"
-"IX: Percent (0–100 fill, 100–200 unfill)\n\r"
-"C1: One color (derive hue from percent)\n\r"
-"SEGCOLOR(1) is the background.";
+"Fill gauge (left->right).\n\r"
+"SX: Smoothing step (higher=faster)\n\r"
+"IX: Intensity — if Percent mode ON: 0–100%%; else 0–255 scale\n\r"
+"C1: One color (single palette index from fill)\n\r"
+"C2: Overlay (don’t draw background)\n\r"
+"C3: Percent mode (use intensity as 0–100%%)\n\r"
+"SEGCOLOR(1) is background when overlay is OFF.";
+
 
 
 /********************************************************************************************************************************************************************************************************************

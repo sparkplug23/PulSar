@@ -368,12 +368,28 @@ class PolyBus
     
     static uint8_t _bri_rgb;
 
+    #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+    static uint16_t reduced_physical_render_length;  // 0 = disabled
+    static uint16_t total_virtual_length;  // 0 = disabled
+    static inline uint16_t MapToReduced(uint16_t pix) 
+    {
+      if (reduced_physical_render_length > 0) {
+        return pix = (uint16_t)((uint32_t)pix * reduced_physical_render_length / total_virtual_length);
+      }
+    }
+    #endif
 
   public:
   
     static inline void useParallelOutput(bool b = true) { useParallelI2S = b; }
     static inline bool isParallelOutput(void) { return useParallelI2S; }
     static inline void setRequiredChannels(uint8_t channels){ required_channels = channels; }
+
+    #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+    static inline void SetReducedPhysicalRenderLength(uint16_t n) { reduced_physical_render_length = n; }
+    #endif
+
+
 
     // inline static uint8_t _elementDim(uint8_t value, uint8_t ratio)
     // {
@@ -434,6 +450,10 @@ class PolyBus
   {
     #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     DEBUG_PRINTF("PolyBus::create busType %d, pin[0] %d, len %d, channel %d\n\r", busType, pins[0], len, channel);
+    #endif
+        
+    #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+      total_virtual_length = len;  // whatever variable holds total LED count
     #endif
     
     void* busPtr = nullptr;
@@ -608,9 +628,10 @@ class PolyBus
     // #endif
 
     // Debug feature to map a large number of virtual pixels to a smaller physical display
-    #ifdef ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS
-    pix = pix % ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS; // Map to fewer pixels
+    #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+      pix = MapToReduced(pix);
     #endif
+
 
     RgbwwColor col = c;
 
@@ -754,10 +775,10 @@ static RgbwwColor getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uin
 
   RgbwwColor col;
 
-  #ifdef ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS
-  // Modulo operation for debugging larger pixel counts on a smaller display
-  pix = pix % ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS; // Map to fewer physical pixels
-  #endif
+#ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+  pix = MapToReduced(pix);
+#endif
+
 
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
@@ -868,9 +889,9 @@ static RgbwwColor getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uin
      * index transmit 0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 .... 4 4 4 4 4 // hence bus timing is accurate, but virtually its condensed
      */
     // Debug feature to map a large number of virtual pixels to a smaller physical display
-    #ifdef ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS
-    pix = pix % ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS; // Map to fewer pixels
-    #endif
+#ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+  pix = MapToReduced(pix);
+#endif
 
     uint8_t r = c >> 16;
     uint8_t g = c >> 8;
@@ -972,10 +993,17 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
 {
   RgbwColor col(0,0,0,0);
 
-  #ifdef ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS
-  // Modulo operation for debugging larger pixel counts on a smaller display
-  pix = pix % ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS; // Map to fewer physical pixels
+  // #ifdef ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS
+  // // Modulo operation for debugging larger pixel counts on a smaller display
+  // pix = pix % ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS; // Map to fewer physical pixels
+  // #endif
+
+  #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+    pix = MapToReduced(pix);
   #endif
+
+
+
 
     switch (busType) {
       case BUSTYPE__NONE__ID: break;

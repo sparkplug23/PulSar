@@ -647,7 +647,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
 
-  // stateUpdated(callMode);
+  stateUpdated(callMode);
   if (presetToRestore) currentPreset = presetToRestore;
   
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -1255,7 +1255,7 @@ void mAnimatorLight::sappend(char stype, const char* key, int val)
 bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 {
 
-  ALOG_INF(PSTR("================deserializeSegment"));
+  // ALOG_INF(PSTR("================deserializeSegment"));
 
   byte id = elem["id"] | it;
   if (id >= getMaxSegments())
@@ -1374,7 +1374,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
     // if (segbri > 0) seg.setOpacity(segbri);
     // seg.setOption(SEG_OPTION_ON, segbri); // use transition
-    ALOG_INF(PSTR("USing the opacity as RGB, but need to decide where to use later"));
+    // ALOG_INF(PSTR("USing the opacity as RGB, but need to decide where to use later"));
     seg.setBrightnessRGB(segbri);
     seg.setBrightnessCCT(segbri);
   }
@@ -1427,7 +1427,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
             if (kelvin <  0) continue;
             if (kelvin == 0)
             {
-              ALOG_INF(PSTR("seg.setColor(i, 0); %d"), i);
+              // ALOG_INF(PSTR("seg.setColor(i, 0); %d"), i);
               seg.setColor(i, 0);
             }
             if (kelvin >  0) colorKtoRGB(kelvin, brgbw);
@@ -1446,7 +1446,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
         if (!colValid) continue;
 
-        ALOG_INF(PSTR("seg.setColor(%d, RGBW32(rgbw[%d],rgbw[%d],rgbw[%d],rgbw[%d]));"),i, rgbw[0], rgbw[1], rgbw[2], rgbw[3]);
+        // ALOG_INF(PSTR("seg.setColor(%d, RGBW32(rgbw[%d],rgbw[%d],rgbw[%d],rgbw[%d]));"),i, rgbw[0], rgbw[1], rgbw[2], rgbw[3]);
     
         seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));
         if (seg.animation_mode_id == 0) force_update(); //instant refresh

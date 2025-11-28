@@ -750,6 +750,7 @@ class mAnimatorLight :
     #endif
 
     void CommandSet_PaletteID(uint16_t value, uint8_t segment_index = 0);
+    void CommandSet_Palette2ID(uint16_t value, uint8_t segment_index = 0);
 
     void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
     int16_t GetFlasherFunctionIDbyName(const char* f);
@@ -3876,6 +3877,11 @@ inline void Set_DynamicBuffer_StartingColour_RgbwwColor(uint16_t pixelIndex, con
 
 
 inline uint32_t Get_DynamicBuffer_DesiredColour(uint16_t pixelIndex) {
+
+// Serial.printf("_coldataLen D=%d\n\r");Serial.flush();
+
+    if(_coldataLen==0) return 0;
+
     size_t offset = pixelIndex * colour_width__used_in_effect_generate * 2; // Desired is the first part of the pair
 
     // Extract RGB or WRGB based on colour width
@@ -3890,7 +3896,12 @@ inline uint32_t Get_DynamicBuffer_DesiredColour(uint16_t pixelIndex) {
 
 
 inline uint32_t Get_DynamicBuffer_StartingColour(uint16_t pixelIndex) {
+// Serial.printf("_coldataLen S=%d\n\r", _coldataLen);Serial.flush();
     size_t offset = (pixelIndex * colour_width__used_in_effect_generate * 2) + colour_width__used_in_effect_generate; // Starting is after desired
+
+// Serial.printf("colour_width__used_in_effect_generate S=%d,%d\n\r",colour_width__used_in_effect_generate,offset);Serial.flush();
+    
+    if(_coldataLen==0) return 0;
 
     // Extract RGB or WRGB based on colour width
     if (colour_width__used_in_effect_generate == 4) { // WRGB
@@ -3899,6 +3910,7 @@ inline uint32_t Get_DynamicBuffer_StartingColour(uint16_t pixelIndex) {
         return RGBW32(coldata[offset], coldata[offset + 1], coldata[offset + 2], 0); // No white channel
     }
 
+Serial.printf("_coldataLenB S=%d\n\r", _coldataLen);Serial.flush();
     return 0; // Return black if colour width is invalid
 }
 
@@ -4108,6 +4120,8 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(
 // Temporary function until I decide what to do with brightness
 inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const AnimationParam& param) {
     
+// Serial.println("if");Serial.flush();
+
   #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
   
     float progress = param.progress;
@@ -4126,9 +4140,12 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
             setPixelColor(i, blendedRgbww, BRIGHTNESS_ALREADY_SET);
             #endif
         } else {
+// Serial.println("if1a");Serial.flush();
             // Retrieve starting and desired colors for RGB/WRGB
             uint32_t startColor = Get_DynamicBuffer_StartingColour(i);
+// Serial.println("if1b");Serial.flush();
             uint32_t desiredColor = Get_DynamicBuffer_DesiredColour(i);
+// Serial.println("if1c");Serial.flush();
             // SERIAL_DEBUG_COL32i("startColor", startColor, i);
             // SERIAL_DEBUG_COL32i("desiredColor", desiredColor, i);
 
@@ -4138,7 +4155,11 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
             // uint32_t blendedColor = RGBW32(rgbw.R, rgbw.G, rgbw.B, rgbw.W); // When debugging without a blend
             // uint32_t blendedColor = desiredColor; // When debugging without a blend
 
+// Serial.println("if1");Serial.flush();
+
             setPixelColor(i, blendedColor, BRIGHTNESS_ALREADY_SET);
+
+// Serial.println("if2");Serial.flush();
 
             #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE
             if(i < ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE) {              
@@ -4189,6 +4210,8 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
     }
 
     #endif
+    
+// Serial.println("ifEND");Serial.flush();
 }
 
 
@@ -5429,137 +5452,99 @@ uint16_t tpmPayloadFrameSize _INIT(0);
 bool useMainSegmentOnly _INIT(false);
 
 
-    // ======================= mAnimatorLight.h — header additions =======================
-    // #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
 
-    // // Tiny container for Standby runtime state & config.
-    // // (We keep it trivial now; you can extend it later.)
-    // struct STANDBY {
-    //   // runtime
-    //   bool     active        = false;
-    //   bool     haveResumeRAM = false;
-    //   uint8_t  callModeLast  = CALL_MODE_NO_NOTIFY;
-
-    //   // fades (ms)
-    //   uint16_t fade_in_ms    = 600;
-    //   uint16_t fade_out_ms   = 600;
-
-    //   // optional idle timeout (not used yet)
-    //   uint32_t timeout_ms    = 0;
-    //   uint32_t deadline_ms   = 0;
-
-    //   // RAM blobs (null-terminated JSON)
-    //   char*    profileRAM    = nullptr;  // standby preset JSON (virtual preset)
-    //   size_t   profileLen    = 0;
-
-    //   char*    resumeRAM     = nullptr;  // snapshot of current scene to return to
-    //   size_t   resumeLen     = 0;
-    // };
-
-    // public:
-    //   // Global instance
-    //   STANDBY standby;
-
-    //   // Phase-1 Standby API (minimal)
-    //   bool Standby_Init();                                 // load profile from FS or seed default
-    //   bool Standby_SetProfileFromJson(const char* json);   // set + persist profile
-    //   bool Standby_Start(uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
-    //   bool Standby_Stop (uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
-    //   bool Standby_IsActive() const { return standby.active; }
-
-    //   // Optional tick hooks (for future timeout-based standby)
-    //   void Standby_OnActivity();   // reset deadline / auto-exit later
-    //   void Standby_Tick();         // call from loop() if you enable timeouts
-
-    //   // Existing Phase-1 save/load of full state (globals + segments)
-    //   bool FileSave__State(bool includeBounds = true, bool includeBri = true,
-    //                       bool selectedOnly = false, bool fullGlobals = false);
-    //   bool FileLoad__State(uint8_t callMode = CALL_MODE_NO_NOTIFY);
-
-    // private:
-    //   // Helpers
-    //   bool Standby_CaptureResumeToRAM();                   // serialize current state → standby.resumeRAM
-    //   bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
-
-    //   // Paths
-    //   static const char kStateSnapshotPath[]   PROGMEM;    // "/lgt_state.json"   (already added)
-    //   static const char kStandbyProfilePath[]  PROGMEM;    // "/lgt_standby.json"
-
-    // #endif // ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-// ======================= mAnimatorLight.h — Standby scaffolding (PHASE 1) =======================
 // #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
 
-// // --- Compile-time template knobs (you define these in your config header) ---
-// // #define USE_STANDBY_TEMPLATE
-// // #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION  1
-// // DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE) R"=====( {...} )=====";
+// // ---------- Standby meta ----------
+// enum class STBY_SRC : uint8_t { Unknown=0, Template, Uploaded, Current, FS };
 
 // struct STANDBY {
-//   // runtime
+//   // runtime status
 //   bool     active        = false;
 //   bool     haveResumeRAM = false;
 //   uint8_t  callModeLast  = CALL_MODE_NO_NOTIFY;
 
-//   // fades (defaults; override per-call)
+//   // fades
 //   uint16_t fade_in_ms    = 600;
 //   uint16_t fade_out_ms   = 600;
 
-//   // optional idle timeout groundwork
+//   // inactivity timeout (optional)
 //   uint32_t timeout_ms    = 0;
 //   uint32_t deadline_ms   = 0;
 
-//   // RAM blobs (null-terminated JSON)
-//   char*    profileRAM    = nullptr;  // standby preset JSON
+//   // profile + snapshot blobs
+//   char*    profileRAM    = nullptr;
 //   size_t   profileLen    = 0;
-//   char*    resumeRAM     = nullptr;  // snapshot for resume
+//   char*    resumeRAM     = nullptr;
 //   size_t   resumeLen     = 0;
+
+//   // provenance
+//   STBY_SRC last_src      = STBY_SRC::Unknown;
+//   int      last_ver      = -1;
+
+//   // delayed-start scheduling
+//   bool     delayedStartPending = false;
+//   uint32_t delayedStartAtMs    = 0;
+//   uint8_t  delayedStartCallMode= CALL_MODE_NO_NOTIFY;
 // };
 
 // public:
-//   // Global instance
+//   // ---------- Standby state ----------
 //   STANDBY standby;
 
-//   // Boot/init & profile management
-//   bool Standby_Init();                             // gate: FS vs PROGMEM template (holder/version)
-//   bool Standby_SetProfileFromJson(const char* json);
-//   bool Standby_SaveProfileToFS();                  // persist current profileRAM to FS
+//   // ---------- Profile management ----------
+//   bool Standby_Init();  // load/gate profile, enforce template version if compiled
+//   bool Standby_ReloadTemplate(bool persist = true);
+//   bool Standby_SetProfileFromJson(const char* json,
+//                                   STBY_SRC src = STBY_SRC::Uploaded);
+//   bool Standby_SaveProfileToFS();
 
-//   bool Standby_ReloadTemplate(bool persist = true); // force: load template → RAM, optionally update FS
-
-//   // Start/Stop (apply profile / restore snapshot)
+//   // ---------- Start/Stop ----------
 //   bool Standby_Start(uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
 //   bool Standby_Stop (uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
 //   inline bool Standby_IsActive() const { return standby.active; }
 
-//   // Optional: activity/timeout
-//   void Standby_OnActivity();
-//   void Standby_Tick();
+//   // ---------- Timeout / activity hooks ----------
+//   void Standby_OnActivity();  // resets deadline based on timeout_ms
+//   void EverySecond_Standby();        // call each loop to handle timeout & delayed start
 
-//   // State snapshot helpers you already added
+//   // ---------- Delayed start API ----------
+//   bool Standby_ScheduleStart(uint32_t delay_ms,
+//                              uint8_t callMode = CALL_MODE_NO_NOTIFY);
+//   void Standby_CancelScheduledStart();
+
+//   // ---------- Snapshot & validation ----------
 //   bool FileSave__State(bool includeBounds = true, bool includeBri = true,
 //                        bool selectedOnly = false, bool fullGlobals = false);
 //   bool FileLoad__State(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+//   bool ValidateJSON(const char* json_str);
 
 // private:
-//   // Internal helpers
-//   bool Standby_CaptureResumeToRAM();               // serialize current state → RAM
+//   // ---------- Helpers ----------
+//   bool Standby_CaptureResumeToRAM();
 //   bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
 
-//   // FS paths
+//   // ---------- FS paths ----------
 //   static const char kStandbyProfilePath[]  PROGMEM; // "/lgt_standby.json"
-//   static const char kStateSnapshotPath[]   PROGMEM; // "/lgt_state.json" (already used)
+//   static const char kStateSnapshotPath[]   PROGMEM; // "/lgt_state.json"
+//   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+//   static const char kResumeSnapshotPath[] PROGMEM;  // "/lgt_state_resume.json"
+//   #endif
 
-//   // Template (holder/version) gate
-//   bool Standby_LoadProfileFromFS();                // read file → profileRAM
-//   bool Standby_WriteProfileToFS(const char* json, size_t len);
-//   int  Standby_ReadVersionFromJson(const char* json, size_t len); // returns -1 if absent
-// // returns true if JSON parses; optionally returns version via out param (or -1 if absent)
-//   bool Standby_ValidateJson(const char* json, size_t len, int* out_version = nullptr);
+//   // ---------- FS I/O ----------
+//   bool Standby_LoadProfileFromFS();
+//   bool Standby_WriteProfileToFS(const char* json);
 
-// #endif // ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+//   // ---------- Template loader ----------
+//   bool Load_StandbyTemplate_Into_ProfileRAM(bool injectTemplateId = true);
 
-// ========== mAnimatorLight.h additions (meta + source tagging) ==========
+//   // ---------- Logging ----------
+//   static const char* StbySrcName(STBY_SRC s);
+// #endif
+
+
 #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+#include "Decounter.h"   // your header shown earlier
 
 enum class STBY_SRC : uint8_t { Unknown=0, Template, Uploaded, Current, FS };
 
@@ -5571,8 +5556,8 @@ struct STANDBY {
   uint16_t fade_in_ms    = 600;
   uint16_t fade_out_ms   = 600;
 
-  uint32_t timeout_ms    = 0;
-  uint32_t deadline_ms   = 0;
+  uint32_t timeout_ms    = 0;     // (unused with Decounter; keep if you want)
+  uint32_t deadline_ms   = 0;     // (unused with Decounter; keep if you want)
 
   // runtime RAM blobs
   char*    profileRAM    = nullptr;
@@ -5580,18 +5565,25 @@ struct STANDBY {
   char*    resumeRAM     = nullptr;
   size_t   resumeLen     = 0;
 
-  STBY_SRC last_src      = STBY_SRC::Unknown;   // for logging/diag
-  int      last_ver      = -1;                  // parsed/annotated version
+  STBY_SRC last_src      = STBY_SRC::Unknown;
+  int      last_ver      = -1;
+
+  // --- New: single remain-awake countdown ---
+  // When running, and it hits 0, enter Standby.
+  Decounter<uint32_t> tick__awake;     // seconds
+  uint16_t            fade_override_ms = 0;  // optional override on Standby_Stop (Wake)
+ 
+  // ctor-like defaults for clarity
+  STANDBY() : active(false), haveResumeRAM(false), callModeLast(CALL_MODE_NO_NOTIFY) {}
 };
 
 public:
   STANDBY standby;
 
   // profile mgmt
-  bool Standby_Init();                                       // holder/version gate
-  bool Standby_ReloadTemplate(bool persist = true);          // force from PROGMEM
-  bool Standby_SetProfileFromJson(const char* json,
-                                  STBY_SRC src = STBY_SRC::Uploaded);
+  bool Standby_Init();
+  bool Standby_ReloadTemplate(bool persist = true);
+  bool Standby_SetProfileFromJson(const char* json, STBY_SRC src = STBY_SRC::Uploaded);
   bool Standby_SaveProfileToFS();
 
   // start/stop
@@ -5599,39 +5591,33 @@ public:
   bool Standby_Stop (uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
   inline bool Standby_IsActive() const { return standby.active; }
 
-  // optional timeout hooks
-  void Standby_OnActivity();
-  void Standby_Tick();
+  // remain-awake control (single timer)
+  inline void Standby_SetRemainAwake(uint32_t secs) { standby.tick__awake.Start(secs); }
+  inline void Standby_CancelRemainAwake()          { standby.tick__awake.Stop(); }
+  void        EverySecond_Standby();  // call this from your 1 Hz task
 
-  // Loads the PROGMEM standby template into standby.profileRAM.
-  // If injectTemplateId is true, appends ,"template_id":<LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION>}
-  // just before the final '}'. Returns true on success.
+  // hooks / helpers
+  void Standby_OnActivity();      // e.g. reset remain-awake on motion, if desired
   bool Load_StandbyTemplate_Into_ProfileRAM(bool injectTemplateId = true);
-
-  // state snapshot (already implemented)
   bool FileSave__State(bool includeBounds = true, bool includeBri = true,
                        bool selectedOnly = false, bool fullGlobals = false);
   bool FileLoad__State(uint8_t callMode = CALL_MODE_NO_NOTIFY);
   bool ValidateJSON(const char* json_str);
 
 private:
-  // helpers
   bool Standby_CaptureResumeToRAM();
   bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
+  bool Standby_LoadProfileFromFS();
+  bool Standby_WriteProfileToFS(const char* json);
+  static const char* StbySrcName(STBY_SRC s);
 
-  // FS paths
-  static const char kStandbyProfilePath[]  PROGMEM; // "/lgt_standby.json"
-  static const char kStateSnapshotPath[]   PROGMEM; // "/lgt_state.json"
+  static const char kStandbyProfilePath[]  PROGMEM;
+  static const char kStateSnapshotPath[]   PROGMEM;
   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
   static const char kResumeSnapshotPath[] PROGMEM;
   #endif
-
-  // FS I/O
-  bool Standby_LoadProfileFromFS();
-  bool Standby_WriteProfileToFS(const char* json);
-
-  static const char* StbySrcName(STBY_SRC s); // for logs
 #endif
+
 
 
     /************************************************************************************************

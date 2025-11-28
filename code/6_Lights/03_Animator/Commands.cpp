@@ -251,6 +251,30 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     data_buffer.isserviced++;
   }
 
+  if(jtok = obj["Palette2"])
+  {
+    if(jtok.isStr())
+    {
+      if(strcmp(jtok.getStr(),"+")==0)
+      {
+        CommandSet_Palette2ID( SEGMENT_I(segment_index).palette2_id + 1, segment_index);
+      }else
+      if(strcmp(jtok.getStr(),"-")==0)
+      {
+        CommandSet_Palette2ID( SEGMENT_I(segment_index).palette2_id - 1, segment_index);
+      }else
+      if((tmp_id=GetPaletteIDbyName((char*)jtok.getStr()))>=0)
+      {
+        CommandSet_Palette2ID(tmp_id, segment_index);
+      }
+    }else
+    if(jtok.isNum()){
+      CommandSet_Palette2ID(jtok.getInt(), segment_index);
+    }
+    ALOG_INF( PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(SEGMENT_I(segment_index).palette_id, buffer, sizeof(buffer)) );
+    data_buffer.isserviced++;
+  }
+
 
   if(jtok = obj[PM_PIXELRANGE])
   { 
@@ -503,6 +527,16 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       ALOG_INF(PSTR(D_LOG_PIXEL "Check3 %d"), SEGMENT_I(segment_index).check3 );
       data_buffer.isserviced++;
     }
+
+
+
+    if (jtok = jobj["PalIX"]) 
+    {
+      SEGMENT_I(segment_index).palette_live_intensity = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "PalIX %d"), SEGMENT_I(segment_index).palette_live_intensity );
+      data_buffer.isserviced++;
+    }
+    
 
 
 
@@ -1504,8 +1538,362 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
   #endif // ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS options above to be moved into debug methods
 
-  
   #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  // if (jtok = obj["Standby"])
+  // {
+  //   ALOG_INF(PSTR("Standby command FOUND"));
+
+  //   JsonParserObject jDbg = jtok.getObject();
+  //   JsonParserToken jtok2 = 0; 
+
+  //   // Optional fade override from this command (bounded to uint16_t)
+  //   uint16_t fadeMs = 0;
+  //   if (jtok2 = jDbg["FadeMs"]) {
+  //     int v = jtok2.getInt();
+  //     if (v < 0) v = 0;
+  //     if (v > 65535) v = 65535;
+  //     fadeMs = (uint16_t)v;
+  //     ALOG_INF(PSTR("FadeMs=%u"), (unsigned)fadeMs);
+  //   }
+
+  //   // ---------------- Standby control (uses virtual preset profile) -------------
+  //   if (jtok2 = jDbg["Start"]) {
+  //     uint8_t callMode = CALL_MODE_NO_NOTIFY;
+  //     ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), (unsigned)fadeMs, callMode);
+  //     if (jtok2.getInt()) Standby_Start(fadeMs, callMode);
+  //   } else {
+  //     ALOG_INF(PSTR("Debug:StandbyStart not found"));
+  //   }
+
+  //   if (jtok2 = jDbg["Stop"]) {
+  //     uint8_t callMode = CALL_MODE_NO_NOTIFY;
+  //     if (jtok2.getInt()) Standby_Stop(fadeMs, callMode);
+  //   }
+
+  //   // ---------------- Standby Wake (1 = resume now; >1 = resume now & re-enter after N sec) ----------------
+  //   if (jtok2 = jDbg["Wake"]) {
+  //     int32_t secs = jtok2.getInt();
+  //     constexpr uint32_t STANDBY_DELAY_MAX_MS = 0x7FFFFFFFul; // ~24.85 days rollover-safe
+
+  //     if (!standby.active) {
+  //       // Not in standby:
+  //       //  - Wake==1: no-op
+  //       //  - Wake>1: schedule future enter-standby only (no state change)
+  //       if (secs > 1) {
+  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
+  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
+  //         ALOG_INF(PSTR("Standby: Wake while not active — schedule enter in %u ms"), (unsigned)ms);
+  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
+  //       } else if (secs <= 0) {
+  //         ALOG_INF(PSTR("Standby: Wake<=0 while not active — cancel any pending schedule"));
+  //         Standby_CancelScheduledStart();
+  //       } else {
+  //         ALOG_INF(PSTR("Standby: Wake==1 while not active — no-op"));
+  //       }
+  //     } else {
+  //       // In standby now:
+  //       //  - Wake==1: leave now (restore), no auto-return.
+  //       //  - Wake>1: leave now (restore) and schedule re-enter after N sec.
+  //       if (secs <= 1) {
+  //         ALOG_INF(PSTR("Standby: Wake immediate"));
+  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
+  //         Standby_CancelScheduledStart();
+  //       } else {
+  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
+  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
+  //         ALOG_INF(PSTR("Standby: Wake %ld s -> %u ms (auto re-enter scheduled)"), (long)secs, (unsigned)ms);
+  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
+  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
+  //       }
+  //     }
+  //   }
+
+  //   // Init
+  //   if (jtok2 = jDbg["Init"]) {
+  //     if (jtok2.getInt()) Standby_Init();
+  //   }
+
+  //   // Replace profile from raw JSON string (validated; saved to FS)
+  //   if (jDbg["SetProfile"]) {
+  //     const char* s = nullptr;
+  //     auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
+  //     if (o && o["json"]) s = o["json"].getStr();
+  //     if (s) {
+  //       ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
+  //       Standby_SetProfileFromJson(s);
+  //     }
+  //   }
+
+  //   // Convenience: snapshot current scene and store as standby profile
+  //   if (jDbg["StandbySaveCurrentAsProfile"]) {
+  //     DynamicJsonDocument d(12*1024);
+  //     JsonObject root = d.to<JsonObject>();
+  //     serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
+  //     String tmp; serializeJson(d, tmp);
+  //     Standby_SetProfileFromJson(tmp.c_str());
+  //     ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
+  //   }
+
+  // } else {
+  //   ALOG_INF(PSTR("Standby not found"));
+  // }
+  // #endif
+
+  if (jtok = obj["Standby"]) {
+  ALOG_INF(PSTR("Standby command FOUND"));
+  JsonParserObject jDbg = jtok.getObject();
+  JsonParserToken  jtok2 = 0;
+
+  uint16_t fadeMs = 0;
+  if (jtok2 = jDbg["FadeMs"]) {
+    fadeMs = (uint16_t)jtok2.getInt();
+    standby.fade_override_ms = fadeMs;   // store override for this wake cycle
+    ALOG_INF(PSTR("Standby: FadeMs=%u"), (unsigned)fadeMs);
+  }
+
+  if (jtok2 = jDbg["Start"]) {
+    uint8_t callMode = CALL_MODE_NO_NOTIFY;
+    if (jtok2.getInt()) {
+      Standby_Start(/*fadeMs=*/0, callMode);
+      // If you want: cancel remain-awake because we explicitly entered standby
+      Standby_CancelRemainAwake();
+    }
+  }
+
+  if (jtok2 = jDbg["Stop"]) {
+    uint8_t callMode = CALL_MODE_NO_NOTIFY;
+    if (jtok2.getInt()) {
+      // Use fade override if provided in this command
+      uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
+      Standby_Stop(f, callMode);
+      // Do NOT start any timer here; Stop is a pure "leave standby"
+    }
+  }
+
+  // Wake semantics:
+  //   0  → cancel any pending remain-awake (no state change)
+  //   1  → if in standby, leave now (with optional FadeMs), no auto return
+  //   >1 → leave standby if active (with FadeMs), then stay awake for N seconds, auto-enter standby
+  if (jtok2 = jDbg["Wake"]) {
+    uint32_t secs = jtok2.getInt();
+
+    if (secs == 0) {
+      ALOG_INF(PSTR("Standby: Wake<=0 → cancel remain-awake"));
+      Standby_CancelRemainAwake();
+      // no state change
+    } else if (secs == 1) {
+      if (standby.active) {
+        uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
+        ALOG_INF(PSTR("Standby: Wake==1 → leave standby now (fade=%u)"), (unsigned)f);
+        Standby_Stop(f, CALL_MODE_NO_NOTIFY);
+      } else {
+        ALOG_INF(PSTR("Standby: Wake==1 while already awake → no-op"));
+      }
+      Standby_CancelRemainAwake(); // no auto return
+    } else { // secs > 1
+      ALOG_INF(PSTR("Wake s>1 "));
+      uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
+      if (standby.active) {
+        ALOG_INF(PSTR("Standby: Wake %ld s → leave standby now (fade=%u)"), (long)secs, (unsigned)f);
+        Standby_Stop(f, CALL_MODE_NO_NOTIFY);
+      } else {
+        ALOG_INF(PSTR("Standby: Wake %ld s while already awake"), (long)secs);
+      }
+      //Serial.println("here3");Serial.flush();
+      Standby_SetRemainAwake(secs);
+      ALOG_INF(PSTR("Standby: remain-awake started: %u s"), (unsigned)secs);
+    }
+
+    SEGMENT_I(0).single_animation_override.time_ms = 2000;
+
+  }
+
+  if (jtok2 = jDbg["Init"]) {
+    if (jtok2.getInt()) Standby_Init();
+  }
+
+  if (jDbg["SetProfile"]) {
+    const char* s = nullptr;
+    auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
+    if (o && o["json"]) s = o["json"].getStr();
+    if (s) {
+      ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
+      Standby_SetProfileFromJson(s);
+    }
+  }
+
+  if (jDbg["StandbySaveCurrentAsProfile"]) {
+    DynamicJsonDocument d(12*1024);
+    JsonObject root = d.to<JsonObject>();
+    serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
+    String tmp; serializeJson(d, tmp);
+    Standby_SetProfileFromJson(tmp.c_str());
+    ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
+  }
+
+  Serial.println("ABOUT TO WAIT FOR STABILITY");
+  //delay(4000);
+}
+
+
+#endif // ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+
+  // #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  // if (jtok = obj["Standby"])
+  // {
+
+  //   ALOG_INF(PSTR("Standby command FOUND"));
+    
+  //   JsonParserObject jDbg = jtok.getObject();
+  //   JsonParserToken jtok2 = 0; 
+
+  //   uint16_t fadeMs = 0;
+  //   if(jtok2 = jDbg["FadeMs"])
+  //   {
+  //     fadeMs = jtok2.getInt();
+  //     ALOG_INF(PSTR("FadeMs=%d"),fadeMs);
+  //   }
+
+  //   // // ---------------- Standby control (uses virtual preset profile) -------------
+  //   if (jtok2 = jDbg["Start"]) {
+  //     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
+  //   //   auto t = jDbg["StandbyStart"]; JsonParserObject o = t.getObject();
+  //   //   if (o) {
+  //   //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+  //   //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+  //   //   }
+  //     ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), fadeMs, callMode);
+  //     if(jtok2.getInt())
+  //     Standby_Start(fadeMs, callMode);
+  //   }else{
+  //     ALOG_INF(PSTR("Debug:StandbyStart not found"));
+  //   }
+
+  //   if (jtok2 = jDbg["Stop"]) {
+  //     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
+  //   //   auto t = jDbg["StandbyStop"]; JsonParserObject o = t.getObject();
+  //   //   if (o) {
+  //   //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
+  //   //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+  //   //   }
+  //   //   ALOG_INF(PSTR("Debug:StandbyStop fade=%u callMode=%u"), fadeMs, callMode);
+  //     if(jtok2.getInt())
+  //     Standby_Stop(fadeMs, callMode);
+  //   }
+
+  //     // ---------------- Standby delayed start (X = seconds) ----------------
+  //     // Usage examples:
+  //     // - {"StandbyDelayedStart": 300} → schedule start in 5 minutes
+  //     // - {"StandbyDelayedStart": 0} → cancel any pending delayed start
+
+
+  //   if (jtok2 = jDbg["DelayedStart"]) {
+  //     int32_t secs = jtok2.getInt();   // X in seconds
+      
+  //     // Max safe delay for rollover-safe compare ~ 2^31-1 ms ≈ 24.85 days.
+  //     constexpr uint32_t STANDBY_DELAY_MAX_MS = 0x7FFFFFFFul;
+
+  //     if (secs > 0) {
+  //       uint64_t ms64 = (uint64_t)secs * 1000ull;   // convert to ms
+  //       uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS)
+  //                         ? STANDBY_DELAY_MAX_MS
+  //                         : (uint32_t)ms64;
+
+  //       ALOG_INF(PSTR("Debug:StandbyDelayedStart %ld s -> %u ms (scheduled)"),
+  //               (long)secs, (unsigned)ms);
+  //       Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
+  //     } else {
+  //       // X <= 0 cancels any pending delayed start
+  //       ALOG_INF(PSTR("Debug:StandbyDelayedStart <=0 (cancel pending)"));
+  //       Standby_CancelScheduledStart();
+  //     }
+  //   }
+
+
+  //   // ---------------- Standby Wake (1 = immediate resume; >1 = resume now, re-enter after N sec) ----------------
+  //   if (jtok2 = jDbg["Wake"]) {
+  //     int32_t secs = jtok2.getInt();
+  //     constexpr uint32_t STANDBY_DELAY_MAX_MS = 0x7FFFFFFFul; // ~24.85 days rollover-safe
+
+  //     // If not in standby:
+  //     //  - Wake==1: do nothing (already awake).
+  //     //  - Wake>1: only (re)schedule a future standby start; do NOT change current state.
+  //     if (!standby.active) {
+  //       if (secs > 1) {
+  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
+  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
+  //         ALOG_INF(PSTR("Standby: Wake while not active — schedule enter in %u ms"), (unsigned)ms);
+  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
+  //       } else if (secs <= 0) {
+  //         ALOG_INF(PSTR("Standby: Wake<=0 while not active — cancel any pending schedule"));
+  //         Standby_CancelScheduledStart();
+  //       } else {
+  //         ALOG_INF(PSTR("Standby: Wake==1 while not active — no-op"));
+  //       }
+  //     } else {
+  //       // Currently in standby:
+  //       //  - Wake==1: leave now (restore), no auto-return.
+  //       //  - Wake>1: leave now (restore) AND schedule re-enter after N sec.
+  //       if (secs <= 1) {
+  //         ALOG_INF(PSTR("Standby: Wake immediate"));
+  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
+  //         Standby_CancelScheduledStart();
+  //       } else {
+  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
+  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
+  //         ALOG_INF(PSTR("Standby: Wake %ld s -> %u ms (auto re-enter scheduled)"), (long)secs, (unsigned)ms);
+  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
+  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
+  //       }
+  //     }
+  //   }
+
+
+    
+
+  //   // // Force reload the PROGMEM template → RAM (and FS if persist=true)
+  //   // if (jDbg["StandbyReloadTemplate"]) {
+  //   //   bool persist = true;
+  //   //   auto t = jDbg["StandbyReloadTemplate"]; JsonParserObject o = t.getObject();
+  //   //   if (o && o["persist"]) persist = (bool)o["persist"].getInt();
+  //   //   ALOG_INF(PSTR("Debug:StandbyReloadTemplate persist=%d"), persist);
+  //   //   Standby_ReloadTemplate(persist);   // <-- single explicit function; do NOT call Standby_Init() here
+  //   // }
+
+  //   // Replace profile from raw JSON string (validated; saved to FS)
+  //   if (jtok2 = jDbg["Init"]) {
+  //     if(jtok2.getInt())
+  //     Standby_Init();
+  //   }
+
+
+  //   // Replace profile from raw JSON string (validated; saved to FS)
+  //   if (jDbg["SetProfile"]) {
+  //     const char* s = nullptr;
+  //     auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
+  //     if (o && o["json"]) s = o["json"].getStr();
+  //     if (s) {
+  //       ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
+  //       Standby_SetProfileFromJson(s);
+  //     }
+  //   }
+
+  //   // Convenience: snapshot current scene and store as standby profile
+  //   if (jDbg["StandbySaveCurrentAsProfile"]) {
+  //     // Serialize a *compact* state and store as standby.profileRAM (+ FS)
+  //     DynamicJsonDocument d(12*1024);
+  //     JsonObject root = d.to<JsonObject>();
+  //     serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
+  //     String tmp; serializeJson(d, tmp);
+  //     Standby_SetProfileFromJson(tmp.c_str());
+  //     ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
+  //   }
+
+  // }else{
+  //   ALOG_INF(PSTR("Standby not found"));
+  // }
+
+
   // if(jtok = obj["Debug"].getObject()["SaveSegment"])
   // {
   //   ALOG_DBG(PSTR("Debug:SaveSegment"));
@@ -1539,7 +1927,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
   //   }
   // }
   // Debug command handler — lightweight parser style (no `| default`)
-// #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+#ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
 if (jtok = obj["Debug"])
 {
 
@@ -1576,72 +1964,6 @@ if (jtok = obj["Debug"])
     FileLoad__State(callMode);
   }
 
-  // // ---------------- Standby control (uses virtual preset profile) -------------
-  if (jtok2 = jDbg["StandbyStart"]) {
-    uint16_t fadeMs  = 0;
-    uint8_t  callMode= CALL_MODE_NO_NOTIFY;
-  //   auto t = jDbg["StandbyStart"]; JsonParserObject o = t.getObject();
-  //   if (o) {
-  //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-  //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-  //   }
-    ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), fadeMs, callMode);
-    if(jtok2.getInt())
-    Standby_Start(fadeMs, callMode);
-  }else{
-    ALOG_INF(PSTR("Debug:StandbyStart not found"));
-  }
-
-  if (jtok2 = jDbg["StandbyStop"]) {
-    uint16_t fadeMs  = 0;
-    uint8_t  callMode= CALL_MODE_NO_NOTIFY;
-  //   auto t = jDbg["StandbyStop"]; JsonParserObject o = t.getObject();
-  //   if (o) {
-  //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-  //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-  //   }
-  //   ALOG_INF(PSTR("Debug:StandbyStop fade=%u callMode=%u"), fadeMs, callMode);
-    if(jtok2.getInt())
-    Standby_Stop(fadeMs, callMode);
-  }
-
-  // // Force reload the PROGMEM template → RAM (and FS if persist=true)
-  // if (jDbg["StandbyReloadTemplate"]) {
-  //   bool persist = true;
-  //   auto t = jDbg["StandbyReloadTemplate"]; JsonParserObject o = t.getObject();
-  //   if (o && o["persist"]) persist = (bool)o["persist"].getInt();
-  //   ALOG_INF(PSTR("Debug:StandbyReloadTemplate persist=%d"), persist);
-  //   Standby_ReloadTemplate(persist);   // <-- single explicit function; do NOT call Standby_Init() here
-  // }
-
-  // Replace profile from raw JSON string (validated; saved to FS)
-  if (jtok2 = jDbg["StandbyInit"]) {
-    if(jtok2.getInt())
-    Standby_Init();
-  }
-
-
-  // Replace profile from raw JSON string (validated; saved to FS)
-  if (jDbg["StandbySetProfile"]) {
-    const char* s = nullptr;
-    auto t = jDbg["StandbySetProfile"]; JsonParserObject o = t.getObject();
-    if (o && o["json"]) s = o["json"].getStr();
-    if (s) {
-      ALOG_INF(PSTR("Debug:StandbySetProfile len=%u"), (unsigned)strlen(s));
-      Standby_SetProfileFromJson(s);
-    }
-  }
-
-  // Convenience: snapshot current scene and store as standby profile
-  if (jDbg["StandbySaveCurrentAsProfile"]) {
-    // Serialize a *compact* state and store as standby.profileRAM (+ FS)
-    DynamicJsonDocument d(12*1024);
-    JsonObject root = d.to<JsonObject>();
-    serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
-    String tmp; serializeJson(d, tmp);
-    Standby_SetProfileFromJson(tmp.c_str());
-    ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
-  }
 //   // ---------- SaveState ----------
 //   if (jDbg["SaveState"])
 //   {
@@ -1974,6 +2296,13 @@ void mAnimatorLight::CommandSet_PaletteID(uint16_t value, uint8_t segment_index)
   SEGMENT_I(segment_index).palette_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
   segment_current_index = segment_index;
   SEGMENT.LoadPalette(segments[segment_index].palette_id);
+}
+
+void mAnimatorLight::CommandSet_Palette2ID(uint16_t value, uint8_t segment_index)
+{
+  char buffer[50];
+  SEGMENT_I(segment_index).palette2_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
+  // No Load
 }
 
 

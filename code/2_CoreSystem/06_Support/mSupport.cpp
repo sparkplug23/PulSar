@@ -213,8 +213,8 @@ return 0;
 #if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
 
 const char* host = "recovery";
-const char* ssid = "HACS2400";
-const char* password = "af4d8bc9ab";
+const char* ssid = STA_SSID1;
+const char* password = STA_PASS1;
 
 #endif //  defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
 
@@ -521,6 +521,13 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
     }break;
     case TASK_EVERY_SECOND:{
 
+#ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
+// bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
+bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
+pinMode(26,OUTPUT);
+digitalWrite(26,onoff);
+
+#endif
 
       #ifdef ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
         Serial.println("IP address: ");
@@ -552,6 +559,16 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
 
       PerformEverySecond();
     }break;
+    case TASK_EVERY_MINUTE:
+
+#ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
+// bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
+//bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
+//pinMode(26,OUTPUT);
+digitalWrite(26,!digitalRead(26));
+
+#endif
+    break;
     case TASK_ON_BOOT_SUCCESSFUL:
 
       #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)

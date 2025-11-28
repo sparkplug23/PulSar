@@ -212,13 +212,20 @@ bool mAnimatorLight::Standby_Stop(uint16_t /*fadeMs*/, uint8_t callMode)
     return false;
   }
 
+  ALOG_INF(PSTR("here")); Serial.flush();
+
   const bool ok = Standby_JsonCommand_Run(src, len, callMode);
+  
+  ALOG_INF(PSTR("here2")); Serial.flush();
   if (ok) {
     standby.active = false;
     ALOG_INF(PSTR("Standby_Stop: restored previous state (OK)"));
   } else {
     ALOG_ERR(PSTR("Standby_Stop: failed to restore previous state"));
   }
+
+  // SEGMENT_I(0).single_animation_override.time_ms = 2000;
+
   return ok;
 }
 
@@ -472,7 +479,10 @@ bool mAnimatorLight::Standby_CaptureResumeToRAM()
  ********************************************************************************************************************************************************************************************************************/
 bool mAnimatorLight::Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode)
 {
-  LoggingLevels level = LOG_LEVEL_INFO;
+  LoggingLevels level = LOG_LEVEL_DEBUG_MORE;
+
+  Serial.println("Standby_JsonCommand_Run");
+  Serial.flush();
 
   if (!json || !len) {
     ALOG_ERR(PSTR("Standby_JsonCommand_Run: empty (len=%u)"), (unsigned)len);
@@ -594,5 +604,28 @@ bool mAnimatorLight::FileLoad__State(uint8_t callMode)
   ALOG_INF(PSTR("FileLoad__State: applied snapshot from %s"), path);
   return true;
 }
+
+
+void mAnimatorLight::EverySecond_Standby()
+{
+  if (!standby.tick__awake.IsRunning()) return;
+
+  bool will_expire = (standby.tick__awake.Value() == 1);
+  standby.tick__awake.UpdateTick();
+
+  ALOG_INF(PSTR("StandbyTick: active=%d remain_awake=%u s"),
+           (int)standby.active,
+           (unsigned)standby.tick__awake.ValueWithDisabledAsZero());
+
+  if (will_expire) {
+    standby.tick__awake.Stop();
+    ALOG_INF(PSTR("StandbyTick: remain-awake expired → entering Standby"));
+    Standby_Start(0, CALL_MODE_NO_NOTIFY);
+  }
+}
+
+
+
+
 
 #endif // ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET

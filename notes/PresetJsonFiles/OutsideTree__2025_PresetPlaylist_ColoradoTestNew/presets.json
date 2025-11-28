@@ -1,0 +1,56 @@
+
+{
+  "0": {},
+  "1": {
+    "n":"Static Snowy02",
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Static Palette",
+      "Intensity":127,
+      "Speed":127,
+      "Grouping":1,
+      "Decimate":0,
+      "Reverse":0,
+      "RateMs": 4000
+    },
+    "BrightnessRGB": 100
+  },
+  "2": {
+    "n":"FastPops Snowy02",
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Firefly",
+      "Intensity":20,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":7,
+      "RateMs": 50
+    },
+    "BrightnessRGB": 100
+  },
+  "3": {
+    "n":"Steps ColourfulPairs G1",
+    "ColourPalette":"Colourful Pairs 01",
+    "Effects": {
+      "Function":"Stepping Palette",
+      "Intensity":20,
+      "Speed":50,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "98":{
+    "n":"Basic Test 1",
+    "playlist":{
+      "ps" :[1, 2, 3],
+      "dur":[100, 200, 100],
+      "repeat":0,
+      "end":0,
+      "r":1
+    },
+    "on":true
+  }
+  
+}

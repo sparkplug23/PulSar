@@ -251,7 +251,7 @@ void mAnimatorLight::SubTask_Presets()
   const char *filename = getPresetsFileName(tmpPreset < 255);
 
   // allocate buffer
-  if (!requestJSONBufferLock(9)) return;  // will also assign gDoc
+  // if (!requestJSONBufferLock(9)) return;  // will also assign gDoc
 
   presetToApply = 0; //clear request for preset
   callModeToApply = 0;
@@ -294,6 +294,9 @@ void mAnimatorLight::SubTask_Presets()
    */
   if(requestDataBufferLock(GetModuleUniqueID()))
   {
+
+
+
     D_DATA_BUFFER_SOFT_CLEAR();
 
     // Serialise from ArduinoJson into buffer for parser to load

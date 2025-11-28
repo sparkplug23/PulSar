@@ -735,6 +735,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "10_ConSpec/21_LightNeo_MotionAlerts/mLightNeo_MotionAlerts.h"
   #define tkrCC_motion_alerts        static_cast<mLightNeo_MotionAlerts*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_MOTION_ALERTS__ID))
 #endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE
+  #include "10_ConSpec/22_LightNeo_RadarDistance/mLightNeo_RadarDistance.h"
+  #define tkrCC_motion_alerts        static_cast<mLightNeo_RadarDistance*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE__ID))
+#endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define tkr_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])

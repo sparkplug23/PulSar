@@ -39,7 +39,7 @@
 // #define DEVICE_MEADOWS__OUTSIDE__SIDE_TREE
 // #define DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
 // #define DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
-#define DEVICE_MEADOWS__XMAS25__RED_TREE
+// #define DEVICE_MEADOWS__XMAS25__RED_TREE
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

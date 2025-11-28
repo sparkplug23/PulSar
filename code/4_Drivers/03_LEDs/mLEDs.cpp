@@ -14,6 +14,8 @@
  * status_led optionally will show power state of primary.
  * 
  * 
+ * Show MOTION on STATUS_LED
+ * 
  * 
  */
 
@@ -41,8 +43,8 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     #endif // ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
     #ifdef ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_LED1
     case TASK_EVERY_SECOND:
-      digitalWrite(tkr_pins->Pin(GPIO_LED1_INV_ID), !digitalRead(tkr_pins->Pin(GPIO_LED1_INV_ID))); // Blink the LED on pin 8 every second
-      Serial.printf("LED on pin %d toggled\n\r", tkr_pins->Pin(GPIO_LED1_INV_ID)); // Debug message
+      digitalWrite(tkr_pins->Pin(GPIO_LED1_INV), !digitalRead(tkr_pins->Pin(GPIO_LED1_INV))); // Blink the LED on pin 8 every second
+      Serial.printf("LED on pin %d toggled\n\r", tkr_pins->Pin(GPIO_LED1_INV)); // Debug message
     break;
     #endif // ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN
   }
@@ -101,18 +103,18 @@ void mLEDs::Pre_Init(void)
 
     int8_t pin = -1;
 
-    if(tkr_pins->PinUsed(GPIO_LED1_ID, ii))
+    if(tkr_pins->PinUsed(GPIO_LED1, ii))
     {
       SetUsed(ii);
-      pin = tkr_pins->GetPin(GPIO_LED1_ID, ii);
+      pin = tkr_pins->GetPin(GPIO_LED1, ii);
       pinMode(pin, OUTPUT);
       digitalWrite(pin, LOW); // Default: OFF
     }else
-    if(tkr_pins->PinUsed(GPIO_LED1_INV_ID, ii))
+    if(tkr_pins->PinUsed(GPIO_LED1_INV, ii))
     {
       SetUsed(ii);
-      pin = tkr_pins->GetPin(GPIO_LED1_INV_ID, ii);
-      ALOG_INF(PSTR("%d %d %d"), GPIO_LED1_INV_ID, ii, pin);
+      pin = tkr_pins->GetPin(GPIO_LED1_INV, ii);
+      ALOG_INF(PSTR("%d %d %d"), GPIO_LED1_INV, ii, pin);
       pinMode(pin, OUTPUT);
       digitalWrite(pin, HIGH); // Default: OFF
       SetInvertFlag(ii);
@@ -140,7 +142,7 @@ void mLEDs::Init(void)
   leds.resize( UsedCount() );  // Allocate space for MAX_LEDS
 
   for (uint8_t i = 0; i < UsedCount(); i++) {
-    uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, i);  // Get the pin for each LED
+    uint8_t pin = tkr_pins->GetPin(GPIO_LED1, i);  // Get the pin for each LED
     pinMode(pin, OUTPUT);  // Set the pin as output
 
     // if (i == 0) {  // LED 1 - Blink 3 times, each blink 300ms apart, cycle every 5 seconds
@@ -196,7 +198,7 @@ void mLEDs::Refresh_LED(uint8_t led_index)
 {
 
   LedState led = leds[led_index];
-  uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, led_index);  // Get the corresponding pin for each LED
+  uint8_t pin = tkr_pins->GetPin(GPIO_LED1, led_index);  // Get the corresponding pin for each LED
 
   uint32_t currentTime = millis();
   uint32_t tElapsed = currentTime - led.lastUpdateTime;
@@ -325,7 +327,7 @@ void mLEDs::StartEffect_Pulse(uint8_t index, uint8_t pulseCount, uint16_t period
   leds[index].startTime = millis();  // Record the start time
 
   // Attach the PWM channel to the pin for the pulse mode
-  uint8_t pin = tkr_pins->GetPin(GPIO_LED1_ID, index);
+  uint8_t pin = tkr_pins->GetPin(GPIO_LED1, index);
   #ifdef ESP32 // tmp fix for 4chPro
   analogAttach(pin, index);  // The PWM channel corresponds to the index of the LED
   #endif
@@ -337,7 +339,7 @@ void mLEDs::SetInvertFlag(uint8_t b) {
 }
 
 bool mLEDs::IsUsed(uint8_t index) {
-  return (tkr_pins->PinUsed(GPIO_LED1_ID, index) || tkr_pins->PinUsed(GPIO_LED1_INV_ID, index) || bitRead(used_bitmask, index));
+  return (tkr_pins->PinUsed(GPIO_LED1, index) || tkr_pins->PinUsed(GPIO_LED1_INV, index) || bitRead(used_bitmask, index));
 }
 
 void mLEDs::SetUsed(uint8_t index) {
@@ -535,8 +537,8 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV_ID,0));
-    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV_ID,0));
+    JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV,0));
+    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV,0));
 
   return JBI->End();
 

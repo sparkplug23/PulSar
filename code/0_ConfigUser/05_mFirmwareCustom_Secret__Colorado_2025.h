@@ -1,65 +1,17 @@
-#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO24_H
-#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO24_H
-
-
-/*********************************************************************************************
- * 
- * Cameras
- * - Webcam for streaming
- * - Bring 3-6 different versions
- * 
- * Lighting
- * - 2x200 12V 10cm pebble
- * - 2x201 12V 2.5cm pebble
- * - ?x100 5V pebbles, individual ESP32
- * - PIR Sensors into 3V3 side for easy wiring, build the standby mode into the code
- *  -- Put at the bottom of the stairs, behind the brown chair.
- * 
- * GPS?
- * - Serial GPS to esp32
- * -- Create poll method
- * -- Create interrupt driven method (using uart module)
- * -- NMEA method
- * -- UBLOX method
- * -- TTL UART connectors so GUI can configure and sniff. Where is my GPS sniffer build (used to be in my room)
- * 
- * 
- * 
- * 
- * 
- * Devices to be used around christmas time
- * - I should keep this file as backup each year and add when needed, perhaps install on USB stick in light boxes with compiled versions for flashing .bin (or just copy of project at that state for recompile) each year if needed
-
-
-Through whatever means, at boot, the device name (and mac) should be printed asap so reset can tell me what the device is.
-
-Redboard 4X 5V number 1
-Redboard 4X 5V number 2
-
-100 Green wire x 4
-narrow strip, 160/m, 5v strip
-
-
-Bring 5V PSU that can work in the states, no USB
-
-
-esp32 x5 on their own for testing
-
-esp32 dev board buttons and switches
-
-esp32 sdcard board for measurements
-
-sd card reader
-
-
-USE 2A BLACK WITH BLACK SONOFF FOR WREATH
-
-
-
-*********************************************************************************************/
+#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO25_H
+#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO25_H
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+
+/*** Colorado Lighting Overview
+ * Stairs: PIR standby testing
+ * Redboard1: Whitehall playlists
+ * Redboard2: Meadows redtree playlists
+ * Playlist: Serial debugger of playlist
+ * Santa Hat: 2D Python/Effect Tester (Put on minifridge)
+ * 
+ */
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -68,75 +20,152 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 *******************************************************************************************************************************************/
 
 /**
+ * String of 100 under TV, bucket? something to hold them.
+ * Use: Nightlight only
+ * Status: On all the time
+ * Will enter standby mode, as red, darkest.
+ * Motion of PIR will turn them on for 1 minutes, then 1 minute fade to standby.
+**/
+// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_01
+
+/**
+ * @brief under the bed? PIR2, use them wrapped around my bed stand as nightlight, or, closest/basement door?
+ * 100 leds, by motion.
+ * Development Notes:
+ * * Button A/B for local control
+ * * Status LED 
+ * *  
+ * 
+ */
+// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_02
+
+
+/**
+ * Laptop testing
+ * * Creating new "Light Standy" and "Light Resume" (leave standy) 
+ * 
+ */
+// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_03
+
+
+/***
+ * Another LED device will be used for button controller
+ */
+// single device, create then test on one bare wire 100leds, then compile in to that set
+
+
+ /**
+  * @brief Isolated radar sensor will be used for lighting, this esp32, will use a controller 
+  * (or else the slave will listen on mqtt) and will take the data, and use this to apply 
+  * saturation changes. Otherwise always on, but RADAR will change saturation.
+  * PART A: ESP32 + RADAR Only
+  * PART B: ESP32 12v ones outside under deck, or, the clear ones just hang across the rocks?
+  */
+//#define RUN ON 200 5V LEDS, OUTSIDE
+
+ /**
+  * Whitehall Tree full playlist (using render_compression)
+  * on Green 12V
+  */
+  #define DEVICE_COLORADO25__REDBOARD_01
+
+/**
+ * @brief clear 12V
+ * Meadows playlist (and timing)
+ **/
+  // #define DEVICE_COLORADO25__REDBOARD_02
+
+/**
+ * @brief 
+ * Physical connected to laptop just when testing playlist loading, then flash to REDBOARDS
+ */
+//#define DEVICE_COLORADO25__PLAYLIST_TESTBED
+
+
+
+/**
+ * RADAR Sensor
+ * * LED1 : Status LED1 (which must show network, mqtt, other modes in blinks ... other layered mode, is PWM=Distance)
+ * * Currently in the kitchen, proximity should show LED brightness?
+ * part A of the above??
+ */
+// #define DEVICE_COLORADO25__MOTION_SENSOR_RADAR
+
+/**
  * 4x201 Black 2.5cm Pixels
  * Santa hat, matrix test
  * Status: Only used when LED indexes are manually found, another eps32 with WLED is in use
+ * 2D testing
 **/
 // #define DEVICE_COLORADO24__MANUAL_FIND_LEDS_ON_HAT
 
 /**
- * String of 100 on the wall
- * Use: Nightlight only
- * Status: On all the time
+ * 4x201 Black 2.5cm Pixels
+ * Santa hat, matrix test
+ * Status: Only used when LED indexes are manually found, another eps32 with WLED is in use
+ * 2D testing
 **/
-// #define DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
+// #define DEVICE_COLORADO24__2D_ANIMATE_LEDS_ON_HAT
+
+
+/**
+ * @brief under the bed?
+ * 100 leds, by motion.
+ * Development Notes:
+ * * RADAR will be the amount of pixels active, or at least some distance = effect
+ * 
+ * *  segment0: percent of static motion
+ * *  segment1: percent of moving motion
+ * 
+ * "percent" needs to have overlay enabled, so I can draw over another pixel without background fill
+ * LOCATION: across wall with masking tape, powered from fridge, remove when cleaners come.
+ */
+// #define DEVICE_COLORADO25__LED_STRING__RADAR_REACTIVE_01
+
 
 /**
  * Tester
- * Use: Running "Sequencer" without LEDs
- * Not using sequencer this year, if playlists are working. 
- * Openhab will just need to be used to set the locked times to switch playlist
+ * Create and test whitehall tree playlist, with 2400 LEDS for timing
+ * 1D wrapped testing, leave running
 **/
-// #define DEVICE_COLORADO24__STRING_02__SEQUENCER__NOLEDS
+// #define DELETE _____  DEVICE_COLORADO24__STRING_02__SEQUENCER__NOLEDS
 
 /**
- * String of 250x2 outside, replicating outside_tree but as only 500 LEDs wide
- * Testing "Playlists" and "Presets"
+ * @brief 2D whitehall tester, can I use last years test positions for this?
+ * 
+ */
+
+
+/**
+ * Create and show meadows tree?
 **/
 // #define DEVICE_COLORADO24__STRING_03__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__250LEDS
 
 /**
- * To run as outside tree for home
- * No connected LEDs, will run STRING_03 but with 2000 LEDs are expected for tree at home
- * On REDBOARD_01
-**/
-// #define DEVICE_COLORADO24__STRING_04__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__VIRTUAL2000LEDS
-
-/**
- * String of 100 green, will run all so I can see them working
- * Testing "Playlists" and "Presets"
-**/
-// #define DEVICE_COLORADO24__STRING_05__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__100LEDS
-
-/**
- * Testing on plane, trying to make it so they can work with their own wifi and no access point.
- * MQTT will not be used.
-**/
-// #define DEVICE_COLORADO24__STRING_06__AP_MODE_TESTING
-
-/**
- * With White/Green 250 12V
- * Used for?
+ * WEBCAM 1-3, other page
+ * LOCATION: At fridge, facing stairs
+ * LOCATION: Behind bed outside, facing mountains
+ * LOCATION: ?
 **/
 // #define DEVICE_TESTBED_WEBCAM_ARDUINO
 
-/**
- * My WLED converted 2D matrix tester on the santa hat
-**/
-// #define DEVICE_COLORADO24__MATRIX_MAPPED_PULSAR
-
-/**
- * @brief Device will be made that contains different GPIO testing for the esp32
- * * leave 22,21 for possible OLED later
- * * 4 Buttons  (Pull down when active) [12, 14, 18, 19]
- * * 2 Touch Buttons [32,33]                                 (Solder wires to a pad, then tape or something over it so I can test touch through it (and other materials)) 
- * * 2 Switches (Pull down when active) [25, 26, 27, 13]
- * * 4 LEDs
- * * * 2 as Relays
- * * * 2 as LED module for status 
+/***
+ * GPS Devices: 
+ * * GPS + 9axis, to nextion panel, just do multiline mode? or full UI.
+ * Have it log to an SD card, which I can open on my computer later with a JDJSON->GPX conversion
+ * LOCATION: Make for car, use my battery back.
  * 
- */
-// #define DEVICE_ACTIVE_DEVELOPMENT__SWITCHES_AND_BUTTONS_COLORADO24
+ * 
+ * GPS?
+ * - Serial GPS to esp32
+ * -- Create poll method
+ * -- Create interrupt driven method (using uart module)
+ * -- NMEA method
+ * -- UBLOX method
+ * -- TTL UART connectors so GUI can configure and sniff. Where is my GPS sniffer build (used to be in my room) */
+ 
+
+// #define DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01_COL25 // find issue in relay code for meadows heater
 
 
 /** ONLY POWERED/USED DAILY BELOW *************************************************************************************************************************************************************************************************************************************************************************************************************************
@@ -186,7 +215,7 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
 
 
 
-#ifdef DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
+#ifdef DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_01
   #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
   #endif
@@ -197,106 +226,544 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define MQTT_HOST   "192.168.50.206"
+  #define MQTT_HOST   "192.168.0.155"
     #define MQTT_PORT     1883
 
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
 
-  ///////////////////////////////////////////// Enable Logs
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
-  
-  ///////////////////////////////////////////// System Logs
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
   // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 30
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
-  #define SERIAL_LOG_LEVEL_DURING_BOOT 8
-  // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-  // #define USE_DEBUG_PRINT
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_SERIAL_FLUSH
+  // #define DEBUG_FASTBOOT
+  // #define ENABLE_DEBUG_LINE_HERE
 
-  ///////////////////////////////////////////// Module Logs
-  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
-  #define ENABLE_FREERAM_APPENDING_SERIAL
-  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
-  /***********************************
-   * SECTION: System Configs
-  ************************************/    
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
  
-  #define SETTINGS_HOLDER 1239
+  // #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
       
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
 
-  /***********************************
-   * SECTION: Sensor Configs
-  ************************************/  
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
 
-  #define USE_MODULE_SENSORS_INTERFACE  
-  #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
     
-    /**
-     * @brief 
-     * Button 1: Preset iter is press, hold in back to playlist
-     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
-     * 
-     */
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
 
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
-  #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":1000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+// #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
-    "BusConfig":[
+    "BusConfig":[      
       {
         "Pin":13,
-        "ColourOrder":"BGR",
+        "ColourOrder":"GRB",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":100
       }
     ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        100
-      ],
-      "ColourPalette":"Snowy 02",
-      "Effects": {
-        "Function":"Slow Glow",
-        "Speed":10,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 1000
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 1
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" "Roaming" "\""
+      "],"  
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+  #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 15
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  R"=====(
+  {
+    "Rules":[
+      {
+        "Name":"Rule Name",
+        "Trigger":{
+          "Module":"motion",
+          "Function":"MotionStarted",
+          "DeviceName":0,
+          "State":1
+        },
+        "Command":{
+          "Module":"pixels",
+          "Function":"SetPower",
+          "DeviceName":0,
+          "State":"Follow",
+          "JsonCommands":"{\"Standby\":{\"Wake\":10,\"fadeMs\":2000}}"
+        }
+      }
+    ]
+  }
+  )=====";
+
+  #define ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
+
+
+
+
+#endif // DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
+
+
+
+
+
+#ifdef DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+    * SECTION: ENABLE by feature
+  ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+    * SECTION: Sensor Configs
+  ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  #endif
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/     
+ 
+  /**
+    * @brief 
+    * Button 1: Preset iter is press, hold in back to playlist
+    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+    * 
+    * Create a feature, that uses the button for this.
+    * Create a few versions, ie base debug, or standalone controller of like attiny85.
+    * 
+    * MODE_A
+    * * Single press = palette
+    * * Double press = effect
+    * * 3,4,5 = bus show, count, 5 should be a test sequence.
+    * * Hold (no release) = brightness
+    * 
+    * MODE_B
+    * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+    * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+    * 
+  */
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__A__MINIMAL_CONTROL
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__B__DEBUG_CONTROL
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define ENABLE_EFFECT_DESCRIPTIONS
+
+  /***
+   * Feature: Standby developing
+   */
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
       },
-      "BrightnessRGB": 100
-    },
-    "BrightnessRGB": 100
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
   }
   )=====";
   
@@ -310,6 +777,630 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_PIR
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\"," // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\"" // as system status
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // END Device
+
+
+#ifdef DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_03
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+    * SECTION: ENABLE by feature
+  ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+    * SECTION: Sensor Configs
+  ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  #endif
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/     
+ 
+  /**
+    * @brief 
+    * Button 1: Preset iter is press, hold in back to playlist
+    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+    * 
+    * Create a feature, that uses the button for this.
+    * Create a few versions, ie base debug, or standalone controller of like attiny85.
+    * 
+    * MODE_A
+    * * Single press = palette
+    * * Double press = effect
+    * * 3,4,5 = bus show, count, 5 should be a test sequence.
+    * * Hold (no release) = brightness
+    * 
+    * MODE_B
+    * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+    * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+    * 
+  */
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__A__MINIMAL_CONTROL
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__B__DEBUG_CONTROL
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define ENABLE_EFFECT_DESCRIPTIONS
+
+  /***
+   * Feature: Standby developing
+   */
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
+      },
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_PIR
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\"," // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\"" // as system status
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * Motion Started -> Light Animation Normal 
+  * Use json command for compound command
+  *  ** leave standby
+  *  ** restart standby_timer
+  * 
+  * 
+  */ 
+  // #define USE_RULES_TEMPLATE
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // "{"
+  //   "\"Rule0\":{" //switch example
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_PIR_CTR "\","
+  //       "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
+  //       "\"DeviceName\":0," 
+  //       "\"State\":1"
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE_LIGHTS_ANIMATOR_CTR "\","
+  //       "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //     "}"
+  //   "}"
+  // "}";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  R"=====(
+  {
+    "Rules":[
+      {
+        "Name":"Rule Name",
+        "Trigger":{
+          "Module":"motion",
+          "Function":"MotionStarted",
+          "DeviceName":0,
+          "State":1
+        },
+        "Command":{
+          "Module":"pixels",
+          "Function":"SetPower",
+          "DeviceName":0,
+          "State":"Follow",
+          "JsonCommands":"{\"Standby\":{\"DelayedStart\":20}}"
+        }
+      }
+    ]
+  }
+  )=====";
+
+  #define ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
+
+
+
+
+
+#endif // END Device
+
+
+
+
+#ifdef DEVICE_COLORADO25__REDBOARD_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+
+    #define DISABLE_FEATURE_LIGHTS__DECIMATE
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 100
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          250
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+//  /***********************************
+//   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+//  ************************************/  
+//   #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
@@ -320,9 +1411,1462 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
 #endif // DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
 
 
+
+
+
+
+#ifdef DEVICE_COLORADO25__REDBOARD_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_02"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+    // #define DEVICE_COLORADO25__REDBOARD_02 20
+
+    #define     ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":2400
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          2400
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 1
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+//  /***********************************
+//   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+//  ************************************/  
+//   #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // end DEVICE
+
+
+
+
+#ifdef DEVICE_COLORADO25__PLAYLIST_TESTBED
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_02"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+
+    // #define     ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+    #define DISABLE_FEATURE_LIGHTS__DECIMATE
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  // #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+// #define USE_STANDBY_TEMPLATE
+// #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // end DEVICE
+
+
+
+
+#ifdef DEVICE_COLORADO25__LED_STRING__RADAR_REACTIVE_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+    * SECTION: ENABLE by feature
+  ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+#define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+    * SECTION: Sensor Configs
+  ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+  //  #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  #endif
+
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+  #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #define ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE
+#endif
+  
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/     
+ 
+  /**
+    * @brief 
+    * Button 1: Preset iter is press, hold in back to playlist
+    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+    * 
+    * Create a feature, that uses the button for this.
+    * Create a few versions, ie base debug, or standalone controller of like attiny85.
+    * 
+    * MODE_A
+    * * Single press = palette
+    * * Double press = effect
+    * * 3,4,5 = bus show, count, 5 should be a test sequence.
+    * * Hold (no release) = brightness
+    * 
+    * MODE_B
+    * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+    * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+    * 
+  */
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__A__MINIMAL_CONTROL
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__B__DEBUG_CONTROL
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define ENABLE_EFFECT_DESCRIPTIONS
+
+  /***
+   * Feature: Standby developing
+   */
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
+      },
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[      
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"GRB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus Base",
+  //       "PixelRange": [
+  //         0,
+  //         100
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Static",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     },
+  //     {
+  //       "Name":"Bus Top",
+  //       "PixelRange": [
+  //         0,
+  //         100
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Percent",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus Base",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Percent",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "SegColour1": {
+          "RGBWC": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+#define USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_PIR
+     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+      "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
+      "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\"," // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\"" // as system status
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // END Device
+
+
+
+
+/***
+ * Created with single LD2410 radar sensor, for testing the code. 
+ * Lets place it in the kitchen, by the toilet.
+ * Make rule (proximity) sets LED1 (status LED on board)
+ * 
+ * Pins>> 
+ * FUNC : GPIO
+ * LED1 : 2
+ * PIR1 : 13
+ * LD2410_TX : 16
+ * LD2410_RX : 17
+ *
+ * 
+ * 
+ */
+#ifdef DEVICE_COLORADO25__MOTION_SENSOR_RADAR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+
+#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+
+
+  
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+#define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+  #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #define ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE
+#endif
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+  //  #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+
+
+ /***********************************
+  * SECTION: Driver Configs
+ ************************************/  
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_LEDS
+    //#define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_LED1
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"       
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+      "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
+      "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+      #endif
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // DEVICE_COLORADO25__MOTION_SENSOR_RADAR
 
 
 /**
@@ -2864,6 +5408,217 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   
 
 
+
+#ifdef DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01_COL25
+  #define DEVICENAME_CTR          "socket_energy_01_col25"
+  #define DEVICENAME_FRIENDLY_CTR "hvac_oil_radiator #1"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define MQTT_HOST   "192.168.0.155"
+  //   #define MQTT_PORT     1883
+
+    #define ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
+
+    #define USE_MODULE_CORE_FILESYSTEM
+    
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/  
+
+ 
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+  #define ENABLE_TEMPLATE_SECTION__ENERGY
+  #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+
+ 
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+    #define USE_MODULE_SENSORS_INTERFACE
+      #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define USE_MODULE_SENSORS_BME
+  #endif
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  //#define USE_MODULE_SENSORS_BUTTONS
+    
+
+  // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+ 
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+ 
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+ 
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+        
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY
+  //   #define USE_MODULE_ENERGY_INTERFACE
+  // #endif
+  
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+  //   #define USE_MODULE_ENERGY_PZEM004T_V3
+  //     #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+  //   #define MAX_ENERGY_SENSORS 1
+  //   #define MAX_PZEM004T_DEVICES 17
+  //   #define ENABLE_DEVFEATURE_PZEM004T__AUTOSEARCH
+  // #endif
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: MQTT Template Test Loading
+  ************************************/  
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{" 
+      #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      #endif
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"27\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      #endif
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"26\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_REL2_CTR  "\"" // use LED as temporary relay tester
+      #endif  
+
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+
+  /***********************************
+   * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define D_DEVICE_UNIQUE_NAME "Socket"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
+  #define D_DEVICE_SENSOR_ZONE_0_NAME "OilRadiator01-BME0"
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Socket"
+  
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"      
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+      "},"  
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+      "]"  
+    "},"
+    "\"" D_ENERGY "\":{"
+        "\"DeviceCount\":1"    
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_ZONE_0_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+  "}";
+
+
+#endif
 
 
 

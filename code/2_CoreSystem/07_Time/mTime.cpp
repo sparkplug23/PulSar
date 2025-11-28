@@ -607,10 +607,12 @@ void mTime::RtcGetDaylightSavingTimes(uint32_t local_time)
 
 uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time) 
 {
-  
+
+  #ifndef ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO  
   // ALOG_INF(PSTR(D_LOG_TIME2 "RtcTimeZoneOffset"));
   tkr_set->Settings.toffset[1] = 60;//FORCED TO TEST
   tkr_set->Settings.toffset[0] = 0;//FORCED TO TEST
+  #endif
 
   int16_t timezone_minutes = tkr_set->Settings.timezone_minutes2;
   if (tkr_set->Settings.timezone2 < 0) { timezone_minutes *= -1; }

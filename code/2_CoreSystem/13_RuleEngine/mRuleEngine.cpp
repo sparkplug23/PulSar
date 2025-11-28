@@ -126,7 +126,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 void mRuleEngine::RulesLoad_From_Progmem()
 {
 
-  ALOG_DBG(PSTR(D_LOG_RULES "RulesLoad_From_Progmem"));
+  ALOG_INF(PSTR(D_LOG_RULES "RulesLoad_From_Progmem--------------------"));
 
   // DELAY_DEBUG(5000);
 
@@ -146,6 +146,10 @@ void mRuleEngine::RulesLoad_From_Progmem()
   
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
   // tkr_set->runtime.boot_status.rules_template_parse_success = 1;
+
+  mqtthandler_settings.flags.SendNow = true;
+
+
   #endif //USE_RULES_TEMPLATE
 
   
@@ -424,7 +428,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           ALOG_INF(PSTR(D_LOG_RULES "R%d: MATCHED module_id[%d] : Triggered"), rule_index, rules[rule_index].trigger.module_id);
 
           // Populate any jsoncommands to be executed, this takes precident over "State" controls
-          if(rules[rule_index].command.json_commands_dlist_id>0)
+          if(rules[rule_index].command.json_commands_dlist_id>=0)
           {
 
             D_DATA_BUFFER_CLEAR();
@@ -733,116 +737,225 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
 }
 
-
 void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 {
+  JsonParserToken  jtok      = 0;
+  JsonParserToken  jtok_sub  = 0;
+  JsonParserObject jobj      = 0;
 
-// return;
+  // ============================================================
+  // [A] New format: "Rules": [ { "Name": "...", "Trigger": {...}, "Command": {...} }, ... ]
+  // ============================================================
+  uint8_t rules_found = 0;
+  if (obj["Rules"].isArray()) {
+    JsonParserArray rule_arr = obj["Rules"];
+    for (uint8_t i = 0; i < rule_arr.size() && i < MAX_RULE_VARS; i++) {
+      JsonParserObject robj = rule_arr[i];
+      if (robj.isNull()) { continue; }
 
-
-  JsonParserToken jtok = 0; 
-  JsonParserToken jtok_sub = 0; 
-  JsonParserObject jobj = 0;
-  int16_t tmp_id = 0;
-
-  uint8_t rule_index = 0;
-  char rule_name[10] = {0};
-  for(int rule_index=0;rule_index<MAX_RULE_VARS;rule_index++)
-  {
-    sprintf(rule_name, "Rule%d", rule_index);
-    
-    if(jtok = obj[rule_name])
-    {
-      
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        ALOG_HGL(PSTR("MATCHED Rule%d"),rule_index);
-        // DELAY_DEBUG(1000);
-      #endif // ENABLE_LOG_LEVEL_INFO
-
-      EventPackage* p_event = nullptr;
-
-      jobj = obj[rule_name].getObject()["Trigger"];
-      if(!jobj.isNull()){
-        parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
-        // Activate rule
-        rules[rule_index].flag_configured = true;
-        rules[rule_index].flag_enabled = true;
+      // Optional: read/display rule name (store if your struct supports it)
+      if (JsonParserToken jn = robj["Name"]) {
+        #ifdef ENABLE_LOG_LEVEL_INFO
+          ALOG_HGL(PSTR("RULE[%u] Name: %s"), i, jn.getStr());
+        #endif
+        // TODO: if you have storage, copy it: strlcpy(rules[i].name, jn.getStr(), sizeof(rules[i].name));
       }
 
-      jobj = obj[rule_name].getObject()["Command"];
-      if(!jobj.isNull()){
-        parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);        
+      // Trigger
+      jobj = robj["Trigger"];
+      if (!jobj.isNull()) {
+        parsesub_Rule_Part(jobj, &tkr_rules->rules[i].trigger);
+        rules[i].flag_configured = true;
+        rules[i].flag_enabled    = true;
+        #ifdef ENABLE_LOG_LEVEL_INFO
+          ALOG_HGL(PSTR("RULE[%u] Trigger parsed -> enabled"), i);
+        #endif
       }
 
-      mqtthandler_settings.flags.SendNow = true;
+      // Command
+      jobj = robj["Command"];
+      if (!jobj.isNull()) {
+        parsesub_Rule_Part(jobj, &tkr_rules->rules[i].command);
+        #ifdef ENABLE_LOG_LEVEL_INFO
+          ALOG_HGL(PSTR("RULE[%u] Command parsed"), i);
+        #endif
+      }
 
+      rules_found++;
     }
 
-  }  
+    if (rules_found) {
+      #ifdef USE_MODULE_NETWORK_MQTT
+      mqtthandler_settings.flags.SendNow = true;
+      #endif
+    }
+  }
 
+  // ============================================================
+  // [B] Legacy format fallback: "Rule0", "Rule1", ...
+  //     Only if no "Rules" array parsed above.
+  // ============================================================
+  if (rules_found == 0) {
+    char rule_name[10] = {0};
+    for (uint8_t rule_index = 0; rule_index < MAX_RULE_VARS; rule_index++) {
+      sprintf(rule_name, "Rule%d", rule_index);
+      if ((jtok = obj[rule_name])) {
 
-  if(jtok = obj["AddRule"])
-  { // Assuming going forward vectors will be used, but for now just slot relative from 0 index 
+        #ifdef ENABLE_LOG_LEVEL_INFO
+          ALOG_HGL(PSTR("MATCHED %s"), rule_name);
+        #endif
 
-    ALOG_INF(PSTR( D_LOG_RULES "AddRule"));
-
-    if(jtok_sub = jtok.getObject()["Default"])
-    {
-      
-      if(jtok_sub.isArray())
-      {
-        
-        JsonParserArray array = jtok_sub;
-        uint8_t index = 0;
-        for(auto& object:array)
-        {
-          // ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow %s"),object.getStr());
-          AppendRule_FromDefault_UsingName((char*)object.getStr());
+        // Trigger
+        jobj = obj[rule_name].getObject()["Trigger"];
+        if (!jobj.isNull()) {
+          parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
+          rules[rule_index].flag_configured = true;
+          rules[rule_index].flag_enabled    = true;
         }
 
+        // Command
+        jobj = obj[rule_name].getObject()["Command"];
+        if (!jobj.isNull()) {
+          parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);
+        }
+
+        #ifdef USE_MODULE_NETWORK_MQTT
+        mqtthandler_settings.flags.SendNow = true;
+        #endif
       }
     }
-    
-    // if(strcmp(jtok.getStr(), "Switch1Change->Relay1Follow")==0)
-    // {
-    
-    
-    //   ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow"));
+  }
 
-    // }
+  // ============================================================
+  // [C] AddRule support (unchanged except for minor tidy)
+  // ============================================================
+  if ((jtok = obj["AddRule"])) {
+    ALOG_INF(PSTR(D_LOG_RULES "AddRule"));
 
+    if ((jtok_sub = jtok.getObject()["Default"])) {
+      if (jtok_sub.isArray()) {
+        JsonParserArray array = jtok_sub;
+        for (auto& object : array) {
+          AppendRule_FromDefault_UsingName((char*)object.getStr());
+        }
+      }
+    }
 
-    
-    
-    
-    // EventPackage* p_event = nullptr;
-
-
-    // jobj = obj[rule_name].getObject()["Trigger"];
-    // if(!jobj.isNull()){
-    //   parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
-
-    //   // tmp fix, just set but later needs made dynamic
-
-    //   // Activate rule
-    //   rules[rule_index].flag_configured = true;
-    //   rules[rule_index].flag_enabled = true;
-
-
-    // }
-
-    // jobj = obj[rule_name].getObject()["Command"];
-    // if(!jobj.isNull()){
-    //   parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);
-      
-    // }
-
-    
     #ifdef USE_MODULE_NETWORK_MQTT
     mqtthandler_state_ifchanged.flags.SendNow = true;
-    #endif // USE_MODULE_NETWORK_MQTT
-
+    #endif
   }
+
+
+// void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
+// {
+
+// // return;
+
+
+//   JsonParserToken jtok = 0; 
+//   JsonParserToken jtok_sub = 0; 
+//   JsonParserObject jobj = 0;
+//   int16_t tmp_id = 0;
+
+//   uint8_t rule_index = 0;
+//   char rule_name[10] = {0};
+//   for(int rule_index=0;rule_index<MAX_RULE_VARS;rule_index++)
+//   {
+//     sprintf(rule_name, "Rule%d", rule_index);
+    
+//     if(jtok = obj[rule_name])
+//     {
+      
+//       #ifdef ENABLE_LOG_LEVEL_INFO
+//         ALOG_HGL(PSTR("MATCHED Rule%d"),rule_index);
+//         // DELAY_DEBUG(1000);
+//       #endif // ENABLE_LOG_LEVEL_INFO
+
+//       EventPackage* p_event = nullptr;
+
+//       jobj = obj[rule_name].getObject()["Trigger"];
+//       if(!jobj.isNull()){
+//         parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
+//         // Activate rule
+//         rules[rule_index].flag_configured = true;
+//         rules[rule_index].flag_enabled = true;
+//       }
+
+//       jobj = obj[rule_name].getObject()["Command"];
+//       if(!jobj.isNull()){
+//         parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);        
+//       }
+
+//       mqtthandler_settings.flags.SendNow = true;
+
+//     }
+
+//   }  
+
+
+//   if(jtok = obj["AddRule"])
+//   { // Assuming going forward vectors will be used, but for now just slot relative from 0 index 
+
+//     ALOG_INF(PSTR( D_LOG_RULES "AddRule"));
+
+//     if(jtok_sub = jtok.getObject()["Default"])
+//     {
+      
+//       if(jtok_sub.isArray())
+//       {
+        
+//         JsonParserArray array = jtok_sub;
+//         uint8_t index = 0;
+//         for(auto& object:array)
+//         {
+//           // ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow %s"),object.getStr());
+//           AppendRule_FromDefault_UsingName((char*)object.getStr());
+//         }
+
+//       }
+//     }
+    
+//     // if(strcmp(jtok.getStr(), "Switch1Change->Relay1Follow")==0)
+//     // {
+    
+    
+//     //   ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow"));
+
+//     // }
+
+
+    
+    
+    
+//     // EventPackage* p_event = nullptr;
+
+
+//     // jobj = obj[rule_name].getObject()["Trigger"];
+//     // if(!jobj.isNull()){
+//     //   parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
+
+//     //   // tmp fix, just set but later needs made dynamic
+
+//     //   // Activate rule
+//     //   rules[rule_index].flag_configured = true;
+//     //   rules[rule_index].flag_enabled = true;
+
+
+//     // }
+
+//     // jobj = obj[rule_name].getObject()["Command"];
+//     // if(!jobj.isNull()){
+//     //   parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);
+      
+//     // }
+
+    
+//     #ifdef USE_MODULE_NETWORK_MQTT
+//     mqtthandler_state_ifchanged.flags.SendNow = true;
+//     #endif // USE_MODULE_NETWORK_MQTT
+
+//   }
 
 
 
@@ -1082,7 +1195,9 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
             JBI->Add("len", rules[id].command.value.length);
             // if(rules[id].command.p_json_commands!=nullptr){
 
-            if(rules[id].command.json_commands_dlist_id>0){
+            if(rules[id].command.json_commands_dlist_id>=0){
+
+              // if(tkr_rules->jsonbuffer.data != nullptr){
             //     JBI->Add("json", rules[id].command.p_json_commands);
 
 

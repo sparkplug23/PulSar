@@ -212,6 +212,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }else{
           gpio_pin = GPIO_REL1;
         }
+        ALOG_INF(PSTR("Am I here?? %d"), i);
         tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         // tkr_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
@@ -243,6 +244,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
           power_t state = rpower &1;
           tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
           // tkr_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
+          ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         }
       }
     }
@@ -492,6 +494,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
       tkr_set->runtime.power ^= mask;
       Serial.println("Toggle");
       Serial.println(tkr_set->runtime.power,BIN);
+      ALOG_INF(PSTR("RLY Toggle"));
     }
 #ifdef USE_DEVICE_GROUPS
     if (tkr_set->runtime.power != old_power && SRC_REMOTE != source && SRC_RETRY != source) {
@@ -502,6 +505,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
       SendDeviceGroupMessage(device, DGR_MSGTYP_UPDATE, DGR_ITEM_POWER, dgr_power);
     }
 #endif  // USE_DEVICE_GROUPS
+ALOG_INF(PSTR("before SetDeivePower %d,%d,%d %d"),device,state,source,tkr_set->runtime.power);
     SetDevicePower(tkr_set->runtime.power, source);
 #ifdef USE_DOMOTICZ
     DomoticzUpdatePowerState(device);
@@ -700,6 +704,7 @@ void mRelays::EverySecond()
   SubTask_Relay_CycleTimer(); // to enable relay toggling every X minutes (eg floor mat)
   // Function is used to actually configure the output based on above functions
   SubTask_Relay_TimeOn(); // this function will simply check timeroff, timeron and time restriction. Other functions will set these values
+
 
 }
 
@@ -1145,6 +1150,8 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
     rt.relay_status[num].last.offtime = tkr_time->RtcTime; 
     rt.relay_status[num].time_seconds_on = 0; // Off 
   }
+
+  ALOG_INF(PSTR("ExecuteCommandPower to be called"));
 
   ExecuteCommandPower(num,state,SRC_MQTT);
 

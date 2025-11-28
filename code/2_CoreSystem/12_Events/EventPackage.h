@@ -41,5 +41,6 @@ struct EventPackage{
     /**
      * jsoncommands stored in a dlist
      * */
-    uint8_t json_commands_dlist_id = 0; // 0 = none, 1+ is the count
+    // uint8_t json_commands_dlist_id = 0; // 0 = none, 1+ is the count
+    int8_t json_commands_dlist_id = -1; // 0 = none, 1+ is the count
 };

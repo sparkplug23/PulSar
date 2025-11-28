@@ -36,6 +36,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2025.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
@@ -193,8 +194,8 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
  * 
  */
 
-#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA // FORCE ON
-#define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA // FORCE ON
+// #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
   
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -225,6 +226,11 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   
   // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE // Inherit base config
 
+  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
+  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+  #define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+  #define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+  
   /************************************************************************
    * BUS: 
    ************************************************************************/
@@ -258,7 +264,11 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
   #define ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
   #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
-  #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE  
+  
+  #ifndef  DISABLE_FEATURE_LIGHTS__DECIMATE
+  #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE   // To allow debugging of presets without editing
+  #endif
+
   #define ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
   #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
 
