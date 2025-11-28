@@ -122,6 +122,7 @@ void NeoPixelAnimator::StopAll()
 
 void NeoPixelAnimator::UpdateAnimations()
 {
+                Serial.println("UpdateAnimations"); Serial.flush();
     if (_isRunning)
     {
         uint32_t currentTick = millis();

@@ -52,7 +52,7 @@ void mAnimatorLight::unloadPlaylist()
 int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId) 
 {
 
-  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK   "mAnimatorLight::loadPlaylist"));
+  ALOG_INF(PSTR("mAnimatorLight::loadPlaylist"));
 
   unloadPlaylist();
 
@@ -67,7 +67,7 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   byte it = 0;
   for (int ps : presets) 
   {
-    ALOG_INF(PSTR("mAnimatorLight::loadPlaylist: ps=%d"), ps);
+    ALOG_INF(PSTR("ps=%d"), ps);
     if (it >= playlistLen) break;
     playlistEntries[it].preset = ps;
     it++;
@@ -85,9 +85,9 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   {
     for (int dur : durations) 
     {
-      ALOG_INF(PSTR("mAnimatorLight::loadPlaylist: durations.dur %d"), dur);
       if (it >= playlistLen) break;
       playlistEntries[it].dur = (dur > 1) ? dur : 100;
+      ALOG_INF(PSTR("durations.dur %d->%d secs"), dur, playlistEntries[it].dur);
       it++;
     }
   }
@@ -130,12 +130,8 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   if (shuffle) playlistOptions += PL_OPTION_SHUFFLE;
 
   currentPlaylist = presetId;
-  DEBUG_PRINTLN(F("Playlist loaded."));
-  
 
-  
-
-
+  ALOG_INF(PSTR("Playlist %d loaded"),currentPlaylist);
 
 
   return currentPlaylist;
@@ -150,11 +146,13 @@ void mAnimatorLight::SubTask_Playlist()
   static unsigned long presetCycledTime = 0;
 
   // if gDoc is not null JSON buffer is in use so just quit
-  if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_mfile->pDoc != nullptr) 
-  {
-    // ALOG_INF(PSTR("SubTask_Playlist return early"));    
-    return;
-  }
+  // if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_mfile->pDoc != nullptr) 
+  // {
+  //   ALOG_INF(PSTR("SubTask_Playlist return early"));    
+  //   return;
+  // }
+   if (currentPlaylist < 0 || playlistEntries == nullptr) return;
+
 
 
   if(mTime::TimeReached(&tSaved_playlist_debug, 1000)){

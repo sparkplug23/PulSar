@@ -60,6 +60,8 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVENT_SET_POWER_ID:
       RulesEvent_Set_Power();
     break;
+    // Leave standy
+    // Start standy
     #endif// USE_MODULE_CORE_RULES
     /************
      * MQTT SECTION * 
@@ -736,7 +738,7 @@ void mInterfaceLight::RulesEvent_Set_Power()
 
   bool get_state = CommandGet_LightPowerState(); 
 
-  ALOG_TST(PSTR("CommandGet_LightPowerState() = %d"), get_state);
+  ALOG_TST(PSTR("CommandGet_LightPowerState() = %d %d"), get_state, state);
 
   // get state
   ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());

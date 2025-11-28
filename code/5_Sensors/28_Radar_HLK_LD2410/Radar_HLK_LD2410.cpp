@@ -236,7 +236,7 @@ void mHLK_LD2410::Ld1410HandleTargetData(void) {
     rt.detect_distance = 0;
 
     if (rt.buffer[8] != 0x00) {                               // Movement and/or Stationary target
-      rt.moving_distance = rt.buffer[10] << 8 | rt.buffer[9];
+      rt.moving_distance = rt.buffer[10] << 8 | rt.buffer[9]; // cm
       rt.moving_energy   = rt.buffer[11];
       rt.static_distance = rt.buffer[13] << 8 | rt.buffer[12];
       rt.static_energy   = rt.buffer[14];
@@ -245,7 +245,7 @@ void mHLK_LD2410::Ld1410HandleTargetData(void) {
       ALOG_INF(PSTR(D_LOG_LD2410 "Moving: %d, %d, Static: %d, %d, Detect: %d"), rt.moving_distance, rt.moving_energy, rt.static_distance, rt.static_energy, rt.detect_distance);
 
     }else{
-      ALOG_INF(PSTR(D_LOG_LD2410 "No target"));
+      ALOG_DBM(PSTR(D_LOG_LD2410 "No target"));
     }
 
 

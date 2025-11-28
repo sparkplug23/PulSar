@@ -177,8 +177,22 @@ void mPIR::ReadSensor()
 
           // Log or trigger events for active state
           AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "%d (Active)"), sensor_id);
+
+          #ifdef ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
+          
+          #ifdef USE_MODULE_CORE_RULES
+          tkr_rules->NewEventRun(
+              GetModuleUniqueID(), // Unique module ID
+              TASK_EVENT_MOTION_STARTED_ID,  // Task Event
+              sensor_id,                       // Button Index
+              isActive
+          ); // Event has occured, save and check it    
+          #endif
+
+          #else
           tkr_rules->New_Event(GetModuleUniqueID(), sensor_id, isActive);
           pCONT->Tasker_Interface(TASK_EVENT_MOTION_STARTED_ID);               // This tied this submodule, directly into the interface, and will send the response immediately (with the rule populated)
+          #endif
         } 
         else 
         {
@@ -189,8 +203,24 @@ void mPIR::ReadSensor()
 
           // Log or trigger events for inactive state
           AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "%d (Inactive)"), sensor_id);
+
+          
+          #ifdef ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
+          
+          #ifdef USE_MODULE_CORE_RULES
+          tkr_rules->NewEventRun(
+              GetModuleUniqueID(), // Unique module ID
+              TASK_EVENT_MOTION_ENDED_ID,  // Task Event
+              sensor_id,                       // Button Index
+              isActive
+          ); // Event has occured, save and check it    
+          #endif
+
+          #else
           tkr_rules->New_Event(GetModuleUniqueID(), sensor_id, isActive);
           pCONT->Tasker_Interface(TASK_EVENT_MOTION_ENDED_ID);                // This tied this submodule, directly into the interface, and will send the response immediately (with the rule populated)
+          #endif
+        
         }
 
         // Update device name and event information

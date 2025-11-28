@@ -1191,6 +1191,7 @@ int8_t mPins::ConvertIndexPinToRealPin(uint8_t index_pin){
 
 void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
 {
+  ALOG_ERR(PSTR("SHould never be here!!"));
   DigitalWrite(gpio_pin, 0, state);
   // if (tkr_set->pin[gpio_pin] < 99) {
         // AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_RELAYS "DigitalWrite(%d[%d],%d)"),tkr_set->pin[gpio_pin],gpio_pin,state);
@@ -1202,7 +1203,7 @@ void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
 void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state)
 {
   uint8_t real_pin = Pin(gpio_pin, index);
-  ALOG_DBM(PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
+  ALOG_INF(PSTR("DigitalWrite gpio_pin=%d,real_pin=%d,index=%d,state=%d"),gpio_pin,real_pin, index, state &1);
   digitalWrite(real_pin, state &1);
 }
 

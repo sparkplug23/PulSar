@@ -13,7 +13,7 @@ void MQTTConnection::MqttConnected(void)
   sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, tkr_sup->GetResetReason().c_str(), tkr_time->GetUptime().c_str() );
   
   #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
-    char lwt_topic[40];
+    char lwt_topic[50];
     snprintf_P(lwt_topic, sizeof(lwt_topic), PSTR("%s/status/LWT"), prefix_topic);
     pubsub->publish(lwt_topic, lwt_message_ondisconnect_ctr, true); // onconnect message
     delay(100);

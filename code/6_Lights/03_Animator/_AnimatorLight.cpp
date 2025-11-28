@@ -40,10 +40,18 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       Serial.printf_P(PSTR("FPS: %f\n\r"), getFpsFloat());
       #endif
 
+      #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+      EverySecond_Standby();
+      #endif
+
     }break;
     case TASK_LOOP:     
+      // ALOG_INF(PSTR("Loop1"));Serial.flush();
       EveryLoop();
-    break;        
+      // ALOG_INF(PSTR("Loop2"));Serial.flush();
+    break;     
+    case TASK_EVERY_250_MSECOND:
+    break;   
     case TASK_BOOT_MESSAGE:
       BootMessage();
     break;
@@ -649,6 +657,7 @@ void mAnimatorLight::EveryLoop()
   if (doReboot && !doInitBusses) // if busses have to be inited & saved, wait until next iteration
     reset();
     
+      // ALOG_INF(PSTR("Loop1a"));Serial.flush();
   // This should be removed, as realtime mode will cause this to switch anyway
   /**
    * @brief If RealTime modes first
@@ -669,11 +678,14 @@ void mAnimatorLight::EveryLoop()
       SubTask_Demo();
       #endif
 
+      // ALOG_INF(PSTR("Loop1b"));Serial.flush();
       #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS
       DEBUG_LIGHTING__START_TIME_RECORDING(1)
       SubTask_Effects();
       DEBUG_LIGHTING__SAVE_TIME_RECORDING(1, lighting_time_critical_logging.segment_effects); 
       #endif  
+      
+      // ALOG_INF(PSTR("Loop1c"));Serial.flush();
 
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
       SubTask_Playlist();
@@ -942,6 +954,7 @@ void mAnimatorLight::EverySecond_AutoOff()
   }
 
 } // END EverySecond_AutoOff
+
 
 
 
@@ -1942,9 +1955,13 @@ void mAnimatorLight::SubTask_Effects()
       Serial.println("Pre Effect Call -------------------------------------------------------------");
       #endif
       
+      // ALOG_INF(PSTR("Loop1cA %d"),seg.effect_id);Serial.flush();
       // if(seg.effect_id<90)//77
       frameDelay = (this->*effects.function[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
       
+      // ALOG_INF(PSTR("Loop1cB"));Serial.flush();
+      // delay(100);
+      // ALOG_INF(PSTR("Loop1cB2"));Serial.flush();
       #ifdef ENABLE_EFFECTS_TIMING_DEBUG_GPIO
       DEBUG_PIN1_SET(HIGH);
       #endif
@@ -1961,12 +1978,14 @@ void mAnimatorLight::SubTask_Effects()
       } 
       #endif
 
+      // ALOG_INF(PSTR("Loop1cB3"));Serial.flush();
       if(seg.animation_has_anim_callback)
       { 
         StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_current_index); // First run must be reset after StartAnimation is first called 
         // Serial.println("ANIM CALLED");
       }
       
+      // ALOG_INF(PSTR("Loop1cB4"));Serial.flush();
       if(!seg.animation_has_anim_callback)  // Direct method, which the effect has ran above once so can be reset here
       {
         SEGMENT.flags.animator_first_run = RESET_FLAG; // if not
@@ -1978,13 +1997,20 @@ void mAnimatorLight::SubTask_Effects()
     } // END if effect needs to be called
 
       
+      // ALOG_INF(PSTR("Loop1cB5"));Serial.flush();
+      if (seg.animator==nullptr){
+      // ALOG_INF(PSTR("Loop1cB5a"));Serial.flush();
+      }
+      // ALOG_INF(PSTR("Loop1cB5b"));Serial.flush();
     /**
      * @brief If animator is used, then the animation will be called from the animator
      * TODO: Animator should be totally phased out
      **/    
     if (seg.animator->IsAnimating())
     {
+      //  ALOG_INF(PSTR("Loop1cB5c"));Serial.flush();
       seg.animator->UpdateAnimations();
+      //  ALOG_INF(PSTR("Loop1cB5d"));Serial.flush();
       doShow = true;
       SEGMENT.flags.animator_first_run = RESET_FLAG;
 
@@ -2004,6 +2030,8 @@ void mAnimatorLight::SubTask_Effects()
         }
       }
     }
+    
+      // ALOG_INF(PSTR("Loop1cB6"));Serial.flush();
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
     if(doShow)
@@ -2028,6 +2056,8 @@ void mAnimatorLight::SubTask_Effects()
     ALOG_DBG(PSTR("Slow effects %u/%d"), (unsigned)(millis()-nowUp), (int)_frametime);
   }
   #endif  
+  
+      // ALOG_INF(PSTR("Loop1cB7"));Serial.flush();
   if(doShow)
   {
     yield();
@@ -2040,6 +2070,8 @@ void mAnimatorLight::SubTask_Effects()
     ALOG_DBG(PSTR("Slow strip %u/%d"), (unsigned)(millis()-nowUp), (int)_frametime);
   }
   #endif
+  
+      // ALOG_INF(PSTR("Loop1cZ"));Serial.flush();
       
   _force_update = false;
   _isServicing = false;
@@ -2480,7 +2512,7 @@ int16_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 
     // Check for a match with the provided name
     if (strcmp(f, lineBuffer) == 0) {
-      ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s i within effects vector %d"), f, i);
+      ALOG_DBM(PSTR("GetFlasherFunctionIDbyName %s->%d"), f, i);
       // return effects.id[i]; 
       return i; // maybe this is wrong, it should not be returning the index of the loop, but the ID of the effect?
     }

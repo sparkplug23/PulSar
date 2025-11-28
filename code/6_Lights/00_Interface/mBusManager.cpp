@@ -8,6 +8,12 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 
+#ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+uint16_t PolyBus::reduced_physical_render_length = ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED_LENGTH;//50;
+uint16_t PolyBus::total_virtual_length = 0;
+#endif
+
+
 /***************************************************************************************************************************************************************** 
  ** ColorOrderMap *************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/

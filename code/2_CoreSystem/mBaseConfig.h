@@ -37,6 +37,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2025.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
@@ -467,7 +468,9 @@ With latest version, all longer term shared debug features should be added here 
 #define TIME_DST_DAY           Sun               // Day of week (1 or Sun, 2 or Mon, 3 or Tue, 4 or Wed, 5 or Thu, 6 or Fri, 7 or Sat)
 #define TIME_DST_MONTH         Mar               // Month (1 or Jan, 2 or Feb, 3 or Mar, 4 or Apr, 5 or May, 6 or Jun, 7 or Jul, 8 or Aug, 9 or Sep, 10 or Oct, 11 or Nov, 12 or Dec)
 #define TIME_DST_HOUR          2                 // Hour (0 to 23)
+#ifndef TIME_DST_OFFSET
 #define TIME_DST_OFFSET        60                // Offset from UTC in minutes (-780 to +780)
+#endif 
 
 // -- Time - Start Standard Time and timezone offset from UTC in minutes
 #define TIME_STD_HEMISPHERE    North             // [TimeStd] Hemisphere (0 or North, 1 or South)
@@ -475,7 +478,9 @@ With latest version, all longer term shared debug features should be added here 
 #define TIME_STD_DAY           Sun               // Day of week (1 or Sun, 2 or Mon, 3 or Tue, 4 or Wed, 5 or Thu, 6 or Fri, 7 or Sat)
 #define TIME_STD_MONTH         Oct               // Month (1 or Jan, 2 or Feb, 3 or Mar, 4 or Apr, 5 or May, 6 or Jun, 7 or Jul, 8 or Aug, 9 or Sep, 10 or Oct, 11 or Nov, 12 or Dec)
 #define TIME_STD_HOUR          2                 // Hour (0 to 23)
+#ifndef TIME_STD_OFFSET
 #define TIME_STD_OFFSET        0                 // Offset from UTC in minutes (-780 to +780)
+#endif
 
 // -- Location ------------------------------------
 #ifndef LATITUDE              // eg. Belfast, Northern Ireland

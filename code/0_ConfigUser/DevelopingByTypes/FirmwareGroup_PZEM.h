@@ -37,8 +37,12 @@
   #define DEVICENAME_CTR          "socket_energy_01"
   #define DEVICENAME_FRIENDLY_CTR "hvac_oil_radiator #1"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define MQTT_HOST   "192.168.1.70"
+  #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
+
+    #define ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
+
+    #define USE_MODULE_CORE_FILESYSTEM
     
   /***********************************
    * SECTION: System Debug Options
@@ -86,7 +90,7 @@
   #endif
 
   #define USE_MODULE_SENSORS_INTERFACE  
-  #define USE_MODULE_SENSORS_BUTTONS
+  //#define USE_MODULE_SENSORS_BUTTONS
     
 
   // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
@@ -135,6 +139,8 @@
    * SECTION: MQTT Template Test Loading
   ************************************/  
 
+  // #define ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
+
   /***********************************
    * SECTION: GPIO Template
   ************************************/  
@@ -157,7 +163,8 @@
       "\"27\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\"" D_GPIO_FUNCTION_REL1_CTR  "\""
+      "\"26\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_REL2_CTR  "\"" // use LED as temporary relay tester
       #endif  
 
     "},"
