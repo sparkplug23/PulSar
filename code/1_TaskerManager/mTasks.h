@@ -187,6 +187,8 @@ enum TASKER_FUNCTION_TYPES
   TASK_FILESYSTEM__SAVE__MODULE_DATA__ID,   // Each module is asked to save its data -- this should be starggered to avoid blocking
   TASK_FILESYSTEM__LOAD__MODULE_DATA__ID,   // Each module is asked to load its data on restore at boot
 
+  TASK_FILESYSTEM__HANDLE_FILE_CHANGES_FROM_EDIT_URL__ID,
+
 
   TASK_TIME_SYNCED,
 

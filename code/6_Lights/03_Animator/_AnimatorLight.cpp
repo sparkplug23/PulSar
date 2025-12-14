@@ -44,6 +44,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       EverySecond_Standby();
       #endif
 
+      // ALOG_INF(PSTR("AnimatorLight TASK_EVERY_SECOND %d"), tkr_iLight->bus_manager->canAllShow());
+
+      // if (!tkr_iLight->bus_manager->canAllShow()) {      // or strip.CanShow() if you wrap it there
+      //   return;                           // try again on next scheduler tick
+      // }
+
     }break;
     case TASK_LOOP:     
       // ALOG_INF(PSTR("Loop1"));Serial.flush();
@@ -67,6 +73,9 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
     case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
+    break;
+    case TASK_FILESYSTEM__HANDLE_FILE_CHANGES_FROM_EDIT_URL__ID:
+      Handle_FileSave_Edits();
     break;
     #endif
     /************
@@ -107,6 +116,38 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
   return function_result;
 
 } // END FUNCTION
+
+
+// Date Modified: 12Dec25
+void mAnimatorLight::Handle_FileSave_Edits()
+{
+  // If nothing pending, bail early (paranoid guard; optional if caller already checks)
+  if (!SPIFFSEditor::Check_AnyFilesEdited()) return;
+
+  if (SPIFFSEditor::Check_FileEditedIs(F("presets.json"))) {
+    static bool use_new_parser = false;   // toggles each time
+
+    uint32_t t_start = millis();
+
+    // if (!use_new_parser) {
+    //   ALOG_INF(PSTR("presets.json updated, running ScanPresetsFile_GeneratePlaylistIDsFromPSN()"));
+    //   ScanPresetsFile_GeneratePlaylistIDsFromPSN();
+    // } else {
+      ALOG_INF(PSTR("presets.json updated, running ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()"));
+      ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
+    // }
+
+    uint32_t t_elapsed = millis() - t_start;
+    ALOG_INF(PSTR("Playlist rescan (%s) took %u ms"),
+             use_new_parser ? PSTR("v2") : PSTR("v1"),
+             (unsigned)t_elapsed);
+
+    use_new_parser = !use_new_parser; // toggle for next time
+  }
+
+  // Future:
+  // if (SPIFFSEditor::Check_FileEditedIs(F("some_other.json"))) { ... }
+}
 
 
 #ifdef ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
@@ -515,7 +556,7 @@ void mAnimatorLight::Init_Busses()
      if (!Bus::is2Pin(tkr_iLight->busConfigs[i]->type)) {
        digitalCount++;
        unsigned channels = Bus::getNumberOfChannels(tkr_iLight->busConfigs[i]->type);
-       if (tkr_iLight->busConfigs[i]->count > maxLedsOnBus) maxLedsOnBus = tkr_iLight->busConfigs[i]->count;
+       if (tkr_iLight->busConfigs[i]->length > maxLedsOnBus) maxLedsOnBus = tkr_iLight->busConfigs[i]->length;
        if (channels > maxChannels) maxChannels  = channels;
      }
    }
@@ -523,9 +564,10 @@ void mAnimatorLight::Init_Busses()
    /**
     * Assign to use parallel only when pixels per bus are low, and channels are more than 2
     * Will use combined I2Sx2 + RMTx8 when pixels per bus are more than 300
+    * Default is 300 per output, but override is allowed in special cases (eg limited pins but want 1 higher output)
     * 
     */
-   if (maxLedsOnBus <= 300 && digitalCount > 2) 
+   if (maxLedsOnBus <= BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S && digitalCount > 2) 
    {  // I will want >2, as I0 and I1 are for 2 pins only, then immediately switch to parallel
      DEBUG_PRINTF_P(PSTR("Switching to parallel I2S\n\r"));
      useParallel = true;
@@ -533,7 +575,7 @@ void mAnimatorLight::Init_Busses()
      tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
      mem = BusManager::memUsage(maxChannels, maxLedsOnBus, 8); // use alternate memory calculation (hse to be used *after* useParallelOutput())
    }else
-   if (maxLedsOnBus > 300 && digitalCount > 2) 
+   if (maxLedsOnBus > BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S && digitalCount > 2) 
    {
      ALOG_ERR(PSTR("Parallel is required to avoid RMT, but per bus count exceeded. Using anyway for now (%d,%d)"), maxLedsOnBus, digitalCount);
      tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
@@ -1893,15 +1935,37 @@ void mAnimatorLight::SubTask_Effects()
 
   uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
   effect_start_time = nowUp + timebase;
-  if (nowUp - _lastShow < MIN_SHOW_DELAY) return;
+
+  // Rate limit
+  if (nowUp - _lastShow < MIN_SHOW_DELAY) return; // minimum show delay based on frametime. <10ms will cause flicker, especially on parallel methods
+
+  // IMPORTANT: make sure NeoPixelBus DMA is idle before we start writing pixels
+  // adjust access as needed (this->bus_manager, tkr_iLight->bus_manager, etc.)
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
+  if (isUpdating()) {      // or strip.CanShow() if you wrap it there
+    // ALOG_WRN(PSTR("DMA BUSY - SKIPPING EFFECTS CYCLE"));
+    return;                           // try again on next scheduler tick
+  }else{
+    // ALOG_INF(PSTR("->"));
+  }
+  #endif
+
   bool doShow = false;
 
   _isServicing = true;
-  segment_current_index = 0; 
 
+  #ifndef ENABLE_DEVFETURE_LIGHTING__SEGMENT_INDEX_AS_ITER
+  segment_current_index = 0; 
   for (segment &seg : segments) 
   {
-    
+  #endif    
+  #ifdef ENABLE_DEVFETURE_LIGHTING__SEGMENT_INDEX_AS_ITER
+  for (segment_current_index = 0; // global, but reset here
+       segment_current_index < getSegmentsNum();
+       segment_current_index++)
+  {
+    segment &seg = segments[segment_current_index];
+    #endif
     // reset the segment runtime data if needed
     seg.resetIfRequired();
 
@@ -2046,8 +2110,10 @@ void mAnimatorLight::SubTask_Effects()
     /**
      * @brief Now iter forward on active segment
      **/
+    #ifndef ENABLE_DEVFETURE_LIGHTING__SEGMENT_INDEX_AS_ITER
     if( segment_current_index < getSegmentsNum() - 1 ) segment_current_index++; // fix for segment_current_index final iter going beyond getSegmentsNum() causing invalid index memory access
-    
+    #endif
+
   } // END for
   
   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
@@ -5078,9 +5144,8 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
    * ** [false] : Apply brightness to the colour
    * ** [true]  : Get the "full" 255 range colour object
    */
-  bool apply_brightness,
-  
-  uint8_t pbri,
+  bool apply_brightness, // as a flag, should maybe be removed and combined with the pbri below  
+  uint8_t pbri, // since 255 means not, otherwise apply
 
   uint8_t mcol
 ){
@@ -5151,6 +5216,7 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour(
   return colour;
 
 }
+
 
 
 RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW_2025(
@@ -5623,6 +5689,34 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
       Serial.printf("::Segment::setPixelColor(int i, tmpCol %d,%d,%d\n\r", tmpCol.R, tmpCol.G, tmpCol.B);
       #endif
       tkr_anim->setPixelColor(indexSet, tmpCol);
+
+      
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      // for (uint8_t d = 0; d < decimate; d++) 
+      // {
+      //   if (j > 1) break;  // Skip decimate when grouping is on
+
+      //   uint16_t new_indexSet = indexSet + (d * virtualLength());
+      //   if (new_indexSet >= start && new_indexSet < stop) 
+      //   {
+      //     tkr_anim->setPixelColor(new_indexSet, tmpCol);
+      //   }
+      // }
+      if (decimate > 1 && j <= 1)  // only replicate when active & not grouped
+      {
+        for (uint8_t d = 1; d < decimate; d++)  // start from 1, base pixel already set
+        {
+          uint16_t new_indexSet = indexSet + (d * virtualLength());
+          if (new_indexSet >= start && new_indexSet < stop) 
+          {
+            tkr_anim->setPixelColor(new_indexSet, tmpCol);
+          }
+        }
+      }
+      #endif
+
+
+
     }
   }
 }
@@ -6495,6 +6589,9 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
   char buffer[120];
 
   JBI->Start();
+
+
+    JBI->Add("MinShowDelay", MIN_SHOW_DELAY);
 
     uint8_t seg_count = getSegmentsNum();
 

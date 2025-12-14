@@ -288,7 +288,7 @@ class Bus {
 struct BusConfig 
 {
   uint8_t type;
-  uint16_t count;
+  uint16_t length;
   uint16_t start;
   uint8_t colorOrder;
   bool reversed;
@@ -303,7 +303,7 @@ struct BusConfig
 
 
   BusConfig(uint8_t busType, uint8_t* ppins, uint16_t pstart, uint16_t len = 1, uint8_t pcolorOrder = COL_ORDER_GRB, bool rev = false, uint8_t skip = 0, byte aw=RGBW_MODE_MANUAL_ONLY, uint16_t clock_kHz=0U, bool dblBfr=false, uint8_t maPerLed=LED_MILLIAMPS_DEFAULT, uint16_t maMax=ABL_MILLIAMPS_DEFAULT)
-    : count(len)
+    : length(len)
     , start(pstart)
     , colorOrder(pcolorOrder)
     , reversed(rev)
@@ -360,13 +360,13 @@ struct BusConfig
   // Validates start and length and extends total if needed
   bool adjustBounds(uint16_t& total) 
   {
-    if (!count) count = 1;
-    if (count > MAX_LEDS_PER_BUS) count = MAX_LEDS_PER_BUS;
+    if (!length) length = 1;
+    if (length > MAX_LEDS_PER_BUS) length = MAX_LEDS_PER_BUS;
     if (start >= MAX_LEDS_NEO) return false;
     // Limit length of strip if it would exceed total permissible LEDs
-    if (start + count > MAX_LEDS_NEO) count = MAX_LEDS_NEO - start;
+    if (start + length > MAX_LEDS_NEO) length = MAX_LEDS_NEO - start;
     // Extend total count accordingly
-    if (start + count > total) total = start + count;
+    if (start + length > total) total = start + length;
     return true;
   }
 

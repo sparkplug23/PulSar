@@ -33,6 +33,11 @@
 #endif 
 
 
+#ifndef BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S
+#define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 300
+#endif 
+
+
 // Temporary fixing for neopixelbusLg issue
 #ifndef ANIM_BRIGHTNESS_REQUIRED
 #define  false
@@ -382,6 +387,8 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 // Segment width/height helpers.
 #define SEG_W                  segments[getCurrSegmentId()].vWidth()
 #define SEG_H                  segments[getCurrSegmentId()].vHeight()
+
+
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -776,6 +783,50 @@ class mAnimatorLight :
 
     uint8_t GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id);
 
+    
+    // WLED-compat wrapper: ignores 'pal' and uses SEGMENT.palette_id via SEGMENT.GetPaletteColour()
+    // Keeps WLED call-sites working: ColorFromPalette(SEGPALETTE, idx, bri, blend)
+    inline uint32_t ColorFromPaletteRedirect(
+      const CRGBPalette16& /*pal_ignored*/,
+      uint8_t index,
+      uint8_t brightness = 255,
+      TBlendType blendType = NOBLEND
+    ){
+      // Map WLED blend to your palette mode
+      const uint8_t force_mode = (blendType == NOBLEND) 
+                                 ? PALETTE_MODE__FORCE_DISCRETE
+                                 : PALETTE_MODE__FORCE_GRADIENT;
+
+      // Pull from segment-selected palette (auto-load happens inside GetPaletteColour)
+      uint32_t c = SEGMENT.GetPaletteColour(
+          index,                      // 0-255
+          PALETTE_INDEX__IS_255_RANGE, // WLED-style indexing
+          force_mode,
+          PALETTE_WRAP_HARDEDGE,       // keep consistent with your current shim usage
+          nullptr,
+          /*apply_brightness*/ false,  // IMPORTANT: wrapper handles WLED 'brightness'
+          255, // Brightness at maximum for now, handled below
+          0
+      );
+
+      // Apply WLED brightness argument (independent of seg/global brightness)
+      // The brightness is built into the "GetPaletteColour" function above, so this can likely be removed by simply passing pbri
+      if (brightness < 255) {
+        const uint16_t scale = uint16_t(brightness) + 1;
+        c = RGBW32(
+          (R(c) * scale) >> 8,
+          (G(c) * scale) >> 8,
+          (B(c) * scale) >> 8,
+          (W(c) * scale) >> 8
+        );
+      }
+
+      return c;
+    }
+
+
+
+
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -967,9 +1018,50 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     void unloadPlaylist();
     int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
     void SubTask_Playlist();
-    void serializePlaylist(JsonObject sObj);    
+    void serializePlaylist(JsonObject sObj);
+
+    void ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
+
+    #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+    struct PresetFileMeta {
+      bool     enablePsn;     // 0/1: PSN helper enabled
+      bool     enablePlaylistTimeLocks; // NEW
+      uint8_t  parserVersion; // version of PSN parser logic
+      uint32_t lastScanMs;    // last PSN scan duration (ms)
+    };
+    bool LoadPresetFileMeta(PresetFileMeta &meta);
+    bool SavePresetFileMeta(const PresetFileMeta &meta);
+    bool IsPlaylistTimeLocksEnabled();
+    static const uint8_t kPresetMetaParserVersion = 2;
+    // Date Modified: 13Dec25
+    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+    // todStart/todEnd in HHMM (e.g. 1400 = 14:00), 0 => no lock.
+    // nowHHMM in HHMM form (hour*100 + minute).
+    static bool playlistEntryAllowedAtTime(int16_t todStart, int16_t todEnd, uint16_t nowHHMM)
+    {
+      // No lock if both are zero
+      if (todStart == 0 && todEnd == 0) return true;
+
+      // Basic range sanity; treat invalid as unlocked
+      if (todStart < 0 || todStart > 2359 || todEnd < 0 || todEnd > 2359) return true;
+
+      // Normal case: window does not wrap midnight
+      if (todStart <= todEnd) {
+        return (nowHHMM >= todStart && nowHHMM < todEnd);
+      }
+
+      // Wraps midnight: e.g. 2200 -> 0200
+      return (nowHHMM >= todStart || nowHHMM < todEnd);
+    }
+    uint8_t Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM);
+    #endif
+
+    #endif
+
 
     #endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+
+    void Handle_FileSave_Edits();
 
 
     bool isAsterisksOnly(const char* str, byte maxLen);
@@ -1094,7 +1186,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Lake();
     void EffectAnim__Glitter_Base(uint8_t intensity, uint32_t col = ULTRAWHITE);
     uint16_t EffectAnim__Glitter();
-    uint16_t EffectAnim__Meteor(); 
+    uint16_t EffectAnim__Meteor();
     uint16_t EffectAnim__Pride_2015();    
     CRGB EffectAnim__Pacifica_Base_OneLayer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
     uint16_t EffectAnim__Pacifica();    
@@ -2256,6 +2348,9 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
     CRGB ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
     
 
+    
+
+
     const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
     int16_t GetPaletteIDbyName(char* buffer);
     
@@ -2960,7 +3055,7 @@ typedef struct Segment
       if(mirror) vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
 
       #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-      if(decimate > 0)
+      if(decimate > 1)   // only shrink when factor >= 2. 0 and 1 means no decimation
       {
         vLength = (vLength + decimate - 1) / decimate;
       }
@@ -3003,9 +3098,9 @@ typedef struct Segment
     uint8_t  custom1, custom2;    // custom FX parameters/sliders
     struct {
       uint8_t custom3 : 5;        // reduced range slider (0-31)
-      bool    check1  : 1;        // checkmark 1
-      bool    check2  : 1;        // checkmark 2
-      bool    check3  : 1;        // checkmark 3
+      bool    check1  : 1;        // checkmark 1 PaletteIcon
+      bool    check2  : 1;        // checkmark 2 ?
+      bool    check3  : 1;        // checkmark 3 OverlayIcon
     };
     
     uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
@@ -3655,6 +3750,7 @@ typedef struct Segment
       return c;
     }
 
+    
 
     // 2D Blur: shortcuts for bluring columns or rows only (50% faster than full 2D blur)
     inline void blurCols(fract8 blur_amount, bool smear = false) { // blur all columns
@@ -5284,11 +5380,13 @@ time_t localTime _INIT(0);
 // byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
 // int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
 
-#define FLASH_COUNT 4 
+// #define FLASH_COUNT 4 
 #define LED_SKIP_AMOUNT  0
 // #define MIN_SHOW_DELAY  15
-#define MIN_SHOW_DELAY   2 //(_frametime < 16 ? 8 : 15)
-#define DEFAULT_LED_COUNT 30
+#ifndef MIN_SHOW_DELAY
+#define MIN_SHOW_DELAY   20//(_frametime < 16 ? 8 : 15) // minimum show delay based on frametime. <10ms will cause flicker, especially on parallel methods
+#endif
+#define DEFAULT_LED_COUNT 100
 
 
 // Segment capability byte

@@ -67,7 +67,7 @@
   * Whitehall Tree full playlist (using render_compression)
   * on Green 12V
   */
-  #define DEVICE_COLORADO25__REDBOARD_01
+  // #define DEVICE_COLORADO25__REDBOARD_01
 
 /**
  * @brief clear 12V

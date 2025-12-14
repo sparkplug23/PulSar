@@ -44,7 +44,7 @@
 
 // Dedicated SSID for home controllers
 #ifndef  STA_SSID2
-#define STA_SSID2            "HACS2400"                // [Ssid2] Optional alternate AP Wifi SSID
+#define STA_SSID2            "Aurora2400"                // [Ssid2] Optional alternate AP Wifi SSID
 #endif
 #ifndef  STA_PASS2
 #define STA_PASS2            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password

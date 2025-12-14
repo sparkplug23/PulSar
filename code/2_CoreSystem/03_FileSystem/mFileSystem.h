@@ -281,8 +281,7 @@ JsonDocument *pDoc = &gDoc;
   // JsonDocument* pDoc = nullptr;
 void InitJsonDoc(size_t baseSize);// /* e.g., JSON_BUFFER_SIZE */)
 
-
-
+void Handle_FileChanges_WebUIEdits();
 
     bool doCloseFile =false;
     byte errorFlag = 0;

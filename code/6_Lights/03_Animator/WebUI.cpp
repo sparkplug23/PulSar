@@ -461,6 +461,20 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 {
   ALOG_INF(PSTR("deserializeState"));
 
+  #ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  ALOG_INF(PSTR("Checking for PSN/PD in JSON - cant do here, too slow. will cause crash. needs done outside of here.maybe add a hook in edit"));
+
+  // a flag of "filechange" and "its name"
+  //  and send Tasker out, so anything that cares can be triggered by it.
+
+  // Any time a preset/playlist select command comes in, refresh ps from psn
+  // in presets.json. This uses its own JSON doc and does NOT touch the global one.
+  // if (!root["ps"].isNull() || !root["pd"].isNull()) {
+  //   ScanPresetsFile_GeneratePlaylistIDsFromPSN();
+  // }
+#endif
+
+
   bool stateResponse = root[F("v")] | false;
 
   #if defined(WLED_DEBUG) && defined(WLED_DEBUG_HOST)

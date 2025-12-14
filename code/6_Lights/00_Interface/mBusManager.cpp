@@ -172,7 +172,7 @@ uint8_t *Bus::allocateData(size_t size) {
 
 
 BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com)
-: Bus(bc.type, bc.start, bc.autoWhite, bc.count, bc.reversed, (bc.refreshReq))
+: Bus(bc.type, bc.start, bc.autoWhite, bc.length, bc.reversed, (bc.refreshReq))
 , _skip(bc.skipAmount) //sacrificial pixels
 , _colorOrder(bc.colorOrder)
 , _milliAmpsPerLed(bc.milliAmpsPerLed)
@@ -180,9 +180,9 @@ BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com)
 , _colorOrderMap(com)
 {
 
-  if (!isDigital(bc.type) || !bc.count)
+  if (!isDigital(bc.type) || !bc.length)
   {    
-    ALOG_ERR(PSTR("BusDigital type%d or count%d"), bc.type, bc.count);
+    ALOG_ERR(PSTR("BusDigital type%d or length%d"), bc.type, bc.length);
     return;
   }
   _frequencykHz = 0U;
@@ -207,13 +207,13 @@ BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com)
    * Next line creates the buffer needed to store the pixels
    * number of pixels * number of channels [3 (RGB) or 4 (RGBW) ] later I may want to add a check for RGBWW, and making the buffer twice as long for my transition effects 
    */
-  if (bc.doubleBuffer && !allocateData(bc.count * Bus::getNumberOfChannels(bc.type))) return;
+  if (bc.doubleBuffer && !allocateData(bc.length * Bus::getNumberOfChannels(bc.type))) return;
   //_buffering = bc.doubleBuffer;
-  uint16_t lenToCreate = bc.count;
-  if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.count); // only needs a third of "RGB" LEDs for NeoPixelBus
+  uint16_t lenToCreate = bc.length;
+  if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.length); // only needs a third of "RGB" LEDs for NeoPixelBus
   _busPtr = PolyBus::create(_iType, _pins, lenToCreate + _skip, nr);
   _valid = (_busPtr != nullptr);
-  ALOG_INF(PSTR("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u). mA=%d/%d\n"), _valid?"S":"Uns", nr, bc.count, bc.type, _pins[0], is2Pin(bc.type)?_pins[1]:255, _iType, _milliAmpsPerLed, _milliAmpsMax);
+  ALOG_INF(PSTR("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u). mA=%d/%d\n"), _valid?"S":"Uns", nr, bc.length, bc.type, _pins[0], is2Pin(bc.type)?_pins[1]:255, _iType, _milliAmpsPerLed, _milliAmpsMax);
 }
 
 
@@ -404,6 +404,7 @@ void BusDigital::show() {
 bool BusDigital::canShow() const
 {
   if (!_valid) return true;
+  // ALOG_INF(PSTR("BusDigital::canShow %d %d"), _busPtr != nullptr, _iType);
   return PolyBus::canShow(_busPtr, _iType);
 }
 
@@ -1123,7 +1124,7 @@ std::vector<LEDType> BusOnOff::getLEDTypes() {
  *****************************************************************************************************************************************************************/
 
 BusNetwork::BusNetwork(BusConfig &bc)
-: Bus(bc.type, bc.start, bc.autoWhite, bc.count)
+: Bus(bc.type, bc.start, bc.autoWhite, bc.length)
 , _broadcastLock(false)
 {
   switch (bc.type) {
@@ -1236,7 +1237,7 @@ std::vector<LEDType> BusNetwork::getLEDTypes() {
 uint32_t BusManager::memUsage(BusConfig &bc) {
   if (Bus::isOnOff(bc.type) || Bus::isPWM(bc.type)) return OUTPUT_MAX_PINS_WLED;
 
-  unsigned len = bc.count + bc.skipAmount;
+  unsigned len = bc.length + bc.skipAmount;
   unsigned channels = Bus::getNumberOfChannels(bc.type);
   unsigned multiplier = 1;
   if (Bus::isDigital(bc.type)) { // digital types
@@ -1249,7 +1250,7 @@ uint32_t BusManager::memUsage(BusConfig &bc) {
       multiplier = PolyBus::isParallelOutput() ? 24 : 2;
     #endif
   }
-  return (len * multiplier + bc.doubleBuffer * (bc.count + bc.skipAmount)) * channels;
+  return (len * multiplier + bc.doubleBuffer * (bc.length + bc.skipAmount)) * channels;
 }
 
 
@@ -1368,9 +1369,9 @@ void BusManager::show()
 
 
 bool BusManager::canAllShow() {
-  for (unsigned i = 0; i < numBusses; i++) {
-    if (!busses[i]->canShow()) return false;
-  }
+  // for (unsigned i = 0; i < numBusses; i++) {
+  //   if (!busses[i]->canShow()) return false;
+  // }
   return true;
 }
 

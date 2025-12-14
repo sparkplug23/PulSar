@@ -421,6 +421,99 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
 "CB3:IX direct map";
 
 
+// /*******************************************************************************************************************************************************************************************************************
+//  * @description : All palettes are forced to create static gradient palettes using linear blending. 
+//  *                Gradient-type palettes behave normally. Discrete palettes are interpolated across the segment length.
+//  *                Intended to provide smooth transitions between colours, even for non-gradient palettes.
+//  * 
+//  * @note        : This effect forces PALETTE_MODE__FORCE_GRADIENT.
+//  *                Related to `Bands_Palette_SegWidth`, which produces grouped bands without blending.
+//  * 
+//  * @param Speed : If `speed == 255`, the effect is applied statically without blending or memory allocation.
+//  *                If `speed < 255`, the effect is animated using a dynamic colour buffer and blended over time.
+//  *******************************************************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
+// {
+
+//   bool wrapoff = SEGMENT.check1;
+
+//   /**
+//    * SHOW: No transition — directly set colours with gradient logic
+//    * Uses forced gradient even for discrete palettes.
+//    **/
+//   if (SEGMENT.speed == 255)
+//   {
+//     SEGMENT.deallocateColourData(); // clear any previous allocation
+//     uint32_t colour;
+//     for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+//     {
+//       colour = SEGMENT.GetPaletteColour(
+//         pixel,
+//         PALETTE_INDEX__IS_SEGLEN_RANGE,
+//         PALETTE_MODE__FORCE_GRADIENT,
+//         wrapoff
+//       );
+//       SEGMENT.setPixelColor(pixel, colour);
+//     }
+//     return FRAMETIME;
+//   }
+//   /**
+//    * SHOW: Gradient palette applied using blending
+//    * This draws palette colours with forced gradient and transitions to them
+//    **/
+//   else
+//   {
+//     if (!SEGMENT.allocateColourData(SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN)) {
+//       SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+//       return USE_ANIMATOR;
+//     }
+
+//     SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
+
+//     uint32_t colour;
+//     for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+//     {
+//       colour = SEGMENT.GetPaletteColour(
+//         pixel,
+//         PALETTE_INDEX__IS_SEGLEN_RANGE,
+//         PALETTE_MODE__FORCE_GRADIENT,
+//         wrapoff,
+//         NO_ENCODED_VALUE,
+//         ANIM_BRIGHTNESS_REQUIRED
+//       );
+//       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
+//     }
+
+//     SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
+//       #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
+//       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
+//       #else
+//       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
+//       #endif
+//     });
+
+//     return USE_ANIMATOR;
+//   }
+// }                                                                                 //sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp
+// static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
+// "Gradient@"                       // Name
+// "Speed,,,,,Hard edge,,,!"         // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+// ";"
+// "!,!,!,!,!"                       // (no segment colours)
+// ";"
+// "!"                               // primary palette picker
+// ";"
+// "1"                               // 1D strip
+// ";"
+// "sx=127,o1=0,ep=10000"            // defaults: mid speed, hard-edge off, long EP
+// ;
+// static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
+// "ForceGradient\n\r"
+// "SX:Blend\n\r"
+// "C1:HardEdge\n\r"
+// "EP:!\n\r"
+// "GP:!";
+
 /*******************************************************************************************************************************************************************************************************************
  * @description : All palettes are forced to create static gradient palettes using linear blending. 
  *                Gradient-type palettes behave normally. Discrete palettes are interpolated across the segment length.
@@ -431,11 +524,46 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
  * 
  * @param Speed : If `speed == 255`, the effect is applied statically without blending or memory allocation.
  *                If `speed < 255`, the effect is animated using a dynamic colour buffer and blended over time.
+ * 
+ * @param C1    : Gradient repeat width:
+ *                  - 0   -> 5% of SEGLEN, pattern repeats along segment.
+ *                  - 255 -> Full SEGLEN (single gradient over entire segment).
+ *                  - 1..254 -> Linear between 5% and 100% of SEGLEN.
  *******************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
 {
-
   bool wrapoff = SEGMENT.check1;
+
+  const uint16_t seglen = SEGLEN;
+  const uint8_t  width_c1 = SEGMENT.custom1;  // 0..255
+
+  // ---- Compute effective repeat length in pixels (5%..100% of SEGLEN) ----
+  uint16_t repeat_len = seglen;
+
+  if (seglen > 1) {
+    // minimum = ceil(5% of seglen), clamped
+    uint16_t min_len = (uint16_t)((seglen * 5U + 99U) / 100U);
+    if (min_len == 0)        min_len = 1;
+    if (min_len > seglen)    min_len = seglen;
+
+    // Map C1 0..255 to [min_len .. seglen]
+    // C1=0   -> min_len
+    // C1=255 -> seglen
+    repeat_len = (uint16_t)(min_len + ((uint32_t)(seglen - min_len) * width_c1) / 255U);
+    if (repeat_len == 0) repeat_len = 1;
+  }
+
+  // Map physical pixel index -> palette "virtual index" 0..(seglen-1),
+  // with pattern of length repeat_len repeated along the segment.
+  auto compute_palette_index = [seglen, repeat_len](uint16_t pixel) -> uint16_t {
+    if (seglen <= 1 || repeat_len == seglen) {
+      // Normal behaviour: one gradient across whole segment
+      return pixel;
+    }
+    uint16_t pos_in_chunk = (uint16_t)(pixel % repeat_len);
+    // Scale chunk index 0..(repeat_len-1) to 0..(seglen-1)
+    return (uint16_t)(((uint32_t)pos_in_chunk * seglen) / repeat_len);
+  };
 
   /**
    * SHOW: No transition — directly set colours with gradient logic
@@ -445,10 +573,11 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
   {
     SEGMENT.deallocateColourData(); // clear any previous allocation
     uint32_t colour;
-    for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+    for (uint16_t pixel = 0; pixel < seglen; pixel++)
     {
+      uint16_t idx = compute_palette_index(pixel);
       colour = SEGMENT.GetPaletteColour(
-        pixel,
+        idx,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__FORCE_GRADIENT,
         wrapoff
@@ -463,7 +592,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
    **/
   else
   {
-    if (!SEGMENT.allocateColourData(SEGMENT.colour_width__used_in_effect_generate * 2 * SEGLEN)) {
+    if (!SEGMENT.allocateColourData(SEGMENT.colour_width__used_in_effect_generate * 2 * seglen)) {
       SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
       return USE_ANIMATOR;
     }
@@ -471,10 +600,11 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
     uint32_t colour;
-    for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+    for (uint16_t pixel = 0; pixel < seglen; pixel++)
     {
+      uint16_t idx = compute_palette_index(pixel);
       colour = SEGMENT.GetPaletteColour(
-        pixel,
+        idx,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__FORCE_GRADIENT,
         wrapoff,
@@ -495,9 +625,10 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     return USE_ANIMATOR;
   }
 }                                                                                 //sx,ix,c1star,c2cog,c3vis,cbPal,cbLay,cbFav,ep,grp
+
 static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Gradient@"                       // Name
-"Speed,,,,,Hard edge,,,!"         // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"Speed,,Width,,,Hard edge,,,!,!"     // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 "!,!,!,!,!"                       // (no segment colours)
 ";"
@@ -505,14 +636,17 @@ static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 ";"
 "1"                               // 1D strip
 ";"
-"sx=127,o1=0,ep=10000"            // defaults: mid speed, hard-edge off, long EP
+"sx=127,c1=255,o1=0,ep=10000"     // defaults: mid speed, full-width gradient, hard-edge off, long EP
 ;
+
 static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "ForceGradient\n\r"
 "SX:Blend\n\r"
-"C1:HardEdge\n\r"
+"C1:Width\n\r"
+"O1:HardEdge\n\r"
 "EP:!\n\r"
 "GP:!";
+
 
 
 /************************************************************************************************************************************
@@ -979,52 +1113,198 @@ static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC /////////////////////////////////////////////////////////////////////////////////////////////
 
 
+// /*******************************************************************************************************************************************************************************************************************
+//  * @description : Rotates by getting and setting pixel colours, with wrap-around.
+//  *                Single-pass block rotation (no per-step loops). Handles any movement >= 0, normalized to segment length.
+//  * @note        : Used by effects that rotate either the current framebuffer or a freshly painted palette.
+//  ********************************************************************************************************************************************************************************************************************/
+// // uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
+// // {
+
+
+
+// //   if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+// //   // Normalize movement to [0 .. SEGLEN-1]
+// //   uint16_t move = (SEGLEN > 0) ? (movement_amount % SEGLEN) : 0;
+// //   if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
+
+// //   // Save border run to a small temp buffer
+// //   std::vector<uint32_t> edge(move);
+
+// //   if (direction) { // right (toward higher indices)
+// //     // Save tail [SEGLEN-move .. SEGLEN-1]
+// //     for (uint16_t j = 0; j < move; ++j) {
+// //       edge[j] = SEGMENT.getPixelColor(SEGLEN - move + j);
+// //     }
+// //     // Shift block up: [0 .. SEGLEN-move-1] -> [move .. SEGLEN-1]
+// //     for (int32_t i = (int32_t)SEGLEN - 1; i >= (int32_t)move; --i) {
+// //       SEGMENT.setPixelColor((uint16_t)i, SEGMENT.getPixelColor((uint16_t)(i - move)), BRIGHTNESS_ALREADY_SET);
+// //     }
+// //     // Wrap saved tail into head [0 .. move-1]
+// //     for (uint16_t j = 0; j < move; ++j) {
+// //       SEGMENT.setPixelColor(j, edge[j], BRIGHTNESS_ALREADY_SET);
+// //     }
+// //   } else {        // left (toward lower indices)
+// //     // Save head [0 .. move-1]
+// //     for (uint16_t j = 0; j < move; ++j) {
+// //       edge[j] = SEGMENT.getPixelColor(j);
+// //     }
+// //     // Shift block down: [move .. SEGLEN-1] -> [0 .. SEGLEN-move-1]
+// //     for (uint16_t i = 0; i < SEGLEN - move; ++i) {
+// //       SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i + move), BRIGHTNESS_ALREADY_SET);
+// //     }
+// //     // Wrap saved head into tail [SEGLEN-move .. SEGLEN-1]
+// //     for (uint16_t j = 0; j < move; ++j) {
+// //       SEGMENT.setPixelColor(SEGLEN - move + j, edge[j], BRIGHTNESS_ALREADY_SET);
+// //     }
+// //   }
+
+// //   return FRAMETIME_WITH_SPEED(5, 1000); // from 5ms to 1000ms per frame
+// // }
+
+// /*******************************************************************************************************************************************************************************************************************
+//  * @description : Rotates the *physical* LED buffer inside this segment [start..stop), with wrap-around.
+//  *                Pure framebuffer rotation: no grouping/mirror/offset logic is reapplied.
+//  *                This guarantees that whatever the previous effect painted is rotated as-is.
+//  * @note        : direction = true  → right (toward higher physical indices)
+//  *                direction = false → left  (toward lower physical indices)
+//  ********************************************************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
+// {
+
+  
+//   static bool logged_once = false;
+// if (!logged_once) {
+//   ALOG_INF(PSTR("RotatePrev first frame: grp=%u spc=%u dec=%u vLen=%u start=%u stop=%u"),
+//            SEGMENT.grouping, SEGMENT.spacing, SEGMENT.decimate,
+//            SEGMENT.vLength(), SEGMENT.start, SEGMENT.stop);
+//   logged_once = true;
+// }
+
+//   if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+//   const uint16_t len   = SEGLEN;
+//   const uint16_t start = SEGMENT.start;  // physical start index in the LED buffer
+
+//   // Normalize movement to [0 .. len-1]
+//   const uint16_t move = (len > 0) ? (movement_amount % len) : 0;
+//   if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
+
+//   // Small temp buffer to hold the edge that wraps around
+//   std::vector<uint32_t> edge(move);
+
+//   if (direction) { // rotate right: pixels move toward higher indices
+//     // Save tail [len-move .. len-1] in physical coordinates
+//     for (uint16_t j = 0; j < move; ++j) {
+//       edge[j] = tkr_anim->getPixelColor(start + (len - move + j));
+//     }
+
+//     // Shift block up: [0 .. len-move-1] → [move .. len-1]
+//     for (int32_t i = (int32_t)len - 1; i >= (int32_t)move; --i) {
+//       uint32_t srcCol = tkr_anim->getPixelColor(start + (i - move));
+//       tkr_anim->setPixelColor(start + i, srcCol);
+//     }
+
+//     // Wrap saved tail into head [0 .. move-1]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       tkr_anim->setPixelColor(start + j, edge[j]);
+//     }
+
+//   } else {        // rotate left: pixels move toward lower indices
+//     // Save head [0 .. move-1]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       edge[j] = tkr_anim->getPixelColor(start + j);
+//     }
+
+//     // Shift block down: [move .. len-1] → [0 .. len-move-1]
+//     for (uint16_t i = 0; i < len - move; ++i) {
+//       uint32_t srcCol = tkr_anim->getPixelColor(start + (i + move));
+//       tkr_anim->setPixelColor(start + i, srcCol);
+//     }
+
+//     // Wrap saved head into tail [len-move .. len-1]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       tkr_anim->setPixelColor(start + (len - move + j), edge[j]);
+//     }
+//   }
+
+//   // Frame timing unchanged; effect above is pure buffer shuffle
+//   return FRAMETIME_WITH_SPEED(5, 1000);
+// }
 /*******************************************************************************************************************************************************************************************************************
- * @description : Rotates by getting and setting pixel colours, with wrap-around.
- *                Single-pass block rotation (no per-step loops). Handles any movement >= 0, normalized to segment length.
- * @note        : Used by effects that rotate either the current framebuffer or a freshly painted palette.
+ * @description : Rotates by getting and setting segment pixel colours in *virtual index* space, with wrap-around.
+ *                - Uses SEGMENT.vLength() as the valid index range for get/setPixelColor.
+ *                - This preserves all current segment mapping (grouping, mirror, offset, reverse, decimate, 2D mapping, etc.).
+ * @note        : direction = true  → rotate right  (toward higher virtual indices)
+ *                direction = false → rotate left   (toward lower virtual indices)
+ *              : Old bug was using SEGLEN (physical length) as if it were the virtual index range; this breaks when grouping/decimate≠1.
  ********************************************************************************************************************************************************************************************************************/
-uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
+uint16_t IRAM_ATTR mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
 {
+//     static bool logged_once = false;
+// if (!logged_once) {
+//   ALOG_INF(PSTR("RotatePrev first frame: grp=%u spc=%u dec=%u vLen=%u start=%u stop=%u"),
+//            SEGMENT.grouping, SEGMENT.spacing, SEGMENT.decimate,
+//            SEGMENT.vLength(), SEGMENT.start, SEGMENT.stop);
+//   logged_once = true;
+// }
+
+
   if (SEGLEN == 0) return EFFECT_DEFAULT();
 
-  // Normalize movement to [0 .. SEGLEN-1]
-  uint16_t move = (SEGLEN > 0) ? (movement_amount % SEGLEN) : 0;
+  // Work in virtual index space: [0 .. vLen-1] is what getPixelColor()/setPixelColor() expect.
+  const uint16_t vLen = SEGMENT.vLength();
+  if (vLen == 0) return EFFECT_DEFAULT();
+
+  // Normalize movement to [0 .. vLen-1]
+  const uint16_t move = (movement_amount % vLen);
   if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
 
-  // Save border run to a small temp buffer
+  // Temp buffer for the wrapped edge in virtual space
   std::vector<uint32_t> edge(move);
 
-  if (direction) { // right (toward higher indices)
-    // Save tail [SEGLEN-move .. SEGLEN-1]
+  if (direction) {
+    // ------------------------ Rotate right: pixels move toward higher virtual indices ------------------------
+    // Save tail [vLen-move .. vLen-1]
     for (uint16_t j = 0; j < move; ++j) {
-      edge[j] = SEGMENT.getPixelColor(SEGLEN - move + j);
+      edge[j] = SEGMENT.getPixelColor((int)(vLen - move + j));
     }
-    // Shift block up: [0 .. SEGLEN-move-1] -> [move .. SEGLEN-1]
-    for (int32_t i = (int32_t)SEGLEN - 1; i >= (int32_t)move; --i) {
-      SEGMENT.setPixelColor((uint16_t)i, SEGMENT.getPixelColor((uint16_t)(i - move)), BRIGHTNESS_ALREADY_SET);
+
+    // Shift block up: [0 .. vLen-move-1] → [move .. vLen-1]
+    for (int32_t i = (int32_t)vLen - 1; i >= (int32_t)move; --i) {
+      uint32_t srcCol = SEGMENT.getPixelColor((int)(i - move));
+      SEGMENT.setPixelColor((int)i, srcCol, BRIGHTNESS_ALREADY_SET);
     }
+
     // Wrap saved tail into head [0 .. move-1]
     for (uint16_t j = 0; j < move; ++j) {
-      SEGMENT.setPixelColor(j, edge[j], BRIGHTNESS_ALREADY_SET);
+      SEGMENT.setPixelColor((int)j, edge[j], BRIGHTNESS_ALREADY_SET);
     }
-  } else {        // left (toward lower indices)
+
+  } else {
+    // ------------------------ Rotate left: pixels move toward lower virtual indices -------------------------
     // Save head [0 .. move-1]
     for (uint16_t j = 0; j < move; ++j) {
-      edge[j] = SEGMENT.getPixelColor(j);
+      edge[j] = SEGMENT.getPixelColor((int)j);
     }
-    // Shift block down: [move .. SEGLEN-1] -> [0 .. SEGLEN-move-1]
-    for (uint16_t i = 0; i < SEGLEN - move; ++i) {
-      SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i + move), BRIGHTNESS_ALREADY_SET);
+
+    // Shift block down: [move .. vLen-1] → [0 .. vLen-move-1]
+    for (uint16_t i = 0; i < vLen - move; ++i) {
+      uint32_t srcCol = SEGMENT.getPixelColor((int)(i + move));
+      SEGMENT.setPixelColor((int)i, srcCol, BRIGHTNESS_ALREADY_SET);
     }
-    // Wrap saved head into tail [SEGLEN-move .. SEGLEN-1]
+
+    // Wrap saved head into tail [vLen-move .. vLen-1]
     for (uint16_t j = 0; j < move; ++j) {
-      SEGMENT.setPixelColor(SEGLEN - move + j, edge[j], BRIGHTNESS_ALREADY_SET);
+      SEGMENT.setPixelColor((int)(vLen - move + j), edge[j], BRIGHTNESS_ALREADY_SET);
     }
   }
 
-  return FRAMETIME_WITH_SPEED(5, 1000); // from 5ms to 1000ms per frame
+  // Frame timing unchanged; this is pure virtual-buffer shuffle.
+  return FRAMETIME_WITH_SPEED(5, 1000);
 }
+
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -7709,9 +7989,12 @@ uint16_t mAnimatorLight::EffectAnim__Juggle()
   for (int i = 0; i < 8; i++) {
     int index = beatsin88_t((16 + SEGMENT.speed) * (i + 7), 0, SEGLEN - 1);
     fastled_col = CRGB(SEGMENT.getPixelColor(index));
-    fastled_col |= (SEGMENT.palette_id == 0)
+    // fastled_col |= (SEGMENT.palette_id == 0)
+    //   ? CHSV(dothue, 220, 255)
+    //   : CRGB(ColorFromPaletteRedirect(SEGPALETTE, dothue, 255));
+    fastled_col |= (SEGMENT.check1 == 0)
       ? CHSV(dothue, 220, 255)
-      : CRGB(ColorFromPalette(SEGPALETTE, dothue, 255));
+      : CRGB(ColorFromPaletteRedirect(SEGPALETTE, dothue, 255)); // another check would be needed to stop gradeints for exact colours.
     SEGMENT.setPixelColor(index, fastled_col);
     dothue += 32;
   }
@@ -7720,7 +8003,7 @@ uint16_t mAnimatorLight::EffectAnim__Juggle()
 }
 static const char PM_EFFECT_CONFIG__JUGGLE[] PROGMEM =
 "Juggle@"                     // Name
-"Speed,Trail,,,,,,,,,"        // 10 fields (SX, IX)
+"Speed,Trail,,,,PaletteOrRandom,,,,,"        // 10 fields (SX, IX)
 ";"
 ""                            // no segment colors
 ";"
@@ -8058,7 +8341,7 @@ static const char PM_EFFECT_DESCRI__BPM[] PROGMEM =
  * Implementation
  *   • Allocates (SEGLEN+7)/8 bytes for the per-LED bitfield; returns fallback if allocation fails.
  *   • Fade amounts use fract8 and scale with global brightness for consistent look at low brightness.
- *   • Color selection uses ColorFromPalette(SEGPALETTE, random8(), 64, NOBLEND) at spawn time and then intensity is managed by fade math.
+ *   • Color selection uses ColorFromPaletteRedirect(SEGPALETTE, random8(), 64, NOBLEND) at spawn time and then intensity is managed by fade math.
  *
  * Notes & Limits
  *   • 1D effect; works on linearized order for 2D segments.
@@ -8109,7 +8392,7 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
           unsigned index = i >> 3;
           unsigned  bitNum = i & 0x07;
           bitWrite(SEGMENT.data[index], bitNum, true);
-          SEGMENT.setPixelColor(i, ColorFromPalette(SEGPALETTE, hw_random8(), 64, NOBLEND));
+          SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));         
           break; //only spawn 1 new pixel per frame per 50 LEDs
         }
       }
@@ -8200,12 +8483,82 @@ static const char PM_EFFECT_DESCRI__LAKE[] PROGMEM =
  *   • “Smooth” mode uses continuous index/luma; otherwise discrete decay.
  * @note        : Converted from WLED effect "mode_meteor".
  ********************************************************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Meteor()
+// {
+  
+//   if (SEGLEN == 1) return EFFECT_DEFAULT();
+//   if (!SEGMENT.allocateData(SEGLEN)) return EFFECT_DEFAULT(); //allocation failed
+//   const bool meteorSmooth = SEGMENT.check3;
+//   byte* trail = SEGMENT.data;
+
+//   bool hardedge_without_wrap = SEGMENT.check2;
+
+//   const unsigned meteorSize = 1 + SEGLEN / 20; // ~5%
+//   uint16_t meteorstart;
+//   if (meteorSmooth) {
+//     meteorstart = map((SEGMENT.step >> 6 & 0xFF), 0, 255, 0, SEGLEN - 1);
+//   } else {
+//     unsigned counter = effect_start_time * ((SEGMENT.speed >> 2) + 8);
+//     meteorstart = (counter * SEGLEN) >> 16;
+//   }
+
+//   const int max = SEGMENT.palette_id==5 || !SEGMENT.check1 ? 240 : 255;
+
+//   // fade / decay
+//   for (unsigned i = 0; i < SEGLEN; i++) {
+//     uint32_t col;
+//     if (hw_random8() <= 255 - SEGMENT.intensity) {
+//       if (meteorSmooth) {
+//         int change = trail[i] + 4 - hw_random8(24);     // -20..+4
+//         trail[i] = constrain(change, 0, max);
+//         col = SEGMENT.check1
+//           ? SEGMENT.color_from_palette(i, true, false, 0,  trail[i])
+//           : SEGMENT.color_from_palette(trail[i], false, true, 255);
+//       } else {
+//         trail[i] = scale8(trail[i], 128 + hw_random8(127));
+//         int index = trail[i];
+//         int idx = 255;
+//         int bri = (SEGMENT.palette_id==35 || SEGMENT.palette_id==36) ? 255 : trail[i];
+//         if (!SEGMENT.check1) { idx = 0; index = map(i,0,SEGLEN,0,max); bri = trail[i]; }
+//         col = SEGMENT.color_from_palette(index, false, false, idx, bri);
+//       }
+//       SEGMENT.setPixelColor(i, col);
+//     }
+//   }
+
+//   // head
+//   for (unsigned j = 0; j < meteorSize; j++) {
+//     unsigned index = (meteorstart + j) % SEGLEN;
+//     if (meteorSmooth) {
+//       trail[index] = max;
+//       uint32_t col = SEGMENT.check1
+//         ? SEGMENT.color_from_palette(index, true, false, 0, trail[index])
+//         : SEGMENT.color_from_palette(trail[index], false, true, 255);
+//       SEGMENT.setPixelColor(index, col);
+//     } else {
+//       int idx = 255;
+//       int i = trail[index] = max;
+//       if (!SEGMENT.check1) { i = map(index,0,SEGLEN,0,max); idx = 0; }
+//       uint32_t col = SEGMENT.color_from_palette(i, false, false, idx, 255);
+//       SEGMENT.setPixelColor(index, col);
+//     }
+//   }
+
+//   SEGMENT.step += SEGMENT.speed + 1;
+//   return FRAMETIME;
+// }
 uint16_t mAnimatorLight::EffectAnim__Meteor()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
-  if (!SEGMENT.allocateData(SEGLEN)) return EFFECT_DEFAULT(); //allocation failed
-  const bool meteorSmooth = SEGMENT.check3;
+  if (!SEGMENT.allocateData(SEGLEN)) return EFFECT_DEFAULT(); // allocation failed
+
+  const bool meteorSmooth = SEGMENT.check3;   // CB3: Smooth
   byte* trail = SEGMENT.data;
+
+  // CB2: Hard Edge
+  //   ON  -> gradient ends at seglen, no wrap (hard edge).
+  //   OFF -> gradient wraps smoothly (cyclic palette).
+  const bool wrap = SEGMENT.check2;
 
   const unsigned meteorSize = 1 + SEGLEN / 20; // ~5%
   uint16_t meteorstart;
@@ -8216,26 +8569,40 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
     meteorstart = (counter * SEGLEN) >> 16;
   }
 
-  const int max = SEGMENT.palette_id==5 || !SEGMENT.check1 ? 240 : 255;
+  const int max = (SEGMENT.palette_id == 5 || !SEGMENT.check1) ? 240 : 255;
 
   // fade / decay
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint32_t col;
     if (hw_random8() <= 255 - SEGMENT.intensity) {
       if (meteorSmooth) {
-        int change = trail[i] + 4 - hw_random8(24);     // -20..+4
+        int change = trail[i] + 4 - hw_random8(24); // -20..+4
         trail[i] = constrain(change, 0, max);
-        col = SEGMENT.check1
-          ? SEGMENT.color_from_palette(i, true, false, 0,  trail[i])
-          : SEGMENT.color_from_palette(trail[i], false, true, 255);
+
+        if (SEGMENT.check1) {
+          // Gradient mode: position → palette index, trail → brightness
+          col = SEGMENT.color_from_palette(i, true, wrap, 0, trail[i]);
+        } else {
+          // Trail-driven colour mode (legacy WLED behaviour)
+          col = SEGMENT.color_from_palette(trail[i], false, wrap, 255);
+        }
+
       } else {
         trail[i] = scale8(trail[i], 128 + hw_random8(127));
         int index = trail[i];
-        int idx = 255;
-        int bri = (SEGMENT.palette_id==35 || SEGMENT.palette_id==36) ? 255 : trail[i];
-        if (!SEGMENT.check1) { idx = 0; index = map(i,0,SEGLEN,0,max); bri = trail[i]; }
-        col = SEGMENT.color_from_palette(index, false, false, idx, bri);
+        int idx   = 255;
+        int bri   = (SEGMENT.palette_id == 35 || SEGMENT.palette_id == 36) ? 255 : trail[i];
+
+        if (!SEGMENT.check1) {
+          // Position-based gradient in discrete mode
+          idx   = 0;
+          index = map(i, 0, SEGLEN, 0, max);
+          bri   = trail[i];
+        }
+
+        col = SEGMENT.color_from_palette(index, false, wrap, idx, bri);
       }
+
       SEGMENT.setPixelColor(i, col);
     }
   }
@@ -8243,17 +8610,31 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
   // head
   for (unsigned j = 0; j < meteorSize; j++) {
     unsigned index = (meteorstart + j) % SEGLEN;
+
     if (meteorSmooth) {
       trail[index] = max;
-      uint32_t col = SEGMENT.check1
-        ? SEGMENT.color_from_palette(index, true, false, 0, trail[index])
-        : SEGMENT.color_from_palette(trail[index], false, true, 255);
+
+      uint32_t col;
+      if (SEGMENT.check1) {
+        // Gradient mode: head colour from position, brightness from trail
+        col = SEGMENT.color_from_palette(index, true, wrap, 0, trail[index]);
+      } else {
+        // Trail-driven colour for head
+        col = SEGMENT.color_from_palette(trail[index], false, wrap, 255);
+      }
+
       SEGMENT.setPixelColor(index, col);
+
     } else {
       int idx = 255;
-      int i = trail[index] = max;
-      if (!SEGMENT.check1) { i = map(index,0,SEGLEN,0,max); idx = 0; }
-      uint32_t col = SEGMENT.color_from_palette(i, false, false, idx, 255);
+      int i   = trail[index] = max;
+
+      if (!SEGMENT.check1) {
+        i   = map(index, 0, SEGLEN, 0, max);
+        idx = 0;
+      }
+
+      uint32_t col = SEGMENT.color_from_palette(i, false, wrap, idx, 255);
       SEGMENT.setPixelColor(index, col);
     }
   }
@@ -8263,7 +8644,7 @@ uint16_t mAnimatorLight::EffectAnim__Meteor()
 }
 static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM =
 "Meteor@"                                     // Name
-"Speed,Trail,,,,Gradient,Smooth,,,,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"Speed,Trail,,,,Gradient,Hard Edge,Smooth,,,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ""                                            // Segment Colour Names (none)
 ";"
@@ -8275,7 +8656,7 @@ static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM =
 "sx=96,"                                      // speed
 "ix=128,"                                     // trail decay
 "c1=1,"                                       // gradient on
-"c2=0,"                                       // smooth off
+"c3=1,"                                       // smooth off
 "ep=500"                                      // reserved
 ;
 static const char PM_EFFECT_DESCRI__METEOR[] PROGMEM =
@@ -8329,7 +8710,7 @@ CRGB mAnimatorLight::EffectAnim__Base_Twinkle_Smooth_One_Twinkle(uint32_t ms, ui
   unsigned hue = slowcycle8 - salt;
   CRGB c;
   if (bright > 0) {
-    c = ColorFromPalette(SEGPALETTE, hue, bright, NOBLEND);
+    c = ColorFromPaletteRedirect(SEGPALETTE, hue, bright, NOBLEND);
     if (!SEGMENT.check1) {
       // This code takes a pixel, and if its in the 'fading down'
       // part of the cycle, it adjusts the color a little bit like the
@@ -9605,7 +9986,7 @@ CRGB mAnimatorLight::EffectAnim__Pacifica_Base_OneLayer(uint16_t i, CRGBPalette1
   ci += (cs * i);
   unsigned sindex16 = sin16_t(ci) + 32768;
   unsigned sindex8 = scale16(sindex16, 240);
-  return CRGB(ColorFromPalette(p, sindex8, bri, LINEARBLEND));
+  return CRGB(ColorFromPaletteRedirect(p, sindex8, bri, LINEARBLEND));
 }
 
 
@@ -10887,7 +11268,7 @@ uint16_t mAnimatorLight::EffectAnim__Noise_Pal()
 
   for (unsigned i = 0; i < SEGLEN; i++) {
     unsigned index = perlin8(i*scale, SEGMENT.aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
-    SEGMENT.setPixelColor((int)i,  ColorFromPalette(palettes[0], index, 255, LINEARBLEND));  // Use my own palette.
+    SEGMENT.setPixelColor((int)i,  ColorFromPaletteRedirect(palettes[0], index, 255, LINEARBLEND));  // Use my own palette.
   }
 
   SEGMENT.aux0 += beatsin8_t(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
@@ -19101,7 +19482,7 @@ static const char PM_EFFECT_DESCRI__2D__BLACK_HOLE[] PROGMEM =
  *
  *   Notes
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not 2D.
- *   • Palette-driven via ColorFromPalette(..., LINEARBLEND); hue scrolls in aux0.
+ *   • Palette-driven via ColorFromPaletteRedirect(..., LINEARBLEND); hue scrolls in aux0.
  *   • Uses addPixelColorXY + fadePixelColorXY to build lines for a richer, additive look.
  *
  * @return      : FRAMETIME
@@ -19183,7 +19564,7 @@ static const char PM_EFFECT_DESCRI__2D__COLOURED_BURSTS[] PROGMEM =
  *
  *   How it works
  *   • For each column x, two y-positions are computed with `beatsin8_t(...)` that are 180° out of phase (phase offset +128).
- *   • Each strand is colored from the active CRGBPalette16 (ColorFromPalette, LINEARBLEND). Hue drifts with x and time.
+ *   • Each strand is colored from the active CRGBPalette16 (ColorFromPaletteRedirect, LINEARBLEND). Hue drifts with x and time.
  *   • A global fade (`fadeToBlackBy(64)`) creates motion trails; optional blur/smear smooths the path further.
  *
  *   Controls
@@ -19193,7 +19574,7 @@ static const char PM_EFFECT_DESCRI__2D__COLOURED_BURSTS[] PROGMEM =
  *
  *   Notes
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not a matrix.
- *   • Palette-driven; bright/alpha are handled by ColorFromPalette with LINEARBLEND for smooth gradients.
+ *   • Palette-driven; bright/alpha are handled by ColorFromPaletteRedirect with LINEARBLEND for smooth gradients.
  *   • Uses only integer timing math; lightweight and suitable for small ESP targets.
  *
  * @return      : FRAMETIME
@@ -19209,8 +19590,8 @@ uint16_t mAnimatorLight::EffectAnim__2D__DNA()
 
   SEGMENT.fadeToBlackBy(64);
   for (int i = 0; i < cols; i++) {
-    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4    ), ColorFromPalette(SEGPALETTE, i*5+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10), LINEARBLEND));
-    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4+128), ColorFromPalette(SEGPALETTE, i*5+128+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
+    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4    ), ColorFromPaletteRedirect(SEGPALETTE, i*5+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10), LINEARBLEND));
+    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4+128), ColorFromPaletteRedirect(SEGPALETTE, i*5+128+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.intensity / (8 - (SEGMENT.check1 * 2)), SEGMENT.check1);
 
@@ -19294,8 +19675,8 @@ uint16_t mAnimatorLight::EffectAnim__2D__DNASpiral()
         unsigned rate = k * 255 / steps;
         //unsigned dx = lerp8by8(x, x1, rate);
         unsigned dx = positive? (x + k-1) : (x - k+1);   // behaves the same as "lerp8by8" but does not create holes
-        //SEGMENT.setPixelColorXY(dx, i, ColorFromPalette(SEGPALETTE, hue, 255, LINEARBLEND).nscale8_video(rate));
-        SEGMENT.addPixelColorXY(dx, i, ColorFromPalette(SEGPALETTE, hue, 255, LINEARBLEND)); // use setPixelColorXY for different look
+        //SEGMENT.setPixelColorXY(dx, i, ColorFromPaletteRedirect(SEGPALETTE, hue, 255, LINEARBLEND).nscale8_video(rate));
+        SEGMENT.addPixelColorXY(dx, i, ColorFromPaletteRedirect(SEGPALETTE, hue, 255, LINEARBLEND)); // use setPixelColorXY for different look
         SEGMENT.fadePixelColorXY(dx, i, rate);
       }
       SEGMENT.setPixelColorXY(x, i, DARKSLATEGRAY);
@@ -19371,8 +19752,8 @@ uint16_t mAnimatorLight::EffectAnim__2D__Drift()
     float angle = radians(t * (maxDim - i));
     int mySin = sin_t(angle) * i;
     int myCos = cos_t(angle) * i;
-    SEGMENT.setPixelColorXY(colsCenter + mySin, rowsCenter + myCos, ColorFromPalette(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
-    if (SEGMENT.check1) SEGMENT.setPixelColorXY(colsCenter + myCos, rowsCenter + mySin, ColorFromPalette(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
+    SEGMENT.setPixelColorXY(colsCenter + mySin, rowsCenter + myCos, ColorFromPaletteRedirect(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
+    if (SEGMENT.check1) SEGMENT.setPixelColorXY(colsCenter + myCos, rowsCenter + mySin, ColorFromPaletteRedirect(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.intensity>>(3 - SEGMENT.check2), SEGMENT.check2);
 
@@ -19417,7 +19798,7 @@ static const char PM_EFFECT_DESCRI__2D__DRIFT[] PROGMEM =
  *   Notes
  *   • Initializes to black on first call.
  *   • Requires a 2D matrix segment (returns EFFECT_DEFAULT if not 2D).
- *   • Uses mPalette::ColorFromPaletteU32-compatible ColorFromPalette helper.
+ *   • Uses mPalette::ColorFromPaletteU32-compatible ColorFromPaletteRedirect helper.
  *
  * @return      : FRAMETIME
  * @description : firenoise2d. By Andrew Tuline. Yet another short routine.
@@ -19446,7 +19827,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__FireNoise()
   for (int j=0; j < cols; j++) {
     for (int i=0; i < rows; i++) {
       indexx = perlin8(j*yscale*rows/255, i*xscale+effect_start_time/4);                                               // We're moving along our Perlin map.
-      SEGMENT.setPixelColorXY(j, i, ColorFromPalette(pal, min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
+      SEGMENT.setPixelColorXY(j, i, ColorFromPaletteRedirect(pal, min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
     } // for i
   } // for j
 
@@ -19505,7 +19886,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__Frizzles()
   for (size_t i = 8; i > 0; i--) {
     SEGMENT.addPixelColorXY(beatsin8_t(SEGMENT.speed/8 + i, 0, cols - 1),
                             beatsin8_t(SEGMENT.intensity/8 - i, 0, rows - 1),
-                            ColorFromPalette(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
+                            ColorFromPaletteRedirect(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.custom1 >> (3 + SEGMENT.check1), SEGMENT.check1);
   return FRAMETIME;
@@ -20277,7 +20658,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__Noise()
   for (int y = 0; y < rows; y++) {
     for (int x = 0; x < cols; x++) {
       uint8_t pixelHue8 = perlin8(x * scale, y * scale, effect_start_time / (16 - SEGMENT.speed/16));
-      SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, pixelHue8));
+      SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, pixelHue8));
     }
   }
 
@@ -20355,7 +20736,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__PlasmaBall()
                                     (cols - cx == 0) ||
                                     (cols - 1 - cx == 0) ||
                                     ((rows - cy == 0) ||
-                                    (rows - 1 - cy == 0)) ? ColorFromPalette(SEGPALETTE, beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
+                                    (rows - 1 - cy == 0)) ? ColorFromPaletteRedirect(SEGPALETTE, beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
     }
   }
   SEGMENT.blur(SEGMENT.custom2>>5);
@@ -20498,7 +20879,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__Pulser()
   uint32_t a = effect_start_time / (18 - SEGMENT.speed / 16);
   int x = (a / 14) % cols;
   int y = map((sin8_t(a * 5) + sin8_t(a * 4) + sin8_t(a * 2)), 0, 765, rows-1, 0);
-  SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
+  SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
 
   SEGMENT.blur(SEGMENT.intensity>>4);
 
@@ -20577,7 +20958,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__SinDots()
   for (int i = 0; i < 13; i++) {
     int x = sin8_t(t1 + i * SEGMENT.intensity/8)*(cols-1)/255;  // max index now 255x15/255=15!
     int y = sin8_t(t2 + i * SEGMENT.intensity/8)*(rows-1)/255;  // max index now 255x15/255=15!
-    SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
+    SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.custom2 >> (3 + SEGMENT.check1), SEGMENT.check1);
 
@@ -20621,7 +21002,7 @@ static const char PM_EFFECT_DESCRI__2D__SIN_DOTS[] PROGMEM =
  *   • C3: blur amount
  *
  *   Notes
- *   • Palette-driven (ColorFromPalette), additive rendering for brighter crossings.
+ *   • Palette-driven (ColorFromPaletteRedirect), additive rendering for brighter crossings.
  *   • Border logic clamps swarm movement inward (kBorderWidth) to avoid edge clipping.
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not 2D.
  * @description : By: Mark Kriegsman. https://gist.github.com/kriegsman/368b316c55221134b160. Modifed by: Andrew Tuline
@@ -20647,9 +21028,9 @@ uint16_t mAnimatorLight::EffectAnim__2D__SqauredSwirl()
   int n = beatsin8_t(15, kBorderWidth, rows-kBorderWidth);
   int p = beatsin8_t(20, kBorderWidth, rows-kBorderWidth);
 
-  SEGMENT.addPixelColorXY(i, m, ColorFromPalette(SEGPALETTE, effect_start_time/29, 255, LINEARBLEND));
-  SEGMENT.addPixelColorXY(j, n, ColorFromPalette(SEGPALETTE, effect_start_time/41, 255, LINEARBLEND));
-  SEGMENT.addPixelColorXY(k, p, ColorFromPalette(SEGPALETTE, effect_start_time/73, 255, LINEARBLEND));
+  SEGMENT.addPixelColorXY(i, m, ColorFromPaletteRedirect(SEGPALETTE, effect_start_time/29, 255, LINEARBLEND));
+  SEGMENT.addPixelColorXY(j, n, ColorFromPaletteRedirect(SEGPALETTE, effect_start_time/41, 255, LINEARBLEND));
+  SEGMENT.addPixelColorXY(k, p, ColorFromPaletteRedirect(SEGPALETTE, effect_start_time/73, 255, LINEARBLEND));
 
   return FRAMETIME;
 }
@@ -20769,7 +21150,7 @@ static const char PM_EFFECT_DESCRI__2D__SUN_RADIATION[] PROGMEM =
  *   • C3: Sharpness (0–3): narrows banding by exponentiating brightness
  *
  *   Notes
- *   • Palette-driven via ColorFromPalette (SEGPALETTE).
+ *   • Palette-driven via ColorFromPaletteRedirect (SEGPALETTE).
  *   • Safe on any 2D matrix; returns EFFECT_DEFAULT if not 2D.
  * @description : By: Elliott Kember  https://editor.soulmatelights.com/gallery/3-tartan , Modified by: Andrew Tuline
  * @note : Converted from WLED Effects "mode_2Dtartan"
@@ -20797,12 +21178,12 @@ uint16_t mAnimatorLight::EffectAnim__2D__Tartan()
       intensity = bri = sin8_t(x * SEGMENT.speed/2 + offsetX);
       for (int i=0; i<sharpness; i++) intensity *= bri;
       intensity >>= 8*sharpness;
-      SEGMENT.setPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
+      SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, hue, intensity, LINEARBLEND));
       hue = y * 3 + offsetX;
       intensity = bri = sin8_t(y * SEGMENT.intensity/2 + offsetY);
       for (int i=0; i<sharpness; i++) intensity *= bri;
       intensity >>= 8*sharpness;
-      SEGMENT.addPixelColorXY(x, y, ColorFromPalette(SEGPALETTE, hue, intensity, LINEARBLEND));
+      SEGMENT.addPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, hue, intensity, LINEARBLEND));
     }
   }
 
@@ -20844,7 +21225,7 @@ static const char PM_EFFECT_DESCRI__2D__TARTAN[] PROGMEM =
  *   • CB1: smear (enable spatial blur with stronger effect on small matrices)
  *
  *   Notes
- *   • Palette-driven via ColorFromPalette (SEGPALETTE).
+ *   • Palette-driven via ColorFromPaletteRedirect (SEGPALETTE).
  *   • Uses SEGMENT.move() to scroll the entire buffer, then re-plots ships on top.
  *   • Requires a 2D matrix; returns EFFECT_DEFAULT if not 2D.
  * @description : Space ships by stepko (c)05.02.21 [https://editor.soulmatelights.com/gallery/639-space-ships], adapted by Blaz Kristan (AKA blazoncek)
@@ -21051,7 +21432,7 @@ static const char PM_EFFECT_DESCRI__2D__CRAZYBEES[] PROGMEM =
  *       • If a lighter’s lifetime expires or it exits bounds, it is “reseeded” at the head with a
  *         small angle offset and time=0.
  *       • Else it advances along its angle, and we draw it with sub-pixel blending:
- *           SEGMENT.wu_pixel(x*256/10, y*256/10, ColorFromPalette(...))
+ *           SEGMENT.wu_pixel(x*256/10, y*256/10, ColorFromPaletteRedirect(...))
  *   - The head position wraps around edges.
  *   - Scene is faded each frame (fadeToBlackBy), then trails are drawn, then a small blur can be
  *     applied (controlled by IX) to soften the look.
@@ -21147,7 +21528,7 @@ uint16_t mAnimatorLight::EffectAnim__2D__GhostRider()
         lighter->lightersPosX[i] += -7 * sin_t(radians(lighter->Angle[i]));
         lighter->lightersPosY[i] += -7 * cos_t(radians(lighter->Angle[i]));
       }
-      SEGMENT.wu_pixel(lighter->lightersPosX[i] * 256 / 10, lighter->lightersPosY[i] * 256 / 10, ColorFromPalette(SEGPALETTE, (256 - lighter->time[i])));
+      SEGMENT.wu_pixel(lighter->lightersPosX[i] * 256 / 10, lighter->lightersPosY[i] * 256 / 10, ColorFromPaletteRedirect(SEGPALETTE, (256 - lighter->time[i])));
     }
     SEGMENT.blur(SEGMENT.intensity>>3);
   }
@@ -23369,7 +23750,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_MID_NOISE[] PROGMEM =
  *     • volumeSmth directly scales pixel brightness (louder = brighter fire). No FFT binning is used here.
  *
  *   Implementation notes:
- *     • Uses ColorFromPalette with LINEARBLEND on a fixed fire palette (not the global SEGPALETTE).
+ *     • Uses ColorFromPaletteRedirect with LINEARBLEND on a fixed fire palette (not the global SEGPALETTE).
  *     • Initialize to BLACK on first call; per-frame compute per-pixel noise, taper, then palette lookup with volume-based brightness.
  *
  * @note : Converted from WLED Effects "mode_noisefire"
@@ -24462,7 +24843,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_WATERFALL[] PROGMEM =
  *      Derive mirrored companions (ni = cols-1-i, nj = rows-1-j) and cross-pairs (j,i) / (nj,ni).
  *   4) Audio drive: Read smoothed volume (volumeSmth) and raw amplitude (volumeRaw). Use volumeSmth to offset palette index for
  *      subtle hue breathing; scale brightness by (volumeRaw * IX / 64) so louder sound produces brighter strokes.
- *   5) Paint: Add six pixels per frame at the computed coordinates with ColorFromPalette(SEGPALETTE, time+audioOffset, brightness, LINEARBLEND).
+ *   5) Paint: Add six pixels per frame at the computed coordinates with ColorFromPaletteRedirect(SEGPALETTE, time+audioOffset, brightness, LINEARBLEND).
  *
  * @controls    :
  *   SX (Speed)     : Orbit rate; higher values quicken the swirl motion.
@@ -24501,12 +24882,12 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__2D__Swirl()
   float volumeSmth  = *(float*)   um_data->u_data[0]; //ewowi: use instead of sampleAvg???
   int   volumeRaw   = *(int16_t*) um_data->u_data[1];
 
-  SEGMENT.addPixelColorXY( i, j, ColorFromPalette(SEGPALETTE, (effect_start_time / 11 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 11, 200, 255);
-  SEGMENT.addPixelColorXY( j, i, ColorFromPalette(SEGPALETTE, (effect_start_time / 13 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 13, 200, 255);
-  SEGMENT.addPixelColorXY(ni,nj, ColorFromPalette(SEGPALETTE, (effect_start_time / 17 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 17, 200, 255);
-  SEGMENT.addPixelColorXY(nj,ni, ColorFromPalette(SEGPALETTE, (effect_start_time / 29 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 29, 200, 255);
-  SEGMENT.addPixelColorXY( i,nj, ColorFromPalette(SEGPALETTE, (effect_start_time / 37 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 37, 200, 255);
-  SEGMENT.addPixelColorXY(ni, j, ColorFromPalette(SEGPALETTE, (effect_start_time / 41 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 41, 200, 255);
+  SEGMENT.addPixelColorXY( i, j, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 11 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 11, 200, 255);
+  SEGMENT.addPixelColorXY( j, i, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 13 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 13, 200, 255);
+  SEGMENT.addPixelColorXY(ni,nj, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 17 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 17, 200, 255);
+  SEGMENT.addPixelColorXY(nj,ni, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 29 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 29, 200, 255);
+  SEGMENT.addPixelColorXY( i,nj, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 37 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 37, 200, 255);
+  SEGMENT.addPixelColorXY(ni, j, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 41 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 41, 200, 255);
 
   return FRAMETIME;
 }
@@ -24579,8 +24960,8 @@ uint16_t mAnimatorLight::EffectAnim__AudioReactive__2D__Waverly()
     int thisMax = map(thisVal, 0, 512, 0, rows);
 
     for (int j = 0; j < thisMax; j++) {
-      SEGMENT.addPixelColorXY(i, j, ColorFromPalette(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
-      SEGMENT.addPixelColorXY((cols - 1) - i, (rows - 1) - j, ColorFromPalette(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
+      SEGMENT.addPixelColorXY(i, j, ColorFromPaletteRedirect(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
+      SEGMENT.addPixelColorXY((cols - 1) - i, (rows - 1) - j, ColorFromPaletteRedirect(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
     }
   }
   if (SEGMENT.check3) SEGMENT.blur(16, cols*rows < 100);

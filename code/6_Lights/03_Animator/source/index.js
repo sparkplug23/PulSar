@@ -3389,6 +3389,32 @@ function setPreset(i)
 		delete obj.n;  // no need for name
 	}
 	if (isPlaylist(i)) obj.on = true; // force on
+
+	// // Resolve playlist psn[] => ps[] before sending to ESP
+	// if (obj.playlist && obj.playlist.psn) {
+	// 	const psArray = [];
+	// 	const names = obj.playlist.psn;
+
+	// 	names.forEach(name => {
+	// 		let found = 0;
+
+	// 		// Search pJson for matching preset name
+	// 		for (const pid in pJson) {
+	// 			if (!pJson[pid]) continue;
+	// 			if (pJson[pid].n && pJson[pid].n.toLowerCase() === name.toLowerCase()) {
+	// 				found = parseInt(pid);
+	// 				break;
+	// 			}
+	// 		}
+
+	// 		psArray.push(found);
+	// 	});
+
+	// 	obj.playlist.ps = psArray;   // <-- This becomes the numeric playlist list
+	// 	console.debug("Playlist name→id mapping:", names, "=>", psArray);
+	// }
+
+
 	showToast("Loading preset " + pName(i) +" (" + i + ")");
 	requestJson(obj);
 }

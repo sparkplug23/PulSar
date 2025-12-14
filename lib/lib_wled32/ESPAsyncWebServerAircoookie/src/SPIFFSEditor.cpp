@@ -266,6 +266,11 @@ static const byte edit_htm_gz[] PROGMEM  = {
 
 #define SPIFFS_MAXLENGTH_FILEPATH 32
 
+
+// static member definitions
+volatile bool SPIFFSEditor::s_fileChanged = false;
+String        SPIFFSEditor::s_lastFile;
+
 /* Exclusion list feature not needed and omitted */
 
 // WEB HANDLER IMPLEMENTATION
@@ -392,12 +397,37 @@ void SPIFFSEditor::handleRequest(AsyncWebServerRequest *request){
       request->send(200, "", "DELETE: "+request->getParam("path", true)->value());
     } else
       request->send(404);
-  } else if(request->method() == HTTP_POST){
-    if(request->hasParam("data", true, true) && _fs.exists(request->getParam("data", true, true)->value()))
-      request->send(200, "", "UPLOADED: "+request->getParam("data", true, true)->value());
-    else
-      request->send(500);
-  } else if(request->method() == HTTP_PUT){
+  } 
+  // else if(request->method() == HTTP_POST){
+  //   if(request->hasParam("data", true, true) && _fs.exists(request->getParam("data", true, true)->value()))
+  //     request->send(200, "", "UPLOADED: "+request->getParam("data", true, true)->value());
+  //   else
+  //     request->send(500);
+  // } 
+  else if(request->method() == HTTP_POST){
+    if (request->hasParam("data", true, true)) {
+      String fname = request->getParam("data", true, true)->value();
+      if (_fs.exists(fname)) {
+        // mark change
+        SPIFFSEditor::s_lastFile   = fname;
+        SPIFFSEditor::s_fileChanged = true;
+        Serial.printf("SPIFFSEditor: File changed: %s\n", fname.c_str());
+
+        request->send(200, "", "UPLOADED: " + fname);
+      } else {
+        request->send(500);
+      }
+    } else {
+      request->send(400);
+    }
+  }
+
+  
+  
+  
+  
+  
+  else if(request->method() == HTTP_PUT){
     if(request->hasParam("path", true)){
       String filename = request->getParam("path", true)->value();
       if(_fs.exists(filename)){
@@ -407,6 +437,13 @@ void SPIFFSEditor::handleRequest(AsyncWebServerRequest *request){
         if(f){
           f.write((uint8_t)0x00);
           f.close();
+
+          
+        // mark change for newly created file
+        SPIFFSEditor::s_lastFile   = filename;
+        SPIFFSEditor::s_fileChanged = true;
+
+
           request->send(200, "", "CREATE: "+filename);
         } else {
           request->send(500);

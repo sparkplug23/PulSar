@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#define WLED_DEBUG_FS2
+// #define WLED_DEBUG_FS2
 
 #define FS_BUFSIZE 256
 
@@ -80,7 +80,9 @@ void mFileSystem::closeFile() {
     uint32_t s = millis();
   #endif
   f.close();
+  #ifdef WLED_DEBUG_FS2
   Serial.printf("took %d ms\n", millis() - s);
+  #endif
   doCloseFile = false;
 }
 
@@ -140,14 +142,18 @@ bool mFileSystem::bufferedFind(const char *target, bool fromStart)
       if(buf[count] == target[index]) {
         if(++index >= targetLen) { // return true if all chars in the target match
           f.seek((f.position() - bufsize) + count +1);
+  #ifdef WLED_DEBUG_FS2
           Serial.printf("Found at pos %d, took %d ms", f.position(), millis() - s);
+  #endif
           return true;
         }
       }
       count++;
     }
   }
+  #ifdef WLED_DEBUG_FS2
   Serial.printf("No match, took %d ms\n", millis() - s);
+  #endif
   return false;
 }
 
@@ -184,7 +190,9 @@ bool mFileSystem::bufferedFindSpace(size_t targetLen, bool fromStart)
             f.seek((f.position() - bufsize) + count +1 - targetLen);
             knownLargestSpace = MAX_SPACE; //there may be larger spaces after, so we don't know
           }
+  #ifdef WLED_DEBUG_FS2
           Serial.printf("Found at pos %d, took %d ms", f.position(), millis() - s);
+  #endif  
           return true;
         }
       } else {
@@ -198,7 +206,9 @@ bool mFileSystem::bufferedFindSpace(size_t targetLen, bool fromStart)
       count++;
     }
   }
+  #ifdef WLED_DEBUG_FS2
   Serial.printf("No match, took %d ms\n", millis() - s);
+  #endif
   return false;
 }
 
@@ -226,13 +236,17 @@ bool mFileSystem::bufferedFindObjectEnd()
       if (buf[count] == '}') objDepth--;
       if (objDepth == 0) {
         f.seek((f.position() - bufsize) + count +1);
+  #ifdef WLED_DEBUG_FS2
         Serial.printf("} at pos %d, took %d ms", f.position(), millis() - s);
+  #endif  
         return true;
       }
       count++;
     }
   }
+  #ifdef WLED_DEBUG_FS2
   Serial.printf("No match, took %d ms\n", millis() - s);
+  #endif
   return false;
 }
 
@@ -280,7 +294,9 @@ bool mFileSystem::appendObjectToFile(const char* key, JsonDocument* content, uin
     if (f.position() > 2) f.write(','); //add comma if not first object
     f.print(key);
     serializeJson(*content, f);
+  #ifdef WLED_DEBUG_FS2
     Serial.printf("Inserted, took %d ms (total %d)", millis() - s1, millis() - s);
+  #endif  
     doCloseFile = true;
     return true;
   }
@@ -328,7 +344,9 @@ bool mFileSystem::appendObjectToFile(const char* key, JsonDocument* content, uin
   f.write('}');
 
   doCloseFile = true;
+  #ifdef WLED_DEBUG_FS2
   Serial.printf("Appended, took %d ms (total %d)", millis() - s1, millis() - s);
+  #endif  
   return true;
 }
 
@@ -424,7 +442,7 @@ bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocu
 {
   if (doCloseFile) closeFile();
   #ifdef WLED_DEBUG_FS2
-    Serial.printf("Read from %s with key %s >>>\n", file, (key==nullptr)?"nullptr":key);
+    // Serial.printf("Read from %s with key %s >>>\n", file, (key==nullptr)?"nullptr":key);
     uint32_t s = millis();
   #endif
   f = FILE_SYSTEM.open(file, "r");
@@ -434,14 +452,16 @@ bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocu
   {
     f.close();
     dest->clear();
+    #ifdef WLED_DEBUG_FS2
     Serial.println("Obj not found.");
+    #endif
     return false;
   }
 
   deserializeJson(*dest, f);
 
   f.close();
-  Serial.printf("Read, took %d ms\n", millis() - s);
+  // Serial.printf("Read, took %d ms\n", millis() - s);
   return true;
 }
 
@@ -608,6 +628,7 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
       SystemTask__Execute_Module_Data_Save();
       #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+      Handle_FileChanges_WebUIEdits();
     break;
     case TASK_EVERY_MINUTE:
       // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
@@ -676,6 +697,31 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     return FUNCTION_RESULT_UNKNOWN_ID;  
 
 } // END Tasker
+
+
+
+
+// Date Modified: 12Dec25
+void mFileSystem::Handle_FileChanges_WebUIEdits()
+{
+  String changedFile;
+
+  // Check if any file changes have occurred (clears the flag if true)
+  if (!SPIFFSEditor::Check_AnyFilesEdited()) {
+    ALOG_DBG(PSTR("No file change detected.")); //debug for now
+    return;
+  }
+
+  ALOG_DBG(PSTR("File change detected: %s"), SPIFFSEditor::Get_LastEditedFileName().c_str());
+
+  tkr->Tasker_Interface(TASK_FILESYSTEM__HANDLE_FILE_CHANGES_FROM_EDIT_URL__ID);
+
+  SPIFFSEditor::Check_ClearFilesEditFlag();
+  
+  return;
+}
+
+
 
 
 

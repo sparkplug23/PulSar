@@ -49,15 +49,195 @@ void mAnimatorLight::unloadPlaylist()
 }
 
 
+// int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId) 
+// {
+
+//   ALOG_INF(PSTR("mAnimatorLight::loadPlaylist"));
+
+//   unloadPlaylist();
+
+//   #ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+
+//   #ifdef ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
+//   ALOG_INF(PSTR("Playlist name-based loading enabled"));
+// #endif
+
+//   bool useNames = false;
+
+//   // Check for psn (preset names)
+//   JsonArray psn = playlistObj["psn"];
+//   if (!psn.isNull() && psn.size() > 0) {
+//       useNames = true;
+//       playlistLen = psn.size();
+//   } else {
+//       // fallback to ps numeric
+//       JsonArray presets = playlistObj["ps"];
+//       playlistLen = presets.size();
+//   }
+
+//   if (playlistLen == 0) return -1;
+//   if (playlistLen > 100) playlistLen = 100;
+
+//   playlistEntries = new PlaylistEntry[playlistLen];
+//   if (!playlistEntries) return -1;
+
+//   byte it = 0;
+
+//   if (useNames) {
+//       ALOG_INF(PSTR("Loading playlist via preset names (psn)"));
+
+//       for (const char* name : psn) {
+//           if (it >= playlistLen) break;
+
+//           byte foundIndex = 0;
+//           bool ok = false;
+
+//           // resolve preset name to ID
+//           for (byte p = 1; p < 251; p++) {
+//               String pname;
+//               if (getPresetName(p, pname)) {
+//                   if (pname.equalsIgnoreCase(name)) {
+//                       foundIndex = p;
+//                       ok = true;
+//                       break;
+//                   }
+//               }
+//           }
+
+//           if (!ok) {
+//               ALOG_ERR(PSTR("Playlist error: preset name '%s' not found"), name);
+//               foundIndex = 0;   // fallback = invalid preset (skip gracefully)
+//           }
+
+//           playlistEntries[it].preset = foundIndex;
+
+//           ALOG_INF(PSTR("psn[%d] '%s' -> preset %d"), it, name, foundIndex);
+//           it++;
+//       }
+
+//   } else {
+//       // original numeric "ps"
+//       JsonArray presets = playlistObj["ps"];
+//       ALOG_INF(PSTR("Loading playlist via preset indices (ps)"));
+//       for (int ps : presets) {
+//           if (it >= playlistLen) break;
+//           playlistEntries[it].preset = ps;
+//           ALOG_INF(PSTR("ps[%d] -> %d"), it, ps);
+//           it++;
+//       }
+//   }
+
+//   #endif
+
+
+//   JsonArray presets = playlistObj["ps"];
+//   playlistLen = presets.size();
+//   if (playlistLen == 0) return -1;
+//   if (playlistLen > 100) playlistLen = 100;
+
+//   playlistEntries = new PlaylistEntry[playlistLen];
+//   if (playlistEntries == nullptr) return -1;
+
+//   byte it = 0;
+//   for (int ps : presets) 
+//   {
+//     ALOG_INF(PSTR("ps=%d"), ps);
+//     if (it >= playlistLen) break;
+//     playlistEntries[it].preset = ps;
+//     it++;
+//   }
+
+//   it = 0;
+//   JsonArray durations = playlistObj["dur"];
+//   if (durations.isNull()) 
+//   {
+//     ALOG_INF(PSTR("mAnimatorLight::loadPlaylist: durations.isNull()"));
+//     playlistEntries[0].dur = playlistObj["dur"] | 100; //10 seconds as fallback
+//     it = 1;
+//   } 
+//   else 
+//   {
+//     for (int dur : durations) 
+//     {
+//       if (it >= playlistLen) break;
+//       playlistEntries[it].dur = (dur > 1) ? dur : 100;
+//       ALOG_INF(PSTR("durations.dur %d->%d secs"), dur, playlistEntries[it].dur);
+//       it++;
+//     }
+//   }
+
+//   for (int i = it; i < playlistLen; i++) playlistEntries[i].dur = playlistEntries[it -1].dur;
+
+//   it = 0;
+//   JsonArray tr = playlistObj[F("transition")];
+//   if (tr.isNull()) 
+//   {
+//     playlistEntries[0].tr = playlistObj[F("transition")] | (transitionDelay / 100);
+//     it = 1;
+//   } 
+//   else 
+//   {
+//     for (int transition : tr) 
+//     {
+//       if (it >= playlistLen) break;
+//       playlistEntries[it].tr = transition;
+//       it++;
+//     }
+//   }
+//   for (int i = it; i < playlistLen; i++) playlistEntries[i].tr = playlistEntries[it -1].tr;
+
+//   int rep = playlistObj[F("repeat")];
+//   bool shuffle = false;
+//   if (rep < 0) 
+//   { //support negative values as infinite + shuffle
+//     rep = 0; shuffle = true;
+//     ALOG_INF(PSTR("Shuffle started ======================================"));
+//   }
+
+//   playlistRepeat = rep;
+//   if (playlistRepeat > 0) playlistRepeat++; //add one extra repetition immediately since it will be deducted on first start
+//   playlistEndPreset = playlistObj["end"] | 0;
+//   // if end preset is 255 restore original preset (if any running) upon playlist end
+//   if (playlistEndPreset == 255 && currentPreset > 0) playlistEndPreset = currentPreset;
+//   if (playlistEndPreset > 250) playlistEndPreset = 0;
+//   shuffle = shuffle || playlistObj["r"];
+//   if (shuffle) playlistOptions += PL_OPTION_SHUFFLE;
+
+//   currentPlaylist = presetId;
+
+//   ALOG_INF(PSTR("Playlist %d loaded"),currentPlaylist);
+
+
+//   return currentPlaylist;
+
+// }
+
 int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId) 
 {
-
   ALOG_INF(PSTR("mAnimatorLight::loadPlaylist"));
 
   unloadPlaylist();
 
-  JsonArray presets = playlistObj["ps"];
-  playlistLen = presets.size();
+  JsonArray presets;       // numeric preset indices (ps)
+  bool useNames = false;   // true if we are using psn[]
+  
+#ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  JsonArray psn = playlistObj["psn"];
+
+  #ifdef ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
+  ALOG_INF(PSTR("Playlist name-based loading feature compiled in"));
+  #endif
+
+  if (!psn.isNull() && psn.size() > 0) {
+    useNames    = true;
+    playlistLen = psn.size();
+  } else
+#endif
+  {
+    presets     = playlistObj["ps"];
+    playlistLen = presets.size();
+  }
+
   if (playlistLen == 0) return -1;
   if (playlistLen > 100) playlistLen = 100;
 
@@ -65,20 +245,79 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   if (playlistEntries == nullptr) return -1;
 
   byte it = 0;
-  for (int ps : presets) 
+
+#ifdef ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  if (useNames) 
   {
-    ALOG_INF(PSTR("ps=%d"), ps);
-    if (it >= playlistLen) break;
-    playlistEntries[it].preset = ps;
-    it++;
+    ALOG_INF(PSTR("Loading playlist via preset names (psn)"));
+
+    for (const char* name : psn) 
+    {
+
+
+      ALOG_INF(PSTR("psn name='%s'"), name);
+
+      if (it >= playlistLen) break;
+
+      byte  foundIndex = 0;
+      bool  ok         = false;
+
+      // resolve preset name to ID 1..250
+      /**
+       * Searching for preset defined as by name, in all presets "n"
+       * 
+       */
+      for (byte p = 1; p < 255; p++) 
+      {
+        String pname;
+        if (getPresetName(p, pname)) 
+        {
+          if (pname.equalsIgnoreCase(name)) 
+          {
+            foundIndex = p;
+            ok         = true;
+            break;
+          }
+        }
+      }
+
+      #ifdef ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+      return -1;
+      #endif
+
+      if (!ok) 
+      {
+        ALOG_ERR(PSTR("Playlist error: preset name '%s' not found"), name);
+        foundIndex = 0; // invalid/placeholder
+      }
+
+      playlistEntries[it].preset = foundIndex;
+      ALOG_INF(PSTR("psn[%d] '%s' -> preset %d"), it, name, foundIndex);
+      it++;
+    }
+  }
+  else
+#endif
+  {
+    // original numeric "ps" behaviour
+    ALOG_INF(PSTR("Loading playlist via preset indices (ps)"));
+
+    for (int ps : presets) 
+    {
+      if (it >= playlistLen) break;
+      playlistEntries[it].preset = ps;
+      ALOG_INF(PSTR("ps[%d] -> %d"), it, ps);
+      it++;
+    }
   }
 
+  // ---- durations ----
   it = 0;
   JsonArray durations = playlistObj["dur"];
   if (durations.isNull()) 
   {
     ALOG_INF(PSTR("mAnimatorLight::loadPlaylist: durations.isNull()"));
-    playlistEntries[0].dur = playlistObj["dur"] | 100; //10 seconds as fallback
+    playlistEntries[0].dur = playlistObj["dur"] | 100; // 10 seconds as fallback
     it = 1;
   } 
   else 
@@ -91,9 +330,12 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
       it++;
     }
   }
+  // copy last duration forward for remaining entries
+  for (int i = it; i < playlistLen; i++) {
+    playlistEntries[i].dur = playlistEntries[it - 1].dur;
+  }
 
-  for (int i = it; i < playlistLen; i++) playlistEntries[i].dur = playlistEntries[it -1].dur;
-
+  // ---- transitions ----
   it = 0;
   JsonArray tr = playlistObj[F("transition")];
   if (tr.isNull()) 
@@ -110,33 +352,48 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
       it++;
     }
   }
-  for (int i = it; i < playlistLen; i++) playlistEntries[i].tr = playlistEntries[it -1].tr;
+  for (int i = it; i < playlistLen; i++) {
+    playlistEntries[i].tr = playlistEntries[it - 1].tr;
+  }
 
-  int rep = playlistObj[F("repeat")];
+  // ---- repeat / shuffle / end ----
+  int  rep     = playlistObj[F("repeat")];
   bool shuffle = false;
   if (rep < 0) 
-  { //support negative values as infinite + shuffle
-    rep = 0; shuffle = true;
+  { 
+    // support negative values as infinite + shuffle
+    rep     = 0; 
+    shuffle = true;
     ALOG_INF(PSTR("Shuffle started ======================================"));
   }
 
   playlistRepeat = rep;
-  if (playlistRepeat > 0) playlistRepeat++; //add one extra repetition immediately since it will be deducted on first start
+  if (playlistRepeat > 0) {
+    // add one extra repetition immediately since it will be deducted on first start
+    playlistRepeat++;
+  }
+
   playlistEndPreset = playlistObj["end"] | 0;
   // if end preset is 255 restore original preset (if any running) upon playlist end
-  if (playlistEndPreset == 255 && currentPreset > 0) playlistEndPreset = currentPreset;
-  if (playlistEndPreset > 250) playlistEndPreset = 0;
+  if (playlistEndPreset == 255 && currentPreset > 0) {
+    playlistEndPreset = currentPreset;
+  }
+  if (playlistEndPreset > 250) {
+    playlistEndPreset = 0;
+  }
+
   shuffle = shuffle || playlistObj["r"];
-  if (shuffle) playlistOptions += PL_OPTION_SHUFFLE;
+  if (shuffle) {
+    playlistOptions += PL_OPTION_SHUFFLE;
+  }
 
   currentPlaylist = presetId;
 
-  ALOG_INF(PSTR("Playlist %d loaded"),currentPlaylist);
-
+  ALOG_INF(PSTR("Playlist %d loaded (len=%d)"), currentPlaylist, playlistLen);
 
   return currentPlaylist;
-
 }
+
 
 
 void mAnimatorLight::SubTask_Playlist() 
@@ -173,6 +430,37 @@ void mAnimatorLight::SubTask_Playlist()
     // if (tkr_iLight->getBri_Global() == 0 || nightlightActive) return;
 
     ++playlistIndex %= playlistLen; // -1 at 1st run (limit to playlistLen)
+
+    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+    {
+        uint16_t nowHM = mTime::Get_HHMM();   // Or however you obtain HHMM in your system
+
+        // IMPORTANT: You need access to the playlist JSON for this preset
+        // This retrieves the preset object again:
+        if (requestJSONBufferLock(31)) {
+            if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(true),
+                                                    currentPlaylist,
+                                                    tkr_mfile->pDoc))
+            {
+                JsonObject presetObj = tkr_mfile->pDoc->as<JsonObject>();
+                JsonObject playlist  = presetObj["playlist"];
+
+                if (!playlist.isNull()) {
+                    playlistIndex =
+                        Playlist_SelectAllowedIndexByTime(
+                            playlist,
+                            playlistIndex,
+                            nowHM
+                        );
+                }
+            }
+            releaseJSONBufferLock();
+        }
+    }
+    #endif
+
+
+
 
     // playlist roll-over
     if (!playlistIndex) 

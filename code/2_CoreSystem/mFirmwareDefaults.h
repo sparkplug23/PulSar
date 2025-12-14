@@ -37,6 +37,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2025.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__Christmas_2025.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
@@ -319,6 +320,21 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+
+  /**
+   * @brief Added 13Dec25
+   * 
+   */
+  #define ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  #define ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+  #define ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__PLAYLIST_PSN_TO_PS_CREATE_BACKUP_FILE
+  #define ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
+  #define ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
+  #define MIN_SHOW_DELAY 25
 
 
   // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES // need to introduce a basic/lite version when only being used for palettes.

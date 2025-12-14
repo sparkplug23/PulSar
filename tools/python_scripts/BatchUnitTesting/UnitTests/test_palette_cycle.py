@@ -27,6 +27,8 @@ ETSI - ETSI to transform the standards development landscape with Software Devel
 60ghz sensing? Should do some sensing simulations.
 30th October, DSIT advanced activity day.
 
+1-20: 19:26
+
     # client = mqtt.Client()
     # if response_topic_enabled:
     #     client.on_message = on_message

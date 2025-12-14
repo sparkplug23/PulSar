@@ -88,6 +88,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     }
   }
 
+  #ifndef ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
   // === [2] Optional "Segments":[{...seg info...}, {...seg info...}] array format ===
   if (segments_found == 0 && obj["Segments"].isArray()) {
     JsonParserArray seg_arr = obj["Segments"];
@@ -102,6 +103,129 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
       segments_found++;
     }
   }
+  #else
+    // === [2] Optional "Segments":[{...seg info...}, {...seg info...}] array format ===
+  if (segments_found == 0 && obj["Segments"].isArray())
+  {
+    JsonParserArray seg_arr = obj["Segments"];
+
+    // --- [2a] Special case: auto-expand "MatchBus" template across all valid BusConfig entries ---
+    bool handled_matchbus = false;
+    if (seg_arr.size() > 0)
+    {
+      JsonParserObject first_seg = seg_arr[0];
+      JsonParserToken  pr       = first_seg[PM_PIXELRANGE];
+
+      bool is_matchbus = false;
+      if (pr && pr.isStr())
+      {
+        const char *s = pr.getStr();
+        if (s)
+        {
+          // Accept both "MatchBus" and "MatchedBus" (typo-safe)
+          if (!strcasecmp_P(s, PSTR("MatchBus")) || !strcasecmp_P(s, PSTR("MatchedBus")))
+          {
+            is_matchbus = true;
+          }
+        }
+      }
+
+      if (is_matchbus)
+      {
+        // Collect VALID busConfig indices (start < stop, start != stop)
+        uint8_t valid_bus_idx[WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES];
+        uint8_t valid_bus_count = 0;
+
+        for (uint8_t b = 0; b < (WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES); b++)
+        {
+          BusConfig *cfg = tkr_iLight->busConfigs[b];
+          if (!cfg) continue;
+
+          uint32_t start = cfg->start;
+          uint32_t stop  = (cfg->length > 0) ? (uint32_t)start + cfg->length - 1 : start;
+
+          // Valid = start < stop and not equal (i.e. at least 2 pixels)
+          if (cfg->length == 0)   continue;
+          if (stop <= start)      continue;
+
+          valid_bus_idx[valid_bus_count++] = b;
+        }
+
+        if (valid_bus_count == 0)
+        {
+          ALOG_ERR(PSTR(D_LOG_PIXEL "Segments/MatchBus but no valid BusConfig entries"));
+        }
+        else
+        {
+          uint8_t max_segments = min<uint8_t>(valid_bus_count, MAX_NUM_SEGMENTS);
+
+          for (uint8_t seg_i = 0; seg_i < max_segments; seg_i++)
+          {
+            // Ensure segment exists
+            if (seg_i >= segments.size())
+            {
+              uint16_t seg_size_before = segments.size();
+              Segment_AppendNew(0, 10, seg_i);
+              ALOG_INF(PSTR("Created new segment%02d %dB (T%dB)"),
+                       seg_i, segments.size() - seg_size_before, segments.size());
+            }
+
+            // Pick template: replicate last template if fewer Segments than buses
+            uint8_t templ_idx = (seg_i < seg_arr.size())
+                                ? seg_i
+                                : (uint8_t)(seg_arr.size() - 1);
+            JsonParserObject seg_obj = seg_arr[templ_idx];
+
+            // Parse full segment config from template
+            subparse_JSONCommand(seg_obj, seg_i);
+
+            // Now override PixelRange from corresponding valid BusConfig
+            BusConfig *cfg = tkr_iLight->busConfigs[ valid_bus_idx[seg_i] ];
+            uint16_t  start = cfg->start;
+            uint32_t  stop32 = (cfg->length > 0)
+                               ? (uint32_t)start + cfg->length - 1
+                               : start;
+            uint16_t  stop  = (stop32 > PIXEL_RANGE_LIMIT)
+                              ? PIXEL_RANGE_LIMIT
+                              : (uint16_t)stop32;
+
+            SEGMENT_I(seg_i).start = start;
+            SEGMENT_I(seg_i).stop  = stop;
+
+            ALOG_INF(PSTR(D_LOG_PIXEL "PixelRange MatchBus: seg %d → bus %d [%u,%u] (len %u)"),
+                     seg_i,
+                     valid_bus_idx[seg_i],
+                     SEGMENT_I(seg_i).start,
+                     SEGMENT_I(seg_i).stop,
+                     cfg->length);
+          }
+
+          segments_found   = max_segments;
+          handled_matchbus = true;
+        }
+      }
+    }
+
+    // --- [2b] Normal Segments array (no MatchBus) ---
+    if (!handled_matchbus)
+    {
+      for (uint8_t i = 0; i < seg_arr.size() && i < MAX_NUM_SEGMENTS; i++)
+      {
+        JsonParserObject seg_obj = seg_arr[i];
+        if (i >= segments.size())
+        {
+          uint16_t seg_size = segments.size();
+          Segment_AppendNew(0, 10, i);
+          ALOG_INF(PSTR("Created new segment%02d %dB (T%dB)"),
+                   i, segments.size() - seg_size, segments.size());
+        }
+        subparse_JSONCommand(seg_obj, i);
+        segments_found++;
+      }
+    }
+  }
+
+  #endif
 
   // === [3] Check for keys that match segment names === ie the new SegmentName can be used directly to group segment commands
   if (segments_found == 0) {
@@ -275,7 +399,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     data_buffer.isserviced++;
   }
 
-
+#ifndef ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
   if(jtok = obj[PM_PIXELRANGE])
   { 
     if(jtok.isArray())
@@ -300,6 +424,43 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       data_buffer.isserviced++;
     }
   }
+  #else
+    if (jtok = obj[PM_PIXELRANGE])
+  {
+    if (jtok.isArray())
+    {
+      JsonParserArray arrobj = jtok;
+
+      // X range
+      SEGMENT_I(segment_index).start = arrobj[0].getInt();
+      SEGMENT_I(segment_index).stop  = arrobj[1].getInt();
+
+      if (SEGMENT_I(segment_index).stop > PIXEL_RANGE_LIMIT)
+      {
+        ALOG_ERR(PSTR("stop %d exceeds max %d"),
+                 SEGMENT_I(segment_index).stop, PIXEL_RANGE_LIMIT);
+        SEGMENT_I(segment_index).stop = PIXEL_RANGE_LIMIT;
+      }
+
+      // Optional Y range: [start, stop, startY, stopY]
+      if (arrobj.size() >= 4)
+      {
+        SEGMENT_I(segment_index).startY = arrobj[2].getInt();
+        SEGMENT_I(segment_index).stopY  = arrobj[3].getInt();
+      }
+
+      ALOG_INF(PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"),
+               SEGMENT_I(segment_index).start,
+               SEGMENT_I(segment_index).stop);
+      data_buffer.isserviced++;
+    }
+    else
+    {
+      // Legacy path never used MatchBus, so non-array is an error
+      ALOG_ERR(PSTR(D_LOG_PIXEL "PixelRange expects array [start,stop(,startY,stopY)]"));
+    }
+  }
+  #endif
 
 
   if(jtok = obj["Name"])
@@ -380,6 +541,13 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     { 
       SEGMENT_I(segment_index).grouping = jtok.getInt();  
       ALOG_COM( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP
+      if(SEGMENT_I(segment_index).grouping > (SEGMENT_I(segment_index).length()/2))
+      {
+        SEGMENT_I(segment_index).grouping = SEGMENT_I(segment_index).length()/2;
+        ALOG_WRN(PSTR(D_LOG_PIXEL "Grouping overridden to %d to fit segment length"), SEGMENT_I(segment_index).grouping);
+      }
+      #endif
       data_buffer.isserviced++;
     }
     
@@ -401,28 +569,52 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
     if (jtok = jobj["DecimatePerc"])
     {
-      uint8_t percentage = jtok.getInt();  // Get the percentage from the JSON input
-      ALOG_INF(PSTR("TEST %d"), percentage);
+      uint8_t percentage = jtok.getInt();  // Requested compute percentage (0–100)
+      ALOG_INF(PSTR(D_LOG_PIXEL " DecimatePerc input = %d"), percentage);
 
+      // --- CASE 1: 0% → Disable decimation entirely ---
+      //
+      // Meaning:
+      // - Compute at full virtual resolution
+      // - Pretend decimate does not exist
+      //
       if (percentage == 0)
       {
-        // Disable decimation
-        SEGMENT_I(segment_index).decimate = 0;
-        ALOG_INF(PSTR(D_LOG_PIXEL  "Decimation disabled by DecimatePerc = 0."));
+        SEGMENT_I(segment_index).decimate = 0;   // Flag meaning "feature OFF"
+        ALOG_INF(PSTR(D_LOG_PIXEL " Decimation disabled (DecimatePerc = 0)."));
         data_buffer.isserviced++;
+        return;
       }
-      else if (percentage > 0 && percentage <= 100)
-      {
-        // Calculate decimate as a replication factor
-        SEGMENT_I(segment_index).decimate = 100 / percentage;
-        ALOG_INF(PSTR(D_LOG_PIXEL  "DecimatePerc of %d is decimate %d"), percentage, SEGMENT_I(segment_index).decimate);
-        data_buffer.isserviced++;
-      }
-      else
-      {
-        ALOG_ERR(PSTR(D_LOG_PIXEL  "Invalid DecimatePerc value. Must be between 0 and 100."));
-      }
+
+      // --- Clamp percentage to sane range (1–100 only) ---
+      if (percentage > 100) percentage = 100;
+
+      // --- CASE 2: 1–100% → Active compute percentage ---
+      //
+      // decimate = 100 / percentage
+      //
+      // Examples:
+      //   100% → decimate = 1  (full res, same as 0)
+      //    50% → decimate = 2  (half compute)
+      //    25% → decimate = 4  (quarter compute)
+      //    10% → decimate = 10 (10% compute)
+      //
+      // Only decimate >= 2 actually reduces resolution.
+      //
+      uint8_t dec = (uint8_t)((100 + (percentage / 2)) / percentage);  // rounded
+
+      if (dec < 1) dec = 1;   // Safety: min = 1
+
+      SEGMENT_I(segment_index).decimate = dec;
+
+      ALOG_INF(
+        PSTR(D_LOG_PIXEL " DecimatePerc = %d -> decimate = %d (compute ≈ %d%%)"),
+        percentage, dec, 100 / dec
+      );
+
+      data_buffer.isserviced++;
     }
+
 
 
 
@@ -1240,7 +1432,12 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
 
   if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
-    SEGMENT_I(segment_index).setBrightnessRGB( map(jtok.getInt(), 0,100, 0,255) );
+    uint8_t brightness = map(jtok.getInt(), 0,100, 0,255);
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED
+    ALOG_WRN(PSTR("Brightness RGB command limited due to preset testing mode"));
+    brightness = brightness > 10 ? 10 : brightness;
+    #endif
+    SEGMENT_I(segment_index).setBrightnessRGB( brightness );
     ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
     data_buffer.isserviced++;
   }else
@@ -1411,19 +1608,19 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
     if(jtok = jObj_debug["Option0"])
     { 
-      SEGMENT_I(segment_index).params_internal.aux0 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_user[0] = jtok.getInt();  
     }
     if(jtok = jObj_debug["Option1"])
     { 
-      SEGMENT_I(segment_index).params_internal.aux1 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_user[1] = jtok.getInt();  
     }
     if(jtok = jObj_debug["Option2"])
     { 
-      SEGMENT_I(segment_index).params_internal.aux2 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_user[2] = jtok.getInt();  
     }
     if(jtok = jObj_debug["Option3"])
     {
-      SEGMENT_I(segment_index).params_internal.aux3 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_user[3] = jtok.getInt();  
     }
 
     if(jtok = jObj_debug["Options"]){ 
@@ -1435,15 +1632,20 @@ if (jtok = obj["MQTTPixelArrays"]) {
           if(arrlen > 4){ break; }
           switch(arrlen)
           {
-            case 0: SEGMENT_I(segment_index).params_internal.aux0 = v.getInt(); break;
-            case 1: SEGMENT_I(segment_index).params_internal.aux1 = v.getInt(); break;
-            case 2: SEGMENT_I(segment_index).params_internal.aux2 = v.getInt(); break;
-            case 3: SEGMENT_I(segment_index).params_internal.aux3 = v.getInt(); break;
+            case 0: SEGMENT_I(segment_index).params_user[0] = v.getInt(); break;
+            case 1: SEGMENT_I(segment_index).params_user[1] = v.getInt(); break;
+            case 2: SEGMENT_I(segment_index).params_user[2] = v.getInt(); break;
+            case 3: SEGMENT_I(segment_index).params_user[3] = v.getInt(); break;
           }
           arrlen++;        
         }
         SEGMENT_I(segment_index).reset = false; // Do not reset if options have been set
-        ALOG_COM(PSTR(D_LOG_PIXEL "AuxOptions Segment[%d] flag%d = %d,%d,%d,%d"), segment_index, SEGMENT_I(segment_index).reset, SEGMENT_I(segment_index).params_internal.aux0, SEGMENT_I(segment_index).params_internal.aux1, SEGMENT_I(segment_index).params_internal.aux2, SEGMENT_I(segment_index).params_internal.aux3 );
+        ALOG_COM(PSTR(D_LOG_PIXEL "AuxOptions Segment[%d] flag%d = %d,%d,%d,%d"), segment_index, 
+        SEGMENT_I(segment_index).reset, 
+        SEGMENT_I(segment_index).params_user[0], 
+        SEGMENT_I(segment_index).params_user[1], 
+        SEGMENT_I(segment_index).params_user[2], 
+        SEGMENT_I(segment_index).params_user[3] );
         data_buffer.isserviced++;
       }
     }
@@ -1513,7 +1715,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
       // remove all inactive segments (from the back)
       int deleted = 0;
-      if (segments.size() <= 1) return 0;
+      if (segments.size() <= 1) return;
       for (size_t i = segments.size()-1; i > 0; i--)
         if (segments[i].stop == 0 || force) {
           DEBUG_PRINT(F("Purging segment segment: ")); DEBUG_PRINTLN(i);
@@ -1531,6 +1733,12 @@ if (jtok = obj["MQTTPixelArrays"]) {
         }
       }
 
+    }
+
+    if(jtok = jObj_debug["PlaylistsPSFromPSN"])
+    { 
+      ALOG_INF(PSTR("Debug: forcing ScanPresetsFile_GeneratePlaylistIDsFromPSN()"));
+      ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
     }
 
 
